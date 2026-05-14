@@ -6,7 +6,6 @@ from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.responses import send_response, send_error
 from app.models.nutrition.recipe import Recipe, RecipeDetail
-from app.models.nutrition.diet import DietDetail
 from app.schemas.nutrition.recipe import RecipeCreate, RecipeUpdate, RecipeOut, RecipeAssignRequest
 
 router = APIRouter(prefix="/recipes", tags=["Nutrition - Recipes"])
@@ -49,10 +48,12 @@ def assign(data: RecipeAssignRequest, db: Session = Depends(get_db), _=Depends(g
 
 
 @router.get("/client/{client_id}")
-def clients(client_id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    diet_details = db.query(DietDetail).filter(DietDetail.recipe_id.isnot(None)).all()
-    recipe_ids = list({d.recipe_id for d in diet_details})
-    items = db.query(Recipe).filter(Recipe.id.in_(recipe_ids)).all()
+def clients(client_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    from app.models.user import UserDetail
+    client_detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
+    if not client_detail:
+        return send_error("Cliente no encontrado")
+    items = db.query(Recipe).filter(Recipe.instructor_id == client_detail.user_id).all()
     return send_response([RecipeOut.model_validate(i).model_dump() for i in items], "OK")
 
 

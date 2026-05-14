@@ -3,7 +3,7 @@ from typing import Optional, List
 
 
 class RecipeDetailCreate(BaseModel):
-    aliment_id: int
+    aliment_id: str
     quantity: Optional[float] = None
     unit_id: Optional[int] = None
     notes: Optional[str] = None
@@ -48,7 +48,7 @@ class RecipeAssignRequest(BaseModel):
 
 class RecipeDetailOut(BaseModel):
     id: int
-    aliment_id: int
+    aliment_id: str
     quantity: Optional[float] = None
     unit_id: Optional[int] = None
     notes: Optional[str] = None

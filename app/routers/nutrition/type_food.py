@@ -17,7 +17,7 @@ def _get_or_404(db: Session, obj_id: int):
 
 @router.get("/findAll")
 def find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
-    items = db.query(TypeFood).filter(TypeFood.state == 1).all()
+    items = db.query(TypeFood).filter(TypeFood.status == 1).all()
     return send_response([TypeFoodOut.model_validate(i).model_dump() for i in items], "OK")
 
 

@@ -6,6 +6,7 @@ from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.responses import send_response, send_error
 from app.models.role import Role
+from slugify import slugify
 from app.models.menu import Menu, MenuRole
 from app.schemas.role import RoleCreateRequest, RoleUpdateRequest, MenuAssignRequest, RoleOut
 from app.schemas.auth import MenuOut
@@ -19,7 +20,8 @@ def _get_or_404(db: Session, role_id: int):
 
 @router.post("")
 def create(data: RoleCreateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    role = Role(name=data.name)
+    slug = slugify(data.slug or data.name)
+    role = Role(name=data.name, slug=slug)
     db.add(role)
     db.commit()
     db.refresh(role)

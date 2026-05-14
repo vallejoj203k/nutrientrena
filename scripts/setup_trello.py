@@ -137,10 +137,18 @@ def crear_card(nombre, desc, lista_id):
 
 
 def main():
+    # Obtener el ID largo del board (necesario para crear listas)
+    rb = requests.get(f"{BASE}/boards/{BOARD_ID}", params=AUTH)
+    if rb.status_code != 200:
+        print(f"ERROR al conectar con el board: {rb.status_code} - {rb.text}")
+        return
+    board_real_id = rb.json()["id"]
+    print(f"Board ID: {board_real_id}")
+
     print("Obteniendo listas del board...")
-    r = requests.get(f"{BASE}/boards/{BOARD_ID}/lists", params=AUTH)
+    r = requests.get(f"{BASE}/boards/{board_real_id}/lists", params=AUTH)
     if r.status_code != 200:
-        print(f"ERROR al conectar con el board: {r.status_code} - {r.text}")
+        print(f"ERROR al obtener listas: {r.status_code} - {r.text}")
         return
 
     existentes = r.json()
@@ -149,9 +157,11 @@ def main():
     for nombre in LISTAS:
         if nombre not in lista_ids:
             print(f"   Creando lista: {nombre}")
-            lid = crear_lista(nombre)
-            if lid:
-                lista_ids[nombre] = lid
+            rr = requests.post(f"{BASE}/lists", params={**AUTH, "name": nombre, "idBoard": board_real_id})
+            if rr.status_code != 200:
+                print(f"      ERROR: {rr.status_code} - {rr.text}")
+            else:
+                lista_ids[nombre] = rr.json()["id"]
         else:
             print(f"   Lista ya existe: {nombre}")
 

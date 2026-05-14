@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 echo "=========================================="
 echo "  DB DIAGNOSTICO (sin passwords)"
@@ -14,10 +13,14 @@ echo "  DB_HOST       = ${DB_HOST:-(no seteado)}"
 echo "=========================================="
 
 echo ">>> Corriendo migraciones..."
-alembic upgrade head
-
-echo ">>> Cargando seeds iniciales..."
-python -m app.seeds.run_seeds
+if alembic upgrade head; then
+    echo ">>> Migraciones OK"
+    echo ">>> Cargando seeds iniciales..."
+    python -m app.seeds.run_seeds && echo ">>> Seeds OK" || echo ">>> Seeds fallaron (continuando)"
+else
+    echo ">>> MIGRACIONES FALLARON — revisa DATABASE_URL"
+    echo ">>> Iniciando servidor de todos modos para diagnóstico..."
+fi
 
 echo ">>> Iniciando servidor en puerto ${PORT:-8000}..."
 exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"

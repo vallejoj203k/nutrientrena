@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-
 from app.database import Base
 
 
@@ -18,7 +17,7 @@ class Menu(Base):
 
 
 class MenuRole(Base):
-    __tablename__ = "menu_roles"
+    __tablename__ = "menu_role"  # matches Laravel pivot table name
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)

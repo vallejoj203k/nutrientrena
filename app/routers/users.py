@@ -1,70 +1,126 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
-from slugify import slugify
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.security import hash_password
-from app.models.user import User
-from app.schemas.user import UserCreateRequest, UserUpdateRequest, UserStateRequest, UserAssignRequest, WeeksTrainingRequest, UserOut
+from app.core.responses import send_response, send_error
+from app.models.user import User, UserDetail, RoleUser, UserParent
+from app.models.role import Role
+from app.schemas.user import (
+    UserCreateRequest, UserUpdateRequest, UserStateRequest,
+    UserAssignRequest, WeeksTrainingRequest, UserDetailOut,
+)
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-def _get_or_404(db: Session, user_id: int) -> User:
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return user
+def _get_detail_or_404(db: Session, detail_id: str):
+    detail = db.query(UserDetail).filter(UserDetail.id == detail_id).first()
+    return detail
+
+
+def _serialize(detail: UserDetail, db: Session) -> dict:
+    out = UserDetailOut.model_validate(detail).model_dump()
+    role_users = db.query(RoleUser).filter(RoleUser.user_id == detail.user_id).all()
+    out["roles"] = [{"id": ru.role_id, "name": ru.role.name if ru.role else None} for ru in role_users]
+    out["email"] = detail.user.email if detail.user else None
+    return out
 
 
 @router.post("")
 def create(data: UserCreateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
     if db.query(User).filter(User.email == data.email).first():
-        raise HTTPException(status_code=400, detail="El email ya está registrado")
-
-    slug_base = slugify(f"{data.name} {data.last_name or ''}".strip())
-    slug = slug_base
-    counter = 1
-    while db.query(User).filter(User.slug == slug).first():
-        slug = f"{slug_base}-{counter}"
-        counter += 1
+        return send_error("El email ya está registrado", code=400)
 
     user = User(
-        **data.model_dump(exclude={"password"}),
+        name=data.name,
+        email=data.email,
         password=hash_password(data.password),
-        slug=slug,
     )
     db.add(user)
+    db.flush()
+
+    db.add(RoleUser(role_id=data.role_id, user_id=user.id))
+
+    detail = UserDetail(
+        user_id=user.id,
+        name=data.name,
+        last_name=data.last_name,
+        phone=data.phone,
+        height=data.height,
+        weight=data.weight,
+        occupation=data.occupation,
+        country_code=data.country_code,
+        gender_id=data.gender_id,
+        activity_id=data.activity_id,
+        status_id=data.status_id,
+        objective_id=data.objective_id,
+        defecit=data.defecit,
+        excedente=data.excedente,
+    )
+    db.add(detail)
+    db.flush()
+
+    if data.instructor:
+        instructor_detail = db.query(UserDetail).filter(UserDetail.id == data.instructor).first()
+        if instructor_detail:
+            db.add(UserParent(
+                user_detail_id=detail.id,
+                parent_user_detail_id=instructor_detail.id,
+            ))
+
     db.commit()
-    db.refresh(user)
-    return UserOut.model_validate(user)
+    db.refresh(detail)
+    return send_response(_serialize(detail, db), "Usuario creado")
 
 
 @router.post("/assign")
 def assigned(data: UserAssignRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    user = _get_or_404(db, data.user_id)
-    user.instructor_id = data.instructor_id
+    client_detail = _get_detail_or_404(db, data.user_id)
+    if not client_detail:
+        return send_error("Usuario no encontrado")
+
+    instructor_detail = _get_detail_or_404(db, data.user_parent_id)
+    if not instructor_detail:
+        return send_error("Instructor no encontrado")
+
+    existing = db.query(UserParent).filter(
+        UserParent.user_detail_id == data.user_id
+    ).first()
+    if existing:
+        existing.parent_user_detail_id = data.user_parent_id
+    else:
+        db.add(UserParent(
+            user_detail_id=data.user_id,
+            parent_user_detail_id=data.user_parent_id,
+        ))
     db.commit()
-    return {"message": "Asignado correctamente"}
+    return send_response(None, "Asignado correctamente")
 
 
 @router.post("/weeks")
 def weeks_training(data: WeeksTrainingRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    user = _get_or_404(db, data.user_id)
-    user.notes = str(data.weeks)
+    detail = _get_detail_or_404(db, data.client_id)
+    if not detail:
+        return send_error("Usuario no encontrado")
+    detail.start_date = data.start_date
+    detail.end_date = data.end_date
     db.commit()
-    return {"message": "Semanas actualizadas"}
+    return send_response(None, "Semanas actualizadas")
 
 
 @router.get("/{slug}/findAll")
 def find_all(slug: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    instructor = db.query(User).filter(User.slug == slug).first()
-    if not instructor:
-        raise HTTPException(status_code=404, detail="Instructor no encontrado")
-    clients = db.query(User).filter(User.instructor_id == instructor.id).all()
-    return [UserOut.model_validate(c) for c in clients]
+    role = db.query(Role).filter(Role.slug == slug).first()
+    if not role:
+        return send_error("Rol no encontrado")
+
+    role_users = db.query(RoleUser).filter(RoleUser.role_id == role.id).all()
+    user_ids = [ru.user_id for ru in role_users]
+    details = db.query(UserDetail).filter(UserDetail.user_id.in_(user_ids)).all()
+    return send_response([_serialize(d, db) for d in details], "OK")
 
 
 @router.get("/{slug}/search")
@@ -74,53 +130,100 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    instructor = db.query(User).filter(User.slug == slug).first()
-    if not instructor:
-        raise HTTPException(status_code=404, detail="Instructor no encontrado")
+    role = db.query(Role).filter(Role.slug == slug).first()
+    if not role:
+        return send_error("Rol no encontrado")
 
-    q = db.query(User).filter(User.instructor_id == instructor.id)
+    role_user_ids = [ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == role.id).all()]
+
+    q = db.query(UserDetail).filter(UserDetail.user_id.in_(role_user_ids))
+
     if search:
         q = q.filter(
-            (User.name.ilike(f"%{search}%")) | (User.email.ilike(f"%{search}%"))
+            UserDetail.name.ilike(f"%{search}%")
+            | UserDetail.last_name.ilike(f"%{search}%")
         )
+
     total = q.count()
-    users = q.offset((page - 1) * per_page).limit(per_page).all()
-    return {
-        "data": [UserOut.model_validate(u) for u in users],
-        "total": total,
-        "page": page,
-        "per_page": per_page,
-        "last_page": (total + per_page - 1) // per_page,
-    }
-
-
-@router.get("/{id}/edit")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return UserOut.model_validate(_get_or_404(db, id))
-
-
-@router.put("/{id}/update")
-def updated(id: int, data: UserUpdateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    user = _get_or_404(db, id)
-    for field, value in data.model_dump(exclude_unset=True).items():
-        setattr(user, field, value)
-    db.commit()
-    db.refresh(user)
-    return UserOut.model_validate(user)
-
-
-@router.put("/{id}/change")
-def change_state(id: int, data: UserStateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    user = _get_or_404(db, id)
-    user.state = data.state
-    db.commit()
-    return {"message": "Estado actualizado"}
+    details = q.offset((page - 1) * per_page).limit(per_page).all()
+    return send_response(
+        {
+            "data": [_serialize(d, db) for d in details],
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "last_page": max(1, (total + per_page - 1) // per_page),
+        },
+        "OK",
+    )
 
 
 @router.get("/report")
-def report_users(db: Session = Depends(get_db), _=Depends(get_current_user)):
-    total = db.query(User).count()
-    active = db.query(User).filter(User.state == 1).count()
-    return {"total": total, "active": active, "inactive": total - active}
+def report_users(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    current_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+
+    role_users = db.query(RoleUser).filter(RoleUser.user_id == current_user.id).all()
+    role_ids = [ru.role_id for ru in role_users]
+    roles = db.query(Role).filter(Role.id.in_(role_ids)).all()
+    is_admin = any(r.slug == "admin" for r in roles)
+
+    if is_admin:
+        total = db.query(UserDetail).count()
+    else:
+        parent_ids = db.query(UserParent).filter(
+            UserParent.parent_user_detail_id == current_detail.id
+        ).all() if current_detail else []
+        client_ids = [p.user_detail_id for p in parent_ids]
+        total = len(client_ids)
+
+    return send_response({"total": total}, "OK")
+
+
+@router.get("/{id}/edit")
+def edit(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    detail = _get_detail_or_404(db, id)
+    if not detail:
+        return send_error("Usuario no encontrado")
+    return send_response(_serialize(detail, db), "OK")
+
+
+@router.put("/{id}/update")
+def updated(id: str, data: UserUpdateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    detail = _get_detail_or_404(db, id)
+    if not detail:
+        return send_error("Usuario no encontrado")
+
+    user_fields = {}
+    if data.email is not None:
+        user_fields["email"] = data.email
+    if data.password is not None:
+        user_fields["password"] = hash_password(data.password)
+    for field, value in user_fields.items():
+        setattr(detail.user, field, value)
+
+    detail_fields = data.model_dump(exclude_unset=True, exclude={"email", "password", "role_id"})
+    for field, value in detail_fields.items():
+        setattr(detail, field, value)
+
+    if data.role_id is not None:
+        role_user = db.query(RoleUser).filter(RoleUser.user_id == detail.user_id).first()
+        if role_user:
+            role_user.role_id = data.role_id
+        else:
+            db.add(RoleUser(role_id=data.role_id, user_id=detail.user_id))
+
+    db.commit()
+    db.refresh(detail)
+    return send_response(_serialize(detail, db), "Usuario actualizado")
+
+
+@router.put("/{id}/change")
+def change_state(id: str, data: UserStateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    detail = _get_detail_or_404(db, id)
+    if not detail:
+        return send_error("Usuario no encontrado")
+    detail.status_id = data.status_id
+    db.commit()
+    return send_response(None, "Estado actualizado")

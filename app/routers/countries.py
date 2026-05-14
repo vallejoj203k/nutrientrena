@@ -4,6 +4,7 @@ from typing import Optional
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.responses import send_response
 from app.models.country import Country
 
 router = APIRouter(prefix="/countries", tags=["Countries"])
@@ -19,4 +20,7 @@ def search(
     if search:
         q = q.filter(Country.country.ilike(f"%{search}%"))
     items = q.limit(50).all()
-    return [{"id": c.id, "code": c.code, "country": c.country} for c in items]
+    return send_response(
+        [{"id": c.id, "code": c.code, "country": c.country} for c in items],
+        "OK",
+    )

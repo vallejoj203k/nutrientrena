@@ -9,64 +9,96 @@ class UserCreateRequest(BaseModel):
     email: EmailStr
     password: str
     phone: Optional[str] = None
-    document: Optional[str] = None
-    birth_date: Optional[datetime] = None
-    gender_id: Optional[int] = None
-    country_id: Optional[int] = None
-    role_id: Optional[int] = None
-    instructor_id: Optional[int] = None
     height: Optional[float] = None
     weight: Optional[float] = None
-    activity_level_id: Optional[int] = None
-    training_level_id: Optional[int] = None
-    goal_id: Optional[int] = None
-    notes: Optional[str] = None
+    occupation: Optional[str] = None
+    country_code: Optional[str] = None
+    gender_id: Optional[int] = None
+    activity_id: Optional[int] = None
+    status_id: Optional[int] = None
+    objective_id: Optional[int] = None
+    defecit: Optional[float] = None
+    excedente: Optional[float] = None
+    role_id: int
+    instructor: Optional[str] = None  # UserDetail UUID of instructor
 
 
 class UserUpdateRequest(BaseModel):
     name: Optional[str] = None
     last_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
     phone: Optional[str] = None
-    document: Optional[str] = None
-    birth_date: Optional[datetime] = None
-    gender_id: Optional[int] = None
-    country_id: Optional[int] = None
     height: Optional[float] = None
     weight: Optional[float] = None
-    activity_level_id: Optional[int] = None
-    training_level_id: Optional[int] = None
-    goal_id: Optional[int] = None
-    notes: Optional[str] = None
+    occupation: Optional[str] = None
+    country_code: Optional[str] = None
+    gender_id: Optional[int] = None
+    activity_id: Optional[int] = None
+    status_id: Optional[int] = None
+    objective_id: Optional[int] = None
+    defecit: Optional[float] = None
+    excedente: Optional[float] = None
+    role_id: Optional[int] = None
 
 
 class UserStateRequest(BaseModel):
-    state: int
+    status_id: int
 
 
 class UserAssignRequest(BaseModel):
-    user_id: int
-    instructor_id: int
+    user_id: str          # UserDetail UUID of client
+    user_parent_id: str   # UserDetail UUID of instructor
 
 
 class WeeksTrainingRequest(BaseModel):
-    user_id: int
-    weeks: int
+    client_id: str   # UserDetail UUID
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
 
 
-class UserOut(BaseModel):
+class ParameterDetailOut(BaseModel):
+    id: int
+    description: str
+    model_config = {"from_attributes": True}
+
+
+class CountryOut(BaseModel):
+    code: str
+    country: str
+    model_config = {"from_attributes": True}
+
+
+class RoleOut(BaseModel):
     id: int
     name: str
+    model_config = {"from_attributes": True}
+
+
+class UserDetailOut(BaseModel):
+    id: str
+    user_id: int
+    name: str
     last_name: Optional[str] = None
-    email: str
-    slug: Optional[str] = None
     phone: Optional[str] = None
-    document: Optional[str] = None
-    state: int
-    photo: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None
-    role_id: Optional[int] = None
-    instructor_id: Optional[int] = None
+    occupation: Optional[str] = None
+    country_code: Optional[str] = None
+    gender_id: Optional[int] = None
+    activity_id: Optional[int] = None
+    status_id: Optional[int] = None
+    objective_id: Optional[int] = None
+    defecit: Optional[float] = None
+    excedente: Optional[float] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
     created_at: Optional[datetime] = None
+
+    status: Optional[ParameterDetailOut] = None
+    gender: Optional[ParameterDetailOut] = None
+    activity: Optional[ParameterDetailOut] = None
+    objective: Optional[ParameterDetailOut] = None
+    country: Optional[CountryOut] = None
 
     model_config = {"from_attributes": True}

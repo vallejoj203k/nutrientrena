@@ -3,83 +3,95 @@ from typing import Optional, List
 from datetime import datetime
 
 
-class DietDetailCreate(BaseModel):
-    aliment_id: Optional[int] = None
-    recipe_id: Optional[int] = None
-    meal_type_id: Optional[int] = None
-    quantity: Optional[float] = None
-    unit_id: Optional[int] = None
-    notes: Optional[str] = None
+class DietFoodAlimentCreate(BaseModel):
+    id: Optional[int] = None
+    aliment_id: str
+    quantity_calc: Optional[float] = None
     order: Optional[int] = 0
+    delete: Optional[bool] = False
+
+
+class DietFoodCreate(BaseModel):
+    id: Optional[int] = None
+    name: str
+    detail: Optional[List[DietFoodAlimentCreate]] = []
+    delete: Optional[bool] = False
 
 
 class DietCreate(BaseModel):
+    title: str
+    calories: Optional[float] = None
+    quantity: Optional[float] = None
+    type_id: Optional[int] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    body_fat: Optional[float] = None
+    level_activity_id: Optional[int] = None
+    objective_id: Optional[int] = None
+    proteins: Optional[float] = None
+    carbs: Optional[float] = None
+    fats: Optional[float] = None
+    deficit: Optional[float] = None
+    surplus: Optional[float] = None
+    foods: Optional[List[DietFoodCreate]] = []
+
+
+class DietUpdate(DietCreate):
+    id: str
+    title: Optional[str] = None
+
+
+class AlimentSimpleOut(BaseModel):
+    id: str
     name: str
-    description: Optional[str] = None
-    client_id: Optional[int] = None
-    category_id: Optional[int] = None
-    goal_id: Optional[int] = None
+    quantity: Optional[float] = None
     calories: Optional[float] = None
     proteins: Optional[float] = None
-    carbs: Optional[float] = None
+    carbohydrates: Optional[float] = None
     fats: Optional[float] = None
-    weeks: Optional[int] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    details: Optional[List[DietDetailCreate]] = []
+    quantity_type: Optional[dict] = None
+    model_config = {"from_attributes": True}
 
 
-class DietUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    client_id: Optional[int] = None
-    category_id: Optional[int] = None
-    goal_id: Optional[int] = None
-    calories: Optional[float] = None
-    proteins: Optional[float] = None
-    carbs: Optional[float] = None
-    fats: Optional[float] = None
-    weeks: Optional[int] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    state: Optional[int] = None
-    details: Optional[List[DietDetailCreate]] = None
+class DietFoodAlimentOut(BaseModel):
+    id: int
+    aliment_id: str
+    aliment: Optional[AlimentSimpleOut] = None
+    quantity: Optional[float] = None
+    order: int
+    model_config = {"from_attributes": True}
 
 
-class DietAssignRequest(BaseModel):
-    client_id: int
+class DietFoodOut(BaseModel):
+    id: int
+    name: str
+    detail: List[DietFoodAlimentOut] = []
+    model_config = {"from_attributes": True}
 
 
 class DietDetailOut(BaseModel):
     id: int
-    aliment_id: Optional[int] = None
-    recipe_id: Optional[int] = None
-    meal_type_id: Optional[int] = None
-    quantity: Optional[float] = None
-    unit_id: Optional[int] = None
-    notes: Optional[str] = None
-    order: int
-
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    body_fat: Optional[float] = None
+    level_activity_id: Optional[int] = None
+    objective_id: Optional[int] = None
+    proteins: Optional[float] = None
+    carbs: Optional[float] = None
+    fats: Optional[float] = None
+    deficit: Optional[float] = None
+    surplus: Optional[float] = None
     model_config = {"from_attributes": True}
 
 
 class DietOut(BaseModel):
-    id: int
-    name: str
-    description: Optional[str] = None
-    client_id: Optional[int] = None
-    instructor_id: Optional[int] = None
-    category_id: Optional[int] = None
-    goal_id: Optional[int] = None
+    id: str
+    title: str
     calories: Optional[float] = None
-    proteins: Optional[float] = None
-    carbs: Optional[float] = None
-    fats: Optional[float] = None
-    weeks: Optional[int] = None
-    state: int
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    quantity: Optional[float] = None
+    type_id: Optional[int] = None
+    user_id: Optional[int] = None
     created_at: Optional[datetime] = None
-    details: List[DietDetailOut] = []
-
+    detail: Optional[DietDetailOut] = None
+    foods: List[DietFoodOut] = []
     model_config = {"from_attributes": True}

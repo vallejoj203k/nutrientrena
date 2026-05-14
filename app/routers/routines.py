@@ -1,189 +1,242 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import Optional, List
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.responses import send_response, send_error
 from app.models.routine import Routine, RoutineDay, RoutineDayDetail
-from app.models.user import User
 from app.schemas.routine import (
     RoutineCreate, RoutineUpdate, RoutineOut, RoutineCloneRequest,
-    RoutineAssignRequest, RoutineListRequest, BulkCreateClientRequest
+    RoutineAssignRequest, RoutineListRequest, BulkCreateClientRequest,
+    RoutineDayOut,
 )
 
 router = APIRouter(prefix="/routines", tags=["Routines"])
 
 
-def _get_or_404(db: Session, routine_id: int) -> Routine:
-    obj = db.query(Routine).filter(Routine.id == routine_id).first()
-    if not obj:
-        raise HTTPException(status_code=404, detail="Rutina no encontrada")
-    return obj
+def _get_or_404(db: Session, routine_id: int):
+    return db.query(Routine).filter(Routine.id == routine_id).first()
 
 
-def _build_routine(db: Session, data, instructor_id: int) -> Routine:
-    routine_data = data.model_dump(exclude={"days"})
-    routine_data["instructor_id"] = instructor_id
-    routine = Routine(**routine_data)
-    db.add(routine)
-    db.flush()
+def _serialize(routine: Routine) -> dict:
+    out = RoutineOut.model_validate(routine).model_dump(exclude={"days_list"})
+    out["days_list"] = [RoutineDayOut.from_orm_day(d).model_dump() for d in routine.days_list]
+    return out
 
-    for day_data in (data.days or []):
+
+def _create_days(db: Session, routine_id: int, days_data: list):
+    for day_data in days_data:
         day = RoutineDay(
-            routine_id=routine.id,
-            name=day_data.name,
-            day_number=day_data.day_number,
-            rest=day_data.rest or 0,
+            routine_id=routine_id,
+            day_name=day_data.day_name,
+            description=day_data.content_html,
         )
         db.add(day)
         db.flush()
         for detail_data in (day_data.details or []):
             db.add(RoutineDayDetail(
+                routine_id=routine_id,
                 routine_day_id=day.id,
-                **detail_data.model_dump(),
+                muscle_group_id=detail_data.muscle_group_id,
+                training_id=detail_data.training_id,
+                series=detail_data.series,
+                repetitions=detail_data.repetitions,
+                break_time=detail_data.break_time,
             ))
-    return routine
 
 
-@router.get("/findAll")
-def find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
-    items = db.query(Routine).filter(Routine.state == 1).all()
-    return [RoutineOut.model_validate(i) for i in items]
-
-
-@router.post("/clone")
-def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    source = _get_or_404(db, data.routine_id)
-    new_routine = Routine(
-        name=f"{source.name} (copia)",
-        description=source.description,
-        client_id=data.client_id,
-        instructor_id=current_user.id,
-        weeks=source.weeks,
-    )
-    db.add(new_routine)
-    db.flush()
-    for day in source.days:
-        new_day = RoutineDay(routine_id=new_routine.id, name=day.name, day_number=day.day_number, rest=day.rest)
+def _clone_days(db: Session, source: Routine, new_routine_id: int):
+    for day in source.days_list:
+        new_day = RoutineDay(
+            routine_id=new_routine_id,
+            day_name=day.day_name,
+            description=day.description,
+        )
         db.add(new_day)
         db.flush()
         for detail in day.details:
             db.add(RoutineDayDetail(
+                routine_id=new_routine_id,
                 routine_day_id=new_day.id,
+                muscle_group_id=detail.muscle_group_id,
                 training_id=detail.training_id,
-                sets=detail.sets,
-                reps=detail.reps,
-                weight=detail.weight,
-                rest_seconds=detail.rest_seconds,
-                notes=detail.notes,
-                order=detail.order,
+                series=detail.series,
+                repetitions=detail.repetitions,
+                break_time=detail.break_time,
             ))
+
+
+@router.get("/findAll")
+def find_all(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    items = db.query(Routine).filter(Routine.user_id == current_user.id).all()
+    return send_response([_serialize(i) for i in items], "OK")
+
+
+@router.post("/clone")
+def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    source = _get_or_404(db, data.id)
+    if not source:
+        return send_error("Rutina no encontrada")
+    new_routine = Routine(
+        name=f"{source.name} (copia)",
+        user_id=current_user.id,
+        gender_id=source.gender_id,
+        training=source.training,
+        training_level_id=source.training_level_id,
+        time=source.time,
+        days=source.days,
+    )
+    db.add(new_routine)
+    db.flush()
+    _clone_days(db, source, new_routine.id)
     db.commit()
     db.refresh(new_routine)
-    return RoutineOut.model_validate(new_routine)
+    return send_response(_serialize(new_routine), "Rutina clonada")
 
 
 @router.post("/assigned")
-def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    routine = _get_or_404(db, data.routine_id)
-    routine.client_id = data.client_id
+def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    from app.models.user import UserDetail
+    client_detail = db.query(UserDetail).filter(UserDetail.id == data.client_id).first()
+    if not client_detail:
+        return send_error("Cliente no encontrado")
+
+    routine = Routine(
+        name=data.name,
+        user_id=client_detail.user_id,
+        gender_id=data.gender_id,
+        training=data.training,
+        training_level_id=data.training_level_id,
+        time=data.time,
+        days=data.days,
+    )
+    db.add(routine)
+    db.flush()
+    _create_days(db, routine.id, data.days_list or [])
     db.commit()
-    return {"message": "Rutina asignada"}
+    db.refresh(routine)
+    return send_response(_serialize(routine), "Rutina asignada")
 
 
 @router.post("/list")
 def list_ids(data: RoutineListRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
     items = db.query(Routine).filter(Routine.id.in_(data.ids)).all()
-    return [RoutineOut.model_validate(i) for i in items]
+    return send_response([_serialize(i) for i in items], "OK")
 
 
 @router.post("/client/bulkCreate")
-def bulk_create_client(data: BulkCreateClientRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    source = _get_or_404(db, data.routine_id)
+def bulk_create_client(
+    data: BulkCreateClientRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    from app.models.user import UserDetail
+    client_detail = db.query(UserDetail).filter(UserDetail.id == data.client_id).first()
+    if not client_detail:
+        return send_error("Cliente no encontrado")
+
     created = []
-    for client_id in data.client_ids:
+    for routine_data in data.routines:
+        if routine_data.id:
+            routine = db.query(Routine).filter(Routine.id == routine_data.id).first()
+            if routine:
+                routine.name = routine_data.name
+                routine.gender_id = routine_data.gender_id
+                routine.training = routine_data.training
+                routine.training_level_id = routine_data.training_level_id
+                routine.time = routine_data.time
+                routine.days = routine_data.days
+                for day in list(routine.days_list):
+                    db.delete(day)
+                db.flush()
+                _create_days(db, routine.id, routine_data.days_list or [])
+                created.append(routine.id)
+                continue
+
         new_routine = Routine(
-            name=source.name,
-            description=source.description,
-            client_id=client_id,
-            instructor_id=current_user.id,
-            weeks=source.weeks,
+            name=routine_data.name,
+            user_id=client_detail.user_id,
+            gender_id=routine_data.gender_id,
+            training=routine_data.training,
+            training_level_id=routine_data.training_level_id,
+            time=routine_data.time,
+            days=routine_data.days,
         )
         db.add(new_routine)
         db.flush()
-        for day in source.days:
-            new_day = RoutineDay(routine_id=new_routine.id, name=day.name, day_number=day.day_number, rest=day.rest)
-            db.add(new_day)
-            db.flush()
-            for detail in day.details:
-                db.add(RoutineDayDetail(
-                    routine_day_id=new_day.id,
-                    training_id=detail.training_id,
-                    sets=detail.sets,
-                    reps=detail.reps,
-                    weight=detail.weight,
-                    rest_seconds=detail.rest_seconds,
-                    notes=detail.notes,
-                    order=detail.order,
-                ))
+        _create_days(db, new_routine.id, routine_data.days_list or [])
         created.append(new_routine.id)
+
     db.commit()
-    return {"created": created}
+    return send_response({"created": created}, "Rutinas creadas")
 
 
-@router.get("/client/{id_client}")
-def client_routines(id_client: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    items = db.query(Routine).filter(Routine.client_id == id_client, Routine.state == 1).all()
-    return [RoutineOut.model_validate(i) for i in items]
+@router.get("/client/{client_id}")
+def client_routines(client_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    from app.models.user import UserDetail
+    client_detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
+    if not client_detail:
+        return send_error("Cliente no encontrado")
+    items = db.query(Routine).filter(Routine.user_id == client_detail.user_id).all()
+    return send_response([_serialize(i) for i in items], "OK")
 
 
 @router.get("/client/{customer_id}/mail")
-def mail(customer_id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return {"message": f"Correo enviado al cliente {customer_id}"}
+def mail(customer_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    return send_response(None, f"Correo enviado al cliente {customer_id}")
 
 
 @router.get("/{id}/pdf")
 def pdf(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    _get_or_404(db, id)
-    return {"message": "PDF generado", "routine_id": id}
+    if not _get_or_404(db, id):
+        return send_error("Rutina no encontrada")
+    return send_response({"routine_id": id}, "PDF generado")
 
 
 @router.get("/{id}/edit")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return RoutineOut.model_validate(_get_or_404(db, id))
+    routine = _get_or_404(db, id)
+    if not routine:
+        return send_error("Rutina no encontrada")
+    return send_response(_serialize(routine), "OK")
 
 
 @router.post("")
 def create(data: RoutineCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    routine = _build_routine(db, data, current_user.id)
+    routine = Routine(
+        name=data.name,
+        user_id=current_user.id,
+        gender_id=data.gender_id,
+        training=data.training,
+        training_level_id=data.training_level_id,
+        time=data.time,
+        days=data.days,
+    )
+    db.add(routine)
+    db.flush()
+    _create_days(db, routine.id, data.days_list or [])
     db.commit()
     db.refresh(routine)
-    return RoutineOut.model_validate(routine)
+    return send_response(_serialize(routine), "Rutina creada")
 
 
 @router.put("/{id}/update")
 def updated(id: int, data: RoutineUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
     routine = _get_or_404(db, id)
-    update_data = data.model_dump(exclude_unset=True, exclude={"days"})
-    for field, value in update_data.items():
-        setattr(routine, field, value)
+    if not routine:
+        return send_error("Rutina no encontrada")
 
-    if data.days is not None:
-        for day in routine.days:
+    for f in ("name", "gender_id", "training", "training_level_id", "time", "days"):
+        v = getattr(data, f, None)
+        if v is not None:
+            setattr(routine, f, v)
+
+    if data.days_list is not None:
+        for day in list(routine.days_list):
             db.delete(day)
         db.flush()
-        for day_data in data.days:
-            day = RoutineDay(
-                routine_id=routine.id,
-                name=day_data.name,
-                day_number=day_data.day_number,
-                rest=day_data.rest or 0,
-            )
-            db.add(day)
-            db.flush()
-            for detail_data in (day_data.details or []):
-                db.add(RoutineDayDetail(routine_day_id=day.id, **detail_data.model_dump()))
+        _create_days(db, routine.id, data.days_list)
 
     db.commit()
     db.refresh(routine)
-    return RoutineOut.model_validate(routine)
+    return send_response(_serialize(routine), "Rutina actualizada")

@@ -4,10 +4,12 @@ from typing import Optional, List
 
 class RoleCreateRequest(BaseModel):
     name: str
+    slug: Optional[str] = None
 
 
 class RoleUpdateRequest(BaseModel):
     name: Optional[str] = None
+    slug: Optional[str] = None
 
 
 class MenuAssignRequest(BaseModel):
@@ -18,5 +20,6 @@ class MenuAssignRequest(BaseModel):
 class RoleOut(BaseModel):
     id: int
     name: str
+    slug: Optional[str] = None
 
     model_config = {"from_attributes": True}

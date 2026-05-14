@@ -1,0 +1,19 @@
+from app.models.user import User
+from app.models.role import Role
+from app.models.menu import Menu, MenuRole
+from app.models.country import Country
+from app.models.parameter import Parameter, ParameterDetail
+from app.models.muscle_group import MuscleGroup, MuscleGroupClient
+from app.models.training import Training, TrainingClient
+from app.models.routine import Routine, RoutineDay, RoutineDayDetail
+from app.models.client_target import ClientTarget
+from app.models.event_user import EventUser
+from app.models.type_event import TypeEvent
+from app.models.template_notes import TemplateNote
+from app.models.note_user import NoteUser
+from app.models.progress_day import ProgressDay
+from app.models.nutrition.type_food import TypeFood
+from app.models.nutrition.group_food import GroupFood
+from app.models.nutrition.aliment import Aliment
+from app.models.nutrition.diet import Diet, DietDetail
+from app.models.nutrition.recipe import Recipe, RecipeDetail

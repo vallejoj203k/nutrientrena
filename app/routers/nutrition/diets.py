@@ -62,11 +62,6 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
             db.add(food)
             db.flush()
 
-        existing_aliment_ids = {
-            dfa.id for dfa in db.query(DietFoodAliment).filter(
-                DietFoodAliment.diet_food_id == food.id
-            ).all()
-        }
         kept_ids = set()
 
         for aliment_data in (food_data.detail or []):

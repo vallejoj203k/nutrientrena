@@ -1,22 +1,31 @@
+import uuid
 from sqlalchemy.orm import Session
-from app.models.user import User
-from app.models.role import Role, ADMIN
+from app.models.user import User, UserDetail, RoleUser
+from app.models.role import ADMIN
 from app.core.security import hash_password
+
+ADMIN_EMAIL = "admin@nutrientrena.com"
 
 
 def seed_admin_user(db: Session):
-    if db.query(User).filter(User.email == "admin@nutrientrena.com").first():
+    if db.query(User).filter(User.email == ADMIN_EMAIL).first():
         return
 
-    admin_role = db.query(Role).filter(Role.name == ADMIN).first()
     user = User(
-        name="Admin",
-        last_name="NutrientrenaI",
-        email="admin@nutrientrena.com",
+        name="Admin Nutrientrena",
+        email=ADMIN_EMAIL,
         password=hash_password("Admin123!"),
-        slug="admin-nutrientrena",
-        role_id=admin_role.id if admin_role else None,
-        state=1,
     )
     db.add(user)
+    db.flush()
+
+    db.add(RoleUser(user_id=user.id, role_id=ADMIN))
+
+    db.add(UserDetail(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        name="Admin",
+        last_name="Nutrientrena",
+    ))
+
     db.commit()

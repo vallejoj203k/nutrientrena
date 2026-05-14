@@ -5,7 +5,10 @@ from typing import Optional
 class Settings(BaseSettings):
     APP_NAME: str = "NutrientrenaAPI"
     DEBUG: bool = False
+    PORT: int = 8000
 
+    # Railway injects DATABASE_URL directly; individual vars used for local dev
+    DATABASE_URL: Optional[str] = None
     DB_HOST: str = "localhost"
     DB_PORT: int = 3306
     DB_USER: str = "root"
@@ -29,7 +32,15 @@ class Settings(BaseSettings):
     MAIL_FROM: Optional[str] = None
 
     @property
-    def DATABASE_URL(self) -> str:
+    def db_url(self) -> str:
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            # Railway provides mysql:// or postgresql:// — normalize to PyMySQL/psycopg2
+            if url.startswith("mysql://"):
+                url = url.replace("mysql://", "mysql+pymysql://", 1)
+            elif url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+            return url
         return (
             f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

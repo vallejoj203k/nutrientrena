@@ -115,5 +115,5 @@ def menus(current_user: User = Depends(get_current_user), db: Session = Depends(
         tree = _build_menu_tree(menu_list)
 
         return send_response([m.model_dump() for m in tree], "List Menus by User")
-    except Exception as e:
+    except Exception:
         return send_error("Hubo un error.")

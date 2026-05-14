@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  lint-and-verify:
+    name: Lint & Import Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install ruff
+
+      - name: Lint with ruff
+        run: |
+          ruff check app/ --select E,F,W --ignore E501,F401
+
+      - name: Verify all models import cleanly
+        env:
+          DB_HOST: localhost
+          DB_USER: root
+          DB_PASSWORD: ""
+          DB_NAME: nutrientrena
+          SECRET_KEY: ci-secret-key
+        run: |
+          python -c "
+          import app.models
+          from app.database import Base
+          tables = list(Base.metadata.tables.keys())
+          print(f'✅ {len(tables)} tablas registradas')
+          assert len(tables) == 33, f'Expected 33 tables, got {len(tables)}'
+          "
+
+      - name: Verify app loads all routes
+        env:
+          DB_HOST: localhost
+          DB_USER: root
+          DB_PASSWORD: ""
+          DB_NAME: nutrientrena
+          SECRET_KEY: ci-secret-key
+        run: |
+          python -c "
+          from app.main import app
+          routes = [r for r in app.routes if hasattr(r, 'path')]
+          print(f'✅ {len(routes)} rutas registradas')
+          assert len(routes) >= 50, f'Expected at least 50 routes, got {len(routes)}'
+          "
+
+      - name: Verify migration file exists
+        run: |
+          python -c "
+          import glob
+          files = glob.glob('alembic/versions/*.py')
+          assert len(files) >= 1, 'No migration files found'
+          print(f'✅ {len(files)} migracion(es) encontrada(s)')
+          "

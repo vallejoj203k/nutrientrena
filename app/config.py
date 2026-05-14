@@ -7,7 +7,8 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     PORT: int = 8000
 
-    # Railway injects DATABASE_URL directly; individual vars used for local dev
+    # Railway MySQL plugin injects MYSQL_URL; other providers use DATABASE_URL
+    MYSQL_URL: Optional[str] = None
     DATABASE_URL: Optional[str] = None
     DB_HOST: str = "localhost"
     DB_PORT: int = 3306
@@ -33,14 +34,14 @@ class Settings(BaseSettings):
 
     @property
     def db_url(self) -> str:
-        if self.DATABASE_URL:
-            url = self.DATABASE_URL
-            # Railway provides mysql:// or postgresql:// — normalize to PyMySQL/psycopg2
-            if url.startswith("mysql://"):
-                url = url.replace("mysql://", "mysql+pymysql://", 1)
-            elif url.startswith("postgres://"):
-                url = url.replace("postgres://", "postgresql+psycopg2://", 1)
-            return url
+        # Priority: MYSQL_URL (Railway) → DATABASE_URL → individual vars
+        raw = self.MYSQL_URL or self.DATABASE_URL
+        if raw:
+            if raw.startswith("mysql://"):
+                return raw.replace("mysql://", "mysql+pymysql://", 1)
+            if raw.startswith("postgres://"):
+                return raw.replace("postgres://", "postgresql+psycopg2://", 1)
+            return raw
         return (
             f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

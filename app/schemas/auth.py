@@ -1,16 +1,11 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
+    remember_me: Optional[bool] = False
 
 
 class RefreshTokenRequest(BaseModel):
@@ -27,17 +22,15 @@ class MenuOut(BaseModel):
     icon: Optional[str] = None
     path: Optional[str] = None
     menuParentId: Optional[int] = None
+    childMenu: Optional[List["MenuOut"]] = []
 
     model_config = {"from_attributes": True}
 
 
-class UserMeOut(BaseModel):
-    id: int
-    name: str
-    last_name: Optional[str] = None
-    email: str
-    photo: Optional[str] = None
-    role: Optional[str] = None
-    slug: Optional[str] = None
+MenuOut.model_rebuild()
 
-    model_config = {"from_attributes": True}
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"

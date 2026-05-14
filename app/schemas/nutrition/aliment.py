@@ -1,55 +1,53 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
 
 
 class AlimentCreate(BaseModel):
-    name: str
-    type_food_id: Optional[int] = None
     group_food_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    calories: Optional[float] = None
-    proteins: Optional[float] = None
-    carbs: Optional[float] = None
-    fats: Optional[float] = None
-    fiber: Optional[float] = None
-    sugar: Optional[float] = None
-    sodium: Optional[float] = None
+    brand: Optional[str] = None
+    name: str
     quantity: Optional[float] = None
-    description: Optional[str] = None
+    quantity_type_id: Optional[int] = None
+    proteins: Optional[float] = None
+    carbohydrates: Optional[float] = None
+    fats: Optional[float] = None
+    calories: Optional[float] = None
+    comments: Optional[str] = None
 
 
 class AlimentUpdate(BaseModel):
-    name: Optional[str] = None
-    type_food_id: Optional[int] = None
     group_food_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    calories: Optional[float] = None
-    proteins: Optional[float] = None
-    carbs: Optional[float] = None
-    fats: Optional[float] = None
-    fiber: Optional[float] = None
-    sugar: Optional[float] = None
-    sodium: Optional[float] = None
+    brand: Optional[str] = None
+    name: Optional[str] = None
     quantity: Optional[float] = None
-    description: Optional[str] = None
-    state: Optional[int] = None
+    quantity_type_id: Optional[int] = None
+    proteins: Optional[float] = None
+    carbohydrates: Optional[float] = None
+    fats: Optional[float] = None
+    calories: Optional[float] = None
+    comments: Optional[str] = None
+    status: Optional[int] = None
+
+
+class QuantityTypeOut(BaseModel):
+    id: int
+    description: str
+    model_config = {"from_attributes": True}
 
 
 class AlimentOut(BaseModel):
-    id: int
-    name: str
-    type_food_id: Optional[int] = None
+    id: str
     group_food_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    calories: Optional[float] = None
-    proteins: Optional[float] = None
-    carbs: Optional[float] = None
-    fats: Optional[float] = None
-    fiber: Optional[float] = None
-    sugar: Optional[float] = None
-    sodium: Optional[float] = None
+    brand: Optional[str] = None
+    name: str
     quantity: Optional[float] = None
-    state: int
+    quantity_type_id: Optional[int] = None
+    quantity_type: Optional[QuantityTypeOut] = None
+    proteins: Optional[float] = None
+    carbohydrates: Optional[float] = None
+    fats: Optional[float] = None
+    calories: Optional[float] = None
+    comments: Optional[str] = None
+    parent_id: Optional[str] = None
 
     model_config = {"from_attributes": True}

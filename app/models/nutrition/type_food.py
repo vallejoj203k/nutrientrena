@@ -10,8 +10,8 @@ class TypeFood(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     description = Column(String(500), nullable=True)
-    state = Column(Integer, default=1)
+    status = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    aliments = relationship("Aliment", back_populates="type_food")
+    diets = relationship("Diet", back_populates="type", foreign_keys="Diet.type_id")

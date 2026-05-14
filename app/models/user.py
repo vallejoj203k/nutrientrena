@@ -20,6 +20,10 @@ class User(Base):
     detail = relationship("UserDetail", back_populates="user", uselist=False,
                           foreign_keys="UserDetail.user_id")
     role_users = relationship("RoleUser", back_populates="user")
+    client_target = relationship("ClientTarget", back_populates="user", uselist=False)
+    events = relationship("EventUser", back_populates="user", foreign_keys="EventUser.user_id")
+    notes_user = relationship("NoteUser", back_populates="user", foreign_keys="NoteUser.user_id")
+    progress_days = relationship("ProgressDay", back_populates="user")
 
 
 class RoleUser(Base):

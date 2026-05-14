@@ -69,3 +69,4 @@ class Aliment(Base):
     description = relationship("AlimentDescription", back_populates="aliment", uselist=False)
     parent = relationship("Aliment", remote_side=[id], foreign_keys=[parent_id])
     diet_food_aliments = relationship("DietFoodAliment", back_populates="aliment")
+    recipe_details = relationship("RecipeDetail", back_populates="aliment")

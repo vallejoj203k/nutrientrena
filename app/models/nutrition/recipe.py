@@ -27,7 +27,6 @@ class Recipe(Base):
     instructor = relationship("User")
     category = relationship("ParameterDetail", foreign_keys=[category_id])
     details = relationship("RecipeDetail", back_populates="recipe", cascade="all, delete-orphan")
-    diet_details = relationship("DietDetail", back_populates="recipe")
 
 
 class RecipeDetail(Base):
@@ -35,7 +34,7 @@ class RecipeDetail(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
-    aliment_id = Column(Integer, ForeignKey("aliments.id"), nullable=False)
+    aliment_id = Column(String(36), ForeignKey("aliments.id"), nullable=False)
     quantity = Column(Float, nullable=True)
     unit_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     notes = Column(Text, nullable=True)

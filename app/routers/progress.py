@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.responses import send_response, send_error
 from app.models.progress_day import ProgressDay
 from app.models.client_target import ClientTarget
 from app.schemas.progress import ProgressCreate, ProgressOut, ClientTargetCreate, ClientTargetOut
@@ -14,14 +15,11 @@ router_targets = APIRouter(prefix="/client-targets", tags=["Client Targets"])
 
 @router_progress.post("")
 def create_progress(data: ProgressCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    obj = ProgressDay(
-        user_id=data.user_id or current_user.id,
-        **data.model_dump(exclude={"user_id"}),
-    )
+    obj = ProgressDay(user_id=data.user_id or current_user.id, **data.model_dump(exclude={"user_id"}))
     db.add(obj)
     db.commit()
     db.refresh(obj)
-    return ProgressOut.model_validate(obj)
+    return send_response(ProgressOut.model_validate(obj).model_dump(), "Progreso registrado")
 
 
 @router_progress.get("/search")
@@ -32,17 +30,17 @@ def search_progress(
 ):
     uid = user_id or current_user.id
     items = db.query(ProgressDay).filter(ProgressDay.user_id == uid).order_by(ProgressDay.date.desc()).all()
-    return [ProgressOut.model_validate(i) for i in items]
+    return send_response([ProgressOut.model_validate(i).model_dump() for i in items], "OK")
 
 
 @router_progress.delete("/delete/{id}")
 def delete_progress(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
     obj = db.query(ProgressDay).filter(ProgressDay.id == id).first()
     if not obj:
-        raise HTTPException(status_code=404, detail="Registro no encontrado")
+        return send_error("Registro no encontrado")
     db.delete(obj)
     db.commit()
-    return {"message": "Registro eliminado"}
+    return send_response(None, "Registro eliminado")
 
 
 @router_targets.get("/search")
@@ -54,8 +52,8 @@ def search_targets(
     uid = user_id or current_user.id
     obj = db.query(ClientTarget).filter(ClientTarget.user_id == uid).first()
     if not obj:
-        return {}
-    return ClientTargetOut.model_validate(obj)
+        return send_response(None, "Sin objetivos registrados")
+    return send_response(ClientTargetOut.model_validate(obj).model_dump(), "OK")
 
 
 @router_targets.put("")
@@ -70,4 +68,4 @@ def create_or_update_target(data: ClientTargetCreate, db: Session = Depends(get_
         db.add(obj)
     db.commit()
     db.refresh(obj)
-    return ClientTargetOut.model_validate(obj)
+    return send_response(ClientTargetOut.model_validate(obj).model_dump(), "Objetivos actualizados")

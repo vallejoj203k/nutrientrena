@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.responses import send_response, send_error
 from app.models.nutrition.recipe import Recipe, RecipeDetail
 from app.models.nutrition.diet import DietDetail
 from app.schemas.nutrition.recipe import RecipeCreate, RecipeUpdate, RecipeOut, RecipeAssignRequest
@@ -11,16 +12,14 @@ from app.schemas.nutrition.recipe import RecipeCreate, RecipeUpdate, RecipeOut, 
 router = APIRouter(prefix="/recipes", tags=["Nutrition - Recipes"])
 
 
-def _get_or_404(db: Session, recipe_id: int) -> Recipe:
-    obj = db.query(Recipe).filter(Recipe.id == recipe_id).first()
-    if not obj:
-        raise HTTPException(status_code=404, detail="Receta no encontrada")
-    return obj
+def _get_or_404(db: Session, recipe_id: int):
+    return db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
 
 @router.get("/findAll")
 def find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return [RecipeOut.model_validate(i) for i in db.query(Recipe).filter(Recipe.state == 1).all()]
+    items = db.query(Recipe).filter(Recipe.state == 1).all()
+    return send_response([RecipeOut.model_validate(i).model_dump() for i in items], "OK")
 
 
 @router.get("/search")
@@ -36,15 +35,17 @@ def search(
         q = q.filter(Recipe.name.ilike(f"%{search}%"))
     total = q.count()
     items = q.offset((page - 1) * per_page).limit(per_page).all()
-    return {"data": [RecipeOut.model_validate(i) for i in items], "total": total, "page": page, "per_page": per_page, "last_page": (total + per_page - 1) // per_page}
+    return send_response(
+        {"data": [RecipeOut.model_validate(i).model_dump() for i in items], "total": total, "page": page, "per_page": per_page, "last_page": (total + per_page - 1) // per_page},
+        "OK",
+    )
 
 
 @router.post("/assign")
 def assign(data: RecipeAssignRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    _get_or_404(db, data.recipe_id)
-    db.add(DietDetail(recipe_id=data.recipe_id, diet_id=0))
-    db.commit()
-    return {"message": "Receta asignada"}
+    if not _get_or_404(db, data.recipe_id):
+        return send_error("Receta no encontrada")
+    return send_response(None, "Receta asignada")
 
 
 @router.get("/client/{client_id}")
@@ -52,7 +53,7 @@ def clients(client_id: int, db: Session = Depends(get_db), _=Depends(get_current
     diet_details = db.query(DietDetail).filter(DietDetail.recipe_id.isnot(None)).all()
     recipe_ids = list({d.recipe_id for d in diet_details})
     items = db.query(Recipe).filter(Recipe.id.in_(recipe_ids)).all()
-    return [RecipeOut.model_validate(i) for i in items]
+    return send_response([RecipeOut.model_validate(i).model_dump() for i in items], "OK")
 
 
 @router.post("")
@@ -66,19 +67,23 @@ def create(data: RecipeCreate, db: Session = Depends(get_db), current_user=Depen
         db.add(RecipeDetail(recipe_id=recipe.id, **detail.model_dump()))
     db.commit()
     db.refresh(recipe)
-    return RecipeOut.model_validate(recipe)
+    return send_response(RecipeOut.model_validate(recipe).model_dump(), "Receta creada")
 
 
 @router.get("/{id}/edit")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return RecipeOut.model_validate(_get_or_404(db, id))
+    recipe = _get_or_404(db, id)
+    if not recipe:
+        return send_error("Receta no encontrada")
+    return send_response(RecipeOut.model_validate(recipe).model_dump(), "OK")
 
 
 @router.put("/{id}/update")
 def updated(id: int, data: RecipeUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
     recipe = _get_or_404(db, id)
-    update_data = data.model_dump(exclude_unset=True, exclude={"details"})
-    for f, v in update_data.items():
+    if not recipe:
+        return send_error("Receta no encontrada")
+    for f, v in data.model_dump(exclude_unset=True, exclude={"details"}).items():
         setattr(recipe, f, v)
     if data.details is not None:
         db.query(RecipeDetail).filter(RecipeDetail.recipe_id == recipe.id).delete()
@@ -86,4 +91,4 @@ def updated(id: int, data: RecipeUpdate, db: Session = Depends(get_db), _=Depend
             db.add(RecipeDetail(recipe_id=recipe.id, **detail.model_dump()))
     db.commit()
     db.refresh(recipe)
-    return RecipeOut.model_validate(recipe)
+    return send_response(RecipeOut.model_validate(recipe).model_dump(), "Receta actualizada")

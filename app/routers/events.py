@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.responses import send_response, send_error
 from app.models.event_user import EventUser
 from app.models.type_event import TypeEvent
 from app.schemas.events import EventCreate, EventUpdate, EventOut, TypeEventCreate, TypeEventUpdate, TypeEventOut
@@ -13,18 +14,12 @@ router_events = APIRouter(prefix="/events", tags=["Events"])
 router_type_events = APIRouter(prefix="/type-events", tags=["Type Events"])
 
 
-def _get_event_or_404(db: Session, event_id: int) -> EventUser:
-    obj = db.query(EventUser).filter(EventUser.id == event_id).first()
-    if not obj:
-        raise HTTPException(status_code=404, detail="Evento no encontrado")
-    return obj
+def _get_event_or_404(db: Session, event_id: int):
+    return db.query(EventUser).filter(EventUser.id == event_id).first()
 
 
-def _get_type_event_or_404(db: Session, obj_id: int) -> TypeEvent:
-    obj = db.query(TypeEvent).filter(TypeEvent.id == obj_id).first()
-    if not obj:
-        raise HTTPException(status_code=404, detail="Tipo de evento no encontrado")
-    return obj
+def _get_type_or_404(db: Session, obj_id: int):
+    return db.query(TypeEvent).filter(TypeEvent.id == obj_id).first()
 
 
 @router_events.post("")
@@ -41,7 +36,7 @@ def create_event(data: EventCreate, db: Session = Depends(get_db), current_user=
     db.add(event)
     db.commit()
     db.refresh(event)
-    return EventOut.model_validate(event)
+    return send_response(EventOut.model_validate(event).model_dump(), "Evento creado")
 
 
 @router_events.get("/search")
@@ -52,32 +47,35 @@ def search_events(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    q = db.query(EventUser)
     uid = user_id or current_user.id
-    q = q.filter(EventUser.user_id == uid)
+    q = db.query(EventUser).filter(EventUser.user_id == uid)
     if start:
         q = q.filter(EventUser.start_date >= start)
     if end:
         q = q.filter(EventUser.start_date <= end)
-    return [EventOut.model_validate(e) for e in q.all()]
+    return send_response([EventOut.model_validate(e).model_dump() for e in q.all()], "OK")
 
 
 @router_events.delete("/delete/{id}")
 def delete_event(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
     event = _get_event_or_404(db, id)
+    if not event:
+        return send_error("Evento no encontrado")
     db.delete(event)
     db.commit()
-    return {"message": "Evento eliminado"}
+    return send_response(None, "Evento eliminado")
 
 
 @router_events.post("/update/{id}")
 def update_event(id: int, data: EventUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
     event = _get_event_or_404(db, id)
+    if not event:
+        return send_error("Evento no encontrado")
     for f, v in data.model_dump(exclude_unset=True).items():
         setattr(event, f, v)
     db.commit()
     db.refresh(event)
-    return EventOut.model_validate(event)
+    return send_response(EventOut.model_validate(event).model_dump(), "Evento actualizado")
 
 
 @router_type_events.post("")
@@ -86,22 +84,25 @@ def create_type(data: TypeEventCreate, db: Session = Depends(get_db), _=Depends(
     db.add(obj)
     db.commit()
     db.refresh(obj)
-    return TypeEventOut.model_validate(obj)
+    return send_response(TypeEventOut.model_validate(obj).model_dump(), "Tipo de evento creado")
 
 
 @router_type_events.post("/update/{id}")
 def update_type(id: int, data: TypeEventUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    obj = _get_type_event_or_404(db, id)
+    obj = _get_type_or_404(db, id)
+    if not obj:
+        return send_error("Tipo de evento no encontrado")
     for f, v in data.model_dump(exclude_unset=True).items():
         setattr(obj, f, v)
     db.commit()
     db.refresh(obj)
-    return TypeEventOut.model_validate(obj)
+    return send_response(TypeEventOut.model_validate(obj).model_dump(), "Actualizado")
 
 
 @router_type_events.get("/find-all")
 def find_all_types(db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return [TypeEventOut.model_validate(i) for i in db.query(TypeEvent).filter(TypeEvent.state == 1).all()]
+    items = db.query(TypeEvent).filter(TypeEvent.state == 1).all()
+    return send_response([TypeEventOut.model_validate(i).model_dump() for i in items], "OK")
 
 
 @router_type_events.get("/search")
@@ -113,12 +114,14 @@ def search_types(
     q = db.query(TypeEvent)
     if search:
         q = q.filter(TypeEvent.name.ilike(f"%{search}%"))
-    return [TypeEventOut.model_validate(i) for i in q.all()]
+    return send_response([TypeEventOut.model_validate(i).model_dump() for i in q.all()], "OK")
 
 
 @router_type_events.delete("/delete/{id}")
 def delete_type(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    obj = _get_type_event_or_404(db, id)
+    obj = _get_type_or_404(db, id)
+    if not obj:
+        return send_error("Tipo de evento no encontrado")
     db.delete(obj)
     db.commit()
-    return {"message": "Tipo de evento eliminado"}
+    return send_response(None, "Tipo de evento eliminado")

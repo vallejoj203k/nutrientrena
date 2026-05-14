@@ -1,31 +1,50 @@
+import os
 from pydantic_settings import BaseSettings
 from typing import Optional
+
+
+def _normalize_url(url: str) -> str:
+    if url.startswith("mysql://"):
+        return url.replace("mysql://", "mysql+pymysql://", 1)
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+psycopg2://", 1)
+    return url
+
+
+def _build_db_url() -> str:
+    """
+    Read DB connection from environment directly (bypasses pydantic parsing).
+    Priority: DATABASE_URL → MYSQL_URL → MYSQLHOST vars → local defaults.
+    """
+    raw = os.environ.get("DATABASE_URL") or os.environ.get("MYSQL_URL")
+    if raw:
+        return _normalize_url(raw)
+
+    host = os.environ.get("MYSQLHOST")
+    if host:
+        port = os.environ.get("MYSQLPORT", "3306")
+        user = os.environ.get("MYSQLUSER", "root")
+        password = os.environ.get("MYSQLPASSWORD", "")
+        db = os.environ.get("MYSQLDATABASE", "railway")
+        return f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}"
+
+    # local dev fallback
+    host = os.environ.get("DB_HOST", "localhost")
+    port = os.environ.get("DB_PORT", "3306")
+    user = os.environ.get("DB_USER", "root")
+    password = os.environ.get("DB_PASSWORD", "")
+    db = os.environ.get("DB_NAME", "nutrientrena")
+    return f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}"
+
+
+# Resolved once at import time — visible to alembic env.py and database.py
+SQLALCHEMY_DATABASE_URL = _build_db_url()
 
 
 class Settings(BaseSettings):
     APP_NAME: str = "NutrientrenaAPI"
     DEBUG: bool = False
     PORT: int = 8000
-
-    # --- Database ---
-    # Railway MySQL plugin injects MYSQL_URL or individual MYSQL* vars.
-    # Local dev uses DB_* vars.
-    MYSQL_URL: Optional[str] = None          # Railway: mysql://user:pass@host:port/db
-    DATABASE_URL: Optional[str] = None       # Generic override
-
-    # Railway individual MySQL vars (injected when service is linked)
-    MYSQLHOST: Optional[str] = None
-    MYSQLPORT: int = 3306
-    MYSQLUSER: Optional[str] = None
-    MYSQLPASSWORD: Optional[str] = None
-    MYSQLDATABASE: Optional[str] = None
-
-    # Local dev fallbacks
-    DB_HOST: str = "localhost"
-    DB_PORT: int = 3306
-    DB_USER: str = "root"
-    DB_PASSWORD: str = ""
-    DB_NAME: str = "nutrientrena"
 
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"
@@ -45,27 +64,7 @@ class Settings(BaseSettings):
 
     @property
     def db_url(self) -> str:
-        # 1. Full URL from Railway MySQL plugin
-        raw = self.MYSQL_URL or self.DATABASE_URL
-        if raw:
-            if raw.startswith("mysql://"):
-                return raw.replace("mysql://", "mysql+pymysql://", 1)
-            if raw.startswith("postgres://"):
-                return raw.replace("postgres://", "postgresql+psycopg2://", 1)
-            return raw
-
-        # 2. Individual Railway MySQL vars (MYSQLHOST injected by linked service)
-        if self.MYSQLHOST:
-            return (
-                f"mysql+pymysql://{self.MYSQLUSER}:{self.MYSQLPASSWORD}"
-                f"@{self.MYSQLHOST}:{self.MYSQLPORT}/{self.MYSQLDATABASE}"
-            )
-
-        # 3. Local dev vars
-        return (
-            f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        )
+        return SQLALCHEMY_DATABASE_URL
 
     class Config:
         env_file = ".env"

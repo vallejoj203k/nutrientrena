@@ -56,11 +56,9 @@ class Settings(BaseSettings):
     AWS_DEFAULT_REGION: str = "us-east-1"
     AWS_BUCKET: Optional[str] = None
 
-    MAIL_HOST: Optional[str] = None
-    MAIL_PORT: int = 587
-    MAIL_USER: Optional[str] = None
-    MAIL_PASSWORD: Optional[str] = None
-    MAIL_FROM: Optional[str] = None
+    RESEND_API_KEY: Optional[str] = None
+    MAIL_FROM: str = "onboarding@resend.dev"
+    FRONTEND_URL: str = "http://localhost:3000"
 
     @property
     def db_url(self) -> str:

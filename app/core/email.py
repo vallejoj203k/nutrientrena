@@ -11,6 +11,7 @@ APP_NAME = os.environ.get("APP_NAME", "Nutrientrena")
 
 def _send_resend(to: str, subject: str, html: str) -> bool:
     if not RESEND_API_KEY:
+        print("EMAIL ERROR: RESEND_API_KEY no configurado")
         return False
     payload = json.dumps({
         "from": f"{APP_NAME} <{MAIL_FROM}>",
@@ -29,8 +30,11 @@ def _send_resend(to: str, subject: str, html: str) -> bool:
     )
     try:
         with urllib.request.urlopen(req) as r:
+            print(f"EMAIL OK: enviado a {to} — status {r.status}")
             return r.status == 200
-    except urllib.error.HTTPError:
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"EMAIL ERROR: {e.code} — {body}")
         return False
 
 

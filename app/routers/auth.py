@@ -5,6 +5,7 @@ from app.database import get_db
 from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
 from app.core.dependencies import get_current_user
 from app.core.responses import send_response, send_error
+from app.core.email import send_recover_password_email
 from app.models.user import User, UserDetail, RoleUser
 from app.models.menu import Menu, MenuRole
 from app.models.role import CLIENT
@@ -78,7 +79,15 @@ def refresh_token_endpoint(data: RefreshTokenRequest, db: Session = Depends(get_
 def recover_password(data: RecoverPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user:
-        return send_error("Usuario no encontrado")
+        # Respuesta genérica para no revelar si el email existe
+        return send_response([], "Se envio un correo electronico.")
+
+    user_detail = db.query(UserDetail).filter(UserDetail.user_id == user.id).first()
+    name = user_detail.name if user_detail else user.name
+
+    reset_token = create_access_token({"sub": str(user.id), "purpose": "reset"})
+    send_recover_password_email(to=user.email, name=name, token=reset_token)
+
     return send_response([], "Se envio un correo electronico.")
 
 

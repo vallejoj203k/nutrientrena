@@ -1,10 +1,11 @@
+import os
 import uuid
 from sqlalchemy.orm import Session
 from app.models.user import User, UserDetail, RoleUser
 from app.models.role import ADMIN
 from app.core.security import hash_password
 
-ADMIN_EMAIL = "admin@nutrientrena.com"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@nutrientrena.com")
 
 
 def seed_admin_user(db: Session):

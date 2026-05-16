@@ -94,6 +94,27 @@ SPRINTS = {
             ),
         },
         {
+            "name": "Sprint 11 - Dashboard Kanban de clientes",
+            "desc": (
+                "✅ GET /api/users/kanban → clientes agrupados por estado\n"
+                "✅ Soporta ?coach_id= para filtrar por coach\n"
+                "✅ Devuelve status_name desde parameter_details\n"
+                "✅ PUT /api/users/{id}/change → mover cliente de estado (drag & drop)"
+            ),
+        },
+        {
+            "name": "Sprint 12 - Check-ins semanales",
+            "desc": (
+                "✅ Modelo WeeklyCheckin: cliente, coach, fecha, peso, notas, notas_coach\n"
+                "✅ POST /api/checkins → registrar check-in\n"
+                "✅ GET /api/checkins/client/{id} → historial con progreso de peso\n"
+                "✅ GET /api/checkins/summary/{id} → resumen total: cambio de peso, total check-ins\n"
+                "✅ PUT /api/checkins/{id}/coach-notes → agregar notas del coach\n"
+                "✅ DELETE /api/checkins/{id} → eliminar check-in\n"
+                "✅ Migración b2c3d4e5f6a7 (tabla weekly_checkins)"
+            ),
+        },
+        {
             "name": "Sprint 9 - Roles, Estados y Módulo Forms",
             "desc": (
                 "✅ 6 roles: superadmin, admin, setter, closer, coach, cliente\n"
@@ -131,25 +152,6 @@ SPRINTS = {
                 "[ ] GET /api/users/{id} → verificar que peso/altura se actualizaron\n"
                 "[ ] Verificar status_id cliente: 48 (pendiente) → 49 (recibido)\n"
                 "[ ] GET /api/parameters → confirmar los 15 estados de cliente"
-            ),
-        },
-        {
-            "name": "Sprint 11 - Dashboard Kanban de clientes",
-            "desc": (
-                "[ ] Endpoint GET /api/clients/kanban → clientes agrupados por estado\n"
-                "[ ] Endpoint PATCH /api/clients/{id}/status → mover cliente de estado\n"
-                "[ ] Filtros: por coach, por estado, por fecha\n"
-                "[ ] Respuesta incluye datos básicos: nombre, email, estado, fecha ingreso"
-            ),
-        },
-        {
-            "name": "Sprint 12 - Check-ins semanales",
-            "desc": (
-                "[ ] Modelo WeeklyCheckin: cliente, fecha, peso, fotos, notas\n"
-                "[ ] POST /api/checkins → crear check-in del cliente\n"
-                "[ ] GET /api/checkins/client/{id} → historial del cliente\n"
-                "[ ] Comparar peso actual vs objetivo vs semana anterior\n"
-                "[ ] Notificación al coach cuando cliente envía check-in"
             ),
         },
         {

@@ -18,3 +18,4 @@ from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment
 from app.models.nutrition.recipe import Recipe, RecipeDetail
 from app.models.form import FormTemplate, FormTemplateField, FormAssignment, FormResponse
+from app.models.checkin import WeeklyCheckin

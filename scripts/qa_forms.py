@@ -55,8 +55,8 @@ def get(path, token=None):
 h("1. LOGIN")
 r = post("/api/auth/login", {"email": EMAIL, "password": PASSWORD})
 check("POST /api/auth/login devuelve 200", r.status_code == 200, str(r.status_code))
-token = r.json().get("data", {}).get("access_token")
-check("Respuesta incluye access_token", bool(token))
+token = r.json().get("data", {}).get("token")
+check("Respuesta incluye token", bool(token))
 
 # ── 2. GET /api/auth/me ───────────────────────────────────────────────────────
 h("2. ME")

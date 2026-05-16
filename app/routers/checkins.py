@@ -1,0 +1,130 @@
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+from typing import Optional
+
+from app.database import get_db
+from app.core.dependencies import get_current_user
+from app.core.responses import send_response, send_error
+from app.models.checkin import WeeklyCheckin
+from app.models.user import UserDetail
+from app.schemas.checkin import CheckinCreate, CheckinCoachUpdate, CheckinOut
+
+router = APIRouter(prefix="/checkins", tags=["Check-ins"])
+
+
+def _get_coach_detail(db: Session, user_id: int) -> Optional[UserDetail]:
+    return db.query(UserDetail).filter(UserDetail.user_id == user_id).first()
+
+
+@router.post("")
+def create_checkin(
+    data: CheckinCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    client = db.query(UserDetail).filter(UserDetail.id == data.client_user_detail_id).first()
+    if not client:
+        return send_error("Cliente no encontrado")
+
+    coach_detail = _get_coach_detail(db, current_user.id)
+
+    checkin = WeeklyCheckin(
+        client_user_detail_id=data.client_user_detail_id,
+        coach_user_detail_id=coach_detail.id if coach_detail else None,
+        checkin_date=data.checkin_date,
+        weight=data.weight,
+        notes=data.notes,
+    )
+    db.add(checkin)
+    db.commit()
+    db.refresh(checkin)
+    return send_response(CheckinOut.model_validate(checkin).model_dump(), "Check-in registrado")
+
+
+@router.get("/client/{client_id}")
+def client_checkins(
+    client_id: str,
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+    _=Depends(get_current_user),
+):
+    checkins = (
+        db.query(WeeklyCheckin)
+        .filter(WeeklyCheckin.client_user_detail_id == client_id)
+        .order_by(WeeklyCheckin.checkin_date.desc())
+        .limit(limit)
+        .all()
+    )
+    data = [CheckinOut.model_validate(c).model_dump() for c in checkins]
+
+    # Calcular progreso: diferencia de peso entre último y anterior check-in
+    progress = None
+    if len(checkins) >= 2 and checkins[0].weight and checkins[1].weight:
+        progress = round(checkins[0].weight - checkins[1].weight, 2)
+
+    return send_response({"checkins": data, "weight_progress": progress}, "OK")
+
+
+@router.get("/summary/{client_id}")
+def client_summary(
+    client_id: str,
+    db: Session = Depends(get_db),
+    _=Depends(get_current_user),
+):
+    checkins = (
+        db.query(WeeklyCheckin)
+        .filter(WeeklyCheckin.client_user_detail_id == client_id)
+        .order_by(WeeklyCheckin.checkin_date.asc())
+        .all()
+    )
+    if not checkins:
+        return send_response({"total": 0}, "Sin check-ins")
+
+    weights = [c.weight for c in checkins if c.weight is not None]
+    first_weight = weights[0] if weights else None
+    last_weight  = weights[-1] if weights else None
+    total_change = round(last_weight - first_weight, 2) if first_weight and last_weight else None
+
+    return send_response({
+        "total": len(checkins),
+        "first_checkin": str(checkins[0].checkin_date),
+        "last_checkin":  str(checkins[-1].checkin_date),
+        "first_weight":  first_weight,
+        "last_weight":   last_weight,
+        "total_weight_change": total_change,
+    }, "OK")
+
+
+@router.put("/{id}/coach-notes")
+def add_coach_notes(
+    id: str,
+    data: CheckinCoachUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    checkin = db.query(WeeklyCheckin).filter(WeeklyCheckin.id == id).first()
+    if not checkin:
+        return send_error("Check-in no encontrado")
+
+    if data.coach_notes is not None:
+        checkin.coach_notes = data.coach_notes
+    if data.weight is not None:
+        checkin.weight = data.weight
+
+    coach_detail = _get_coach_detail(db, current_user.id)
+    if coach_detail and not checkin.coach_user_detail_id:
+        checkin.coach_user_detail_id = coach_detail.id
+
+    db.commit()
+    db.refresh(checkin)
+    return send_response(CheckinOut.model_validate(checkin).model_dump(), "Notas actualizadas")
+
+
+@router.delete("/{id}")
+def delete_checkin(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    checkin = db.query(WeeklyCheckin).filter(WeeklyCheckin.id == id).first()
+    if not checkin:
+        return send_error("Check-in no encontrado")
+    db.delete(checkin)
+    db.commit()
+    return send_response(None, "Check-in eliminado")

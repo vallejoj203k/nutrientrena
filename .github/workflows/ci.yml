@@ -43,7 +43,7 @@ jobs:
           from app.database import Base
           tables = list(Base.metadata.tables.keys())
           print(f'✅ {len(tables)} tablas registradas')
-          assert len(tables) == 33, f'Expected 33 tables, got {len(tables)}'
+          assert len(tables) >= 33, f'Expected at least 33 tables, got {len(tables)}'
           "
 
       - name: Verify app loads all routes

@@ -1,8 +1,5 @@
 import os
-import urllib.request
-import urllib.error
-import json
-
+import resend
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 MAIL_FROM = os.environ.get("MAIL_FROM", "onboarding@resend.dev")
@@ -13,28 +10,18 @@ def _send_resend(to: str, subject: str, html: str) -> bool:
     if not RESEND_API_KEY:
         print("EMAIL ERROR: RESEND_API_KEY no configurado")
         return False
-    payload = json.dumps({
-        "from": f"{APP_NAME} <{MAIL_FROM}>",
-        "to": [to],
-        "subject": subject,
-        "html": html,
-    }).encode()
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=payload,
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {RESEND_API_KEY}",
-            "Content-Type": "application/json",
-        },
-    )
     try:
-        with urllib.request.urlopen(req) as r:
-            print(f"EMAIL OK: enviado a {to} — status {r.status}")
-            return r.status == 200
-    except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(f"EMAIL ERROR: {e.code} — {body}")
+        resend.api_key = RESEND_API_KEY
+        r = resend.Emails.send({
+            "from": f"{APP_NAME} <{MAIL_FROM}>",
+            "to": [to],
+            "subject": subject,
+            "html": html,
+        })
+        print(f"EMAIL OK: enviado a {to} — id {r.get('id')}")
+        return True
+    except Exception as e:
+        print(f"EMAIL ERROR: {e}")
         return False
 
 
@@ -57,15 +44,15 @@ def send_recover_password_email(to: str, name: str, token: str) -> bool:
                 <td style="padding:40px 32px;">
                   <h2 style="color:#111827; margin:0 0 16px;">Hola, {name}</h2>
                   <p style="color:#6b7280; font-size:16px; line-height:1.6; margin:0 0 24px;">
-                    Recibimos una solicitud para restablecer la contraseña de tu cuenta.
-                    Haz clic en el botón de abajo para crear una nueva contraseña.
+                    Recibimos una solicitud para restablecer la contrasena de tu cuenta.
+                    Haz clic en el boton de abajo para crear una nueva contrasena.
                   </p>
                   <div style="text-align:center; margin:32px 0;">
                     <a href="{reset_link}"
                        style="background:#16a34a; color:#ffffff; padding:14px 32px;
                               border-radius:6px; text-decoration:none; font-size:16px;
                               font-weight:bold; display:inline-block;">
-                      Restablecer contraseña
+                      Restablecer contrasena
                     </a>
                   </div>
                   <p style="color:#9ca3af; font-size:14px; margin:24px 0 0;">
@@ -87,4 +74,4 @@ def send_recover_password_email(to: str, name: str, token: str) -> bool:
     </body>
     </html>
     """
-    return _send_resend(to, f"Restablecer contraseña — {APP_NAME}", html)
+    return _send_resend(to, f"Restablecer contrasena - {APP_NAME}", html)

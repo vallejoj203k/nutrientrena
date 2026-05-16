@@ -15,6 +15,7 @@ from app.seeds.parameters import seed_parameters
 from app.seeds.countries import seed_countries
 from app.seeds.menus import seed_menus
 from app.seeds.admin_user import seed_admin_user
+from app.seeds.default_form import seed_default_form
 
 
 def run_all():
@@ -31,6 +32,8 @@ def run_all():
         seed_menus(db)
         print("Seeding admin user...")
         seed_admin_user(db)
+        print("Seeding default form...")
+        seed_default_form(db)
         print("Done.")
     finally:
         db.close()

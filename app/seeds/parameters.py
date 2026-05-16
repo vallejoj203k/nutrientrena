@@ -4,14 +4,37 @@ from app.models.parameter import Parameter, ParameterDetail
 
 PARAMETERS = [
     {
-        "description": "Estado de Usuarios",
-        "details": [{"description": "Activo"}, {"description": "Inactivo"}],
+        "description": "Estado del Cliente",
+        "details": [
+            {"description": "Pago pendiente"},
+            {"description": "Reserva recibida"},
+            {"description": "Pago recibido"},
+            {"description": "Formulario pendiente"},
+            {"description": "Formulario recibido"},
+            {"description": "Cliente contactado"},
+            {"description": "Videollamada pendiente"},
+            {"description": "Videollamada realizada"},
+            {"description": "Plan en creacion"},
+            {"description": "Plan entregado"},
+            {"description": "En seguimiento"},
+            {"description": "Cliente en riesgo"},
+            {"description": "Finalizado"},
+            {"description": "Renovado"},
+            {"description": "Cancelado / Reembolsado"},
+        ],
+    },
+    {
+        "description": "Estado de Cuenta",
+        "details": [
+            {"description": "Activo"},
+            {"description": "Inactivo"},
+        ],
     },
     {
         "description": "Genero",
         "details": [
             {"description": "Masculino"},
-            {"description": "Femenina"},
+            {"description": "Femenino"},
             {"description": "Otro"},
         ],
     },
@@ -25,7 +48,7 @@ PARAMETERS = [
         ],
     },
     {
-        "description": "Nivel entrenamiento",
+        "description": "Nivel de entrenamiento",
         "details": [
             {"description": "Principiante"},
             {"description": "Intermedio"},
@@ -44,16 +67,16 @@ PARAMETERS = [
     {
         "description": "Nivel de actividad",
         "details": [
-            {"description": "Sedentario", "value_1": "1.2", "value_1_description": "VALOR"},
-            {"description": "Ligera", "value_1": "1.375", "value_1_description": "VALOR"},
-            {"description": "Moderada", "value_1": "1.55", "value_1_description": "VALOR"},
-            {"description": "Intensa", "value_1": "1.65", "value_1_description": "VALOR"},
-            {"description": "Muy Activa", "value_1": "1.725", "value_1_description": "VALOR"},
-            {"description": "Extra Fuerte", "value_1": "1.9", "value_1_description": "VALOR"},
+            {"description": "Sedentario",    "value_1": "1.2",   "value_1_description": "VALOR"},
+            {"description": "Ligera",         "value_1": "1.375", "value_1_description": "VALOR"},
+            {"description": "Moderada",       "value_1": "1.55",  "value_1_description": "VALOR"},
+            {"description": "Intensa",        "value_1": "1.65",  "value_1_description": "VALOR"},
+            {"description": "Muy Activa",     "value_1": "1.725", "value_1_description": "VALOR"},
+            {"description": "Extra Fuerte",   "value_1": "1.9",   "value_1_description": "VALOR"},
         ],
     },
     {
-        "description": "Objectivo",
+        "description": "Objetivo",
         "details": [
             {"description": "Mantenimiento"},
             {"description": "Perder Grasa"},
@@ -63,14 +86,14 @@ PARAMETERS = [
     {
         "description": "Categoria de Comida",
         "details": [
-            {"description": "Mediterránea"},
+            {"description": "Mediterranea"},
             {"description": "Keto"},
             {"description": "Low carb"},
             {"description": "Vegetariana"},
             {"description": "Vegana"},
             {"description": "Ovolactovegetariana"},
             {"description": "Lactovegetariana"},
-            {"description": "Ayuno Interminente"},
+            {"description": "Ayuno Intermitente"},
             {"description": "Fodmap"},
         ],
     },
@@ -84,13 +107,13 @@ PARAMETERS = [
         ],
     },
     {
-        "description": "Objectivo Usuario",
+        "description": "Objetivo Usuario",
         "details": [
             {"description": "Perder Grasa"},
             {"description": "Aumentar masa muscular"},
             {"description": "Mejorar rendimiento deportivo"},
             {"description": "Tonificar"},
-            {"description": "Mejorar hábitos"},
+            {"description": "Mejorar habitos"},
             {"description": "Adelgazar"},
         ],
     },

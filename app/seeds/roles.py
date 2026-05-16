@@ -3,9 +3,12 @@ from app.models.role import Role
 
 
 ROLES = [
-    {"id": 1, "name": "Administrador", "slug": "admin"},
-    {"id": 2, "name": "Cliente", "slug": "client"},
-    {"id": 3, "name": "Instructor", "slug": "instructor"},
+    {"id": 1, "name": "Superadmin",        "slug": "superadmin"},
+    {"id": 2, "name": "Administrador",     "slug": "admin"},
+    {"id": 3, "name": "Setter",            "slug": "setter"},
+    {"id": 4, "name": "Closer",            "slug": "closer"},
+    {"id": 5, "name": "Coach",             "slug": "coach"},
+    {"id": 6, "name": "Cliente",           "slug": "client"},
 ]
 
 

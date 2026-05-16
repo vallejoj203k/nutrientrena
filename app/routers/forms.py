@@ -7,6 +7,7 @@ from app.core.dependencies import get_current_user
 from app.core.responses import send_response, send_error
 from app.models.form import FormTemplate, FormTemplateField, FormAssignment, FormResponse, PROFILE_FIELD_MAP
 from app.models.user import UserDetail
+from app.models.parameter import ParameterDetail
 from app.schemas.form import (
     FormTemplateCreate, FormTemplateUpdate, FormTemplateOut,
     FormAssignRequest, FormSubmitRequest, FormAssignmentOut,
@@ -15,8 +16,17 @@ from app.schemas.form import (
 router_templates = APIRouter(prefix="/form-templates", tags=["Forms - Templates"])
 router_assignments = APIRouter(prefix="/form-assignments", tags=["Forms - Assignments"])
 
-CLIENT_STATE_PENDING   = 48  # "Formulario pendiente"
-CLIENT_STATE_SUBMITTED = 49  # "Formulario recibido"
+_CLIENT_STATE_CACHE: dict = {}
+
+
+def _get_client_state_id(db: Session, description: str) -> int | None:
+    if description not in _CLIENT_STATE_CACHE:
+        row = db.query(ParameterDetail).filter(
+            ParameterDetail.description == description
+        ).first()
+        if row:
+            _CLIENT_STATE_CACHE[description] = row.id
+    return _CLIENT_STATE_CACHE.get(description)
 
 
 # ── Templates ─────────────────────────────────────────────────────────────────
@@ -154,7 +164,7 @@ def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_
     )
     db.add(assignment)
 
-    client.status_id = CLIENT_STATE_PENDING
+    client.status_id = _get_client_state_id(db, "Formulario pendiente")
     db.commit()
     db.refresh(assignment)
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "Formulario asignado")
@@ -215,7 +225,7 @@ def submit_form(id: str, data: FormSubmitRequest, db: Session = Depends(get_db),
                 except (ValueError, TypeError):
                     pass
 
-        client.status_id = CLIENT_STATE_SUBMITTED
+        client.status_id = _get_client_state_id(db, "Formulario recibido")
 
     assignment.status = "submitted"
     assignment.submitted_at = datetime.utcnow()

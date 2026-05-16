@@ -157,10 +157,11 @@ SPRINTS = {
         {
             "name": "Sprint 13 - Entrega del plan al cliente",
             "desc": (
-                "[ ] Endpoint POST /api/plans/deliver → enviar plan por email al cliente\n"
-                "[ ] Template de email con rutina + dieta asignada\n"
-                "[ ] Estado cliente cambia a 'Plan entregado' (ID 54)\n"
-                "[ ] PDF adjunto de la dieta (opcional, ver Sprint 16)"
+                "✅ POST /api/plans/deliver → envía email al cliente con plan completo\n"
+                "✅ Email HTML con macros (kcal, proteínas, carbos, grasas)\n"
+                "✅ Email incluye días de rutina y mensaje personalizado del coach\n"
+                "✅ Estado cliente cambia a 'Plan entregado' automáticamente\n"
+                "✅ Funciona sin dieta o sin rutina (campos opcionales)"
             ),
         },
     ],

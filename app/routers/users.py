@@ -7,7 +7,8 @@ from app.core.dependencies import get_current_user
 from app.core.security import hash_password
 from app.core.responses import send_response, send_error
 from app.models.user import User, UserDetail, RoleUser, UserParent
-from app.models.role import Role
+from app.models.role import Role, CLIENT
+from app.models.parameter import ParameterDetail, Parameter
 from app.schemas.user import (
     UserCreateRequest, UserUpdateRequest, UserStateRequest,
     UserAssignRequest, WeeksTrainingRequest, UserDetailOut,
@@ -156,6 +157,71 @@ def search(
             "per_page": per_page,
             "last_page": max(1, (total + per_page - 1) // per_page),
         },
+        "OK",
+    )
+
+
+@router.get("/kanban")
+def kanban(
+    coach_id: Optional[str] = Query(None, description="Filtrar por UserDetail UUID del coach"),
+    db: Session = Depends(get_db),
+    _=Depends(get_current_user),
+):
+    # Obtener todos los IDs de usuarios con rol cliente
+    client_user_ids = [
+        ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == CLIENT).all()
+    ]
+
+    q = db.query(UserDetail).filter(UserDetail.user_id.in_(client_user_ids))
+
+    if coach_id:
+        assigned_ids = [
+            up.user_detail_id for up in
+            db.query(UserParent).filter(UserParent.parent_user_detail_id == coach_id).all()
+        ]
+        q = q.filter(UserDetail.id.in_(assigned_ids))
+
+    clients = q.all()
+
+    # Agrupar por status_id
+    groups: dict[Optional[int], list] = {}
+    for c in clients:
+        key = c.status_id
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(_serialize(c, db))
+
+    # Obtener los nombres de estado del Cliente
+    estado_param = db.query(Parameter).filter(
+        Parameter.description == "Estado del Cliente"
+    ).first()
+    state_names: dict[int, str] = {}
+    if estado_param:
+        for pd in db.query(ParameterDetail).filter(
+            ParameterDetail.parameter_id == estado_param.id
+        ).all():
+            state_names[pd.id] = pd.description
+
+    columns = []
+    # Columna sin estado
+    if None in groups:
+        columns.append({
+            "status_id": None,
+            "status_name": "Sin estado",
+            "total": len(groups[None]),
+            "clients": groups[None],
+        })
+    # Columnas con estado, en orden de ID
+    for sid in sorted(k for k in groups if k is not None):
+        columns.append({
+            "status_id": sid,
+            "status_name": state_names.get(sid, str(sid)),
+            "total": len(groups[sid]),
+            "clients": groups[sid],
+        })
+
+    return send_response(
+        {"columns": columns, "total_clients": len(clients)},
         "OK",
     )
 

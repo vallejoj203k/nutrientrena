@@ -184,7 +184,35 @@ check("GET /api/form-templates devuelve 200", r.status_code == 200)
 templates = r.json().get("data", [])
 check("Al menos 1 plantilla", len(templates) >= 1, str(len(templates)))
 
+# ── 14. Kanban de clientes ────────────────────────────────────────────────────
+h("14. KANBAN DE CLIENTES")
+r = get("/api/users/kanban", token)
+check("GET /api/users/kanban devuelve 200", r.status_code == 200, str(r.status_code))
+kanban = r.json().get("data", {})
+columns = kanban.get("columns", [])
+total   = kanban.get("total_clients", 0)
+check("Kanban devuelve columnas", isinstance(columns, list), str(type(columns)))
+check("Total clientes >= 1", total >= 1, str(total))
+print(f"   {total} cliente(s) en {len(columns)} columna(s):")
+for col in columns:
+    print(f"     [{col['status_id']}] {col['status_name']}: {col['total']} cliente(s)")
+
+# ── 15. Kanban filtrado por coach ─────────────────────────────────────────────
+h("15. KANBAN FILTRADO POR COACH")
+admin_detail_id = me.get("id")   # UUID de UserDetail del admin (actúa como coach)
+r = get(f"/api/users/kanban?coach_id={admin_detail_id}", token)
+check("GET /api/users/kanban?coach_id=... devuelve 200", r.status_code == 200, str(r.status_code))
+
+# ── 16. Cambio de estado desde Kanban ────────────────────────────────────────
+h("16. CAMBIO DE ESTADO (drag & drop)")
+r = requests.put(
+    f"{BASE}/api/users/{client_detail_id}/change",
+    json={"status_id": status_id_after},
+    headers={"Authorization": f"Bearer {token}"},
+)
+check("PUT /api/users/{id}/change devuelve 200", r.status_code == 200, str(r.status_code))
+
 # ── Resumen ───────────────────────────────────────────────────────────────────
 print(f"\n{SEP}")
-print(f"{OK} Sprint 10 QA completado — todos los checks pasaron")
+print(f"{OK} Sprint 10 + Sprint 11 QA completado — todos los checks pasaron")
 print(f"{SEP}\n")

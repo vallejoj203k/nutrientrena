@@ -91,10 +91,11 @@ r = post("/api/users", {
 }, token)
 check("POST /api/users devuelve 200 o 201", r.status_code in (200, 201), str(r.status_code))
 client_data = r.json().get("data", {})
-client_detail_id = client_data.get("detail", {}).get("id") or client_data.get("user_detail_id")
-client_user_id   = client_data.get("id")
-check("Respuesta incluye detail.id (UserDetail UUID)", bool(client_detail_id), str(client_detail_id))
-print(f"   Cliente creado: id={client_user_id}, detail_id={client_detail_id}")
+# POST /api/users devuelve UserDetail directamente: id=UUID, user_id=int
+client_detail_id = client_data.get("id")        # UUID de UserDetail
+client_user_id   = client_data.get("user_id")   # int de User (para /edit)
+check("Respuesta incluye UserDetail UUID", bool(client_detail_id), str(client_detail_id))
+print(f"   Cliente creado: user_id={client_user_id}, detail_id={client_detail_id}")
 
 # ── 5. Asignar formulario ─────────────────────────────────────────────────────
 h("5. ASIGNAR FORMULARIO")
@@ -111,10 +112,10 @@ print(f"   Assignment id={assignment_id}")
 
 # ── 6. Verificar estado cliente → Formulario pendiente ────────────────────────
 h("6. ESTADO CLIENTE TRAS ASIGNACIÓN")
-r = get(f"/api/users/{client_user_id}", token)
-check("GET /api/users/{id} devuelve 200", r.status_code == 200, str(r.status_code))
+r = get(f"/api/users/{client_detail_id}/edit", token)
+check("GET /api/users/{id}/edit devuelve 200", r.status_code == 200, str(r.status_code))
 udata = r.json().get("data", {})
-status_id = udata.get("detail", {}).get("status_id")
+status_id = udata.get("status_id")
 check("status_id fue actualizado (no None)", status_id is not None, str(status_id))
 print(f"   status_id del cliente = {status_id}  (debe ser 'Formulario pendiente')")
 
@@ -147,9 +148,9 @@ check("submitted_at no es None", submitted.get("submitted_at") is not None, str(
 
 # ── 9. Verificar perfil actualizado ──────────────────────────────────────────
 h("9. PERFIL CLIENTE ACTUALIZADO")
-r = get(f"/api/users/{client_user_id}", token)
-check("GET /api/users/{id} devuelve 200", r.status_code == 200)
-detail = r.json().get("data", {}).get("detail", {})
+r = get(f"/api/users/{client_detail_id}/edit", token)
+check("GET /api/users/{id}/edit devuelve 200", r.status_code == 200)
+detail = r.json().get("data", {})
 check("weight actualizado a 78.5", str(detail.get("weight")) == "78.5", str(detail.get("weight")))
 check("height actualizado a 175.0", str(detail.get("height")) in ("175.0", "175"), str(detail.get("height")))
 check("phone actualizado", detail.get("phone") == "+34 600 000 001", str(detail.get("phone")))

@@ -31,103 +31,107 @@ AUTH = {"key": API_KEY, "token": TOKEN}
 
 LISTAS = ["Backlog", "Por Hacer", "En Proceso", "Control de Calidad", "Hecho"]
 
+# =============================================================================
+# ESTADO ACTUAL DEL PROYECTO — actualizado 2026-05-16
+#
+# FASE 1 BACKEND: 100% completada
+#   38 tablas en MySQL (Railway) · 128 rutas registradas
+#   Módulos: auth, users, roles, params, países, menús,
+#            alimentos, recetas, dietas, rutinas, entrenamientos,
+#            eventos, notas, progreso, formularios, check-ins, planes
+#
+# FASE 2 PENDIENTE: analíticas, upload, PDF, frontend, permisos
+# =============================================================================
+
 SPRINTS = {
     # ─────────────────────────────────────────────────────────────────────────
-    # HECHO
+    # HECHO ✅
     # ─────────────────────────────────────────────────────────────────────────
     "Hecho": [
         {
-            "name": "FASE 0 - Infraestructura base",
+            "name": "FASE 0 — Infraestructura base ✅",
             "desc": (
-                "✅ Proyecto FastAPI + estructura de carpetas (app/routers, models, schemas, seeds)\n"
-                "✅ SQLAlchemy 2 + Alembic configurado\n"
-                "✅ 37 tablas migradas a MySQL (Railway)\n"
-                "✅ Seeds idempotentes: roles(6), parametros, paises, menus, admin\n"
-                "✅ JWT auth: login, refresh, logout, /me\n"
-                "✅ Recuperar contraseña via Resend SDK\n"
-                "✅ HTTPBearer en Swagger (token sin prefijo Bearer)\n"
-                "✅ Desplegado en Railway con dominio .up.railway.app\n"
-                "✅ CI/CD GitHub Actions: lint ruff + validacion modelos + validacion rutas"
+                "✅ FastAPI + SQLAlchemy 2 + Alembic sobre MySQL en Railway\n"
+                "✅ Seeds idempotentes: 6 roles, 15 estados de cliente, países, menús, admin\n"
+                "✅ JWT auth: login / refresh / logout / /me\n"
+                "✅ Recuperar contraseña via Resend SDK (email real)\n"
+                "✅ HTTPBearer en Swagger UI\n"
+                "✅ Deploy continuo en Railway (.up.railway.app)\n"
+                "✅ CI/CD GitHub Actions: lint + validación de modelos + validación de rutas\n"
+                "✅ CORS abierto listo para conectar frontend"
             ),
         },
         {
-            "name": "Sprint 1-5 - Modelos y migraciones base",
+            "name": "Sprint 1-8 — Modelos, migraciones y CRUDs ✅",
             "desc": (
-                "✅ 33 tablas base: users, user_details, roles, role_user, parameters, parameter_details\n"
-                "✅ countries, menus, menu_role\n"
-                "✅ aliments, aliment_descriptions, type_foods, group_foods\n"
-                "✅ recipes, recipe_details\n"
-                "✅ diets, diet_details, diet_foods, diet_food_aliments\n"
-                "✅ routines, routine_days, routine_day_details\n"
-                "✅ trainings, training_clients, muscle_groups, muscle_group_clients\n"
-                "✅ events, event_users, type_events\n"
-                "✅ notes, note_users, template_notes\n"
-                "✅ progress_day_users, client_targets\n"
-                "✅ user_parents"
+                "✅ 33 tablas base migradas\n"
+                "✅ users / user_details / roles / parameters / countries / menus\n"
+                "✅ aliments (UUID) / aliment_descriptions / type_foods / group_foods\n"
+                "✅ recipes / recipe_details\n"
+                "✅ diets / diet_details / diet_foods / diet_food_aliments\n"
+                "✅ routines / routine_days / routine_day_details\n"
+                "✅ trainings / training_clients / muscle_groups / muscle_group_clients\n"
+                "✅ events / event_users / type_events\n"
+                "✅ notes / note_users / template_notes\n"
+                "✅ progress_day_users / client_targets / user_parents\n"
+                "✅ CRUDs completos para todos los módulos anteriores"
             ),
         },
         {
-            "name": "Sprint 6 - Routers secundarios",
-            "desc": (
-                "✅ aliments: UUID como id, filtro parent_id, created/updated_user_id\n"
-                "✅ group_food / type_food: campo state renombrado a status\n"
-                "✅ roles: generacion automatica de slug al crear\n"
-                "✅ Todos los CRUDs: aliments, recipes, diets, routines, trainings, events, notes, progress"
-            ),
-        },
-        {
-            "name": "Sprint 7 - Eventos, Notas, Progreso",
-            "desc": (
-                "✅ Events / TypeEvents: CRUD completo\n"
-                "✅ Notes / TemplateNotes: CRUD completo\n"
-                "✅ ProgressDay / ClientTargets: CRUD completo\n"
-                "✅ Modelos, schemas y routers consistentes con FK correctas"
-            ),
-        },
-        {
-            "name": "Sprint 8 - Recetas y fixes",
-            "desc": (
-                "✅ RecipeDetail.aliment_id: int -> str (UUID)\n"
-                "✅ GET /recipes/client/{client_id}: corregido con UserDetail\n"
-                "✅ Seed admin_user reescrito: crea User + UserDetail + RoleUser\n"
-                "✅ ADMIN_EMAIL leido desde variable de entorno Railway"
-            ),
-        },
-        {
-            "name": "Sprint 11 - Dashboard Kanban de clientes",
-            "desc": (
-                "✅ GET /api/users/kanban → clientes agrupados por estado\n"
-                "✅ Soporta ?coach_id= para filtrar por coach\n"
-                "✅ Devuelve status_name desde parameter_details\n"
-                "✅ PUT /api/users/{id}/change → mover cliente de estado (drag & drop)"
-            ),
-        },
-        {
-            "name": "Sprint 12 - Check-ins semanales",
-            "desc": (
-                "✅ Modelo WeeklyCheckin: cliente, coach, fecha, peso, notas, notas_coach\n"
-                "✅ POST /api/checkins → registrar check-in\n"
-                "✅ GET /api/checkins/client/{id} → historial con progreso de peso\n"
-                "✅ GET /api/checkins/summary/{id} → resumen total: cambio de peso, total check-ins\n"
-                "✅ PUT /api/checkins/{id}/coach-notes → agregar notas del coach\n"
-                "✅ DELETE /api/checkins/{id} → eliminar check-in\n"
-                "✅ Migración b2c3d4e5f6a7 (tabla weekly_checkins)"
-            ),
-        },
-        {
-            "name": "Sprint 9 - Roles, Estados y Módulo Forms",
+            "name": "Sprint 9 — Roles, estados y módulo Forms ✅",
             "desc": (
                 "✅ 6 roles: superadmin, admin, setter, closer, coach, cliente\n"
-                "✅ 15 estados de cliente (IDs 45-59): Pago pendiente → Cancelado/Reembolsado\n"
-                "✅ Estado de cuenta: Activo / Inactivo\n"
-                "✅ Módulo Forms completo:\n"
-                "   - FormTemplate / FormTemplateField\n"
-                "   - FormAssignment (UUID) / FormResponse\n"
-                "   - 11 endpoints: CRUD plantillas + asignar + enviar + respuestas\n"
-                "   - Auto-sync respuestas → perfil del cliente (peso, altura, etc.)\n"
-                "   - Seed: Formulario de Bienvenida con 10 campos\n"
-                "✅ Migración a1b2c3d4e5f6 con 4 tablas nuevas (total 37)\n"
-                "✅ CI actualizado: assert >= 33 tablas, >= 50 rutas (121 activas)"
+                "✅ 15 estados del flujo de cliente: Pago pendiente → Cancelado\n"
+                "✅ Formularios de intake:\n"
+                "   · FormTemplate + FormTemplateField (plantillas personalizables)\n"
+                "   · FormAssignment (asignación UUID por cliente)\n"
+                "   · FormResponse (respuestas guardadas en BD)\n"
+                "   · Auto-sync respuestas → perfil del cliente (peso, altura, etc.)\n"
+                "   · Seed: Formulario de Bienvenida con 10 campos\n"
+                "✅ 11 endpoints: CRUD plantillas + asignar + enviar + ver respuestas\n"
+                "✅ Estado cliente: Formulario pendiente → Formulario recibido (automático)"
+            ),
+        },
+        {
+            "name": "Sprint 10 — QA integral formularios ✅",
+            "desc": (
+                "✅ Script qa_forms.py con 16 checks automatizados contra Railway\n"
+                "✅ Flujo completo verificado en producción:\n"
+                "   login → crear cliente → asignar form → submit → perfil actualizado\n"
+                "✅ Protecciones validadas: doble asignación y doble submit bloqueados\n"
+                "✅ 7 respuestas guardadas correctamente en BD\n"
+                "✅ IDs de estado resueltos dinámicamente (sin hardcoding)"
+            ),
+        },
+        {
+            "name": "Sprint 11 — Dashboard Kanban ✅",
+            "desc": (
+                "✅ GET /api/users/kanban → clientes agrupados por estado con nombre\n"
+                "✅ Filtro ?coach_id=UUID → solo clientes del coach\n"
+                "✅ PUT /api/users/{id}/change → cambio de estado (drag & drop)\n"
+                "✅ Verificado en producción: 3 clientes en 2 columnas"
+            ),
+        },
+        {
+            "name": "Sprint 12 — Check-ins semanales ✅",
+            "desc": (
+                "✅ Tabla weekly_checkins (UUID, cliente, coach, fecha, peso, notas)\n"
+                "✅ POST /api/checkins → registrar check-in del cliente\n"
+                "✅ GET /api/checkins/client/{id} → historial + delta de peso semana a semana\n"
+                "✅ GET /api/checkins/summary/{id} → cambio total de peso desde inicio\n"
+                "✅ PUT /api/checkins/{id}/coach-notes → feedback del coach\n"
+                "✅ DELETE /api/checkins/{id} → eliminar registro"
+            ),
+        },
+        {
+            "name": "Sprint 13 — Entrega del plan por email ✅",
+            "desc": (
+                "✅ POST /api/plans/deliver → envía email HTML al cliente\n"
+                "✅ Email incluye: macros (kcal/proteínas/carbos/grasas), días de rutina\n"
+                "   y mensaje personalizado del coach\n"
+                "✅ Estado cliente → 'Plan entregado' de forma automática\n"
+                "✅ Dieta y rutina son opcionales (se puede enviar solo mensaje)\n"
+                "✅ Verificado en producción con email real (Resend SDK)"
             ),
         },
     ],
@@ -138,96 +142,81 @@ SPRINTS = {
     "En Proceso": [],
 
     # ─────────────────────────────────────────────────────────────────────────
-    # POR HACER
+    # POR HACER — FASE 2
     # ─────────────────────────────────────────────────────────────────────────
     "Por Hacer": [
         {
-            "name": "Sprint 10 - QA Integral Forms",
+            "name": "Sprint 14 — Analíticas y métricas",
             "desc": (
-                "[ ] Login admin y obtener token JWT\n"
-                "[ ] GET /api/form-templates/default → devuelve Formulario de Bienvenida\n"
-                "[ ] POST /api/users → crear cliente de prueba\n"
-                "[ ] POST /api/form-assignments → asignar formulario al cliente\n"
-                "[ ] POST /api/form-assignments/{id}/submit → enviar respuestas\n"
-                "[ ] GET /api/users/{id} → verificar que peso/altura se actualizaron\n"
-                "[ ] Verificar status_id cliente: 48 (pendiente) → 49 (recibido)\n"
-                "[ ] GET /api/parameters → confirmar los 15 estados de cliente"
+                "[ ] GET /api/analytics/overview\n"
+                "    → total clientes, clientes activos, nuevos este mes\n"
+                "[ ] GET /api/analytics/states\n"
+                "    → distribución de clientes por estado (para gráfico de barras)\n"
+                "[ ] GET /api/analytics/checkins\n"
+                "    → promedio de peso perdido, adherencia (% clientes con check-in)\n"
+                "[ ] GET /api/analytics/coaches\n"
+                "    → clientes por coach, planes entregados\n"
+                "[ ] Filtros: ?from=fecha&to=fecha&coach_id=uuid"
             ),
         },
         {
-            "name": "Sprint 13 - Entrega del plan al cliente",
+            "name": "Sprint 15 — Upload de imágenes",
             "desc": (
-                "✅ POST /api/plans/deliver → envía email al cliente con plan completo\n"
-                "✅ Email HTML con macros (kcal, proteínas, carbos, grasas)\n"
-                "✅ Email incluye días de rutina y mensaje personalizado del coach\n"
-                "✅ Estado cliente cambia a 'Plan entregado' automáticamente\n"
-                "✅ Funciona sin dieta o sin rutina (campos opcionales)"
-            ),
-        },
-    ],
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # BACKLOG
-    # ─────────────────────────────────────────────────────────────────────────
-    "Backlog": [
-        {
-            "name": "Sprint 14 - Analíticas y métricas",
-            "desc": (
-                "[ ] GET /api/analytics/overview → totales: clientes, activos, ingresos\n"
-                "[ ] GET /api/analytics/clients → nuevos por semana/mes\n"
-                "[ ] GET /api/analytics/states → distribución por estado kanban\n"
-                "[ ] GET /api/analytics/checkins → adherencia y progreso promedio\n"
-                "[ ] Filtros por rango de fechas y por coach"
-            ),
-        },
-        {
-            "name": "Sprint 15 - Upload de imágenes",
-            "desc": (
-                "[ ] Configurar AWS S3 o Cloudflare R2\n"
-                "[ ] POST /api/files/upload → subir imagen, devolver URL\n"
+                "[ ] Configurar almacenamiento: AWS S3 o Cloudflare R2\n"
+                "[ ] POST /api/files/upload → subir imagen, devolver URL pública\n"
                 "[ ] Integrar en perfil de usuario (foto de perfil)\n"
-                "[ ] Integrar en check-ins (fotos de progreso)\n"
+                "[ ] Integrar en check-ins (fotos de progreso del cliente)\n"
                 "[ ] Integrar en alimentos (foto del alimento)"
             ),
         },
         {
-            "name": "Sprint 16 - PDF de dietas y rutinas",
+            "name": "Sprint 16 — PDF de dietas y rutinas",
             "desc": (
-                "[ ] Implementar generación PDF en GET /api/diets/{id}/pdf\n"
-                "[ ] Template HTML con macros, alimentos por comida, calorías\n"
-                "[ ] PDF de rutina con ejercicios, series, repeticiones\n"
-                "[ ] Descarga directa o link firmado S3"
+                "[ ] GET /api/diets/{id}/pdf → PDF con macros y alimentos por comida\n"
+                "[ ] GET /api/routines/{id}/pdf → PDF con días, ejercicios, series/reps\n"
+                "[ ] Template HTML → PDF con WeasyPrint o similar\n"
+                "[ ] Adjuntar PDF al email de entrega del plan (Sprint 13)"
+            ),
+        },
+    ],
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # BACKLOG — FASE 3
+    # ─────────────────────────────────────────────────────────────────────────
+    "Backlog": [
+        {
+            "name": "Sprint 17 — Frontend (integración con API)",
+            "desc": (
+                "[ ] Conectar Next.js / React con API en Railway\n"
+                "[ ] Login → guardar JWT → rutas protegidas\n"
+                "[ ] Vista Kanban de clientes con drag & drop\n"
+                "[ ] Formulario de intake embebido para el cliente\n"
+                "[ ] Historial de check-ins con gráfico de progreso de peso\n"
+                "[ ] Dashboard de analíticas"
             ),
         },
         {
-            "name": "Sprint 17 - Frontend integration",
+            "name": "Sprint 18 — Roles y permisos granulares",
             "desc": (
-                "[ ] Conectar frontend (Next.js / React) con API en Railway\n"
-                "[ ] Configurar CORS para dominio del frontend\n"
-                "[ ] Autenticación: guardar JWT en httpOnly cookie o localStorage\n"
-                "[ ] Probar flujo completo: login → dashboard → kanban → form → check-in"
+                "[ ] Middleware de autorización por rol en cada endpoint\n"
+                "[ ] Setter: crear leads, asignar formularios\n"
+                "[ ] Closer: ver y actualizar estados de pago\n"
+                "[ ] Coach: solo sus clientes asignados, sin acceso admin\n"
+                "[ ] Admin: acceso total excepto panel superadmin\n"
+                "[ ] Superadmin: gestión de cuentas y configuración global"
             ),
         },
         {
-            "name": "Sprint 18 - Roles y permisos granulares",
+            "name": "Sprint 19 — Notificaciones internas",
             "desc": (
-                "[ ] Middleware de autorización por rol (setter, closer, coach, admin)\n"
-                "[ ] Setter: solo puede crear leads / asignar formularios\n"
-                "[ ] Closer: puede ver y actualizar estados de pago\n"
-                "[ ] Coach: solo ve sus clientes asignados\n"
-                "[ ] Admin: acceso total excepto superadmin"
+                "[ ] Notificar al coach cuando cliente envía formulario\n"
+                "[ ] Notificar al coach cuando cliente sube check-in\n"
+                "[ ] Notificar al cliente cuando el coach deja notas\n"
+                "[ ] Canal: email (Resend) y/o webhook configurable"
             ),
         },
     ],
 }
-
-
-def crear_lista(nombre):
-    r = requests.post(f"{BASE}/lists", params={**AUTH, "name": nombre, "idBoard": BOARD_ID})
-    if r.status_code != 200:
-        print(f"      ERROR al crear lista '{nombre}': {r.status_code} - {r.text}")
-        return None
-    return r.json()["id"]
 
 
 def crear_card(nombre, desc, lista_id):

@@ -85,5 +85,5 @@ Con el servidor corriendo:
 
 ## Credenciales admin por defecto
 
-- Email: `admin@nutrientrena.com`
+- Email: `vallejoj203@gmail.com`
 - Password: `Admin123!`

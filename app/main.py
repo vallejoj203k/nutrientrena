@@ -1,7 +1,10 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.routers import (
@@ -57,9 +60,14 @@ app.include_router(diets.router, prefix=API_PREFIX)
 app.include_router(recipes.router, prefix=API_PREFIX)
 
 
+_frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.isdir(_frontend_dir):
+    app.mount("/app", StaticFiles(directory=_frontend_dir, html=True), name="frontend")
+
+
 @app.get("/", include_in_schema=False)
 def root():
-    return RedirectResponse(url="/api/docs")
+    return RedirectResponse(url="/app/login.html")
 
 
 @app.get("/api/health")

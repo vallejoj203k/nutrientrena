@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriEntrena — Login</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Panel izquierdo ── */
+    .left {
+      flex: 1;
+      background: #5B2D8E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.07) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(0,0,0,.15) 0%, transparent 60%);
+    }
+
+    /* Grid decorativo de fondo */
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* Ilustración isométrica con CSS */
+    .illustration {
+      position: relative;
+      z-index: 1;
+      width: 420px;
+      height: 360px;
+    }
+
+    /* Piso isométrico */
+    .floor {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 340px;
+      height: 80px;
+      background: rgba(255,255,255,.08);
+      border-radius: 8px;
+      transform: translateX(-50%) rotateX(55deg) rotateZ(-45deg);
+    }
+
+    /* Figura corriendo en cinta */
+    .treadmill-wrap {
+      position: absolute;
+      left: 30px;
+      bottom: 120px;
+      animation: run .6s ease-in-out infinite alternate;
+    }
+    @keyframes run { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+
+    .treadmill {
+      width: 120px;
+      height: 55px;
+      background: rgba(255,255,255,.15);
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,.25);
+      position: relative;
+    }
+    .treadmill::after {
+      content: '';
+      position: absolute;
+      bottom: 6px; left: 10px; right: 10px;
+      height: 6px;
+      background: rgba(255,255,255,.3);
+      border-radius: 3px;
+      animation: belt .4s linear infinite;
+    }
+    @keyframes belt { from { background-position: 0 0; } to { background-position: 20px 0; } }
+
+    .runner {
+      position: absolute;
+      top: -70px;
+      left: 30px;
+    }
+    .runner-body {
+      width: 18px; height: 32px;
+      background: #F472B6;
+      border-radius: 9px 9px 4px 4px;
+      position: relative;
+    }
+    .runner-head {
+      width: 20px; height: 20px;
+      background: #FBBF24;
+      border-radius: 50%;
+      position: absolute;
+      top: -22px; left: -1px;
+    }
+    .runner-leg {
+      width: 8px; height: 18px;
+      background: #4ADE80;
+      border-radius: 4px;
+      position: absolute;
+      bottom: -16px;
+    }
+    .runner-leg.left  { left: 2px;  transform: rotate(-20deg); animation: legL .3s ease-in-out infinite alternate; }
+    .runner-leg.right { right: 2px; transform: rotate(20deg);  animation: legR .3s ease-in-out infinite alternate; }
+    @keyframes legL { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
+    @keyframes legR { from { transform: rotate(20deg);  } to { transform: rotate(-20deg); } }
+
+    /* Banco de pesas */
+    .bench-wrap {
+      position: absolute;
+      right: 20px;
+      bottom: 100px;
+    }
+    .bench {
+      width: 130px;
+      height: 20px;
+      background: rgba(255,255,255,.2);
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,.3);
+      position: relative;
+    }
+    .bench::before, .bench::after {
+      content: '';
+      position: absolute;
+      bottom: -24px;
+      width: 12px; height: 24px;
+      background: rgba(255,255,255,.2);
+      border-radius: 3px;
+    }
+    .bench::before { left: 15px; }
+    .bench::after  { right: 15px; }
+
+    .barbell {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 10px;
+      background: rgba(255,255,255,.35);
+      border-radius: 5px;
+      animation: lift .8s ease-in-out infinite alternate;
+    }
+    @keyframes lift { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-8px); } }
+    .barbell::before, .barbell::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      width: 22px; height: 26px;
+      background: rgba(255,255,255,.25);
+      border-radius: 4px;
+    }
+    .barbell::before { left: 0; }
+    .barbell::after  { right: 0; }
+
+    .lifter {
+      position: absolute;
+      top: -90px;
+      left: 25px;
+    }
+    .lifter-body {
+      width: 22px; height: 36px;
+      background: #60A5FA;
+      border-radius: 8px 8px 3px 3px;
+    }
+    .lifter-head {
+      width: 22px; height: 22px;
+      background: #FBBF24;
+      border-radius: 50%;
+      position: absolute;
+      top: -24px; left: 0;
+    }
+
+    /* Pelota */
+    .ball {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 54px; height: 54px;
+      background: radial-gradient(circle at 35% 35%, #C084FC, #7C3AED);
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.3);
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(-14px); }
+    }
+
+    /* Mancuernas */
+    .dumbbells {
+      position: absolute;
+      bottom: 55px;
+      right: 50px;
+      display: flex;
+      gap: 10px;
+    }
+    .dumbbell {
+      width: 40px; height: 14px;
+      background: rgba(255,255,255,.2);
+      border-radius: 3px;
+      position: relative;
+    }
+    .dumbbell::before, .dumbbell::after {
+      content: '';
+      position: absolute;
+      top: -5px;
+      width: 10px; height: 24px;
+      background: rgba(255,255,255,.3);
+      border-radius: 3px;
+    }
+    .dumbbell::before { left: -2px; }
+    .dumbbell::after  { right: -2px; }
+
+    /* ── Panel derecho ── */
+    .right {
+      width: 480px;
+      min-width: 380px;
+      background: #F3F4F6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .form-box {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Logo */
+    .logo-banner {
+      background: #5B2D8E;
+      border-radius: 10px;
+      padding: 18px 24px;
+      text-align: center;
+    }
+    .logo-text {
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-style: italic;
+    }
+    .logo-text span {
+      color: #C084FC;
+    }
+
+    /* Inputs */
+    .input-group {
+      position: relative;
+    }
+    .input-group svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9CA3AF;
+      pointer-events: none;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 14px 14px 14px 42px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      font-size: 15px;
+      background: #fff;
+      color: #111827;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .input-group input::placeholder { color: #9CA3AF; }
+    .input-group input:focus { border-color: #5B2D8E; }
+
+    /* Botón login */
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      background: #5B2D8E;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background .2s, transform .1s;
+      letter-spacing: .5px;
+    }
+    .btn-login:hover   { background: #4A2475; }
+    .btn-login:active  { transform: scale(.98); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Spinner */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Link recuperar */
+    .forgot {
+      text-align: center;
+      font-size: 13px;
+      color: #6B7280;
+    }
+    .forgot a {
+      color: #5B2D8E;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .forgot a:hover { text-decoration: underline; }
+
+    /* Error */
+    .error-msg {
+      background: #FEE2E2;
+      border: 1px solid #FECACA;
+      color: #DC2626;
+      padding: 10px 14px;
+      border-radius: 7px;
+      font-size: 14px;
+      display: none;
+    }
+
+    /* Success */
+    .success-msg {
+      background: #DCFCE7;
+      border: 1px solid #BBF7D0;
+      color: #16A34A;
+      padding: 10px 14px;
+      border-radius: 7px;
+      font-size: 14px;
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      .left { display: none; }
+      .right { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Panel izquierdo -->
+  <div class="left">
+    <div class="grid-bg"></div>
+    <div class="illustration">
+      <div class="ball"></div>
+
+      <div class="treadmill-wrap">
+        <div class="treadmill">
+          <div class="runner">
+            <div class="runner-body">
+              <div class="runner-head"></div>
+              <div class="runner-leg left"></div>
+              <div class="runner-leg right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bench-wrap">
+        <div class="barbell"></div>
+        <div class="bench">
+          <div class="lifter">
+            <div class="lifter-body">
+              <div class="lifter-head"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dumbbells">
+        <div class="dumbbell"></div>
+        <div class="dumbbell"></div>
+        <div class="dumbbell"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="right">
+    <div class="form-box">
+
+      <div class="logo-banner">
+        <div class="logo-text">Nutri<span>Entrena</span></div>
+      </div>
+
+      <div class="error-msg"   id="errorMsg"></div>
+      <div class="success-msg" id="successMsg"></div>
+
+      <div class="input-group">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <input id="emailInput" type="email" placeholder="usuario" autocomplete="email" />
+      </div>
+
+      <div class="input-group">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <input id="passInput" type="password" placeholder="password" autocomplete="current-password" />
+      </div>
+
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        <span id="btnText">Login</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+
+      <div class="forgot">
+        <a href="#" onclick="doRecover(); return false;">¿Olvidaste tu contraseña?</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://nutrientrena-production.up.railway.app';
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      const el = document.getElementById('successMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    function setLoading(val) {
+      const btn  = document.getElementById('loginBtn');
+      const txt  = document.getElementById('btnText');
+      const spin = document.getElementById('spinner');
+      btn.disabled    = val;
+      txt.style.display  = val ? 'none' : 'inline';
+      spin.style.display = val ? 'block' : 'none';
+    }
+
+    async function doLogin() {
+      const email    = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passInput').value;
+
+      if (!email || !password) {
+        showError('Por favor completa todos los campos.');
+        return;
+      }
+
+      setLoading(true);
+      document.getElementById('errorMsg').style.display   = 'none';
+      document.getElementById('successMsg').style.display = 'none';
+
+      try {
+        const res  = await fetch(`${API}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          showError(data.message || 'Credenciales incorrectas.');
+          return;
+        }
+
+        localStorage.setItem('token',         data.data.token);
+        localStorage.setItem('refresh_token', data.data.refresh_token);
+
+        showSuccess('¡Bienvenido! Redirigiendo...');
+        setTimeout(() => {
+          // Aquí irá la redirección al dashboard cuando esté listo
+          alert('Login exitoso ✅\nToken guardado en localStorage.\n\nDashboard próximamente.');
+        }, 800);
+
+      } catch (e) {
+        showError('Error de conexión. Verifica tu internet.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function doRecover() {
+      const email = document.getElementById('emailInput').value.trim();
+      if (!email) {
+        showError('Escribe tu email primero.');
+        return;
+      }
+      try {
+        const res  = await fetch(`${API}/api/auth/recover-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        showSuccess(data.message || 'Correo enviado. Revisa tu bandeja de entrada.');
+      } catch {
+        showError('Error al enviar el correo.');
+      }
+    }
+
+    // Enter para hacer login
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  </script>
+</body>
+</html>

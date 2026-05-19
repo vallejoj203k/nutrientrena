@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Dashboard</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --purple:#5B2D8E;
+      --purple-dark:#4A2475;
+      --purple-light:#7C3AED;
+      --purple-pale:#F3EEFF;
+      --gray-bg:#F3F4F6;
+      --sidebar-w:240px;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{
+      width:var(--sidebar-w);min-width:var(--sidebar-w);
+      background:var(--purple);
+      display:flex;flex-direction:column;
+      height:100vh;overflow-y:auto;
+    }
+    .sidebar-logo{
+      padding:24px 20px 20px;
+      border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .sidebar-logo span{
+      font-size:20px;font-weight:900;color:#fff;
+      letter-spacing:1px;font-style:italic;text-transform:uppercase;
+    }
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{
+      display:flex;align-items:center;gap:10px;
+      padding:11px 20px;color:rgba(255,255,255,.75);
+      cursor:pointer;font-size:14px;transition:all .15s;
+      border-left:3px solid transparent;
+    }
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+
+    .sidebar-user{
+      padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);
+      display:flex;align-items:center;gap:10px;
+    }
+    .avatar{
+      width:36px;height:36px;border-radius:50%;
+      background:#C084FC;display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:#fff;font-size:14px;flex-shrink:0;
+    }
+    .user-info{flex:1;min-width:0;}
+    .user-name{color:#fff;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:rgba(255,255,255,.5);font-size:11px;}
+    .btn-logout{
+      background:none;border:none;color:rgba(255,255,255,.5);
+      cursor:pointer;padding:4px;border-radius:4px;transition:color .15s;
+    }
+    .btn-logout:hover{color:#fff;}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+    /* Header */
+    .topbar{
+      background:#fff;padding:16px 28px;
+      display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid #E5E7EB;flex-shrink:0;
+    }
+    .topbar h1{font-size:20px;font-weight:700;color:#111827;}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .badge-dot{
+      width:8px;height:8px;background:#22C55E;border-radius:50%;
+      box-shadow:0 0 0 3px rgba(34,197,94,.2);
+    }
+    .topbar-right span{font-size:13px;color:#6B7280;}
+
+    /* Content */
+    .content{flex:1;overflow-y:auto;padding:28px;}
+
+    /* ── Stat cards ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+    .stat-card{
+      background:#fff;border-radius:12px;padding:20px;
+      display:flex;align-items:center;gap:16px;
+      box-shadow:0 1px 3px rgba(0,0,0,.06);
+    }
+    .stat-icon{
+      width:48px;height:48px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .stat-icon.purple{background:var(--purple-pale);}
+    .stat-icon.green {background:#F0FDF4;}
+    .stat-icon.blue  {background:#EFF6FF;}
+    .stat-icon.amber {background:#FFFBEB;}
+    .stat-label{font-size:12px;color:#6B7280;margin-bottom:4px;}
+    .stat-value{font-size:26px;font-weight:800;color:#111827;line-height:1;}
+    .stat-sub{font-size:11px;color:#9CA3AF;margin-top:4px;}
+
+    /* ── Sección dos columnas ── */
+    .two-col{display:grid;grid-template-columns:1fr 360px;gap:20px;}
+
+    /* ── Kanban preview ── */
+    .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .card-title{font-size:15px;font-weight:700;color:#111827;}
+    .card-link{font-size:13px;color:var(--purple);cursor:pointer;font-weight:500;}
+    .card-link:hover{text-decoration:underline;}
+
+    .kanban-cols{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;}
+    .kanban-col{min-width:160px;flex-shrink:0;}
+    .col-header{
+      padding:7px 10px;border-radius:7px;margin-bottom:8px;
+      font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:space-between;
+    }
+    .col-badge{
+      background:rgba(0,0,0,.12);border-radius:20px;
+      padding:1px 7px;font-size:11px;font-weight:700;
+    }
+    .client-card{
+      background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;
+      padding:10px;margin-bottom:6px;cursor:pointer;transition:box-shadow .15s;
+    }
+    .client-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);}
+    .client-name{font-size:13px;font-weight:600;color:#111827;margin-bottom:2px;}
+    .client-email{font-size:11px;color:#9CA3AF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .client-days{font-size:11px;color:#6B7280;margin-top:5px;}
+
+    /* Colores de estado */
+    .s0 {background:#F3F4F6;color:#374151;}
+    .s48{background:#FEF3C7;color:#92400E;}
+    .s49{background:#DCFCE7;color:#166534;}
+    .s50{background:#DBEAFE;color:#1E40AF;}
+    .s51{background:#EDE9FE;color:#5B21B6;}
+    .s52{background:#FCE7F3;color:#9D174D;}
+    .s53{background:#E0F2FE;color:#075985;}
+    .s54{background:#D1FAE5;color:#065F46;}
+
+    /* ── Clientes recientes ── */
+    .recent-list{display:flex;flex-direction:column;gap:10px;}
+    .recent-item{
+      display:flex;align-items:center;gap:12px;
+      padding:10px;border-radius:8px;cursor:pointer;transition:background .15s;
+    }
+    .recent-item:hover{background:#F9FAFB;}
+    .recent-avatar{
+      width:38px;height:38px;border-radius:50%;
+      background:var(--purple-pale);color:var(--purple);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:14px;flex-shrink:0;
+    }
+    .recent-info{flex:1;min-width:0;}
+    .recent-name{font-size:13px;font-weight:600;color:#111827;}
+    .recent-email{font-size:11px;color:#9CA3AF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .state-pill{
+      font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;flex-shrink:0;
+    }
+
+    /* ── Skeleton loader ── */
+    .skeleton{background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* ── Toast ── */
+    #toast{
+      position:fixed;bottom:24px;right:24px;
+      background:#111827;color:#fff;padding:12px 18px;
+      border-radius:8px;font-size:14px;opacity:0;
+      transition:opacity .3s;pointer-events:none;z-index:999;
+    }
+    #toast.show{opacity:1;}
+
+    /* Responsive */
+    @media(max-width:1100px){
+      .stats-grid{grid-template-columns:repeat(2,1fr);}
+      .two-col{grid-template-columns:1fr;}
+    }
+    @media(max-width:720px){
+      .sidebar{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de administración</small>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="setPage('dashboard')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="setPage('kanban')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="12"/><rect x="17" y="3" width="5" height="15"/></svg>
+      Kanban clientes
+    </div>
+    <div class="nav-section">Gestión</div>
+    <div class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </div>
+    <div class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Formularios
+    </div>
+    <div class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Check-ins
+    </div>
+    <div class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Nutrición
+    </div>
+    <div class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Entrenamiento
+    </div>
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41"/></svg>
+      Configuración
+    </div>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="avatar" id="userAvatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="userName">Cargando...</div>
+      <div class="user-role" id="userRole">—</div>
+    </div>
+    <button class="btn-logout" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="pageTitle">Dashboard</h1>
+    <div class="topbar-right">
+      <div class="badge-dot"></div>
+      <span>Conectado a producción</span>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <svg width="22" height="22" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Total clientes</div>
+          <div class="stat-value" id="statTotal"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
+          <div class="stat-sub">registrados</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg width="22" height="22" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">En seguimiento</div>
+          <div class="stat-value" id="statActive"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
+          <div class="stat-sub">activos</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg width="22" height="22" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Columnas Kanban</div>
+          <div class="stat-value" id="statKanban"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
+          <div class="stat-sub">estados activos</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <svg width="22" height="22" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.92 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.99 5.99l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Sin estado</div>
+          <div class="stat-value" id="statNoState"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
+          <div class="stat-sub">requieren atención</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dos columnas -->
+    <div class="two-col">
+
+      <!-- Kanban -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Estado de clientes</span>
+          <span class="card-link" onclick="setPage('kanban')">Ver kanban completo →</span>
+        </div>
+        <div class="kanban-cols" id="kanbanCols">
+          <div style="color:#9CA3AF;font-size:13px;padding:20px 0;">Cargando...</div>
+        </div>
+      </div>
+
+      <!-- Clientes recientes -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👥 Clientes recientes</span>
+        </div>
+        <div class="recent-list" id="recentList">
+          <div style="color:#9CA3AF;font-size:13px;">Cargando...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+const API = 'https://nutrientrena-production.up.railway.app';
+
+function token(){ return localStorage.getItem('token'); }
+
+function toast(msg, dur=3000){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), dur);
+}
+
+async function apiFetch(path, opts={}){
+  const res = await fetch(API+path, {
+    ...opts,
+    headers:{ 'Authorization':'Bearer '+token(), 'Content-Type':'application/json', ...(opts.headers||{}) }
+  });
+  if(res.status===401){ logout(); return null; }
+  return res.json();
+}
+
+function logout(){
+  apiFetch('/api/auth/logout',{method:'POST'}).catch(()=>{});
+  localStorage.removeItem('token');
+  localStorage.removeItem('refresh_token');
+  window.location.href='login.html';
+}
+
+function initials(name=''){
+  return name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
+}
+
+const STATE_COLORS = {
+  null:'s0', 45:'s0', 46:'s0', 47:'s0',
+  48:'s48', 49:'s49', 50:'s50', 51:'s51',
+  52:'s52', 53:'s53', 54:'s54',
+};
+function stateClass(id){ return STATE_COLORS[id]||'s0'; }
+
+// ── Cargar datos ──────────────────────────────────────────────────────────────
+async function loadDashboard(){
+  if(!token()){ window.location.href='login.html'; return; }
+
+  // Me
+  const me = await apiFetch('/api/auth/me');
+  if(!me) return;
+  const u = me.data||{};
+  document.getElementById('userName').textContent   = u.name||'Usuario';
+  document.getElementById('userRole').textContent   = (u.roles&&u.roles[0]?.name)||'—';
+  document.getElementById('userAvatar').textContent = initials(u.name||'U');
+
+  // Kanban
+  const kb = await apiFetch('/api/users/kanban');
+  if(!kb) return;
+  const cols    = kb.data?.columns||[];
+  const total   = kb.data?.total_clients||0;
+  const noState = cols.find(c=>c.status_id===null)?.total||0;
+  const active  = cols.find(c=>c.status_name==='En seguimiento')?.total||0;
+
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statActive').textContent  = active;
+  document.getElementById('statKanban').textContent  = cols.filter(c=>c.total>0).length;
+  document.getElementById('statNoState').textContent = noState;
+
+  // Kanban columnas
+  const kbEl = document.getElementById('kanbanCols');
+  if(!cols.length){ kbEl.innerHTML='<span style="color:#9CA3AF;font-size:13px;">No hay clientes aún</span>'; }
+  else {
+    kbEl.innerHTML = cols.filter(c=>c.total>0).map(col=>{
+      const cls = stateClass(col.status_id);
+      const cards = (col.clients||[]).slice(0,3).map(c=>`
+        <div class="client-card">
+          <div class="client-name">${c.name||''} ${c.last_name||''}</div>
+          <div class="client-email">${c.email||''}</div>
+        </div>`).join('');
+      const more = col.total>3 ? `<div style="font-size:11px;color:#9CA3AF;text-align:center;padding:4px;">+${col.total-3} más</div>` : '';
+      return `
+        <div class="kanban-col">
+          <div class="col-header ${cls}">
+            <span>${col.status_name}</span>
+            <span class="col-badge">${col.total}</span>
+          </div>
+          ${cards}${more}
+        </div>`;
+    }).join('');
+  }
+
+  // Clientes recientes (todos de la lista kanban aplanados)
+  const allClients = cols.flatMap(c=>c.clients||[]).slice(0,8);
+  const rl = document.getElementById('recentList');
+  if(!allClients.length){ rl.innerHTML='<span style="color:#9CA3AF;font-size:13px;">No hay clientes</span>'; }
+  else {
+    rl.innerHTML = allClients.map(c=>{
+      const sc = stateClass(c.status_id);
+      const sn = cols.find(col=>(col.clients||[]).some(x=>x.id===c.id))?.status_name||'Sin estado';
+      return `
+        <div class="recent-item">
+          <div class="recent-avatar">${initials((c.name||'')+(c.last_name?' '+c.last_name:''))}</div>
+          <div class="recent-info">
+            <div class="recent-name">${c.name||''} ${c.last_name||''}</div>
+            <div class="recent-email">${c.email||''}</div>
+          </div>
+          <span class="state-pill ${sc}">${sn}</span>
+        </div>`;
+    }).join('');
+  }
+}
+
+function setPage(page){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  event.currentTarget?.classList?.add('active');
+  if(page==='kanban'){
+    toast('Vista Kanban completa — próximamente');
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer
 
 from app.config import settings
@@ -54,6 +55,11 @@ app.include_router(group_food.router, prefix=API_PREFIX)
 app.include_router(aliments.router, prefix=API_PREFIX)
 app.include_router(diets.router, prefix=API_PREFIX)
 app.include_router(recipes.router, prefix=API_PREFIX)
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/api/docs")
 
 
 @app.get("/api/health")

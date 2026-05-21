@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Check-ins</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --purple:#5B2D8E;--purple-dark:#4A2475;--purple-light:#7C3AED;
+      --purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar h1{font-size:18px;font-weight:700;color:#111;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-sm{padding:5px 10px;font-size:12px;}
+    .btn-danger-soft{background:#FEE2E2;color:#DC2626;border:none;}
+    .btn-danger-soft:hover{background:#DC2626;color:#fff;}
+
+    /* ── Content area ── */
+    .content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Client selector bar ── */
+    .selector-bar{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+    .selector-bar label{font-size:13px;font-weight:600;color:#374151;white-space:nowrap;}
+    .client-select{padding:9px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;color:#111;background:#fff;outline:none;cursor:pointer;min-width:240px;transition:.15s;}
+    .client-select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,45,142,.1);}
+
+    /* ── Summary cards ── */
+    .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .summary-card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px;}
+    .summary-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .si-purple{background:var(--purple-pale);}
+    .si-green{background:#F0FDF4;}
+    .si-blue{background:#EFF6FF;}
+    .si-red{background:#FEF2F2;}
+    .summary-label{font-size:11px;color:#6B7280;margin-bottom:3px;}
+    .summary-value{font-size:22px;font-weight:800;color:#111;line-height:1;}
+    .summary-sub{font-size:11px;color:#9CA3AF;margin-top:3px;}
+    .val-green{color:#16A34A;}
+    .val-red{color:#DC2626;}
+
+    /* ── Table card ── */
+    .table-card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;flex:1;}
+    .table-header{padding:16px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;}
+    .table-title{font-size:14px;font-weight:700;color:#111;}
+    .table-subtitle{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .table-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;min-width:700px;}
+    thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
+    thead th:first-child{padding-left:20px;}
+    thead th:last-child{text-align:center;}
+    tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:#FAFAFA;}
+    tbody td{padding:13px 16px;font-size:13px;color:#374151;vertical-align:middle;}
+    tbody td:first-child{padding-left:20px;}
+    tbody td:last-child{text-align:center;}
+
+    /* Row actions */
+    .row-actions{display:flex;gap:5px;justify-content:center;opacity:0;transition:.15s;}
+    tbody tr:hover .row-actions{opacity:1;}
+    .icon-btn{background:none;border:1px solid #E5E7EB;border-radius:6px;padding:5px 8px;cursor:pointer;color:#6B7280;font-size:12px;transition:.15s;display:inline-flex;align-items:center;gap:4px;}
+    .icon-btn:hover{background:var(--purple-pale);color:var(--purple);border-color:var(--purple);}
+    .icon-btn.del:hover{background:#FEE2E2;color:#DC2626;border-color:#DC2626;}
+
+    /* Weight progress pill */
+    .progress-pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+    .pill-green{background:#DCFCE7;color:#16A34A;}
+    .pill-red{background:#FEE2E2;color:#DC2626;}
+    .pill-neutral{background:#F3F4F6;color:#6B7280;}
+
+    /* Coach notes cell */
+    .coach-notes-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6B7280;font-style:italic;font-size:12px;}
+    .no-notes{color:#D1D5DB;font-size:12px;}
+
+    /* Date cell */
+    .date-cell{font-weight:600;color:#111;font-size:13px;}
+    .date-sub{font-size:11px;color:#9CA3AF;margin-top:1px;}
+
+    /* Weight cell */
+    .weight-val{font-weight:700;font-size:14px;color:#111;}
+    .weight-unit{font-size:11px;color:#9CA3AF;margin-left:2px;}
+
+    /* ── Empty state ── */
+    .empty-state{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .empty-icon{font-size:48px;margin-bottom:12px;opacity:.5;}
+    .empty-state h3{font-size:15px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .empty-state p{font-size:13px;}
+
+    /* ── Skeleton ── */
+    .skeleton{background:linear-gradient(90deg,#E5E7EB 25%,#F3F4F6 50%,#E5E7EB 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;display:inline-block;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .skel-row td{padding:14px 16px;}
+
+    /* ── Modal overlay ── */
+    .modal-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.45);
+      display:flex;align-items:center;justify-content:center;
+      z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;
+    }
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{
+      background:#fff;border-radius:16px;padding:28px;width:100%;max-width:480px;
+      box-shadow:0 20px 60px rgba(0,0,0,.2);
+      transform:translateY(16px);transition:transform .2s;
+    }
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-title{font-size:17px;font-weight:700;color:#111;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+    .modal-close{margin-left:auto;background:none;border:none;cursor:pointer;color:#9CA3AF;padding:2px;display:flex;}
+    .modal-close:hover{color:#374151;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px;}
+    .form-group input,.form-group select,.form-group textarea{
+      width:100%;padding:10px 13px;border:1px solid #E5E7EB;border-radius:8px;
+      font-size:13px;color:#111;background:#fff;outline:none;transition:.15s;
+      font-family:inherit;resize:vertical;
+    }
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,45,142,.1);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid #E5E7EB;}
+
+    /* ── Toast ── */
+    #toast{
+      position:fixed;bottom:24px;right:24px;z-index:999;
+      padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;
+      opacity:0;transform:translateY(8px);pointer-events:none;
+      transition:opacity .25s,transform .25s;max-width:360px;
+      box-shadow:0 4px 16px rgba(0,0,0,.15);
+    }
+    #toast.show{opacity:1;transform:translateY(0);}
+    #toast.success{background:#111827;color:#fff;}
+    #toast.error{background:#DC2626;color:#fff;}
+
+    /* ── Responsive ── */
+    @media(max-width:960px){
+      .summary-grid{grid-template-columns:repeat(2,1fr);}
+    }
+    @media(max-width:720px){
+      .sidebar{display:none;}
+      .summary-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de administración</small>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="kanban.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="12"/><rect x="17" y="3" width="5" height="15"/></svg>
+      Kanban clientes
+    </a>
+    <div class="nav-section">Gestión</div>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item active" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Check-ins
+    </a>
+    <a class="nav-item" href="#">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Formularios
+    </a>
+    <a class="nav-item" href="#">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Nutrición
+    </a>
+    <a class="nav-item" href="#">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Rutinas
+    </a>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Cargando...</div>
+        <div class="user-role" id="userRole">—</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<div class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <h1>Check-ins</h1>
+    <div>
+      <button class="btn btn-primary" onclick="openNewCheckinModal()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo check-in
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Client selector -->
+    <div class="selector-bar">
+      <svg width="18" height="18" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <label for="clientSelect">Cliente:</label>
+      <select class="client-select" id="clientSelect" onchange="onClientChange()">
+        <option value="">— Selecciona un cliente —</option>
+      </select>
+      <span id="clientLoadingHint" style="font-size:12px;color:#9CA3AF;">Cargando clientes...</span>
+    </div>
+
+    <!-- Summary cards (hidden until client selected) -->
+    <div class="summary-grid" id="summaryGrid" style="display:none;">
+      <div class="summary-card">
+        <div class="summary-icon si-purple">
+          <svg width="20" height="20" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <div class="summary-label">Total check-ins</div>
+          <div class="summary-value" id="sumTotal">—</div>
+          <div class="summary-sub">registros</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon" id="sumChangeIcon" style="background:#F0FDF4;">
+          <svg width="20" height="20" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24" id="sumChangeSvg"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div>
+          <div class="summary-label">Variación total</div>
+          <div class="summary-value" id="sumChange">—</div>
+          <div class="summary-sub">desde el inicio</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon si-blue">
+          <svg width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="summary-label">Peso actual</div>
+          <div class="summary-value" id="sumLastWeight">—</div>
+          <div class="summary-sub" id="sumFirstWeight">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table card -->
+    <div class="table-card">
+      <div class="table-header">
+        <div>
+          <div class="table-title">Historial de check-ins</div>
+          <div class="table-subtitle" id="tableSubtitle">Selecciona un cliente para ver sus check-ins</div>
+        </div>
+        <div id="clientBadge"></div>
+      </div>
+
+      <!-- Skeleton state -->
+      <div id="skeletonState" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Peso</th><th>Variación</th><th>Notas del cliente</th><th>Notas del coach</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="skeletonRows"></tbody>
+        </table>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">
+          <svg width="52" height="52" fill="none" stroke="#D1D5DB" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Sin check-ins</h3>
+        <p id="emptyMsg">Selecciona un cliente para ver su historial de check-ins.</p>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" id="tableWrap" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Peso</th>
+              <th>Variación</th>
+              <th>Notas del cliente</th>
+              <th>Notas del coach</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="checkinsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══════════════════ MODAL: Nuevo check-in ══════════════════ -->
+<div class="modal-overlay" id="newCheckinModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="newModalTitle">
+    <div class="modal-title">
+      <svg width="18" height="18" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span id="newModalTitle">Nuevo check-in</span>
+      <button class="modal-close" onclick="closeModal('newCheckinModal')" aria-label="Cerrar">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label for="ncClient">Cliente</label>
+      <select class="client-select" id="ncClient" style="width:100%;">
+        <option value="">— Selecciona un cliente —</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ncDate">Fecha</label>
+        <input type="date" id="ncDate"/>
+      </div>
+      <div class="form-group">
+        <label for="ncWeight">Peso (kg)</label>
+        <input type="number" id="ncWeight" placeholder="75.5" step="0.1" min="0"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="ncNotes">Notas del cliente</label>
+      <textarea id="ncNotes" rows="3" placeholder="Cómo se sintió esta semana, observaciones..."></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('newCheckinModal')">Cancelar</button>
+      <button class="btn btn-primary" id="btnSaveCheckin" onclick="saveNewCheckin()">Guardar check-in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ MODAL: Coach notes ══════════════════ -->
+<div class="modal-overlay" id="coachNotesModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cnModalTitle">
+    <div class="modal-title">
+      <svg width="18" height="18" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span id="cnModalTitle">Notas del coach</span>
+      <button class="modal-close" onclick="closeModal('coachNotesModal')" aria-label="Cerrar">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div id="cnCheckinInfo" style="background:#F9FAFB;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#6B7280;"></div>
+
+    <div class="form-group">
+      <label for="cnNotes">Notas del coach</label>
+      <textarea id="cnNotes" rows="5" placeholder="Escribe las notas, recomendaciones o feedback para el cliente..."></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('coachNotesModal')">Cancelar</button>
+      <button class="btn btn-primary" id="btnSaveCoachNotes" onclick="saveCoachNotes()">Guardar notas</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ MODAL: Confirm delete ══════════════════ -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:400px;" role="dialog" aria-modal="true">
+    <div class="modal-title">
+      <svg width="18" height="18" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Eliminar check-in
+      <button class="modal-close" onclick="closeModal('deleteModal')" aria-label="Cerrar">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p style="font-size:14px;color:#374151;line-height:1.6;" id="deleteMsg">¿Estás seguro de que quieres eliminar este check-in? Esta acción no se puede deshacer.</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancelar</button>
+      <button class="btn btn-danger-soft" id="btnConfirmDelete" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ─────────────────────────────────────────────
+   Constants & state
+───────────────────────────────────────────── */
+const API = 'https://nutrientrena-production.up.railway.app/api';
+let clients = [];
+let activeClientId = null;
+let checkins = [];
+let pendingDeleteId = null;
+let pendingCoachNotesId = null;
+let meData = null;
+
+/* ─────────────────────────────────────────────
+   Utils
+───────────────────────────────────────────── */
+function token() { return localStorage.getItem('token'); }
+
+function toast(msg, type = 'success', dur = 3500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = ''; }, dur);
+}
+
+async function apiFetch(path, opts = {}) {
+  try {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: {
+        'Authorization': 'Bearer ' + token(),
+        'Content-Type': 'application/json',
+        ...(opts.headers || {})
+      }
+    });
+    if (res.status === 401) { logout(); return null; }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Error ${res.status}`);
+    }
+    return res.json();
+  } catch (e) {
+    throw e;
+  }
+}
+
+function initials(name = '') {
+  return name.trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function logout() {
+  fetch(API.replace('/api', '') + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token() } }).catch(() => {});
+  localStorage.removeItem('token');
+  localStorage.removeItem('refresh_token');
+  window.location.href = 'login.html';
+}
+
+/* ─────────────────────────────────────────────
+   Init
+───────────────────────────────────────────── */
+async function init() {
+  if (!token()) { window.location.href = 'login.html'; return; }
+
+  // Load current user
+  try {
+    const me = await apiFetch('/auth/me');
+    if (!me) return;
+    const u = me.data || me || {};
+    meData = u;
+    document.getElementById('userName').textContent  = u.name || 'Usuario';
+    document.getElementById('userRole').textContent  = (u.roles && u.roles[0]?.name) || '—';
+    document.getElementById('userAvatar').textContent = initials(u.name || 'U');
+  } catch(e) {
+    console.error('Error loading user:', e);
+  }
+
+  // Load clients
+  await loadClients();
+}
+
+async function loadClients() {
+  try {
+    const data = await apiFetch('/users/client/findAll');
+    clients = (data?.data || data || []);
+    populateClientSelects();
+    document.getElementById('clientLoadingHint').style.display = 'none';
+  } catch(e) {
+    document.getElementById('clientLoadingHint').textContent = 'Error al cargar clientes';
+    toast('Error al cargar clientes: ' + e.message, 'error');
+  }
+}
+
+function populateClientSelects() {
+  const opts = clients.map(c => {
+    const fullName = [c.name, c.last_name].filter(Boolean).join(' ');
+    return `<option value="${c.id}">${fullName}</option>`;
+  }).join('');
+
+  const selMain = document.getElementById('clientSelect');
+  const selModal = document.getElementById('ncClient');
+
+  selMain.innerHTML  = '<option value="">— Selecciona un cliente —</option>' + opts;
+  selModal.innerHTML = '<option value="">— Selecciona un cliente —</option>' + opts;
+}
+
+/* ─────────────────────────────────────────────
+   Client selection
+───────────────────────────────────────────── */
+async function onClientChange() {
+  const id = document.getElementById('clientSelect').value;
+  if (!id) {
+    activeClientId = null;
+    hideSummary();
+    showEmptyState('Selecciona un cliente para ver su historial de check-ins.');
+    return;
+  }
+  activeClientId = id;
+  // Sync modal select
+  document.getElementById('ncClient').value = id;
+  await loadClientData(id);
+}
+
+async function loadClientData(clientId) {
+  showSkeletonRows(5);
+  hideSummary();
+
+  try {
+    const [checkinsRes, summaryRes] = await Promise.all([
+      apiFetch(`/checkins/client/${clientId}`),
+      apiFetch(`/checkins/summary/${clientId}`)
+    ]);
+
+    checkins = checkinsRes?.data || checkinsRes || [];
+    const summary = summaryRes?.data || summaryRes || {};
+
+    renderSummary(summary);
+    renderCheckins(checkins);
+
+    const client = clients.find(c => String(c.id) === String(clientId));
+    const name = client ? [client.name, client.last_name].filter(Boolean).join(' ') : 'cliente';
+    document.getElementById('tableSubtitle').textContent = `${checkins.length} check-in(s) registrado(s) para ${name}`;
+    document.getElementById('clientBadge').innerHTML = `<span style="background:var(--purple-pale);color:var(--purple);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;">${name}</span>`;
+
+  } catch(e) {
+    toast('Error al cargar check-ins: ' + e.message, 'error');
+    showEmptyState('Error al cargar los check-ins. Intenta de nuevo.');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Summary
+───────────────────────────────────────────── */
+function renderSummary(s) {
+  document.getElementById('sumTotal').textContent = s.total_checkins ?? '—';
+
+  const change = s.total_weight_change;
+  const changeEl = document.getElementById('sumChange');
+  const changeIcon = document.getElementById('sumChangeIcon');
+  const changeSvg  = document.getElementById('sumChangeSvg');
+
+  if (change != null && change !== '') {
+    const n = parseFloat(change);
+    const sign = n > 0 ? '+' : '';
+    changeEl.textContent = `${sign}${n.toFixed(1)} kg`;
+    if (n < 0) {
+      changeEl.className = 'summary-value val-green';
+      changeIcon.style.background = '#F0FDF4';
+      changeSvg.setAttribute('stroke', '#16A34A');
+    } else if (n > 0) {
+      changeEl.className = 'summary-value val-red';
+      changeIcon.style.background = '#FEF2F2';
+      changeSvg.setAttribute('stroke', '#DC2626');
+    } else {
+      changeEl.className = 'summary-value';
+    }
+  } else {
+    changeEl.textContent = '—';
+    changeEl.className = 'summary-value';
+  }
+
+  const lastW = s.last_weight;
+  const firstW = s.first_weight;
+  document.getElementById('sumLastWeight').textContent = lastW != null ? `${parseFloat(lastW).toFixed(1)} kg` : '—';
+  document.getElementById('sumFirstWeight').textContent = firstW != null ? `Inicio: ${parseFloat(firstW).toFixed(1)} kg` : '—';
+
+  document.getElementById('summaryGrid').style.display = 'grid';
+}
+
+function hideSummary() {
+  document.getElementById('summaryGrid').style.display = 'none';
+}
+
+/* ─────────────────────────────────────────────
+   Skeleton
+───────────────────────────────────────────── */
+function showSkeletonRows(n) {
+  document.getElementById('emptyState').style.display   = 'none';
+  document.getElementById('tableWrap').style.display    = 'none';
+  document.getElementById('skeletonState').style.display = 'block';
+
+  const rows = Array.from({length: n}, () => `
+    <tr class="skel-row">
+      <td><span class="skeleton" style="width:80px;height:14px;">&nbsp;</span></td>
+      <td><span class="skeleton" style="width:52px;height:14px;">&nbsp;</span></td>
+      <td><span class="skeleton" style="width:60px;height:18px;border-radius:20px;">&nbsp;</span></td>
+      <td><span class="skeleton" style="width:140px;height:14px;">&nbsp;</span></td>
+      <td><span class="skeleton" style="width:120px;height:14px;">&nbsp;</span></td>
+      <td><span class="skeleton" style="width:64px;height:28px;border-radius:6px;">&nbsp;</span></td>
+    </tr>`).join('');
+  document.getElementById('skeletonRows').innerHTML = rows;
+}
+
+/* ─────────────────────────────────────────────
+   Empty state
+───────────────────────────────────────────── */
+function showEmptyState(msg) {
+  document.getElementById('skeletonState').style.display = 'none';
+  document.getElementById('tableWrap').style.display    = 'none';
+  document.getElementById('emptyMsg').textContent = msg;
+  document.getElementById('emptyState').style.display   = 'block';
+}
+
+/* ─────────────────────────────────────────────
+   Render checkins table
+───────────────────────────────────────────── */
+function renderCheckins(list) {
+  document.getElementById('skeletonState').style.display = 'none';
+
+  if (!list.length) {
+    showEmptyState('Este cliente no tiene check-ins registrados todavía.');
+    return;
+  }
+
+  const tbody = document.getElementById('checkinsTbody');
+  tbody.innerHTML = list.map(ci => {
+    const prog = ci.weight_progress;
+    let pillHtml = '<span class="progress-pill pill-neutral">—</span>';
+    if (prog != null && prog !== '') {
+      const n = parseFloat(prog);
+      if (n < 0) {
+        pillHtml = `<span class="progress-pill pill-green">▼ ${Math.abs(n).toFixed(1)} kg</span>`;
+      } else if (n > 0) {
+        pillHtml = `<span class="progress-pill pill-red">▲ ${n.toFixed(1)} kg</span>`;
+      } else {
+        pillHtml = `<span class="progress-pill pill-neutral">= 0 kg</span>`;
+      }
+    }
+
+    const notes = ci.notes
+      ? `<span title="${escHtml(ci.notes)}">${escHtml(truncate(ci.notes, 50))}</span>`
+      : `<span class="no-notes">—</span>`;
+
+    const coachNotes = ci.coach_notes
+      ? `<span class="coach-notes-cell" title="${escHtml(ci.coach_notes)}">${escHtml(truncate(ci.coach_notes, 45))}</span>`
+      : `<span class="no-notes">Sin notas</span>`;
+
+    return `<tr>
+      <td>
+        <div class="date-cell">${formatDate(ci.checkin_date)}</div>
+        <div class="date-sub">${formatDate(ci.created_at)}</div>
+      </td>
+      <td>
+        <span class="weight-val">${ci.weight != null ? parseFloat(ci.weight).toFixed(1) : '—'}</span>
+        <span class="weight-unit">kg</span>
+      </td>
+      <td>${pillHtml}</td>
+      <td>${notes}</td>
+      <td>${coachNotes}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" onclick="openCoachNotesModal(${ci.id})" title="Editar notas del coach">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Coach
+          </button>
+          <button class="icon-btn del" onclick="openDeleteModal(${ci.id})" title="Eliminar check-in">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tableWrap').style.display = 'block';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function truncate(s, n) {
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+
+/* ─────────────────────────────────────────────
+   Modal helpers
+───────────────────────────────────────────── */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+/* ─────────────────────────────────────────────
+   New check-in modal
+───────────────────────────────────────────── */
+function openNewCheckinModal() {
+  document.getElementById('ncDate').value   = todayISO();
+  document.getElementById('ncWeight').value = '';
+  document.getElementById('ncNotes').value  = '';
+  if (activeClientId) {
+    document.getElementById('ncClient').value = activeClientId;
+  }
+  openModal('newCheckinModal');
+  document.getElementById('ncClient').focus();
+}
+
+async function saveNewCheckin() {
+  const clientId = document.getElementById('ncClient').value;
+  const date     = document.getElementById('ncDate').value;
+  const weight   = document.getElementById('ncWeight').value;
+  const notes    = document.getElementById('ncNotes').value.trim();
+
+  if (!clientId) { toast('Selecciona un cliente', 'error'); return; }
+  if (!date)     { toast('Indica la fecha del check-in', 'error'); return; }
+  if (!weight)   { toast('Introduce el peso', 'error'); return; }
+
+  const btn = document.getElementById('btnSaveCheckin');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    const body = {
+      client_user_detail_id: parseInt(clientId),
+      checkin_date: date,
+      weight: parseFloat(weight),
+      notes: notes || undefined
+    };
+    if (meData?.id) body.coach_user_detail_id = meData.id;
+
+    await apiFetch('/checkins', { method: 'POST', body: JSON.stringify(body) });
+
+    toast('Check-in guardado correctamente', 'success');
+    closeModal('newCheckinModal');
+
+    // Reload if same client
+    if (String(clientId) === String(activeClientId)) {
+      await loadClientData(activeClientId);
+    }
+  } catch(e) {
+    toast('Error al guardar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar check-in';
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Coach notes modal
+───────────────────────────────────────────── */
+function openCoachNotesModal(checkinId) {
+  const ci = checkins.find(c => c.id === checkinId);
+  if (!ci) return;
+
+  pendingCoachNotesId = checkinId;
+  document.getElementById('cnNotes').value = ci.coach_notes || '';
+  document.getElementById('cnCheckinInfo').innerHTML =
+    `<strong>Check-in del ${formatDate(ci.checkin_date)}</strong> &mdash; Peso: <strong>${ci.weight != null ? parseFloat(ci.weight).toFixed(1) + ' kg' : '—'}</strong>`;
+  openModal('coachNotesModal');
+  document.getElementById('cnNotes').focus();
+}
+
+async function saveCoachNotes() {
+  if (!pendingCoachNotesId) return;
+  const notes = document.getElementById('cnNotes').value.trim();
+
+  const btn = document.getElementById('btnSaveCoachNotes');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    await apiFetch(`/checkins/${pendingCoachNotesId}/coach-notes`, {
+      method: 'PUT',
+      body: JSON.stringify({ coach_notes: notes })
+    });
+
+    toast('Notas del coach actualizadas', 'success');
+    closeModal('coachNotesModal');
+
+    // Update local state
+    const ci = checkins.find(c => c.id === pendingCoachNotesId);
+    if (ci) ci.coach_notes = notes;
+    renderCheckins(checkins);
+
+  } catch(e) {
+    toast('Error al guardar notas: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar notas';
+    pendingCoachNotesId = null;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Delete modal
+───────────────────────────────────────────── */
+function openDeleteModal(checkinId) {
+  const ci = checkins.find(c => c.id === checkinId);
+  pendingDeleteId = checkinId;
+  const dateStr = ci ? formatDate(ci.checkin_date) : '';
+  document.getElementById('deleteMsg').textContent =
+    `¿Estás seguro de que quieres eliminar el check-in del ${dateStr}? Esta acción no se puede deshacer.`;
+  openModal('deleteModal');
+}
+
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const btn = document.getElementById('btnConfirmDelete');
+  btn.disabled = true;
+  btn.textContent = 'Eliminando...';
+
+  try {
+    await apiFetch(`/checkins/${pendingDeleteId}`, { method: 'DELETE' });
+    toast('Check-in eliminado', 'success');
+    closeModal('deleteModal');
+    checkins = checkins.filter(c => c.id !== pendingDeleteId);
+    renderCheckins(checkins);
+    // Reload summary
+    if (activeClientId) {
+      try {
+        const summaryRes = await apiFetch(`/checkins/summary/${activeClientId}`);
+        const summary = summaryRes?.data || summaryRes || {};
+        renderSummary(summary);
+      } catch(_) {}
+    }
+    document.getElementById('tableSubtitle').textContent = `${checkins.length} check-in(s) registrado(s)`;
+  } catch(e) {
+    toast('Error al eliminar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Eliminar';
+    pendingDeleteId = null;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Boot
+───────────────────────────────────────────── */
+init();
+</script>
+</body>
+</html>

@@ -10,7 +10,7 @@ from app.core.dependencies import get_current_user
 router = APIRouter(prefix="/files", tags=["Files"])
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
-MAX_SIZE_MB = 5
+MAX_SIZE_MB = 10
 
 
 def _get_r2_client():

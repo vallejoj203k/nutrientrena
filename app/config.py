@@ -53,8 +53,10 @@ class Settings(BaseSettings):
 
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
-    AWS_DEFAULT_REGION: str = "us-east-1"
+    AWS_DEFAULT_REGION: str = "auto"
     AWS_BUCKET: Optional[str] = None
+    AWS_ENDPOINT_URL: Optional[str] = None   # R2 endpoint
+    R2_PUBLIC_URL: Optional[str] = None       # public r2.dev URL
 
     RESEND_API_KEY: Optional[str] = None
     MAIL_FROM: str = "onboarding@resend.dev"

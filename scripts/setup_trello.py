@@ -32,7 +32,7 @@ AUTH = {"key": API_KEY, "token": TOKEN}
 LISTAS = ["Backlog", "Por Hacer", "En Proceso", "Control de Calidad", "Hecho"]
 
 # =============================================================================
-# ESTADO ACTUAL DEL PROYECTO — actualizado 2026-05-16
+# ESTADO ACTUAL DEL PROYECTO — actualizado 2026-05-25
 #
 # FASE 1 BACKEND: 100% completada
 #   38 tablas en MySQL (Railway) · 128 rutas registradas
@@ -40,7 +40,13 @@ LISTAS = ["Backlog", "Por Hacer", "En Proceso", "Control de Calidad", "Hecho"]
 #            alimentos, recetas, dietas, rutinas, entrenamientos,
 #            eventos, notas, progreso, formularios, check-ins, planes
 #
-# FASE 2 PENDIENTE: analíticas, upload, PDF, frontend, permisos
+# FASE 2 EN CURSO:
+#   ✅ Sprint 14 — Analíticas y métricas (4 endpoints)
+#   ✅ Sprint 15 — Upload de imágenes (Cloudflare R2, boto3)
+#   🔜 Sprint 16 — PDF de dietas y rutinas
+#   🔜 Sprint 17 — Frontend completo
+#   🔜 Sprint 18 — Roles y permisos granulares
+#   🔜 Sprint 19 — Notificaciones internas
 # =============================================================================
 
 SPRINTS = {
@@ -134,6 +140,37 @@ SPRINTS = {
                 "✅ Verificado en producción con email real (Resend SDK)"
             ),
         },
+        {
+            "name": "Sprint 14 — Analíticas y métricas ✅",
+            "desc": (
+                "✅ GET /api/analytics/overview\n"
+                "   → total clientes, activos, nuevos este mes, coaches, total check-ins\n"
+                "✅ GET /api/analytics/states\n"
+                "   → distribución de clientes por estado con porcentajes\n"
+                "✅ GET /api/analytics/checkins\n"
+                "   → adherencia (%), cambio de peso promedio, tendencia semanal (8 semanas)\n"
+                "✅ GET /api/analytics/coaches\n"
+                "   → clientes asignados y check-ins recibidos por coach\n"
+                "✅ Filtros: ?coach_id=uuid en todos los endpoints\n"
+                "✅ Frontend analytics.html: 6 tarjetas + gráfico barras + dona + línea + tabla coaches\n"
+                "✅ Gráficos SVG sin librerías externas"
+            ),
+        },
+        {
+            "name": "Sprint 15 — Upload de imágenes ✅",
+            "desc": (
+                "✅ Cloudflare R2 configurado (S3-compatible con boto3)\n"
+                "✅ POST /api/files/upload → sube imagen, devuelve URL pública\n"
+                "✅ DELETE /api/files/delete → elimina archivo por key\n"
+                "✅ GET /api/files/list → lista archivos por carpeta\n"
+                "✅ Límite: 10 MB · Formatos: JPG, PNG, WEBP, GIF\n"
+                "✅ Carpetas: uploads, profiles, checkins, aliments\n"
+                "✅ Integrado en client-profile.html: avatar con hover overlay + click para subir\n"
+                "✅ Integrado en checkins.html: foto de progreso con preview + lightbox\n"
+                "✅ URL pública activa: pub-397ed3b6f1d1480d8c17d960513a3c78.r2.dev\n"
+                "✅ Verificado en producción: upload retorna 200 con URL pública real"
+            ),
+        },
     ],
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -145,30 +182,6 @@ SPRINTS = {
     # POR HACER — FASE 2
     # ─────────────────────────────────────────────────────────────────────────
     "Por Hacer": [
-        {
-            "name": "Sprint 14 — Analíticas y métricas",
-            "desc": (
-                "[ ] GET /api/analytics/overview\n"
-                "    → total clientes, clientes activos, nuevos este mes\n"
-                "[ ] GET /api/analytics/states\n"
-                "    → distribución de clientes por estado (para gráfico de barras)\n"
-                "[ ] GET /api/analytics/checkins\n"
-                "    → promedio de peso perdido, adherencia (% clientes con check-in)\n"
-                "[ ] GET /api/analytics/coaches\n"
-                "    → clientes por coach, planes entregados\n"
-                "[ ] Filtros: ?from=fecha&to=fecha&coach_id=uuid"
-            ),
-        },
-        {
-            "name": "Sprint 15 — Upload de imágenes",
-            "desc": (
-                "[ ] Configurar almacenamiento: AWS S3 o Cloudflare R2\n"
-                "[ ] POST /api/files/upload → subir imagen, devolver URL pública\n"
-                "[ ] Integrar en perfil de usuario (foto de perfil)\n"
-                "[ ] Integrar en check-ins (fotos de progreso del cliente)\n"
-                "[ ] Integrar en alimentos (foto del alimento)"
-            ),
-        },
         {
             "name": "Sprint 16 — PDF de dietas y rutinas",
             "desc": (
@@ -185,14 +198,14 @@ SPRINTS = {
     # ─────────────────────────────────────────────────────────────────────────
     "Backlog": [
         {
-            "name": "Sprint 17 — Frontend (integración con API)",
+            "name": "Sprint 17 — Frontend avanzado y pulido",
             "desc": (
-                "[ ] Conectar Next.js / React con API en Railway\n"
-                "[ ] Login → guardar JWT → rutas protegidas\n"
-                "[ ] Vista Kanban de clientes con drag & drop\n"
-                "[ ] Formulario de intake embebido para el cliente\n"
-                "[ ] Historial de check-ins con gráfico de progreso de peso\n"
-                "[ ] Dashboard de analíticas"
+                "[ ] Notificaciones in-app (badge de pendientes)\n"
+                "[ ] Modo oscuro / tema personalizable\n"
+                "[ ] Paginación infinita en listados grandes\n"
+                "[ ] Vista móvil / PWA (manifest.json + service worker)\n"
+                "[ ] Exportar tabla de clientes a CSV\n"
+                "[ ] Filtros avanzados en kanban y check-ins"
             ),
         },
         {

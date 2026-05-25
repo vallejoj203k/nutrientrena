@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form
 from typing import Optional
 import boto3
 import uuid
-import os
 
 from app.config import settings
 from app.core.responses import send_response, send_error
@@ -15,13 +14,9 @@ MAX_SIZE_MB = 5
 
 
 def _get_r2_client():
-    endpoint = settings.AWS_ENDPOINT_URL or (
-        f"https://{settings.AWS_ACCESS_KEY_ID}.r2.cloudflarestorage.com"
-        if not settings.AWS_ENDPOINT_URL else settings.AWS_ENDPOINT_URL
-    )
     return boto3.client(
         "s3",
-        endpoint_url=f"https://77925e3b1a6f6513bce155f71f6aa790.r2.cloudflarestorage.com",
+        endpoint_url="https://77925e3b1a6f6513bce155f71f6aa790.r2.cloudflarestorage.com",
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
         region_name="auto",

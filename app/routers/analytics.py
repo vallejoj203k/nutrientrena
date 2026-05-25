@@ -6,10 +6,10 @@ from sqlalchemy import func
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
-from app.models.user import User, UserDetail, RoleUser, UserParent
+from app.models.user import UserDetail, RoleUser, UserParent
 from app.models.role import COACH, CLIENT
 from app.models.checkin import WeeklyCheckin
-from app.models.parameter import Parameter, ParameterDetail
+from app.models.parameter import ParameterDetail
 from app.core.responses import send_response
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])

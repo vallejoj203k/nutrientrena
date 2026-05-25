@@ -372,6 +372,18 @@
       <label for="ncNotes">Notas del cliente</label>
       <textarea id="ncNotes" rows="3" placeholder="Cómo se sintió esta semana, observaciones..."></textarea>
     </div>
+    <div class="form-group">
+      <label>Foto de progreso (opcional)</label>
+      <div id="photoPreviewWrap" style="display:none;margin-bottom:8px;">
+        <img id="photoPreview" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;"/>
+        <button onclick="clearPhoto()" style="margin-top:6px;font-size:12px;color:#DC2626;background:none;border:none;cursor:pointer;">✕ Quitar foto</button>
+      </div>
+      <label for="ncPhoto" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border:2px dashed #E5E7EB;border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:#6B7280;text-transform:none;letter-spacing:0;font-weight:400;" id="photoLabel">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Seleccionar imagen (JPG, PNG — máx 5 MB)
+      </label>
+      <input type="file" id="ncPhoto" accept="image/*" style="display:none;" onchange="previewPhoto(this)"/>
+    </div>
 
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('newCheckinModal')">Cancelar</button>
@@ -693,9 +705,14 @@ function renderCheckins(list) {
       ? `<span class="coach-notes-cell" title="${escHtml(ci.coach_notes)}">${escHtml(truncate(ci.coach_notes, 45))}</span>`
       : `<span class="no-notes">Sin notas</span>`;
 
+    const photoThumb = ci.photo_url
+      ? `<img src="${escHtml(ci.photo_url)}" onclick="openPhoto('${escHtml(ci.photo_url)}')"
+           style="width:36px;height:36px;object-fit:cover;border-radius:6px;cursor:pointer;margin-left:8px;vertical-align:middle;border:2px solid #E5E7EB;" title="Ver foto"/>`
+      : '';
+
     return `<tr>
       <td>
-        <div class="date-cell">${formatDate(ci.checkin_date)}</div>
+        <div class="date-cell">${formatDate(ci.checkin_date)}${photoThumb}</div>
         <div class="date-sub">${formatDate(ci.created_at)}</div>
       </td>
       <td>
@@ -766,6 +783,43 @@ function openNewCheckinModal() {
   document.getElementById('ncClient').focus();
 }
 
+// ── Photo preview ─────────────────────────────────────────────────────────────
+function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('photoPreview').src = e.target.result;
+    document.getElementById('photoPreviewWrap').style.display = 'block';
+    document.getElementById('photoLabel').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhoto() {
+  document.getElementById('ncPhoto').value = '';
+  document.getElementById('photoPreviewWrap').style.display = 'none';
+  document.getElementById('photoLabel').style.display = 'flex';
+}
+
+async function uploadCheckinPhoto() {
+  const input = document.getElementById('ncPhoto');
+  if (!input.files[0]) return null;
+  try {
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    fd.append('folder', 'checkins');
+    const r = await fetch(`${API}/files/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const j = await r.json();
+    return r.ok ? (j.data || j).url : null;
+  } catch { return null; }
+}
+
+// ── Save check-in ─────────────────────────────────────────────────────────────
 async function saveNewCheckin() {
   const clientId = document.getElementById('ncClient').value;
   const date     = document.getElementById('ncDate').value;
@@ -781,20 +835,24 @@ async function saveNewCheckin() {
   btn.textContent = 'Guardando...';
 
   try {
+    // Upload photo first if present
+    const photoUrl = await uploadCheckinPhoto();
+
     const body = {
-      client_user_detail_id: parseInt(clientId),
+      client_user_detail_id: clientId,
       checkin_date: date,
       weight: parseFloat(weight),
-      notes: notes || undefined
+      notes: notes || undefined,
     };
+    if (photoUrl) body.photo_url = photoUrl;
     if (meData?.id) body.coach_user_detail_id = meData.id;
 
     await apiFetch('/checkins', { method: 'POST', body: JSON.stringify(body) });
 
     toast('Check-in guardado correctamente', 'success');
     closeModal('newCheckinModal');
+    clearPhoto();
 
-    // Reload if same client
     if (String(clientId) === String(activeClientId)) {
       await loadClientData(activeClientId);
     }
@@ -892,6 +950,17 @@ async function confirmDelete() {
     btn.textContent = 'Eliminar';
     pendingDeleteId = null;
   }
+}
+
+/* ─────────────────────────────────────────────
+   Photo lightbox
+───────────────────────────────────────────── */
+function openPhoto(url) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+  overlay.innerHTML = `<img src="${url}" style="max-width:90vw;max-height:90vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);"/>`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
 }
 
 /* ─────────────────────────────────────────────

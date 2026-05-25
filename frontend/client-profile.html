@@ -50,7 +50,14 @@
 
     /* Profile header */
     .profile-header{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-    .profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;flex-shrink:0;}
+    .profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;flex-shrink:0;position:relative;cursor:pointer;overflow:hidden;}
+    .profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+    .avatar-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;border-radius:50%;}
+    .profile-avatar:hover .avatar-overlay{opacity:1;}
+    .avatar-overlay svg{color:#fff;}
+    .avatar-upload-input{display:none;}
+    .upload-spinner{display:none;width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg)}}
     .profile-info{flex:1;}
     .profile-name{font-size:22px;font-weight:800;color:#111;margin-bottom:4px;}
     .profile-email{font-size:14px;color:#6B7280;margin-bottom:8px;}
@@ -344,7 +351,16 @@ function renderProfile(c, checkins, formResponses, formAssignment) {
   document.getElementById('content').innerHTML = `
     <!-- Profile header -->
     <div class="profile-header">
-      <div class="profile-avatar">${initials}</div>
+      <div class="profile-avatar" onclick="document.getElementById('avatarInput').click()" title="Cambiar foto">
+        ${c.photo_url
+          ? `<img src="${esc(c.photo_url)}" alt="${esc(name)}"/>`
+          : initials}
+        <div class="avatar-overlay">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <div class="upload-spinner" id="avatarSpinner"></div>
+        </div>
+      </div>
+      <input type="file" id="avatarInput" class="avatar-upload-input" accept="image/*" onchange="uploadAvatar(this)"/>
       <div class="profile-info">
         <div class="profile-name">${esc(name)}</div>
         <div class="profile-email">${esc(c.email || '—')}</div>
@@ -570,6 +586,58 @@ async function deliverPlan() {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Upload avatar ─────────────────────────────────────────────────────────────
+async function uploadAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const spinner = document.getElementById('avatarSpinner');
+  const overlay = document.querySelector('.avatar-overlay');
+  if (spinner) { spinner.style.display = 'block'; overlay.querySelector('svg').style.display = 'none'; }
+
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('folder', 'profiles');
+
+    const r = await fetch(`${API}/files/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const j = await r.json();
+    if (!r.ok) { toast(j.detail || 'Error al subir la foto', 'error'); return; }
+
+    const url = (j.data || j).url;
+
+    // Update avatar display
+    const avatar = document.querySelector('.profile-avatar');
+    const existing = avatar.querySelector('img');
+    if (existing) { existing.src = url; }
+    else {
+      avatar.innerHTML = `
+        <img src="${url}" alt="foto"/>
+        <div class="avatar-overlay">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>`;
+    }
+
+    // Save URL to user profile
+    await fetch(`${API}/users/${clientId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ photo_url: url }),
+    });
+
+    toast('Foto actualizada', 'success');
+  } catch {
+    toast('Error de conexión', 'error');
+  } finally {
+    if (spinner) { spinner.style.display = 'none'; if (overlay?.querySelector('svg')) overlay.querySelector('svg').style.display = 'block'; }
+    input.value = '';
+  }
+}
+
 function esc(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }

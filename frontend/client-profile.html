@@ -858,6 +858,22 @@ function renderBizTab() {
     <div class="info-item"><label>Consentimiento evolución</label><span>${c.consentimiento_evolucion?'✅ Sí':'❌ No'}</span></div>`;
 }
 
+/* ── Update profile header badges only (called after biz save) ── */
+function renderProfileHeader() {
+  const c = clientData;
+  const badges = [];
+  if (c.status_name || c.status?.description) badges.push(`<span class="badge badge-status">${esc(c.status_name || c.status?.description)}</span>`);
+  if (c.coach_name && c.coach_name !== '—') badges.push(`<span class="badge badge-coach">Coach: ${esc(c.coach_name)}</span>`);
+  if (c.estado_pago) {
+    const payMap = {pendiente:'badge-pay-pendiente',parcial:'badge-pay-parcial',pagado:'badge-pay-pagado'};
+    const payLabel = {pendiente:'⏳ Pendiente',parcial:'🔶 Parcial',pagado:'✅ Pagado'};
+    badges.push(`<span class="badge ${payMap[c.estado_pago]||'badge-pay-default'}">${payLabel[c.estado_pago]||c.estado_pago}</span>`);
+  }
+  document.getElementById('profileBadges').innerHTML = badges.join('');
+  const waBtn = document.getElementById('waBtn');
+  if (waBtn) waBtn.style.display = c.whatsapp_link ? 'inline-flex' : 'none';
+}
+
 /* ── Mini chart ── */
 function renderMiniChart(weights) {
   const min = Math.min(...weights), max = Math.max(...weights);
@@ -1022,7 +1038,8 @@ async function saveBiz() {
     clientData = { ...clientData, ...(j.data || j) };
     closeBizModal();
     renderBizTab();
-    renderAll();
+    // Refresh badges and profile header without resetting active tab
+    renderProfileHeader();
     showToast('Información comercial actualizada', 'success');
   } catch { document.getElementById('bizError').textContent = 'Error de conexión'; }
   finally { btn.textContent = 'Guardar cambios'; btn.disabled = false; }

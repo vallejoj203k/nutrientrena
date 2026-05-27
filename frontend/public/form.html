@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Formulario de evaluación</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F2F5;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px;}
+
+    .header{width:100%;max-width:560px;text-align:center;margin-bottom:28px;}
+    .logo{font-size:24px;font-weight:900;color:var(--purple);letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .logo em{color:#C084FC;font-style:inherit;}
+    .header-sub{font-size:13px;color:#9CA3AF;margin-top:4px;}
+
+    .card{background:#fff;border-radius:16px;width:100%;max-width:560px;box-shadow:0 4px 20px rgba(91,45,142,.08);border:1px solid #EDE9FE;overflow:hidden;}
+    .card-head{background:var(--purple);padding:28px 28px 24px;}
+    .card-head h1{font-size:20px;font-weight:800;color:#fff;line-height:1.3;}
+    .card-head p{font-size:13px;color:rgba(255,255,255,.7);margin-top:6px;line-height:1.5;}
+    .card-body{padding:24px 28px;}
+
+    .form-group{margin-bottom:18px;}
+    .form-group label{display:block;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group label .req{color:#EF4444;margin-left:2px;}
+    .form-group input,.form-group select,.form-group textarea{
+      width:100%;padding:11px 13px;border:1.5px solid #E5E7EB;border-radius:8px;
+      font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,45,142,.08);}
+    .form-group textarea{resize:vertical;min-height:90px;}
+    .form-group select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+
+    .section-divider{font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.8px;margin:24px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--purple-pale);}
+
+    .submit-btn{width:100%;padding:14px;background:var(--purple);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;margin-top:8px;}
+    .submit-btn:hover:not(:disabled){background:var(--purple-dark);}
+    .submit-btn:disabled{opacity:.6;cursor:not-allowed;}
+
+    /* States */
+    .state{display:none;flex-direction:column;align-items:center;text-align:center;padding:48px 28px;}
+    .state.active{display:flex;}
+    .state-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:32px;}
+    .state-icon.success{background:#D1FAE5;}
+    .state-icon.error{background:#FEE2E2;}
+    .state-icon.info{background:var(--purple-pale);}
+    .state h2{font-size:20px;font-weight:800;color:#111;margin-bottom:10px;}
+    .state p{font-size:14px;color:#6B7280;line-height:1.6;max-width:360px;}
+
+    /* Spinner */
+    .spinner{width:40px;height:40px;border:3px solid #E5E7EB;border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    .progress-bar{width:100%;height:4px;background:#EDE9FE;position:relative;overflow:hidden;}
+    .progress-fill{height:100%;background:var(--purple);transition:width .4s ease;}
+
+    @media(max-width:480px){
+      .card-head{padding:22px 20px 18px;}
+      .card-body{padding:18px 20px;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Nutri<em>Entrena</em></div>
+  <div class="header-sub">Formulario de evaluación inicial</div>
+</div>
+
+<div class="card" id="mainCard">
+  <!-- Loading state -->
+  <div class="state active" id="stateLoading">
+    <div class="spinner"></div>
+    <p style="color:#6B7280;">Cargando formulario…</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="state" id="stateError">
+    <div class="state-icon error">❌</div>
+    <h2>Formulario no encontrado</h2>
+    <p>El enlace no es válido o ha caducado. Contacta con tu coach para recibir un nuevo enlace.</p>
+  </div>
+
+  <!-- Already submitted state -->
+  <div class="state" id="stateSubmitted">
+    <div class="state-icon info">✅</div>
+    <h2>Formulario ya enviado</h2>
+    <p>Ya completaste este formulario anteriormente. Tu coach revisará la información y se pondrá en contacto contigo pronto.</p>
+  </div>
+
+  <!-- Success state -->
+  <div class="state" id="stateSuccess">
+    <div class="state-icon success">🎉</div>
+    <h2>¡Formulario enviado!</h2>
+    <p>Hemos recibido tus respuestas correctamente. Tu coach las revisará y se pondrá en contacto contigo en breve para comenzar tu plan personalizado.</p>
+  </div>
+
+  <!-- Form -->
+  <div id="formSection" style="display:none;">
+    <div class="card-head">
+      <h1 id="formTitle">Formulario de evaluación</h1>
+      <p id="formDescription">Completa todos los campos para que podamos preparar tu plan.</p>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="card-body">
+      <form id="evalForm" onsubmit="submitForm(event)">
+        <div id="fieldsContainer"></div>
+        <button class="submit-btn" type="submit" id="submitBtn">
+          Enviar formulario →
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://nutrientrena-production.up.railway.app/api';
+  const params = new URLSearchParams(location.search);
+  const assignmentId = params.get('id');
+  let formFields = [];
+
+  /* ── Init ── */
+  async function init() {
+    if (!assignmentId) { showState('stateError'); return; }
+
+    try {
+      const r = await fetch(`${API}/public/form/${assignmentId}`);
+      const d = await r.json();
+      if (!r.ok || !d.data) { showState('stateError'); return; }
+
+      const assignment = d.data;
+
+      if (assignment.status === 'submitted') {
+        showState('stateSubmitted');
+        return;
+      }
+
+      const template = assignment.template;
+      if (!template) { showState('stateError'); return; }
+
+      formFields = (template.fields || []).sort((a, b) => a.order - b.order);
+      document.getElementById('formTitle').textContent = template.title || 'Formulario de evaluación';
+      document.getElementById('formDescription').textContent =
+        template.description || 'Completa todos los campos para que podamos preparar tu plan personalizado.';
+
+      renderFields(formFields);
+      showState('formSection', true);
+    } catch {
+      showState('stateError');
+    }
+  }
+
+  /* ── Render fields ── */
+  function renderFields(fields) {
+    const container = document.getElementById('fieldsContainer');
+    let lastSection = null;
+    const sections = {
+      weight: 'Datos corporales',
+      height: 'Datos corporales',
+      age: 'Datos corporales',
+      gender_id: 'Datos corporales',
+      name: 'Datos personales',
+      last_name: 'Datos personales',
+      phone: 'Datos personales',
+      email: 'Datos personales',
+      country_code: 'Datos personales',
+      occupation: 'Datos personales',
+      objective_id: 'Objetivo y actividad',
+      activity_id: 'Objetivo y actividad',
+      training_days: 'Objetivo y actividad',
+      equipment: 'Objetivo y actividad',
+      pathologies: 'Historial médico',
+      injuries: 'Historial médico',
+      food_allergies: 'Historial médico',
+      eating_habits: 'Hábitos',
+      sleep_hours: 'Hábitos',
+      stress_level: 'Hábitos',
+      experience: 'Motivación',
+      motivation: 'Motivación',
+    };
+
+    fields.forEach((field, idx) => {
+      const sectionName = sections[field.field_key];
+      if (sectionName && sectionName !== lastSection) {
+        lastSection = sectionName;
+        const div = document.createElement('div');
+        div.className = 'section-divider';
+        div.textContent = sectionName;
+        container.appendChild(div);
+      }
+      container.appendChild(buildField(field, idx));
+    });
+
+    updateProgress();
+  }
+
+  function buildField(field, idx) {
+    const wrap = document.createElement('div');
+    wrap.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.htmlFor = `field_${field.field_key}`;
+    label.innerHTML = esc(field.label) + (field.required ? '<span class="req">*</span>' : '');
+    wrap.appendChild(label);
+
+    let input;
+
+    if (field.field_type === 'textarea') {
+      input = document.createElement('textarea');
+      input.rows = 3;
+      if (field.placeholder) input.placeholder = field.placeholder;
+    } else if (field.field_type === 'select') {
+      input = document.createElement('select');
+      const blank = document.createElement('option');
+      blank.value = '';
+      blank.textContent = field.placeholder || 'Selecciona una opción';
+      input.appendChild(blank);
+      try {
+        const opts = JSON.parse(field.options || '[]');
+        opts.forEach(opt => {
+          const o = document.createElement('option');
+          if (typeof opt === 'object') {
+            o.value = opt.id ?? opt.value ?? opt.label;
+            o.textContent = opt.label ?? opt.name ?? opt.value;
+          } else {
+            o.value = opt;
+            o.textContent = opt;
+          }
+          input.appendChild(o);
+        });
+      } catch {}
+    } else {
+      input = document.createElement('input');
+      input.type = field.field_type || 'text';
+      if (field.placeholder) input.placeholder = field.placeholder;
+    }
+
+    input.id = `field_${field.field_key}`;
+    input.name = field.field_key;
+    if (field.required) input.required = true;
+    input.addEventListener('input', updateProgress);
+
+    wrap.appendChild(input);
+    return wrap;
+  }
+
+  /* ── Progress ── */
+  function updateProgress() {
+    const required = formFields.filter(f => f.required);
+    if (!required.length) { document.getElementById('progressFill').style.width = '100%'; return; }
+    const filled = required.filter(f => {
+      const el = document.getElementById(`field_${f.field_key}`);
+      return el && el.value.trim() !== '';
+    }).length;
+    document.getElementById('progressFill').style.width = `${Math.round((filled / required.length) * 100)}%`;
+  }
+
+  /* ── Submit ── */
+  async function submitForm(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    const responses = formFields.map(field => {
+      const el = document.getElementById(`field_${field.field_key}`);
+      return { field_key: field.field_key, value: el ? (el.value.trim() || null) : null };
+    }).filter(r => r.value !== null);
+
+    try {
+      const r = await fetch(`${API}/public/form/${assignmentId}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ responses }),
+      });
+      const d = await r.json();
+      if (!r.ok) {
+        if (r.status === 400 && d.message?.includes('ya fue enviado')) {
+          showState('stateSubmitted');
+          return;
+        }
+        throw new Error(d.message || `HTTP ${r.status}`);
+      }
+      showState('stateSuccess');
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Enviar formulario →';
+      alert(`Error al enviar: ${err.message}. Por favor, inténtalo de nuevo.`);
+    }
+  }
+
+  /* ── Utils ── */
+  function showState(id, isForm = false) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById('formSection').style.display = 'none';
+
+    if (isForm) {
+      document.getElementById('formSection').style.display = 'block';
+    } else {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  init();
+</script>
+</body>
+</html>

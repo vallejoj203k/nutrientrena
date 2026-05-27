@@ -359,12 +359,12 @@
 
   async function loadPendingBadge() {
     try {
-      const r = await fetch(`${API}/form-responses/pending-count`, { headers: authHeaders() });
+      const r = await fetch(`${API}/form-assignments/pending`, { headers: authHeaders() });
       if (!r.ok) return;
       const d = await r.json();
-      const n = d.data?.count || 0;
+      const n = (d.data || []).length;
       const badge = document.getElementById('formsBadge');
-      if (n > 0) { badge.textContent = n; badge.style.display = ''; }
+      if (n > 0) { badge.textContent = n; badge.style.display = 'inline-block'; }
     } catch { /* ignore */ }
   }
 

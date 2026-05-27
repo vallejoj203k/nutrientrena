@@ -16,6 +16,11 @@ class RecoverPasswordRequest(BaseModel):
     email: EmailStr
 
 
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+
 class MenuOut(BaseModel):
     menuId: int
     name: str

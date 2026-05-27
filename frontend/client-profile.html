@@ -405,7 +405,11 @@
       <div class="form-row">
         <div class="form-group">
           <label>Dieta (opcional)</label>
-          <select id="deliverDiet"><option value="">— Sin dieta —</option></select>
+          <select id="deliverDiet" onchange="updateDietPreview(this.value)"><option value="">— Sin dieta —</option></select>
+          <div id="dietPreview" style="display:none;background:#F3EEFF;border-radius:8px;padding:10px 12px;margin-top:8px;">
+            <div id="dietPreviewName" style="font-size:12px;font-weight:700;color:#5B2D8E;margin-bottom:6px;"></div>
+            <div id="dietPreviewPills" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
         </div>
         <div class="form-group">
           <label>Rutina (opcional)</label>
@@ -526,6 +530,7 @@ let clientData = null;
 let formAssignment = null;
 let deliveries = [];
 let checkins = [];
+let _deliverDiets = [];
 let _clientDietId = null, _clientRoutineId = null;
 
 const FORM_SECTIONS = {
@@ -830,13 +835,17 @@ function renderDeliveriesTab() {
       <div style="flex:1;min-width:0;">
         <div class="delivery-date">${fmtDateTime(d.delivered_at)}</div>
         <div class="delivery-chips">
-          ${d.diet_id    ? `<span class="chip chip-diet">🥗 Dieta</span>` : ''}
-          ${d.routine_id ? `<span class="chip chip-routine">🏋️ Rutina</span>` : ''}
+          ${d.diet_id    ? `<span class="chip chip-diet">🥗 ${esc(d.diet_title || 'Dieta')}</span>` : ''}
+          ${d.routine_id ? `<span class="chip chip-routine">🏋️ ${esc(d.routine_name || 'Rutina')}</span>` : ''}
           ${d.email_sent ? `<span class="chip chip-email">✉️ Email enviado</span>` : `<span class="chip chip-noemail">Sin email</span>`}
           ${d.loom_link  ? `<a class="chip chip-loom" href="${esc(d.loom_link)}" target="_blank">🎬 Loom</a>` : ''}
         </div>
         ${d.message ? `<div class="delivery-msg">"${esc(d.message)}"</div>` : ''}
       </div>
+      ${d.email_sent ? `<button class="btn btn-xs btn-ghost" onclick="resendDelivery('${esc(d.id)}')" style="flex-shrink:0;align-self:center;" title="Reenviar email">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+        Re-enviar
+      </button>` : ''}
     </div>`).join('');
 }
 
@@ -938,6 +947,7 @@ async function openDeliverModal() {
   document.getElementById('deliverMsg').value = '';
   document.getElementById('deliverLoom').value = '';
   document.getElementById('deliverSendEmail').checked = true;
+  updateDietPreview('');
 
   try {
     const [dr, rr] = await Promise.all([
@@ -945,10 +955,11 @@ async function openDeliverModal() {
       fetch(`${API}/routines/findAll`, { headers: h() }),
     ]);
     if (dr.ok) {
-      const diets = (await dr.json()).data || [];
+      _deliverDiets = (await dr.json()).data || [];
       const sel = document.getElementById('deliverDiet');
       sel.innerHTML = '<option value="">— Sin dieta —</option>';
-      diets.forEach(d => sel.innerHTML += `<option value="${d.id}">${esc(d.title || d.name || d.id)}</option>`);
+      _deliverDiets.forEach(d => sel.innerHTML += `<option value="${d.id}">${esc(d.title || d.name || d.id)}</option>`);
+      sel.value = '';
     }
     if (rr.ok) {
       const routines = (await rr.json()).data || [];
@@ -961,7 +972,35 @@ async function openDeliverModal() {
   document.getElementById('deliverOverlay').classList.add('open');
 }
 
+function updateDietPreview(dietId) {
+  const prev = document.getElementById('dietPreview');
+  if (!dietId) { prev.style.display = 'none'; return; }
+  const diet = _deliverDiets.find(d => d.id === dietId);
+  if (!diet) { prev.style.display = 'none'; return; }
+  const pills = [
+    diet.calories != null ? `${Math.round(diet.calories)} kcal` : null,
+    diet.detail?.proteins != null ? `${Math.round(diet.detail.proteins)}g prot` : null,
+    diet.detail?.carbs    != null ? `${Math.round(diet.detail.carbs)}g carbs`   : null,
+    diet.detail?.fats     != null ? `${Math.round(diet.detail.fats)}g grasas`   : null,
+  ].filter(Boolean);
+  document.getElementById('dietPreviewName').textContent = diet.title || '';
+  document.getElementById('dietPreviewPills').innerHTML = pills.map(p =>
+    `<span style="background:#fff;border-radius:12px;padding:2px 9px;font-size:11px;color:#5B2D8E;border:1px solid #DDD4FE;">${p}</span>`
+  ).join('');
+  prev.style.display = 'block';
+}
+
 function closeDeliverModal() { document.getElementById('deliverOverlay').classList.remove('open'); }
+
+async function resendDelivery(id) {
+  if (!confirm('¿Reenviar el email de esta entrega al cliente?')) return;
+  try {
+    const r = await fetch(`${API}/plans/resend/${id}`, { method: 'POST', headers: h() });
+    const j = await r.json();
+    if (r.ok) showToast('Email reenviado correctamente', 'success');
+    else showToast(j.message || 'Error al reenviar', 'error');
+  } catch { showToast('Error de conexión', 'error'); }
+}
 
 async function deliverPlan() {
   const btn = document.getElementById('deliverBtn');

@@ -201,6 +201,14 @@
       Volver
     </button>
     <h1 id="pageTitle">Perfil del cliente</h1>
+    <button class="btn btn-ghost btn-sm" id="pdfDietBtn" onclick="downloadPdf('diet')" style="display:none">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>
+      PDF Dieta
+    </button>
+    <button class="btn btn-ghost btn-sm" id="pdfRoutineBtn" onclick="downloadPdf('routine')" style="display:none">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg>
+      PDF Rutina
+    </button>
     <button class="btn btn-ghost btn-sm" onclick="openDeliverModal()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       Entregar plan
@@ -650,9 +658,71 @@ function toast(msg, type) {
   el._t = setTimeout(() => { el.className = 'toast'; }, 4000);
 }
 
+// ── PDF download ─────────────────────────────────────────────────────────────
+// IDs globales que se llenan al cargar las dietas/rutinas del cliente
+let _clientDietId = null;
+let _clientRoutineId = null;
+
+async function loadClientPlans() {
+  try {
+    const [dietRes, routineRes] = await Promise.all([
+      fetch(`${API}/diets/client/${clientId}`,    { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/routines/client/${clientId}`,  { headers: { Authorization: `Bearer ${token}` }}),
+    ]);
+    if (dietRes.ok) {
+      const dj = await dietRes.json();
+      const diets = dj.data || dj || [];
+      const arr = Array.isArray(diets) ? diets : [];
+      if (arr.length) {
+        _clientDietId = arr[0].id;
+        document.getElementById('pdfDietBtn').style.display = 'flex';
+      }
+    }
+    if (routineRes.ok) {
+      const rj = await routineRes.json();
+      const routines = rj.data || rj || [];
+      const arr = Array.isArray(routines) ? routines : [];
+      if (arr.length) {
+        _clientRoutineId = arr[0].id;
+        document.getElementById('pdfRoutineBtn').style.display = 'flex';
+      }
+    }
+  } catch {}
+}
+
+async function downloadPdf(type) {
+  const id  = type === 'diet' ? _clientDietId : _clientRoutineId;
+  const btn = document.getElementById(type === 'diet' ? 'pdfDietBtn' : 'pdfRoutineBtn');
+  if (!id) { toast('No hay ' + (type === 'diet' ? 'dieta' : 'rutina') + ' asignada', 'error'); return; }
+
+  const prev = btn.innerHTML;
+  btn.innerHTML = '⏳ Generando…';
+  btn.disabled = true;
+
+  try {
+    const url  = `${API}/${type === 'diet' ? 'diets' : 'routines'}/${id}/pdf`;
+    const r    = await fetch(url, { headers: { Authorization: `Bearer ${token}` }});
+    if (!r.ok) { toast('Error al generar el PDF', 'error'); return; }
+
+    const blob = await r.blob();
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = (type === 'diet' ? 'dieta' : 'rutina') + '_' + id + '.pdf';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('PDF descargado', 'success');
+  } catch {
+    toast('Error de conexión', 'error');
+  } finally {
+    btn.innerHTML = prev;
+    btn.disabled  = false;
+  }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadUser();
 loadClient();
+loadClientPlans();
 </script>
 </body>
 </html>

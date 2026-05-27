@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.responses import send_response, send_error
 from app.models.routine import Routine, RoutineDay, RoutineDayDetail
+from app.pdf.routine_pdf import generate_routine_pdf
 from app.schemas.routine import (
     RoutineCreate, RoutineUpdate, RoutineOut, RoutineCloneRequest,
     RoutineAssignRequest, RoutineListRequest, BulkCreateClientRequest,
@@ -188,9 +190,19 @@ def mail(customer_id: str, db: Session = Depends(get_db), _=Depends(get_current_
 
 @router.get("/{id}/pdf")
 def pdf(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    if not _get_or_404(db, id):
+    routine = _get_or_404(db, id)
+    if not routine:
         return send_error("Rutina no encontrada")
-    return send_response({"routine_id": id}, "PDF generado")
+    try:
+        pdf_bytes = generate_routine_pdf(routine)
+    except Exception as e:
+        return send_error(f"Error generando PDF: {str(e)}", code=500)
+    safe_name = (routine.name or "rutina").replace(" ", "_").lower()
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}.pdf"'},
+    )
 
 
 @router.get("/{id}/edit")

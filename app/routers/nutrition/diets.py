@@ -1,5 +1,5 @@
-import uuid
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -8,6 +8,7 @@ from app.core.responses import send_response, send_error
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment
 from app.models.nutrition.aliment import Aliment
 from app.schemas.nutrition.diet import DietCreate, DietUpdate, DietOut
+from app.pdf.diet_pdf import generate_diet_pdf
 
 router = APIRouter(prefix="/diets", tags=["Nutrition - Diets"])
 
@@ -137,9 +138,19 @@ def client_diets(client_id: str, db: Session = Depends(get_db), _=Depends(get_cu
 
 @router.get("/{id}/pdf")
 def pdf(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
-    if not _get_or_404(db, id):
+    diet = _get_or_404(db, id)
+    if not diet:
         return send_error("Dieta no encontrada")
-    return send_response({"diet_id": id}, "PDF generado")
+    try:
+        pdf_bytes = generate_diet_pdf(diet)
+    except Exception as e:
+        return send_error(f"Error generando PDF: {str(e)}", code=500)
+    safe_name = (diet.title or "dieta").replace(" ", "_").lower()
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}.pdf"'},
+    )
 
 
 @router.post("/{client_id}/assigned")

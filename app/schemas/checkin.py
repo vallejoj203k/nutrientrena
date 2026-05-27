@@ -8,11 +8,24 @@ class CheckinCreate(BaseModel):
     checkin_date: date
     weight: Optional[float] = None
     notes: Optional[str] = None
+    photo_url: Optional[str] = None
+    body_fat: Optional[float] = None
+    waist: Optional[float] = None
+    chest: Optional[float] = None
+    hips: Optional[float] = None
+    arms: Optional[float] = None
+    legs: Optional[float] = None
 
 
 class CheckinCoachUpdate(BaseModel):
     coach_notes: Optional[str] = None
     weight: Optional[float] = None
+    body_fat: Optional[float] = None
+    waist: Optional[float] = None
+    chest: Optional[float] = None
+    hips: Optional[float] = None
+    arms: Optional[float] = None
+    legs: Optional[float] = None
 
 
 class CheckinOut(BaseModel):
@@ -23,6 +36,13 @@ class CheckinOut(BaseModel):
     weight: Optional[float] = None
     notes: Optional[str] = None
     coach_notes: Optional[str] = None
+    photo_url: Optional[str] = None
+    body_fat: Optional[float] = None
+    waist: Optional[float] = None
+    chest: Optional[float] = None
+    hips: Optional[float] = None
+    arms: Optional[float] = None
+    legs: Optional[float] = None
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

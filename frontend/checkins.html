@@ -387,8 +387,38 @@
       <label for="ncNotes">Notas del cliente</label>
       <textarea id="ncNotes" rows="3" placeholder="Cómo se sintió esta semana, observaciones..."></textarea>
     </div>
-    <div class="form-group">
-      <label>Foto de progreso (opcional)</label>
+    <!-- Measurements -->
+    <div style="font-size:11px;font-weight:700;color:#5B2D8E;text-transform:uppercase;letter-spacing:.8px;margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid #F3EEFF;">Medidas corporales (opcional)</div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="form-group">
+        <label for="ncBodyFat">% Grasa corporal</label>
+        <input type="number" id="ncBodyFat" placeholder="18.5" step="0.1" min="0" max="60"/>
+      </div>
+      <div class="form-group">
+        <label for="ncWaist">Cintura (cm)</label>
+        <input type="number" id="ncWaist" placeholder="82" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="ncChest">Pecho (cm)</label>
+        <input type="number" id="ncChest" placeholder="100" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="ncHips">Cadera (cm)</label>
+        <input type="number" id="ncHips" placeholder="95" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="ncArms">Brazos (cm)</label>
+        <input type="number" id="ncArms" placeholder="35" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="ncLegs">Piernas (cm)</label>
+        <input type="number" id="ncLegs" placeholder="55" step="0.5" min="0"/>
+      </div>
+    </div>
+
+    <!-- Photo -->
+    <div style="font-size:11px;font-weight:700;color:#5B2D8E;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px;padding-bottom:6px;border-bottom:2px solid #F3EEFF;">Foto de progreso (opcional)</div>
+    <div class="form-group" style="margin-bottom:0;">
       <div id="photoPreviewWrap" style="display:none;margin-bottom:8px;">
         <img id="photoPreview" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;"/>
         <button onclick="clearPhoto()" style="margin-top:6px;font-size:12px;color:#DC2626;background:none;border:none;cursor:pointer;">✕ Quitar foto</button>
@@ -422,12 +452,44 @@
 
     <div class="form-group">
       <label for="cnNotes">Notas del coach</label>
-      <textarea id="cnNotes" rows="5" placeholder="Escribe las notas, recomendaciones o feedback para el cliente..."></textarea>
+      <textarea id="cnNotes" rows="4" placeholder="Escribe las notas, recomendaciones o feedback para el cliente..."></textarea>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;color:#5B2D8E;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px;padding-bottom:6px;border-bottom:2px solid #F3EEFF;">Actualizar medidas (opcional)</div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="form-group">
+        <label for="cnWeight">Peso (kg)</label>
+        <input type="number" id="cnWeight" placeholder="75.5" step="0.1" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="cnBodyFat">% Grasa</label>
+        <input type="number" id="cnBodyFat" placeholder="18.5" step="0.1" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="cnWaist">Cintura (cm)</label>
+        <input type="number" id="cnWaist" placeholder="82" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="cnChest">Pecho (cm)</label>
+        <input type="number" id="cnChest" placeholder="100" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="cnHips">Cadera (cm)</label>
+        <input type="number" id="cnHips" placeholder="95" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="cnArms">Brazos (cm)</label>
+        <input type="number" id="cnArms" placeholder="35" step="0.5" min="0"/>
+      </div>
+      <div class="form-group">
+        <label for="cnLegs">Piernas (cm)</label>
+        <input type="number" id="cnLegs" placeholder="55" step="0.5" min="0"/>
+      </div>
     </div>
 
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('coachNotesModal')">Cancelar</button>
-      <button class="btn btn-primary" id="btnSaveCoachNotes" onclick="saveCoachNotes()">Guardar notas</button>
+      <button class="btn btn-primary" id="btnSaveCoachNotes" onclick="saveCoachNotes()">Guardar</button>
     </div>
   </div>
 </div>
@@ -754,7 +816,12 @@ function renderCheckins(list) {
 
     const photoThumb = ci.photo_url
       ? `<img src="${escHtml(ci.photo_url)}" onclick="openPhoto('${escHtml(ci.photo_url)}')"
-           style="width:36px;height:36px;object-fit:cover;border-radius:6px;cursor:pointer;margin-left:8px;vertical-align:middle;border:2px solid #E5E7EB;" title="Ver foto"/>`
+           style="width:32px;height:32px;object-fit:cover;border-radius:6px;cursor:pointer;margin-left:8px;vertical-align:middle;border:2px solid #E5E7EB;" title="Ver foto"/>`
+      : '';
+
+    const measStr = buildMeasStr(ci);
+    const measHtml = measStr
+      ? `<div style="font-size:10px;color:#9CA3AF;margin-top:3px;line-height:1.4;">${escHtml(measStr)}</div>`
       : '';
 
     return `<tr>
@@ -765,17 +832,18 @@ function renderCheckins(list) {
       <td>
         <span class="weight-val">${ci.weight != null ? parseFloat(ci.weight).toFixed(1) : '—'}</span>
         <span class="weight-unit">kg</span>
+        ${ci.body_fat != null ? `<div style="font-size:10px;color:#6B7280;margin-top:2px;">${ci.body_fat}% grasa</div>` : ''}
       </td>
       <td>${pillHtml}</td>
-      <td>${notes}</td>
+      <td>${notes}${measHtml}</td>
       <td>${coachNotes}</td>
       <td>
         <div class="row-actions">
-          <button class="icon-btn" onclick="openCoachNotesModal(${ci.id})" title="Editar notas del coach">
+          <button class="icon-btn" onclick="openCoachNotesModal('${escHtml(ci.id)}')" title="Editar notas del coach">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             Coach
           </button>
-          <button class="icon-btn del" onclick="openDeleteModal(${ci.id})" title="Eliminar check-in">
+          <button class="icon-btn del" onclick="openDeleteModal('${escHtml(ci.id)}')" title="Eliminar check-in">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
           </button>
         </div>
@@ -823,6 +891,10 @@ function openNewCheckinModal() {
   document.getElementById('ncDate').value   = todayISO();
   document.getElementById('ncWeight').value = '';
   document.getElementById('ncNotes').value  = '';
+  ['ncBodyFat','ncWaist','ncChest','ncHips','ncArms','ncLegs'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  clearPhoto();
   if (activeClientId) {
     document.getElementById('ncClient').value = activeClientId;
   }
@@ -885,6 +957,7 @@ async function saveNewCheckin() {
     // Upload photo first if present
     const photoUrl = await uploadCheckinPhoto();
 
+    const pf = id => { const v = document.getElementById(id).value; return v !== '' ? parseFloat(v) : undefined; };
     const body = {
       client_user_detail_id: clientId,
       checkin_date: date,
@@ -893,6 +966,12 @@ async function saveNewCheckin() {
     };
     if (photoUrl) body.photo_url = photoUrl;
     if (meData?.id) body.coach_user_detail_id = meData.id;
+    const bf = pf('ncBodyFat'); if (bf !== undefined) body.body_fat = bf;
+    const wa = pf('ncWaist');   if (wa !== undefined) body.waist    = wa;
+    const ch = pf('ncChest');   if (ch !== undefined) body.chest    = ch;
+    const hi = pf('ncHips');    if (hi !== undefined) body.hips     = hi;
+    const ar = pf('ncArms');    if (ar !== undefined) body.arms     = ar;
+    const le = pf('ncLegs');    if (le !== undefined) body.legs     = le;
 
     await apiFetch('/checkins', { method: 'POST', body: JSON.stringify(body) });
 
@@ -919,40 +998,57 @@ function openCoachNotesModal(checkinId) {
   if (!ci) return;
 
   pendingCoachNotesId = checkinId;
-  document.getElementById('cnNotes').value = ci.coach_notes || '';
+  document.getElementById('cnNotes').value    = ci.coach_notes || '';
+  document.getElementById('cnWeight').value   = ci.weight   != null ? ci.weight   : '';
+  document.getElementById('cnBodyFat').value  = ci.body_fat != null ? ci.body_fat : '';
+  document.getElementById('cnWaist').value    = ci.waist    != null ? ci.waist    : '';
+  document.getElementById('cnChest').value    = ci.chest    != null ? ci.chest    : '';
+  document.getElementById('cnHips').value     = ci.hips     != null ? ci.hips     : '';
+  document.getElementById('cnArms').value     = ci.arms     != null ? ci.arms     : '';
+  document.getElementById('cnLegs').value     = ci.legs     != null ? ci.legs     : '';
+
+  const measStr = buildMeasStr(ci);
   document.getElementById('cnCheckinInfo').innerHTML =
-    `<strong>Check-in del ${formatDate(ci.checkin_date)}</strong> &mdash; Peso: <strong>${ci.weight != null ? parseFloat(ci.weight).toFixed(1) + ' kg' : '—'}</strong>`;
+    `<strong>Check-in del ${formatDate(ci.checkin_date)}</strong> &mdash; Peso: <strong>${ci.weight != null ? parseFloat(ci.weight).toFixed(1) + ' kg' : '—'}</strong>${measStr ? ' &mdash; ' + measStr : ''}`;
   openModal('coachNotesModal');
   document.getElementById('cnNotes').focus();
 }
 
+function buildMeasStr(ci) {
+  const parts = [];
+  if (ci.body_fat != null) parts.push(`${ci.body_fat}% grasa`);
+  if (ci.waist    != null) parts.push(`Cin. ${ci.waist}cm`);
+  if (ci.chest    != null) parts.push(`Pec. ${ci.chest}cm`);
+  if (ci.hips     != null) parts.push(`Cad. ${ci.hips}cm`);
+  if (ci.arms     != null) parts.push(`Bra. ${ci.arms}cm`);
+  if (ci.legs     != null) parts.push(`Pie. ${ci.legs}cm`);
+  return parts.join(' · ');
+}
+
 async function saveCoachNotes() {
   if (!pendingCoachNotesId) return;
-  const notes = document.getElementById('cnNotes').value.trim();
-
   const btn = document.getElementById('btnSaveCoachNotes');
-  btn.disabled = true;
-  btn.textContent = 'Guardando...';
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  const pf = id => { const v = document.getElementById(id).value; return v !== '' ? parseFloat(v) : undefined; };
+  const body = { coach_notes: document.getElementById('cnNotes').value.trim() };
+  const w = pf('cnWeight'); if (w !== undefined) body.weight   = w;
+  const bf = pf('cnBodyFat'); if (bf !== undefined) body.body_fat = bf;
+  const wa = pf('cnWaist');   if (wa !== undefined) body.waist    = wa;
+  const ch = pf('cnChest');   if (ch !== undefined) body.chest    = ch;
+  const hi = pf('cnHips');    if (hi !== undefined) body.hips     = hi;
+  const ar = pf('cnArms');    if (ar !== undefined) body.arms     = ar;
+  const le = pf('cnLegs');    if (le !== undefined) body.legs     = le;
 
   try {
-    await apiFetch(`/checkins/${pendingCoachNotesId}/coach-notes`, {
-      method: 'PUT',
-      body: JSON.stringify({ coach_notes: notes })
-    });
-
-    toast('Notas del coach actualizadas', 'success');
+    await apiFetch(`/checkins/${pendingCoachNotesId}/coach-notes`, { method: 'PUT', body: JSON.stringify(body) });
+    toast('Check-in actualizado', 'success');
     closeModal('coachNotesModal');
-
-    // Update local state
-    const ci = allCheckins.find(c => c.id === pendingCoachNotesId);
-    if (ci) ci.coach_notes = notes;
-    applyFilters();
-
+    if (activeClientId) await loadClientData(activeClientId);
   } catch(e) {
-    toast('Error al guardar notas: ' + e.message, 'error');
+    toast('Error al guardar: ' + e.message, 'error');
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Guardar notas';
+    btn.disabled = false; btn.textContent = 'Guardar';
     pendingCoachNotesId = null;
   }
 }

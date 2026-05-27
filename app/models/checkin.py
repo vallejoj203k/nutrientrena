@@ -15,6 +15,13 @@ class WeeklyCheckin(Base):
     weight       = Column(Float, nullable=True)
     notes        = Column(Text, nullable=True)
     coach_notes  = Column(Text, nullable=True)
+    photo_url    = Column(String(500), nullable=True)
+    body_fat     = Column(Float, nullable=True)
+    waist        = Column(Float, nullable=True)
+    chest        = Column(Float, nullable=True)
+    hips         = Column(Float, nullable=True)
+    arms         = Column(Float, nullable=True)
+    legs         = Column(Float, nullable=True)
     created_at   = Column(DateTime, default=datetime.utcnow)
     updated_at   = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

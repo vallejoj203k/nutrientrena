@@ -56,6 +56,13 @@ def create_checkin(
         checkin_date=data.checkin_date,
         weight=data.weight,
         notes=data.notes,
+        photo_url=data.photo_url,
+        body_fat=data.body_fat,
+        waist=data.waist,
+        chest=data.chest,
+        hips=data.hips,
+        arms=data.arms,
+        legs=data.legs,
     )
     db.add(checkin)
     db.commit()
@@ -151,10 +158,10 @@ def add_coach_notes(
 
     verify_client_access(checkin.client_user_detail_id, current_user, db)
 
-    if data.coach_notes is not None:
-        checkin.coach_notes = data.coach_notes
-    if data.weight is not None:
-        checkin.weight = data.weight
+    for field in ("coach_notes", "weight", "body_fat", "waist", "chest", "hips", "arms", "legs"):
+        v = getattr(data, field, None)
+        if v is not None:
+            setattr(checkin, field, v)
 
     coach_detail = _get_coach_detail(db, current_user.id)
     if coach_detail and not checkin.coach_user_detail_id:

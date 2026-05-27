@@ -5,7 +5,7 @@ import uuid
 
 from app.config import settings
 from app.core.responses import send_response, send_error
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
@@ -32,7 +32,7 @@ def _public_url(key: str) -> str:
 async def upload_file(
     file: UploadFile = File(...),
     folder: Optional[str] = Form("uploads"),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     """
     Sube una imagen a Cloudflare R2 y devuelve la URL pública.
@@ -80,7 +80,7 @@ async def upload_file(
 
 
 @router.delete("/delete")
-def delete_file(key: str, _=Depends(get_current_user)):
+def delete_file(key: str, _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     """Elimina un archivo de R2 por su key."""
     if not settings.AWS_BUCKET:
         return send_error("Almacenamiento no configurado", code=500)
@@ -93,7 +93,7 @@ def delete_file(key: str, _=Depends(get_current_user)):
 
 
 @router.get("/list")
-def list_files(folder: str = "uploads", _=Depends(get_current_user)):
+def list_files(folder: str = "uploads", _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     """Lista los archivos de una carpeta en R2."""
     if not settings.AWS_BUCKET:
         return send_error("Almacenamiento no configurado", code=500)

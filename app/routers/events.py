@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 from app.core.responses import send_response, send_error
 from app.models.event_user import EventUser
 from app.models.type_event import TypeEvent
@@ -23,7 +23,7 @@ def _get_type_or_404(db: Session, obj_id: int):
 
 
 @router_events.post("")
-def create_event(data: EventCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_event(data: EventCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     event = EventUser(
         user_id=data.user_id or current_user.id,
         type_event_id=data.type_event_id,
@@ -45,7 +45,7 @@ def search_events(
     start: Optional[datetime] = Query(None),
     end: Optional[datetime] = Query(None),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     uid = user_id or current_user.id
     q = db.query(EventUser).filter(EventUser.user_id == uid)
@@ -57,7 +57,7 @@ def search_events(
 
 
 @router_events.delete("/delete/{id}")
-def delete_event(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def delete_event(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     event = _get_event_or_404(db, id)
     if not event:
         return send_error("Evento no encontrado")
@@ -67,7 +67,7 @@ def delete_event(id: int, db: Session = Depends(get_db), _=Depends(get_current_u
 
 
 @router_events.post("/update/{id}")
-def update_event(id: int, data: EventUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def update_event(id: int, data: EventUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     event = _get_event_or_404(db, id)
     if not event:
         return send_error("Evento no encontrado")
@@ -79,7 +79,7 @@ def update_event(id: int, data: EventUpdate, db: Session = Depends(get_db), _=De
 
 
 @router_type_events.post("")
-def create_type(data: TypeEventCreate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def create_type(data: TypeEventCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = TypeEvent(**data.model_dump())
     db.add(obj)
     db.commit()
@@ -88,7 +88,7 @@ def create_type(data: TypeEventCreate, db: Session = Depends(get_db), _=Depends(
 
 
 @router_type_events.post("/update/{id}")
-def update_type(id: int, data: TypeEventUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def update_type(id: int, data: TypeEventUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_type_or_404(db, id)
     if not obj:
         return send_error("Tipo de evento no encontrado")
@@ -100,7 +100,7 @@ def update_type(id: int, data: TypeEventUpdate, db: Session = Depends(get_db), _
 
 
 @router_type_events.get("/find-all")
-def find_all_types(db: Session = Depends(get_db), _=Depends(get_current_user)):
+def find_all_types(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(TypeEvent).filter(TypeEvent.state == 1).all()
     return send_response([TypeEventOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -109,7 +109,7 @@ def find_all_types(db: Session = Depends(get_db), _=Depends(get_current_user)):
 def search_types(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     q = db.query(TypeEvent)
     if search:
@@ -118,7 +118,7 @@ def search_types(
 
 
 @router_type_events.delete("/delete/{id}")
-def delete_type(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def delete_type(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_type_or_404(db, id)
     if not obj:
         return send_error("Tipo de evento no encontrado")

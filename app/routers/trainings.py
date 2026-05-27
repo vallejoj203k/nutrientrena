@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 from app.core.responses import send_response, send_error
 from app.models.training import Training, TrainingClient
 from app.schemas.training import TrainingCreate, TrainingUpdate, TrainingAssignRequest, TrainingOut
@@ -16,7 +16,7 @@ def _get_or_404(db: Session, training_id: int):
 
 
 @router.get("/findAll")
-def find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(Training).filter(Training.state == 1).all()
     return send_response([TrainingOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -28,7 +28,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     q = db.query(Training)
     if search:
@@ -50,7 +50,7 @@ def search(
 
 
 @router.post("/assign")
-def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     for training_id in data.training_ids:
         exists = db.query(TrainingClient).filter_by(training_id=training_id, user_id=data.user_id).first()
         if not exists:
@@ -60,7 +60,7 @@ def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depen
 
 
 @router.get("/{id}/edit")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
@@ -68,7 +68,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
 
 
 @router.post("")
-def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = Training(**data.model_dump())
     db.add(obj)
     db.commit()
@@ -77,7 +77,7 @@ def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(get_cu
 
 
 @router.put("/{id}/update")
-def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")

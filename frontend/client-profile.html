@@ -111,6 +111,12 @@
     .fa-question{font-size:12px;color:#9CA3AF;margin-bottom:3px;}
     .fa-answer{font-size:14px;color:#111;font-weight:500;}
 
+    /* Payment badge */
+    .badge-pago-pendiente{background:#FEF2F2;color:#DC2626;}
+    .badge-pago-parcial{background:#FFF7ED;color:#D97706;}
+    .badge-pago-pagado{background:#ECFDF5;color:#059669;}
+    .badge-pago-default{background:#F3F4F6;color:#6B7280;}
+
     /* Skeleton */
     .skeleton{background:linear-gradient(90deg,#E5E7EB 25%,#F3F4F6 50%,#E5E7EB 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -238,32 +244,119 @@
 
 <!-- Deliver Plan Modal -->
 <div class="modal-overlay" id="deliverOverlay" onclick="if(event.target===this)closeDeliverModal()">
-  <div class="modal">
+  <div class="modal" style="width:520px;">
     <div class="modal-head">
       <h2>Entregar plan al cliente</h2>
       <button class="modal-close" onclick="closeDeliverModal()">×</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>Dieta (opcional)</label>
-        <select id="deliverDiet"><option value="">— Sin dieta —</option></select>
-      </div>
-      <div class="form-group">
-        <label>Rutina (opcional)</label>
-        <select id="deliverRoutine"><option value="">— Sin rutina —</option></select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+        <div class="form-group">
+          <label>Dieta (opcional)</label>
+          <select id="deliverDiet"><option value="">— Sin dieta —</option></select>
+        </div>
+        <div class="form-group">
+          <label>Rutina (opcional)</label>
+          <select id="deliverRoutine"><option value="">— Sin rutina —</option></select>
+        </div>
       </div>
       <div class="form-group">
         <label>Mensaje del coach</label>
-        <textarea id="deliverMsg" placeholder="Escribe un mensaje personalizado para el cliente…"></textarea>
+        <textarea id="deliverMsg" rows="3" placeholder="Escribe un mensaje personalizado para el cliente…" style="resize:vertical;"></textarea>
       </div>
-      <div id="deliverError" style="color:#DC2626;font-size:13px;"></div>
+      <div class="form-group">
+        <label>🎬 Enlace Loom (opcional)</label>
+        <input id="deliverLoom" type="url" placeholder="https://www.loom.com/share/…"/>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;background:#F9FAFB;border-radius:8px;padding:12px 14px;margin-bottom:0;">
+        <input type="checkbox" id="deliverSendEmail" checked style="width:auto;accent-color:#5B2D8E;width:16px;height:16px;cursor:pointer;"/>
+        <label for="deliverSendEmail" style="text-transform:none;letter-spacing:0;font-size:14px;color:#374151;margin:0;cursor:pointer;">
+          Enviar email al cliente
+        </label>
+        <span style="margin-left:auto;font-size:11px;color:#9CA3AF;">Desactiva para sólo registrar la entrega</span>
+      </div>
+      <div id="deliverError" style="color:#DC2626;font-size:13px;margin-top:12px;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeDeliverModal()">Cancelar</button>
       <button class="btn btn-primary" id="deliverBtn" onclick="deliverPlan()">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Enviar por email
+        <span id="deliverBtnLabel">Entregar plan</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Business fields modal -->
+<div class="modal-overlay" id="bizOverlay" onclick="if(event.target===this)closeBizModal()">
+  <div class="modal" style="width:600px;">
+    <div class="modal-head">
+      <h2>Información comercial</h2>
+      <button class="modal-close" onclick="closeBizModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+        <div class="form-group">
+          <label>Plan comprado</label>
+          <input id="biz_plan_comprado" placeholder="Ej: Plan Premium 3 meses"/>
+        </div>
+        <div class="form-group">
+          <label>Precio (€)</label>
+          <input id="biz_precio" type="number" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label>Estado de pago</label>
+          <select id="biz_estado_pago">
+            <option value="">— Sin definir —</option>
+            <option value="pendiente">⏳ Pendiente</option>
+            <option value="parcial">🔶 Parcial</option>
+            <option value="pagado">✅ Pagado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Método de pago</label>
+          <input id="biz_metodo_pago" placeholder="Ej: Tarjeta, Transferencia…"/>
+        </div>
+        <div class="form-group">
+          <label>Importe pagado (€)</label>
+          <input id="biz_importe_pagado" type="number" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label>Importe pendiente (€)</label>
+          <input id="biz_importe_pendiente" type="number" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label>Fecha de compra</label>
+          <input id="biz_fecha_compra" type="date"/>
+        </div>
+        <div class="form-group">
+          <label>Fecha límite entrega</label>
+          <input id="biz_fecha_limite_entrega" type="date"/>
+        </div>
+        <div class="form-group">
+          <label>Responsable venta</label>
+          <input id="biz_responsable_venta" placeholder="Nombre del setter/closer"/>
+        </div>
+        <div class="form-group">
+          <label>Origen CRM</label>
+          <input id="biz_crm_origen" placeholder="Ej: Instagram, Referido…"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Enlace WhatsApp</label>
+        <input id="biz_whatsapp_link" placeholder="https://wa.me/34…"/>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+        <input id="biz_consentimiento" type="checkbox" style="width:auto;"/>
+        <label style="text-transform:none;letter-spacing:0;font-size:14px;color:#374151;margin:0;">
+          Consentimiento de fotografías de evolución
+        </label>
+      </div>
+      <div id="bizError" style="color:#DC2626;font-size:13px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeBizModal()">Cancelar</button>
+      <button class="btn btn-primary" id="bizSaveBtn" onclick="saveBiz()">Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -304,10 +397,11 @@ function logout() {
 // ── Load client ───────────────────────────────────────────────────────────────
 async function loadClient() {
   try {
-    const [profileRes, checkinsRes, formRes] = await Promise.all([
-      fetch(`${API}/users/${clientId}/edit`, { headers: { Authorization: `Bearer ${token}` }}),
-      fetch(`${API}/checkins/client/${clientId}`, { headers: { Authorization: `Bearer ${token}` }}),
-      fetch(`${API}/form-assignments/client/${clientId}`, { headers: { Authorization: `Bearer ${token}` }}),
+    const [profileRes, checkinsRes, formRes, deliveriesRes] = await Promise.all([
+      fetch(`${API}/users/${clientId}/edit`,               { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/checkins/client/${clientId}`,           { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/form-assignments/client/${clientId}`,   { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/plans/history/${clientId}`,             { headers: { Authorization: `Bearer ${token}` }}),
     ]);
 
     const profileJ = await profileRes.json();
@@ -335,14 +429,21 @@ async function loadClient() {
       }
     }
 
-    renderProfile(clientData, checkins, formResponses, formAssignment);
+    let deliveries = [];
+    if (deliveriesRes.ok) {
+      const dj = await deliveriesRes.json();
+      deliveries = dj.data || dj || [];
+      if (!Array.isArray(deliveries)) deliveries = [];
+    }
+
+    renderProfile(clientData, checkins, formResponses, formAssignment, deliveries);
   } catch(e) {
     document.getElementById('content').innerHTML =
       `<div style="text-align:center;padding:60px;color:#9CA3AF;">Error al cargar el perfil del cliente.</div>`;
   }
 }
 
-function renderProfile(c, checkins, formResponses, formAssignment) {
+function renderProfile(c, checkins, formResponses, formAssignment, deliveries = []) {
   const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Sin nombre';
   const initials = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('pageTitle').textContent = name;
@@ -469,6 +570,95 @@ function renderProfile(c, checkins, formResponses, formAssignment) {
       </div>
     </div>
 
+    <!-- Business / CRM info -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        Información comercial
+        <button class="btn btn-ghost btn-sm" onclick="openBizModal()">✏️ Editar</button>
+      </div>
+      <div class="info-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+        <div class="info-item">
+          <label>Plan comprado</label>
+          <span>${esc(c.plan_comprado || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>Precio</label>
+          <span>${c.precio != null ? '€' + Number(c.precio).toFixed(2) : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Estado de pago</label>
+          <span class="badge badge-pago-${c.estado_pago || 'default'}" style="margin-top:2px;">
+            ${c.estado_pago === 'pendiente' ? '⏳ Pendiente' : c.estado_pago === 'parcial' ? '🔶 Parcial' : c.estado_pago === 'pagado' ? '✅ Pagado' : '—'}
+          </span>
+        </div>
+        <div class="info-item">
+          <label>Importe pagado</label>
+          <span>${c.importe_pagado != null ? '€' + Number(c.importe_pagado).toFixed(2) : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Importe pendiente</label>
+          <span>${c.importe_pendiente != null ? '€' + Number(c.importe_pendiente).toFixed(2) : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Método de pago</label>
+          <span>${esc(c.metodo_pago || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha de compra</label>
+          <span>${c.fecha_compra ? new Date(c.fecha_compra).toLocaleDateString('es-ES') : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha límite entrega</label>
+          <span>${c.fecha_limite_entrega ? new Date(c.fecha_limite_entrega).toLocaleDateString('es-ES') : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Responsable venta</label>
+          <span>${esc(c.responsable_venta || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>Origen CRM</label>
+          <span>${esc(c.crm_origen || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>WhatsApp</label>
+          <span>${c.whatsapp_link ? `<a href="${esc(c.whatsapp_link)}" target="_blank" style="color:var(--purple);">Abrir chat →</a>` : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Consentimiento evolución</label>
+          <span>${c.consentimiento_evolucion ? '✅ Sí' : '❌ No'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery history -->
+    ${deliveries.length > 0 ? `
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">Historial de entregas de plan</div>
+      <div>
+        ${deliveries.map((d, i) => {
+          const date = new Date(d.delivered_at).toLocaleString('es-ES', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+          return `
+            <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 0;${i < deliveries.length-1 ? 'border-bottom:1px solid #F3F4F6;' : ''}">
+              <div style="width:36px;height:36px;border-radius:50%;background:#F3EEFF;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+                <svg width="16" height="16" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:#111;margin-bottom:3px;">${date}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;">
+                  ${d.diet_id    ? `<span style="font-size:11px;background:#F0FDF4;color:#16A34A;padding:2px 8px;border-radius:20px;font-weight:600;">🥗 Dieta</span>` : ''}
+                  ${d.routine_id ? `<span style="font-size:11px;background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:20px;font-weight:600;">🏋️ Rutina</span>` : ''}
+                  ${d.email_sent ? `<span style="font-size:11px;background:#ECFDF5;color:#059669;padding:2px 8px;border-radius:20px;font-weight:600;">✉️ Email enviado</span>`
+                                 : `<span style="font-size:11px;background:#F3F4F6;color:#6B7280;padding:2px 8px;border-radius:20px;font-weight:600;">Sin email</span>`}
+                  ${d.loom_link  ? `<a href="${esc(d.loom_link)}" target="_blank" style="font-size:11px;background:#FDF4FF;color:#7C3AED;padding:2px 8px;border-radius:20px;font-weight:600;text-decoration:none;">🎬 Loom</a>` : ''}
+                </div>
+                ${d.message ? `<div style="font-size:12px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px;">"${esc(d.message)}"</div>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+    ` : ''}
+
     <!-- Form responses -->
     ${formResponses.length > 0 ? `
     <div class="card">
@@ -520,30 +710,27 @@ function renderMiniChart(checkins) {
 async function openDeliverModal() {
   document.getElementById('deliverError').textContent = '';
   document.getElementById('deliverMsg').value = '';
+  document.getElementById('deliverLoom').value = '';
+  document.getElementById('deliverSendEmail').checked = true;
 
-  // Load diets and routines
   try {
     const [dietRes, routineRes] = await Promise.all([
-      fetch(`${API}/diets`, { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/diets`,    { headers: { Authorization: `Bearer ${token}` }}),
       fetch(`${API}/routines`, { headers: { Authorization: `Bearer ${token}` }}),
     ]);
     if (dietRes.ok) {
       const dj = await dietRes.json();
-      const diets = dj.data || dj || [];
+      const diets = Array.isArray(dj.data || dj) ? (dj.data || dj) : [];
       const sel = document.getElementById('deliverDiet');
       sel.innerHTML = '<option value="">— Sin dieta —</option>';
-      (Array.isArray(diets) ? diets : []).forEach(d => {
-        sel.innerHTML += `<option value="${d.id}">${esc(d.name || d.title || d.id)}</option>`;
-      });
+      diets.forEach(d => { sel.innerHTML += `<option value="${d.id}">${esc(d.name || d.title || d.id)}</option>`; });
     }
     if (routineRes.ok) {
       const rj = await routineRes.json();
-      const routines = rj.data || rj || [];
+      const routines = Array.isArray(rj.data || rj) ? (rj.data || rj) : [];
       const sel = document.getElementById('deliverRoutine');
       sel.innerHTML = '<option value="">— Sin rutina —</option>';
-      (Array.isArray(routines) ? routines : []).forEach(r => {
-        sel.innerHTML += `<option value="${r.id}">${esc(r.name || r.title || r.id)}</option>`;
-      });
+      routines.forEach(r => { sel.innerHTML += `<option value="${r.id}">${esc(r.name || r.title || r.id)}</option>`; });
     }
   } catch {}
 
@@ -558,17 +745,24 @@ async function deliverPlan() {
   const dietId    = document.getElementById('deliverDiet').value;
   const routineId = document.getElementById('deliverRoutine').value;
   const message   = document.getElementById('deliverMsg').value.trim();
+  const loomLink  = document.getElementById('deliverLoom').value.trim();
+  const sendEmail = document.getElementById('deliverSendEmail').checked;
   const btn       = document.getElementById('deliverBtn');
+  const lbl       = document.getElementById('deliverBtnLabel');
 
   document.getElementById('deliverError').textContent = '';
-  btn.textContent = 'Enviando…';
+  lbl.textContent = 'Registrando…';
   btn.disabled = true;
 
   try {
-    const body = { client_user_detail_id: clientId };
+    const body = {
+      client_user_detail_id: clientId,
+      send_email: sendEmail,
+    };
     if (dietId)    body.diet_id    = dietId;
     if (routineId) body.routine_id = parseInt(routineId);
     if (message)   body.message    = message;
+    if (loomLink)  body.loom_link  = loomLink;
 
     const r = await fetch(`${API}/plans/deliver`, {
       method: 'POST',
@@ -577,18 +771,20 @@ async function deliverPlan() {
     });
     const j = await r.json();
     if (!r.ok) {
-      document.getElementById('deliverError').textContent = j.detail || j.message || 'Error al enviar';
+      document.getElementById('deliverError').textContent = j.detail || j.message || 'Error al registrar';
       return;
     }
 
     const d = j.data || j;
     closeDeliverModal();
-    toast(d.email_sent ? `Plan enviado a ${d.client_email}` : 'Plan procesado (email no enviado)', d.email_sent ? 'success' : '');
+    if (d.email_sent)        toast(`Plan enviado a ${d.client_email}`, 'success');
+    else if (!sendEmail)     toast('Plan registrado sin email', 'success');
+    else                     toast('Plan registrado (email no configurado)');
     loadClient();
   } catch {
     document.getElementById('deliverError').textContent = 'Error de conexión';
   } finally {
-    btn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar por email';
+    lbl.textContent = 'Entregar plan';
     btn.disabled = false;
   }
 }
@@ -716,6 +912,76 @@ async function downloadPdf(type) {
   } finally {
     btn.innerHTML = prev;
     btn.disabled  = false;
+  }
+}
+
+// ── Business / CRM modal ─────────────────────────────────────────────────────
+function openBizModal() {
+  if (!clientData) return;
+  const c = clientData;
+  document.getElementById('biz_plan_comprado').value        = c.plan_comprado || '';
+  document.getElementById('biz_precio').value               = c.precio != null ? c.precio : '';
+  document.getElementById('biz_estado_pago').value          = c.estado_pago || '';
+  document.getElementById('biz_metodo_pago').value          = c.metodo_pago || '';
+  document.getElementById('biz_importe_pagado').value       = c.importe_pagado != null ? c.importe_pagado : '';
+  document.getElementById('biz_importe_pendiente').value    = c.importe_pendiente != null ? c.importe_pendiente : '';
+  document.getElementById('biz_fecha_compra').value         = c.fecha_compra ? c.fecha_compra.slice(0, 10) : '';
+  document.getElementById('biz_fecha_limite_entrega').value = c.fecha_limite_entrega ? c.fecha_limite_entrega.slice(0, 10) : '';
+  document.getElementById('biz_responsable_venta').value    = c.responsable_venta || '';
+  document.getElementById('biz_crm_origen').value           = c.crm_origen || '';
+  document.getElementById('biz_whatsapp_link').value        = c.whatsapp_link || '';
+  document.getElementById('biz_consentimiento').checked     = !!c.consentimiento_evolucion;
+  document.getElementById('bizError').textContent = '';
+  document.getElementById('bizOverlay').classList.add('open');
+}
+
+function closeBizModal() {
+  document.getElementById('bizOverlay').classList.remove('open');
+}
+
+async function saveBiz() {
+  const btn = document.getElementById('bizSaveBtn');
+  document.getElementById('bizError').textContent = '';
+  btn.textContent = 'Guardando…';
+  btn.disabled = true;
+
+  const parseOptFloat = val => val !== '' && val != null ? parseFloat(val) : null;
+
+  const body = {
+    plan_comprado:           document.getElementById('biz_plan_comprado').value.trim() || null,
+    precio:                  parseOptFloat(document.getElementById('biz_precio').value),
+    estado_pago:             document.getElementById('biz_estado_pago').value || null,
+    metodo_pago:             document.getElementById('biz_metodo_pago').value.trim() || null,
+    importe_pagado:          parseOptFloat(document.getElementById('biz_importe_pagado').value),
+    importe_pendiente:       parseOptFloat(document.getElementById('biz_importe_pendiente').value),
+    fecha_compra:            document.getElementById('biz_fecha_compra').value || null,
+    fecha_limite_entrega:    document.getElementById('biz_fecha_limite_entrega').value || null,
+    responsable_venta:       document.getElementById('biz_responsable_venta').value.trim() || null,
+    crm_origen:              document.getElementById('biz_crm_origen').value.trim() || null,
+    whatsapp_link:           document.getElementById('biz_whatsapp_link').value.trim() || null,
+    consentimiento_evolucion: document.getElementById('biz_consentimiento').checked,
+  };
+
+  try {
+    const r = await fetch(`${API}/users/${clientId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!r.ok) {
+      document.getElementById('bizError').textContent = j.detail || j.message || 'Error al guardar';
+      return;
+    }
+    clientData = { ...clientData, ...(j.data || j) };
+    closeBizModal();
+    toast('Información comercial actualizada', 'success');
+    loadClient();
+  } catch {
+    document.getElementById('bizError').textContent = 'Error de conexión';
+  } finally {
+    btn.textContent = 'Guardar cambios';
+    btn.disabled = false;
   }
 }
 

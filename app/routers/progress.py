@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 from app.core.responses import send_response, send_error
 from app.models.progress_day import ProgressDay
 from app.models.client_target import ClientTarget
@@ -14,7 +14,7 @@ router_targets = APIRouter(prefix="/client-targets", tags=["Client Targets"])
 
 
 @router_progress.post("")
-def create_progress(data: ProgressCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_progress(data: ProgressCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = ProgressDay(user_id=data.user_id or current_user.id, **data.model_dump(exclude={"user_id"}))
     db.add(obj)
     db.commit()
@@ -26,7 +26,7 @@ def create_progress(data: ProgressCreate, db: Session = Depends(get_db), current
 def search_progress(
     user_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     uid = user_id or current_user.id
     items = db.query(ProgressDay).filter(ProgressDay.user_id == uid).order_by(ProgressDay.date.desc()).all()
@@ -34,7 +34,7 @@ def search_progress(
 
 
 @router_progress.delete("/delete/{id}")
-def delete_progress(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def delete_progress(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = db.query(ProgressDay).filter(ProgressDay.id == id).first()
     if not obj:
         return send_error("Registro no encontrado")
@@ -47,7 +47,7 @@ def delete_progress(id: int, db: Session = Depends(get_db), _=Depends(get_curren
 def search_targets(
     user_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     uid = user_id or current_user.id
     obj = db.query(ClientTarget).filter(ClientTarget.user_id == uid).first()
@@ -57,7 +57,7 @@ def search_targets(
 
 
 @router_targets.put("")
-def create_or_update_target(data: ClientTargetCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_or_update_target(data: ClientTargetCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     uid = data.user_id or current_user.id
     obj = db.query(ClientTarget).filter(ClientTarget.user_id == uid).first()
     if obj:

@@ -6,6 +6,7 @@ from app.database import Base
 
 
 PROFILE_FIELD_MAP = {
+    # Form field key  →  UserDetail column
     "weight":       "weight",
     "height":       "height",
     "gender_id":    "gender_id",
@@ -14,6 +15,10 @@ PROFILE_FIELD_MAP = {
     "phone":        "phone",
     "occupation":   "occupation",
     "country_code": "country_code",
+    # New fields (free-text — stored in form_responses only, not in user_details):
+    # "training_days", "equipment", "pathologies", "injuries", "food_allergies",
+    # "eating_habits", "sleep_hours", "stress_level", "experience", "motivation"
+    # are intentionally NOT mapped so coach notes are preserved.
 }
 
 

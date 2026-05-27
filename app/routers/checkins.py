@@ -3,11 +3,31 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import (
+    require_role_ids, verify_client_access,
+    SUPERADMIN, ADMIN, COACH,
+)
 from app.core.responses import send_response, send_error
+from app.core.email import notify_coach_checkin, notify_client_coach_notes
 from app.models.checkin import WeeklyCheckin
-from app.models.user import UserDetail
+from app.models.user import UserDetail, UserParent, User
 from app.schemas.checkin import CheckinCreate, CheckinCoachUpdate, CheckinOut
+
+
+def _get_coach_for_client(client_detail_id: str, db: Session):
+    """Return (coach_detail, coach_user) for a client, or (None, None)."""
+    parent = db.query(UserParent).filter(
+        UserParent.user_detail_id == client_detail_id
+    ).first()
+    if not parent:
+        return None, None
+    coach_detail = db.query(UserDetail).filter(
+        UserDetail.id == parent.parent_user_detail_id
+    ).first()
+    if not coach_detail:
+        return None, None
+    coach_user = db.query(User).filter(User.id == coach_detail.user_id).first()
+    return coach_detail, coach_user
 
 router = APIRouter(prefix="/checkins", tags=["Check-ins"])
 
@@ -16,18 +36,20 @@ def _get_coach_detail(db: Session, user_id: int) -> Optional[UserDetail]:
     return db.query(UserDetail).filter(UserDetail.user_id == user_id).first()
 
 
+# ── Create: admin, coach ───────────────────────────────────────────────────────
 @router.post("")
 def create_checkin(
     data: CheckinCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     client = db.query(UserDetail).filter(UserDetail.id == data.client_user_detail_id).first()
     if not client:
         return send_error("Cliente no encontrado")
 
-    coach_detail = _get_coach_detail(db, current_user.id)
+    verify_client_access(data.client_user_detail_id, current_user, db)
 
+    coach_detail = _get_coach_detail(db, current_user.id)
     checkin = WeeklyCheckin(
         client_user_detail_id=data.client_user_detail_id,
         coach_user_detail_id=coach_detail.id if coach_detail else None,
@@ -38,16 +60,34 @@ def create_checkin(
     db.add(checkin)
     db.commit()
     db.refresh(checkin)
+
+    # ── Notify coach ──────────────────────────────────────────────────────────
+    coach_detail, coach_user = _get_coach_for_client(data.client_user_detail_id, db)
+    if coach_user and coach_user.email:
+        client = db.query(UserDetail).filter(UserDetail.id == data.client_user_detail_id).first()
+        client_name = f"{client.name or ''} {client.last_name or ''}".strip() if client else "Cliente"
+        coach_name  = f"{coach_detail.name or ''} {coach_detail.last_name or ''}".strip() or "Coach"
+        notify_coach_checkin(
+            coach_email=coach_user.email,
+            coach_name=coach_name,
+            client_name=client_name,
+            checkin_date=str(data.checkin_date or ""),
+            weight=data.weight,
+        )
+
     return send_response(CheckinOut.model_validate(checkin).model_dump(), "Check-in registrado")
 
 
+# ── Get by client: admin, coach (own clients only) ────────────────────────────
 @router.get("/client/{client_id}")
 def client_checkins(
     client_id: str,
     limit: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
+    verify_client_access(client_id, current_user, db)
+
     checkins = (
         db.query(WeeklyCheckin)
         .filter(WeeklyCheckin.client_user_detail_id == client_id)
@@ -57,7 +97,6 @@ def client_checkins(
     )
     data = [CheckinOut.model_validate(c).model_dump() for c in checkins]
 
-    # Calcular progreso: diferencia de peso entre último y anterior check-in
     progress = None
     if len(checkins) >= 2 and checkins[0].weight and checkins[1].weight:
         progress = round(checkins[0].weight - checkins[1].weight, 2)
@@ -65,12 +104,15 @@ def client_checkins(
     return send_response({"checkins": data, "weight_progress": progress}, "OK")
 
 
+# ── Summary: admin, coach (own clients only) ──────────────────────────────────
 @router.get("/summary/{client_id}")
 def client_summary(
     client_id: str,
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
+    verify_client_access(client_id, current_user, db)
+
     checkins = (
         db.query(WeeklyCheckin)
         .filter(WeeklyCheckin.client_user_detail_id == client_id)
@@ -95,16 +137,19 @@ def client_summary(
     }, "OK")
 
 
+# ── Coach notes: admin, coach ─────────────────────────────────────────────────
 @router.put("/{id}/coach-notes")
 def add_coach_notes(
     id: str,
     data: CheckinCoachUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     checkin = db.query(WeeklyCheckin).filter(WeeklyCheckin.id == id).first()
     if not checkin:
         return send_error("Check-in no encontrado")
+
+    verify_client_access(checkin.client_user_detail_id, current_user, db)
 
     if data.coach_notes is not None:
         checkin.coach_notes = data.coach_notes
@@ -117,11 +162,41 @@ def add_coach_notes(
 
     db.commit()
     db.refresh(checkin)
+
+    # ── Notify client when coach leaves notes ─────────────────────────────────
+    if data.coach_notes:
+        client = db.query(UserDetail).filter(
+            UserDetail.id == checkin.client_user_detail_id
+        ).first()
+        client_user = db.query(User).filter(User.id == client.user_id).first() if client else None
+        if client_user and client_user.email:
+            client_name = f"{client.name or ''} {client.last_name or ''}".strip() or "Cliente"
+            coach_detail_obj = None
+            if checkin.coach_user_detail_id:
+                coach_detail_obj = db.query(UserDetail).filter(
+                    UserDetail.id == checkin.coach_user_detail_id
+                ).first()
+            coach_name = (
+                f"{coach_detail_obj.name or ''} {coach_detail_obj.last_name or ''}".strip()
+                if coach_detail_obj else "Tu coach"
+            )
+            notify_client_coach_notes(
+                client_email=client_user.email,
+                client_name=client_name,
+                coach_name=coach_name,
+                notes=data.coach_notes,
+            )
+
     return send_response(CheckinOut.model_validate(checkin).model_dump(), "Notas actualizadas")
 
 
+# ── Delete: admin only ────────────────────────────────────────────────────────
 @router.delete("/{id}")
-def delete_checkin(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def delete_checkin(
+    id: str,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+):
     checkin = db.query(WeeklyCheckin).filter(WeeklyCheckin.id == id).first()
     if not checkin:
         return send_error("Check-in no encontrado")

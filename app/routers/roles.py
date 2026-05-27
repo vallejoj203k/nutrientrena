@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN
 from app.core.responses import send_response, send_error
 from app.models.role import Role
 from slugify import slugify
@@ -19,7 +19,7 @@ def _get_or_404(db: Session, role_id: int):
 
 
 @router.post("")
-def create(data: RoleCreateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def create(data: RoleCreateRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     slug = slugify(data.slug or data.name)
     role = Role(name=data.name, slug=slug)
     db.add(role)
@@ -34,7 +34,7 @@ def find_all(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN)),
 ):
     q = db.query(Role)
     if search:
@@ -54,13 +54,13 @@ def find_all(
 
 
 @router.get("/menus")
-def menus_find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
+def menus_find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     menus = db.query(Menu).all()
     return send_response([MenuOut.model_validate(m).model_dump() for m in menus], "OK")
 
 
 @router.post("/menus")
-def menus_assign(data: MenuAssignRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def menus_assign(data: MenuAssignRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     if not _get_or_404(db, data.role_id):
         return send_error("Rol no encontrado")
     db.query(MenuRole).filter(MenuRole.role_id == data.role_id).delete()
@@ -71,7 +71,7 @@ def menus_assign(data: MenuAssignRequest, db: Session = Depends(get_db), _=Depen
 
 
 @router.get("/{id}/menus")
-def menus_edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def menus_edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     if not _get_or_404(db, id):
         return send_error("Rol no encontrado")
     menu_roles = db.query(MenuRole).filter(MenuRole.role_id == id).all()
@@ -79,7 +79,7 @@ def menus_edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_use
 
 
 @router.get("/{id}")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     role = _get_or_404(db, id)
     if not role:
         return send_error("Rol no encontrado")
@@ -87,7 +87,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
 
 
 @router.put("/{id}")
-def update(id: int, data: RoleUpdateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def update(id: int, data: RoleUpdateRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     role = _get_or_404(db, id)
     if not role:
         return send_error("Rol no encontrado")

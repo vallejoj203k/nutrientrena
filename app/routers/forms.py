@@ -3,15 +3,33 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 from app.core.responses import send_response, send_error
+from app.core.email import notify_coach_form_submitted
 from app.models.form import FormTemplate, FormTemplateField, FormAssignment, FormResponse, PROFILE_FIELD_MAP
-from app.models.user import UserDetail
+from app.models.user import UserDetail, UserParent, User
 from app.models.parameter import ParameterDetail
 from app.schemas.form import (
     FormTemplateCreate, FormTemplateUpdate, FormTemplateOut,
     FormAssignRequest, FormSubmitRequest, FormAssignmentOut,
 )
+from app.seeds.default_form import update_default_form
+
+
+def _get_coach_for_client(client_detail_id: str, db: Session):
+    """Return (coach_detail, coach_user) for a client, or (None, None)."""
+    parent = db.query(UserParent).filter(
+        UserParent.user_detail_id == client_detail_id
+    ).first()
+    if not parent:
+        return None, None
+    coach_detail = db.query(UserDetail).filter(
+        UserDetail.id == parent.parent_user_detail_id
+    ).first()
+    if not coach_detail:
+        return None, None
+    coach_user = db.query(User).filter(User.id == coach_detail.user_id).first()
+    return coach_detail, coach_user
 
 router_templates = APIRouter(prefix="/form-templates", tags=["Forms - Templates"])
 router_assignments = APIRouter(prefix="/form-assignments", tags=["Forms - Assignments"])
@@ -29,10 +47,25 @@ def _get_client_state_id(db: Session, description: str) -> int | None:
     return _CLIENT_STATE_CACHE.get(description)
 
 
+# ── Maintenance ───────────────────────────────────────────────────────────────
+
+@router_templates.post("/update-default")
+def update_default_template(
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+):
+    """Idempotent: append any missing fields to the default intake template."""
+    update_default_form(db)
+    template = db.query(FormTemplate).filter(FormTemplate.is_default.is_(True)).first()
+    if not template:
+        return send_error("No hay plantilla por defecto")
+    return send_response(FormTemplateOut.model_validate(template).model_dump(), "Plantilla actualizada")
+
+
 # ── Templates ─────────────────────────────────────────────────────────────────
 
 @router_templates.post("")
-def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     if data.is_default:
         db.query(FormTemplate).filter(
             FormTemplate.created_by == current_user.id,
@@ -66,7 +99,7 @@ def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), cur
 
 
 @router_templates.get("/default")
-def get_default(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def get_default(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(
         FormTemplate.is_default.is_(True),
     ).first()
@@ -76,13 +109,13 @@ def get_default(db: Session = Depends(get_db), current_user=Depends(get_current_
 
 
 @router_templates.get("")
-def list_templates(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def list_templates(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     templates = db.query(FormTemplate).filter(FormTemplate.created_by == current_user.id).all()
     return send_response([FormTemplateOut.model_validate(t).model_dump() for t in templates], "OK")
 
 
 @router_templates.get("/{id}")
-def get_template(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def get_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
         return send_error("Plantilla no encontrada")
@@ -90,7 +123,7 @@ def get_template(id: int, db: Session = Depends(get_db), _=Depends(get_current_u
 
 
 @router_templates.put("/{id}")
-def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
         return send_error("Plantilla no encontrada")
@@ -128,7 +161,7 @@ def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get
 
 
 @router_templates.delete("/{id}")
-def delete_template(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def delete_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
         return send_error("Plantilla no encontrada")
@@ -140,7 +173,7 @@ def delete_template(id: int, db: Session = Depends(get_db), _=Depends(get_curren
 # ── Assignments ───────────────────────────────────────────────────────────────
 
 @router_assignments.post("")
-def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == data.form_template_id).first()
     if not template:
         return send_error("Plantilla no encontrada")
@@ -171,7 +204,7 @@ def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_
 
 
 @router_assignments.get("/pending")
-def pending_assignments(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def pending_assignments(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignments = db.query(FormAssignment).filter(
         FormAssignment.assigned_by == current_user.id,
         FormAssignment.status == "pending",
@@ -180,7 +213,7 @@ def pending_assignments(db: Session = Depends(get_db), current_user=Depends(get_
 
 
 @router_assignments.get("/client/{client_id}")
-def client_assignment(client_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def client_assignment(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignment = db.query(FormAssignment).filter(
         FormAssignment.client_user_detail_id == client_id,
     ).order_by(FormAssignment.created_at.desc()).first()
@@ -190,7 +223,7 @@ def client_assignment(client_id: str, db: Session = Depends(get_db), _=Depends(g
 
 
 @router_assignments.post("/{id}/submit")
-def submit_form(id: str, data: FormSubmitRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def submit_form(id: str, data: FormSubmitRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignment = db.query(FormAssignment).filter(FormAssignment.id == id).first()
     if not assignment:
         return send_error("Formulario no encontrado")
@@ -232,12 +265,26 @@ def submit_form(id: str, data: FormSubmitRequest, db: Session = Depends(get_db),
 
     db.commit()
     db.refresh(assignment)
-    print(f"FORM SUBMITTED: cliente {assignment.client_user_detail_id} envió formulario {id}")
+
+    # ── Notify coach ──────────────────────────────────────────────────────────
+    if client:
+        coach_detail, coach_user = _get_coach_for_client(client.id, db)
+        if coach_user and coach_user.email:
+            client_name = f"{client.name or ''} {client.last_name or ''}".strip() or "Cliente"
+            coach_name  = f"{coach_detail.name or ''} {coach_detail.last_name or ''}".strip() or "Coach"
+            client_user = db.query(User).filter(User.id == client.user_id).first()
+            notify_coach_form_submitted(
+                coach_email=coach_user.email,
+                coach_name=coach_name,
+                client_name=client_name,
+                client_email=client_user.email if client_user else "",
+            )
+
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "Formulario enviado correctamente")
 
 
 @router_assignments.get("/{id}/responses")
-def get_responses(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def get_responses(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignment = db.query(FormAssignment).filter(FormAssignment.id == id).first()
     if not assignment:
         return send_error("Formulario no encontrado")

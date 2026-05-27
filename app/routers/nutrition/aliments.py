@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
 from app.models.nutrition.aliment import Aliment
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
@@ -16,7 +16,7 @@ def _get_or_404(db: Session, obj_id: str):
 
 
 @router.get("/findAll")
-def find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Aliment).filter(Aliment.parent_id.is_(None)).all()
     return send_response([AlimentOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -28,7 +28,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
     if search:
@@ -50,7 +50,7 @@ def search(
 
 
 @router.get("/{id}/edit")
-def edit(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Alimento no encontrado")
@@ -61,7 +61,7 @@ def edit(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
 def create(
     data: AlimentCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     obj = Aliment(**data.model_dump(), created_user_id=current_user.id)
     db.add(obj)
@@ -75,7 +75,7 @@ def updated(
     id: str,
     data: AlimentUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     obj = _get_or_404(db, id)
     if not obj:
@@ -89,5 +89,5 @@ def updated(
 
 
 @router.post("/import")
-async def import_aliments(file: UploadFile = File(...), _=Depends(get_current_user)):
+async def import_aliments(file: UploadFile = File(...), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     return send_response({"filename": file.filename}, "Importación recibida")

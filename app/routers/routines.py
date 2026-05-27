@@ -3,7 +3,7 @@ from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
 from app.models.routine import Routine, RoutineDay, RoutineDayDetail
 from app.pdf.routine_pdf import generate_routine_pdf
@@ -69,13 +69,13 @@ def _clone_days(db: Session, source: Routine, new_routine_id: int):
 
 
 @router.get("/findAll")
-def find_all(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def find_all(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Routine).filter(Routine.user_id == current_user.id).all()
     return send_response([_serialize(i) for i in items], "OK")
 
 
 @router.post("/clone")
-def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     source = _get_or_404(db, data.id)
     if not source:
         return send_error("Rutina no encontrada")
@@ -97,7 +97,7 @@ def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user
 
 
 @router.post("/assigned")
-def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     from app.models.user import UserDetail
     client_detail = db.query(UserDetail).filter(UserDetail.id == data.client_id).first()
     if not client_detail:
@@ -121,7 +121,7 @@ def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), current_
 
 
 @router.post("/list")
-def list_ids(data: RoutineListRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def list_ids(data: RoutineListRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Routine).filter(Routine.id.in_(data.ids)).all()
     return send_response([_serialize(i) for i in items], "OK")
 
@@ -130,7 +130,7 @@ def list_ids(data: RoutineListRequest, db: Session = Depends(get_db), _=Depends(
 def bulk_create_client(
     data: BulkCreateClientRequest,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     from app.models.user import UserDetail
     client_detail = db.query(UserDetail).filter(UserDetail.id == data.client_id).first()
@@ -174,7 +174,7 @@ def bulk_create_client(
 
 
 @router.get("/client/{client_id}")
-def client_routines(client_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def client_routines(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     from app.models.user import UserDetail
     client_detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
     if not client_detail:
@@ -184,12 +184,12 @@ def client_routines(client_id: str, db: Session = Depends(get_db), _=Depends(get
 
 
 @router.get("/client/{customer_id}/mail")
-def mail(customer_id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def mail(customer_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     return send_response(None, f"Correo enviado al cliente {customer_id}")
 
 
 @router.get("/{id}/pdf")
-def pdf(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def pdf(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
@@ -206,7 +206,7 @@ def pdf(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
 
 
 @router.get("/{id}/edit")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
@@ -214,7 +214,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
 
 
 @router.post("")
-def create(data: RoutineCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create(data: RoutineCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = Routine(
         name=data.name,
         user_id=current_user.id,
@@ -233,7 +233,7 @@ def create(data: RoutineCreate, db: Session = Depends(get_db), current_user=Depe
 
 
 @router.put("/{id}/update")
-def updated(id: int, data: RoutineUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def updated(id: int, data: RoutineUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")

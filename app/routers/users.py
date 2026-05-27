@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import (
+    require_role_ids, verify_client_access, filter_clients_by_role,
+    SUPERADMIN, ADMIN, SETTER, CLOSER, COACH,
+)
 from app.core.security import hash_password
 from app.core.responses import send_response, send_error
 from app.models.user import User, UserDetail, RoleUser, UserParent
@@ -18,8 +21,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 def _get_detail_or_404(db: Session, detail_id: str):
-    detail = db.query(UserDetail).filter(UserDetail.id == detail_id).first()
-    return detail
+    return db.query(UserDetail).filter(UserDetail.id == detail_id).first()
 
 
 def _serialize(detail: UserDetail, db: Session) -> dict:
@@ -30,8 +32,13 @@ def _serialize(detail: UserDetail, db: Session) -> dict:
     return out
 
 
+# ── Create: superadmin, admin, setter ─────────────────────────────────────────
 @router.post("")
-def create(data: UserCreateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def create(
+    data: UserCreateRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER)),
+):
     if db.query(User).filter(User.email == data.email).first():
         return send_error("El email ya está registrado", code=400)
 
@@ -77,8 +84,13 @@ def create(data: UserCreateRequest, db: Session = Depends(get_db), _=Depends(get
     return send_response(_serialize(detail, db), "Usuario creado")
 
 
+# ── Assign coach: superadmin, admin ───────────────────────────────────────────
 @router.post("/assign")
-def assigned(data: UserAssignRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def assigned(
+    data: UserAssignRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+):
     client_detail = _get_detail_or_404(db, data.user_id)
     if not client_detail:
         return send_error("Usuario no encontrado")
@@ -101,19 +113,30 @@ def assigned(data: UserAssignRequest, db: Session = Depends(get_db), _=Depends(g
     return send_response(None, "Asignado correctamente")
 
 
+# ── Update training weeks: admin, coach ───────────────────────────────────────
 @router.post("/weeks")
-def weeks_training(data: WeeksTrainingRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def weeks_training(
+    data: WeeksTrainingRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
     detail = _get_detail_or_404(db, data.client_id)
     if not detail:
         return send_error("Usuario no encontrado")
+    verify_client_access(data.client_id, current_user, db)
     detail.start_date = data.start_date
     detail.end_date = data.end_date
     db.commit()
     return send_response(None, "Semanas actualizadas")
 
 
+# ── Find all by role slug: staff only ─────────────────────────────────────────
 @router.get("/{slug}/findAll")
-def find_all(slug: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def find_all(
+    slug: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
     role = db.query(Role).filter(Role.slug == slug).first()
     if not role:
         return send_error("Rol no encontrado")
@@ -121,9 +144,15 @@ def find_all(slug: str, db: Session = Depends(get_db), _=Depends(get_current_use
     role_users = db.query(RoleUser).filter(RoleUser.role_id == role.id).all()
     user_ids = [ru.user_id for ru in role_users]
     details = db.query(UserDetail).filter(UserDetail.user_id.in_(user_ids)).all()
+
+    # Coaches only see their assigned clients when slug=client
+    if slug == "client":
+        details = filter_clients_by_role(details, current_user, db)
+
     return send_response([_serialize(d, db) for d in details], "OK")
 
 
+# ── Search: staff only ────────────────────────────────────────────────────────
 @router.get("/{slug}/search")
 def search(
     slug: str,
@@ -131,14 +160,13 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     role = db.query(Role).filter(Role.slug == slug).first()
     if not role:
         return send_error("Rol no encontrado")
 
     role_user_ids = [ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == role.id).all()]
-
     q = db.query(UserDetail).filter(UserDetail.user_id.in_(role_user_ids))
 
     if search:
@@ -147,8 +175,16 @@ def search(
             | UserDetail.last_name.ilike(f"%{search}%")
         )
 
-    total = q.count()
-    details = q.offset((page - 1) * per_page).limit(per_page).all()
+    all_details = q.all()
+
+    # Coaches only see their own clients
+    if slug == "client":
+        all_details = filter_clients_by_role(all_details, current_user, db)
+
+    total = len(all_details)
+    start = (page - 1) * per_page
+    details = all_details[start: start + per_page]
+
     return send_response(
         {
             "data": [_serialize(d, db) for d in details],
@@ -161,17 +197,16 @@ def search(
     )
 
 
+# ── Kanban: staff only (coaches see only their clients) ───────────────────────
 @router.get("/kanban")
 def kanban(
     coach_id: Optional[str] = Query(None, description="Filtrar por UserDetail UUID del coach"),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
-    # Obtener todos los IDs de usuarios con rol cliente
     client_user_ids = [
         ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == CLIENT).all()
     ]
-
     q = db.query(UserDetail).filter(UserDetail.user_id.in_(client_user_ids))
 
     if coach_id:
@@ -182,8 +217,8 @@ def kanban(
         q = q.filter(UserDetail.id.in_(assigned_ids))
 
     clients = q.all()
+    clients = filter_clients_by_role(clients, current_user, db)
 
-    # Agrupar por status_id
     groups: dict[Optional[int], list] = {}
     for c in clients:
         key = c.status_id
@@ -191,7 +226,6 @@ def kanban(
             groups[key] = []
         groups[key].append(_serialize(c, db))
 
-    # Obtener los nombres de estado del Cliente
     estado_param = db.query(Parameter).filter(
         Parameter.description == "Estado del Cliente"
     ).first()
@@ -203,7 +237,6 @@ def kanban(
             state_names[pd.id] = pd.description
 
     columns = []
-    # Columna sin estado
     if None in groups:
         columns.append({
             "status_id": None,
@@ -211,7 +244,6 @@ def kanban(
             "total": len(groups[None]),
             "clients": groups[None],
         })
-    # Columnas con estado, en orden de ID
     for sid in sorted(k for k in groups if k is not None):
         columns.append({
             "status_id": sid,
@@ -220,46 +252,56 @@ def kanban(
             "clients": groups[sid],
         })
 
-    return send_response(
-        {"columns": columns, "total_clients": len(clients)},
-        "OK",
-    )
+    return send_response({"columns": columns, "total_clients": len(clients)}, "OK")
 
 
+# ── Report: any staff ─────────────────────────────────────────────────────────
 @router.get("/report")
-def report_users(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def report_users(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
     current_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+    from app.core.dependencies import _user_role_ids
+    user_roles = _user_role_ids(current_user.id, db)
 
-    role_users = db.query(RoleUser).filter(RoleUser.user_id == current_user.id).all()
-    role_ids = [ru.role_id for ru in role_users]
-    roles = db.query(Role).filter(Role.id.in_(role_ids)).all()
-    is_admin = any(r.slug == "admin" for r in roles)
-
-    if is_admin:
+    if SUPERADMIN in user_roles or ADMIN in user_roles:
         total = db.query(UserDetail).count()
     else:
         parent_ids = db.query(UserParent).filter(
             UserParent.parent_user_detail_id == current_detail.id
         ).all() if current_detail else []
-        client_ids = [p.user_detail_id for p in parent_ids]
-        total = len(client_ids)
+        total = len(parent_ids)
 
     return send_response({"total": total}, "OK")
 
 
+# ── Get by ID: staff only, coaches restricted to own clients ──────────────────
 @router.get("/{id}/edit")
-def edit(id: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def edit(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
     detail = _get_detail_or_404(db, id)
     if not detail:
         return send_error("Usuario no encontrado")
+    verify_client_access(id, current_user, db)
     return send_response(_serialize(detail, db), "OK")
 
 
+# ── Update: admin, coach (own clients only) ───────────────────────────────────
 @router.put("/{id}/update")
-def updated(id: str, data: UserUpdateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def updated(
+    id: str,
+    data: UserUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
     detail = _get_detail_or_404(db, id)
     if not detail:
         return send_error("Usuario no encontrado")
+    verify_client_access(id, current_user, db)
 
     user_fields = {}
     if data.email is not None:
@@ -285,8 +327,14 @@ def updated(id: str, data: UserUpdateRequest, db: Session = Depends(get_db), _=D
     return send_response(_serialize(detail, db), "Usuario actualizado")
 
 
+# ── Change state: admin, setter, closer ───────────────────────────────────────
 @router.put("/{id}/change")
-def change_state(id: str, data: UserStateRequest, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def change_state(
+    id: str,
+    data: UserStateRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER)),
+):
     detail = _get_detail_or_404(db, id)
     if not detail:
         return send_error("Usuario no encontrado")

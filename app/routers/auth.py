@@ -2,14 +2,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
+from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token, hash_password
 from app.core.dependencies import get_current_user
 from app.core.responses import send_response, send_error
 from app.core.email import send_recover_password_email
 from app.models.user import User, UserDetail, RoleUser
 from app.models.menu import Menu, MenuRole
-from app.models.role import CLIENT
-from app.schemas.auth import LoginRequest, RefreshTokenRequest, RecoverPasswordRequest, MenuOut
+from app.schemas.auth import LoginRequest, RefreshTokenRequest, RecoverPasswordRequest, ResetPasswordRequest, MenuOut
 from app.schemas.user import UserDetailOut
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -89,6 +88,26 @@ def recover_password(data: RecoverPasswordRequest, db: Session = Depends(get_db)
     send_recover_password_email(to=user.email, name=name, token=reset_token)
 
     return send_response([], "Se envio un correo electronico.")
+
+
+@router.post("/reset-password")
+def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
+    payload = decode_token(data.token)
+    if payload is None:
+        return send_error("El enlace ha expirado o no es válido", code=400)
+    if payload.get("type") != "access" or payload.get("purpose") != "reset":
+        return send_error("Token inválido", code=400)
+
+    user = db.query(User).filter(User.id == int(payload["sub"])).first()
+    if not user:
+        return send_error("Usuario no encontrado", code=404)
+
+    if len(data.password) < 6:
+        return send_error("La contraseña debe tener al menos 6 caracteres", code=400)
+
+    user.password = hash_password(data.password)
+    db.commit()
+    return send_response(None, "Contraseña actualizada correctamente")
 
 
 @router.get("/me")

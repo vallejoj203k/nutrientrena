@@ -8,9 +8,26 @@ from app.core.dependencies import (
     SUPERADMIN, ADMIN, COACH,
 )
 from app.core.responses import send_response, send_error
+from app.core.email import notify_coach_checkin, notify_client_coach_notes
 from app.models.checkin import WeeklyCheckin
-from app.models.user import UserDetail
+from app.models.user import UserDetail, UserParent, User
 from app.schemas.checkin import CheckinCreate, CheckinCoachUpdate, CheckinOut
+
+
+def _get_coach_for_client(client_detail_id: str, db: Session):
+    """Return (coach_detail, coach_user) for a client, or (None, None)."""
+    parent = db.query(UserParent).filter(
+        UserParent.user_detail_id == client_detail_id
+    ).first()
+    if not parent:
+        return None, None
+    coach_detail = db.query(UserDetail).filter(
+        UserDetail.id == parent.parent_user_detail_id
+    ).first()
+    if not coach_detail:
+        return None, None
+    coach_user = db.query(User).filter(User.id == coach_detail.user_id).first()
+    return coach_detail, coach_user
 
 router = APIRouter(prefix="/checkins", tags=["Check-ins"])
 
@@ -43,6 +60,21 @@ def create_checkin(
     db.add(checkin)
     db.commit()
     db.refresh(checkin)
+
+    # ── Notify coach ──────────────────────────────────────────────────────────
+    coach_detail, coach_user = _get_coach_for_client(data.client_user_detail_id, db)
+    if coach_user and coach_user.email:
+        client = db.query(UserDetail).filter(UserDetail.id == data.client_user_detail_id).first()
+        client_name = f"{client.name or ''} {client.last_name or ''}".strip() if client else "Cliente"
+        coach_name  = f"{coach_detail.name or ''} {coach_detail.last_name or ''}".strip() or "Coach"
+        notify_coach_checkin(
+            coach_email=coach_user.email,
+            coach_name=coach_name,
+            client_name=client_name,
+            checkin_date=str(data.checkin_date or ""),
+            weight=data.weight,
+        )
+
     return send_response(CheckinOut.model_validate(checkin).model_dump(), "Check-in registrado")
 
 
@@ -130,6 +162,31 @@ def add_coach_notes(
 
     db.commit()
     db.refresh(checkin)
+
+    # ── Notify client when coach leaves notes ─────────────────────────────────
+    if data.coach_notes:
+        client = db.query(UserDetail).filter(
+            UserDetail.id == checkin.client_user_detail_id
+        ).first()
+        client_user = db.query(User).filter(User.id == client.user_id).first() if client else None
+        if client_user and client_user.email:
+            client_name = f"{client.name or ''} {client.last_name or ''}".strip() or "Cliente"
+            coach_detail_obj = None
+            if checkin.coach_user_detail_id:
+                coach_detail_obj = db.query(UserDetail).filter(
+                    UserDetail.id == checkin.coach_user_detail_id
+                ).first()
+            coach_name = (
+                f"{coach_detail_obj.name or ''} {coach_detail_obj.last_name or ''}".strip()
+                if coach_detail_obj else "Tu coach"
+            )
+            notify_client_coach_notes(
+                client_email=client_user.email,
+                client_name=client_name,
+                coach_name=coach_name,
+                notes=data.coach_notes,
+            )
+
     return send_response(CheckinOut.model_validate(checkin).model_dump(), "Notas actualizadas")
 
 

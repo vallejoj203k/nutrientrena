@@ -219,3 +219,143 @@ def send_recover_password_email(to: str, name: str, token: str) -> bool:
     </html>
     """
     return _send_resend(to, f"Restablecer contrasena - {APP_NAME}", html)
+
+
+# ── Notification emails ────────────────────────────────────────────────────────
+
+def _base_notification_html(title: str, body_html: str) -> str:
+    """Shared wrapper for all internal notification emails."""
+    return f"""
+<!DOCTYPE html>
+<html>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 0;">
+      <table width="560" style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+        <tr>
+          <td style="background:#5B2D8E;padding:28px 32px;">
+            <h1 style="color:#fff;margin:0;font-size:20px;font-weight:800;letter-spacing:.5px;">
+              {APP_NAME}
+            </h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px;">
+            <h2 style="color:#111827;margin:0 0 16px;font-size:18px;">{title}</h2>
+            {body_html}
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F9FAFB;padding:16px 32px;text-align:center;">
+            <p style="color:#9CA3AF;font-size:11px;margin:0;">&copy; 2025 {APP_NAME}</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+
+def notify_coach_form_submitted(
+    coach_email: str,
+    coach_name: str,
+    client_name: str,
+    client_email: str,
+) -> bool:
+    """Notify coach when a client submits their intake form."""
+    body = f"""
+    <p style="color:#6B7280;font-size:15px;line-height:1.7;margin:0 0 20px;">
+      Hola <strong>{coach_name}</strong>,<br><br>
+      Tu cliente <strong>{client_name}</strong> ({client_email}) acaba de enviar
+      su formulario de onboarding.
+    </p>
+    <div style="background:#F0EBF8;border-left:4px solid #5B2D8E;padding:16px;border-radius:0 8px 8px 0;margin-bottom:24px;">
+      <p style="margin:0;color:#5B2D8E;font-weight:600;font-size:14px;">
+        ✅ Estado actualizado → Formulario recibido
+      </p>
+      <p style="margin:8px 0 0;color:#6B7280;font-size:13px;">
+        Ya puedes revisar sus respuestas y comenzar a preparar el plan.
+      </p>
+    </div>
+    <p style="color:#9CA3AF;font-size:13px;margin:0;">
+      Este es un aviso automático de {APP_NAME}.
+    </p>"""
+    html = _base_notification_html(
+        "📋 Formulario recibido de un cliente",
+        body,
+    )
+    return _send_resend(
+        coach_email,
+        f"{client_name} envió su formulario — {APP_NAME}",
+        html,
+    )
+
+
+def notify_coach_checkin(
+    coach_email: str,
+    coach_name: str,
+    client_name: str,
+    checkin_date: str,
+    weight: float | None,
+) -> bool:
+    """Notify coach when a client registers a weekly check-in."""
+    weight_line = (
+        f'<p style="color:#374151;font-size:15px;margin:8px 0 0;">⚖️ Peso registrado: <strong>{weight} kg</strong></p>'
+        if weight else ""
+    )
+    body = f"""
+    <p style="color:#6B7280;font-size:15px;line-height:1.7;margin:0 0 20px;">
+      Hola <strong>{coach_name}</strong>,<br><br>
+      Tu cliente <strong>{client_name}</strong> ha registrado su check-in semanal.
+    </p>
+    <div style="background:#F0EBF8;border-left:4px solid #5B2D8E;padding:16px;border-radius:0 8px 8px 0;margin-bottom:24px;">
+      <p style="color:#5B2D8E;font-weight:600;font-size:14px;margin:0;">
+        📅 Fecha: {checkin_date}
+      </p>
+      {weight_line}
+    </div>
+    <p style="color:#9CA3AF;font-size:13px;margin:0;">
+      Entra a la plataforma para revisar su progreso y dejar tus notas.
+    </p>"""
+    html = _base_notification_html(
+        f"📊 Nuevo check-in de {client_name}",
+        body,
+    )
+    return _send_resend(
+        coach_email,
+        f"Nuevo check-in de {client_name} — {APP_NAME}",
+        html,
+    )
+
+
+def notify_client_coach_notes(
+    client_email: str,
+    client_name: str,
+    coach_name: str,
+    notes: str,
+) -> bool:
+    """Notify client when coach leaves notes on their check-in."""
+    body = f"""
+    <p style="color:#6B7280;font-size:15px;line-height:1.7;margin:0 0 20px;">
+      Hola <strong>{client_name}</strong>,<br><br>
+      Tu coach <strong>{coach_name}</strong> ha dejado comentarios en tu último check-in.
+    </p>
+    <div style="background:#F0EBF8;border-left:4px solid #5B2D8E;padding:20px;border-radius:0 8px 8px 0;margin-bottom:24px;">
+      <p style="margin:0 0 6px;font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;">
+        Mensaje de tu coach
+      </p>
+      <p style="margin:0;color:#111827;font-size:15px;line-height:1.7;">{notes}</p>
+    </div>
+    <p style="color:#9CA3AF;font-size:13px;margin:0;">
+      Sigue así, ¡vas por buen camino! 💪
+    </p>"""
+    html = _base_notification_html(
+        "💬 Tu coach te ha dejado un mensaje",
+        body,
+    )
+    return _send_resend(
+        client_email,
+        f"Mensaje de tu coach {coach_name} — {APP_NAME}",
+        html,
+    )

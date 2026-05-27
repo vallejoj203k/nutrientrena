@@ -31,6 +31,7 @@ def send_plan_email(
     diet: dict | None,
     routine: dict | None,
     coach_message: str = "",
+    loom_link: str = "",
 ) -> bool:
     diet_section = ""
     if diet:
@@ -113,9 +114,33 @@ def send_plan_email(
     if coach_message:
         coach_block = f"""
         <tr>
-          <td style="background:#F3EEFF;border-left:4px solid #5B2D8E;padding:16px;border-radius:0 8px 8px 0;margin:16px 0;">
+          <td style="background:#F3EEFF;border-left:4px solid #5B2D8E;padding:16px;border-radius:0 8px 8px 0;margin-bottom:16px;">
             <p style="margin:0 0 4px;font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;">Mensaje de tu coach</p>
             <p style="margin:0;color:#111827;font-size:15px;line-height:1.6;">{coach_message}</p>
+          </td>
+        </tr>"""
+
+    loom_block = ""
+    if loom_link:
+        loom_block = f"""
+        <tr>
+          <td style="padding:20px 0 8px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#F3EEFF;border-radius:10px;padding:20px;text-align:center;">
+                  <p style="margin:0 0 6px;font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;">Video explicativo de tu coach</p>
+                  <p style="margin:0 0 14px;color:#374151;font-size:14px;line-height:1.5;">
+                    Tu coach ha grabado un video para explicarte el plan en detalle.
+                  </p>
+                  <a href="{loom_link}"
+                     style="background:#5B2D8E;color:#ffffff;padding:11px 28px;
+                            border-radius:8px;text-decoration:none;font-size:14px;
+                            font-weight:700;display:inline-block;">
+                    🎬 Ver video
+                  </a>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>"""
 
@@ -142,6 +167,7 @@ def send_plan_email(
                   </p>
                   <table width="100%" cellpadding="0" cellspacing="0">
                     {coach_block}
+                    {loom_block}
                     {diet_section}
                     {routine_section}
                   </table>

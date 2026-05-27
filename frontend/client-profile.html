@@ -244,31 +244,44 @@
 
 <!-- Deliver Plan Modal -->
 <div class="modal-overlay" id="deliverOverlay" onclick="if(event.target===this)closeDeliverModal()">
-  <div class="modal">
+  <div class="modal" style="width:520px;">
     <div class="modal-head">
       <h2>Entregar plan al cliente</h2>
       <button class="modal-close" onclick="closeDeliverModal()">×</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>Dieta (opcional)</label>
-        <select id="deliverDiet"><option value="">— Sin dieta —</option></select>
-      </div>
-      <div class="form-group">
-        <label>Rutina (opcional)</label>
-        <select id="deliverRoutine"><option value="">— Sin rutina —</option></select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+        <div class="form-group">
+          <label>Dieta (opcional)</label>
+          <select id="deliverDiet"><option value="">— Sin dieta —</option></select>
+        </div>
+        <div class="form-group">
+          <label>Rutina (opcional)</label>
+          <select id="deliverRoutine"><option value="">— Sin rutina —</option></select>
+        </div>
       </div>
       <div class="form-group">
         <label>Mensaje del coach</label>
-        <textarea id="deliverMsg" placeholder="Escribe un mensaje personalizado para el cliente…"></textarea>
+        <textarea id="deliverMsg" rows="3" placeholder="Escribe un mensaje personalizado para el cliente…" style="resize:vertical;"></textarea>
       </div>
-      <div id="deliverError" style="color:#DC2626;font-size:13px;"></div>
+      <div class="form-group">
+        <label>🎬 Enlace Loom (opcional)</label>
+        <input id="deliverLoom" type="url" placeholder="https://www.loom.com/share/…"/>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;background:#F9FAFB;border-radius:8px;padding:12px 14px;margin-bottom:0;">
+        <input type="checkbox" id="deliverSendEmail" checked style="width:auto;accent-color:#5B2D8E;width:16px;height:16px;cursor:pointer;"/>
+        <label for="deliverSendEmail" style="text-transform:none;letter-spacing:0;font-size:14px;color:#374151;margin:0;cursor:pointer;">
+          Enviar email al cliente
+        </label>
+        <span style="margin-left:auto;font-size:11px;color:#9CA3AF;">Desactiva para sólo registrar la entrega</span>
+      </div>
+      <div id="deliverError" style="color:#DC2626;font-size:13px;margin-top:12px;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeDeliverModal()">Cancelar</button>
       <button class="btn btn-primary" id="deliverBtn" onclick="deliverPlan()">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Enviar por email
+        <span id="deliverBtnLabel">Entregar plan</span>
       </button>
     </div>
   </div>
@@ -384,10 +397,11 @@ function logout() {
 // ── Load client ───────────────────────────────────────────────────────────────
 async function loadClient() {
   try {
-    const [profileRes, checkinsRes, formRes] = await Promise.all([
-      fetch(`${API}/users/${clientId}/edit`, { headers: { Authorization: `Bearer ${token}` }}),
-      fetch(`${API}/checkins/client/${clientId}`, { headers: { Authorization: `Bearer ${token}` }}),
-      fetch(`${API}/form-assignments/client/${clientId}`, { headers: { Authorization: `Bearer ${token}` }}),
+    const [profileRes, checkinsRes, formRes, deliveriesRes] = await Promise.all([
+      fetch(`${API}/users/${clientId}/edit`,               { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/checkins/client/${clientId}`,           { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/form-assignments/client/${clientId}`,   { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/plans/history/${clientId}`,             { headers: { Authorization: `Bearer ${token}` }}),
     ]);
 
     const profileJ = await profileRes.json();
@@ -415,14 +429,21 @@ async function loadClient() {
       }
     }
 
-    renderProfile(clientData, checkins, formResponses, formAssignment);
+    let deliveries = [];
+    if (deliveriesRes.ok) {
+      const dj = await deliveriesRes.json();
+      deliveries = dj.data || dj || [];
+      if (!Array.isArray(deliveries)) deliveries = [];
+    }
+
+    renderProfile(clientData, checkins, formResponses, formAssignment, deliveries);
   } catch(e) {
     document.getElementById('content').innerHTML =
       `<div style="text-align:center;padding:60px;color:#9CA3AF;">Error al cargar el perfil del cliente.</div>`;
   }
 }
 
-function renderProfile(c, checkins, formResponses, formAssignment) {
+function renderProfile(c, checkins, formResponses, formAssignment, deliveries = []) {
   const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Sin nombre';
   const initials = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('pageTitle').textContent = name;
@@ -609,6 +630,35 @@ function renderProfile(c, checkins, formResponses, formAssignment) {
       </div>
     </div>
 
+    <!-- Delivery history -->
+    ${deliveries.length > 0 ? `
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">Historial de entregas de plan</div>
+      <div>
+        ${deliveries.map((d, i) => {
+          const date = new Date(d.delivered_at).toLocaleString('es-ES', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+          return `
+            <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 0;${i < deliveries.length-1 ? 'border-bottom:1px solid #F3F4F6;' : ''}">
+              <div style="width:36px;height:36px;border-radius:50%;background:#F3EEFF;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+                <svg width="16" height="16" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:#111;margin-bottom:3px;">${date}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;">
+                  ${d.diet_id    ? `<span style="font-size:11px;background:#F0FDF4;color:#16A34A;padding:2px 8px;border-radius:20px;font-weight:600;">🥗 Dieta</span>` : ''}
+                  ${d.routine_id ? `<span style="font-size:11px;background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:20px;font-weight:600;">🏋️ Rutina</span>` : ''}
+                  ${d.email_sent ? `<span style="font-size:11px;background:#ECFDF5;color:#059669;padding:2px 8px;border-radius:20px;font-weight:600;">✉️ Email enviado</span>`
+                                 : `<span style="font-size:11px;background:#F3F4F6;color:#6B7280;padding:2px 8px;border-radius:20px;font-weight:600;">Sin email</span>`}
+                  ${d.loom_link  ? `<a href="${esc(d.loom_link)}" target="_blank" style="font-size:11px;background:#FDF4FF;color:#7C3AED;padding:2px 8px;border-radius:20px;font-weight:600;text-decoration:none;">🎬 Loom</a>` : ''}
+                </div>
+                ${d.message ? `<div style="font-size:12px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px;">"${esc(d.message)}"</div>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+    ` : ''}
+
     <!-- Form responses -->
     ${formResponses.length > 0 ? `
     <div class="card">
@@ -660,30 +710,27 @@ function renderMiniChart(checkins) {
 async function openDeliverModal() {
   document.getElementById('deliverError').textContent = '';
   document.getElementById('deliverMsg').value = '';
+  document.getElementById('deliverLoom').value = '';
+  document.getElementById('deliverSendEmail').checked = true;
 
-  // Load diets and routines
   try {
     const [dietRes, routineRes] = await Promise.all([
-      fetch(`${API}/diets`, { headers: { Authorization: `Bearer ${token}` }}),
+      fetch(`${API}/diets`,    { headers: { Authorization: `Bearer ${token}` }}),
       fetch(`${API}/routines`, { headers: { Authorization: `Bearer ${token}` }}),
     ]);
     if (dietRes.ok) {
       const dj = await dietRes.json();
-      const diets = dj.data || dj || [];
+      const diets = Array.isArray(dj.data || dj) ? (dj.data || dj) : [];
       const sel = document.getElementById('deliverDiet');
       sel.innerHTML = '<option value="">— Sin dieta —</option>';
-      (Array.isArray(diets) ? diets : []).forEach(d => {
-        sel.innerHTML += `<option value="${d.id}">${esc(d.name || d.title || d.id)}</option>`;
-      });
+      diets.forEach(d => { sel.innerHTML += `<option value="${d.id}">${esc(d.name || d.title || d.id)}</option>`; });
     }
     if (routineRes.ok) {
       const rj = await routineRes.json();
-      const routines = rj.data || rj || [];
+      const routines = Array.isArray(rj.data || rj) ? (rj.data || rj) : [];
       const sel = document.getElementById('deliverRoutine');
       sel.innerHTML = '<option value="">— Sin rutina —</option>';
-      (Array.isArray(routines) ? routines : []).forEach(r => {
-        sel.innerHTML += `<option value="${r.id}">${esc(r.name || r.title || r.id)}</option>`;
-      });
+      routines.forEach(r => { sel.innerHTML += `<option value="${r.id}">${esc(r.name || r.title || r.id)}</option>`; });
     }
   } catch {}
 
@@ -698,17 +745,24 @@ async function deliverPlan() {
   const dietId    = document.getElementById('deliverDiet').value;
   const routineId = document.getElementById('deliverRoutine').value;
   const message   = document.getElementById('deliverMsg').value.trim();
+  const loomLink  = document.getElementById('deliverLoom').value.trim();
+  const sendEmail = document.getElementById('deliverSendEmail').checked;
   const btn       = document.getElementById('deliverBtn');
+  const lbl       = document.getElementById('deliverBtnLabel');
 
   document.getElementById('deliverError').textContent = '';
-  btn.textContent = 'Enviando…';
+  lbl.textContent = 'Registrando…';
   btn.disabled = true;
 
   try {
-    const body = { client_user_detail_id: clientId };
+    const body = {
+      client_user_detail_id: clientId,
+      send_email: sendEmail,
+    };
     if (dietId)    body.diet_id    = dietId;
     if (routineId) body.routine_id = parseInt(routineId);
     if (message)   body.message    = message;
+    if (loomLink)  body.loom_link  = loomLink;
 
     const r = await fetch(`${API}/plans/deliver`, {
       method: 'POST',
@@ -717,18 +771,20 @@ async function deliverPlan() {
     });
     const j = await r.json();
     if (!r.ok) {
-      document.getElementById('deliverError').textContent = j.detail || j.message || 'Error al enviar';
+      document.getElementById('deliverError').textContent = j.detail || j.message || 'Error al registrar';
       return;
     }
 
     const d = j.data || j;
     closeDeliverModal();
-    toast(d.email_sent ? `Plan enviado a ${d.client_email}` : 'Plan procesado (email no enviado)', d.email_sent ? 'success' : '');
+    if (d.email_sent)        toast(`Plan enviado a ${d.client_email}`, 'success');
+    else if (!sendEmail)     toast('Plan registrado sin email', 'success');
+    else                     toast('Plan registrado (email no configurado)');
     loadClient();
   } catch {
     document.getElementById('deliverError').textContent = 'Error de conexión';
   } finally {
-    btn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar por email';
+    lbl.textContent = 'Entregar plan';
     btn.disabled = false;
   }
 }

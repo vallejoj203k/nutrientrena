@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 from app.core.responses import send_response, send_error
 from app.models.nutrition.group_food import GroupFood
 from app.schemas.nutrition.food import GroupFoodCreate, GroupFoodUpdate, GroupFoodOut
@@ -16,7 +16,7 @@ def _get_or_404(db: Session, obj_id: int):
 
 
 @router.get("/findAll")
-def find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(GroupFood).filter(GroupFood.status == 1).all()
     return send_response([GroupFoodOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -27,7 +27,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     q = db.query(GroupFood)
     if search:
@@ -41,7 +41,7 @@ def search(
 
 
 @router.get("/{id}/edit")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Grupo de alimento no encontrado")
@@ -49,7 +49,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
 
 
 @router.post("")
-def create(data: GroupFoodCreate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def create(data: GroupFoodCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = GroupFood(**data.model_dump())
     db.add(obj)
     db.commit()
@@ -58,7 +58,7 @@ def create(data: GroupFoodCreate, db: Session = Depends(get_db), _=Depends(get_c
 
 
 @router.put("/{id}/update")
-def updated(id: int, data: GroupFoodUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def updated(id: int, data: GroupFoodUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Grupo de alimento no encontrado")

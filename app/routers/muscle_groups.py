@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 from app.core.responses import send_response, send_error
 from app.models.muscle_group import MuscleGroup
 from app.schemas.muscle_group import MuscleGroupCreate, MuscleGroupUpdate, MuscleGroupOut
@@ -16,7 +16,7 @@ def _get_or_404(db: Session, muscle_id: int):
 
 
 @router.get("/findAll")
-def find_all(db: Session = Depends(get_db), _=Depends(get_current_user)):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(MuscleGroup).filter(MuscleGroup.state == 1).all()
     return send_response([MuscleGroupOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -27,7 +27,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
     q = db.query(MuscleGroup)
     if search:
@@ -47,7 +47,7 @@ def search(
 
 
 @router.get("/{id}/edit")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Grupo muscular no encontrado")
@@ -55,7 +55,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
 
 
 @router.post("")
-def create(data: MuscleGroupCreate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def create(data: MuscleGroupCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = MuscleGroup(**data.model_dump())
     db.add(obj)
     db.commit()
@@ -64,7 +64,7 @@ def create(data: MuscleGroupCreate, db: Session = Depends(get_db), _=Depends(get
 
 
 @router.put("/{id}/update")
-def updated(id: int, data: MuscleGroupUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def updated(id: int, data: MuscleGroupUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Grupo muscular no encontrado")

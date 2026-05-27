@@ -8,7 +8,6 @@ from app.core.responses import send_response, send_error
 from app.core.email import send_recover_password_email
 from app.models.user import User, UserDetail, RoleUser
 from app.models.menu import Menu, MenuRole
-from app.models.role import CLIENT
 from app.schemas.auth import LoginRequest, RefreshTokenRequest, RecoverPasswordRequest, MenuOut
 from app.schemas.user import UserDetailOut
 

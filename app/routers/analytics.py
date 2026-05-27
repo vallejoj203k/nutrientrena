@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
 from app.models.user import UserDetail, RoleUser, UserParent
-from app.models.role import COACH, CLIENT
+from app.models.role import CLIENT
 from app.models.checkin import WeeklyCheckin
 from app.models.parameter import ParameterDetail
 from app.core.responses import send_response
@@ -41,7 +41,7 @@ def _get_client_details(db: Session, coach_id: Optional[str] = None):
 def overview(
     coach_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     """
     Totales generales: clientes, activos, nuevos este mes, coaches.
@@ -95,7 +95,7 @@ def overview(
 def states_distribution(
     coach_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     """
     Distribución de clientes por estado — para gráfico de barras/dona.
@@ -134,7 +134,7 @@ def checkin_stats(
     from_date: Optional[date] = Query(None, alias="from"),
     to_date: Optional[date] = Query(None, alias="to"),
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     """
     Métricas de check-ins: peso promedio perdido, adherencia, totales.
@@ -196,7 +196,7 @@ def checkin_stats(
 @router.get("/coaches")
 def coaches_stats(
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     """
     Métricas por coach: clientes asignados, check-ins recibidos.

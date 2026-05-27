@@ -4,7 +4,10 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import (
+    require_role_ids, verify_client_access,
+    SUPERADMIN, ADMIN, COACH,
+)
 from app.core.responses import send_response, send_error
 from app.core.email import send_plan_email
 from app.models.user import UserDetail, User
@@ -33,8 +36,9 @@ class PlanDeliverRequest(BaseModel):
 def deliver_plan(
     data: PlanDeliverRequest,
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
+    verify_client_access(data.client_user_detail_id, current_user, db)
     client_detail = db.query(UserDetail).filter(
         UserDetail.id == data.client_user_detail_id
     ).first()

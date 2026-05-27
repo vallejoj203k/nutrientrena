@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Dietas</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* Main */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar h1{font-size:18px;font-weight:700;color:#111;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+    .btn-icon{padding:7px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:flex;color:#6B7280;transition:.15s;}
+    .btn-icon:hover{background:#E5E7EB;color:#111;}
+
+    /* Toolbar */
+    .toolbar{padding:14px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
+    .search-wrap{position:relative;flex:1;min-width:200px;max-width:320px;}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;}
+    .search-wrap input:focus{border-color:var(--purple);}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .total-label{font-size:13px;color:#6B7280;margin-left:auto;}
+
+    /* Content */
+    .content{flex:1;overflow-y:auto;padding:24px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* Cards grid */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+
+    /* Diet card */
+    .diet-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;transition:.15s;position:relative;}
+    .diet-card:hover{border-color:#D8B4FE;box-shadow:0 4px 12px rgba(91,45,142,.1);}
+    .diet-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+    .diet-card-title{font-size:15px;font-weight:700;color:#111;line-height:1.3;}
+    .diet-card-type{font-size:11px;color:#6B7280;margin-top:3px;}
+    .diet-card-actions{display:flex;gap:6px;flex-shrink:0;}
+    .macro-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+    .macro-chip{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:8px;min-width:60px;flex:1;}
+    .macro-chip .val{font-size:16px;font-weight:800;line-height:1;}
+    .macro-chip .lbl{font-size:10px;margin-top:3px;font-weight:500;}
+    .macro-kcal{background:#F3EEFF;color:#5B2D8E;}
+    .macro-p{background:#EFF6FF;color:#2563EB;}
+    .macro-c{background:#FEFCE8;color:#D97706;}
+    .macro-f{background:#FDF4FF;color:#7C3AED;}
+    .foods-list{font-size:12px;color:#6B7280;border-top:1px solid #F3F4F6;padding-top:10px;}
+    .foods-list strong{color:#374151;font-size:11px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;}
+    .food-tag{display:inline-block;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:20px;padding:2px 8px;font-size:11px;margin:2px 3px 2px 0;}
+
+    /* Empty state */
+    .empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .empty svg{margin-bottom:16px;opacity:.3;}
+    .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .empty p{font-size:13px;}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#fff;border-radius:16px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
+    .modal-close:hover{color:#374151;}
+    .modal-body{padding:20px 24px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--purple);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+    .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
+    .section-title{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
+
+    /* Foods section in modal */
+    .foods-editor{border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;}
+    .food-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #F3F4F6;}
+    .food-item:last-child{border-bottom:none;}
+    .food-item input{flex:1;padding:6px 8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;outline:none;}
+    .food-item input:focus{border-color:var(--purple);}
+    .food-remove{background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;border-radius:4px;display:flex;}
+    .food-remove:hover{background:#FEF2F2;}
+    .add-food-btn{display:flex;align-items:center;gap:6px;padding:10px 12px;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;width:100%;}
+    .add-food-btn:hover{background:var(--purple-pale);}
+
+    /* Delete confirm */
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .confirm-overlay.open{opacity:1;pointer-events:all;}
+    .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .confirm-overlay.open .confirm-box{transform:translateY(0);}
+    .confirm-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.5;}
+    .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:300;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+
+    @media(max-width:768px){
+      body{flex-direction:column;}
+      .sidebar{width:100%;min-width:unset;height:auto;}
+      .sidebar-nav,.sidebar-user{display:none;}
+      .cards-grid{grid-template-columns:1fr;}
+      .form-row,.form-row-4{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de gestión</small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item" href="kanban.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="12"/><rect x="17" y="3" width="5" height="15"/></svg>
+      Kanban
+    </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item active" href="diets.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
+      Dietas
+    </a>
+    <a class="nav-item" href="routines.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Rutinas
+    </a>
+    <div class="nav-section">Seguimiento</div>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <a class="nav-item" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Formularios
+      <span class="nav-badge" id="formsBadge" style="display:none"></span>
+    </a>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytics
+    </a>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <h1>Dietas</h1>
+    <button class="btn btn-primary" onclick="openModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nueva dieta
+    </button>
+  </div>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar dieta…" oninput="applyFilter()"/>
+    </div>
+    <span class="total-label" id="totalLabel"></span>
+  </div>
+  <div class="content" id="content">
+    <div class="empty">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
+      <h3>Cargando dietas…</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Diet modal -->
+<div class="modal-overlay" id="dietOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Nueva dieta</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Título *</label>
+          <input id="f_title" placeholder="Ej: Dieta de definición — 1800 kcal"/>
+        </div>
+      </div>
+      <div class="section-title">Macros y calorías</div>
+      <div class="form-row-4">
+        <div class="form-group">
+          <label>Calorías (kcal)</label>
+          <input id="f_calories" type="number" placeholder="1800"/>
+        </div>
+        <div class="form-group">
+          <label>Proteínas (g)</label>
+          <input id="f_proteins" type="number" placeholder="150"/>
+        </div>
+        <div class="form-group">
+          <label>Carbos (g)</label>
+          <input id="f_carbs" type="number" placeholder="180"/>
+        </div>
+        <div class="form-group">
+          <label>Grasas (g)</label>
+          <input id="f_fats" type="number" placeholder="60"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Déficit (kcal)</label>
+          <input id="f_deficit" type="number" placeholder="300"/>
+        </div>
+        <div class="form-group">
+          <label>Superávit (kcal)</label>
+          <input id="f_surplus" type="number" placeholder="0"/>
+        </div>
+      </div>
+      <div class="section-title">Comidas del plan</div>
+      <div class="foods-editor" id="foodsEditor"></div>
+      <button class="add-food-btn" onclick="addFood()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Añadir comida
+      </button>
+      <div id="modalError" style="color:#DC2626;font-size:13px;margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveDiet()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>¿Eliminar dieta?</h3>
+    <p>Esta acción no se puede deshacer. Se eliminará la dieta y todos sus alimentos.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+let token = localStorage.getItem('token');
+if (!token) location.href = 'login.html';
+
+let allDiets = [];
+let editingId = null;
+let deletingId = null;
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function loadUser() {
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` }});
+    if (r.status === 401) { logout(); return; }
+    const j = await r.json();
+    const u = j.data || j;
+    const name = u.name || u.full_name || 'Usuario';
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarRole').textContent = (u.roles?.[0]?.name) || '—';
+    document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+  } catch {}
+}
+
+function logout() { localStorage.clear(); location.href = 'login.html'; }
+
+async function loadPendingBadge() {
+  try {
+    const r = await fetch(`${API}/form-assignments/pending`, { headers: { Authorization: `Bearer ${token}` }});
+    if (!r.ok) return;
+    const j = await r.json();
+    const count = (j.data || j || []).length;
+    const badge = document.getElementById('formsBadge');
+    if (count > 0) { badge.textContent = count; badge.style.display = 'inline-block'; }
+  } catch {}
+}
+
+// ── Load diets ────────────────────────────────────────────────────────────────
+async function loadDiets() {
+  try {
+    const r = await fetch(`${API}/diets/findAll`, { headers: { Authorization: `Bearer ${token}` }});
+    const j = await r.json();
+    allDiets = j.data || j || [];
+    if (!Array.isArray(allDiets)) allDiets = [];
+    renderDiets(allDiets);
+  } catch {
+    document.getElementById('content').innerHTML = `<div class="empty"><h3>Error al cargar</h3><p>No se pudieron cargar las dietas</p></div>`;
+  }
+}
+
+function applyFilter() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allDiets.filter(d => (d.title || '').toLowerCase().includes(q));
+  renderDiets(filtered);
+}
+
+function renderDiets(diets) {
+  const el = document.getElementById('content');
+  document.getElementById('totalLabel').textContent = `${diets.length} dieta${diets.length !== 1 ? 's' : ''}`;
+
+  if (!diets.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
+        <h3>No hay dietas</h3>
+        <p>Crea tu primera dieta usando el botón "Nueva dieta"</p>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="cards-grid">${diets.map(d => dietCard(d)).join('')}</div>`;
+}
+
+function dietCard(d) {
+  const det = d.detail || {};
+  const kcal = d.calories ? Math.round(d.calories) : null;
+  const prot = det.proteins ? Math.round(det.proteins) : null;
+  const carb = det.carbs    ? Math.round(det.carbs)    : null;
+  const fat  = det.fats     ? Math.round(det.fats)     : null;
+
+  const macros = (kcal || prot || carb || fat) ? `
+    <div class="macro-row">
+      ${kcal != null ? `<div class="macro-chip macro-kcal"><span class="val">${kcal}</span><span class="lbl">kcal</span></div>` : ''}
+      ${prot != null ? `<div class="macro-chip macro-p"><span class="val">${prot}g</span><span class="lbl">Prot.</span></div>` : ''}
+      ${carb != null ? `<div class="macro-chip macro-c"><span class="val">${carb}g</span><span class="lbl">Carbs</span></div>` : ''}
+      ${fat  != null ? `<div class="macro-chip macro-f"><span class="val">${fat}g</span><span class="lbl">Grasas</span></div>` : ''}
+    </div>` : '';
+
+  const foods = (d.foods || []);
+  const foodTags = foods.slice(0, 5).map(f => `<span class="food-tag">${esc(f.name)}</span>`).join('');
+  const moreTag = foods.length > 5 ? `<span class="food-tag">+${foods.length - 5} más</span>` : '';
+  const foodsSection = foods.length ? `
+    <div class="foods-list">
+      <strong>Comidas</strong>
+      ${foodTags}${moreTag}
+    </div>` : '';
+
+  return `
+    <div class="diet-card">
+      <div class="diet-card-header">
+        <div>
+          <div class="diet-card-title">${esc(d.title)}</div>
+        </div>
+        <div class="diet-card-actions">
+          <button class="btn-icon" title="Descargar PDF" onclick="downloadPdf('${d.id}', '${esc(d.title)}')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+          </button>
+          <button class="btn-icon" title="Editar" onclick="openModal('${d.id}')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon" title="Eliminar" onclick="openConfirm('${d.id}')" style="color:#EF4444;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+      ${macros}
+      ${foodsSection}
+    </div>`;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+async function openModal(id = null) {
+  editingId = id;
+  document.getElementById('modalTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
+  document.getElementById('modalError').textContent = '';
+  clearForm();
+
+  if (id) {
+    try {
+      const r = await fetch(`${API}/diets/${id}/edit`, { headers: { Authorization: `Bearer ${token}` }});
+      const j = await r.json();
+      const d = j.data || j;
+      document.getElementById('f_title').value    = d.title || '';
+      document.getElementById('f_calories').value = d.calories || '';
+      const det = d.detail || {};
+      document.getElementById('f_proteins').value = det.proteins || '';
+      document.getElementById('f_carbs').value    = det.carbs    || '';
+      document.getElementById('f_fats').value     = det.fats     || '';
+      document.getElementById('f_deficit').value  = det.deficit  || '';
+      document.getElementById('f_surplus').value  = det.surplus  || '';
+      document.getElementById('foodsEditor').innerHTML = '';
+      (d.foods || []).forEach(f => addFood(f.name));
+    } catch { toast('Error al cargar la dieta', 'error'); return; }
+  } else {
+    document.getElementById('foodsEditor').innerHTML = '';
+  }
+
+  document.getElementById('dietOverlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('dietOverlay').classList.remove('open'); }
+
+function clearForm() {
+  ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_deficit','f_surplus'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+function addFood(name = '') {
+  const editor = document.getElementById('foodsEditor');
+  const div = document.createElement('div');
+  div.className = 'food-item';
+  div.innerHTML = `
+    <input type="text" placeholder="Ej: Desayuno — Avena con fruta" value="${esc(name)}"/>
+    <button class="food-remove" onclick="this.parentElement.remove()" title="Eliminar comida">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+  editor.appendChild(div);
+}
+
+async function saveDiet() {
+  const title = document.getElementById('f_title').value.trim();
+  if (!title) { document.getElementById('modalError').textContent = 'El título es obligatorio'; return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  document.getElementById('modalError').textContent = '';
+
+  const foodInputs = document.querySelectorAll('#foodsEditor .food-item input');
+  const foods = Array.from(foodInputs)
+    .map(i => i.value.trim())
+    .filter(Boolean)
+    .map(name => ({ name }));
+
+  const pNum = id => { const v = document.getElementById(id).value; return v !== '' ? parseFloat(v) : null; };
+
+  const body = {
+    title,
+    calories:  pNum('f_calories'),
+    proteins:  pNum('f_proteins'),
+    carbs:     pNum('f_carbs'),
+    fats:      pNum('f_fats'),
+    deficit:   pNum('f_deficit'),
+    surplus:   pNum('f_surplus'),
+    foods,
+  };
+  if (editingId) body.id = editingId;
+
+  try {
+    const url    = editingId ? `${API}/diets/${editingId}/update` : `${API}/diets`;
+    const method = editingId ? 'PUT' : 'POST';
+    const r = await fetch(url, {
+      method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!r.ok) { document.getElementById('modalError').textContent = j.detail || j.message || 'Error al guardar'; return; }
+    closeModal();
+    toast(editingId ? 'Dieta actualizada' : 'Dieta creada', 'success');
+    loadDiets();
+  } catch { document.getElementById('modalError').textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+function openConfirm(id) { deletingId = id; document.getElementById('confirmOverlay').classList.add('open'); }
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); deletingId = null; }
+
+async function confirmDelete() {
+  if (!deletingId) return;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.textContent = 'Eliminando…'; btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/diets/${deletingId}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) { toast('Error al eliminar', 'error'); return; }
+    closeConfirm();
+    toast('Dieta eliminada', 'success');
+    loadDiets();
+  } catch { toast('Error de conexión', 'error'); }
+  finally { btn.textContent = 'Eliminar'; btn.disabled = false; }
+}
+
+// ── PDF ───────────────────────────────────────────────────────────────────────
+async function downloadPdf(id, title) {
+  toast('Generando PDF…');
+  try {
+    const r = await fetch(`${API}/diets/${id}/pdf`, { headers: { Authorization: `Bearer ${token}` }});
+    if (!r.ok) { toast('Error al generar el PDF', 'error'); return; }
+    const blob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (title || 'dieta').replace(/\s+/g, '_').toLowerCase() + '.pdf';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('PDF descargado', 'success');
+  } catch { toast('Error de conexión', 'error'); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast show ${type || ''}`;
+  clearTimeout(el._t); el._t = setTimeout(() => el.className = 'toast', 3500);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadUser();
+loadDiets();
+loadPendingBadge();
+</script>
+</body>
+</html>

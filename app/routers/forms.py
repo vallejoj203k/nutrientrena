@@ -5,7 +5,8 @@ from datetime import datetime
 from app.database import get_db
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
 from app.core.responses import send_response, send_error
-from app.core.email import notify_coach_form_submitted
+from app.core.email import notify_coach_form_submitted, send_form_link_email
+from app.config import settings
 from app.models.form import FormTemplate, FormTemplateField, FormAssignment, FormResponse, PROFILE_FIELD_MAP
 from app.models.user import UserDetail, UserParent, User
 from app.models.parameter import ParameterDetail
@@ -200,7 +201,31 @@ def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_
     client.status_id = _get_client_state_id(db, "Formulario pendiente")
     db.commit()
     db.refresh(assignment)
+
+    # Send public form link to client
+    client_user = db.query(User).filter(User.id == client.user_id).first()
+    if client_user and client_user.email:
+        form_link = f"{settings.FRONTEND_URL}/app/public/form.html?id={assignment.id}"
+        client_name = f"{client.name or ''} {client.last_name or ''}".strip() or ""
+        coach_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+        coach_name = f"{coach_detail.name or ''} {coach_detail.last_name or ''}".strip() if coach_detail else ""
+        send_form_link_email(
+            to=client_user.email,
+            client_name=client_name,
+            form_link=form_link,
+            coach_name=coach_name,
+        )
+
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "Formulario asignado")
+
+
+@router_assignments.get("/pending-count")
+def pending_count(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+    count = db.query(FormAssignment).filter(
+        FormAssignment.assigned_by == current_user.id,
+        FormAssignment.status == "pending",
+    ).count()
+    return send_response({"count": count}, "OK")
 
 
 @router_assignments.get("/pending")

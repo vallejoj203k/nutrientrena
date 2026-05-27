@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Rutinas</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* Main */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar h1{font-size:18px;font-weight:700;color:#111;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+    .btn-icon{padding:7px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:flex;color:#6B7280;transition:.15s;}
+    .btn-icon:hover{background:#E5E7EB;color:#111;}
+
+    /* Toolbar */
+    .toolbar{padding:14px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
+    .search-wrap{position:relative;flex:1;min-width:200px;max-width:320px;}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;}
+    .search-wrap input:focus{border-color:var(--purple);}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .total-label{font-size:13px;color:#6B7280;margin-left:auto;}
+
+    /* Content */
+    .content{flex:1;overflow-y:auto;padding:24px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* Cards grid */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+
+    /* Routine card */
+    .routine-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;transition:.15s;position:relative;}
+    .routine-card:hover{border-color:#D8B4FE;box-shadow:0 4px 12px rgba(91,45,142,.1);}
+    .routine-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+    .routine-card-title{font-size:15px;font-weight:700;color:#111;line-height:1.3;}
+    .routine-card-sub{font-size:11px;color:#6B7280;margin-top:3px;}
+    .routine-card-actions{display:flex;gap:6px;flex-shrink:0;}
+    .meta-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+    .meta-chip{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;}
+    .meta-days{background:#F3EEFF;color:#5B2D8E;}
+    .meta-time{background:#EFF6FF;color:#2563EB;}
+    .meta-level{background:#F0FDF4;color:#16A34A;}
+    .meta-training{background:#FEF9C3;color:#92400E;}
+    .days-list-preview{font-size:12px;color:#6B7280;border-top:1px solid #F3F4F6;padding-top:10px;}
+    .days-list-preview strong{color:#374151;font-size:11px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;}
+    .day-tag{display:inline-block;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:20px;padding:2px 8px;font-size:11px;margin:2px 3px 2px 0;}
+
+    /* Empty state */
+    .empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .empty svg{margin-bottom:16px;opacity:.3;}
+    .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .empty p{font-size:13px;}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#fff;border-radius:16px;width:680px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
+    .modal-close:hover{color:#374151;}
+    .modal-body{padding:20px 24px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px;}
+    .section-title{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
+
+    /* Days editor */
+    .days-editor{display:flex;flex-direction:column;gap:12px;}
+    .day-item{border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;}
+    .day-item-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;}
+    .day-num{width:24px;height:24px;border-radius:50%;background:var(--purple);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .day-item-head input{flex:1;padding:5px 8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-weight:600;outline:none;background:#fff;}
+    .day-item-head input:focus{border-color:var(--purple);}
+    .day-remove{background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;border-radius:4px;display:flex;margin-left:auto;}
+    .day-remove:hover{background:#FEF2F2;}
+    .day-item-body{padding:10px 12px;}
+    .day-item-body textarea{width:100%;min-height:80px;padding:8px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;outline:none;resize:vertical;font-family:inherit;color:#374151;}
+    .day-item-body textarea:focus{border-color:var(--purple);}
+    .add-day-btn{display:flex;align-items:center;gap:6px;padding:10px 12px;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;background:var(--purple-pale);border:2px dashed #D8B4FE;border-radius:10px;width:100%;justify-content:center;transition:.15s;}
+    .add-day-btn:hover{background:#EDE9FE;border-color:var(--purple);}
+
+    /* Delete confirm */
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .confirm-overlay.open{opacity:1;pointer-events:all;}
+    .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .confirm-overlay.open .confirm-box{transform:translateY(0);}
+    .confirm-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.5;}
+    .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:300;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+
+    @media(max-width:768px){
+      body{flex-direction:column;}
+      .sidebar{width:100%;min-width:unset;height:auto;}
+      .sidebar-nav,.sidebar-user{display:none;}
+      .cards-grid{grid-template-columns:1fr;}
+      .form-row,.form-row-3{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de gestión</small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item" href="kanban.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="12"/><rect x="17" y="3" width="5" height="15"/></svg>
+      Kanban
+    </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="diets.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
+      Dietas
+    </a>
+    <a class="nav-item active" href="routines.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Rutinas
+    </a>
+    <div class="nav-section">Seguimiento</div>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <a class="nav-item" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Formularios
+      <span class="nav-badge" id="formsBadge" style="display:none"></span>
+    </a>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytics
+    </a>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <h1>Rutinas</h1>
+    <button class="btn btn-primary" onclick="openModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nueva rutina
+    </button>
+  </div>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar rutina…" oninput="applyFilter()"/>
+    </div>
+    <span class="total-label" id="totalLabel"></span>
+  </div>
+  <div class="content" id="content">
+    <div class="empty">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <h3>Cargando rutinas…</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Routine modal -->
+<div class="modal-overlay" id="routineOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Nueva rutina</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Name -->
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input id="f_name" placeholder="Ej: Rutina fuerza 4 días — Upper/Lower"/>
+      </div>
+
+      <!-- Meta info -->
+      <div class="section-title">Configuración</div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Tipo de entrenamiento</label>
+          <input id="f_training" placeholder="Fuerza, Cardio, HIIT…"/>
+        </div>
+        <div class="form-group">
+          <label>Días por semana</label>
+          <input id="f_days" type="number" min="1" max="7" placeholder="4"/>
+        </div>
+        <div class="form-group">
+          <label>Duración (min)</label>
+          <input id="f_time" type="number" min="15" placeholder="60"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Género</label>
+          <select id="f_gender">
+            <option value="">Cualquiera</option>
+            <option value="1">Masculino</option>
+            <option value="2">Femenino</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nivel</label>
+          <select id="f_level">
+            <option value="">Sin especificar</option>
+            <option value="1">Principiante</option>
+            <option value="2">Intermedio</option>
+            <option value="3">Avanzado</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Days list -->
+      <div class="section-title">Programa de días</div>
+      <div class="days-editor" id="daysEditor"></div>
+      <button class="add-day-btn" onclick="addDay()" style="margin-top:12px;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar día
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveRoutine()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>Eliminar rutina</h3>
+    <p id="confirmText">¿Estás seguro de que deseas eliminar esta rutina? Esta acción no se puede deshacer.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://nutrientrena-production.up.railway.app/api';
+  let token = localStorage.getItem('access_token') || '';
+  let allRoutines = [];
+  let editingId = null;
+  let deletingId = null;
+  const LEVELS = {1:'Principiante', 2:'Intermedio', 3:'Avanzado'};
+  const GENDERS = {1:'Masculino', 2:'Femenino'};
+
+  /* ── Auth ── */
+  function authHeaders() { return { 'Content-Type':'application/json', Authorization:`Bearer ${token}` }; }
+
+  async function initUser() {
+    if (!token) { location.href = 'login.html'; return; }
+    try {
+      const r = await fetch(`${API}/auth/me`, { headers: authHeaders() });
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      const u = d.data || d;
+      document.getElementById('sidebarName').textContent = u.name || u.email || '—';
+      document.getElementById('sidebarRole').textContent = u.role?.name || '';
+      document.getElementById('sidebarAvatar').textContent = (u.name || u.email || 'U')[0].toUpperCase();
+    } catch { /* silent */ }
+  }
+
+  function logout() {
+    localStorage.removeItem('access_token');
+    location.href = 'login.html';
+  }
+
+  /* ── Load ── */
+  async function loadRoutines() {
+    try {
+      const r = await fetch(`${API}/routines/findAll`, { headers: authHeaders() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      allRoutines = d.data || [];
+      renderRoutines(allRoutines);
+    } catch (e) {
+      document.getElementById('content').innerHTML = `
+        <div class="empty">
+          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <h3>Error al cargar</h3><p>${e.message}</p>
+        </div>`;
+    }
+  }
+
+  async function loadPendingBadge() {
+    try {
+      const r = await fetch(`${API}/form-assignments/pending`, { headers: authHeaders() });
+      if (!r.ok) return;
+      const d = await r.json();
+      const n = (d.data || []).length;
+      const badge = document.getElementById('formsBadge');
+      if (n > 0) { badge.textContent = n; badge.style.display = 'inline-block'; }
+    } catch { /* ignore */ }
+  }
+
+  /* ── Render ── */
+  function applyFilter() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allRoutines.filter(r =>
+      (r.name || '').toLowerCase().includes(q) ||
+      (r.training || '').toLowerCase().includes(q)
+    );
+    renderRoutines(filtered);
+  }
+
+  function renderRoutines(list) {
+    const el = document.getElementById('content');
+    document.getElementById('totalLabel').textContent = `${list.length} rutina${list.length !== 1 ? 's' : ''}`;
+    if (!list.length) {
+      el.innerHTML = `
+        <div class="empty">
+          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <h3>Sin rutinas</h3><p>Crea tu primera rutina con el botón "Nueva rutina".</p>
+        </div>`;
+      return;
+    }
+    el.innerHTML = `<div class="cards-grid">${list.map(routineCard).join('')}</div>`;
+  }
+
+  function routineCard(r) {
+    const levelName = r.training_level_id ? (LEVELS[r.training_level_id] || `Nivel ${r.training_level_id}`) : null;
+    const days = r.days_list || [];
+    const dayTags = days.slice(0, 5).map(d =>
+      `<span class="day-tag">${esc(d.day_name || 'Día')}</span>`
+    ).join('') + (days.length > 5 ? `<span class="day-tag">+${days.length - 5}</span>` : '');
+
+    return `
+      <div class="routine-card">
+        <div class="routine-card-header">
+          <div>
+            <div class="routine-card-title">${esc(r.name)}</div>
+            <div class="routine-card-sub">${days.length} día${days.length !== 1 ? 's' : ''} programados${r.gender_id ? ' · ' + GENDERS[r.gender_id] : ''}</div>
+          </div>
+          <div class="routine-card-actions">
+            <button class="btn-icon" onclick="downloadPdf(${r.id}, '${esc(r.name)}')" title="Descargar PDF">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+            <button class="btn-icon" onclick="cloneRoutine(${r.id})" title="Clonar rutina">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <button class="btn-icon" onclick="openModal(${r.id})" title="Editar rutina">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon" onclick="openConfirm(${r.id}, '${esc(r.name)}')" title="Eliminar rutina" style="color:#EF4444;">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="meta-row">
+          ${r.days ? `<span class="meta-chip meta-days"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${r.days} días/sem</span>` : ''}
+          ${r.time ? `<span class="meta-chip meta-time"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${r.time} min</span>` : ''}
+          ${levelName ? `<span class="meta-chip meta-level">${levelName}</span>` : ''}
+          ${r.training ? `<span class="meta-chip meta-training">${esc(r.training)}</span>` : ''}
+        </div>
+        ${days.length ? `
+        <div class="days-list-preview">
+          <strong>Días</strong>
+          ${dayTags}
+        </div>` : ''}
+      </div>`;
+  }
+
+  /* ── Modal ── */
+  async function openModal(id = null) {
+    editingId = id;
+    clearForm();
+    document.getElementById('modalTitle').textContent = id ? 'Editar rutina' : 'Nueva rutina';
+    document.getElementById('saveBtn').textContent = id ? 'Actualizar' : 'Guardar';
+
+    if (id) {
+      try {
+        const r = await fetch(`${API}/routines/${id}/edit`, { headers: authHeaders() });
+        const d = await r.json();
+        const rt = d.data || d;
+        document.getElementById('f_name').value = rt.name || '';
+        document.getElementById('f_training').value = rt.training || '';
+        document.getElementById('f_days').value = rt.days || '';
+        document.getElementById('f_time').value = rt.time || '';
+        document.getElementById('f_gender').value = rt.gender_id || '';
+        document.getElementById('f_level').value = rt.training_level_id || '';
+        (rt.days_list || []).forEach(day => addDay(day.day_name || '', day.content_html || ''));
+      } catch { showToast('Error al cargar la rutina', 'error'); return; }
+    }
+
+    document.getElementById('routineOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('f_name').focus(), 100);
+  }
+
+  function closeModal() {
+    document.getElementById('routineOverlay').classList.remove('open');
+    editingId = null;
+    clearForm();
+  }
+
+  function clearForm() {
+    ['f_name','f_training','f_days','f_time'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f_gender').value = '';
+    document.getElementById('f_level').value = '';
+    document.getElementById('daysEditor').innerHTML = '';
+  }
+
+  /* ── Days editor ── */
+  let dayCounter = 0;
+
+  function addDay(name = '', description = '') {
+    dayCounter++;
+    const idx = dayCounter;
+    const editor = document.getElementById('daysEditor');
+    const div = document.createElement('div');
+    div.className = 'day-item';
+    div.dataset.idx = idx;
+    div.innerHTML = `
+      <div class="day-item-head">
+        <span class="day-num">${editor.children.length + 1}</span>
+        <input type="text" placeholder="Ej: Día 1 — Pecho y tríceps" value="${esc(name)}" data-day-name="${idx}"/>
+        <button class="day-remove" onclick="removeDay(${idx})" title="Eliminar día">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="day-item-body">
+        <textarea placeholder="Descripción del día, ejercicios, series y reps…" data-day-desc="${idx}">${esc(description)}</textarea>
+      </div>`;
+    editor.appendChild(div);
+    renumberDays();
+    if (!name) div.querySelector('input').focus();
+  }
+
+  function removeDay(idx) {
+    const editor = document.getElementById('daysEditor');
+    const item = editor.querySelector(`[data-idx="${idx}"]`);
+    if (item) item.remove();
+    renumberDays();
+  }
+
+  function renumberDays() {
+    const editor = document.getElementById('daysEditor');
+    Array.from(editor.children).forEach((item, i) => {
+      const num = item.querySelector('.day-num');
+      if (num) num.textContent = i + 1;
+    });
+  }
+
+  function collectDays() {
+    const editor = document.getElementById('daysEditor');
+    const days = [];
+    for (const item of editor.children) {
+      const nameInput = item.querySelector('[data-day-name]');
+      const descInput = item.querySelector('[data-day-desc]');
+      days.push({
+        day_name: nameInput ? nameInput.value.trim() : '',
+        content_html: descInput ? descInput.value.trim() : '',
+        details: [],
+      });
+    }
+    return days;
+  }
+
+  /* ── Save ── */
+  async function saveRoutine() {
+    const name = document.getElementById('f_name').value.trim();
+    if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+
+    const payload = {
+      name,
+      training: document.getElementById('f_training').value.trim() || null,
+      days: parseInt(document.getElementById('f_days').value) || null,
+      time: parseInt(document.getElementById('f_time').value) || null,
+      gender_id: parseInt(document.getElementById('f_gender').value) || null,
+      training_level_id: parseInt(document.getElementById('f_level').value) || null,
+      days_list: collectDays(),
+    };
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    try {
+      const url = editingId ? `${API}/routines/${editingId}/update` : `${API}/routines`;
+      const method = editingId ? 'PUT' : 'POST';
+      const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+      showToast(editingId ? 'Rutina actualizada' : 'Rutina creada', 'success');
+      closeModal();
+      await loadRoutines();
+    } catch (e) {
+      showToast(e.message || 'Error al guardar', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = editingId ? 'Actualizar' : 'Guardar';
+    }
+  }
+
+  /* ── Clone ── */
+  async function cloneRoutine(id) {
+    try {
+      const r = await fetch(`${API}/routines/clone`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ id }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+      showToast('Rutina clonada', 'success');
+      await loadRoutines();
+    } catch (e) {
+      showToast(e.message || 'Error al clonar', 'error');
+    }
+  }
+
+  /* ── Delete ── */
+  function openConfirm(id, name) {
+    deletingId = id;
+    document.getElementById('confirmText').textContent =
+      `¿Estás seguro de que deseas eliminar la rutina "${name}"? Esta acción no se puede deshacer.`;
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+
+  function closeConfirm() {
+    document.getElementById('confirmOverlay').classList.remove('open');
+    deletingId = null;
+  }
+
+  async function confirmDelete() {
+    if (!deletingId) return;
+    try {
+      const r = await fetch(`${API}/routines/${deletingId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+      showToast('Rutina eliminada', 'success');
+      closeConfirm();
+      await loadRoutines();
+    } catch (e) {
+      showToast(e.message || 'Error al eliminar', 'error');
+      closeConfirm();
+    }
+  }
+
+  /* ── PDF ── */
+  async function downloadPdf(id, title) {
+    try {
+      const r = await fetch(`${API}/routines/${id}/pdf`, { headers: authHeaders() });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/\s+/g,'_').toLowerCase()}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      showToast('Error al descargar PDF', 'error');
+    }
+  }
+
+  /* ── Toast ── */
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast show ${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  /* ── Utils ── */
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /* ── Init ── */
+  initUser();
+  loadRoutines();
+  loadPendingBadge();
+</script>
+</body>
+</html>

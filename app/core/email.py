@@ -290,6 +290,36 @@ def notify_coach_form_submitted(
     )
 
 
+def send_form_link_email(
+    to: str,
+    client_name: str,
+    form_link: str,
+    coach_name: str = "",
+) -> bool:
+    """Send the public intake form link to a new client."""
+    greeting = f"Hola <strong>{client_name}</strong>," if client_name else "Hola,"
+    coach_line = f"Tu coach <strong>{coach_name}</strong> te ha enviado" if coach_name else "Te han enviado"
+    body = f"""
+    <p style="color:#6B7280;font-size:15px;line-height:1.7;margin:0 0 20px;">
+      {greeting}<br><br>
+      {coach_line} un formulario de evaluación inicial. Por favor, complétalo
+      para que podamos preparar tu plan personalizado.
+    </p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="{form_link}"
+         style="display:inline-block;padding:14px 32px;background:#5B2D8E;color:#fff;
+                text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;
+                letter-spacing:.3px;">
+        Completar formulario →
+      </a>
+    </div>
+    <p style="color:#9CA3AF;font-size:13px;margin:0;text-align:center;">
+      Este enlace es personal. No lo compartas con nadie.
+    </p>"""
+    html = _base_notification_html("📋 Completa tu formulario de evaluación", body)
+    return _send_resend(to, f"Tu formulario de evaluación — {APP_NAME}", html)
+
+
 def notify_coach_checkin(
     coach_email: str,
     coach_name: str,

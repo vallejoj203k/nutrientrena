@@ -253,3 +253,13 @@ def updated(id: str, data: DietUpdate, db: Session = Depends(get_db), current_us
     db.commit()
     db.refresh(diet)
     return send_response(_serialize(diet), "Dieta actualizada")
+
+
+@router.delete("/{id}")
+def delete(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+    diet = _get_or_404(db, id)
+    if not diet:
+        return send_error("Dieta no encontrada")
+    db.delete(diet)
+    db.commit()
+    return send_response(None, "Dieta eliminada")

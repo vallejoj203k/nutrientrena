@@ -252,3 +252,13 @@ def updated(id: int, data: RoutineUpdate, db: Session = Depends(get_db), _=Depen
     db.commit()
     db.refresh(routine)
     return send_response(_serialize(routine), "Rutina actualizada")
+
+
+@router.delete("/{id}")
+def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+    routine = _get_or_404(db, id)
+    if not routine:
+        return send_error("Rutina no encontrada")
+    db.delete(routine)
+    db.commit()
+    return send_response(None, "Rutina eliminada")

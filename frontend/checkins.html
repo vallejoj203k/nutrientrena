@@ -659,7 +659,17 @@ async function loadClientData(clientId) {
       apiFetch(`/checkins/summary/${clientId}`)
     ]);
 
-    allCheckins = checkinsRes?.data || checkinsRes || [];
+    const checkinsData = checkinsRes?.data || {};
+    const rawList = Array.isArray(checkinsData) ? checkinsData : (checkinsData.checkins || []);
+
+    // Compute per-checkin weight delta (list is ordered desc by date)
+    allCheckins = rawList.map((ci, i) => {
+      const prev = rawList[i + 1];
+      const delta = (ci.weight != null && prev?.weight != null)
+        ? parseFloat((ci.weight - prev.weight).toFixed(2))
+        : null;
+      return { ...ci, weight_progress: delta };
+    });
     const summary = summaryRes?.data || summaryRes || {};
 
     renderSummary(summary);

@@ -45,6 +45,7 @@
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
     .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
 
     .sidebar-user{
       padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);
@@ -213,9 +214,10 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" href="forms.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Formularios
+      <span class="nav-badge" id="formsBadge" style="display:none"></span>
     </a>
     <a class="nav-item" href="checkins.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -450,7 +452,21 @@ function setPage(page){
   }
 }
 
+// ── Badge: formularios pendientes ─────────────────────────────────────────────
+async function loadPendingBadge() {
+  try {
+    const r = await apiFetch('/form-assignments?status=pending&per_page=1');
+    const total = (r?.data?.total) || (r?.total) || 0;
+    const badge = document.getElementById('formsBadge');
+    if (badge && total > 0) {
+      badge.textContent = total > 99 ? '99+' : total;
+      badge.style.display = 'inline-block';
+    }
+  } catch {}
+}
+
 loadDashboard();
+loadPendingBadge();
 </script>
 </body>
 </html>

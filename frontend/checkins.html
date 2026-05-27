@@ -56,6 +56,11 @@
     .selector-bar label{font-size:13px;font-weight:600;color:#374151;white-space:nowrap;}
     .client-select{padding:9px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;color:#111;background:#fff;outline:none;cursor:pointer;min-width:240px;transition:.15s;}
     .client-select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,45,142,.1);}
+    .filter-select{padding:9px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;color:#111;background:#fff;outline:none;cursor:pointer;transition:.15s;}
+    .filter-select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,45,142,.1);}
+    .filter-sep{width:1px;height:28px;background:#E5E7EB;flex-shrink:0;}
+    .clear-dates-btn{font-size:12px;color:var(--purple);background:none;border:none;cursor:pointer;padding:2px 4px;white-space:nowrap;text-decoration:underline;text-underline-offset:2px;}
+    .clear-dates-btn:hover{color:var(--purple-dark);}
 
     /* ── Summary cards ── */
     .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
@@ -253,6 +258,16 @@
         <option value="">— Selecciona un cliente —</option>
       </select>
       <span id="clientLoadingHint" style="font-size:12px;color:#9CA3AF;">Cargando clientes...</span>
+
+      <div class="filter-sep"></div>
+
+      <label for="filterFrom" style="font-size:13px;font-weight:600;color:#374151;white-space:nowrap;">Desde:</label>
+      <input type="date" id="filterFrom" class="filter-select" onchange="applyFilters()" title="Fecha desde"/>
+
+      <label for="filterTo" style="font-size:13px;font-weight:600;color:#374151;white-space:nowrap;">Hasta:</label>
+      <input type="date" id="filterTo" class="filter-select" onchange="applyFilters()" title="Fecha hasta"/>
+
+      <button class="clear-dates-btn" onclick="clearDateFilters()" title="Limpiar filtro de fechas">Limpiar</button>
     </div>
 
     <!-- Summary cards (hidden until client selected) -->
@@ -445,7 +460,8 @@
 const API = 'https://nutrientrena-production.up.railway.app/api';
 let clients = [];
 let activeClientId = null;
-let checkins = [];
+let allCheckins = [];   // full data from server for the selected client
+let checkins = [];      // currently displayed (after date filter)
 let pendingDeleteId = null;
 let pendingCoachNotesId = null;
 let meData = null;
@@ -581,11 +597,11 @@ async function loadClientData(clientId) {
       apiFetch(`/checkins/summary/${clientId}`)
     ]);
 
-    checkins = checkinsRes?.data || checkinsRes || [];
+    allCheckins = checkinsRes?.data || checkinsRes || [];
     const summary = summaryRes?.data || summaryRes || {};
 
     renderSummary(summary);
-    renderCheckins(checkins);
+    applyFilters();
 
     const client = clients.find(c => String(c.id) === String(clientId));
     const name = client ? [client.name, client.last_name].filter(Boolean).join(' ') : 'cliente';
@@ -669,6 +685,37 @@ function showEmptyState(msg) {
   document.getElementById('tableWrap').style.display    = 'none';
   document.getElementById('emptyMsg').textContent = msg;
   document.getElementById('emptyState').style.display   = 'block';
+}
+
+/* ─────────────────────────────────────────────
+   Date-range filter
+───────────────────────────────────────────── */
+function applyFilters() {
+  const from = document.getElementById('filterFrom').value;  // "YYYY-MM-DD" or ""
+  const to   = document.getElementById('filterTo').value;
+
+  checkins = allCheckins.filter(ci => {
+    const d = ci.checkin_date ? ci.checkin_date.slice(0, 10) : '';
+    if (from && d < from) return false;
+    if (to   && d > to)   return false;
+    return true;
+  });
+
+  renderCheckins(checkins);
+
+  // Keep subtitle in sync if a client is already loaded
+  if (activeClientId) {
+    const client = clients.find(c => String(c.id) === String(activeClientId));
+    const name = client ? [client.name, client.last_name].filter(Boolean).join(' ') : 'cliente';
+    document.getElementById('tableSubtitle').textContent =
+      `${checkins.length} check-in(s) registrado(s) para ${name}`;
+  }
+}
+
+function clearDateFilters() {
+  document.getElementById('filterFrom').value = '';
+  document.getElementById('filterTo').value   = '';
+  applyFilters();
 }
 
 /* ─────────────────────────────────────────────
@@ -868,7 +915,7 @@ async function saveNewCheckin() {
    Coach notes modal
 ───────────────────────────────────────────── */
 function openCoachNotesModal(checkinId) {
-  const ci = checkins.find(c => c.id === checkinId);
+  const ci = allCheckins.find(c => c.id === checkinId);
   if (!ci) return;
 
   pendingCoachNotesId = checkinId;
@@ -897,9 +944,9 @@ async function saveCoachNotes() {
     closeModal('coachNotesModal');
 
     // Update local state
-    const ci = checkins.find(c => c.id === pendingCoachNotesId);
+    const ci = allCheckins.find(c => c.id === pendingCoachNotesId);
     if (ci) ci.coach_notes = notes;
-    renderCheckins(checkins);
+    applyFilters();
 
   } catch(e) {
     toast('Error al guardar notas: ' + e.message, 'error');
@@ -914,7 +961,7 @@ async function saveCoachNotes() {
    Delete modal
 ───────────────────────────────────────────── */
 function openDeleteModal(checkinId) {
-  const ci = checkins.find(c => c.id === checkinId);
+  const ci = allCheckins.find(c => c.id === checkinId);
   pendingDeleteId = checkinId;
   const dateStr = ci ? formatDate(ci.checkin_date) : '';
   document.getElementById('deleteMsg').textContent =
@@ -932,8 +979,8 @@ async function confirmDelete() {
     await apiFetch(`/checkins/${pendingDeleteId}`, { method: 'DELETE' });
     toast('Check-in eliminado', 'success');
     closeModal('deleteModal');
-    checkins = checkins.filter(c => c.id !== pendingDeleteId);
-    renderCheckins(checkins);
+    allCheckins = allCheckins.filter(c => c.id !== pendingDeleteId);
+    applyFilters();
     // Reload summary
     if (activeClientId) {
       try {
@@ -942,7 +989,6 @@ async function confirmDelete() {
         renderSummary(summary);
       } catch(_) {}
     }
-    document.getElementById('tableSubtitle').textContent = `${checkins.length} check-in(s) registrado(s)`;
   } catch(e) {
     toast('Error al eliminar: ' + e.message, 'error');
   } finally {

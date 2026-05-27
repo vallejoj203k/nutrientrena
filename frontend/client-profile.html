@@ -111,6 +111,12 @@
     .fa-question{font-size:12px;color:#9CA3AF;margin-bottom:3px;}
     .fa-answer{font-size:14px;color:#111;font-weight:500;}
 
+    /* Payment badge */
+    .badge-pago-pendiente{background:#FEF2F2;color:#DC2626;}
+    .badge-pago-parcial{background:#FFF7ED;color:#D97706;}
+    .badge-pago-pagado{background:#ECFDF5;color:#059669;}
+    .badge-pago-default{background:#F3F4F6;color:#6B7280;}
+
     /* Skeleton */
     .skeleton{background:linear-gradient(90deg,#E5E7EB 25%,#F3F4F6 50%,#E5E7EB 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -264,6 +270,80 @@
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         Enviar por email
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Business fields modal -->
+<div class="modal-overlay" id="bizOverlay" onclick="if(event.target===this)closeBizModal()">
+  <div class="modal" style="width:600px;">
+    <div class="modal-head">
+      <h2>Información comercial</h2>
+      <button class="modal-close" onclick="closeBizModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+        <div class="form-group">
+          <label>Plan comprado</label>
+          <input id="biz_plan_comprado" placeholder="Ej: Plan Premium 3 meses"/>
+        </div>
+        <div class="form-group">
+          <label>Precio (€)</label>
+          <input id="biz_precio" type="number" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label>Estado de pago</label>
+          <select id="biz_estado_pago">
+            <option value="">— Sin definir —</option>
+            <option value="pendiente">⏳ Pendiente</option>
+            <option value="parcial">🔶 Parcial</option>
+            <option value="pagado">✅ Pagado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Método de pago</label>
+          <input id="biz_metodo_pago" placeholder="Ej: Tarjeta, Transferencia…"/>
+        </div>
+        <div class="form-group">
+          <label>Importe pagado (€)</label>
+          <input id="biz_importe_pagado" type="number" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label>Importe pendiente (€)</label>
+          <input id="biz_importe_pendiente" type="number" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label>Fecha de compra</label>
+          <input id="biz_fecha_compra" type="date"/>
+        </div>
+        <div class="form-group">
+          <label>Fecha límite entrega</label>
+          <input id="biz_fecha_limite_entrega" type="date"/>
+        </div>
+        <div class="form-group">
+          <label>Responsable venta</label>
+          <input id="biz_responsable_venta" placeholder="Nombre del setter/closer"/>
+        </div>
+        <div class="form-group">
+          <label>Origen CRM</label>
+          <input id="biz_crm_origen" placeholder="Ej: Instagram, Referido…"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Enlace WhatsApp</label>
+        <input id="biz_whatsapp_link" placeholder="https://wa.me/34…"/>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+        <input id="biz_consentimiento" type="checkbox" style="width:auto;"/>
+        <label style="text-transform:none;letter-spacing:0;font-size:14px;color:#374151;margin:0;">
+          Consentimiento de fotografías de evolución
+        </label>
+      </div>
+      <div id="bizError" style="color:#DC2626;font-size:13px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeBizModal()">Cancelar</button>
+      <button class="btn btn-primary" id="bizSaveBtn" onclick="saveBiz()">Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -466,6 +546,66 @@ function renderProfile(c, checkins, formResponses, formAssignment) {
             }).join('')}
           `
         }
+      </div>
+    </div>
+
+    <!-- Business / CRM info -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        Información comercial
+        <button class="btn btn-ghost btn-sm" onclick="openBizModal()">✏️ Editar</button>
+      </div>
+      <div class="info-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+        <div class="info-item">
+          <label>Plan comprado</label>
+          <span>${esc(c.plan_comprado || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>Precio</label>
+          <span>${c.precio != null ? '€' + Number(c.precio).toFixed(2) : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Estado de pago</label>
+          <span class="badge badge-pago-${c.estado_pago || 'default'}" style="margin-top:2px;">
+            ${c.estado_pago === 'pendiente' ? '⏳ Pendiente' : c.estado_pago === 'parcial' ? '🔶 Parcial' : c.estado_pago === 'pagado' ? '✅ Pagado' : '—'}
+          </span>
+        </div>
+        <div class="info-item">
+          <label>Importe pagado</label>
+          <span>${c.importe_pagado != null ? '€' + Number(c.importe_pagado).toFixed(2) : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Importe pendiente</label>
+          <span>${c.importe_pendiente != null ? '€' + Number(c.importe_pendiente).toFixed(2) : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Método de pago</label>
+          <span>${esc(c.metodo_pago || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha de compra</label>
+          <span>${c.fecha_compra ? new Date(c.fecha_compra).toLocaleDateString('es-ES') : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha límite entrega</label>
+          <span>${c.fecha_limite_entrega ? new Date(c.fecha_limite_entrega).toLocaleDateString('es-ES') : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Responsable venta</label>
+          <span>${esc(c.responsable_venta || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>Origen CRM</label>
+          <span>${esc(c.crm_origen || '—')}</span>
+        </div>
+        <div class="info-item">
+          <label>WhatsApp</label>
+          <span>${c.whatsapp_link ? `<a href="${esc(c.whatsapp_link)}" target="_blank" style="color:var(--purple);">Abrir chat →</a>` : '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Consentimiento evolución</label>
+          <span>${c.consentimiento_evolucion ? '✅ Sí' : '❌ No'}</span>
+        </div>
       </div>
     </div>
 
@@ -716,6 +856,76 @@ async function downloadPdf(type) {
   } finally {
     btn.innerHTML = prev;
     btn.disabled  = false;
+  }
+}
+
+// ── Business / CRM modal ─────────────────────────────────────────────────────
+function openBizModal() {
+  if (!clientData) return;
+  const c = clientData;
+  document.getElementById('biz_plan_comprado').value        = c.plan_comprado || '';
+  document.getElementById('biz_precio').value               = c.precio != null ? c.precio : '';
+  document.getElementById('biz_estado_pago').value          = c.estado_pago || '';
+  document.getElementById('biz_metodo_pago').value          = c.metodo_pago || '';
+  document.getElementById('biz_importe_pagado').value       = c.importe_pagado != null ? c.importe_pagado : '';
+  document.getElementById('biz_importe_pendiente').value    = c.importe_pendiente != null ? c.importe_pendiente : '';
+  document.getElementById('biz_fecha_compra').value         = c.fecha_compra ? c.fecha_compra.slice(0, 10) : '';
+  document.getElementById('biz_fecha_limite_entrega').value = c.fecha_limite_entrega ? c.fecha_limite_entrega.slice(0, 10) : '';
+  document.getElementById('biz_responsable_venta').value    = c.responsable_venta || '';
+  document.getElementById('biz_crm_origen').value           = c.crm_origen || '';
+  document.getElementById('biz_whatsapp_link').value        = c.whatsapp_link || '';
+  document.getElementById('biz_consentimiento').checked     = !!c.consentimiento_evolucion;
+  document.getElementById('bizError').textContent = '';
+  document.getElementById('bizOverlay').classList.add('open');
+}
+
+function closeBizModal() {
+  document.getElementById('bizOverlay').classList.remove('open');
+}
+
+async function saveBiz() {
+  const btn = document.getElementById('bizSaveBtn');
+  document.getElementById('bizError').textContent = '';
+  btn.textContent = 'Guardando…';
+  btn.disabled = true;
+
+  const parseOptFloat = val => val !== '' && val != null ? parseFloat(val) : null;
+
+  const body = {
+    plan_comprado:           document.getElementById('biz_plan_comprado').value.trim() || null,
+    precio:                  parseOptFloat(document.getElementById('biz_precio').value),
+    estado_pago:             document.getElementById('biz_estado_pago').value || null,
+    metodo_pago:             document.getElementById('biz_metodo_pago').value.trim() || null,
+    importe_pagado:          parseOptFloat(document.getElementById('biz_importe_pagado').value),
+    importe_pendiente:       parseOptFloat(document.getElementById('biz_importe_pendiente').value),
+    fecha_compra:            document.getElementById('biz_fecha_compra').value || null,
+    fecha_limite_entrega:    document.getElementById('biz_fecha_limite_entrega').value || null,
+    responsable_venta:       document.getElementById('biz_responsable_venta').value.trim() || null,
+    crm_origen:              document.getElementById('biz_crm_origen').value.trim() || null,
+    whatsapp_link:           document.getElementById('biz_whatsapp_link').value.trim() || null,
+    consentimiento_evolucion: document.getElementById('biz_consentimiento').checked,
+  };
+
+  try {
+    const r = await fetch(`${API}/users/${clientId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!r.ok) {
+      document.getElementById('bizError').textContent = j.detail || j.message || 'Error al guardar';
+      return;
+    }
+    clientData = { ...clientData, ...(j.data || j) };
+    closeBizModal();
+    toast('Información comercial actualizada', 'success');
+    loadClient();
+  } catch {
+    document.getElementById('bizError').textContent = 'Error de conexión';
+  } finally {
+    btn.textContent = 'Guardar cambios';
+    btn.disabled = false;
   }
 }
 

@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -57,6 +57,21 @@ class UserDetail(Base):
     end_date = Column(DateTime, nullable=True)
     defecit = Column(Float, nullable=True)
     excedente = Column(Float, nullable=True)
+
+    # ── Business / CRM fields ─────────────────────────────────────────────────
+    plan_comprado = Column(String(255), nullable=True)
+    precio = Column(Float, nullable=True)
+    estado_pago = Column(String(50), nullable=True)          # pendiente / parcial / pagado
+    importe_pagado = Column(Float, nullable=True)
+    importe_pendiente = Column(Float, nullable=True)
+    metodo_pago = Column(String(100), nullable=True)
+    fecha_compra = Column(Date, nullable=True)
+    fecha_limite_entrega = Column(Date, nullable=True)
+    responsable_venta = Column(String(255), nullable=True)
+    crm_origen = Column(String(255), nullable=True)
+    whatsapp_link = Column(String(500), nullable=True)
+    consentimiento_evolucion = Column(Boolean, nullable=True, default=False)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

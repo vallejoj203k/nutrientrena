@@ -13,6 +13,7 @@ from app.schemas.form import (
     FormTemplateCreate, FormTemplateUpdate, FormTemplateOut,
     FormAssignRequest, FormSubmitRequest, FormAssignmentOut,
 )
+from app.seeds.default_form import update_default_form
 
 
 def _get_coach_for_client(client_detail_id: str, db: Session):
@@ -44,6 +45,21 @@ def _get_client_state_id(db: Session, description: str) -> int | None:
         if row:
             _CLIENT_STATE_CACHE[description] = row.id
     return _CLIENT_STATE_CACHE.get(description)
+
+
+# ── Maintenance ───────────────────────────────────────────────────────────────
+
+@router_templates.post("/update-default")
+def update_default_template(
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+):
+    """Idempotent: append any missing fields to the default intake template."""
+    update_default_form(db)
+    template = db.query(FormTemplate).filter(FormTemplate.is_default.is_(True)).first()
+    if not template:
+        return send_error("No hay plantilla por defecto")
+    return send_response(FormTemplateOut.model_validate(template).model_dump(), "Plantilla actualizada")
 
 
 # ── Templates ─────────────────────────────────────────────────────────────────

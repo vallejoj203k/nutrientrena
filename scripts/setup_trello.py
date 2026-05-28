@@ -1,7 +1,15 @@
 """
-Crea las listas y cards del sprint board en Trello.
-Uso: python scripts/setup_trello.py
-Requiere: pip install requests
+Sincroniza el estado del proyecto con el board de Trello.
+- Mueve cards existentes a la lista correcta si ya existen
+- Crea cards nuevas si no existen
+- No duplica
+
+Uso:
+  pip install requests
+  export TRELLO_API_KEY="..."
+  export TRELLO_TOKEN="..."
+  export TRELLO_BOARD_ID="..."
+  python scripts/setup_trello.py
 """
 import os
 import sys
@@ -20,39 +28,33 @@ BASE     = "https://api.trello.com/1"
 if not all([API_KEY, TOKEN, BOARD_ID]):
     print("ERROR: define las variables de entorno TRELLO_API_KEY, TRELLO_TOKEN y TRELLO_BOARD_ID")
     print()
-    print("Ejemplo en PowerShell:")
+    print("PowerShell:")
     print('  $env:TRELLO_API_KEY="tu_api_key"')
     print('  $env:TRELLO_TOKEN="tu_token"')
     print('  $env:TRELLO_BOARD_ID="tu_board_id"')
-    print('  python scripts/setup_trello.py')
+    print()
+    print("Bash / Railway shell:")
+    print('  export TRELLO_API_KEY="tu_api_key"')
+    print('  export TRELLO_TOKEN="tu_token"')
+    print('  export TRELLO_BOARD_ID="tu_board_id"')
     sys.exit(1)
 
-AUTH = {"key": API_KEY, "token": TOKEN}
-
+AUTH  = {"key": API_KEY, "token": TOKEN}
 LISTAS = ["Backlog", "Por Hacer", "En Proceso", "Control de Calidad", "Hecho"]
 
 # =============================================================================
-# ESTADO ACTUAL DEL PROYECTO — actualizado 2026-05-25
+# ESTADO DEL PROYECTO — actualizado 2026-05-28
 #
-# FASE 1 BACKEND: 100% completada
-#   38 tablas en MySQL (Railway) · 128 rutas registradas
-#   Módulos: auth, users, roles, params, países, menús,
-#            alimentos, recetas, dietas, rutinas, entrenamientos,
-#            eventos, notas, progreso, formularios, check-ins, planes
-#
-# FASE 2 EN CURSO:
-#   ✅ Sprint 14 — Analíticas y métricas (4 endpoints)
-#   ✅ Sprint 15 — Upload de imágenes (Cloudflare R2, boto3)
-#   🔜 Sprint 16 — PDF de dietas y rutinas
-#   🔜 Sprint 17 — Frontend completo
-#   🔜 Sprint 18 — Roles y permisos granulares
-#   🔜 Sprint 19 — Notificaciones internas
+# FASE 0 + FASE 1 BACKEND: ✅ 100%
+# FASE 2 FRONTEND + UX:    ✅ 100%  (Sprints 14–19 + extras)
+# FASE 3 NUTRICIÓN:        🔄 En proceso (Días 9–13)
 # =============================================================================
 
 SPRINTS = {
-    # ─────────────────────────────────────────────────────────────────────────
+
+    # ──────────────────────────────────────────────────────────────────────────
     # HECHO ✅
-    # ─────────────────────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────────────────
     "Hecho": [
         {
             "name": "FASE 0 — Infraestructura base ✅",
@@ -62,180 +64,325 @@ SPRINTS = {
                 "✅ JWT auth: login / refresh / logout / /me\n"
                 "✅ Recuperar contraseña via Resend SDK (email real)\n"
                 "✅ HTTPBearer en Swagger UI\n"
-                "✅ Deploy continuo en Railway (.up.railway.app)\n"
-                "✅ CI/CD GitHub Actions: lint + validación de modelos + validación de rutas\n"
+                "✅ Deploy continuo en Railway (nutrientrena-production.up.railway.app)\n"
+                "✅ CI/CD GitHub Actions: lint + validación de modelos y rutas\n"
                 "✅ CORS abierto listo para conectar frontend"
             ),
         },
         {
-            "name": "Sprint 1-8 — Modelos, migraciones y CRUDs ✅",
+            "name": "Sprints 1–8 — Modelos, migraciones y CRUDs ✅",
             "desc": (
-                "✅ 33 tablas base migradas\n"
+                "✅ 38 tablas en MySQL, 128+ rutas registradas\n"
                 "✅ users / user_details / roles / parameters / countries / menus\n"
-                "✅ aliments (UUID) / aliment_descriptions / type_foods / group_foods\n"
-                "✅ recipes / recipe_details\n"
+                "✅ aliments / type_foods / group_foods / recipes\n"
                 "✅ diets / diet_details / diet_foods / diet_food_aliments\n"
                 "✅ routines / routine_days / routine_day_details\n"
-                "✅ trainings / training_clients / muscle_groups / muscle_group_clients\n"
-                "✅ events / event_users / type_events\n"
-                "✅ notes / note_users / template_notes\n"
+                "✅ trainings / muscle_groups / events / notes\n"
                 "✅ progress_day_users / client_targets / user_parents\n"
-                "✅ CRUDs completos para todos los módulos anteriores"
+                "✅ weekly_checkins / plan_deliveries\n"
+                "✅ form_templates / form_assignments / form_responses\n"
+                "✅ CRUDs completos para todos los módulos"
             ),
         },
         {
             "name": "Sprint 9 — Roles, estados y módulo Forms ✅",
             "desc": (
                 "✅ 6 roles: superadmin, admin, setter, closer, coach, cliente\n"
-                "✅ 15 estados del flujo de cliente: Pago pendiente → Cancelado\n"
-                "✅ Formularios de intake:\n"
-                "   · FormTemplate + FormTemplateField (plantillas personalizables)\n"
-                "   · FormAssignment (asignación UUID por cliente)\n"
-                "   · FormResponse (respuestas guardadas en BD)\n"
-                "   · Auto-sync respuestas → perfil del cliente (peso, altura, etc.)\n"
-                "   · Seed: Formulario de Bienvenida con 10 campos\n"
+                "✅ 15 estados del flujo de cliente (Pago pendiente → Cancelado)\n"
+                "✅ Formularios de intake con plantillas personalizables (18+ campos)\n"
+                "✅ FormAssignment por cliente (UUID)\n"
+                "✅ FormResponse: auto-sync respuestas → perfil del cliente\n"
                 "✅ 11 endpoints: CRUD plantillas + asignar + enviar + ver respuestas\n"
-                "✅ Estado cliente: Formulario pendiente → Formulario recibido (automático)"
+                "✅ Estado automático: Formulario pendiente → Formulario recibido"
             ),
         },
         {
             "name": "Sprint 10 — QA integral formularios ✅",
             "desc": (
                 "✅ Script qa_forms.py con 16 checks automatizados contra Railway\n"
-                "✅ Flujo completo verificado en producción:\n"
-                "   login → crear cliente → asignar form → submit → perfil actualizado\n"
-                "✅ Protecciones validadas: doble asignación y doble submit bloqueados\n"
-                "✅ 7 respuestas guardadas correctamente en BD\n"
-                "✅ IDs de estado resueltos dinámicamente (sin hardcoding)"
+                "✅ Flujo completo verificado en producción\n"
+                "✅ Protecciones: doble asignación y doble submit bloqueados\n"
+                "✅ IDs de estado resueltos dinámicamente"
             ),
         },
         {
             "name": "Sprint 11 — Dashboard Kanban ✅",
             "desc": (
-                "✅ GET /api/users/kanban → clientes agrupados por estado con nombre\n"
+                "✅ GET /api/users/kanban → clientes agrupados por estado\n"
                 "✅ Filtro ?coach_id=UUID → solo clientes del coach\n"
                 "✅ PUT /api/users/{id}/change → cambio de estado (drag & drop)\n"
-                "✅ Verificado en producción: 3 clientes en 2 columnas"
+                "✅ Frontend kanban.html con columnas arrastrables"
             ),
         },
         {
             "name": "Sprint 12 — Check-ins semanales ✅",
             "desc": (
                 "✅ Tabla weekly_checkins (UUID, cliente, coach, fecha, peso, notas)\n"
-                "✅ POST /api/checkins → registrar check-in del cliente\n"
-                "✅ GET /api/checkins/client/{id} → historial + delta de peso semana a semana\n"
-                "✅ GET /api/checkins/summary/{id} → cambio total de peso desde inicio\n"
+                "✅ POST /api/checkins → registrar check-in\n"
+                "✅ GET /api/checkins/client/{id} → historial + delta de peso\n"
+                "✅ GET /api/checkins/summary/{id} → cambio total desde inicio\n"
                 "✅ PUT /api/checkins/{id}/coach-notes → feedback del coach\n"
-                "✅ DELETE /api/checkins/{id} → eliminar registro"
+                "✅ DELETE /api/checkins/{id}"
             ),
         },
         {
             "name": "Sprint 13 — Entrega del plan por email ✅",
             "desc": (
-                "✅ POST /api/plans/deliver → envía email HTML al cliente\n"
-                "✅ Email incluye: macros (kcal/proteínas/carbos/grasas), días de rutina\n"
-                "   y mensaje personalizado del coach\n"
-                "✅ Estado cliente → 'Plan entregado' de forma automática\n"
-                "✅ Dieta y rutina son opcionales (se puede enviar solo mensaje)\n"
-                "✅ Verificado en producción con email real (Resend SDK)"
+                "✅ POST /api/plans/deliver → email HTML al cliente\n"
+                "✅ Email con macros (kcal/proteínas/carbs/grasas) + días de rutina\n"
+                "✅ Mensaje personalizado del coach + enlace Loom\n"
+                "✅ Estado cliente → 'Plan entregado' automático\n"
+                "✅ Verificado en producción con Resend SDK"
             ),
         },
         {
             "name": "Sprint 14 — Analíticas y métricas ✅",
             "desc": (
-                "✅ GET /api/analytics/overview\n"
-                "   → total clientes, activos, nuevos este mes, coaches, total check-ins\n"
-                "✅ GET /api/analytics/states\n"
-                "   → distribución de clientes por estado con porcentajes\n"
-                "✅ GET /api/analytics/checkins\n"
-                "   → adherencia (%), cambio de peso promedio, tendencia semanal (8 semanas)\n"
-                "✅ GET /api/analytics/coaches\n"
-                "   → clientes asignados y check-ins recibidos por coach\n"
-                "✅ Filtros: ?coach_id=uuid en todos los endpoints\n"
-                "✅ Frontend analytics.html: 6 tarjetas + gráfico barras + dona + línea + tabla coaches\n"
-                "✅ Gráficos SVG sin librerías externas"
+                "✅ GET /api/analytics/overview → clientes, check-ins, coaches\n"
+                "✅ GET /api/analytics/states → distribución por estado (%)\n"
+                "✅ GET /api/analytics/checkins → adherencia, cambio de peso, tendencia 8 semanas\n"
+                "✅ GET /api/analytics/coaches → clientes y check-ins por coach\n"
+                "✅ Frontend analytics.html: gráficos SVG sin librerías externas"
             ),
         },
         {
-            "name": "Sprint 15 — Upload de imágenes ✅",
+            "name": "Sprint 15 — Upload de imágenes (Cloudflare R2) ✅",
             "desc": (
-                "✅ Cloudflare R2 configurado (S3-compatible con boto3)\n"
-                "✅ POST /api/files/upload → sube imagen, devuelve URL pública\n"
-                "✅ DELETE /api/files/delete → elimina archivo por key\n"
-                "✅ GET /api/files/list → lista archivos por carpeta\n"
-                "✅ Límite: 10 MB · Formatos: JPG, PNG, WEBP, GIF\n"
-                "✅ Carpetas: uploads, profiles, checkins, aliments\n"
-                "✅ Integrado en client-profile.html: avatar con hover overlay + click para subir\n"
-                "✅ Integrado en checkins.html: foto de progreso con preview + lightbox\n"
-                "✅ URL pública activa: pub-397ed3b6f1d1480d8c17d960513a3c78.r2.dev\n"
-                "✅ Verificado en producción: upload retorna 200 con URL pública real"
+                "✅ Cloudflare R2 configurado (S3-compatible, boto3)\n"
+                "✅ POST /api/files/upload → URL pública\n"
+                "✅ Límite 10 MB · Formatos: JPG, PNG, WEBP, GIF\n"
+                "✅ Avatar de cliente editable con hover overlay\n"
+                "✅ Foto de progreso en check-ins con preview + lightbox"
+            ),
+        },
+        {
+            "name": "Sprint 16 — Generación de PDF ✅",
+            "desc": (
+                "✅ GET /api/diets/{id}/pdf → PDF con macros y alimentos por comida\n"
+                "✅ GET /api/routines/{id}/pdf → PDF con días, ejercicios y descripción\n"
+                "✅ Descarga directa desde diets.html y routines.html\n"
+                "✅ Clon de dietas y rutinas (POST /diets/clone, POST /routines/clone)"
+            ),
+        },
+        {
+            "name": "Sprint 17 — Frontend avanzado ✅",
+            "desc": (
+                "✅ Exportación CSV de clientes\n"
+                "✅ Filtros por estado, coach, país en clients.html\n"
+                "✅ Badges de estado con colores semánticos\n"
+                "✅ diets.html: tarjetas con macros, foods tags, PDF, clon, eliminar\n"
+                "✅ routines.html: tarjetas con chips, editor por días, PDF, clon\n"
+                "✅ Diseño responsivo en todas las páginas"
+            ),
+        },
+        {
+            "name": "Sprint 18 — Control de acceso por roles ✅",
+            "desc": (
+                "✅ require_role_ids() en todos los endpoints\n"
+                "✅ verify_client_access() → coaches solo ven sus clientes\n"
+                "✅ Roles: Superadmin, Admin, Setter, Closer, Coach, Cliente\n"
+                "✅ Setter/Closer acceden a catálogos; Coach accede a sus clientes"
+            ),
+        },
+        {
+            "name": "Sprint 19 — Notificaciones por email ✅",
+            "desc": (
+                "✅ Email al coach cuando cliente registra check-in\n"
+                "✅ Email al cliente cuando coach deja notas\n"
+                "✅ Email con link al formulario de intake al asignarlo\n"
+                "✅ Email con resumen de plan (dieta + rutina + Loom)\n"
+                "✅ Todas las plantillas con branding NutriEntrena (purple #5B2D8E)"
+            ),
+        },
+        {
+            "name": "Extras Fase 2 — CRM + perfil extendido ✅",
+            "desc": (
+                "✅ Campos CRM en user_details: plan_comprado, precio, estado_pago,\n"
+                "   importe_pagado/pendiente, fecha_compra, fecha_limite_entrega,\n"
+                "   responsable_venta, crm_origen, whatsapp_link, consentimiento\n"
+                "✅ Migración c3d4e5f6a7b8 aplicada en Railway\n"
+                "✅ Tab Comercial en client-profile.html con grid editable\n"
+                "✅ GET /api/plans/history/{client_id} → historial de entregas\n"
+                "✅ POST /api/plans/resend/{id} → reenviar email de entrega"
+            ),
+        },
+        {
+            "name": "Fase 3 / Sprint 20 — Portal público para clientes ✅",
+            "desc": (
+                "✅ GET /api/public/form/{assignment_id} → sin autenticación\n"
+                "✅ POST /api/public/form/{assignment_id}/submit\n"
+                "✅ Página public/form.html: formulario dinámico con barra de progreso\n"
+                "✅ Estados: cargando → formulario → enviado / ya respondido / error\n"
+                "✅ FRONTEND_URL env var en Railway controla el link del formulario"
+            ),
+        },
+        {
+            "name": "Fase 3 / Sprint 21 — Perfil de cliente extendido ✅",
+            "desc": (
+                "✅ 4 tabs en client-profile.html: Resumen | Formulario | Entregas | Comercial\n"
+                "✅ Resumen: stats (check-ins, peso, estado), gráfica SVG de evolución\n"
+                "✅ Formulario: 3 estados (sin asignar / pendiente / respondido con labels)\n"
+                "✅ Entregas: historial con chips de dieta/rutina/email/Loom\n"
+                "✅ Botón Re-enviar email en cada entrega previa\n"
+                "✅ Badge de formulario pendiente en tab"
+            ),
+        },
+        {
+            "name": "Fase 3 / Sprint 22 — Check-ins con mediciones corporales ✅",
+            "desc": (
+                "✅ 7 nuevas columnas: body_fat, waist, chest, hips, arms, legs, photo_url\n"
+                "✅ Migración Alembic e5f6a7b8c9d0 aplicada en Railway\n"
+                "✅ Modal de nuevo check-in: sección de mediciones en grid 3 columnas\n"
+                "✅ Modal de notas del coach: edita mediciones + peso\n"
+                "✅ Tabla con resumen de mediciones por check-in"
+            ),
+        },
+        {
+            "name": "Fase 3 / Sprint 23 — UX entregas de planes ✅",
+            "desc": (
+                "✅ Historial muestra nombre real de dieta y rutina (antes solo ID)\n"
+                "✅ Botón Re-enviar email en cada entrega del historial\n"
+                "✅ POST /api/plans/resend/{delivery_id}\n"
+                "✅ Preview inline de macros al seleccionar dieta en modal\n"
+                "✅ Helpers _build_diet_payload / _build_routine_payload reutilizables"
+            ),
+        },
+        {
+            "name": "Fase 3 / Día 9 — Catálogos de nutrición ✅",
+            "desc": (
+                "✅ nutrition-catalog.html: dos paneles (Tipos de alimento | Grupos de alimento)\n"
+                "✅ CRUD completo: crear, editar, eliminar (soft-delete via PUT status=0)\n"
+                "✅ Búsqueda en tiempo real + contador + atajos de teclado\n"
+                "✅ Fix bug schema food.py: state → status (el CRUD no funcionaba antes)\n"
+                "✅ Sidebar con sección Nutrición: Catálogos → Alimentos → Recetas → Dietas"
             ),
         },
     ],
 
-    # ─────────────────────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────────────────
     # EN PROCESO
-    # ─────────────────────────────────────────────────────────────────────────
-    "En Proceso": [],
+    # ──────────────────────────────────────────────────────────────────────────
+    "En Proceso": [
+        {
+            "name": "Fase 3 — Nutrición frontend 🔄",
+            "desc": (
+                "✅ Día 9: nutrition-catalog.html (Tipos + Grupos)\n"
+                "🔄 Día 10: aliments.html — CRUD + importación masiva CSV\n"
+                "[ ] Día 11: recipes.html — CRUD + asignación a cliente\n"
+                "[ ] Día 12: diets.html — ya entregado ✅\n"
+                "[ ] Día 13: Metas del cliente — peso objetivo vs actual en perfil"
+            ),
+        },
+    ],
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # POR HACER — FASE 2
-    # ─────────────────────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────────────────
+    # POR HACER — Fase 3 pendiente
+    # ──────────────────────────────────────────────────────────────────────────
     "Por Hacer": [
         {
-            "name": "Sprint 16 — PDF de dietas y rutinas",
+            "name": "Fase 3 / Día 10 — aliments.html",
             "desc": (
-                "[ ] GET /api/diets/{id}/pdf → PDF con macros y alimentos por comida\n"
-                "[ ] GET /api/routines/{id}/pdf → PDF con días, ejercicios, series/reps\n"
-                "[ ] Template HTML → PDF con WeasyPrint o similar\n"
-                "[ ] Adjuntar PDF al email de entrega del plan (Sprint 13)"
+                "[ ] Tabla de alimentos con búsqueda + paginación\n"
+                "[ ] Modal crear/editar: nombre, grupo, macros (prot/carbs/grasas/kcal)\n"
+                "[ ] Importación masiva desde CSV (POST /api/aliments/import)\n"
+                "[ ] Preview de CSV antes de importar\n"
+                "[ ] Backend: GET /api/aliments/search con filtros"
+            ),
+        },
+        {
+            "name": "Fase 3 / Día 11 — recipes.html",
+            "desc": (
+                "[ ] Listado de recetas con búsqueda\n"
+                "[ ] Modal crear/editar: nombre, ingredientes, instrucciones\n"
+                "[ ] Asignar receta a cliente (POST /api/recipes/assign)\n"
+                "[ ] Ver recetas asignadas por cliente"
+            ),
+        },
+        {
+            "name": "Fase 3 / Día 13 — Metas del cliente",
+            "desc": (
+                "[ ] Tab o sección 'Metas' en client-profile.html\n"
+                "[ ] Registrar peso objetivo (ClientTarget)\n"
+                "[ ] Gráfica peso actual vs peso objetivo a lo largo del tiempo\n"
+                "[ ] Indicador de progreso porcentual hacia la meta\n"
+                "[ ] Backend: POST /api/client-targets, GET /api/client-targets/search"
             ),
         },
     ],
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # BACKLOG — FASE 3
-    # ─────────────────────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────────────────
+    # BACKLOG — ideas futuras
+    # ──────────────────────────────────────────────────────────────────────────
     "Backlog": [
         {
-            "name": "Sprint 17 — Frontend avanzado y pulido",
+            "name": "Log de entrenamiento estilo Hevy",
             "desc": (
-                "[ ] Notificaciones in-app (badge de pendientes)\n"
-                "[ ] Modo oscuro / tema personalizable\n"
-                "[ ] Paginación infinita en listados grandes\n"
-                "[ ] Vista móvil / PWA (manifest.json + service worker)\n"
-                "[ ] Exportar tabla de clientes a CSV\n"
-                "[ ] Filtros avanzados en kanban y check-ins"
+                "[ ] Registrar sesiones de entrenamiento: ejercicio, series, reps, carga\n"
+                "[ ] Historial por cliente y por ejercicio\n"
+                "[ ] Progresión de fuerza en gráfica"
             ),
         },
         {
-            "name": "Sprint 18 — Roles y permisos granulares",
+            "name": "Dashboard enriquecido",
             "desc": (
-                "[ ] Middleware de autorización por rol en cada endpoint\n"
-                "[ ] Setter: crear leads, asignar formularios\n"
-                "[ ] Closer: ver y actualizar estados de pago\n"
-                "[ ] Coach: solo sus clientes asignados, sin acceso admin\n"
-                "[ ] Admin: acceso total excepto panel superadmin\n"
-                "[ ] Superadmin: gestión de cuentas y configuración global"
+                "[ ] Métricas reales: clientes activos, check-ins recientes\n"
+                "[ ] Pipeline CRM en el dashboard\n"
+                "[ ] Alertas: clientes sin check-in en 2+ semanas\n"
+                "[ ] Clientes con fecha límite de entrega próxima"
             ),
         },
         {
-            "name": "Sprint 19 — Notificaciones internas",
+            "name": "Vista móvil / PWA",
             "desc": (
-                "[ ] Notificar al coach cuando cliente envía formulario\n"
-                "[ ] Notificar al coach cuando cliente sube check-in\n"
-                "[ ] Notificar al cliente cuando el coach deja notas\n"
-                "[ ] Canal: email (Resend) y/o webhook configurable"
+                "[ ] manifest.json + service worker\n"
+                "[ ] Navegación responsiva en móvil\n"
+                "[ ] Notificaciones push"
             ),
         },
     ],
 }
 
 
-def crear_card(nombre, desc, lista_id):
-    r = requests.post(f"{BASE}/cards", params={**AUTH, "name": nombre, "desc": desc, "idList": lista_id})
+# ─────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_all_cards(board_real_id: str) -> dict:
+    """Devuelve {nombre_normalizado: card_dict} de todas las cards del board."""
+    r = requests.get(
+        f"{BASE}/boards/{board_real_id}/cards",
+        params={**AUTH, "fields": "id,name,idList"},
+    )
     if r.status_code != 200:
-        print(f"      ERROR al crear card '{nombre}': {r.status_code} - {r.text}")
+        print(f"ERROR al obtener cards: {r.status_code}")
+        return {}
+    return {c["name"].strip(): c for c in r.json()}
+
+
+def upsert_card(nombre: str, desc: str, lista_id: str, existing_cards: dict):
+    card = existing_cards.get(nombre.strip())
+    if card:
+        if card["idList"] != lista_id:
+            requests.put(
+                f"{BASE}/cards/{card['id']}",
+                params={**AUTH, "idList": lista_id, "desc": desc},
+            )
+            print(f"      → Movida a lista correcta")
+        else:
+            requests.put(
+                f"{BASE}/cards/{card['id']}",
+                params={**AUTH, "desc": desc},
+            )
+            print(f"      → Descripción actualizada")
+    else:
+        r = requests.post(
+            f"{BASE}/cards",
+            params={**AUTH, "name": nombre, "desc": desc, "idList": lista_id},
+        )
+        if r.status_code != 200:
+            print(f"      ERROR al crear card: {r.status_code} - {r.text}")
+        else:
+            print(f"      → Creada")
 
 
 def main():
@@ -244,41 +391,44 @@ def main():
         print(f"ERROR al conectar con el board: {rb.status_code} - {rb.text}")
         return
     board_real_id = rb.json()["id"]
-    print(f"Board: {rb.json()['name']} ({board_real_id})")
+    print(f"Board: {rb.json()['name']} ({board_real_id})\n")
 
-    print("Obteniendo listas del board...")
+    # Obtener / crear listas
     r = requests.get(f"{BASE}/boards/{board_real_id}/lists", params=AUTH)
-    if r.status_code != 200:
-        print(f"ERROR al obtener listas: {r.status_code} - {r.text}")
-        return
-
     existentes = r.json()
     lista_ids = {l["name"]: l["id"] for l in existentes}
 
     for nombre in LISTAS:
         if nombre not in lista_ids:
-            print(f"   Creando lista: {nombre}")
-            rr = requests.post(f"{BASE}/lists", params={**AUTH, "name": nombre, "idBoard": board_real_id})
-            if rr.status_code != 200:
-                print(f"      ERROR: {rr.status_code} - {rr.text}")
-            else:
+            print(f"Creando lista: {nombre}")
+            rr = requests.post(
+                f"{BASE}/lists",
+                params={**AUTH, "name": nombre, "idBoard": board_real_id},
+            )
+            if rr.status_code == 200:
                 lista_ids[nombre] = rr.json()["id"]
+            else:
+                print(f"  ERROR: {rr.status_code}")
         else:
-            print(f"   Lista ya existe: {nombre}")
+            print(f"Lista OK: {nombre}")
 
-    print("\nCreando cards...")
+    print()
+
+    # Obtener todas las cards existentes para no duplicar
+    existing_cards = get_all_cards(board_real_id)
+    print(f"Cards existentes en el board: {len(existing_cards)}\n")
+
+    # Upsert cards
+    print("Sincronizando cards…")
     for lista_nombre, cards in SPRINTS.items():
-        if not cards:
-            continue
-        if lista_nombre not in lista_ids:
-            print(f"   SKIP: lista '{lista_nombre}' no encontrada")
+        if not cards or lista_nombre not in lista_ids:
             continue
         lista_id = lista_ids[lista_nombre]
         for card in cards:
-            print(f"   [{lista_nombre}] {card['name']}")
-            crear_card(card["name"], card["desc"], lista_id)
+            print(f"  [{lista_nombre}] {card['name']}")
+            upsert_card(card["name"], card["desc"], lista_id, existing_cards)
 
-    print(f"\nListo: https://trello.com/b/{BOARD_ID}")
+    print(f"\n✅ Listo: https://trello.com/b/{BOARD_ID}")
 
 
 if __name__ == "__main__":

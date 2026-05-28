@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
 
 
 class TypeFoodCreate(BaseModel):
@@ -11,14 +10,14 @@ class TypeFoodCreate(BaseModel):
 class TypeFoodUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    state: Optional[int] = None
+    status: Optional[int] = None
 
 
 class TypeFoodOut(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
-    state: int
+    status: int
 
     model_config = {"from_attributes": True}
 
@@ -31,13 +30,13 @@ class GroupFoodCreate(BaseModel):
 class GroupFoodUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    state: Optional[int] = None
+    status: Optional[int] = None
 
 
 class GroupFoodOut(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
-    state: int
+    status: int
 
     model_config = {"from_attributes": True}

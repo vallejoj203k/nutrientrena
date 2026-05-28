@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Catálogos de Nutrición</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar h1{font-size:18px;font-weight:700;color:#111;}
+    .topbar-sub{font-size:13px;color:#6B7280;margin-top:2px;}
+
+    .content{flex:1;overflow-y:auto;padding:24px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Two-panel layout ── */
+    .panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+    @media(max-width:900px){.panels{grid-template-columns:1fr;}}
+
+    /* ── Panel card ── */
+    .panel-card{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;overflow:hidden;}
+    .panel-head{padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;}
+    .panel-head-left h2{font-size:15px;font-weight:700;color:#111;}
+    .panel-head-left p{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .panel-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;background:var(--purple-pale);color:var(--purple);border-radius:20px;font-size:11px;font-weight:700;padding:0 6px;margin-left:8px;}
+
+    .panel-toolbar{padding:12px 16px;border-bottom:1px solid #F3F4F6;display:flex;gap:10px;align-items:center;}
+    .search-wrap{position:relative;flex:1;}
+    .search-wrap input{width:100%;padding:8px 12px 8px 34px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;background:#FAFAFA;}
+    .search-wrap input:focus{border-color:var(--purple);background:#fff;}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;}
+
+    /* ── Table ── */
+    .catalog-table{width:100%;border-collapse:collapse;}
+    .catalog-table th{padding:10px 16px;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F3F4F6;}
+    .catalog-table td{padding:12px 16px;font-size:13px;color:#111;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
+    .catalog-table tr:last-child td{border-bottom:none;}
+    .catalog-table tr:hover td{background:#FAFAFA;}
+    .catalog-table .desc{font-size:12px;color:#6B7280;}
+    .catalog-table .empty-row td{text-align:center;padding:40px;color:#9CA3AF;font-size:13px;}
+
+    /* ── Buttons ── */
+    .btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+    .btn-icon{padding:6px;border-radius:7px;background:none;border:none;cursor:pointer;display:inline-flex;color:#6B7280;transition:.15s;}
+    .btn-icon:hover{background:#F3F4F6;color:#111;}
+    .btn-icon.danger:hover{background:#FEE2E2;color:#DC2626;}
+    .actions-cell{display:flex;gap:4px;justify-content:flex-end;}
+
+    /* ── Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#fff;border-radius:16px;width:440px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
+    .modal-close:hover{color:#374151;}
+    .modal-body{padding:20px 24px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group input,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;resize:vertical;}
+    .form-group textarea{min-height:72px;}
+    .form-group input:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-error{color:#DC2626;font-size:12px;margin-top:8px;}
+
+    /* ── Confirm dialog ── */
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .confirm-overlay.open{opacity:1;pointer-events:all;}
+    .confirm-box{background:#fff;border-radius:14px;padding:28px;width:360px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .confirm-overlay.open .confirm-box{transform:translateY(0);}
+    .confirm-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:24px;line-height:1.5;}
+    .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:300;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de gestión</small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item" href="kanban.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="12"/><rect x="17" y="3" width="5" height="15"/></svg>
+      Kanban
+    </a>
+    <div class="nav-section">Nutrición</div>
+    <a class="nav-item active" href="nutrition-catalog.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+      Catálogos
+    </a>
+    <a class="nav-item" href="aliments.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Alimentos
+    </a>
+    <a class="nav-item" href="recipes.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 20h20M5 20V8l7-5 7 5v12"/><path d="M10 20v-5h4v5"/></svg>
+      Recetas
+    </a>
+    <a class="nav-item" href="diets.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
+      Dietas
+    </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="routines.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Rutinas
+    </a>
+    <div class="nav-section">Seguimiento</div>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <a class="nav-item" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Formularios
+      <span class="nav-badge" id="formsBadge" style="display:none"></span>
+    </a>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytics
+    </a>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Catálogos de Nutrición</h1>
+      <div class="topbar-sub">Tipos y grupos de alimentos usados en dietas</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="panels">
+
+      <!-- ── TypeFood panel ── -->
+      <div class="panel-card">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <h2>Tipos de Alimento <span class="panel-count" id="tfCount">0</span></h2>
+            <p>Clasifica las dietas por tipo (ej: Hipocalórica, Vegana)</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('typeFood')">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar
+          </button>
+        </div>
+        <div class="panel-toolbar">
+          <div class="search-wrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="tfSearch" placeholder="Buscar tipo…" oninput="renderTypeFood()"/>
+          </div>
+        </div>
+        <table class="catalog-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th style="width:80px;"></th>
+            </tr>
+          </thead>
+          <tbody id="tfBody">
+            <tr class="empty-row"><td colspan="3">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── GroupFood panel ── -->
+      <div class="panel-card">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <h2>Grupos de Alimento <span class="panel-count" id="gfCount">0</span></h2>
+            <p>Agrupa los alimentos por categoría (ej: Lácteos, Carnes)</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('groupFood')">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar
+          </button>
+        </div>
+        <div class="panel-toolbar">
+          <div class="search-wrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="gfSearch" placeholder="Buscar grupo…" oninput="renderGroupFood()"/>
+          </div>
+        </div>
+        <table class="catalog-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th style="width:80px;"></th>
+            </tr>
+          </thead>
+          <tbody id="gfBody">
+            <tr class="empty-row"><td colspan="3">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /panels -->
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ── Create / Edit modal ── -->
+<div class="modal-overlay" id="catalogOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Nuevo tipo</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId"/>
+      <input type="hidden" id="editCatalog"/>
+      <div class="form-group">
+        <label>Nombre</label>
+        <input id="fieldName" type="text" placeholder="Ej: Hipocalórica" maxlength="255"/>
+      </div>
+      <div class="form-group">
+        <label>Descripción <span style="font-weight:400;text-transform:none;">(opcional)</span></label>
+        <textarea id="fieldDesc" placeholder="Descripción breve…" maxlength="500"></textarea>
+      </div>
+      <div class="form-error" id="modalError"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveItem()">
+        <span id="saveBtnLabel">Guardar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm delete ── -->
+<div class="confirm-overlay" id="confirmOverlay" onclick="if(event.target===this)closeConfirm()">
+  <div class="confirm-box">
+    <h3>¿Eliminar registro?</h3>
+    <p id="confirmMsg">Esta acción desactivará el registro y no aparecerá en las listas.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="doDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API   = 'https://nutrientrena-production.up.railway.app/api';
+const token = localStorage.getItem('token');
+const h     = () => ({ Authorization: `Bearer ${token}` });
+const esc   = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+if (!token) location.href = 'login.html';
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let tfItems = [], gfItems = [];
+let deletingId = null, deletingCatalog = null;
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadAll() {
+  try {
+    const [tfRes, gfRes] = await Promise.all([
+      fetch(`${API}/typeFood/findAll`,  { headers: h() }),
+      fetch(`${API}/groupFood/findAll`, { headers: h() }),
+    ]);
+    if (tfRes.status === 401 || gfRes.status === 401) { logout(); return; }
+    if (tfRes.ok) tfItems = (await tfRes.json()).data || [];
+    if (gfRes.ok) gfItems = (await gfRes.json()).data || [];
+  } catch { toast('Error al cargar catálogos', 'error'); }
+  renderTypeFood();
+  renderGroupFood();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function filter(items, q) {
+  if (!q) return items;
+  q = q.toLowerCase();
+  return items.filter(i =>
+    i.name.toLowerCase().includes(q) ||
+    (i.description || '').toLowerCase().includes(q)
+  );
+}
+
+function renderTable(tbodyId, items, catalog) {
+  const tbody = document.getElementById(tbodyId);
+  if (!items.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Sin registros — haz clic en Agregar para crear uno</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items.map(item => `
+    <tr>
+      <td style="font-weight:600;">${esc(item.name)}</td>
+      <td class="desc">${esc(item.description || '—')}</td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn-icon" onclick="openEdit('${catalog}', ${item.id})" title="Editar">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon danger" onclick="openConfirm('${catalog}', ${item.id}, '${esc(item.name)}')" title="Eliminar">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderTypeFood() {
+  const q = document.getElementById('tfSearch').value.trim();
+  const filtered = filter(tfItems, q);
+  document.getElementById('tfCount').textContent = filtered.length;
+  renderTable('tfBody', filtered, 'typeFood');
+}
+
+function renderGroupFood() {
+  const q = document.getElementById('gfSearch').value.trim();
+  const filtered = filter(gfItems, q);
+  document.getElementById('gfCount').textContent = filtered.length;
+  renderTable('gfBody', filtered, 'groupFood');
+}
+
+// ── Modal open ────────────────────────────────────────────────────────────────
+function openModal(catalog, item = null) {
+  const label = catalog === 'typeFood' ? 'tipo de alimento' : 'grupo de alimento';
+  document.getElementById('modalTitle').textContent  = item ? `Editar ${label}` : `Nuevo ${label}`;
+  document.getElementById('editCatalog').value = catalog;
+  document.getElementById('editId').value      = item?.id ?? '';
+  document.getElementById('fieldName').value   = item?.name ?? '';
+  document.getElementById('fieldDesc').value   = item?.description ?? '';
+  document.getElementById('modalError').textContent  = '';
+  document.getElementById('saveBtn').disabled  = false;
+  document.getElementById('saveBtnLabel').textContent = 'Guardar';
+  document.getElementById('catalogOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('fieldName').focus(), 120);
+}
+
+function openEdit(catalog, id) {
+  const items = catalog === 'typeFood' ? tfItems : gfItems;
+  const item  = items.find(i => i.id === id);
+  if (item) openModal(catalog, item);
+}
+
+function closeModal() {
+  document.getElementById('catalogOverlay').classList.remove('open');
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveItem() {
+  const catalog = document.getElementById('editCatalog').value;
+  const id      = document.getElementById('editId').value;
+  const name    = document.getElementById('fieldName').value.trim();
+  const desc    = document.getElementById('fieldDesc').value.trim();
+
+  if (!name) {
+    document.getElementById('modalError').textContent = 'El nombre es requerido.';
+    document.getElementById('fieldName').focus();
+    return;
+  }
+
+  const btn = document.getElementById('saveBtn');
+  const lbl = document.getElementById('saveBtnLabel');
+  btn.disabled = true; lbl.textContent = 'Guardando…';
+  document.getElementById('modalError').textContent = '';
+
+  const prefix  = catalog === 'typeFood' ? 'typeFood' : 'groupFood';
+  const url     = id ? `${API}/${prefix}/${id}/update` : `${API}/${prefix}`;
+  const method  = id ? 'PUT' : 'POST';
+  const body    = { name, description: desc || null };
+
+  try {
+    const r = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!r.ok) {
+      document.getElementById('modalError').textContent = j.message || j.detail || 'Error al guardar.';
+      return;
+    }
+    closeModal();
+    toast(id ? 'Actualizado correctamente' : 'Creado correctamente', 'success');
+    loadAll();
+  } catch {
+    document.getElementById('modalError').textContent = 'Error de conexión.';
+  } finally {
+    btn.disabled = false; lbl.textContent = 'Guardar';
+  }
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+function openConfirm(catalog, id, name) {
+  deletingCatalog = catalog;
+  deletingId      = id;
+  document.getElementById('confirmMsg').textContent = `Se eliminará "${name}". Esta acción no se puede deshacer.`;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  deletingId = deletingCatalog = null;
+}
+
+async function doDelete() {
+  if (!deletingId || !deletingCatalog) return;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true; btn.textContent = 'Eliminando…';
+
+  const prefix = deletingCatalog === 'typeFood' ? 'typeFood' : 'groupFood';
+  try {
+    const r = await fetch(`${API}/${prefix}/${deletingId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ status: 0 }),
+    });
+    if (r.ok) {
+      closeConfirm();
+      toast('Registro eliminado', 'success');
+      loadAll();
+    } else {
+      toast('No se pudo eliminar', 'error');
+    }
+  } catch { toast('Error de conexión', 'error'); }
+  finally  { btn.disabled = false; btn.textContent = 'Eliminar'; }
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeConfirm();
+  }
+  if (e.key === 'Enter' && document.getElementById('catalogOverlay').classList.contains('open')) {
+    if (document.activeElement?.tagName !== 'TEXTAREA') saveItem();
+  }
+});
+
+// ── User & helpers ────────────────────────────────────────────────────────────
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = `toast show ${type || ''}`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = 'toast'; }, 3500);
+}
+
+async function loadUser() {
+  try {
+    const r = await fetch(`${API}/users/me`, { headers: h() });
+    if (r.status === 401) { logout(); return; }
+    const j = await r.json();
+    const u = j.data || j;
+    const detail = u.detail || {};
+    const name   = `${detail.name || ''} ${detail.last_name || ''}`.trim() || u.email || 'Usuario';
+    document.getElementById('sidebarName').textContent   = name;
+    document.getElementById('sidebarRole').textContent   = (u.roles?.[0]?.name) || '—';
+    document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+  } catch {}
+}
+
+async function loadPendingBadge() {
+  try {
+    const r = await fetch(`${API}/form-assignments/pending-count`, { headers: h() });
+    if (!r.ok) return;
+    const j = await r.json();
+    const count = j.data?.count ?? 0;
+    const badge = document.getElementById('formsBadge');
+    if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; }
+  } catch {}
+}
+
+function logout() { localStorage.clear(); location.href = 'login.html'; }
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadUser();
+loadPendingBadge();
+loadAll();
+</script>
+</body>
+</html>

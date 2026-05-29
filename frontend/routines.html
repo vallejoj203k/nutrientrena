@@ -326,7 +326,7 @@
 
 <script>
   const API = 'https://nutrientrena-production.up.railway.app/api';
-  let token = localStorage.getItem('access_token') || '';
+  let token = localStorage.getItem('token') || '';
   let allRoutines = [];
   let editingId = null;
   let deletingId = null;
@@ -350,7 +350,7 @@
   }
 
   function logout() {
-    localStorage.removeItem('access_token');
+    localStorage.removeItem('token');
     location.href = 'login.html';
   }
 

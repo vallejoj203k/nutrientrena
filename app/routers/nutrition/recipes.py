@@ -29,13 +29,19 @@ def search(
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
-    q = db.query(Recipe)
+    q = db.query(Recipe).filter(Recipe.state == 1)
     if search:
         q = q.filter(Recipe.name.ilike(f"%{search}%"))
     total = q.count()
-    items = q.offset((page - 1) * per_page).limit(per_page).all()
+    items = q.order_by(Recipe.name).offset((page - 1) * per_page).limit(per_page).all()
     return send_response(
-        {"data": [RecipeOut.model_validate(i).model_dump() for i in items], "total": total, "page": page, "per_page": per_page, "last_page": (total + per_page - 1) // per_page},
+        {
+            "data": [RecipeOut.model_validate(i).model_dump() for i in items],
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "last_page": max(1, (total + per_page - 1) // per_page),
+        },
         "OK",
     )
 

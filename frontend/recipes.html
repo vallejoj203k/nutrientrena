@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Recetas</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar-left h1{font-size:18px;font-weight:700;color:#111;}
+    .topbar-left p{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .topbar-actions{display:flex;gap:10px;}
+    .toolbar{padding:12px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
+    .search-wrap{position:relative;flex:1;min-width:200px;max-width:360px;}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;background:#FAFAFA;}
+    .search-wrap input:focus{border-color:var(--purple);background:#fff;}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;}
+    .total-badge{margin-left:auto;font-size:13px;color:#6B7280;white-space:nowrap;}
+    .content{flex:1;overflow-y:auto;padding:24px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Cards grid ── */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+    .recipe-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;transition:.15s;}
+    .recipe-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#D1D5DB;}
+    .card-header{padding:16px 16px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+    .card-name{font-size:15px;font-weight:700;color:#111;line-height:1.3;}
+    .card-desc{font-size:12px;color:#6B7280;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .card-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:#9CA3AF;margin-top:6px;}
+    .card-meta span{display:flex;align-items:center;gap:3px;}
+    .card-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#F3F4F6;border-top:1px solid #F3F4F6;}
+    .macro-cell{background:#fff;padding:8px 4px;text-align:center;}
+    .macro-cell .val{font-size:14px;font-weight:700;color:#111;}
+    .macro-cell .lbl{font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+    .macro-cell.prot .val{color:#3B82F6;}
+    .macro-cell.carb .val{color:#F59E0B;}
+    .macro-cell.fat .val{color:#EF4444;}
+    .macro-cell.kcal .val{color:var(--purple);}
+    .card-footer{padding:10px 12px;border-top:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .ingr-count{font-size:12px;color:#6B7280;display:flex;align-items:center;gap:4px;}
+    .card-actions{display:flex;gap:4px;}
+
+    /* ── Pagination ── */
+    .pagination{margin-top:24px;display:flex;align-items:center;justify-content:space-between;}
+    .page-info{font-size:13px;color:#6B7280;}
+    .page-btns{display:flex;gap:6px;}
+    .page-btn{padding:7px 12px;border:1px solid #E5E7EB;border-radius:7px;background:#fff;font-size:13px;cursor:pointer;color:#374151;transition:.15s;}
+    .page-btn:hover:not(:disabled){border-color:var(--purple);color:var(--purple);}
+    .page-btn:disabled{opacity:.4;cursor:default;}
+    .page-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+
+    /* ── Buttons ── */
+    .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+    .btn-icon{padding:6px;border-radius:7px;background:none;border:none;cursor:pointer;display:inline-flex;color:#6B7280;transition:.15s;}
+    .btn-icon:hover{background:#F3F4F6;color:#111;}
+    .btn-icon.danger:hover{background:#FEE2E2;color:#DC2626;}
+
+    /* ── Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#fff;border-radius:16px;width:640px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
+    .modal-close:hover{color:#374151;}
+    .modal-body{padding:20px 24px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-group textarea{min-height:72px;resize:vertical;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+    .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
+    .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .form-error{color:#DC2626;font-size:12px;margin-top:6px;}
+
+    /* ── Ingredient rows ── */
+    .ingr-list{display:flex;flex-direction:column;gap:8px;}
+    .ingr-row{display:grid;grid-template-columns:1fr 80px 1fr auto;gap:8px;align-items:start;}
+    .ingr-row .ac-wrap{position:relative;}
+    .ingr-row input{width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:13px;outline:none;}
+    .ingr-row input:focus{border-color:var(--purple);}
+    .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;display:none;}
+    .ac-dropdown.open{display:block;}
+    .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #F9FAFB;}
+    .ac-item:last-child{border-bottom:none;}
+    .ac-item:hover{background:var(--purple-pale);}
+    .ac-item .ac-name{font-weight:600;color:#111;}
+    .ac-item .ac-brand{font-size:11px;color:#9CA3AF;}
+    .ingr-add-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--purple-pale);color:var(--purple);border:1px dashed var(--purple);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px;width:100%;justify-content:center;transition:.15s;}
+    .ingr-add-btn:hover{background:#E9DCFF;}
+    .ingr-empty{padding:20px;text-align:center;color:#9CA3AF;font-size:13px;border:1px dashed #E5E7EB;border-radius:8px;}
+
+    /* ── Empty state ── */
+    .empty-state{text-align:center;padding:80px 20px;color:#9CA3AF;}
+    .empty-state svg{margin:0 auto 16px;display:block;opacity:.3;}
+    .empty-state p{font-size:15px;}
+    .empty-state small{font-size:13px;margin-top:4px;display:block;}
+
+    /* ── Delete modal ── */
+    .del-modal{width:400px;}
+    .del-modal .modal-body{text-align:center;padding:28px 24px;}
+    .del-modal .del-icon{width:56px;height:56px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#DC2626;}
+    .del-modal h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .del-modal p{font-size:13px;color:#6B7280;line-height:1.5;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(20px);opacity:0;transition:.25s;}
+    .toast.show{transform:none;opacity:1;}
+    .toast.ok{background:#111;color:#fff;}
+    .toast.err{background:#DC2626;color:#fff;}
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de gestión</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="kanban.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+      Kanban
+    </a>
+    <a href="clients.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a href="checkins.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <a href="forms.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Formularios
+      <span class="nav-badge" id="formsBadge" style="display:none"></span>
+    </a>
+    <div class="nav-section">Nutrición</div>
+    <a href="diets.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Dietas
+    </a>
+    <a href="aliments.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Alimentos
+    </a>
+    <a href="recipes.html" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v4l3 3"/></svg>
+      Recetas
+    </a>
+    <a href="nutrition-catalog.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Catálogos
+    </a>
+    <div class="nav-section">Entrenamiento</div>
+    <a href="routines.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Rutinas
+    </a>
+    <div class="nav-section">Análisis</div>
+    <a href="analytics.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytics
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Recetas</h1>
+      <p>Crea y gestiona recetas con ingredientes y macros</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nueva receta
+      </button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar receta…" oninput="debouncedSearch()"/>
+    </div>
+    <span class="total-badge" id="totalBadge"></span>
+  </div>
+
+  <div class="content" id="content">
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div class="pagination" id="pagination" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ── Create / Edit Modal ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Nueva receta</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" id="fName" placeholder="Pollo con verduras al horno…"/>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="fDesc" placeholder="Breve descripción de la receta…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Instrucciones</label>
+        <textarea id="fInstr" rows="4" placeholder="Pasos de preparación…" style="min-height:90px;"></textarea>
+      </div>
+      <div class="form-row" style="gap:0 16px;">
+        <div class="form-group">
+          <label>Raciones</label>
+          <input type="number" id="fServings" min="1" placeholder="2"/>
+        </div>
+        <div class="form-group">
+          <label>Tiempo prep. (min)</label>
+          <input type="number" id="fPrepTime" min="0" placeholder="30"/>
+        </div>
+      </div>
+
+      <div class="section-title">Macronutrientes (por ración)</div>
+      <div class="form-row-4">
+        <div class="form-group">
+          <label>Proteínas (g)</label>
+          <input type="number" id="fProteins" min="0" step="0.1" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label>Carbohidratos (g)</label>
+          <input type="number" id="fCarbs" min="0" step="0.1" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label>Grasas (g)</label>
+          <input type="number" id="fFats" min="0" step="0.1" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label>Calorías (kcal)</label>
+          <input type="number" id="fCalories" min="0" step="1" placeholder="0"/>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <span>Ingredientes</span>
+        <button class="btn btn-ghost btn-sm" onclick="addIngredientRow()" style="padding:4px 10px;font-size:12px;">+ Añadir</button>
+      </div>
+      <div id="ingrList" class="ingr-list"></div>
+      <div id="ingrEmpty" class="ingr-empty" style="display:none;">Sin ingredientes. Pulsa "Añadir" para empezar.</div>
+
+      <div id="modalError" class="form-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="save()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete Confirm Modal ── -->
+<div class="modal-overlay" id="delOverlay" onclick="if(event.target===this)closeDelModal()">
+  <div class="modal del-modal">
+    <div class="modal-body">
+      <div class="del-icon">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </div>
+      <h3>¿Eliminar receta?</h3>
+      <p id="delMsg">Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="modal-footer" style="justify-content:center;">
+      <button class="btn btn-ghost" onclick="closeDelModal()">Cancelar</button>
+      <button class="btn btn-danger" id="delConfirmBtn" onclick="doDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+const token = () => localStorage.getItem('token');
+const headers = () => ({ 'Authorization': `Bearer ${token()}`, 'Content-Type': 'application/json' });
+
+let _page = 1, _perPage = 12, _total = 0, _lastPage = 1;
+let _search = '';
+let _editId = null;
+let _delId = null;
+let _ingrRows = [];
+let _acTimers = {};
+let _formsBadgeLoaded = false;
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function init() {
+  if (!token()) { location.href = 'login.html'; return; }
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: headers() });
+    if (r.status === 401) { location.href = 'login.html'; return; }
+    const d = await r.json();
+    const me = d.data || {};
+    document.getElementById('sidebarName').textContent = me.name || me.email || '';
+    document.getElementById('sidebarRole').textContent = me.role?.name || '';
+    const ini = (me.name || '?')[0].toUpperCase();
+    document.getElementById('sidebarAvatar').textContent = ini;
+    loadFormsBadge();
+  } catch { location.href = 'login.html'; }
+  loadRecipes();
+}
+
+async function loadFormsBadge() {
+  try {
+    const r = await fetch(`${API}/form-assignments/pending-count`, { headers: headers() });
+    if (!r.ok) return;
+    const d = await r.json();
+    const count = d.data?.count || 0;
+    const badge = document.getElementById('formsBadge');
+    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+  } catch {}
+}
+
+function logout() {
+  fetch(`${API}/auth/logout`, { method: 'POST', headers: headers() }).finally(() => {
+    localStorage.clear(); location.href = 'login.html';
+  });
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadRecipes(page = 1) {
+  _page = page;
+  const params = new URLSearchParams({ page: _page, per_page: _perPage });
+  if (_search) params.set('search', _search);
+  try {
+    const r = await fetch(`${API}/recipes/search?${params}`, { headers: headers() });
+    const d = await r.json();
+    const payload = d.data || {};
+    const items = payload.data || [];
+    _total = payload.total || 0;
+    _lastPage = payload.last_page || 1;
+    renderCards(items);
+    renderPagination();
+    document.getElementById('totalBadge').textContent = `${_total} receta${_total !== 1 ? 's' : ''}`;
+  } catch { toast('Error al cargar recetas', true); }
+}
+
+// ── Render cards ──────────────────────────────────────────────────────────────
+function renderCards(items) {
+  const grid = document.getElementById('cardsGrid');
+  if (!items.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state">
+      <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v4l3 3"/></svg>
+      <p>No hay recetas todavía</p>
+      <small>Crea tu primera receta con el botón "Nueva receta"</small>
+    </div></div>`;
+    return;
+  }
+  grid.innerHTML = items.map(r => {
+    const prot = r.proteins != null ? r.proteins.toFixed(1) : '—';
+    const carb = r.carbs != null ? r.carbs.toFixed(1) : '—';
+    const fat  = r.fats != null ? r.fats.toFixed(1) : '—';
+    const kcal = r.calories != null ? Math.round(r.calories) : '—';
+    const ingrs = (r.details || []).length;
+    const meta = [];
+    if (r.servings) meta.push(`<span><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${r.servings} raciones</span>`);
+    if (r.prep_time) meta.push(`<span><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${r.prep_time} min</span>`);
+    return `<div class="recipe-card">
+      <div class="card-header">
+        <div>
+          <div class="card-name">${esc(r.name)}</div>
+          ${r.description ? `<div class="card-desc">${esc(r.description)}</div>` : ''}
+          ${meta.length ? `<div class="card-meta">${meta.join('')}</div>` : ''}
+        </div>
+      </div>
+      <div class="card-macros">
+        <div class="macro-cell prot"><div class="val">${prot}</div><div class="lbl">Prot.</div></div>
+        <div class="macro-cell carb"><div class="val">${carb}</div><div class="lbl">Carbs</div></div>
+        <div class="macro-cell fat"><div class="val">${fat}</div><div class="lbl">Grasas</div></div>
+        <div class="macro-cell kcal"><div class="val">${kcal}</div><div class="lbl">Kcal</div></div>
+      </div>
+      <div class="card-footer">
+        <div class="ingr-count">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+          ${ingrs} ingrediente${ingrs !== 1 ? 's' : ''}
+        </div>
+        <div class="card-actions">
+          <button class="btn-icon" title="Editar" onclick="openEdit(${r.id})">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon danger" title="Eliminar" onclick="openDel(${r.id}, '${esc(r.name)}')">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+function renderPagination() {
+  const el = document.getElementById('pagination');
+  if (_lastPage <= 1) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  const from = (_page - 1) * _perPage + 1;
+  const to   = Math.min(_page * _perPage, _total);
+  let btns = `<button class="page-btn" onclick="loadRecipes(${_page - 1})" ${_page === 1 ? 'disabled' : ''}>←</button>`;
+  const start = Math.max(1, _page - 2), end = Math.min(_lastPage, _page + 2);
+  if (start > 1) btns += `<button class="page-btn" onclick="loadRecipes(1)">1</button>${start > 2 ? '<span style="padding:0 4px;color:#9CA3AF">…</span>' : ''}`;
+  for (let i = start; i <= end; i++) btns += `<button class="page-btn${i === _page ? ' active' : ''}" onclick="loadRecipes(${i})">${i}</button>`;
+  if (end < _lastPage) btns += `${end < _lastPage - 1 ? '<span style="padding:0 4px;color:#9CA3AF">…</span>' : ''}<button class="page-btn" onclick="loadRecipes(${_lastPage})">${_lastPage}</button>`;
+  btns += `<button class="page-btn" onclick="loadRecipes(${_page + 1})" ${_page === _lastPage ? 'disabled' : ''}>→</button>`;
+  el.innerHTML = `<span class="page-info">${from}–${to} de ${_total}</span><div class="page-btns">${btns}</div>`;
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+let _searchTimer;
+function debouncedSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => {
+    _search = document.getElementById('searchInput').value.trim();
+    loadRecipes(1);
+  }, 350);
+}
+
+// ── Modal open/close ──────────────────────────────────────────────────────────
+function openModal(recipe = null) {
+  _editId = recipe ? recipe.id : null;
+  _ingrRows = [];
+  document.getElementById('modalTitle').textContent = recipe ? 'Editar receta' : 'Nueva receta';
+  document.getElementById('fName').value     = recipe?.name || '';
+  document.getElementById('fDesc').value     = recipe?.description || '';
+  document.getElementById('fInstr').value    = recipe?.instructions || '';
+  document.getElementById('fServings').value = recipe?.servings || '';
+  document.getElementById('fPrepTime').value = recipe?.prep_time || '';
+  document.getElementById('fProteins').value = recipe?.proteins ?? '';
+  document.getElementById('fCarbs').value    = recipe?.carbs ?? '';
+  document.getElementById('fFats').value     = recipe?.fats ?? '';
+  document.getElementById('fCalories').value = recipe?.calories ?? '';
+  document.getElementById('modalError').textContent = '';
+  const list = document.getElementById('ingrList');
+  list.innerHTML = '';
+  if (recipe?.details?.length) {
+    recipe.details.forEach(d => addIngredientRow(d));
+  }
+  syncIngrEmpty();
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('fName').focus(), 100);
+}
+
+async function openEdit(id) {
+  try {
+    const r = await fetch(`${API}/recipes/${id}/edit`, { headers: headers() });
+    const d = await r.json();
+    if (d.data) openModal(d.data);
+  } catch { toast('Error al cargar receta', true); }
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  closeAllAc();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ── Ingredients ───────────────────────────────────────────────────────────────
+function addIngredientRow(detail = null) {
+  const rowId = Date.now() + Math.random();
+  const row = { id: rowId, aliment_id: detail?.aliment_id || null, aliment_name: '' };
+  _ingrRows.push(row);
+
+  const div = document.createElement('div');
+  div.className = 'ingr-row';
+  div.id = `irow-${rowId}`;
+  div.innerHTML = `
+    <div class="ac-wrap">
+      <input type="text" id="iac-${rowId}" placeholder="Buscar alimento…" autocomplete="off"
+        oninput="acSearch('${rowId}', this.value)"
+        onfocus="acSearch('${rowId}', this.value)"
+        onblur="setTimeout(()=>closeAc('${rowId}'),200)"/>
+      <div class="ac-dropdown" id="acdrop-${rowId}"></div>
+    </div>
+    <input type="number" id="iqty-${rowId}" min="0" step="0.1" placeholder="Cant."/>
+    <input type="text" id="inotes-${rowId}" placeholder="Notas (opcional)"/>
+    <button class="btn-icon danger" onclick="removeIngredient('${rowId}')" title="Quitar">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+
+  document.getElementById('ingrList').appendChild(div);
+
+  if (detail) {
+    document.getElementById(`iqty-${rowId}`).value = detail.quantity || '';
+    document.getElementById(`inotes-${rowId}`).value = detail.notes || '';
+    if (detail.aliment_id) {
+      row.aliment_id = detail.aliment_id;
+      resolveAlimentName(rowId, detail.aliment_id);
+    }
+  }
+  syncIngrEmpty();
+}
+
+async function resolveAlimentName(rowId, alimentId) {
+  try {
+    const r = await fetch(`${API}/aliments/${alimentId}/edit`, { headers: headers() });
+    const d = await r.json();
+    if (d.data) {
+      const input = document.getElementById(`iac-${rowId}`);
+      if (input) input.value = d.data.name || alimentId;
+      const row = _ingrRows.find(x => x.id == rowId);
+      if (row) row.aliment_name = d.data.name || '';
+    }
+  } catch {}
+}
+
+function removeIngredient(rowId) {
+  _ingrRows = _ingrRows.filter(r => r.id != rowId);
+  const el = document.getElementById(`irow-${rowId}`);
+  if (el) el.remove();
+  syncIngrEmpty();
+}
+
+function syncIngrEmpty() {
+  const empty = document.getElementById('ingrEmpty');
+  const list  = document.getElementById('ingrList');
+  empty.style.display = list.children.length === 0 ? '' : 'none';
+}
+
+// ── Aliment autocomplete ──────────────────────────────────────────────────────
+async function acSearch(rowId, val) {
+  clearTimeout(_acTimers[rowId]);
+  if (!val || val.length < 2) { closeAc(rowId); return; }
+  _acTimers[rowId] = setTimeout(async () => {
+    try {
+      const p = new URLSearchParams({ search: val, per_page: 10, page: 1 });
+      const r = await fetch(`${API}/aliments/search?${p}`, { headers: headers() });
+      const d = await r.json();
+      const items = d.data?.data || [];
+      showAcDropdown(rowId, items);
+    } catch {}
+  }, 250);
+}
+
+function showAcDropdown(rowId, items) {
+  const drop = document.getElementById(`acdrop-${rowId}`);
+  if (!drop) return;
+  if (!items.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = items.map(a => `
+    <div class="ac-item" onmousedown="selectAliment('${rowId}', '${a.id}', '${esc(a.name).replace(/'/g, "\\'")}')">
+      <div class="ac-name">${esc(a.name)}</div>
+      ${a.brand ? `<div class="ac-brand">${esc(a.brand)}</div>` : ''}
+    </div>`).join('');
+  drop.classList.add('open');
+}
+
+function selectAliment(rowId, alimentId, alimentName) {
+  const row = _ingrRows.find(r => r.id == rowId);
+  if (row) { row.aliment_id = alimentId; row.aliment_name = alimentName; }
+  const input = document.getElementById(`iac-${rowId}`);
+  if (input) input.value = alimentName;
+  closeAc(rowId);
+}
+
+function closeAc(rowId) {
+  const drop = document.getElementById(`acdrop-${rowId}`);
+  if (drop) drop.classList.remove('open');
+}
+
+function closeAllAc() {
+  document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function save() {
+  const name = document.getElementById('fName').value.trim();
+  const errEl = document.getElementById('modalError');
+  if (!name) { errEl.textContent = 'El nombre es obligatorio.'; return; }
+  errEl.textContent = '';
+
+  const details = _ingrRows
+    .filter(r => r.aliment_id)
+    .map((r, i) => ({
+      aliment_id: r.aliment_id,
+      quantity: parseFloat(document.getElementById(`iqty-${r.id}`)?.value) || null,
+      notes: document.getElementById(`inotes-${r.id}`)?.value.trim() || null,
+      order: i,
+    }));
+
+  const payload = {
+    name,
+    description:  document.getElementById('fDesc').value.trim() || null,
+    instructions: document.getElementById('fInstr').value.trim() || null,
+    servings:     parseInt(document.getElementById('fServings').value) || null,
+    prep_time:    parseInt(document.getElementById('fPrepTime').value) || null,
+    proteins:     parseFloat(document.getElementById('fProteins').value) || null,
+    carbs:        parseFloat(document.getElementById('fCarbs').value) || null,
+    fats:         parseFloat(document.getElementById('fFats').value) || null,
+    calories:     parseFloat(document.getElementById('fCalories').value) || null,
+    details,
+  };
+
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  try {
+    const method = _editId ? 'PUT' : 'POST';
+    const url    = _editId ? `${API}/recipes/${_editId}/update` : `${API}/recipes`;
+    const r = await fetch(url, { method, headers: headers(), body: JSON.stringify(payload) });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; return; }
+    closeModal();
+    toast(_editId ? 'Receta actualizada' : 'Receta creada');
+    loadRecipes(_editId ? _page : 1);
+  } catch { errEl.textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+function openDel(id, name) {
+  _delId = id;
+  document.getElementById('delMsg').textContent = `¿Eliminar "${name}"? Esta acción no se puede deshacer.`;
+  document.getElementById('delOverlay').classList.add('open');
+}
+
+function closeDelModal() {
+  document.getElementById('delOverlay').classList.remove('open');
+}
+
+async function doDelete() {
+  const btn = document.getElementById('delConfirmBtn');
+  btn.textContent = 'Eliminando…'; btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/recipes/${_delId}/update`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({ state: 0 }),
+    });
+    const d = await r.json();
+    if (!r.ok) { toast(d.message || 'Error al eliminar', true); return; }
+    closeDelModal();
+    toast('Receta eliminada');
+    loadRecipes(_page);
+  } catch { toast('Error de conexión', true); }
+  finally { btn.textContent = 'Eliminar'; btn.disabled = false; }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${err ? 'err' : 'ok'}`;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeDelModal();
+  }
+});
+
+init();
+</script>
+</body>
+</html>

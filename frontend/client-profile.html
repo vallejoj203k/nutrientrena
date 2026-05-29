@@ -183,6 +183,38 @@
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
 
+    /* ── Metas tab ── */
+    .target-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    @media(max-width:900px){.target-grid{grid-template-columns:1fr;}}
+    .target-card{background:#fff;border-radius:12px;padding:20px;border:1px solid #F3F4F6;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .target-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .target-card-title{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;}
+    .target-values{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;}
+    .target-current{font-size:28px;font-weight:800;color:#111;}
+    .target-current small{font-size:13px;font-weight:500;color:#9CA3AF;}
+    .target-goal{font-size:13px;color:#6B7280;}
+    .target-goal strong{color:var(--purple);font-size:15px;}
+    .progress-bar{height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden;}
+    .progress-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+    .progress-fill.green{background:linear-gradient(90deg,#10B981,#34D399);}
+    .progress-fill.purple{background:linear-gradient(90deg,var(--purple),#C084FC);}
+    .progress-fill.blue{background:linear-gradient(90deg,#3B82F6,#60A5FA);}
+    .progress-fill.orange{background:linear-gradient(90deg,#F59E0B,#FCD34D);}
+    .progress-label{display:flex;justify-content:space-between;font-size:11px;color:#9CA3AF;margin-top:5px;}
+    .macros-target-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    @media(max-width:600px){.macros-target-grid{grid-template-columns:repeat(2,1fr);}}
+    .macro-target-cell{background:#FAFAFA;border-radius:10px;padding:14px 10px;text-align:center;border:1px solid #F3F4F6;}
+    .macro-target-val{font-size:22px;font-weight:800;color:#111;}
+    .macro-target-lbl{font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+    .macro-target-cell.prot .macro-target-val{color:#3B82F6;}
+    .macro-target-cell.carb .macro-target-val{color:#F59E0B;}
+    .macro-target-cell.fat  .macro-target-val{color:#EF4444;}
+    .macro-target-cell.kcal .macro-target-val{color:var(--purple);}
+    .target-empty{text-align:center;padding:60px 20px;}
+    .target-empty svg{opacity:.2;margin-bottom:16px;}
+    .target-empty p{color:#9CA3AF;font-size:14px;margin-bottom:16px;}
+    .no-target-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#FEF9C3;color:#92400E;border-radius:20px;font-size:11px;font-weight:600;}
+
     @media(max-width:768px){
       body{flex-direction:column;}
       .sidebar{width:100%;min-width:unset;height:auto;}
@@ -356,6 +388,10 @@
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         Comercial
       </button>
+      <button class="tab-btn" id="tab-metas-btn" onclick="showTab('metas')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Metas
+      </button>
     </div>
 
     <!-- Tab panes -->
@@ -403,6 +439,11 @@
           </div>
           <div class="info-grid cols-3" id="bizGrid"></div>
         </div>
+      </div>
+
+      <!-- ── METAS ── -->
+      <div class="tab-pane" id="tab-metas">
+        <div id="metasContent"></div>
       </div>
 
     </div><!-- /content -->
@@ -729,6 +770,9 @@ function renderAll() {
 
   // Comercial tab
   renderBizTab();
+
+  // Metas tab
+  loadTarget();
 
   // Update tab badges
   if (formAssignment?.status === 'pending') {
@@ -1154,6 +1198,247 @@ function showToast(msg, type='') {
 /* ── Init ── */
 initUser();
 loadClient();
+
+/* ── Metas ── */
+let _target = null;
+
+async function loadTarget() {
+  const uid = clientData?.user_id;
+  if (!uid) return;
+  try {
+    const r = await fetch(`${API}/client-targets/search?user_id=${uid}`, { headers: h() });
+    const d = await r.json();
+    _target = d.data || null;
+  } catch { _target = null; }
+  renderTargetTab();
+}
+
+function renderTargetTab() {
+  const el = document.getElementById('metasContent');
+  const c = clientData || {};
+  const currentWeight = checkins.length ? (checkins[0].weight || c.weight) : c.weight;
+  const currentBf = checkins.length ? (checkins[0].body_fat || null) : null;
+
+  if (!_target) {
+    el.innerHTML = `
+      <div class="target-card">
+        <div class="target-empty">
+          <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <p>No hay objetivos definidos para este cliente</p>
+          <button class="btn btn-primary" onclick="openTargetModal()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Definir objetivos
+          </button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const t = _target;
+
+  // Weight progress
+  let weightSection = '';
+  if (t.target_weight) {
+    const curr = parseFloat(currentWeight) || null;
+    const goal = t.target_weight;
+    let pct = 0, label = '—', barClass = 'purple';
+    if (curr) {
+      const diff = curr - goal;
+      const isLoss = goal < curr;
+      if (isLoss) {
+        // Losing weight: start is when profile was created (use curr as reference)
+        const startRef = Math.max(curr, goal + Math.abs(diff) * 1.5);
+        pct = Math.min(100, Math.round(((startRef - curr) / (startRef - goal)) * 100));
+        label = diff > 0 ? `Faltan ${diff.toFixed(1)} kg` : '¡Objetivo alcanzado!';
+        barClass = 'green';
+      } else {
+        pct = Math.min(100, Math.round((curr / goal) * 100));
+        label = diff < 0 ? `Faltan ${Math.abs(diff).toFixed(1)} kg` : '¡Objetivo alcanzado!';
+        barClass = 'blue';
+      }
+    }
+    weightSection = `
+      <div class="target-card">
+        <div class="target-card-head">
+          <span class="target-card-title">Peso corporal</span>
+          ${curr && Math.abs(curr - goal) < 0.5 ? '<span style="background:#ECFDF5;color:#059669;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;">✓ Logrado</span>' : ''}
+        </div>
+        <div class="target-values">
+          <div class="target-current">${curr ? curr + '<small> kg actual</small>' : '<small>Sin datos</small>'}</div>
+          <div class="target-goal">→ objetivo <strong>${goal} kg</strong></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
+        <div class="progress-label"><span>${label}</span><span>${pct}%</span></div>
+      </div>`;
+  }
+
+  // Body fat progress
+  let bfSection = '';
+  if (t.target_body_fat) {
+    const curr = parseFloat(currentBf) || null;
+    const goal = t.target_body_fat;
+    let pct = 0, label = '—';
+    if (curr) {
+      const diff = curr - goal;
+      const startRef = Math.max(curr, goal + Math.abs(diff) * 1.5);
+      pct = Math.min(100, Math.round(((startRef - curr) / (startRef - goal)) * 100));
+      label = diff > 0 ? `Faltan ${diff.toFixed(1)}%` : '¡Objetivo alcanzado!';
+    }
+    bfSection = `
+      <div class="target-card">
+        <div class="target-card-head">
+          <span class="target-card-title">% Grasa corporal</span>
+          ${curr && Math.abs(curr - goal) < 0.5 ? '<span style="background:#ECFDF5;color:#059669;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;">✓ Logrado</span>' : ''}
+        </div>
+        <div class="target-values">
+          <div class="target-current">${curr ? curr + '<small>% actual</small>' : '<small>Sin datos</small>'}</div>
+          <div class="target-goal">→ objetivo <strong>${goal}%</strong></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill orange" style="width:${pct}%"></div></div>
+        <div class="progress-label"><span>${label}</span><span>${pct}%</span></div>
+      </div>`;
+  }
+
+  // Macros
+  const hasMacros = t.calories || t.proteins || t.carbs || t.fats;
+  const macrosSection = hasMacros ? `
+    <div class="target-card">
+      <div class="target-card-head"><span class="target-card-title">Macros objetivo diarios</span></div>
+      <div class="macros-target-grid">
+        <div class="macro-target-cell prot"><div class="macro-target-val">${t.proteins != null ? t.proteins + 'g' : '—'}</div><div class="macro-target-lbl">Proteínas</div></div>
+        <div class="macro-target-cell carb"><div class="macro-target-val">${t.carbs != null ? t.carbs + 'g' : '—'}</div><div class="macro-target-lbl">Carbohidratos</div></div>
+        <div class="macro-target-cell fat"><div class="macro-target-val">${t.fats != null ? t.fats + 'g' : '—'}</div><div class="macro-target-lbl">Grasas</div></div>
+        <div class="macro-target-cell kcal"><div class="macro-target-val">${t.calories != null ? Math.round(t.calories) : '—'}</div><div class="macro-target-lbl">Kcal</div></div>
+      </div>
+    </div>` : '';
+
+  const notesSection = t.notes ? `
+    <div class="target-card">
+      <div class="target-card-head"><span class="target-card-title">Notas del coach</span></div>
+      <p style="font-size:13px;color:#374151;line-height:1.6;">${esc(t.notes)}</p>
+    </div>` : '';
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn btn-ghost btn-sm" onclick="openTargetModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar objetivos
+      </button>
+    </div>
+    <div class="target-grid">
+      ${weightSection}
+      ${bfSection}
+    </div>
+    ${macrosSection}
+    ${notesSection}`;
+}
+
+function openTargetModal() {
+  const t = _target || {};
+  document.getElementById('tm_weight').value    = t.target_weight    ?? '';
+  document.getElementById('tm_bf').value        = t.target_body_fat  ?? '';
+  document.getElementById('tm_muscle').value    = t.target_muscle_mass ?? '';
+  document.getElementById('tm_kcal').value      = t.calories         ?? '';
+  document.getElementById('tm_prot').value      = t.proteins         ?? '';
+  document.getElementById('tm_carbs').value     = t.carbs            ?? '';
+  document.getElementById('tm_fats').value      = t.fats             ?? '';
+  document.getElementById('tm_notes').value     = t.notes            || '';
+  document.getElementById('tm_err').textContent = '';
+  document.getElementById('targetOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('tm_weight').focus(), 100);
+}
+
+function closeTargetModal() {
+  document.getElementById('targetOverlay').classList.remove('open');
+}
+
+async function saveTarget() {
+  const uid = clientData?.user_id;
+  if (!uid) return;
+  const payload = {
+    user_id:            uid,
+    target_weight:      parseFloat(document.getElementById('tm_weight').value) || null,
+    target_body_fat:    parseFloat(document.getElementById('tm_bf').value) || null,
+    target_muscle_mass: parseFloat(document.getElementById('tm_muscle').value) || null,
+    calories:           parseFloat(document.getElementById('tm_kcal').value) || null,
+    proteins:           parseFloat(document.getElementById('tm_prot').value) || null,
+    carbs:              parseFloat(document.getElementById('tm_carbs').value) || null,
+    fats:               parseFloat(document.getElementById('tm_fats').value) || null,
+    notes:              document.getElementById('tm_notes').value.trim() || null,
+  };
+  const btn = document.getElementById('tm_saveBtn');
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/client-targets`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+    if (!r.ok) { document.getElementById('tm_err').textContent = d.message || 'Error al guardar'; return; }
+    _target = d.data;
+    closeTargetModal();
+    renderTargetTab();
+    showToast('Objetivos guardados');
+  } catch { document.getElementById('tm_err').textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+}
 </script>
+
+<!-- ── Modal Metas ── -->
+<div class="modal-overlay" id="targetOverlay" onclick="if(event.target===this)closeTargetModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Objetivos del cliente</h2>
+      <button class="modal-close" onclick="closeTargetModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#9CA3AF;margin-bottom:16px;">Deja en blanco los campos que no apliquen.</p>
+      <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;">Composición corporal</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 14px;">
+        <div class="form-group">
+          <label>Peso objetivo (kg)</label>
+          <input type="number" id="tm_weight" min="0" step="0.1" placeholder="70"/>
+        </div>
+        <div class="form-group">
+          <label>% Grasa objetivo</label>
+          <input type="number" id="tm_bf" min="0" max="60" step="0.1" placeholder="18"/>
+        </div>
+        <div class="form-group">
+          <label>Masa muscular (kg)</label>
+          <input type="number" id="tm_muscle" min="0" step="0.1" placeholder="55"/>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;margin-top:6px;">Macros diarios objetivo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;">
+        <div class="form-group">
+          <label>Proteínas (g)</label>
+          <input type="number" id="tm_prot" min="0" step="1" placeholder="150"/>
+        </div>
+        <div class="form-group">
+          <label>Carbohidratos (g)</label>
+          <input type="number" id="tm_carbs" min="0" step="1" placeholder="200"/>
+        </div>
+        <div class="form-group">
+          <label>Grasas (g)</label>
+          <input type="number" id="tm_fats" min="0" step="1" placeholder="60"/>
+        </div>
+        <div class="form-group">
+          <label>Calorías (kcal)</label>
+          <input type="number" id="tm_kcal" min="0" step="1" placeholder="1800"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas del coach</label>
+        <textarea id="tm_notes" placeholder="Observaciones, contexto o instrucciones para el cliente…" style="min-height:72px;width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;resize:vertical;font-family:inherit;"></textarea>
+      </div>
+      <div id="tm_err" style="color:#DC2626;font-size:12px;margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTargetModal()">Cancelar</button>
+      <button class="btn btn-primary" id="tm_saveBtn" onclick="saveTarget()">Guardar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

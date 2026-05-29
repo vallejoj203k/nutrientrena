@@ -196,8 +196,7 @@ def send_plan_email(
     </body>
     </html>
     """
-    ok, _ = _send_resend(to, f"Tu plan personalizado está listo — {APP_NAME}", html)
-    return ok
+    return _send_resend(to, f"Tu plan personalizado está listo — {APP_NAME}", html)
 
 
 def send_recover_password_email(to: str, name: str, token: str) -> bool:

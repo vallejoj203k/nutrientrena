@@ -113,8 +113,9 @@ def deliver_plan(
 
     # ── Send email (optional) ─────────────────────────────────────────────────
     sent = False
+    email_error = ""
     if data.send_email:
-        sent = send_plan_email(
+        sent, email_error = send_plan_email(
             to=client_user.email,
             client_name=client_detail.name,
             diet=diet_payload,
@@ -149,6 +150,7 @@ def deliver_plan(
         {
             "delivery": PlanDeliveryOut.model_validate(delivery).model_dump(),
             "email_sent": sent,
+            "email_error": email_error,
             "client_email": client_user.email,
             "status_updated": state_id is not None,
         },

@@ -124,7 +124,7 @@ def deliver_plan(
         )
 
     # ── Save delivery record ──────────────────────────────────────────────────
-    coach_detail = _get_coach_detail(db, current_user.id)
+    coach_detail = _get_coach_detail(current_user.id, db)
     delivery = PlanDelivery(
         client_user_detail_id=data.client_user_detail_id,
         coach_user_detail_id=coach_detail.id if coach_detail else None,

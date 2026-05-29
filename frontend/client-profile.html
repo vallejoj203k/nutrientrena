@@ -1079,12 +1079,17 @@ async function deliverPlan() {
 
   try {
     const r = await fetch(`${API}/plans/deliver`, { method:'POST', headers:{'Content-Type':'application/json',...h()}, body: JSON.stringify(body) });
-    const j = await r.json();
-    if (!r.ok) { document.getElementById('deliverError').textContent = j.message || 'Error'; return; }
+    let j = {};
+    try { j = await r.json(); } catch { j = {}; }
+    if (!r.ok) {
+      const msg = j.message || j.detail || `Error ${r.status}`;
+      document.getElementById('deliverError').textContent = Array.isArray(msg) ? msg.map(e=>e.msg||e).join(', ') : String(msg);
+      return;
+    }
     closeDeliverModal();
     showToast(body.send_email ? 'Plan entregado y email enviado' : 'Plan registrado sin email', 'success');
     loadClient();
-  } catch { document.getElementById('deliverError').textContent = 'Error de conexión'; }
+  } catch (e) { document.getElementById('deliverError').textContent = 'Error de conexión: ' + e.message; }
   finally { btn.disabled = false; lbl.textContent = 'Entregar plan'; }
 }
 

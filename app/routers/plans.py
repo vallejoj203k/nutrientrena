@@ -10,7 +10,7 @@ from app.core.dependencies import (
     SUPERADMIN, ADMIN, COACH,
 )
 from app.core.responses import send_response, send_error
-from app.core.email import send_plan_email
+from app.core.email import send_plan_email, _send_resend
 from app.models.plan import PlanDelivery
 from app.models.user import UserDetail, User
 from app.models.parameter import ParameterDetail
@@ -223,4 +223,32 @@ def resend_delivery(
     return send_response(
         {"email_sent": sent},
         "Email reenviado correctamente" if sent else "No se pudo enviar el email",
+    )
+
+
+# ── Debug: test email ─────────────────────────────────────────────────────────
+
+class TestEmailRequest(BaseModel):
+    to: str
+
+@router.post("/test-email")
+def test_email(
+    data: TestEmailRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    import os
+    ok, err = _send_resend(
+        data.to,
+        "Test de email — Nutrientrena",
+        "<p>Este es un email de prueba enviado desde Nutrientrena.</p>",
+    )
+    return send_response(
+        {
+            "sent": ok,
+            "error": err,
+            "resend_api_key_set": bool(os.environ.get("RESEND_API_KEY")),
+            "mail_from": os.environ.get("MAIL_FROM", "onboarding@resend.dev"),
+        },
+        "OK" if ok else "Fallo al enviar",
     )

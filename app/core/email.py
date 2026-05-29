@@ -6,10 +6,12 @@ MAIL_FROM = os.environ.get("MAIL_FROM", "onboarding@resend.dev")
 APP_NAME = os.environ.get("APP_NAME", "Nutrientrena")
 
 
-def _send_resend(to: str, subject: str, html: str) -> bool:
+def _send_resend(to: str, subject: str, html: str) -> tuple[bool, str]:
+    """Returns (success, error_message)."""
     if not RESEND_API_KEY:
-        print("EMAIL ERROR: RESEND_API_KEY no configurado")
-        return False
+        msg = "RESEND_API_KEY no configurado"
+        print(f"EMAIL ERROR: {msg}")
+        return False, msg
     try:
         resend.api_key = RESEND_API_KEY
         r = resend.Emails.send({
@@ -18,11 +20,13 @@ def _send_resend(to: str, subject: str, html: str) -> bool:
             "subject": subject,
             "html": html,
         })
-        print(f"EMAIL OK: enviado a {to} — id {r.get('id')}")
-        return True
+        email_id = r.get("id") if isinstance(r, dict) else getattr(r, "id", str(r))
+        print(f"EMAIL OK: enviado a {to} — id {email_id}")
+        return True, ""
     except Exception as e:
-        print(f"EMAIL ERROR: {e}")
-        return False
+        msg = str(e)
+        print(f"EMAIL ERROR to {to}: {msg}")
+        return False, msg
 
 
 def send_plan_email(
@@ -192,7 +196,8 @@ def send_plan_email(
     </body>
     </html>
     """
-    return _send_resend(to, f"Tu plan personalizado está listo — {APP_NAME}", html)
+    ok, _ = _send_resend(to, f"Tu plan personalizado está listo — {APP_NAME}", html)
+    return ok
 
 
 def send_recover_password_email(to: str, name: str, token: str) -> bool:
@@ -216,7 +221,8 @@ def send_recover_password_email(to: str, name: str, token: str) -> bool:
       Si no solicitaste esto, puedes ignorar este correo.
     </p>"""
     html = _base_notification_html("🔐 Restablecer contraseña", body)
-    return _send_resend(to, f"Restablecer contraseña — {APP_NAME}", html)
+    ok, _ = _send_resend(to, f"Restablecer contraseña — {APP_NAME}", html)
+    return ok
 
 
 # ── Notification emails ────────────────────────────────────────────────────────
@@ -283,11 +289,12 @@ def notify_coach_form_submitted(
         "📋 Formulario recibido de un cliente",
         body,
     )
-    return _send_resend(
+    ok, _ = _send_resend(
         coach_email,
         f"{client_name} envió su formulario — {APP_NAME}",
         html,
     )
+    return ok
 
 
 def send_form_link_email(
@@ -317,7 +324,8 @@ def send_form_link_email(
       Este enlace es personal. No lo compartas con nadie.
     </p>"""
     html = _base_notification_html("📋 Completa tu formulario de evaluación", body)
-    return _send_resend(to, f"Tu formulario de evaluación — {APP_NAME}", html)
+    ok, _ = _send_resend(to, f"Tu formulario de evaluación — {APP_NAME}", html)
+    return ok
 
 
 def notify_coach_checkin(
@@ -350,11 +358,12 @@ def notify_coach_checkin(
         f"📊 Nuevo check-in de {client_name}",
         body,
     )
-    return _send_resend(
+    ok, _ = _send_resend(
         coach_email,
         f"Nuevo check-in de {client_name} — {APP_NAME}",
         html,
     )
+    return ok
 
 
 def notify_client_coach_notes(
@@ -382,8 +391,9 @@ def notify_client_coach_notes(
         "💬 Tu coach te ha dejado un mensaje",
         body,
     )
-    return _send_resend(
+    ok, _ = _send_resend(
         client_email,
         f"Mensaje de tu coach {coach_name} — {APP_NAME}",
         html,
     )
+    return ok

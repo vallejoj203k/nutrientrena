@@ -627,7 +627,7 @@ async function saveClient() {
   btn.disabled = true;
 
   try {
-    const body = { first_name: firstName, last_name: lastName, email, password, role_id: 6 };
+    const body = { name: firstName, last_name: lastName, email, password, role_id: 6 };
     if (phone)  body.phone  = phone;
     if (gender) body.gender = gender;
     if (goal)   body.goal   = goal;
@@ -639,7 +639,15 @@ async function saveClient() {
     });
     const j = await r.json();
     if (!r.ok) {
-      setErr('errGeneral', j.detail || j.message || 'Error al crear el cliente');
+      let msg = 'Error al crear el cliente';
+      if (j.detail) {
+        msg = Array.isArray(j.detail)
+          ? j.detail.map(e => e.msg || e.message || JSON.stringify(e)).join(', ')
+          : String(j.detail);
+      } else if (j.message) {
+        msg = j.message;
+      }
+      setErr('errGeneral', msg);
       return;
     }
     closeModal();

@@ -1,9 +1,38 @@
 import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import resend
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
-MAIL_FROM = os.environ.get("MAIL_FROM", "onboarding@resend.dev")
-APP_NAME = os.environ.get("APP_NAME", "Nutrientrena")
+MAIL_FROM      = os.environ.get("MAIL_FROM", "onboarding@resend.dev")
+APP_NAME       = os.environ.get("APP_NAME", "Nutrientrena")
+
+GMAIL_USER     = os.environ.get("GMAIL_USER", "")
+GMAIL_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+
+
+def _send_gmail(to: str, subject: str, html: str) -> tuple[bool, str]:
+    """Send via Gmail SMTP using an App Password. Returns (ok, error)."""
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"]    = f"{APP_NAME} <{GMAIL_USER}>"
+        msg["To"]      = to
+        msg.attach(MIMEText(html, "html", "utf-8"))
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.login(GMAIL_USER, GMAIL_PASSWORD)
+            smtp.sendmail(GMAIL_USER, [to], msg.as_string())
+
+        print(f"EMAIL OK (Gmail): enviado a {to}")
+        return True, ""
+    except Exception as e:
+        msg_err = str(e)
+        print(f"EMAIL ERROR (Gmail) to {to}: {msg_err}")
+        return False, msg_err
 
 
 def _send_resend(to: str, subject: str, html: str) -> tuple[bool, str]:
@@ -21,12 +50,19 @@ def _send_resend(to: str, subject: str, html: str) -> tuple[bool, str]:
             "html": html,
         })
         email_id = r.get("id") if isinstance(r, dict) else getattr(r, "id", str(r))
-        print(f"EMAIL OK: enviado a {to} — id {email_id}")
+        print(f"EMAIL OK (Resend): enviado a {to} — id {email_id}")
         return True, ""
     except Exception as e:
         msg = str(e)
-        print(f"EMAIL ERROR to {to}: {msg}")
+        print(f"EMAIL ERROR (Resend) to {to}: {msg}")
         return False, msg
+
+
+def _send(to: str, subject: str, html: str) -> tuple[bool, str]:
+    """Use Gmail if configured, otherwise fall back to Resend."""
+    if GMAIL_USER and GMAIL_PASSWORD:
+        return _send_gmail(to, subject, html)
+    return _send_resend(to, subject, html)
 
 
 def send_plan_email(
@@ -196,7 +232,7 @@ def send_plan_email(
     </body>
     </html>
     """
-    return _send_resend(to, f"Tu plan personalizado está listo — {APP_NAME}", html)
+    return _send(to, f"Tu plan personalizado está listo — {APP_NAME}", html)
 
 
 def send_recover_password_email(to: str, name: str, token: str) -> bool:
@@ -220,7 +256,7 @@ def send_recover_password_email(to: str, name: str, token: str) -> bool:
       Si no solicitaste esto, puedes ignorar este correo.
     </p>"""
     html = _base_notification_html("🔐 Restablecer contraseña", body)
-    ok, _ = _send_resend(to, f"Restablecer contraseña — {APP_NAME}", html)
+    ok, _ = _send(to, f"Restablecer contraseña — {APP_NAME}", html)
     return ok
 
 
@@ -288,7 +324,7 @@ def notify_coach_form_submitted(
         "📋 Formulario recibido de un cliente",
         body,
     )
-    ok, _ = _send_resend(
+    ok, _ = _send(
         coach_email,
         f"{client_name} envió su formulario — {APP_NAME}",
         html,
@@ -323,7 +359,7 @@ def send_form_link_email(
       Este enlace es personal. No lo compartas con nadie.
     </p>"""
     html = _base_notification_html("📋 Completa tu formulario de evaluación", body)
-    ok, _ = _send_resend(to, f"Tu formulario de evaluación — {APP_NAME}", html)
+    ok, _ = _send(to, f"Tu formulario de evaluación — {APP_NAME}", html)
     return ok
 
 
@@ -357,7 +393,7 @@ def notify_coach_checkin(
         f"📊 Nuevo check-in de {client_name}",
         body,
     )
-    ok, _ = _send_resend(
+    ok, _ = _send(
         coach_email,
         f"Nuevo check-in de {client_name} — {APP_NAME}",
         html,
@@ -390,7 +426,7 @@ def notify_client_coach_notes(
         "💬 Tu coach te ha dejado un mensaje",
         body,
     )
-    ok, _ = _send_resend(
+    ok, _ = _send(
         client_email,
         f"Mensaje de tu coach {coach_name} — {APP_NAME}",
         html,

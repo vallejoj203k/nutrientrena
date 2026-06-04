@@ -1122,32 +1122,36 @@ async function acSearch(rowId, val) {
   }, 250);
 }
 
-let rc_acItems = {};
-
 function showAcDropdown(rowId, items) {
   const drop = document.getElementById(`acdrop-${rowId}`);
   if (!drop) return;
   if (!items.length) { drop.classList.remove('open'); return; }
-  rc_acItems[rowId] = items;
-  drop.innerHTML = items.map(a => `
-    <div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}')">
+  drop.innerHTML = items.map(a => {
+    const m = encodeURIComponent(JSON.stringify({
+      p: a.proteins ?? null,
+      c: a.carbohydrates ?? null,
+      f: a.fats ?? null,
+      k: a.calories ?? null,
+    }));
+    return `<div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}','${m}')">
       <div class="ac-name">${esc(a.name)}</div>
       ${a.brand ? `<div class="ac-brand">${esc(a.brand)}</div>` : ''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
   drop.classList.add('open');
 }
 
-function selectAliment(rowId, alimentId, alimentName) {
+function selectAliment(rowId, alimentId, alimentName, macroEncoded) {
   const row = rc_ingrRows.find(r => r.id == rowId);
   if (row) {
     row.aliment_id = alimentId; row.aliment_name = alimentName;
-    const aliment = (rc_acItems[rowId] || []).find(a => String(a.id) === String(alimentId));
-    if (aliment) {
-      row.proteins      = aliment.proteins      ?? null;
-      row.carbohydrates = aliment.carbohydrates ?? null;
-      row.fats          = aliment.fats          ?? null;
-      row.calories      = aliment.calories      ?? null;
-    }
+    try {
+      const m = JSON.parse(decodeURIComponent(macroEncoded || '{}'));
+      row.proteins      = m.p ?? null;
+      row.carbohydrates = m.c ?? null;
+      row.fats          = m.f ?? null;
+      row.calories      = m.k ?? null;
+    } catch {}
   }
   const input = document.getElementById(`iac-${rowId}`);
   if (input) input.value = alimentName;
@@ -1156,19 +1160,21 @@ function selectAliment(rowId, alimentId, alimentName) {
 }
 
 function rcRecalcMacros() {
-  let prot = 0, carb = 0, fat = 0, kcal = 0;
+  let prot = 0, carb = 0, fat = 0, kcal = 0, hasData = false;
   rc_ingrRows.forEach(row => {
     const qty = parseFloat(document.getElementById(`iqty-${row.id}`)?.value) || 0;
-    if (!qty || row.aliment_id == null) return;
+    if (!qty || !row.aliment_id) return;
+    hasData = true;
     prot += ((row.proteins      || 0) / 100) * qty;
     carb += ((row.carbohydrates || 0) / 100) * qty;
     fat  += ((row.fats          || 0) / 100) * qty;
     kcal += ((row.calories      || 0) / 100) * qty;
   });
-  document.getElementById('rc_fProteins').value = prot ? prot.toFixed(1) : '';
-  document.getElementById('rc_fCarbs').value    = carb ? carb.toFixed(1) : '';
-  document.getElementById('rc_fFats').value     = fat  ? fat.toFixed(1)  : '';
-  document.getElementById('rc_fCalories').value = kcal ? Math.round(kcal) : '';
+  if (!hasData) return;
+  document.getElementById('rc_fProteins').value = prot.toFixed(1);
+  document.getElementById('rc_fCarbs').value    = carb.toFixed(1);
+  document.getElementById('rc_fFats').value     = fat.toFixed(1);
+  document.getElementById('rc_fCalories').value = Math.round(kcal);
 }
 
 function closeAc(rowId) { document.getElementById(`acdrop-${rowId}`)?.classList.remove('open'); }

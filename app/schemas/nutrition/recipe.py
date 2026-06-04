@@ -22,6 +22,7 @@ class RecipeCreate(BaseModel):
     servings: Optional[int] = None
     prep_time: Optional[int] = None
     image: Optional[str] = None
+    meal_type: Optional[str] = None
     details: Optional[List[RecipeDetailCreate]] = []
 
 
@@ -37,6 +38,7 @@ class RecipeUpdate(BaseModel):
     servings: Optional[int] = None
     prep_time: Optional[int] = None
     image: Optional[str] = None
+    meal_type: Optional[str] = None
     state: Optional[int] = None
     details: Optional[List[RecipeDetailCreate]] = None
 
@@ -70,6 +72,7 @@ class RecipeOut(BaseModel):
     servings: Optional[int] = None
     prep_time: Optional[int] = None
     image: Optional[str] = None
+    meal_type: Optional[str] = None
     state: int
     details: List[RecipeDetailOut] = []
 

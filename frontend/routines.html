@@ -35,7 +35,15 @@
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
     .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
     .topbar h1{font-size:18px;font-weight:700;color:#111;}
-    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:flex;align-items:center;gap:6px;}
+
+    /* Tabs */
+    .tabs-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;display:flex;gap:0;flex-shrink:0;}
+    .tab-btn{padding:14px 20px;font-size:14px;font-weight:600;color:#6B7280;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;transition:.15s;}
+    .tab-btn:hover{color:#111;}
+    .tab-btn.active{color:var(--purple);border-bottom-color:var(--purple);}
+
+    /* Buttons */
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
     .btn-primary{background:var(--purple);color:#fff;}
     .btn-primary:hover{background:var(--purple-dark);}
     .btn-ghost{background:#F3F4F6;color:#374151;}
@@ -43,8 +51,11 @@
     .btn-danger{background:#FEE2E2;color:#DC2626;}
     .btn-danger:hover{background:#DC2626;color:#fff;}
     .btn-sm{padding:6px 12px;font-size:12px;}
-    .btn-icon{padding:7px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:flex;color:#6B7280;transition:.15s;}
+    .btn-xs{padding:4px 8px;font-size:11px;border-radius:6px;}
+    .btn-icon{padding:7px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:inline-flex;color:#6B7280;transition:.15s;}
     .btn-icon:hover{background:#E5E7EB;color:#111;}
+    .btn-purple{background:var(--purple);color:#fff;}
+    .btn-purple:hover{background:var(--purple-dark);}
 
     /* Toolbar */
     .toolbar{padding:14px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
@@ -54,23 +65,31 @@
     .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
     .total-label{font-size:13px;color:#6B7280;margin-left:auto;}
 
+    /* Filter pills */
+    .filter-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    .pill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
+    .pill:hover{border-color:var(--purple);color:var(--purple);}
+    .pill.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+
     /* Content */
     .content{flex:1;overflow-y:auto;padding:24px;}
     .content::-webkit-scrollbar{width:6px;}
     .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
 
     /* Cards grid */
     .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
 
     /* Routine card */
-    .routine-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;transition:.15s;position:relative;}
+    .routine-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;transition:.15s;}
     .routine-card:hover{border-color:#D8B4FE;box-shadow:0 4px 12px rgba(91,45,142,.1);}
     .routine-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
     .routine-card-title{font-size:15px;font-weight:700;color:#111;line-height:1.3;}
     .routine-card-sub{font-size:11px;color:#6B7280;margin-top:3px;}
     .routine-card-actions{display:flex;gap:6px;flex-shrink:0;}
     .meta-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-    .meta-chip{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;}
+    .meta-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:600;}
     .meta-days{background:#F3EEFF;color:#5B2D8E;}
     .meta-time{background:#EFF6FF;color:#2563EB;}
     .meta-level{background:#F0FDF4;color:#16A34A;}
@@ -79,17 +98,47 @@
     .days-list-preview strong{color:#374151;font-size:11px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;}
     .day-tag{display:inline-block;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:20px;padding:2px 8px;font-size:11px;margin:2px 3px 2px 0;}
 
+    /* Muscle group cards */
+    .mg-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;transition:.15s;display:flex;align-items:center;gap:14px;cursor:pointer;}
+    .mg-card:hover{border-color:#D8B4FE;}
+    .mg-icon{width:48px;height:48px;border-radius:12px;background:var(--purple-pale);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+    .mg-info{flex:1;min-width:0;}
+    .mg-name{font-size:14px;font-weight:700;color:#111;}
+    .mg-desc{font-size:12px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+    /* Table */
+    .table-wrap{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:12px 16px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;text-align:left;}
+    tbody td{padding:12px 16px;font-size:13px;color:#374151;border-bottom:1px solid #F9FAFB;}
+    tbody tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:#FAFAFA;}
+    .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+    .badge-green{background:#D1FAE5;color:#059669;}
+    .badge-gray{background:#F3F4F6;color:#6B7280;}
+    .badge-purple{background:#F3EEFF;color:#5B2D8E;}
+    .badge-blue{background:#EFF6FF;color:#2563EB;}
+    .badge-orange{background:#FEF3C7;color:#D97706;}
+
+    /* Pagination */
+    .pagination{display:flex;align-items:center;gap:8px;padding:16px;justify-content:flex-end;}
+    .page-btn{padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;cursor:pointer;background:#fff;color:#374151;transition:.15s;}
+    .page-btn:hover:not(:disabled){border-color:var(--purple);color:var(--purple);}
+    .page-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+    .page-btn:disabled{opacity:.4;cursor:not-allowed;}
+
     /* Empty state */
     .empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
     .empty svg{margin-bottom:16px;opacity:.3;}
     .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
     .empty p{font-size:13px;}
 
-    /* Modal */
+    /* ── Modals ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
     .modal{background:#fff;border-radius:16px;width:680px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-wide{width:900px;}
     .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
     .modal-head h2{font-size:16px;font-weight:700;color:#111;}
     .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
@@ -104,23 +153,87 @@
     .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px;}
     .section-title{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
 
-    /* Days editor */
-    .days-editor{display:flex;flex-direction:column;gap:12px;}
-    .day-item{border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;}
-    .day-item-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;}
-    .day-num{width:24px;height:24px;border-radius:50%;background:var(--purple);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .day-item-head input{flex:1;padding:5px 8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;font-weight:600;outline:none;background:#fff;}
-    .day-item-head input:focus{border-color:var(--purple);}
-    .day-remove{background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;border-radius:4px;display:flex;margin-left:auto;}
-    .day-remove:hover{background:#FEF2F2;}
-    .day-item-body{padding:10px 12px;}
-    .day-item-body textarea{width:100%;min-height:80px;padding:8px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;outline:none;resize:vertical;font-family:inherit;color:#374151;}
-    .day-item-body textarea:focus{border-color:var(--purple);}
-    .add-day-btn{display:flex;align-items:center;gap:6px;padding:10px 12px;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;background:var(--purple-pale);border:2px dashed #D8B4FE;border-radius:10px;width:100%;justify-content:center;transition:.15s;}
-    .add-day-btn:hover{background:#EDE9FE;border-color:var(--purple);}
+    /* Wizard */
+    .wizard-steps{display:flex;gap:0;margin-bottom:24px;border-radius:10px;overflow:hidden;border:1px solid #E5E7EB;}
+    .wizard-step{flex:1;padding:12px 16px;text-align:center;font-size:13px;font-weight:600;color:#9CA3AF;background:#F9FAFB;cursor:pointer;transition:.15s;}
+    .wizard-step.active{background:var(--purple);color:#fff;}
+    .wizard-step.done{background:#D1FAE5;color:#059669;}
+    .wizard-panel{display:none;}
+    .wizard-panel.active{display:block;}
+
+    /* Builder layout */
+    .builder-layout{display:flex;gap:0;min-height:400px;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;}
+    .days-panel{width:180px;min-width:180px;background:#F9FAFB;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;}
+    .days-panel-header{padding:12px 14px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB;}
+    .days-list{flex:1;overflow-y:auto;padding:8px;}
+    .day-chip{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#374151;cursor:pointer;transition:.15s;margin-bottom:4px;}
+    .day-chip:hover{background:#EDE9FE;}
+    .day-chip.active{background:var(--purple);color:#fff;}
+    .day-chip .day-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .day-chip .day-rm{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;display:flex;color:inherit;opacity:.6;}
+    .day-chip .day-rm:hover{opacity:1;}
+    .days-panel-footer{padding:10px 8px;border-top:1px solid #E5E7EB;}
+    .add-day-chip-btn{width:100%;padding:8px;border-radius:8px;border:1.5px dashed #C084FC;background:#F3EEFF;color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
+    .add-day-chip-btn:hover{background:#EDE9FE;}
+
+    .blocks-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .blocks-header{padding:12px 16px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .blocks-header .day-title{font-size:14px;font-weight:700;color:#111;flex:1;}
+    .add-block-wrap{position:relative;}
+    .block-type-menu{position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:10;min-width:160px;display:none;overflow:hidden;}
+    .block-type-menu.open{display:block;}
+    .block-type-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;font-weight:500;color:#374151;background:none;border:none;cursor:pointer;text-align:left;transition:.15s;}
+    .block-type-menu button:hover{background:#F3EEFF;color:var(--purple);}
+    .blocks-list{flex:1;overflow-y:auto;padding:12px 16px;}
+
+    /* Blocks */
+    .block{background:#fff;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:12px;overflow:hidden;}
+    .block-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;}
+    .block-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+    .block-badge.warmup{background:#FEF3C7;color:#D97706;}
+    .block-badge.normal{background:#EFF6FF;color:#2563EB;}
+    .block-badge.superset{background:#F3EEFF;color:#5B2D8E;}
+    .block-badge.circuit{background:#D1FAE5;color:#059669;}
+    .block-rm{margin-left:auto;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:18px;line-height:1;padding:2px 6px;border-radius:4px;}
+    .block-rm:hover{color:#EF4444;background:#FEF2F2;}
+    .exercise-table{width:100%;border-collapse:collapse;}
+    .exercise-table th{padding:8px 10px;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.3px;background:#FAFAFA;border-bottom:1px solid #F3F4F6;text-align:left;white-space:nowrap;}
+    .exercise-table td{padding:6px 8px;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
+    .exercise-table tr:last-child td{border-bottom:none;}
+    .exercise-table input,.exercise-table select{border:1px solid #E5E7EB;border-radius:6px;padding:5px 7px;font-size:12px;outline:none;font-family:inherit;background:#fff;color:#111;transition:.15s;}
+    .exercise-table input:focus,.exercise-table select:focus{border-color:var(--purple);}
+    .ex-name{font-size:13px;font-weight:600;color:#111;display:block;}
+    .ex-muscle{font-size:11px;color:#9CA3AF;display:block;}
+    .add-exercise-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;border-top:1px solid #F3F4F6;width:100%;transition:.15s;}
+    .add-exercise-btn:hover{background:#F3EEFF;}
+    .empty-day{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 16px;color:#9CA3AF;text-align:center;gap:10px;}
+    .empty-day svg{opacity:.3;}
+    .empty-day p{font-size:13px;}
+
+    /* Exercise picker */
+    .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .picker-overlay.open{opacity:1;pointer-events:all;}
+    .picker-modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;}
+    .picker-overlay.open .picker-modal{transform:translateY(0);}
+    .picker-head{padding:18px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .picker-head h3{font-size:15px;font-weight:700;color:#111;}
+    .picker-filters{padding:12px 16px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
+    .picker-search{width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;margin-bottom:10px;font-family:inherit;}
+    .picker-search:focus{border-color:var(--purple);}
+    .picker-pills{display:flex;gap:6px;flex-wrap:wrap;}
+    .picker-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
+    .picker-pill:hover{border-color:var(--purple);color:var(--purple);}
+    .picker-pill.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+    .picker-results{flex:1;overflow-y:auto;padding:8px 0;}
+    .picker-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid #F9FAFB;}
+    .picker-item:hover{background:#F3EEFF;}
+    .picker-item-icon{width:36px;height:36px;border-radius:8px;background:var(--purple-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .picker-item-name{font-size:13px;font-weight:600;color:#111;}
+    .picker-item-muscle{font-size:11px;color:#9CA3AF;}
+    .picker-empty{padding:32px;text-align:center;color:#9CA3AF;font-size:13px;}
 
     /* Delete confirm */
-    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
     .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .confirm-overlay.open .confirm-box{transform:translateY(0);}
@@ -129,7 +242,7 @@
     .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
 
     /* Toast */
-    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:300;}
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:400;}
     .toast.show{transform:translateY(0);opacity:1;}
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
@@ -140,6 +253,9 @@
       .sidebar-nav,.sidebar-user{display:none;}
       .cards-grid{grid-template-columns:1fr;}
       .form-row,.form-row-3{grid-template-columns:1fr;}
+      .builder-layout{flex-direction:column;}
+      .days-panel{width:100%;min-width:unset;}
+      .modal-wide{width:96vw;}
     }
   </style>
 </head>
@@ -152,7 +268,6 @@
     <small>Panel de administración</small>
   </div>
   <div class="sidebar-nav">
-  <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -202,7 +317,7 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analíticas
     </a>
-  </nav>
+  </div>
   <div class="sidebar-user">
     <div class="user-row">
       <div class="user-avatar" id="sidebarAvatar">U</div>
@@ -220,91 +335,300 @@
 <!-- Main -->
 <div class="main">
   <div class="topbar">
-    <h1>Rutinas</h1>
-    <button class="btn btn-primary" onclick="openModal()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nueva rutina
-    </button>
+    <h1>Entrenamiento</h1>
   </div>
-  <div class="toolbar">
-    <div class="search-wrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="searchInput" placeholder="Buscar rutina…" oninput="applyFilter()"/>
+
+  <!-- Tab bar -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('routines')">Rutinas</button>
+    <button class="tab-btn" onclick="switchTab('exercises')">Ejercicios</button>
+    <button class="tab-btn" onclick="switchTab('muscle-groups')">Grupos musculares</button>
+  </div>
+
+  <!-- Tab: Rutinas -->
+  <div class="tab-content active" id="tab-routines">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchRoutines" placeholder="Buscar rutina…" oninput="applyRoutineFilter()"/>
+      </div>
+      <span class="total-label" id="routineTotalLabel"></span>
+      <button class="btn btn-primary" onclick="openRoutineModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nueva rutina
+      </button>
     </div>
-    <span class="total-label" id="totalLabel"></span>
+    <div class="content">
+      <div id="routinesContent">
+        <div class="empty">
+          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <h3>Cargando rutinas…</h3>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="content" id="content">
-    <div class="empty">
-      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <h3>Cargando rutinas…</h3>
+
+  <!-- Tab: Ejercicios -->
+  <div class="tab-content" id="tab-exercises">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchExercises" placeholder="Buscar ejercicio…" oninput="loadExercises(1)"/>
+      </div>
+      <div class="filter-pills" id="exMgPills"></div>
+      <span class="total-label" id="exTotalLabel"></span>
+      <button class="btn btn-primary" onclick="openExerciseModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo ejercicio
+      </button>
+    </div>
+    <div class="content">
+      <div class="table-wrap" id="exercisesTable">
+        <div class="empty"><h3>Cargando…</h3></div>
+      </div>
+      <div class="pagination" id="exPagination"></div>
+    </div>
+  </div>
+
+  <!-- Tab: Grupos musculares -->
+  <div class="tab-content" id="tab-muscle-groups">
+    <div class="toolbar">
+      <span class="total-label" id="mgTotalLabel"></span>
+      <button class="btn btn-primary" onclick="openMgModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo grupo
+      </button>
+    </div>
+    <div class="content">
+      <div class="cards-grid" id="mgContent">
+        <div class="empty"><h3>Cargando…</h3></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Routine modal -->
-<div class="modal-overlay" id="routineOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
+<!-- ══════════════════════════════════════════════
+     Routine Modal (2-step wizard)
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="routineOverlay" onclick="if(event.target===this)closeRoutineModal()">
+  <div class="modal modal-wide">
     <div class="modal-head">
-      <h2 id="modalTitle">Nueva rutina</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <h2 id="routineModalTitle">Nueva rutina</h2>
+      <button class="modal-close" onclick="closeRoutineModal()">×</button>
     </div>
     <div class="modal-body">
-      <!-- Name -->
-      <div class="form-group">
-        <label>Nombre *</label>
-        <input id="f_name" placeholder="Ej: Rutina fuerza 4 días — Upper/Lower"/>
+      <!-- Wizard steps -->
+      <div class="wizard-steps">
+        <div class="wizard-step active" id="wStep1" onclick="wizardGo(1)">1. Información</div>
+        <div class="wizard-step" id="wStep2" onclick="wizardGo(2)">2. Ejercicios</div>
       </div>
 
-      <!-- Meta info -->
-      <div class="section-title">Configuración</div>
-      <div class="form-row-3">
+      <!-- Step 1 -->
+      <div class="wizard-panel active" id="wPanel1">
         <div class="form-group">
-          <label>Tipo de entrenamiento</label>
-          <input id="f_training" placeholder="Fuerza, Cardio, HIIT…"/>
+          <label>Nombre *</label>
+          <input id="f_name" placeholder="Ej: Rutina fuerza 4 días — Upper/Lower"/>
+        </div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Días por semana</label>
+            <input id="f_days" type="number" min="1" max="7" placeholder="4"/>
+          </div>
+          <div class="form-group">
+            <label>Duración (min)</label>
+            <input id="f_time" type="number" min="15" placeholder="60"/>
+          </div>
+          <div class="form-group">
+            <label>Género</label>
+            <select id="f_gender">
+              <option value="">Cualquiera</option>
+              <option value="1">Masculino</option>
+              <option value="2">Femenino</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
-          <label>Días por semana</label>
-          <input id="f_days" type="number" min="1" max="7" placeholder="4"/>
+          <label>Notas</label>
+          <textarea id="f_notes" rows="3" placeholder="Observaciones generales de la rutina…"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn btn-primary" onclick="wizardNext()">
+            Siguiente
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Builder -->
+      <div class="wizard-panel" id="wPanel2">
+        <div class="builder-layout">
+          <!-- Left: days panel -->
+          <div class="days-panel">
+            <div class="days-panel-header">Días</div>
+            <div class="days-list" id="daysList"></div>
+            <div class="days-panel-footer">
+              <button class="add-day-chip-btn" onclick="addDay()">+ Agregar día</button>
+            </div>
+          </div>
+          <!-- Right: blocks area -->
+          <div class="blocks-area">
+            <div class="blocks-header">
+              <span class="day-title" id="selectedDayName">Selecciona un día</span>
+              <div class="add-block-wrap">
+                <button class="btn btn-sm btn-purple" onclick="toggleBlockMenu()">+ Bloque</button>
+                <div class="block-type-menu" id="blockTypeMenu">
+                  <button onclick="addBlock('warmup');toggleBlockMenu()">&#128293; Calentamiento</button>
+                  <button onclick="addBlock('normal');toggleBlockMenu()">&#128203; Normal</button>
+                  <button onclick="addBlock('superset');toggleBlockMenu()">&#128260; Superserie</button>
+                  <button onclick="addBlock('circuit');toggleBlockMenu()">&#11093; Circuito</button>
+                </div>
+              </div>
+            </div>
+            <div class="blocks-list" id="blocksList">
+              <div class="empty-day">
+                <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+                <p>Agrega un día y crea bloques de ejercicios.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px;">
+          <button class="btn btn-ghost" onclick="wizardGo(1)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            Anterior
+          </button>
+          <button class="btn btn-primary" id="saveRoutineBtn" onclick="saveRoutine()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Guardar rutina
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     Exercise Picker Modal
+════════════════════════════════════════════════ -->
+<div class="picker-overlay" id="pickerOverlay" onclick="if(event.target===this)closePicker()">
+  <div class="picker-modal">
+    <div class="picker-head">
+      <h3>Seleccionar ejercicio</h3>
+      <button class="modal-close" onclick="closePicker()">×</button>
+    </div>
+    <div class="picker-filters">
+      <input class="picker-search" id="pickerSearch" placeholder="Buscar ejercicio…" oninput="searchPicker()"/>
+      <div class="picker-pills" id="pickerPills"></div>
+    </div>
+    <div class="picker-results" id="pickerResults">
+      <div class="picker-empty">Busca un ejercicio para comenzar.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     Exercise Modal (create/edit)
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="exerciseOverlay" onclick="if(event.target===this)closeExerciseModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="exerciseModalTitle">Nuevo ejercicio</h2>
+      <button class="modal-close" onclick="closeExerciseModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input id="ex_name" placeholder="Ej: Press de banca"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Grupo muscular principal</label>
+          <select id="ex_mg"></select>
         </div>
         <div class="form-group">
-          <label>Duración (min)</label>
-          <input id="f_time" type="number" min="15" placeholder="60"/>
+          <label>Grupo muscular secundario</label>
+          <select id="ex_mg2"></select>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Género</label>
-          <select id="f_gender">
-            <option value="">Cualquiera</option>
-            <option value="1">Masculino</option>
-            <option value="2">Femenino</option>
+          <label>Tipo de ejercicio</label>
+          <select id="ex_type">
+            <option value="">Sin especificar</option>
+            <option value="compound">Compuesto</option>
+            <option value="isolation">Aislamiento</option>
+            <option value="cardio">Cardio</option>
+            <option value="mobility">Movilidad</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Nivel</label>
-          <select id="f_level">
+          <label>Localización</label>
+          <select id="ex_location">
             <option value="">Sin especificar</option>
-            <option value="1">Principiante</option>
-            <option value="2">Intermedio</option>
-            <option value="3">Avanzado</option>
+            <option value="gym">Gimnasio</option>
+            <option value="home">Casa</option>
+            <option value="outdoor">Exterior</option>
+            <option value="both">Ambos</option>
           </select>
         </div>
       </div>
-
-      <!-- Days list -->
-      <div class="section-title">Programa de días</div>
-      <div class="days-editor" id="daysEditor"></div>
-      <button class="add-day-btn" onclick="addDay()" style="margin-top:12px;">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Agregar día
-      </button>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="ex_desc" rows="3" placeholder="Descripción del ejercicio…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>URL imagen</label>
+          <input id="ex_image" placeholder="https://…"/>
+        </div>
+        <div class="form-group">
+          <label>URL video</label>
+          <input id="ex_video" placeholder="https://…"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="ex_state">
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" id="saveBtn" onclick="saveRoutine()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Guardar
-      </button>
+      <button class="btn btn-ghost" onclick="closeExerciseModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveExercise()">Guardar ejercicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     Muscle Group Modal
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="mgOverlay" onclick="if(event.target===this)closeMgModal()">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head">
+      <h2 id="mgModalTitle">Nuevo grupo muscular</h2>
+      <button class="modal-close" onclick="closeMgModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input id="mg_name" placeholder="Ej: Pecho"/>
+        </div>
+        <div class="form-group">
+          <label>Icono (emoji)</label>
+          <input id="mg_icon" placeholder="&#128170;" maxlength="10"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="mg_desc" rows="3" placeholder="Descripción del grupo muscular…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeMgModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMuscleGroup()">Guardar</button>
     </div>
   </div>
 </div>
@@ -312,11 +636,11 @@
 <!-- Delete confirm -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
-    <h3>Eliminar rutina</h3>
-    <p id="confirmText">¿Estás seguro de que deseas eliminar esta rutina? Esta acción no se puede deshacer.</p>
+    <h3 id="confirmTitle">Eliminar</h3>
+    <p id="confirmText">¿Estás seguro?</p>
     <div class="confirm-actions">
       <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancelar</button>
-      <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Eliminar</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteFn()">Eliminar</button>
     </div>
   </div>
 </div>
@@ -325,346 +649,904 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const API = 'https://nutrientrena-production.up.railway.app/api';
-  let token = localStorage.getItem('token') || '';
-  let allRoutines = [];
-  let editingId = null;
-  let deletingId = null;
-  const LEVELS = {1:'Principiante', 2:'Intermedio', 3:'Avanzado'};
-  const GENDERS = {1:'Masculino', 2:'Femenino'};
+/* ══════════════════════════════════════════════
+   Config & globals
+════════════════════════════════════════════════ */
+const API = 'https://nutrientrena-production.up.railway.app/api';
+let token = localStorage.getItem('token') || '';
 
-  /* ── Auth ── */
-  function authHeaders() { return { 'Content-Type':'application/json', Authorization:`Bearer ${token}` }; }
+function authHeaders() {
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+}
 
-  async function initUser() {
-    if (!token) { location.href = 'login.html'; return; }
+/* ══════════════════════════════════════════════
+   Utils
+════════════════════════════════════════════════ */
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+let confirmDeleteFn = () => {};
+function openConfirm(title, text, fn) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  confirmDeleteFn = fn;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+
+/* ══════════════════════════════════════════════
+   Auth / Init
+════════════════════════════════════════════════ */
+async function initUser() {
+  if (!token) { location.href = 'login.html'; return; }
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: authHeaders() });
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    const u = d.data || d;
+    document.getElementById('sidebarName').textContent = u.name || u.email || '—';
+    document.getElementById('sidebarRole').textContent = u.role?.name || '';
+    document.getElementById('sidebarAvatar').textContent = (u.name || u.email || 'U')[0].toUpperCase();
+  } catch { /* silent */ }
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  location.href = 'login.html';
+}
+
+async function loadPendingBadge() {
+  try {
+    const r = await fetch(`${API}/form-assignments/pending`, { headers: authHeaders() });
+    if (!r.ok) return;
+    const d = await r.json();
+    const n = (d.data || []).length;
+    const badge = document.getElementById('formsBadge');
+    if (n > 0) { badge.textContent = n; badge.style.display = 'inline-block'; }
+  } catch { /* ignore */ }
+}
+
+/* ══════════════════════════════════════════════
+   Tabs
+════════════════════════════════════════════════ */
+let activeTab = 'routines';
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const tabs = ['routines','exercises','muscle-groups'];
+    b.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+
+  if (tab === 'routines' && allRoutines.length === 0) loadRoutines();
+  if (tab === 'exercises') { loadMuscleGroupsForFilters(); loadExercises(1); }
+  if (tab === 'muscle-groups') loadMuscleGroups();
+}
+
+/* ══════════════════════════════════════════════
+   ── TAB: RUTINAS ──
+════════════════════════════════════════════════ */
+let allRoutines = [];
+const LEVELS = {1:'Principiante', 2:'Intermedio', 3:'Avanzado'};
+const GENDERS = {1:'Masculino', 2:'Femenino'};
+
+async function loadRoutines() {
+  try {
+    const r = await fetch(`${API}/routines/findAll`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    allRoutines = d.data || [];
+    renderRoutines(allRoutines);
+  } catch (e) {
+    document.getElementById('routinesContent').innerHTML = `
+      <div class="empty">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <h3>Error al cargar</h3><p>${esc(e.message)}</p>
+      </div>`;
+  }
+}
+
+function applyRoutineFilter() {
+  const q = document.getElementById('searchRoutines').value.toLowerCase();
+  const filtered = allRoutines.filter(r =>
+    (r.name || '').toLowerCase().includes(q) ||
+    (r.training || '').toLowerCase().includes(q)
+  );
+  renderRoutines(filtered);
+}
+
+function renderRoutines(list) {
+  const el = document.getElementById('routinesContent');
+  document.getElementById('routineTotalLabel').textContent = `${list.length} rutina${list.length !== 1 ? 's' : ''}`;
+  if (!list.length) {
+    el.innerHTML = `<div class="empty">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <h3>Sin rutinas</h3><p>Crea tu primera rutina con el botón "Nueva rutina".</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = `<div class="cards-grid">${list.map(routineCard).join('')}</div>`;
+}
+
+function routineCard(r) {
+  const levelName = r.training_level_id ? (LEVELS[r.training_level_id] || `Nivel ${r.training_level_id}`) : null;
+  const days = r.days_list || [];
+  // Count total blocks across all days
+  const totalBlocks = days.reduce((s, d) => s + (d.blocks || []).length, 0);
+  const dayTags = days.slice(0, 5).map(d =>
+    `<span class="day-tag">${esc(d.day_name || 'Día')}</span>`
+  ).join('') + (days.length > 5 ? `<span class="day-tag">+${days.length - 5}</span>` : '');
+
+  return `
+    <div class="routine-card">
+      <div class="routine-card-header">
+        <div>
+          <div class="routine-card-title">${esc(r.name)}</div>
+          <div class="routine-card-sub">${days.length} día${days.length !== 1 ? 's' : ''}${totalBlocks ? ` · ${totalBlocks} bloques` : ''}${r.gender_id ? ' · ' + GENDERS[r.gender_id] : ''}</div>
+        </div>
+        <div class="routine-card-actions">
+          <button class="btn-icon" onclick="downloadPdf(${r.id}, '${esc(r.name)}')" title="PDF">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+          <button class="btn-icon" onclick="cloneRoutine(${r.id})" title="Clonar">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="btn-icon" onclick="openRoutineModal(${r.id})" title="Editar">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon" onclick="openConfirm('Eliminar rutina','¿Eliminar &quot;${esc(r.name)}&quot;? No se puede deshacer.',()=>deleteRoutine(${r.id}))" title="Eliminar" style="color:#EF4444;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="meta-row">
+        ${r.days ? `<span class="meta-chip meta-days">${r.days} días/sem</span>` : ''}
+        ${r.time ? `<span class="meta-chip meta-time">${r.time} min</span>` : ''}
+        ${levelName ? `<span class="meta-chip meta-level">${esc(levelName)}</span>` : ''}
+        ${r.training ? `<span class="meta-chip meta-training">${esc(r.training)}</span>` : ''}
+      </div>
+      ${days.length ? `<div class="days-list-preview"><strong>Días</strong>${dayTags}</div>` : ''}
+    </div>`;
+}
+
+async function cloneRoutine(id) {
+  try {
+    const r = await fetch(`${API}/routines/clone`, { method:'POST', headers: authHeaders(), body: JSON.stringify({id}) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+    showToast('Rutina clonada', 'success');
+    await loadRoutines();
+  } catch (e) { showToast(e.message || 'Error al clonar', 'error'); }
+}
+
+async function deleteRoutine(id) {
+  closeConfirm();
+  try {
+    const r = await fetch(`${API}/routines/${id}`, { method:'DELETE', headers: authHeaders() });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message);
+    showToast('Rutina eliminada', 'success');
+    await loadRoutines();
+  } catch (e) { showToast(e.message || 'Error', 'error'); }
+}
+
+async function downloadPdf(id, title) {
+  try {
+    const r = await fetch(`${API}/routines/${id}/pdf`, { headers: authHeaders() });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${title.replace(/\s+/g,'_').toLowerCase()}.pdf`; a.click();
+    URL.revokeObjectURL(url);
+  } catch { showToast('Error al descargar PDF', 'error'); }
+}
+
+/* ══════════════════════════════════════════════
+   Routine Modal — Wizard state
+════════════════════════════════════════════════ */
+let editingRoutineId = null;
+let currentWizardStep = 1;
+
+// routineData holds the complete builder state
+const routineData = {
+  name: '', days: 0, time: 0, gender_id: null, notes: '',
+  days_list: []
+};
+let selectedDayIdx = 0;
+let pickerTargetBlockIdx = null;
+
+function resetRoutineData() {
+  routineData.name = '';
+  routineData.days = 0;
+  routineData.time = 0;
+  routineData.gender_id = null;
+  routineData.notes = '';
+  routineData.days_list = [];
+  selectedDayIdx = 0;
+}
+
+async function openRoutineModal(id = null) {
+  editingRoutineId = id;
+  resetRoutineData();
+  document.getElementById('routineModalTitle').textContent = id ? 'Editar rutina' : 'Nueva rutina';
+  clearRoutineForm();
+  wizardGo(1);
+
+  if (id) {
     try {
-      const r = await fetch(`${API}/auth/me`, { headers: authHeaders() });
-      if (!r.ok) throw new Error();
+      const r = await fetch(`${API}/routines/${id}/edit`, { headers: authHeaders() });
       const d = await r.json();
-      const u = d.data || d;
-      document.getElementById('sidebarName').textContent = u.name || u.email || '—';
-      document.getElementById('sidebarRole').textContent = u.role?.name || '';
-      document.getElementById('sidebarAvatar').textContent = (u.name || u.email || 'U')[0].toUpperCase();
-    } catch { /* silent */ }
+      const rt = d.data || d;
+      document.getElementById('f_name').value = rt.name || '';
+      document.getElementById('f_days').value = rt.days || '';
+      document.getElementById('f_time').value = rt.time || '';
+      document.getElementById('f_gender').value = rt.gender_id || '';
+      document.getElementById('f_notes').value = rt.notes || '';
+      // Populate routineData from response
+      routineData.name = rt.name || '';
+      routineData.days = rt.days || 0;
+      routineData.time = rt.time || 0;
+      routineData.gender_id = rt.gender_id || null;
+      routineData.notes = rt.notes || '';
+      routineData.days_list = (rt.days_list || []).map(day => ({
+        day_name: day.day_name || '',
+        description: day.description || '',
+        blocks: (day.blocks || []).map(blk => ({
+          block_type: blk.block_type || 'normal',
+          order_index: blk.order_index || 0,
+          exercises: (blk.exercises || []).map(ex => ({
+            training_id: ex.training_id,
+            training_name: ex.training_name || '',
+            muscle_group_name: ex.muscle_group_name || '',
+            series: ex.series || null,
+            repetitions: ex.repetitions || '',
+            break_time: ex.break_time || null,
+            intensity_type: ex.intensity_type || '',
+            intensity_value: ex.intensity_value || null,
+            notes: ex.notes || '',
+            order_index: ex.order_index || 0,
+          }))
+        }))
+      }));
+    } catch { showToast('Error al cargar la rutina', 'error'); return; }
   }
 
-  function logout() {
-    localStorage.removeItem('token');
-    location.href = 'login.html';
+  document.getElementById('routineOverlay').classList.add('open');
+}
+
+function closeRoutineModal() {
+  document.getElementById('routineOverlay').classList.remove('open');
+  editingRoutineId = null;
+  resetRoutineData();
+}
+
+function clearRoutineForm() {
+  ['f_name','f_days','f_time','f_notes'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('f_gender').value = '';
+  document.getElementById('daysList').innerHTML = '';
+  document.getElementById('blocksList').innerHTML = '';
+  document.getElementById('selectedDayName').textContent = 'Selecciona un día';
+}
+
+function wizardGo(step) {
+  currentWizardStep = step;
+  document.querySelectorAll('.wizard-step').forEach((el, i) => {
+    el.classList.remove('active','done');
+    if (i + 1 === step) el.classList.add('active');
+    else if (i + 1 < step) el.classList.add('done');
+  });
+  document.querySelectorAll('.wizard-panel').forEach((el, i) => {
+    el.classList.toggle('active', i + 1 === step);
+  });
+  if (step === 2) renderDaysList();
+}
+
+function wizardNext() {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+  // Sync step1 data into routineData
+  routineData.name = name;
+  routineData.days = parseInt(document.getElementById('f_days').value) || 0;
+  routineData.time = parseInt(document.getElementById('f_time').value) || 0;
+  routineData.gender_id = parseInt(document.getElementById('f_gender').value) || null;
+  routineData.notes = document.getElementById('f_notes').value.trim();
+  wizardGo(2);
+}
+
+/* ── Days ── */
+function addDay() {
+  const idx = routineData.days_list.length;
+  routineData.days_list.push({
+    day_name: `Día ${idx + 1}`,
+    description: '',
+    blocks: []
+  });
+  renderDaysList();
+  selectDay(routineData.days_list.length - 1);
+}
+
+function removeDay(idx) {
+  routineData.days_list.splice(idx, 1);
+  if (selectedDayIdx >= routineData.days_list.length) {
+    selectedDayIdx = Math.max(0, routineData.days_list.length - 1);
+  }
+  renderDaysList();
+  renderBlocks();
+}
+
+function selectDay(idx) {
+  selectedDayIdx = idx;
+  renderDaysList();
+  renderBlocks();
+}
+
+function renderDaysList() {
+  const container = document.getElementById('daysList');
+  container.innerHTML = '';
+  routineData.days_list.forEach((day, i) => {
+    const chip = document.createElement('div');
+    chip.className = `day-chip${i === selectedDayIdx ? ' active' : ''}`;
+    chip.innerHTML = `
+      <span class="day-chip-name" onclick="selectDay(${i})" style="cursor:pointer">${esc(day.day_name)}</span>
+      <button class="day-rm" onclick="removeDay(${i})" title="Eliminar día">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    chip.addEventListener('click', (e) => {
+      if (!e.target.closest('.day-rm')) selectDay(i);
+    });
+    container.appendChild(chip);
+  });
+}
+
+/* ── Blocks ── */
+const BLOCK_LABELS = {
+  warmup: '&#128293; Calentamiento',
+  normal: '&#128203; Normal',
+  superset: '&#128260; Superserie',
+  circuit: '&#11093; Circuito',
+};
+
+function toggleBlockMenu() {
+  document.getElementById('blockTypeMenu').classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.add-block-wrap')) {
+    document.getElementById('blockTypeMenu')?.classList.remove('open');
+  }
+});
+
+function addBlock(type = 'normal') {
+  if (!routineData.days_list.length) { showToast('Agrega un día primero', 'error'); return; }
+  const day = routineData.days_list[selectedDayIdx];
+  day.blocks.push({ block_type: type, order_index: day.blocks.length, exercises: [] });
+  renderBlocks();
+}
+
+function removeBlock(blockIdx) {
+  const day = routineData.days_list[selectedDayIdx];
+  day.blocks.splice(blockIdx, 1);
+  renderBlocks();
+}
+
+function renderBlocks() {
+  const container = document.getElementById('blocksList');
+  const titleEl = document.getElementById('selectedDayName');
+
+  if (!routineData.days_list.length) {
+    titleEl.textContent = 'Selecciona un día';
+    container.innerHTML = `<div class="empty-day">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+      <p>Agrega un día y crea bloques de ejercicios.</p>
+    </div>`;
+    return;
   }
 
-  /* ── Load ── */
-  async function loadRoutines() {
-    try {
-      const r = await fetch(`${API}/routines/findAll`, { headers: authHeaders() });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const d = await r.json();
-      allRoutines = d.data || [];
-      renderRoutines(allRoutines);
-    } catch (e) {
-      document.getElementById('content').innerHTML = `
-        <div class="empty">
-          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <h3>Error al cargar</h3><p>${e.message}</p>
-        </div>`;
-    }
+  const day = routineData.days_list[selectedDayIdx];
+  titleEl.textContent = day.day_name;
+
+  if (!day.blocks.length) {
+    container.innerHTML = `<div class="empty-day">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <p>Usa el botón "+ Bloque" para agregar bloques de ejercicios.</p>
+    </div>`;
+    return;
   }
 
-  async function loadPendingBadge() {
-    try {
-      const r = await fetch(`${API}/form-assignments/pending`, { headers: authHeaders() });
-      if (!r.ok) return;
-      const d = await r.json();
-      const n = (d.data || []).length;
-      const badge = document.getElementById('formsBadge');
-      if (n > 0) { badge.textContent = n; badge.style.display = 'inline-block'; }
-    } catch { /* ignore */ }
-  }
-
-  /* ── Render ── */
-  function applyFilter() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allRoutines.filter(r =>
-      (r.name || '').toLowerCase().includes(q) ||
-      (r.training || '').toLowerCase().includes(q)
-    );
-    renderRoutines(filtered);
-  }
-
-  function renderRoutines(list) {
-    const el = document.getElementById('content');
-    document.getElementById('totalLabel').textContent = `${list.length} rutina${list.length !== 1 ? 's' : ''}`;
-    if (!list.length) {
-      el.innerHTML = `
-        <div class="empty">
-          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <h3>Sin rutinas</h3><p>Crea tu primera rutina con el botón "Nueva rutina".</p>
-        </div>`;
-      return;
-    }
-    el.innerHTML = `<div class="cards-grid">${list.map(routineCard).join('')}</div>`;
-  }
-
-  function routineCard(r) {
-    const levelName = r.training_level_id ? (LEVELS[r.training_level_id] || `Nivel ${r.training_level_id}`) : null;
-    const days = r.days_list || [];
-    const dayTags = days.slice(0, 5).map(d =>
-      `<span class="day-tag">${esc(d.day_name || 'Día')}</span>`
-    ).join('') + (days.length > 5 ? `<span class="day-tag">+${days.length - 5}</span>` : '');
+  container.innerHTML = day.blocks.map((blk, bi) => {
+    const label = BLOCK_LABELS[blk.block_type] || blk.block_type;
+    const rows = blk.exercises.map((ex, ei) => `
+      <tr data-bi="${bi}" data-ei="${ei}">
+        <td>
+          <span class="ex-name">${esc(ex.training_name) || '<em style="color:#9CA3AF">Sin nombre</em>'}</span>
+          <span class="ex-muscle">${esc(ex.muscle_group_name)}</span>
+        </td>
+        <td><input type="number" min="1" max="20" style="width:52px" value="${esc(ex.series)}" placeholder="—" onchange="updateEx(${bi},${ei},'series',this.value)"/></td>
+        <td><input type="text" style="width:64px" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateEx(${bi},${ei},'repetitions',this.value)"/></td>
+        <td><input type="number" style="width:60px" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateEx(${bi},${ei},'break_time',this.value)"/></td>
+        <td>
+          <select style="width:72px" onchange="updateEx(${bi},${ei},'intensity_type',this.value)">
+            <option value=""${!ex.intensity_type?' selected':''}>—</option>
+            <option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option>
+            <option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option>
+            <option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option>
+            <option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option>
+          </select>
+        </td>
+        <td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td>
+        <td><input type="text" style="width:90px" value="${esc(ex.notes)}" placeholder="Notas…" onchange="updateEx(${bi},${ei},'notes',this.value)"/></td>
+        <td><button style="background:none;border:none;cursor:pointer;color:#EF4444;font-size:16px;padding:4px;" onclick="removeExercise(${bi},${ei})">✕</button></td>
+      </tr>`).join('');
 
     return `
-      <div class="routine-card">
-        <div class="routine-card-header">
-          <div>
-            <div class="routine-card-title">${esc(r.name)}</div>
-            <div class="routine-card-sub">${days.length} día${days.length !== 1 ? 's' : ''} programados${r.gender_id ? ' · ' + GENDERS[r.gender_id] : ''}</div>
-          </div>
-          <div class="routine-card-actions">
-            <button class="btn-icon" onclick="downloadPdf(${r.id}, '${esc(r.name)}')" title="Descargar PDF">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </button>
-            <button class="btn-icon" onclick="cloneRoutine(${r.id})" title="Clonar rutina">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
-            <button class="btn-icon" onclick="openModal(${r.id})" title="Editar rutina">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button class="btn-icon" onclick="openConfirm(${r.id}, '${esc(r.name)}')" title="Eliminar rutina" style="color:#EF4444;">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
-          </div>
+      <div class="block" data-block-idx="${bi}">
+        <div class="block-header">
+          <span class="block-badge ${blk.block_type}">${label}</span>
+          <button class="block-rm" onclick="removeBlock(${bi})">✕</button>
         </div>
-        <div class="meta-row">
-          ${r.days ? `<span class="meta-chip meta-days"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${r.days} días/sem</span>` : ''}
-          ${r.time ? `<span class="meta-chip meta-time"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${r.time} min</span>` : ''}
-          ${levelName ? `<span class="meta-chip meta-level">${levelName}</span>` : ''}
-          ${r.training ? `<span class="meta-chip meta-training">${esc(r.training)}</span>` : ''}
-        </div>
-        ${days.length ? `
-        <div class="days-list-preview">
-          <strong>Días</strong>
-          ${dayTags}
-        </div>` : ''}
-      </div>`;
-  }
-
-  /* ── Modal ── */
-  async function openModal(id = null) {
-    editingId = id;
-    clearForm();
-    document.getElementById('modalTitle').textContent = id ? 'Editar rutina' : 'Nueva rutina';
-    document.getElementById('saveBtn').textContent = id ? 'Actualizar' : 'Guardar';
-
-    if (id) {
-      try {
-        const r = await fetch(`${API}/routines/${id}/edit`, { headers: authHeaders() });
-        const d = await r.json();
-        const rt = d.data || d;
-        document.getElementById('f_name').value = rt.name || '';
-        document.getElementById('f_training').value = rt.training || '';
-        document.getElementById('f_days').value = rt.days || '';
-        document.getElementById('f_time').value = rt.time || '';
-        document.getElementById('f_gender').value = rt.gender_id || '';
-        document.getElementById('f_level').value = rt.training_level_id || '';
-        (rt.days_list || []).forEach(day => addDay(day.day_name || '', day.content_html || ''));
-      } catch { showToast('Error al cargar la rutina', 'error'); return; }
-    }
-
-    document.getElementById('routineOverlay').classList.add('open');
-    setTimeout(() => document.getElementById('f_name').focus(), 100);
-  }
-
-  function closeModal() {
-    document.getElementById('routineOverlay').classList.remove('open');
-    editingId = null;
-    clearForm();
-  }
-
-  function clearForm() {
-    ['f_name','f_training','f_days','f_time'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('f_gender').value = '';
-    document.getElementById('f_level').value = '';
-    document.getElementById('daysEditor').innerHTML = '';
-  }
-
-  /* ── Days editor ── */
-  let dayCounter = 0;
-
-  function addDay(name = '', description = '') {
-    dayCounter++;
-    const idx = dayCounter;
-    const editor = document.getElementById('daysEditor');
-    const div = document.createElement('div');
-    div.className = 'day-item';
-    div.dataset.idx = idx;
-    div.innerHTML = `
-      <div class="day-item-head">
-        <span class="day-num">${editor.children.length + 1}</span>
-        <input type="text" placeholder="Ej: Día 1 — Pecho y tríceps" value="${esc(name)}" data-day-name="${idx}"/>
-        <button class="day-remove" onclick="removeDay(${idx})" title="Eliminar día">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        ${blk.exercises.length ? `
+        <table class="exercise-table">
+          <thead>
+            <tr>
+              <th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th>
+              <th>Intensidad</th><th>Valor</th><th>Notas</th><th></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>` : ''}
+        <button class="add-exercise-btn" onclick="openPicker(${bi})">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar ejercicio
         </button>
-      </div>
-      <div class="day-item-body">
-        <textarea placeholder="Descripción del día, ejercicios, series y reps…" data-day-desc="${idx}">${esc(description)}</textarea>
       </div>`;
-    editor.appendChild(div);
-    renumberDays();
-    if (!name) div.querySelector('input').focus();
+  }).join('');
+}
+
+function updateEx(bi, ei, field, value) {
+  const ex = routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei];
+  if (field === 'series' || field === 'break_time') ex[field] = parseInt(value) || null;
+  else if (field === 'intensity_value') ex[field] = parseFloat(value) || null;
+  else ex[field] = value;
+}
+
+function removeExercise(bi, ei) {
+  routineData.days_list[selectedDayIdx].blocks[bi].exercises.splice(ei, 1);
+  renderBlocks();
+}
+
+/* ── Save routine ── */
+async function saveRoutine() {
+  // Sync step1 in case user jumped back
+  routineData.name = document.getElementById('f_name').value.trim();
+  routineData.days = parseInt(document.getElementById('f_days').value) || null;
+  routineData.time = parseInt(document.getElementById('f_time').value) || null;
+  routineData.gender_id = parseInt(document.getElementById('f_gender').value) || null;
+  routineData.notes = document.getElementById('f_notes').value.trim();
+
+  if (!routineData.name) { showToast('El nombre es obligatorio', 'error'); return; }
+
+  const payload = {
+    name: routineData.name,
+    days: routineData.days,
+    time: routineData.time,
+    gender_id: routineData.gender_id,
+    notes: routineData.notes || null,
+    days_list: routineData.days_list.map((day, i) => ({
+      day_name: day.day_name,
+      description: day.description || null,
+      blocks: day.blocks.map((blk, bi) => ({
+        block_type: blk.block_type,
+        order_index: bi,
+        exercises: blk.exercises.map((ex, ei) => ({
+          training_id: ex.training_id || null,
+          series: parseInt(ex.series) || null,
+          repetitions: ex.repetitions || null,
+          break_time: parseInt(ex.break_time) || null,
+          intensity_type: ex.intensity_type || null,
+          intensity_value: parseFloat(ex.intensity_value) || null,
+          notes: ex.notes || null,
+          order_index: ei,
+        }))
+      }))
+    }))
+  };
+
+  const btn = document.getElementById('saveRoutineBtn');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  try {
+    const url = editingRoutineId ? `${API}/routines/${editingRoutineId}/update` : `${API}/routines`;
+    const method = editingRoutineId ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+    showToast(editingRoutineId ? 'Rutina actualizada' : 'Rutina creada', 'success');
+    closeRoutineModal();
+    await loadRoutines();
+  } catch (e) {
+    showToast(e.message || 'Error al guardar', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar rutina';
   }
+}
 
-  function removeDay(idx) {
-    const editor = document.getElementById('daysEditor');
-    const item = editor.querySelector(`[data-idx="${idx}"]`);
-    if (item) item.remove();
-    renumberDays();
+/* ══════════════════════════════════════════════
+   Exercise Picker
+════════════════════════════════════════════════ */
+let pickerMgFilter = null;
+let pickerSearchTimeout = null;
+let allMuscleGroups = [];
+
+function openPicker(blockIdx) {
+  pickerTargetBlockIdx = blockIdx;
+  document.getElementById('pickerSearch').value = '';
+  pickerMgFilter = null;
+  document.getElementById('pickerOverlay').classList.add('open');
+  renderPickerPills();
+  fetchPickerResults('');
+}
+
+function closePicker() {
+  document.getElementById('pickerOverlay').classList.remove('open');
+}
+
+function renderPickerPills() {
+  const container = document.getElementById('pickerPills');
+  container.innerHTML = `
+    <button class="picker-pill${!pickerMgFilter?' active':''}" onclick="setPickerMg(null)">Todos</button>
+    ${allMuscleGroups.map(mg => `
+      <button class="picker-pill${pickerMgFilter===mg.id?' active':''}" onclick="setPickerMg(${mg.id})">${esc(mg.icon||'')} ${esc(mg.name)}</button>
+    `).join('')}`;
+}
+
+function setPickerMg(id) {
+  pickerMgFilter = id;
+  renderPickerPills();
+  fetchPickerResults(document.getElementById('pickerSearch').value);
+}
+
+function searchPicker() {
+  clearTimeout(pickerSearchTimeout);
+  pickerSearchTimeout = setTimeout(() => {
+    fetchPickerResults(document.getElementById('pickerSearch').value);
+  }, 300);
+}
+
+async function fetchPickerResults(search) {
+  const params = new URLSearchParams({ per_page: 30 });
+  if (search) params.set('search', search);
+  if (pickerMgFilter) params.set('muscle_group_id', pickerMgFilter);
+  try {
+    const r = await fetch(`${API}/trainings/search?${params}`, { headers: authHeaders() });
+    const d = await r.json();
+    const items = (d.data?.data || d.data || []);
+    renderPickerResults(items);
+  } catch {
+    document.getElementById('pickerResults').innerHTML = '<div class="picker-empty">Error al buscar.</div>';
   }
+}
 
-  function renumberDays() {
-    const editor = document.getElementById('daysEditor');
-    Array.from(editor.children).forEach((item, i) => {
-      const num = item.querySelector('.day-num');
-      if (num) num.textContent = i + 1;
-    });
+function renderPickerResults(items) {
+  const container = document.getElementById('pickerResults');
+  if (!items.length) {
+    container.innerHTML = '<div class="picker-empty">No se encontraron ejercicios.</div>';
+    return;
   }
+  container.innerHTML = items.map(ex => `
+    <div class="picker-item" onclick="selectExercise(${ex.id},'${esc(ex.name)}','${esc(ex.muscle_group_name)}')">
+      <div class="picker-item-icon">${ex.muscle_group_name ? ex.muscle_group_name[0] : '?'}</div>
+      <div>
+        <div class="picker-item-name">${esc(ex.name)}</div>
+        <div class="picker-item-muscle">${esc(ex.muscle_group_name || '—')}</div>
+      </div>
+    </div>`).join('');
+}
 
-  function collectDays() {
-    const editor = document.getElementById('daysEditor');
-    const days = [];
-    for (const item of editor.children) {
-      const nameInput = item.querySelector('[data-day-name]');
-      const descInput = item.querySelector('[data-day-desc]');
-      days.push({
-        day_name: nameInput ? nameInput.value.trim() : '',
-        content_html: descInput ? descInput.value.trim() : '',
-        details: [],
-      });
-    }
-    return days;
+function selectExercise(trainingId, name, muscleName) {
+  if (pickerTargetBlockIdx === null) return;
+  const day = routineData.days_list[selectedDayIdx];
+  const blk = day.blocks[pickerTargetBlockIdx];
+  blk.exercises.push({
+    training_id: trainingId,
+    training_name: name,
+    muscle_group_name: muscleName,
+    series: null,
+    repetitions: '',
+    break_time: null,
+    intensity_type: '',
+    intensity_value: null,
+    notes: '',
+    order_index: blk.exercises.length,
+  });
+  closePicker();
+  renderBlocks();
+}
+
+/* ══════════════════════════════════════════════
+   ── TAB: EJERCICIOS ──
+════════════════════════════════════════════════ */
+let exPage = 1;
+let exMgFilter = null;
+let editingExerciseId = null;
+
+async function loadMuscleGroupsForFilters() {
+  if (allMuscleGroups.length) { renderExMgPills(); return; }
+  try {
+    const r = await fetch(`${API}/muscle-groups/findAll`, { headers: authHeaders() });
+    const d = await r.json();
+    allMuscleGroups = d.data || [];
+    renderExMgPills();
+    renderPickerPills();
+  } catch { /* ignore */ }
+}
+
+function renderExMgPills() {
+  const container = document.getElementById('exMgPills');
+  container.innerHTML = `
+    <button class="pill${!exMgFilter?' active':''}" onclick="setExMg(null)">Todos</button>
+    ${allMuscleGroups.map(mg => `
+      <button class="pill${exMgFilter===mg.id?' active':''}" onclick="setExMg(${mg.id})">${esc(mg.icon||'')} ${esc(mg.name)}</button>
+    `).join('')}`;
+}
+
+function setExMg(id) {
+  exMgFilter = id;
+  renderExMgPills();
+  loadExercises(1);
+}
+
+async function loadExercises(page = 1) {
+  exPage = page;
+  const search = document.getElementById('searchExercises').value.trim();
+  const params = new URLSearchParams({ page, per_page: 20 });
+  if (search) params.set('search', search);
+  if (exMgFilter) params.set('muscle_group_id', exMgFilter);
+
+  try {
+    const r = await fetch(`${API}/trainings/search?${params}`, { headers: authHeaders() });
+    const d = await r.json();
+    const result = d.data || {};
+    const items = result.data || [];
+    const total = result.total || 0;
+    const lastPage = result.last_page || 1;
+    document.getElementById('exTotalLabel').textContent = `${total} ejercicio${total !== 1 ? 's' : ''}`;
+    renderExercisesTable(items);
+    renderExPagination(page, lastPage);
+  } catch (e) {
+    document.getElementById('exercisesTable').innerHTML = `<div class="empty"><h3>Error al cargar</h3><p>${esc(e.message)}</p></div>`;
   }
+}
 
-  /* ── Save ── */
-  async function saveRoutine() {
-    const name = document.getElementById('f_name').value.trim();
-    if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+const EX_TYPE_LABELS = { compound:'Compuesto', isolation:'Aislamiento', cardio:'Cardio', mobility:'Movilidad' };
+const EX_LOC_LABELS = { gym:'Gimnasio', home:'Casa', outdoor:'Exterior', both:'Ambos' };
 
-    const payload = {
-      name,
-      training: document.getElementById('f_training').value.trim() || null,
-      days: parseInt(document.getElementById('f_days').value) || null,
-      time: parseInt(document.getElementById('f_time').value) || null,
-      gender_id: parseInt(document.getElementById('f_gender').value) || null,
-      training_level_id: parseInt(document.getElementById('f_level').value) || null,
-      days_list: collectDays(),
-    };
+function renderExercisesTable(items) {
+  const wrap = document.getElementById('exercisesTable');
+  if (!items.length) {
+    wrap.innerHTML = `<div class="empty">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <h3>Sin ejercicios</h3><p>Crea tu primer ejercicio.</p>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th><th>Grupo Muscular</th><th>Tipo</th><th>Localización</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(ex => `
+          <tr>
+            <td><strong>${esc(ex.name)}</strong>${ex.description ? `<br><small style="color:#9CA3AF">${esc(ex.description.substring(0,60))}${ex.description.length>60?'…':''}</small>` : ''}</td>
+            <td>${ex.muscle_group_name ? `<span class="badge badge-purple">${esc(ex.muscle_group_name)}</span>` : '<span style="color:#9CA3AF">—</span>'}</td>
+            <td>${ex.exercise_type ? `<span class="badge badge-blue">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>` : '<span style="color:#9CA3AF">—</span>'}</td>
+            <td>${ex.location ? `<span class="badge badge-orange">${esc(EX_LOC_LABELS[ex.location]||ex.location)}</span>` : '<span style="color:#9CA3AF">—</span>'}</td>
+            <td><span class="badge ${ex.state ? 'badge-green' : 'badge-gray'}">${ex.state ? 'Activo' : 'Inactivo'}</span></td>
+            <td style="display:flex;gap:6px;">
+              <button class="btn-icon" onclick="openExerciseModal(${ex.id})" title="Editar">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
 
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.textContent = 'Guardando…';
+function renderExPagination(page, lastPage) {
+  const container = document.getElementById('exPagination');
+  if (lastPage <= 1) { container.innerHTML = ''; return; }
+  let html = `<button class="page-btn" onclick="loadExercises(${page-1})" ${page<=1?'disabled':''}>← Anterior</button>`;
+  const start = Math.max(1, page - 2);
+  const end = Math.min(lastPage, page + 2);
+  for (let i = start; i <= end; i++) {
+    html += `<button class="page-btn${i===page?' active':''}" onclick="loadExercises(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="loadExercises(${page+1})" ${page>=lastPage?'disabled':''}>Siguiente →</button>`;
+  container.innerHTML = html;
+}
 
+async function openExerciseModal(id = null) {
+  editingExerciseId = id;
+  document.getElementById('exerciseModalTitle').textContent = id ? 'Editar ejercicio' : 'Nuevo ejercicio';
+  // Clear
+  ['ex_name','ex_desc','ex_image','ex_video'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('ex_type').value = '';
+  document.getElementById('ex_location').value = '';
+  document.getElementById('ex_state').value = '1';
+
+  // Load muscle groups into selects
+  await loadMuscleGroupsForFilters();
+  const mgSelect = document.getElementById('ex_mg');
+  const mgSelect2 = document.getElementById('ex_mg2');
+  const options = `<option value="">Sin especificar</option>` + allMuscleGroups.map(mg => `<option value="${mg.id}">${esc(mg.name)}</option>`).join('');
+  mgSelect.innerHTML = options;
+  mgSelect2.innerHTML = options;
+
+  if (id) {
     try {
-      const url = editingId ? `${API}/routines/${editingId}/update` : `${API}/routines`;
-      const method = editingId ? 'PUT' : 'POST';
-      const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      const r = await fetch(`${API}/trainings/${id}/edit`, { headers: authHeaders() });
       const d = await r.json();
-      if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
-      showToast(editingId ? 'Rutina actualizada' : 'Rutina creada', 'success');
-      closeModal();
-      await loadRoutines();
-    } catch (e) {
-      showToast(e.message || 'Error al guardar', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = editingId ? 'Actualizar' : 'Guardar';
-    }
+      const ex = d.data || d;
+      document.getElementById('ex_name').value = ex.name || '';
+      document.getElementById('ex_desc').value = ex.description || '';
+      document.getElementById('ex_mg').value = ex.muscle_group_id || '';
+      document.getElementById('ex_mg2').value = ex.secondary_muscle_group_id || '';
+      document.getElementById('ex_type').value = ex.exercise_type || '';
+      document.getElementById('ex_location').value = ex.location || '';
+      document.getElementById('ex_image').value = ex.image || '';
+      document.getElementById('ex_video').value = ex.video_url || '';
+      document.getElementById('ex_state').value = ex.state ?? 1;
+    } catch { showToast('Error al cargar ejercicio', 'error'); return; }
   }
 
-  /* ── Clone ── */
-  async function cloneRoutine(id) {
+  document.getElementById('exerciseOverlay').classList.add('open');
+}
+
+function closeExerciseModal() {
+  document.getElementById('exerciseOverlay').classList.remove('open');
+  editingExerciseId = null;
+}
+
+async function saveExercise() {
+  const name = document.getElementById('ex_name').value.trim();
+  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+
+  const payload = {
+    name,
+    description: document.getElementById('ex_desc').value.trim() || null,
+    muscle_group_id: parseInt(document.getElementById('ex_mg').value) || null,
+    secondary_muscle_group_id: parseInt(document.getElementById('ex_mg2').value) || null,
+    exercise_type: document.getElementById('ex_type').value || null,
+    location: document.getElementById('ex_location').value || null,
+    image: document.getElementById('ex_image').value.trim() || null,
+    video_url: document.getElementById('ex_video').value.trim() || null,
+    state: parseInt(document.getElementById('ex_state').value),
+  };
+
+  try {
+    const url = editingExerciseId ? `${API}/trainings/${editingExerciseId}/update` : `${API}/trainings`;
+    const method = editingExerciseId ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+    showToast(editingExerciseId ? 'Ejercicio actualizado' : 'Ejercicio creado', 'success');
+    closeExerciseModal();
+    loadExercises(exPage);
+    // Refresh muscle groups for picker
+    allMuscleGroups = [];
+  } catch (e) { showToast(e.message || 'Error al guardar', 'error'); }
+}
+
+/* ══════════════════════════════════════════════
+   ── TAB: GRUPOS MUSCULARES ──
+════════════════════════════════════════════════ */
+let editingMgId = null;
+
+async function loadMuscleGroups() {
+  try {
+    const r = await fetch(`${API}/muscle-groups/findAll`, { headers: authHeaders() });
+    const d = await r.json();
+    const items = d.data || [];
+    allMuscleGroups = items;
+    document.getElementById('mgTotalLabel').textContent = `${items.length} grupo${items.length !== 1 ? 's' : ''}`;
+    renderMuscleGroups(items);
+  } catch (e) {
+    document.getElementById('mgContent').innerHTML = `<div class="empty"><h3>Error al cargar</h3></div>`;
+  }
+}
+
+function renderMuscleGroups(items) {
+  const container = document.getElementById('mgContent');
+  if (!items.length) {
+    container.innerHTML = `<div class="empty">
+      <h3>Sin grupos musculares</h3><p>Crea el primer grupo muscular.</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = items.map(mg => `
+    <div class="mg-card" onclick="openMgModal(${mg.id})">
+      <div class="mg-icon">${esc(mg.icon) || '&#128170;'}</div>
+      <div class="mg-info">
+        <div class="mg-name">${esc(mg.name)}</div>
+        <div class="mg-desc">${esc(mg.description || 'Sin descripción')}</div>
+      </div>
+      <span class="badge ${mg.state ? 'badge-green' : 'badge-gray'}" style="flex-shrink:0">${mg.state ? 'Activo' : 'Inactivo'}</span>
+    </div>`).join('');
+}
+
+async function openMgModal(id = null) {
+  editingMgId = id;
+  document.getElementById('mgModalTitle').textContent = id ? 'Editar grupo muscular' : 'Nuevo grupo muscular';
+  ['mg_name','mg_icon','mg_desc'].forEach(f => document.getElementById(f).value = '');
+
+  if (id) {
     try {
-      const r = await fetch(`${API}/routines/clone`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ id }),
-      });
+      const r = await fetch(`${API}/muscle-groups/${id}/edit`, { headers: authHeaders() });
       const d = await r.json();
-      if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
-      showToast('Rutina clonada', 'success');
-      await loadRoutines();
-    } catch (e) {
-      showToast(e.message || 'Error al clonar', 'error');
-    }
+      const mg = d.data || d;
+      document.getElementById('mg_name').value = mg.name || '';
+      document.getElementById('mg_icon').value = mg.icon || '';
+      document.getElementById('mg_desc').value = mg.description || '';
+    } catch { showToast('Error al cargar grupo', 'error'); return; }
   }
 
-  /* ── Delete ── */
-  function openConfirm(id, name) {
-    deletingId = id;
-    document.getElementById('confirmText').textContent =
-      `¿Estás seguro de que deseas eliminar la rutina "${name}"? Esta acción no se puede deshacer.`;
-    document.getElementById('confirmOverlay').classList.add('open');
-  }
+  document.getElementById('mgOverlay').classList.add('open');
+}
 
-  function closeConfirm() {
-    document.getElementById('confirmOverlay').classList.remove('open');
-    deletingId = null;
-  }
+function closeMgModal() {
+  document.getElementById('mgOverlay').classList.remove('open');
+  editingMgId = null;
+}
 
-  async function confirmDelete() {
-    if (!deletingId) return;
-    try {
-      const r = await fetch(`${API}/routines/${deletingId}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-      });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
-      showToast('Rutina eliminada', 'success');
-      closeConfirm();
-      await loadRoutines();
-    } catch (e) {
-      showToast(e.message || 'Error al eliminar', 'error');
-      closeConfirm();
-    }
-  }
+async function saveMuscleGroup() {
+  const name = document.getElementById('mg_name').value.trim();
+  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
 
-  /* ── PDF ── */
-  async function downloadPdf(id, title) {
-    try {
-      const r = await fetch(`${API}/routines/${id}/pdf`, { headers: authHeaders() });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const blob = await r.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title.replace(/\s+/g,'_').toLowerCase()}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      showToast('Error al descargar PDF', 'error');
-    }
-  }
+  const payload = {
+    name,
+    icon: document.getElementById('mg_icon').value.trim() || null,
+    description: document.getElementById('mg_desc').value.trim() || null,
+  };
 
-  /* ── Toast ── */
-  let toastTimer;
-  function showToast(msg, type = '') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = `toast show ${type}`;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
-  }
+  try {
+    const url = editingMgId ? `${API}/muscle-groups/${editingMgId}/update` : `${API}/muscle-groups`;
+    const method = editingMgId ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+    showToast(editingMgId ? 'Grupo actualizado' : 'Grupo creado', 'success');
+    closeMgModal();
+    // Refresh
+    allMuscleGroups = [];
+    loadMuscleGroups();
+  } catch (e) { showToast(e.message || 'Error al guardar', 'error'); }
+}
 
-  /* ── Utils ── */
-  function esc(s) {
-    if (!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-
-  /* ── Init ── */
-  initUser();
-  loadRoutines();
-  loadPendingBadge();
+/* ══════════════════════════════════════════════
+   Init
+════════════════════════════════════════════════ */
+initUser();
+loadRoutines();
+loadPendingBadge();
 </script>
 </body>
 </html>

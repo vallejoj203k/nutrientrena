@@ -18,7 +18,7 @@ def _get_or_404(db: Session, training_id: int):
 @router.get("/findAll")
 def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(Training).filter(Training.state == 1).all()
-    return send_response([TrainingOut.model_validate(i).model_dump() for i in items], "OK")
+    return send_response([TrainingOut.from_orm_training(i).model_dump() for i in items], "OK")
 
 
 @router.get("/search")
@@ -39,7 +39,7 @@ def search(
     items = q.offset((page - 1) * per_page).limit(per_page).all()
     return send_response(
         {
-            "data": [TrainingOut.model_validate(i).model_dump() for i in items],
+            "data": [TrainingOut.from_orm_training(i).model_dump() for i in items],
             "total": total,
             "page": page,
             "per_page": per_page,
@@ -64,7 +64,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
-    return send_response(TrainingOut.model_validate(obj).model_dump(), "OK")
+    return send_response(TrainingOut.from_orm_training(obj).model_dump(), "OK")
 
 
 @router.post("")
@@ -73,7 +73,7 @@ def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(requir
     db.add(obj)
     db.commit()
     db.refresh(obj)
-    return send_response(TrainingOut.model_validate(obj).model_dump(), "Ejercicio creado")
+    return send_response(TrainingOut.from_orm_training(obj).model_dump(), "Ejercicio creado")
 
 
 @router.put("/{id}/update")
@@ -85,4 +85,4 @@ def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depe
         setattr(obj, f, v)
     db.commit()
     db.refresh(obj)
-    return send_response(TrainingOut.model_validate(obj).model_dump(), "Actualizado")
+    return send_response(TrainingOut.from_orm_training(obj).model_dump(), "Actualizado")

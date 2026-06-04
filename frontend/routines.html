@@ -450,8 +450,6 @@
             <label>Género</label>
             <select id="f_gender">
               <option value="">Cualquiera</option>
-              <option value="1">Masculino</option>
-              <option value="2">Femenino</option>
             </select>
           </div>
         </div>
@@ -725,6 +723,42 @@ async function loadPendingBadge() {
     const badge = document.getElementById('formsBadge');
     if (n > 0) { badge.textContent = n; badge.style.display = 'inline-block'; }
   } catch { /* ignore */ }
+}
+
+/* ══════════════════════════════════════════════
+   Dynamic parameter selects (gender / level)
+════════════════════════════════════════════════ */
+async function loadParamSelects() {
+  try {
+    const r = await fetch(`${API}/parameters/search`, { headers: authHeaders() });
+    if (!r.ok) return;
+    const d = await r.json();
+    const params = d.data || [];
+
+    const genderParam = params.find(p => /g[eé]nero|gender/i.test(p.description));
+    if (genderParam) {
+      const dr = await fetch(`${API}/parameters-detail/search?parameter_id=${genderParam.id}`, { headers: authHeaders() });
+      if (dr.ok) {
+        const dd = await dr.json();
+        const sel = document.getElementById('f_gender');
+        sel.innerHTML = '<option value="">Cualquiera</option>';
+        (dd.data || []).forEach(item => {
+          sel.innerHTML += `<option value="${item.id}">${item.description}</option>`;
+          GENDERS[item.id] = item.description;
+        });
+      }
+    }
+
+    const levelParam = params.find(p => /nivel|level/i.test(p.description));
+    if (levelParam) {
+      const dr = await fetch(`${API}/parameters-detail/search?parameter_id=${levelParam.id}`, { headers: authHeaders() });
+      if (dr.ok) {
+        const dd = await dr.json();
+        Object.keys(LEVELS).forEach(k => delete LEVELS[k]);
+        (dd.data || []).forEach(item => { LEVELS[item.id] = item.description; });
+      }
+    }
+  } catch { /* silent — hardcoded fallback stays */ }
 }
 
 /* ══════════════════════════════════════════════
@@ -1554,6 +1588,7 @@ async function saveMuscleGroup() {
    Init
 ════════════════════════════════════════════════ */
 initUser();
+loadParamSelects();
 loadRoutines();
 loadPendingBadge();
 </script>

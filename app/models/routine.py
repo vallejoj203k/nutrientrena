@@ -55,10 +55,10 @@ class RoutineDay(Base):
     routine = relationship("Routine", back_populates="days_list")
     blocks = relationship("RoutineBlock", back_populates="routine_day",
                           cascade="all, delete-orphan", order_by="RoutineBlock.order_index")
-    details = relationship("RoutineDayDetail", back_populates="routine_day",
-                           cascade="all, delete-orphan", order_by="RoutineDayDetail.id",
+    details = relationship("RoutineDayDetail",
                            primaryjoin="and_(RoutineDayDetail.routine_day_id==RoutineDay.id, RoutineDayDetail.block_id==None)",
                            foreign_keys="RoutineDayDetail.routine_day_id",
+                           order_by="RoutineDayDetail.id",
                            viewonly=True)
 
 
@@ -81,7 +81,7 @@ class RoutineDayDetail(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    routine_day = relationship("RoutineDay", back_populates=None, foreign_keys=[routine_day_id])
+    routine_day = relationship("RoutineDay", foreign_keys=[routine_day_id])
     block = relationship("RoutineBlock", back_populates="exercises")
     training = relationship("Training")
     muscle_group = relationship("MuscleGroup")

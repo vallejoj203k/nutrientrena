@@ -1182,8 +1182,9 @@ async function saveRoutine() {
     const url = editingRoutineId ? `${API}/routines/${editingRoutineId}/update` : `${API}/routines`;
     const method = editingRoutineId ? 'PUT' : 'POST';
     const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+    let d;
+    try { d = await r.json(); } catch { d = {}; }
+    if (!r.ok) throw new Error(d.message || d.detail?.split('\n').slice(-2).join(' ') || `Error HTTP ${r.status}`);
     showToast(editingRoutineId ? 'Rutina actualizada' : 'Rutina creada', 'success');
     closeRoutineModal();
     await loadRoutines();

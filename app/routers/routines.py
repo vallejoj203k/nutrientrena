@@ -375,6 +375,9 @@ def updated(id: int, data: RoutineUpdateV2, db: Session = Depends(get_db), _=Dep
 
     if data.days_list is not None:
         for day in list(routine.days_list):
+            # Delete old-style (block_id IS NULL) details explicitly before cascade
+            for det in list(day.details):
+                db.delete(det)
             db.delete(day)
         db.flush()
         _create_days_v2(db, routine.id, data.days_list)

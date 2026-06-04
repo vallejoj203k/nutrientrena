@@ -9,7 +9,7 @@ from app.config import settings
 from app.routers import (
     auth, users, roles, menus, parameters, countries,
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
-    analytics, public, session_logs,
+    analytics, public, session_logs, client_tasks,
 )
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
 
@@ -60,6 +60,7 @@ app.include_router(aliments.router, prefix=API_PREFIX)
 app.include_router(diets.router, prefix=API_PREFIX)
 app.include_router(recipes.router, prefix=API_PREFIX)
 app.include_router(session_logs.router, prefix=API_PREFIX)
+app.include_router(client_tasks.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
 
 

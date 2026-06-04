@@ -131,6 +131,32 @@
     .status-select-wrap select:focus{border-color:var(--purple);}
     .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;}
 
+    /* ── Task types ── */
+    .task-filter-bar{padding:8px 24px 10px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0;}
+    .task-filter-bar label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-right:4px;}
+    .task-chip-filter{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:.15s;display:flex;align-items:center;gap:4px;}
+    .task-chip-filter:hover{opacity:.8;}
+    .task-chip-filter.active{border-color:currentColor;}
+    .week-nav{display:flex;align-items:center;gap:6px;margin-left:auto;}
+    .week-nav button{background:#F3F4F6;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+    .week-nav button:hover{background:#E5E7EB;}
+    .week-label{font-size:12px;font-weight:600;color:#374151;white-space:nowrap;}
+
+    /* Task chips on cards */
+    .card-tasks{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid #F9FAFB;}
+    .task-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;transition:.1s;}
+    .task-chip.done{opacity:.45;text-decoration:line-through;}
+    .task-chip .chip-del{opacity:0;margin-left:2px;font-size:11px;line-height:1;}
+    .task-chip:hover .chip-del{opacity:1;}
+    .add-task-btn{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;background:#F3F4F6;color:#6B7280;border:none;transition:.15s;}
+    .add-task-btn:hover{background:#E5E7EB;color:#374151;}
+
+    /* Task picker dropdown */
+    .task-picker{position:absolute;z-index:50;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:8px;display:none;width:200px;}
+    .task-picker.open{display:block;}
+    .task-picker-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;transition:.1s;}
+    .task-picker-item:hover{background:#F3F4F6;}
+
     /* Toast */
     .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:200;max-width:320px;}
     .toast.show{transform:translateY(0);opacity:1;}
@@ -245,6 +271,17 @@
     </select>
   </div>
 
+  <!-- Task type filter bar -->
+  <div class="task-filter-bar" id="taskFilterBar">
+    <label>Tareas:</label>
+    <!-- chips inserted by JS -->
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)" title="Semana anterior">‹</button>
+      <span class="week-label" id="weekLabel">…</span>
+      <button onclick="changeWeek(1)" title="Semana siguiente">›</button>
+    </div>
+  </div>
+
   <!-- Board -->
   <div class="board-wrap" id="boardWrap">
     <!-- populated by JS -->
@@ -271,6 +308,9 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- Task picker (singleton floating dropdown) -->
+<div class="task-picker" id="taskPickerDropdown"></div>
+
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
 let token = localStorage.getItem('token');
@@ -288,6 +328,171 @@ const AVATAR_COLORS = [
   '#7C3AED','#2563EB','#059669','#D97706','#DC2626',
   '#4F46E5','#DB2777','#0D9488','#EA580C','#65A30D',
 ];
+
+// ── Task system ───────────────────────────────────────────────────────────────
+const TASK_TYPES = {
+  rutina:    { label:'Rutina',    icon:'🏋️', color:'#5B2D8E', bg:'#F3EEFF' },
+  cardio:    { label:'Cardio',    icon:'🏃', color:'#DC2626', bg:'#FEF2F2' },
+  descanso:  { label:'Descanso',  icon:'😴', color:'#6B7280', bg:'#F9FAFB' },
+  nutricion: { label:'Nutrición', icon:'🥗', color:'#059669', bg:'#ECFDF5' },
+  checkin:   { label:'Check-in',  icon:'✅', color:'#15803D', bg:'#F0FDF4' },
+  foto:      { label:'Foto',      icon:'📸', color:'#D97706', bg:'#FEF3C7' },
+  mensaje:   { label:'Mensaje',   icon:'💬', color:'#2563EB', bg:'#EFF6FF' },
+  video:     { label:'Video',     icon:'🎬', color:'#7C3AED', bg:'#FDF4FF' },
+  sesion:    { label:'Sesión',    icon:'📹', color:'#0891B2', bg:'#ECFEFF' },
+};
+
+let weekTasks = {};       // { clientDetailId: [task, ...] }
+let currentWeek = null;   // Date object (Monday)
+let activeTaskFilter = null;
+let pickerClientId = null;
+
+function _monday(d) {
+  const copy = new Date(d);
+  copy.setDate(copy.getDate() - copy.getDay() + (copy.getDay() === 0 ? -6 : 1));
+  return copy;
+}
+function _isoDate(d) { return d.toISOString().slice(0,10); }
+function _weekStr(d) {
+  const end = new Date(d); end.setDate(d.getDate() + 6);
+  return `${d.getDate()} ${d.toLocaleString('es',{month:'short'})} – ${end.getDate()} ${end.toLocaleString('es',{month:'short'})}`;
+}
+
+function initWeek() {
+  currentWeek = _monday(new Date());
+  document.getElementById('weekLabel').textContent = _weekStr(currentWeek);
+  buildTaskFilterBar();
+}
+
+function buildTaskFilterBar() {
+  const bar = document.getElementById('taskFilterBar');
+  const nav = bar.querySelector('.week-nav');
+  const chips = Object.entries(TASK_TYPES).map(([key, t]) =>
+    `<button class="task-chip-filter${activeTaskFilter===key?' active':''}"
+       style="color:${t.color};background:${t.bg};"
+       onclick="setTaskFilter('${key}')" title="${t.label}">
+       ${t.icon} ${t.label}
+     </button>`
+  ).join('');
+  bar.innerHTML = `<label>Tareas:</label>${chips}`;
+  bar.appendChild(nav);
+}
+
+function setTaskFilter(type) {
+  activeTaskFilter = activeTaskFilter === type ? null : type;
+  buildTaskFilterBar();
+  if (!kanbanData) return;
+  const data = kanbanData.data || kanbanData;
+  renderColumns(data.columns || []);
+}
+
+function changeWeek(dir) {
+  currentWeek.setDate(currentWeek.getDate() + dir * 7);
+  document.getElementById('weekLabel').textContent = _weekStr(currentWeek);
+  loadWeekTasks();
+}
+
+async function loadWeekTasks() {
+  try {
+    const r = await fetch(`${API}/client-tasks/week?week=${_isoDate(currentWeek)}`,
+      { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) return;
+    const j = await r.json();
+    weekTasks = j.data || {};
+  } catch {}
+  if (!kanbanData) return;
+  const data = kanbanData.data || kanbanData;
+  renderColumns(data.columns || []);
+}
+
+// ── Task picker ───────────────────────────────────────────────────────────────
+function openTaskPicker(clientId, btnEl) {
+  pickerClientId = clientId;
+  const picker = document.getElementById('taskPickerDropdown');
+  picker.innerHTML = Object.entries(TASK_TYPES).map(([key, t]) =>
+    `<div class="task-picker-item" onclick="addTask('${clientId}','${key}')">
+      <span>${t.icon}</span>
+      <span style="color:${t.color};">${t.label}</span>
+    </div>`
+  ).join('');
+  // Position near the button
+  const rect = btnEl.getBoundingClientRect();
+  picker.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+  picker.style.left = Math.min(rect.left, window.innerWidth - 210) + 'px';
+  picker.style.position = 'fixed';
+  picker.classList.add('open');
+  setTimeout(() => document.addEventListener('click', closePicker, { once: true }), 10);
+}
+
+function closePicker() {
+  document.getElementById('taskPickerDropdown').classList.remove('open');
+  pickerClientId = null;
+}
+
+async function addTask(clientId, taskType) {
+  closePicker();
+  try {
+    const r = await fetch(`${API}/client-tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      body: JSON.stringify({ client_user_detail_id: clientId, task_type: taskType, week_date: _isoDate(currentWeek) }),
+    });
+    if (!r.ok) { toast('Error al crear tarea','error'); return; }
+    const j = await r.json();
+    const task = j.data;
+    if (!weekTasks[clientId]) weekTasks[clientId] = [];
+    weekTasks[clientId].push(task);
+    refreshCardTasks(clientId);
+  } catch { toast('Error de conexión','error'); }
+}
+
+async function toggleTask(taskId, clientId) {
+  const task = (weekTasks[clientId] || []).find(t => t.id === taskId);
+  if (!task) return;
+  try {
+    const r = await fetch(`${API}/client-tasks/${taskId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      body: JSON.stringify({ done: !task.done }),
+    });
+    if (!r.ok) return;
+    task.done = !task.done;
+    refreshCardTasks(clientId);
+  } catch {}
+}
+
+async function removeTask(taskId, clientId, ev) {
+  ev.stopPropagation();
+  try {
+    const r = await fetch(`${API}/client-tasks/${taskId}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` }});
+    if (!r.ok) return;
+    weekTasks[clientId] = (weekTasks[clientId] || []).filter(t => t.id !== taskId);
+    refreshCardTasks(clientId);
+  } catch {}
+}
+
+function refreshCardTasks(clientId) {
+  const section = document.querySelector(`.client-card[data-id="${clientId}"] .card-tasks`);
+  if (!section) return;
+  section.innerHTML = renderTaskChips(clientId);
+}
+
+function renderTaskChips(clientId) {
+  const tasks = (weekTasks[clientId] || []).filter(t =>
+    !activeTaskFilter || t.task_type === activeTaskFilter
+  );
+  const chips = tasks.map(t => {
+    const tt = TASK_TYPES[t.task_type] || { icon:'•', color:'#6B7280', bg:'#F3F4F6', label: t.task_type };
+    return `<span class="task-chip${t.done?' done':''}"
+      style="color:${tt.color};background:${tt.bg};"
+      onclick="toggleTask(${t.id},'${clientId}')"
+      title="${tt.label}${t.title?' — '+t.title:''}">
+      ${tt.icon}
+      <span class="chip-del" onclick="removeTask(${t.id},'${clientId}',event)">×</span>
+    </span>`;
+  }).join('');
+  return chips + `<button class="add-task-btn" onclick="event.stopPropagation();openTaskPicker('${clientId}',this)">+ Tarea</button>`;
+}
 
 if (!token) { location.href = 'login.html'; }
 
@@ -338,6 +543,7 @@ async function loadBoard() {
 
     renderColumns(columns);
     allStatuses = columns.map(c => ({ id: c.status_id, name: c.status_name }));
+    loadWeekTasks();
   } catch(e) {
     boardWrap.innerHTML = `<div style="padding:40px;color:#9CA3AF;font-size:14px;">Error al cargar el tablero. Verifica tu conexión.</div>`;
   }
@@ -412,6 +618,12 @@ function renderCard(client, statusId, idx) {
   const coachName = client.coach_name || null;
   const weeks = client.training_weeks || null;
 
+  // If task filter active, hide cards with no matching tasks
+  if (activeTaskFilter) {
+    const tasks = weekTasks[client.id] || [];
+    if (!tasks.some(t => t.task_type === activeTaskFilter)) return '';
+  }
+
   return `
     <div class="client-card"
          draggable="true"
@@ -428,12 +640,13 @@ function renderCard(client, statusId, idx) {
       </div>
       <div class="card-meta">
         ${coachName ? `<span class="card-tag coach">Coach: ${escHtml(coachName)}</span>` : ''}
-        ${weeks ? `<span class="card-tag week">${weeks} semanas</span>` : ''}
+        ${weeks ? `<span class="card-tag week">${weeks} sem</span>` : ''}
       </div>
+      <div class="card-tasks">${renderTaskChips(client.id)}</div>
       <div class="card-actions">
-        <button class="card-btn view" onclick="openClientModal('${client.id}','${escAttr(name)}','${escAttr(email)}',${statusId})">
+        <button class="card-btn view" onclick="location.href='client-profile.html?id=${client.id}'">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Ver perfil
+          Perfil
         </button>
         <button class="card-btn note" onclick="openStatusChange('${client.id}','${escAttr(name)}',${statusId})">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -642,6 +855,7 @@ function toast(msg, type) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadUser();
+initWeek();
 
 // ── Badge: formularios pendientes ─────────────────────────────────────────────
 async function loadPendingBadge() {

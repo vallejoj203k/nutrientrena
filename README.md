@@ -64,14 +64,175 @@ Authorization: Bearer <token>
 | Dashboard | `/app/dashboard.html` | Estadísticas generales y preview kanban |
 | Kanban | `/app/kanban.html` | Pipeline de clientes con drag & drop |
 | Clientes | `/app/clients.html` | Lista, búsqueda, filtros, exportar CSV |
-| Perfil cliente | `/app/client-profile.html?id={uuid}` | Tabs: Resumen · Formulario · Entregas · Comercial |
+| Perfil cliente | `/app/client-profile.html?id={uuid}` | Tabs: Resumen · Formulario · Entregas · Comercial · Progreso |
 | Check-ins | `/app/checkins.html` | Historial semanal con mediciones corporales |
 | Formularios | `/app/forms.html` | Plantillas de intake y gestión de asignaciones |
+| **Eventos** | `/app/events.html` | Calendario mensual + CRUD tipos de eventos |
+| **Notas** | `/app/notes.html` | Plantillas reutilizables + notas por cliente |
+| **Progreso** | `/app/progress.html` | Medidas, fotos (x3), gráfica de peso |
 | Dietas | `/app/diets.html` | Creación de dietas, macros, alimentos, PDF, clonar |
+| Alimentos | `/app/aliments.html` | Biblioteca de alimentos + importación CSV |
+| Recetas | `/app/recipes.html` | CRUD de recetas con ingredientes y macros |
 | Rutinas | `/app/routines.html` | Creación de rutinas por días, PDF, clonar |
+| Ajustes | `/app/settings.html` | Configuración del negocio (nombre, moneda, zona horaria…) |
 | Analytics | `/app/analytics.html` | Métricas, gráficos SVG, rendimiento por coach |
 | Catálogos nutrición | `/app/nutrition-catalog.html` | Tipos y grupos de alimentos |
 | Formulario público | `/app/public/form.html?id={uuid}` | Formulario para clientes sin login |
+
+---
+
+## Guía de pruebas — Fase 3 y Fase 4
+
+Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo completo.
+
+---
+
+### Requisitos previos
+
+1. Abrir https://nutrientrena-production.up.railway.app/app/login.html
+2. Iniciar sesión con las credenciales de administrador
+3. Tener al menos **un cliente creado** (rol Cliente) para asociar datos
+
+---
+
+### FASE 3 — Nutrición completa
+
+#### 3.1 Catálogos de nutrición (`/app/nutrition-catalog.html`)
+
+1. Ir a **Catálogos** en el menú lateral
+2. En la pestaña **Tipos de alimento**: crear un tipo nuevo (ej. "Proteína animal") → debe aparecer en la lista
+3. Editar el tipo recién creado → cambiar nombre → guardar → verificar que cambia
+4. Cambiar a la pestaña **Grupos de alimento**: crear un grupo (ej. "Carnes") → debe aparecer
+5. Intentar eliminar un tipo/grupo → confirmar que el diálogo de confirmación aparece y borra correctamente
+
+#### 3.2 Alimentos (`/app/aliments.html`)
+
+1. Ir a **Alimentos** en el menú lateral
+2. Hacer clic en **Nuevo alimento** → rellenar nombre, proteínas, carbos, grasas, calorías → guardar
+3. Buscar el alimento por nombre en el buscador → debe filtrarse en tiempo real
+4. Editar el alimento → modificar un macro → guardar → verificar el cambio
+5. *(Opcional)* Probar importación CSV: descargar la plantilla y subir un CSV con 2–3 alimentos
+
+#### 3.3 Recetas (`/app/recipes.html`)
+
+1. Ir a **Recetas** en el menú lateral
+2. Hacer clic en **Nueva receta** → añadir nombre y descripción
+3. En la sección de ingredientes: buscar alimentos por nombre → añadir cantidad en gramos
+4. Verificar que los macros totales se calculan automáticamente al añadir ingredientes
+5. Guardar → la receta aparece en la lista con sus macros
+6. Editar la receta → añadir o quitar un ingrediente → guardar
+7. Eliminar la receta → confirmar que desaparece de la lista
+
+#### 3.4 Dietas (`/app/diets.html`)
+
+1. Ir a **Dietas** en el menú lateral
+2. Crear una dieta nueva → añadir nombre y seleccionar cliente
+3. Añadir comidas (desayuno, comida, cena) con alimentos de la biblioteca
+4. Verificar que los macros del día se suman correctamente
+5. Descargar el PDF → el PDF debe mostrar las comidas y macros
+6. Usar el botón **Clonar** → la copia aparece en la lista con el sufijo "(copia)"
+7. Asignar la dieta a un cliente → ir al perfil del cliente → pestaña **Entregas** → verificar que aparece
+
+#### 3.5 Ajustes del negocio (`/app/settings.html`)
+
+1. Ir a **Ajustes** en el menú lateral
+2. Rellenar: nombre del negocio, email, teléfono, país, moneda, zona horaria, días de alerta de renovación
+3. Guardar → recargar la página → verificar que los datos persisten
+
+#### 3.6 Perfil de cliente — pestaña Comercial
+
+1. Ir a **Clientes** → abrir el perfil de cualquier cliente
+2. Ir a la pestaña **Comercial**
+3. Hacer clic en editar → introducir la **Fecha de renovación** → guardar
+4. Verificar que el badge de renovación aparece con color correcto:
+   - 🔴 Rojo → renovación vencida
+   - 🟡 Amarillo → ≤ 7 días
+   - 🟣 Morado → ≤ 30 días
+
+---
+
+### FASE 4 — Eventos, Notas y Progreso
+
+#### 4.1 Tipos de evento (`/app/events.html` — panel derecho)
+
+1. Ir a **Eventos** en el menú lateral
+2. En el panel derecho **Tipos de evento**, hacer clic en **+ Tipo**
+3. Escribir un nombre (ej. "Sesión de coaching") y seleccionar un color → guardar
+4. El tipo aparece en la lista con el color elegido
+5. Crear al menos **2 tipos distintos** con colores diferentes (se usarán en el paso siguiente)
+6. Editar un tipo → cambiar el color → guardar → verificar el cambio
+7. Eliminar un tipo que no tenga eventos → confirmar que desaparece
+
+#### 4.2 Calendario de eventos (`/app/events.html` — calendario)
+
+1. Hacer clic en cualquier día del mes en el calendario → se abre el modal de creación con esa fecha prefijada
+2. Rellenar: título (ej. "Llamada de seguimiento"), seleccionar tipo, hora de inicio y fin
+3. Guardar → el evento aparece como chip en el día correspondiente con el color del tipo
+4. Hacer clic en el chip del evento → se abre el **popover** con el título, tipo, horario y botones de editar/eliminar
+5. Editar el evento → cambiar el título → guardar → verificar que el chip se actualiza
+6. **Evento recurrente**: crear un nuevo evento → en el campo Repetición elegir "Semanal" → poner fecha de fin 1 mes después → guardar
+7. Verificar que se crean múltiples chips en todos los lunes (o el día elegido) hasta la fecha de fin
+8. En el popover de un evento recurrente: aparecen dos opciones al eliminar → "Solo este evento" y "Toda la serie" → probar ambas
+9. Navegar entre meses con las flechas ← → y el botón **Hoy**
+
+#### 4.3 Plantillas de notas (`/app/notes.html` — pestaña Plantillas)
+
+1. Ir a **Notas** en el menú lateral
+2. En la pestaña **Plantillas**, hacer clic en **Nueva plantilla**
+3. Escribir título (ej. "Revisión semanal") y contenido detallado → guardar
+4. La plantilla aparece como tarjeta con las primeras líneas del contenido
+5. Crear una segunda plantilla
+6. Buscar por nombre en el buscador → debe filtrar en tiempo real
+7. Editar una plantilla → modificar el contenido → guardar → verificar cambio
+8. Eliminar una plantilla → confirmar que desaparece
+
+#### 4.4 Notas de clientes (`/app/notes.html` — pestaña Notas de clientes)
+
+1. Cambiar a la pestaña **Notas de clientes**
+2. Hacer clic en **Nueva nota**
+3. En el campo **Cliente**: escribir el nombre o email → seleccionar de la lista desplegable
+4. En el campo **Plantilla (opcional)**: elegir una de las plantillas creadas → el título y contenido se rellenan automáticamente
+5. Ajustar el contenido → guardar → la nota aparece en la lista con el nombre del cliente
+6. Filtrar por cliente usando el desplegable → solo deben aparecer notas de ese cliente
+7. Buscar por título en el buscador → debe filtrar correctamente
+8. Editar la nota → modificar el contenido → guardar
+9. Eliminar la nota → confirmar que desaparece
+
+#### 4.5 Progreso del cliente (`/app/progress.html`)
+
+1. Ir a **Progreso** en el menú lateral
+2. Buscar un cliente en el campo de búsqueda de la barra superior → seleccionarlo
+3. El nombre del cliente aparece como etiqueta y el período de los últimos 90 días se carga automáticamente
+4. Hacer clic en **Nuevo registro**
+5. Rellenar: fecha de hoy, peso (ej. 75.5), % grasa, masa muscular, cintura, cadera
+6. Subir **1 foto**: hacer clic en el slot "Foto 1" → seleccionar una imagen del dispositivo → esperar la subida → la miniatura aparece
+7. Guardar → el registro aparece como tarjeta con los valores y la foto
+8. Crear un **segundo registro** con fecha de hace 7 días y peso diferente → la **gráfica de evolución del peso** debe actualizarse
+9. Verificar las **4 tarjetas de estadísticas**: peso actual, % grasa, masa muscular, total de registros
+10. La delta de peso (ej. "-1.2 kg") aparece en verde si bajó o en rojo si subió
+11. Hacer clic en la foto → se abre el **lightbox** a pantalla completa → clic para cerrar
+12. **Filtrar por fechas**: cambiar el rango "Desde / Hasta" → los registros y la gráfica se actualizan
+13. Editar un registro → añadir la foto 2 y la foto 3 → guardar → verificar las 3 fotos
+14. Eliminar un registro → confirmar que desaparece y la gráfica se recalcula
+15. Hacer clic en **×** junto al nombre del cliente → se limpia la selección para elegir otro cliente
+
+#### 4.6 Progreso en perfil de cliente (`/app/client-profile.html`)
+
+1. Ir a **Clientes** → abrir el perfil de un cliente que tenga registros de progreso
+2. Navegar a la pestaña **Progreso**
+3. Verificar que aparecen las tarjetas de peso, grasa y músculo, la gráfica de peso y la tabla de registros
+
+---
+
+### Verificaciones finales
+
+| Comprobación | Cómo verificar |
+|---|---|
+| Menú lateral consistente | Cada página debe mostrar los mismos links en el sidebar |
+| Notas y Progreso en sidebar | Visible en todas las páginas (dashboard, clientes, dietas, etc.) |
+| Toast de confirmación | Cada acción guardar/eliminar muestra notificación verde o roja |
+| Sesión expirada | Abrir en incógnito sin token → redirige a login.html |
+| Datos persistentes | Recargar la página tras guardar → los datos siguen ahí |
 
 ---
 
@@ -114,9 +275,6 @@ Authorization: Bearer <token>
 | 5 | coach | Coach |
 | 6 | client | Cliente |
 
-**Campos CRM en perfil** (guardados en `user_details`):
-`plan_comprado`, `precio`, `estado_pago`, `importe_pagado`, `importe_pendiente`, `metodo_pago`, `fecha_compra`, `fecha_limite_entrega`, `responsable_venta`, `crm_origen`, `whatsapp_link`, `consentimiento_evolucion`
-
 ---
 
 ### Check-ins Semanales (`/api/checkins`)
@@ -129,8 +287,6 @@ Authorization: Bearer <token>
 | `/api/checkins/{id}/coach-notes` | PUT | Notas del coach + actualizar mediciones |
 | `/api/checkins/{id}` | DELETE | Eliminar check-in |
 
-**Campos de medición disponibles:** `weight`, `body_fat`, `waist`, `chest`, `hips`, `arms`, `legs`, `photo_url`
-
 ---
 
 ### Entrega de Planes (`/api/plans`)
@@ -140,18 +296,6 @@ Authorization: Bearer <token>
 | `/api/plans/deliver` | POST | Entregar dieta + rutina al cliente por email |
 | `/api/plans/history/{client_id}` | GET | Historial de entregas con nombres de dieta/rutina |
 | `/api/plans/resend/{delivery_id}` | POST | Reenviar email de una entrega anterior |
-
-```json
-POST /api/plans/deliver
-{
-  "client_user_detail_id": "uuid",
-  "diet_id": "uuid",         
-  "routine_id": 1,           
-  "message": "Mensaje del coach",
-  "loom_link": "https://loom.com/...",
-  "send_email": true
-}
-```
 
 ---
 
@@ -163,13 +307,10 @@ POST /api/plans/deliver
 | `/api/form-templates` | POST | Crear plantilla con campos |
 | `/api/form-templates/{id}` | PUT | Editar plantilla |
 | `/api/form-templates/{id}` | DELETE | Eliminar plantilla |
-| `/api/form-templates/default` | GET | Plantilla por defecto (18 campos) |
 | `/api/form-assignments` | POST | Asignar formulario a cliente |
 | `/api/form-assignments/pending` | GET | Formularios pendientes de respuesta |
-| `/api/form-assignments/pending-count` | GET | Conteo de pendientes (badge) |
 | `/api/form-assignments/client/{id}` | GET | Formulario de un cliente |
 | `/api/form-assignments/{id}/submit` | POST | Cliente envía respuestas |
-| `/api/form-assignments/{id}/responses` | GET | Ver respuestas guardadas |
 
 ### Formulario público — sin autenticación (`/api/public`)
 
@@ -177,8 +318,6 @@ POST /api/plans/deliver
 |----------|--------|------|-------------|
 | `/api/public/form/{assignment_id}` | GET | ❌ | Obtener template + estado del formulario |
 | `/api/public/form/{assignment_id}/submit` | POST | ❌ | Cliente envía respuestas desde el email |
-
-> Al enviar, peso, altura, teléfono, género, objetivo y nivel de actividad se sincronizan al perfil del cliente.
 
 ---
 
@@ -191,8 +330,6 @@ POST /api/plans/deliver
 | `/api/analytics/checkins` | GET | Adherencia, cambio de peso promedio, tendencia 8 semanas |
 | `/api/analytics/coaches` | GET | Clientes y check-ins por coach |
 
-Todos soportan filtro `?coach_id=uuid`.
-
 ---
 
 ### Archivos e Imágenes (`/api/files`)
@@ -204,7 +341,7 @@ Todos soportan filtro `?coach_id=uuid`.
 | `/api/files/list` | GET | Listar archivos de una carpeta |
 
 Límite: **10 MB** · Formatos: JPG, PNG, WEBP, GIF  
-Carpetas: `profiles`, `checkins`, `aliments`, `uploads`
+Carpetas: `profiles`, `checkins`, `aliments`, `uploads`, `progress`
 
 ---
 
@@ -220,8 +357,13 @@ Carpetas: `profiles`, `checkins`, `aliments`, `uploads`
 | `/api/diets/{id}` | DELETE | Eliminar dieta |
 | `/api/diets/{id}/pdf` | GET | Descargar PDF de la dieta |
 | `/api/diets/clone` | POST | Clonar dieta existente |
-| `/api/diets/{client_id}/assigned` | POST | Asignar dieta a cliente |
-| `/api/diets/client/{client_id}` | GET | Dietas asignadas a un cliente |
+
+#### Alimentos y Recetas
+
+| Módulo | Prefijo | Descripción |
+|--------|---------|-------------|
+| Alimentos | `/api/aliments` | CRUD + importación masiva CSV |
+| Recetas | `/api/recipes` | CRUD con ingredientes y macros calculados |
 
 #### Catálogos (`/api/typeFood`, `/api/groupFood`)
 
@@ -229,17 +371,8 @@ Carpetas: `profiles`, `checkins`, `aliments`, `uploads`
 |----------|-------------|
 | `GET /api/typeFood/findAll` | Todos los tipos activos |
 | `POST /api/typeFood` | Crear tipo |
-| `PUT /api/typeFood/{id}/update` | Editar / desactivar |
 | `GET /api/groupFood/findAll` | Todos los grupos activos |
 | `POST /api/groupFood` | Crear grupo |
-| `PUT /api/groupFood/{id}/update` | Editar / desactivar |
-
-#### Alimentos y Recetas
-
-| Módulo | Prefijo | Descripción |
-|--------|---------|-------------|
-| Alimentos | `/api/aliments` | CRUD + importación masiva CSV |
-| Recetas | `/api/recipes` | CRUD + asignación a cliente |
 
 ---
 
@@ -253,22 +386,74 @@ Carpetas: `profiles`, `checkins`, `aliments`, `uploads`
 
 ---
 
-### Seguimiento
+### Seguimiento — Fase 4
 
-| Módulo | Prefijo | Descripción |
-|--------|---------|-------------|
-| Objetivos / Metas | `/api/client-targets` | Peso objetivo del cliente |
-| Progreso diario | `/api/progress-day-users` | Registro diario |
-| Eventos | `/api/events` | Calendario de sesiones |
-| Notas | `/api/note-users` | Notas del coach al cliente |
+#### Eventos (`/api/events`, `/api/type-events`)
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/events` | POST | Crear evento (único o recurrente) |
+| `/api/events/search` | GET | Eventos por usuario y rango de fechas |
+| `/api/events/update/{id}` | POST | Actualizar evento |
+| `/api/events/delete/{id}` | DELETE | Eliminar un evento |
+| `/api/events/delete-group/{group_id}` | DELETE | Eliminar serie recurrente completa |
+| `/api/type-events` | POST | Crear tipo de evento |
+| `/api/type-events/find-all` | GET | Todos los tipos activos |
+| `/api/type-events/update/{id}` | POST | Editar tipo |
+| `/api/type-events/delete/{id}` | DELETE | Eliminar tipo |
+
+**Recurrencia disponible:** `none` · `daily` · `weekly` · `monthly`
+
+#### Notas (`/api/template-notes`, `/api/note-users`)
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/template-notes` | POST | Crear plantilla de nota |
+| `/api/template-notes/find-all` | GET | Plantillas del coach autenticado |
+| `/api/template-notes/update/{id}` | POST | Editar plantilla |
+| `/api/template-notes/delete/{id}` | DELETE | Eliminar plantilla |
+| `/api/note-users` | POST | Crear nota para un cliente |
+| `/api/note-users/find-all` | GET | Notas del coach autenticado |
+| `/api/note-users/search` | GET | Filtrar notas por cliente o título |
+| `/api/note-users/update/{id}` | POST | Editar nota |
+| `/api/note-users/delete/{id}` | DELETE | Eliminar nota |
+
+#### Progreso diario (`/api/progress-day-users`)
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/progress-day-users/upsert` | POST | Crear o actualizar registro por usuario + fecha |
+| `/api/progress-day-users/search` | GET | Registros en rango de fechas (`?from=&to=&user_id=`) |
+| `/api/progress-day-users/{id}` | GET | Registro individual |
+| `/api/progress-day-users/{id}` | PUT | Actualizar registro |
+| `/api/progress-day-users/delete/{id}` | DELETE | Eliminar registro |
+
+**Campos de medición:** `weight`, `body_fat`, `muscle_mass`, `waist`, `hip`, `chest`, `arm`, `thigh`, `notes`, `photo`, `photo2`, `photo3`
+
+#### Metas del cliente (`/api/client-targets`)
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/client-targets/search` | GET | Metas actuales del cliente |
+| `/api/client-targets` | PUT | Crear o actualizar metas |
+
+#### Ajustes del negocio (`/api/settings`)
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/settings` | GET | Obtener configuración actual |
+| `/api/settings` | PUT | Actualizar configuración |
 
 ---
 
 ## Base de datos
 
-**38 tablas en MySQL** desplegadas en Railway. Migraciones con Alembic.
+Migraciones con Alembic. Ejecutar en orden:
 
-Migraciones aplicadas en producción:
+```bash
+alembic upgrade head
+python -m app.seeds.run_seeds
+```
 
 | Revisión | Descripción |
 |----------|-------------|
@@ -278,11 +463,9 @@ Migraciones aplicadas en producción:
 | `c3d4e5f6a7b8` | Campos CRM en user_details |
 | `d4e5f6a7b8c9` | Tabla plan_deliveries |
 | `e5f6a7b8c9d0` | Mediciones corporales en weekly_checkins |
-
-```bash
-alembic upgrade head
-python -m app.seeds.run_seeds
-```
+| `h7i8j9k0l1m2` | Módulo nutrición (alimentos, recetas, dietas) |
+| `i8j9k0l1m2n3` | Tabla app_settings + fecha_renovacion en user_details |
+| `j9k0l1m2n3o4` | Fotos x3 en progress_day_users + recurrencia en event_users |
 
 ---
 
@@ -296,10 +479,9 @@ python -m app.seeds.run_seeds
 | `MAIL_FROM` | Dirección de envío de emails |
 | `ADMIN_EMAIL` | Email del administrador inicial |
 | `FRONTEND_URL` | URL pública del frontend (para links en emails) |
-| `R2_ENDPOINT_URL` | Endpoint de Cloudflare R2 |
-| `R2_ACCESS_KEY_ID` | Access key de R2 |
-| `R2_SECRET_ACCESS_KEY` | Secret key de R2 |
-| `R2_BUCKET_NAME` | Nombre del bucket |
+| `AWS_ACCESS_KEY_ID` | Access key de Cloudflare R2 |
+| `AWS_SECRET_ACCESS_KEY` | Secret key de Cloudflare R2 |
+| `AWS_BUCKET` | Nombre del bucket R2 |
 | `R2_PUBLIC_URL` | URL pública del bucket |
 
 ---
@@ -341,32 +523,29 @@ app/
 │   ├── dependencies.py   # require_role_ids, verify_client_access
 │   ├── email.py          # Emails transaccionales (Resend)
 │   └── responses.py      # send_response / send_error
-├── models/               # Modelos SQLAlchemy (38 tablas)
+├── models/               # Modelos SQLAlchemy
 ├── schemas/              # Schemas Pydantic v2
 ├── routers/
 │   ├── auth.py, users.py, checkins.py, plans.py
 │   ├── forms.py, analytics.py, files.py, public.py
-│   ├── routines.py, progress.py, ...
+│   ├── events.py, notes.py, progress.py, settings.py
 │   └── nutrition/
 │       ├── diets.py, aliments.py, recipes.py
-│       ├── type_food.py, group_food.py
-│       └── ...
+│       └── type_food.py, group_food.py
 ├── pdf/                  # Generación de PDFs (WeasyPrint)
 └── seeds/                # Datos iniciales idempotentes
 alembic/
-└── versions/             # 6 migraciones aplicadas
+└── versions/             # 9 migraciones aplicadas
 frontend/
 ├── login.html, dashboard.html, kanban.html
 ├── clients.html, client-profile.html
 ├── checkins.html, forms.html, analytics.html
-├── diets.html, routines.html
+├── events.html, notes.html, progress.html
+├── diets.html, aliments.html, recipes.html
+├── routines.html, settings.html
 ├── nutrition-catalog.html
 └── public/
     └── form.html         # Formulario sin login para clientes
-scripts/
-├── qa_forms.py           # QA Fase 1 (16 checks)
-├── qa_fase2_3.py         # QA Fase 2 + 3 (checks automatizados)
-└── setup_trello.py       # Sincronización del board Trello
 ```
 
 ---
@@ -375,10 +554,10 @@ scripts/
 
 Cada push a `main` ejecuta en GitHub Actions:
 
-1. **Lint** con `ruff`
-2. **Validación de modelos** — tablas registradas
-3. **Validación de rutas** — endpoints registrados
-4. **Validación de migraciones** — archivos de migración
+1. **Lint** con `ruff` (`E`, `F`, `W` — ignora `E501`, `F401`)
+2. **Validación de modelos** — tablas registradas en SQLAlchemy
+3. **Validación de rutas** — endpoints registrados en FastAPI
+4. **Validación de migraciones** — archivos de migración presentes
 
 ---
 
@@ -389,21 +568,36 @@ Cada push a `main` ejecuta en GitHub Actions:
 | **Fase 0** | Infraestructura, auth, roles, seeds, CI/CD, deploy en Railway | ✅ Completa |
 | **Fase 1** | Clientes, kanban, check-ins, planes, formularios, frontend base | ✅ Completa |
 | **Fase 2** | Analytics, imágenes R2, PDFs, frontend avanzado, roles, emails, CRM | ✅ Completa |
-| **Fase 3** | Nutrición completa, mediciones, portal público, perfil extendido | 🔄 En proceso |
+| **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | ✅ Completa |
+| **Fase 4** | Eventos recurrentes, notas, progreso con fotos | ✅ Completa |
 
 ### Fase 3 — Detalle
 
 | Ítem | Estado |
 |------|--------|
-| Portal público para clientes (formulario sin login) | ✅ |
-| Perfil cliente extendido (4 tabs + CRM) | ✅ |
-| Check-ins con 7 mediciones corporales | ✅ |
-| UX de entregas (nombres reales, re-enviar, preview macros) | ✅ |
-| Catálogos de nutrición (Tipos + Grupos) | ✅ |
-| Alimentos: CRUD + importación masiva CSV | 🔄 |
-| Recetas: CRUD + asignación a cliente | 🔄 |
-| Metas del cliente (peso objetivo vs actual) | 🔄 |
+| Catálogos de nutrición (Tipos + Grupos de alimentos) | ✅ |
+| Alimentos: CRUD + importación masiva CSV | ✅ |
+| Recetas: CRUD con ingredientes y macros calculados | ✅ |
+| Dietas: creación, PDF, clonar, asignar a cliente | ✅ |
+| Ajustes del negocio (nombre, moneda, zona horaria, alertas) | ✅ |
+| Perfil cliente: pestaña Progreso + fecha de renovación con countdown | ✅ |
+| Dashboard: métricas reales (nuevos este mes, adherencia check-ins) | ✅ |
+
+### Fase 4 — Detalle
+
+| Ítem | Estado |
+|------|--------|
+| Backend: progreso con 3 fotos + upsert por fecha + rango fechas | ✅ |
+| Backend: eventos recurrentes (diario / semanal / mensual) | ✅ |
+| `events.html`: calendario mensual con chips por tipo + navegación | ✅ |
+| `events.html`: CRUD tipos de evento con selector de color | ✅ |
+| `events.html`: popover editar/eliminar (uno solo o toda la serie) | ✅ |
+| `notes.html`: plantillas reutilizables CRUD | ✅ |
+| `notes.html`: notas por cliente con aplicación de plantilla | ✅ |
+| `progress.html`: medidas corporales + gráfica SVG de peso | ✅ |
+| `progress.html`: subida de hasta 3 fotos a R2 + lightbox | ✅ |
+| Sidebar unificado en las 16 páginas | ✅ |
 
 ---
 
-*Nutrientrena v2.0 — Mayo 2026*
+*Nutrientrena v2.0 — Junio 2026*

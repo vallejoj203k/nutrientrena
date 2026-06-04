@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Notas</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar-left h1{font-size:18px;font-weight:700;color:#111;}
+    .topbar-left p{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .topbar-actions{display:flex;gap:8px;}
+
+    /* ── Tabs ── */
+    .tab-bar{display:flex;gap:4px;padding:16px 24px 0;border-bottom:1px solid #E5E7EB;background:#fff;}
+    .tab-btn{padding:9px 20px;border:none;background:none;font-size:14px;font-weight:500;color:#6B7280;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;transition:.15s;}
+    .tab-btn.active{color:var(--purple);border-bottom-color:var(--purple);font-weight:600;}
+    .tab-btn:hover:not(.active){color:#374151;}
+
+    /* ── Content area ── */
+    .content{flex:1;overflow-y:auto;padding:24px;}
+
+    /* ── Search bar ── */
+    .search-bar{display:flex;gap:10px;margin-bottom:20px;align-items:center;}
+    .search-input{flex:1;padding:9px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;}
+    .search-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,45,142,.08);}
+
+    /* ── Buttons ── */
+    .btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-outline{background:#fff;color:var(--purple);border:1px solid var(--purple);}
+    .btn-outline:hover{background:var(--purple-pale);}
+    .btn-danger{background:#EF4444;color:#fff;}
+    .btn-danger:hover{background:#DC2626;}
+    .btn-sm{padding:5px 12px;font-size:12px;}
+
+    /* ── Cards grid ── */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+
+    /* ── Template card ── */
+    .tpl-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px;display:flex;flex-direction:column;gap:10px;transition:.15s;}
+    .tpl-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.07);border-color:#D1D5DB;}
+    .tpl-card-title{font-size:15px;font-weight:600;color:#111;display:flex;align-items:center;gap:8px;}
+    .tpl-card-title svg{color:var(--purple);flex-shrink:0;}
+    .tpl-card-content{font-size:13px;color:#6B7280;line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+    .tpl-card-meta{font-size:11px;color:#9CA3AF;}
+    .tpl-card-actions{display:flex;gap:6px;margin-top:4px;}
+
+    /* ── Note card ── */
+    .note-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px;display:flex;flex-direction:column;gap:8px;transition:.15s;}
+    .note-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.07);border-color:#D1D5DB;}
+    .note-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+    .note-card-title{font-size:14px;font-weight:600;color:#111;}
+    .note-card-user{font-size:11px;color:var(--purple);font-weight:600;background:var(--purple-pale);padding:2px 8px;border-radius:20px;}
+    .note-card-content{font-size:13px;color:#6B7280;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+    .note-card-meta{font-size:11px;color:#9CA3AF;display:flex;justify-content:space-between;}
+    .note-card-actions{display:flex;gap:6px;}
+
+    /* ── Empty state ── */
+    .empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .empty svg{margin-bottom:12px;color:#D1D5DB;}
+    .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .empty p{font-size:13px;}
+
+    /* ── Modals ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#fff;border-radius:16px;width:520px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(10px);transition:.2s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-head{padding:20px 24px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;font-size:22px;color:#9CA3AF;cursor:pointer;line-height:1;}
+    .modal-close:hover{color:#374151;}
+    .modal-body{padding:20px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+    .modal-foot{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;gap:8px;justify-content:flex-end;}
+
+    /* ── Form ── */
+    .field{display:flex;flex-direction:column;gap:5px;}
+    .field label{font-size:12px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:.4px;}
+    .field input,.field select,.field textarea{padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;font-family:inherit;resize:vertical;}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,45,142,.08);}
+
+    /* ── Delete confirm ── */
+    .del-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:110;opacity:0;pointer-events:none;transition:.2s;}
+    .del-overlay.open{opacity:1;pointer-events:all;}
+    .del-box{background:#fff;border-radius:14px;padding:28px;width:360px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+    .del-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .del-box p{font-size:13px;color:#6B7280;margin-bottom:20px;}
+    .del-actions{display:flex;gap:8px;justify-content:flex-end;}
+
+    /* ── Client selector in note modal ── */
+    .client-search-wrap{position:relative;}
+    .client-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;max-height:180px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.1);display:none;}
+    .client-dropdown.open{display:block;}
+    .client-option{padding:9px 12px;cursor:pointer;font-size:13px;color:#374151;}
+    .client-option:hover{background:var(--purple-pale);color:var(--purple);}
+    .client-selected-tag{display:inline-flex;align-items:center;gap:6px;background:var(--purple-pale);color:var(--purple);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+    .client-selected-tag button{background:none;border:none;color:var(--purple);cursor:pointer;font-size:14px;line-height:1;padding:0;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;background:#10B981;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:200;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    .toast.error{background:#EF4444;}
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de gestión</small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="clients.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a href="events.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Eventos
+    </a>
+    <a href="notes.html" class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Notas
+    </a>
+    <div class="nav-section">Nutrición</div>
+    <a href="diets.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Dietas
+    </a>
+    <a href="aliments.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+      Alimentos
+    </a>
+    <a href="recipes.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Recetas
+    </a>
+    <div class="nav-section">Entrenamiento</div>
+    <a href="trainings.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M4 9h2M18 9h2M4 15h2M18 15h2M8 7h8"/></svg>
+      Entrenamientos
+    </a>
+    <a href="routines.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+      Rutinas
+    </a>
+    <div class="nav-section">Análisis</div>
+    <a href="analytics.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analíticas
+    </a>
+    <div class="nav-section">Configuración</div>
+    <a href="settings.html" class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">—</div>
+        <div class="user-role" id="sidebarRole">—</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Notas</h1>
+      <p>Plantillas y notas de clientes</p>
+    </div>
+    <div class="topbar-actions" id="topbarActions"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabTemplates" onclick="switchTab('templates')">Plantillas</button>
+    <button class="tab-btn" id="tabNotes" onclick="switchTab('notes')">Notas de clientes</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="mainContent">
+    <div class="empty">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <h3>Cargando...</h3>
+    </div>
+  </div>
+</div>
+
+<!-- ── Template Modal ── -->
+<div class="modal-overlay" id="tplModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="tplModalTitle">Nueva plantilla</h2>
+      <button class="modal-close" onclick="closeTplModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="tplTitle" placeholder="Nombre de la plantilla"/>
+      </div>
+      <div class="field">
+        <label>Contenido</label>
+        <textarea id="tplContent" rows="8" placeholder="Escribe el contenido de la plantilla..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeTplModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTpl()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Note Modal ── -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="noteModalTitle">Nueva nota</h2>
+      <button class="modal-close" onclick="closeNoteModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Cliente</label>
+        <div class="client-search-wrap">
+          <input type="text" id="clientSearchInput" placeholder="Buscar cliente..." autocomplete="off"
+                 oninput="onClientSearch()" onfocus="onClientSearch()"/>
+          <div class="client-dropdown" id="clientDropdown"></div>
+        </div>
+        <div id="clientSelectedTag" style="margin-top:6px;"></div>
+        <input type="hidden" id="noteUserId"/>
+      </div>
+      <div class="field">
+        <label>Plantilla (opcional)</label>
+        <select id="noteTplSelect" onchange="applyTemplate()">
+          <option value="">— Sin plantilla —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="noteTitle" placeholder="Título de la nota"/>
+      </div>
+      <div class="field">
+        <label>Contenido</label>
+        <textarea id="noteContent" rows="8" placeholder="Contenido de la nota..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeNoteModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNote()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete Confirm ── -->
+<div class="del-overlay" id="delOverlay">
+  <div class="del-box">
+    <h3 id="delTitle">¿Eliminar?</h3>
+    <p id="delMsg">Esta acción no se puede deshacer.</p>
+    <div class="del-actions">
+      <button class="btn btn-outline" onclick="closeDelOverlay()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let _token = localStorage.getItem('token');
+let _me = null;
+let _currentTab = 'templates';
+
+// ── State ──────────────────────────────────────────────────────────────────────
+let _templates = [];
+let _notes = [];
+let _clients = [];
+let _editTplId = null;
+let _editNoteId = null;
+let _deleteType = null; // 'tpl' | 'note'
+let _deleteId = null;
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+async function boot() {
+  if (!_token) { location.href = 'login.html'; return; }
+  try {
+    const r = await apiFetch('/auth/me');
+    _me = r.data || r;
+    document.getElementById('sidebarName').textContent = _me.name || _me.email || '—';
+    document.getElementById('sidebarRole').textContent = _me.role?.name || '—';
+    const initials = (_me.name || _me.email || '?').charAt(0).toUpperCase();
+    document.getElementById('sidebarAvatar').textContent = initials;
+  } catch { location.href = 'login.html'; return; }
+  await Promise.all([loadClients(), loadTemplates()]);
+  renderTab();
+}
+
+// ── API helper ─────────────────────────────────────────────────────────────────
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: { 'Authorization': 'Bearer ' + _token, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+  });
+  if (res.status === 401) { location.href = 'login.html'; }
+  return res.json();
+}
+
+// ── Load data ──────────────────────────────────────────────────────────────────
+async function loadTemplates() {
+  try {
+    const r = await apiFetch('/template-notes/find-all');
+    _templates = r.data || [];
+  } catch { _templates = []; }
+}
+
+async function loadNotes(query = '') {
+  try {
+    const qs = query ? `?search=${encodeURIComponent(query)}` : '';
+    const r = await apiFetch('/note-users/find-all');
+    _notes = r.data || [];
+  } catch { _notes = []; }
+}
+
+async function loadClients() {
+  try {
+    const r = await apiFetch('/users/search?role_id=6&limit=200');
+    _clients = r.data?.items || r.data || [];
+  } catch { _clients = []; }
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  _currentTab = tab;
+  document.getElementById('tabTemplates').classList.toggle('active', tab === 'templates');
+  document.getElementById('tabNotes').classList.toggle('active', tab === 'notes');
+  renderTab();
+}
+
+function renderTab() {
+  if (_currentTab === 'templates') {
+    renderTemplatesTab();
+  } else {
+    renderNotesTab();
+  }
+}
+
+// ── Templates tab ──────────────────────────────────────────────────────────────
+function renderTemplatesTab() {
+  const actions = document.getElementById('topbarActions');
+  actions.innerHTML = `<button class="btn btn-primary" onclick="openTplModal()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nueva plantilla
+  </button>`;
+
+  const c = document.getElementById('mainContent');
+  if (!_templates.length) {
+    c.innerHTML = emptyState(
+      'Sin plantillas',
+      'Crea plantillas reutilizables para agilizar la redacción de notas.',
+      'openTplModal()',
+      'Nueva plantilla'
+    );
+    return;
+  }
+
+  const cards = _templates.map(t => `
+    <div class="tpl-card">
+      <div class="tpl-card-title">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        ${esc(t.title)}
+      </div>
+      <div class="tpl-card-content">${esc(t.content || '(Sin contenido)')}</div>
+      <div class="tpl-card-meta">Creada ${fmtDate(t.created_at)}</div>
+      <div class="tpl-card-actions">
+        <button class="btn btn-outline btn-sm" onclick="openTplModal(${t.id})">Editar</button>
+        <button class="btn btn-sm" style="background:#FEE2E2;color:#DC2626;border:none;" onclick="askDelete('tpl',${t.id},'${esc(t.title)}')">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+
+  c.innerHTML = `<div class="search-bar">
+    <input class="search-input" placeholder="Buscar plantilla..." oninput="filterTemplates(this.value)"/>
+  </div><div class="cards-grid" id="tplGrid">${cards}</div>`;
+}
+
+function filterTemplates(q) {
+  const grid = document.getElementById('tplGrid');
+  if (!grid) return;
+  const low = q.toLowerCase();
+  const filtered = _templates.filter(t =>
+    t.title.toLowerCase().includes(low) || (t.content || '').toLowerCase().includes(low)
+  );
+  if (!filtered.length) {
+    grid.innerHTML = '<p style="color:#9CA3AF;font-size:13px;grid-column:1/-1;text-align:center;padding:40px 0;">Sin resultados</p>';
+    return;
+  }
+  grid.innerHTML = filtered.map(t => `
+    <div class="tpl-card">
+      <div class="tpl-card-title">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        ${esc(t.title)}
+      </div>
+      <div class="tpl-card-content">${esc(t.content || '(Sin contenido)')}</div>
+      <div class="tpl-card-meta">Creada ${fmtDate(t.created_at)}</div>
+      <div class="tpl-card-actions">
+        <button class="btn btn-outline btn-sm" onclick="openTplModal(${t.id})">Editar</button>
+        <button class="btn btn-sm" style="background:#FEE2E2;color:#DC2626;border:none;" onclick="askDelete('tpl',${t.id},'${esc(t.title)}')">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Notes tab ──────────────────────────────────────────────────────────────────
+async function renderNotesTab() {
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="openNoteModal()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nueva nota
+  </button>`;
+
+  await loadNotes();
+  renderNoteCards(_notes);
+}
+
+function renderNoteCards(notes) {
+  const c = document.getElementById('mainContent');
+  if (!notes.length) {
+    c.innerHTML = emptyState(
+      'Sin notas',
+      'Registra notas personalizadas para cada cliente.',
+      'openNoteModal()',
+      'Nueva nota'
+    );
+    return;
+  }
+
+  const cards = notes.map(n => {
+    const client = _clients.find(cl => cl.id === n.user_id);
+    const clientName = client ? (client.name || client.email) : `Cliente #${n.user_id}`;
+    return `
+    <div class="note-card">
+      <div class="note-card-top">
+        <div class="note-card-title">${esc(n.title)}</div>
+        <span class="note-card-user">${esc(clientName)}</span>
+      </div>
+      <div class="note-card-content">${esc(n.content || '(Sin contenido)')}</div>
+      <div class="note-card-meta">
+        <span>${fmtDate(n.created_at)}</span>
+        <div class="note-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="openNoteModal(${n.id})">Editar</button>
+          <button class="btn btn-sm" style="background:#FEE2E2;color:#DC2626;border:none;" onclick="askDelete('note',${n.id},'${esc(n.title)}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `
+    <div class="search-bar">
+      <input class="search-input" placeholder="Buscar por título..." oninput="filterNotes(this.value)"/>
+      <select class="search-input" style="flex:0 0 200px;" onchange="filterNotesByClient(this.value)">
+        <option value="">Todos los clientes</option>
+        ${_clients.map(cl => `<option value="${cl.id}">${esc(cl.name || cl.email)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="cards-grid" id="noteGrid">${cards}</div>`;
+}
+
+function filterNotes(q) {
+  const low = q.toLowerCase();
+  const filtered = _notes.filter(n =>
+    n.title.toLowerCase().includes(low) || (n.content || '').toLowerCase().includes(low)
+  );
+  updateNoteGrid(filtered);
+}
+
+function filterNotesByClient(uid) {
+  const id = parseInt(uid);
+  const filtered = uid ? _notes.filter(n => n.user_id === id) : _notes;
+  updateNoteGrid(filtered);
+}
+
+function updateNoteGrid(notes) {
+  const grid = document.getElementById('noteGrid');
+  if (!grid) return;
+  if (!notes.length) {
+    grid.innerHTML = '<p style="color:#9CA3AF;font-size:13px;grid-column:1/-1;text-align:center;padding:40px 0;">Sin resultados</p>';
+    return;
+  }
+  grid.innerHTML = notes.map(n => {
+    const client = _clients.find(cl => cl.id === n.user_id);
+    const clientName = client ? (client.name || client.email) : `Cliente #${n.user_id}`;
+    return `
+    <div class="note-card">
+      <div class="note-card-top">
+        <div class="note-card-title">${esc(n.title)}</div>
+        <span class="note-card-user">${esc(clientName)}</span>
+      </div>
+      <div class="note-card-content">${esc(n.content || '(Sin contenido)')}</div>
+      <div class="note-card-meta">
+        <span>${fmtDate(n.created_at)}</span>
+        <div class="note-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="openNoteModal(${n.id})">Editar</button>
+          <button class="btn btn-sm" style="background:#FEE2E2;color:#DC2626;border:none;" onclick="askDelete('note',${n.id},'${esc(n.title)}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Template Modal ─────────────────────────────────────────────────────────────
+function openTplModal(id = null) {
+  _editTplId = id;
+  document.getElementById('tplModalTitle').textContent = id ? 'Editar plantilla' : 'Nueva plantilla';
+  if (id) {
+    const t = _templates.find(x => x.id === id);
+    document.getElementById('tplTitle').value = t?.title || '';
+    document.getElementById('tplContent').value = t?.content || '';
+  } else {
+    document.getElementById('tplTitle').value = '';
+    document.getElementById('tplContent').value = '';
+  }
+  document.getElementById('tplModal').classList.add('open');
+}
+
+function closeTplModal() {
+  document.getElementById('tplModal').classList.remove('open');
+}
+
+async function saveTpl() {
+  const title = document.getElementById('tplTitle').value.trim();
+  const content = document.getElementById('tplContent').value.trim();
+  if (!title) { showToast('El título es obligatorio', true); return; }
+
+  try {
+    if (_editTplId) {
+      await apiFetch(`/template-notes/update/${_editTplId}`, {
+        method: 'POST', body: JSON.stringify({ title, content }),
+      });
+      showToast('Plantilla actualizada');
+    } else {
+      await apiFetch('/template-notes', {
+        method: 'POST', body: JSON.stringify({ title, content }),
+      });
+      showToast('Plantilla creada');
+    }
+    closeTplModal();
+    await loadTemplates();
+    renderTemplatesTab();
+  } catch { showToast('Error al guardar', true); }
+}
+
+// ── Note Modal ─────────────────────────────────────────────────────────────────
+function openNoteModal(id = null) {
+  _editNoteId = id;
+  document.getElementById('noteModalTitle').textContent = id ? 'Editar nota' : 'Nueva nota';
+  document.getElementById('noteUserId').value = '';
+  document.getElementById('clientSearchInput').value = '';
+  document.getElementById('clientSelectedTag').innerHTML = '';
+  document.getElementById('clientDropdown').classList.remove('open');
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteContent').value = '';
+
+  // Populate template select
+  const sel = document.getElementById('noteTplSelect');
+  sel.innerHTML = '<option value="">— Sin plantilla —</option>' +
+    _templates.map(t => `<option value="${t.id}">${esc(t.title)}</option>`).join('');
+
+  if (id) {
+    const n = _notes.find(x => x.id === id);
+    if (n) {
+      document.getElementById('noteTitle').value = n.title || '';
+      document.getElementById('noteContent').value = n.content || '';
+      document.getElementById('noteUserId').value = n.user_id;
+      const client = _clients.find(cl => cl.id === n.user_id);
+      if (client) setClientTag(client);
+    }
+  }
+
+  // Hide client select if editing (user is fixed)
+  document.getElementById('clientSearchInput').style.display = id ? 'none' : '';
+
+  document.getElementById('noteModal').classList.add('open');
+}
+
+function closeNoteModal() {
+  document.getElementById('noteModal').classList.remove('open');
+  document.getElementById('clientDropdown').classList.remove('open');
+}
+
+function onClientSearch() {
+  const q = document.getElementById('clientSearchInput').value.toLowerCase();
+  const dd = document.getElementById('clientDropdown');
+  const filtered = _clients.filter(c =>
+    (c.name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q)
+  ).slice(0, 20);
+  if (!filtered.length) { dd.classList.remove('open'); return; }
+  dd.innerHTML = filtered.map(c => `
+    <div class="client-option" onclick="selectClient(${c.id})">
+      ${esc(c.name || c.email)} <span style="color:#9CA3AF;font-size:11px;">${esc(c.email || '')}</span>
+    </div>`).join('');
+  dd.classList.add('open');
+}
+
+function selectClient(id) {
+  const client = _clients.find(c => c.id === id);
+  if (!client) return;
+  document.getElementById('noteUserId').value = id;
+  document.getElementById('clientSearchInput').value = '';
+  document.getElementById('clientDropdown').classList.remove('open');
+  setClientTag(client);
+}
+
+function setClientTag(client) {
+  document.getElementById('clientSelectedTag').innerHTML = `
+    <span class="client-selected-tag">
+      ${esc(client.name || client.email)}
+      <button onclick="clearClient()" title="Quitar">×</button>
+    </span>`;
+  document.getElementById('clientSearchInput').style.display = 'none';
+}
+
+function clearClient() {
+  document.getElementById('noteUserId').value = '';
+  document.getElementById('clientSelectedTag').innerHTML = '';
+  document.getElementById('clientSearchInput').style.display = '';
+  document.getElementById('clientSearchInput').value = '';
+}
+
+function applyTemplate() {
+  const sel = document.getElementById('noteTplSelect');
+  const id = parseInt(sel.value);
+  if (!id) return;
+  const t = _templates.find(x => x.id === id);
+  if (!t) return;
+  if (!document.getElementById('noteTitle').value) {
+    document.getElementById('noteTitle').value = t.title;
+  }
+  document.getElementById('noteContent').value = t.content || '';
+}
+
+async function saveNote() {
+  const userId = parseInt(document.getElementById('noteUserId').value);
+  const title = document.getElementById('noteTitle').value.trim();
+  const content = document.getElementById('noteContent').value.trim();
+  const tplId = parseInt(document.getElementById('noteTplSelect').value) || null;
+
+  if (!title) { showToast('El título es obligatorio', true); return; }
+
+  try {
+    if (_editNoteId) {
+      await apiFetch(`/note-users/update/${_editNoteId}`, {
+        method: 'POST', body: JSON.stringify({ title, content }),
+      });
+      showToast('Nota actualizada');
+    } else {
+      if (!userId) { showToast('Selecciona un cliente', true); return; }
+      await apiFetch('/note-users', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId, title, content, template_note_id: tplId }),
+      });
+      showToast('Nota creada');
+    }
+    closeNoteModal();
+    await renderNotesTab();
+  } catch { showToast('Error al guardar', true); }
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────────────
+function askDelete(type, id, name) {
+  _deleteType = type;
+  _deleteId = id;
+  const isNote = type === 'note';
+  document.getElementById('delTitle').textContent = isNote ? '¿Eliminar nota?' : '¿Eliminar plantilla?';
+  document.getElementById('delMsg').textContent = `Se eliminará "${name}" de forma permanente.`;
+  document.getElementById('delOverlay').classList.add('open');
+}
+
+function closeDelOverlay() {
+  document.getElementById('delOverlay').classList.remove('open');
+}
+
+async function confirmDelete() {
+  try {
+    if (_deleteType === 'tpl') {
+      await apiFetch(`/template-notes/delete/${_deleteId}`, { method: 'DELETE' });
+      showToast('Plantilla eliminada');
+      await loadTemplates();
+      renderTemplatesTab();
+    } else {
+      await apiFetch(`/note-users/delete/${_deleteId}`, { method: 'DELETE' });
+      showToast('Nota eliminada');
+      await renderNotesTab();
+    }
+  } catch { showToast('Error al eliminar', true); }
+  closeDelOverlay();
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function showToast(msg, isErr = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast' + (isErr ? ' error' : '');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function emptyState(title, desc, action, btnLabel) {
+  return `<div class="empty">
+    <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <h3>${title}</h3>
+    <p>${desc}</p>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="${action}">${btnLabel}</button>
+  </div>`;
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  location.href = 'login.html';
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  const dd = document.getElementById('clientDropdown');
+  if (dd && !dd.closest('.client-search-wrap')?.contains(e.target)) {
+    dd.classList.remove('open');
+  }
+});
+
+boot();
+</script>
+</body>
+</html>

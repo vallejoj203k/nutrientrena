@@ -145,9 +145,9 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 2. Ir a la pestaña **Comercial**
 3. Hacer clic en editar → introducir la **Fecha de renovación** → guardar
 4. Verificar que el badge de renovación aparece con color correcto:
-   - 🔴 Rojo → renovación vencida
-   - 🟡 Amarillo → ≤ 7 días
-   - 🟣 Morado → ≤ 30 días
+   - ![](https://img.shields.io/badge/●-vencida-red?style=flat-square) Rojo → renovación vencida
+   - ![](https://img.shields.io/badge/●-7_dias-yellow?style=flat-square) Amarillo → ≤ 7 días
+   - ![](https://img.shields.io/badge/●-30_dias-blueviolet?style=flat-square) Morado → ≤ 30 días
 
 ---
 
@@ -242,12 +242,12 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 
 | Endpoint | Método | Auth | Descripción |
 |----------|--------|------|-------------|
-| `/api/auth/login` | POST | ❌ | Iniciar sesión, devuelve token JWT |
-| `/api/auth/me` | GET | ✅ | Perfil del usuario autenticado |
-| `/api/auth/refresh-token` | PUT | ✅ | Renovar token |
-| `/api/auth/logout` | POST | ✅ | Cerrar sesión |
-| `/api/auth/recover-password` | POST | ❌ | Email de recuperación |
-| `/api/auth/menus` | GET | ✅ | Menús disponibles según rol |
+| `/api/auth/login` | POST | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Iniciar sesión, devuelve token JWT |
+| `/api/auth/me` | GET | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Perfil del usuario autenticado |
+| `/api/auth/refresh-token` | PUT | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Renovar token |
+| `/api/auth/logout` | POST | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Cerrar sesión |
+| `/api/auth/recover-password` | POST | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Email de recuperación |
+| `/api/auth/menus` | GET | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Menús disponibles según rol |
 
 ---
 
@@ -316,8 +316,8 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 
 | Endpoint | Método | Auth | Descripción |
 |----------|--------|------|-------------|
-| `/api/public/form/{assignment_id}` | GET | ❌ | Obtener template + estado del formulario |
-| `/api/public/form/{assignment_id}/submit` | POST | ❌ | Cliente envía respuestas desde el email |
+| `/api/public/form/{assignment_id}` | GET | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Obtener template + estado del formulario |
+| `/api/public/form/{assignment_id}/submit` | POST | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Cliente envía respuestas desde el email |
 
 ---
 
@@ -565,38 +565,38 @@ Cada push a `main` ejecuta en GitHub Actions:
 
 | Fase | Descripción | Estado |
 |------|-------------|--------|
-| **Fase 0** | Infraestructura, auth, roles, seeds, CI/CD, deploy en Railway | ✅ Completa |
-| **Fase 1** | Clientes, kanban, check-ins, planes, formularios, frontend base | ✅ Completa |
-| **Fase 2** | Analytics, imágenes R2, PDFs, frontend avanzado, roles, emails, CRM | ✅ Completa |
-| **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | ✅ Completa |
-| **Fase 4** | Eventos recurrentes, notas, progreso con fotos | ✅ Completa |
+| **Fase 0** | Infraestructura, auth, roles, seeds, CI/CD, deploy en Railway | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 1** | Clientes, kanban, check-ins, planes, formularios, frontend base | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 2** | Analytics, imágenes R2, PDFs, frontend avanzado, roles, emails, CRM | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 4** | Eventos recurrentes, notas, progreso con fotos | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 
 ### Fase 3 — Detalle
 
 | Ítem | Estado |
 |------|--------|
-| Catálogos de nutrición (Tipos + Grupos de alimentos) | ✅ |
-| Alimentos: CRUD + importación masiva CSV | ✅ |
-| Recetas: CRUD con ingredientes y macros calculados | ✅ |
-| Dietas: creación, PDF, clonar, asignar a cliente | ✅ |
-| Ajustes del negocio (nombre, moneda, zona horaria, alertas) | ✅ |
-| Perfil cliente: pestaña Progreso + fecha de renovación con countdown | ✅ |
-| Dashboard: métricas reales (nuevos este mes, adherencia check-ins) | ✅ |
+| Catálogos de nutrición (Tipos + Grupos de alimentos) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Alimentos: CRUD + importación masiva CSV | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Recetas: CRUD con ingredientes y macros calculados | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Dietas: creación, PDF, clonar, asignar a cliente | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Ajustes del negocio (nombre, moneda, zona horaria, alertas) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Perfil cliente: pestaña Progreso + fecha de renovación con countdown | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Dashboard: métricas reales (nuevos este mes, adherencia check-ins) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
 
 ### Fase 4 — Detalle
 
 | Ítem | Estado |
 |------|--------|
-| Backend: progreso con 3 fotos + upsert por fecha + rango fechas | ✅ |
-| Backend: eventos recurrentes (diario / semanal / mensual) | ✅ |
-| `events.html`: calendario mensual con chips por tipo + navegación | ✅ |
-| `events.html`: CRUD tipos de evento con selector de color | ✅ |
-| `events.html`: popover editar/eliminar (uno solo o toda la serie) | ✅ |
-| `notes.html`: plantillas reutilizables CRUD | ✅ |
-| `notes.html`: notas por cliente con aplicación de plantilla | ✅ |
-| `progress.html`: medidas corporales + gráfica SVG de peso | ✅ |
-| `progress.html`: subida de hasta 3 fotos a R2 + lightbox | ✅ |
-| Sidebar unificado en las 16 páginas | ✅ |
+| Backend: progreso con 3 fotos + upsert por fecha + rango fechas | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Backend: eventos recurrentes (diario / semanal / mensual) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `events.html`: calendario mensual con chips por tipo + navegación | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `events.html`: CRUD tipos de evento con selector de color | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `events.html`: popover editar/eliminar (uno solo o toda la serie) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `notes.html`: plantillas reutilizables CRUD | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `notes.html`: notas por cliente con aplicación de plantilla | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `progress.html`: medidas corporales + gráfica SVG de peso | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `progress.html`: subida de hasta 3 fotos a R2 + lightbox | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Sidebar unificado en las 16 páginas | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
 
 ---
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Catálogos de Nutrición</title>
+  <title>NutriEntrena — Biblioteca de Nutrición</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
@@ -31,75 +31,152 @@
     .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
     .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
 
-    /* ── Main ── */
+    /* ── Main layout ── */
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
     .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .topbar h1{font-size:18px;font-weight:700;color:#111;}
-    .topbar-sub{font-size:13px;color:#6B7280;margin-top:2px;}
+    .topbar-left h1{font-size:18px;font-weight:700;color:#111;}
+    .topbar-left p{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .topbar-actions{display:flex;gap:10px;}
 
-    .content{flex:1;overflow-y:auto;padding:24px;}
-    .content::-webkit-scrollbar{width:6px;}
-    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    /* ── Tab nav ── */
+    .tab-nav{background:#fff;border-bottom:1px solid #E5E7EB;display:flex;padding:0 24px;flex-shrink:0;}
+    .tab-btn{padding:14px 18px;font-size:13px;font-weight:600;color:#6B7280;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;white-space:nowrap;}
+    .tab-btn:hover{color:#374151;}
+    .tab-btn.active{color:var(--purple);border-bottom-color:var(--purple);}
 
-    /* ── Two-panel layout ── */
-    .panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
-    @media(max-width:900px){.panels{grid-template-columns:1fr;}}
+    /* ── Tab content ── */
+    .tab-content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+    .tab-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 
-    /* ── Panel card ── */
-    .panel-card{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;overflow:hidden;}
-    .panel-head{padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;}
-    .panel-head-left h2{font-size:15px;font-weight:700;color:#111;}
-    .panel-head-left p{font-size:12px;color:#9CA3AF;margin-top:2px;}
-    .panel-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;background:var(--purple-pale);color:var(--purple);border-radius:20px;font-size:11px;font-weight:700;padding:0 6px;margin-left:8px;}
-
-    .panel-toolbar{padding:12px 16px;border-bottom:1px solid #F3F4F6;display:flex;gap:10px;align-items:center;}
-    .search-wrap{position:relative;flex:1;}
-    .search-wrap input{width:100%;padding:8px 12px 8px 34px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;background:#FAFAFA;}
+    /* ── Toolbar ── */
+    .toolbar{padding:12px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
+    .search-wrap{position:relative;flex:1;min-width:180px;max-width:320px;}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;background:#FAFAFA;}
     .search-wrap input:focus{border-color:var(--purple);background:#fff;}
     .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;}
+    .filter-select{padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#FAFAFA;cursor:pointer;min-width:160px;}
+    .filter-select:focus{border-color:var(--purple);}
+    .total-badge{font-size:13px;color:#6B7280;white-space:nowrap;}
+    .toolbar-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
 
-    /* ── Table ── */
-    .catalog-table{width:100%;border-collapse:collapse;}
-    .catalog-table th{padding:10px 16px;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F3F4F6;}
-    .catalog-table td{padding:12px 16px;font-size:13px;color:#111;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
-    .catalog-table tr:last-child td{border-bottom:none;}
-    .catalog-table tr:hover td{background:#FAFAFA;}
-    .catalog-table .desc{font-size:12px;color:#6B7280;}
-    .catalog-table .empty-row td{text-align:center;padding:40px;color:#9CA3AF;font-size:13px;}
+    /* ── Scrollable areas ── */
+    .table-scroll{flex:1;overflow-y:auto;}
+    .table-scroll::-webkit-scrollbar{width:6px;}
+    .table-scroll::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    .cards-scroll{flex:1;overflow-y:auto;padding:24px;}
+    .cards-scroll::-webkit-scrollbar{width:6px;}
+    .cards-scroll::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Tables ── */
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:10px 16px;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;background:#FAFAFA;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
+    tbody td{padding:13px 16px;font-size:13px;color:#111;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
+    tbody tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:#FAFAFA;}
+    .empty-row td{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .td-macro{font-size:12px;color:#374151;text-align:right;}
+    .td-macro span{display:block;font-size:10px;color:#9CA3AF;}
+    .td-group{display:inline-flex;align-items:center;padding:3px 9px;background:var(--purple-pale);color:var(--purple);border-radius:12px;font-size:11px;font-weight:600;}
+    .actions-cell{display:flex;gap:4px;justify-content:flex-end;}
+
+    /* ── Pagination ── */
+    .pagination-bar{padding:14px 24px;background:#fff;border-top:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .page-info{font-size:13px;color:#6B7280;}
+    .page-btns{display:flex;gap:6px;}
+    .page-btn{padding:7px 12px;border:1px solid #E5E7EB;border-radius:7px;background:#fff;font-size:13px;cursor:pointer;color:#374151;transition:.15s;}
+    .page-btn:hover:not(:disabled){border-color:var(--purple);color:var(--purple);}
+    .page-btn:disabled{opacity:.4;cursor:default;}
+    .page-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+    .rc-pagination{margin-top:20px;display:flex;align-items:center;justify-content:space-between;}
+
+    /* ── Cards ── */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+    .recipe-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;transition:.15s;}
+    .recipe-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#D1D5DB;}
+    .card-header{padding:16px 16px 12px;}
+    .card-name{font-size:15px;font-weight:700;color:#111;line-height:1.3;}
+    .card-desc{font-size:12px;color:#6B7280;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .card-meta{font-size:11px;color:#9CA3AF;margin-top:6px;}
+    .card-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#F3F4F6;border-top:1px solid #F3F4F6;}
+    .macro-cell{background:#fff;padding:8px 4px;text-align:center;}
+    .macro-cell .val{font-size:14px;font-weight:700;color:#111;}
+    .macro-cell .lbl{font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+    .macro-cell.prot .val{color:#3B82F6;}
+    .macro-cell.carb .val{color:#F59E0B;}
+    .macro-cell.fat  .val{color:#EF4444;}
+    .macro-cell.kcal .val{color:var(--purple);}
+    .card-footer{padding:10px 12px;border-top:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
 
     /* ── Buttons ── */
-    .btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
     .btn-primary{background:var(--purple);color:#fff;}
     .btn-primary:hover{background:var(--purple-dark);}
     .btn-ghost{background:#F3F4F6;color:#374151;}
     .btn-ghost:hover{background:#E5E7EB;}
     .btn-danger{background:#FEE2E2;color:#DC2626;}
     .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-outline{background:#fff;color:var(--purple);border:1.5px solid var(--purple);}
+    .btn-outline:hover{background:var(--purple-pale);}
     .btn-sm{padding:6px 12px;font-size:12px;}
     .btn-icon{padding:6px;border-radius:7px;background:none;border:none;cursor:pointer;display:inline-flex;color:#6B7280;transition:.15s;}
     .btn-icon:hover{background:#F3F4F6;color:#111;}
     .btn-icon.danger:hover{background:#FEE2E2;color:#DC2626;}
-    .actions-cell{display:flex;gap:4px;justify-content:flex-end;}
 
-    /* ── Modal ── */
+    /* ── Modals ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
-    .modal{background:#fff;border-radius:16px;width:440px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .modal-overlay.open .modal{transform:translateY(0);}
-    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;}
+    .modal-lg{width:640px;}
+    .modal-sm{width:440px;}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
     .modal-head h2{font-size:16px;font-weight:700;color:#111;}
     .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
     .modal-close:hover{color:#374151;}
     .modal-body{padding:20px 24px;}
-    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;}
-    .form-group{margin-bottom:16px;}
-    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
-    .form-group input,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;resize:vertical;}
-    .form-group textarea{min-height:72px;}
-    .form-group input:focus,.form-group textarea:focus{border-color:var(--purple);}
-    .form-error{color:#DC2626;font-size:12px;margin-top:8px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-group textarea{min-height:72px;resize:vertical;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+    .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
+    .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .form-error{color:#DC2626;font-size:12px;margin-top:6px;}
 
-    /* ── Confirm dialog ── */
+    /* ── Ingredient rows ── */
+    .ingr-list{display:flex;flex-direction:column;gap:8px;}
+    .ingr-row{display:grid;grid-template-columns:1fr 80px 1fr auto;gap:8px;align-items:start;}
+    .ingr-row .ac-wrap{position:relative;}
+    .ingr-row input{width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:13px;outline:none;}
+    .ingr-row input:focus{border-color:var(--purple);}
+    .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;display:none;}
+    .ac-dropdown.open{display:block;}
+    .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #F9FAFB;}
+    .ac-item:last-child{border-bottom:none;}
+    .ac-item:hover{background:var(--purple-pale);}
+    .ac-item .ac-name{font-weight:600;color:#111;}
+    .ac-item .ac-brand{font-size:11px;color:#9CA3AF;}
+    .ingr-empty{padding:20px;text-align:center;color:#9CA3AF;font-size:13px;border:1px dashed #E5E7EB;border-radius:8px;}
+
+    /* ── Import modal ── */
+    .import-modal{width:680px;}
+    .dropzone{border:2px dashed #D1D5DB;border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:.2s;background:#FAFAFA;}
+    .dropzone:hover,.dropzone.drag{border-color:var(--purple);background:var(--purple-pale);}
+    .dropzone p{font-size:13px;color:#6B7280;}
+    .dropzone strong{color:var(--purple);}
+    .preview-table-wrap{max-height:220px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;margin-top:14px;}
+    .preview-table{width:100%;border-collapse:collapse;font-size:12px;}
+    .preview-table th{padding:8px 12px;background:#FAFAFA;font-weight:700;color:#6B7280;border-bottom:1px solid #E5E7EB;text-transform:uppercase;font-size:10px;white-space:nowrap;}
+    .preview-table td{padding:8px 12px;border-bottom:1px solid #F9FAFB;color:#374151;}
+    .import-stats{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+    .import-stat{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;}
+    .import-stat.total{background:#F3EEFF;color:var(--purple);}
+    .import-stat.ok{background:#ECFDF5;color:#059669;}
+    .import-stat.err{background:#FEF2F2;color:#DC2626;}
+
+    /* ── Confirm ── */
     .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
     .confirm-box{background:#fff;border-radius:14px;padding:28px;width:360px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
@@ -124,7 +201,6 @@
     <small>Panel de administración</small>
   </div>
   <div class="sidebar-nav">
-  <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -137,6 +213,10 @@
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
+    </a>
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Eventos
     </a>
     <a class="nav-item" href="checkins.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -182,7 +262,12 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analíticas
     </a>
-  </nav>
+    <div class="nav-section">Configuración</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </div>
   <div class="sidebar-user">
     <div class="user-row">
       <div class="user-avatar" id="sidebarAvatar">U</div>
@@ -200,120 +285,294 @@
 <!-- ── Main ── -->
 <div class="main">
   <div class="topbar">
-    <div>
-      <h1>Catálogos de Nutrición</h1>
-      <div class="topbar-sub">Tipos y grupos de alimentos usados en dietas</div>
+    <div class="topbar-left">
+      <h1>Biblioteca de Nutrición</h1>
+      <p>Alimentos, recetas, tipos y grupos de alimento</p>
+    </div>
+    <div class="topbar-actions" id="topbarActions">
+      <!-- updated dynamically per tab -->
     </div>
   </div>
 
-  <div class="content">
-    <div class="panels">
+  <!-- Tab nav -->
+  <div class="tab-nav">
+    <button id="tabnav-alimentos" class="tab-btn active" onclick="showTab('alimentos')">Alimentos</button>
+    <button id="tabnav-recetas"   class="tab-btn" onclick="showTab('recetas')">Recetas</button>
+    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Alimento</button>
+    <button id="tabnav-grupos"    class="tab-btn" onclick="showTab('grupos')">Grupos de Alimento</button>
+  </div>
 
-      <!-- ── TypeFood panel ── -->
-      <div class="panel-card">
-        <div class="panel-head">
-          <div class="panel-head-left">
-            <h2>Tipos de Alimento <span class="panel-count" id="tfCount">0</span></h2>
-            <p>Clasifica las dietas por tipo (ej: Hipocalórica, Vegana)</p>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="openModal('typeFood')">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Agregar
+  <div class="tab-content">
+
+    <!-- ── Tab: Alimentos ── -->
+    <div id="tab-alimentos" class="tab-pane">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="al_search" placeholder="Buscar alimento…" oninput="alOnSearch()"/>
+        </div>
+        <select class="filter-select" id="al_groupFilter" onchange="alOnSearch()">
+          <option value="">Todos los grupos</option>
+        </select>
+        <span class="total-badge" id="al_total"></span>
+        <div class="toolbar-right">
+          <button class="btn btn-outline btn-sm" onclick="openImportModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            Importar CSV
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAlimentNew()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo alimento
           </button>
         </div>
-        <div class="panel-toolbar">
-          <div class="search-wrap">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="tfSearch" placeholder="Buscar tipo…" oninput="renderTypeFood()"/>
-          </div>
-        </div>
-        <table class="catalog-table">
+      </div>
+      <div class="table-scroll">
+        <table>
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Descripción</th>
-              <th style="width:80px;"></th>
+              <th>Grupo</th>
+              <th style="text-align:right;">Proteínas</th>
+              <th style="text-align:right;">Carbs</th>
+              <th style="text-align:right;">Grasas</th>
+              <th style="text-align:right;">Kcal</th>
+              <th style="width:90px;"></th>
             </tr>
           </thead>
-          <tbody id="tfBody">
-            <tr class="empty-row"><td colspan="3">Cargando…</td></tr>
+          <tbody id="al_tbody">
+            <tr class="empty-row"><td colspan="7">Cargando…</td></tr>
           </tbody>
         </table>
+        <div class="pagination-bar" id="al_paginationBar">
+          <span class="page-info" id="al_pageInfo"></span>
+          <div class="page-btns" id="al_pageBtns"></div>
+        </div>
       </div>
+    </div>
 
-      <!-- ── GroupFood panel ── -->
-      <div class="panel-card">
-        <div class="panel-head">
-          <div class="panel-head-left">
-            <h2>Grupos de Alimento <span class="panel-count" id="gfCount">0</span></h2>
-            <p>Agrupa los alimentos por categoría (ej: Lácteos, Carnes)</p>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="openModal('groupFood')">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Agregar
+    <!-- ── Tab: Recetas ── -->
+    <div id="tab-recetas" class="tab-pane" style="display:none">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="rc_search" placeholder="Buscar receta…" oninput="rcOnSearch()"/>
+        </div>
+        <span class="total-badge" id="rc_total"></span>
+        <div class="toolbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openRecipeModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva receta
           </button>
         </div>
-        <div class="panel-toolbar">
-          <div class="search-wrap">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="gfSearch" placeholder="Buscar grupo…" oninput="renderGroupFood()"/>
-          </div>
-        </div>
-        <table class="catalog-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Descripción</th>
-              <th style="width:80px;"></th>
-            </tr>
-          </thead>
-          <tbody id="gfBody">
-            <tr class="empty-row"><td colspan="3">Cargando…</td></tr>
-          </tbody>
-        </table>
       </div>
+      <div class="cards-scroll">
+        <div class="cards-grid" id="rc_grid"></div>
+        <div class="rc-pagination" id="rc_pagination" style="display:none"></div>
+      </div>
+    </div>
 
-    </div><!-- /panels -->
-  </div><!-- /content -->
+    <!-- ── Tab: Tipos de Alimento ── -->
+    <div id="tab-tipos" class="tab-pane" style="display:none">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="tf_search" placeholder="Buscar tipo…" oninput="renderTypeFood()"/>
+        </div>
+        <span class="total-badge" id="tf_count_badge"></span>
+        <div class="toolbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openCatalogModal('typeFood')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo tipo
+          </button>
+        </div>
+      </div>
+      <div class="table-scroll" style="padding:24px;">
+        <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th style="width:80px;"></th>
+              </tr>
+            </thead>
+            <tbody id="tf_tbody">
+              <tr class="empty-row"><td colspan="3">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab: Grupos de Alimento ── -->
+    <div id="tab-grupos" class="tab-pane" style="display:none">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="gf_search" placeholder="Buscar grupo…" oninput="renderGroupFood()"/>
+        </div>
+        <span class="total-badge" id="gf_count_badge"></span>
+        <div class="toolbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openCatalogModal('groupFood')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo grupo
+          </button>
+        </div>
+      </div>
+      <div class="table-scroll" style="padding:24px;">
+        <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th style="width:80px;"></th>
+              </tr>
+            </thead>
+            <tbody id="gf_tbody">
+              <tr class="empty-row"><td colspan="3">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-content -->
 </div><!-- /main -->
 
-<!-- ── Create / Edit modal ── -->
-<div class="modal-overlay" id="catalogOverlay" onclick="if(event.target===this)closeModal()">
+<!-- ── Aliment modal ── -->
+<div class="modal-overlay" id="al_overlay" onclick="if(event.target===this)closeAlimentModal()">
   <div class="modal">
     <div class="modal-head">
-      <h2 id="modalTitle">Nuevo tipo</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <h2 id="al_modalTitle">Nuevo alimento</h2>
+      <button class="modal-close" onclick="closeAlimentModal()">×</button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="editId"/>
-      <input type="hidden" id="editCatalog"/>
-      <div class="form-group">
-        <label>Nombre</label>
-        <input id="fieldName" type="text" placeholder="Ej: Hipocalórica" maxlength="255"/>
+      <input type="hidden" id="al_editId"/>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre *</label><input id="al_fName" type="text" placeholder="Ej: Pollo a la plancha" maxlength="255"/></div>
+        <div class="form-group"><label>Marca</label><input id="al_fBrand" type="text" placeholder="Ej: Hacendado" maxlength="255"/></div>
       </div>
-      <div class="form-group">
-        <label>Descripción <span style="font-weight:400;text-transform:none;">(opcional)</span></label>
-        <textarea id="fieldDesc" placeholder="Descripción breve…" maxlength="500"></textarea>
+      <div class="form-row">
+        <div class="form-group"><label>Grupo de alimento</label><select id="al_fGroup"><option value="">— Sin grupo —</option></select></div>
+        <div class="form-group"><label>Cantidad (g / ml)</label><input id="al_fQty" type="number" step="0.1" min="0" placeholder="100"/></div>
       </div>
-      <div class="form-error" id="modalError"></div>
+      <div class="section-title">Macronutrientes (por porción)</div>
+      <div class="form-row-4">
+        <div class="form-group"><label>Proteínas (g)</label><input id="al_fProteins" type="number" step="0.1" min="0" placeholder="0"/></div>
+        <div class="form-group"><label>Carbs (g)</label><input id="al_fCarbs" type="number" step="0.1" min="0" placeholder="0"/></div>
+        <div class="form-group"><label>Grasas (g)</label><input id="al_fFats" type="number" step="0.1" min="0" placeholder="0"/></div>
+        <div class="form-group"><label>Calorías</label><input id="al_fCalories" type="number" step="1" min="0" placeholder="0"/></div>
+      </div>
+      <div class="form-group"><label>Comentarios</label><textarea id="al_fComments" placeholder="Notas adicionales…" maxlength="500"></textarea></div>
+      <div class="form-error" id="al_modalError"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" id="saveBtn" onclick="saveItem()">
-        <span id="saveBtnLabel">Guardar</span>
-      </button>
+      <button class="btn btn-ghost" onclick="closeAlimentModal()">Cancelar</button>
+      <button class="btn btn-primary" id="al_saveBtn" onclick="saveAliment()"><span id="al_saveBtnLabel">Guardar</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Import modal ── -->
+<div class="modal-overlay" id="al_importOverlay" onclick="if(event.target===this)closeImportModal()">
+  <div class="modal import-modal">
+    <div class="modal-head">
+      <h2>Importar alimentos desde CSV</h2>
+      <button class="modal-close" onclick="closeImportModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <p style="font-size:13px;color:#6B7280;">Sube un archivo CSV con los alimentos.</p>
+        <button style="font-size:12px;color:var(--purple);cursor:pointer;text-decoration:underline;background:none;border:none;" onclick="downloadAlTemplate()">⬇ Descargar plantilla</button>
+      </div>
+      <div class="dropzone" id="al_dropzone" onclick="document.getElementById('al_csvFile').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleAlDrop(event)">
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block;color:#9CA3AF;"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        <p><strong>Haz clic</strong> o arrastra un CSV aquí</p>
+        <p style="font-size:11px;margin-top:4px;">Columnas: nombre, marca, grupo_id, proteinas, carbohidratos, grasas, calorias, cantidad</p>
+      </div>
+      <input type="file" id="al_csvFile" accept=".csv,text/csv" style="display:none" onchange="handleAlFileSelect(this)"/>
+      <div id="al_importPreview" style="display:none;">
+        <div class="import-stats" id="al_importStats"></div>
+        <div class="preview-table-wrap" id="al_previewWrap"></div>
+      </div>
+      <div id="al_importResult" style="display:none;margin-top:14px;padding:12px;border-radius:8px;font-size:13px;"></div>
+      <div class="form-error" id="al_importError"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeImportModal()">Cancelar</button>
+      <button class="btn btn-primary" id="al_importBtn" onclick="doAlImport()" disabled><span id="al_importBtnLabel">Importar</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Recipe modal ── -->
+<div class="modal-overlay" id="rc_overlay" onclick="if(event.target===this)closeRecipeModal()">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h2 id="rc_modalTitle">Nueva receta</h2>
+      <button class="modal-close" onclick="closeRecipeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="rc_fName" placeholder="Pollo con verduras al horno…"/></div>
+      <div class="form-group"><label>Descripción</label><textarea id="rc_fDesc" placeholder="Breve descripción…"></textarea></div>
+      <div class="form-group"><label>Instrucciones</label><textarea id="rc_fInstr" style="min-height:90px;" placeholder="Pasos de preparación…"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Raciones</label><input type="number" id="rc_fServings" min="1" placeholder="2"/></div>
+        <div class="form-group"><label>Tiempo prep. (min)</label><input type="number" id="rc_fPrepTime" min="0" placeholder="30"/></div>
+      </div>
+      <div class="section-title">Macronutrientes (por ración)</div>
+      <div class="form-row-4">
+        <div class="form-group"><label>Proteínas (g)</label><input type="number" id="rc_fProteins" min="0" step="0.1" placeholder="0"/></div>
+        <div class="form-group"><label>Carbohidratos (g)</label><input type="number" id="rc_fCarbs" min="0" step="0.1" placeholder="0"/></div>
+        <div class="form-group"><label>Grasas (g)</label><input type="number" id="rc_fFats" min="0" step="0.1" placeholder="0"/></div>
+        <div class="form-group"><label>Calorías (kcal)</label><input type="number" id="rc_fCalories" min="0" step="1" placeholder="0"/></div>
+      </div>
+      <div class="section-title">
+        <span>Ingredientes</span>
+        <button class="btn btn-ghost btn-sm" onclick="addIngrRow()" style="padding:4px 10px;font-size:12px;">+ Añadir</button>
+      </div>
+      <div id="rc_ingrList" class="ingr-list"></div>
+      <div id="rc_ingrEmpty" class="ingr-empty">Sin ingredientes. Pulsa "Añadir" para empezar.</div>
+      <div class="form-error" id="rc_modalError"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeRecipeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="rc_saveBtn" onclick="saveRecipe()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Catalog modal (TypeFood / GroupFood) ── -->
+<div class="modal-overlay" id="cat_overlay" onclick="if(event.target===this)closeCatalogModal()">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h2 id="cat_modalTitle">Nuevo tipo</h2>
+      <button class="modal-close" onclick="closeCatalogModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nombre *</label><input id="cat_fName" type="text" placeholder="Ej: Hipocalórica" maxlength="255"/></div>
+      <div class="form-group"><label>Descripción <span style="font-weight:400;text-transform:none;">(opcional)</span></label><textarea id="cat_fDesc" placeholder="Descripción breve…" maxlength="500"></textarea></div>
+      <div class="form-error" id="cat_modalError"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCatalogModal()">Cancelar</button>
+      <button class="btn btn-primary" id="cat_saveBtn" onclick="saveCatalog()"><span id="cat_saveBtnLabel">Guardar</span></button>
     </div>
   </div>
 </div>
 
 <!-- ── Confirm delete ── -->
-<div class="confirm-overlay" id="confirmOverlay" onclick="if(event.target===this)closeConfirm()">
+<div class="confirm-overlay" id="conf_overlay" onclick="if(event.target===this)closeConfirm()">
   <div class="confirm-box">
     <h3>¿Eliminar registro?</h3>
-    <p id="confirmMsg">Esta acción desactivará el registro y no aparecerá en las listas.</p>
+    <p id="conf_msg">Esta acción no se puede deshacer.</p>
     <div class="confirm-actions">
       <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
-      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="doDelete()">Eliminar</button>
+      <button class="btn btn-danger" id="conf_deleteBtn" onclick="doConfirmDelete()">Eliminar</button>
     </div>
   </div>
 </div>
@@ -322,214 +581,728 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const API   = 'https://nutrientrena-production.up.railway.app/api';
+const API   = '/api';
 const token = localStorage.getItem('token');
 const h     = () => ({ Authorization: `Bearer ${token}` });
+const hj    = () => ({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
 const esc   = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmt   = v => v != null ? Number(v).toFixed(1) : '—';
 
 if (!token) location.href = 'login.html';
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let tfItems = [], gfItems = [];
-let deletingId = null, deletingCatalog = null;
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function showTab(name) {
+  ['alimentos','recetas','tipos','grupos'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === name ? '' : 'none';
+    document.getElementById(`tabnav-${t}`).classList.toggle('active', t === name);
+  });
+  if (name === 'alimentos' && !al_loaded) loadAliments(1);
+  if (name === 'recetas'   && !rc_loaded) loadRecipes(1);
+  if (name === 'tipos'     && !tf_loaded) loadTypeFood();
+  if (name === 'grupos'    && !gf_loaded) loadGroupFood();
+}
 
-// ── Load ──────────────────────────────────────────────────────────────────────
-async function loadAll() {
+// ─── ALIMENTOS ────────────────────────────────────────────────────────────────
+let al_groups = [], al_page = 1, al_totalPages = 1, al_total = 0;
+let al_searchTimer = null, al_loaded = false;
+
+async function loadAlGroups() {
   try {
-    const [tfRes, gfRes] = await Promise.all([
-      fetch(`${API}/typeFood/findAll`,  { headers: h() }),
-      fetch(`${API}/groupFood/findAll`, { headers: h() }),
-    ]);
-    if (tfRes.status === 401 || gfRes.status === 401) { logout(); return; }
-    if (tfRes.ok) tfItems = (await tfRes.json()).data || [];
-    if (gfRes.ok) gfItems = (await gfRes.json()).data || [];
-  } catch { toast('Error al cargar catálogos', 'error'); }
-  renderTypeFood();
-  renderGroupFood();
+    const r = await fetch(`${API}/groupFood/findAll`, { headers: h() });
+    if (!r.ok) return;
+    al_groups = (await r.json()).data || [];
+    const sel  = document.getElementById('al_groupFilter');
+    const fSel = document.getElementById('al_fGroup');
+    al_groups.forEach(g => {
+      sel.innerHTML  += `<option value="${g.id}">${esc(g.name)}</option>`;
+      fSel.innerHTML += `<option value="${g.id}">${esc(g.name)}</option>`;
+    });
+    // share with grupos tab (avoid second API call)
+    gf_items  = al_groups;
+    gf_loaded = true;
+  } catch {}
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
-function filter(items, q) {
-  if (!q) return items;
-  q = q.toLowerCase();
-  return items.filter(i =>
-    i.name.toLowerCase().includes(q) ||
-    (i.description || '').toLowerCase().includes(q)
-  );
+async function loadAliments(page = 1) {
+  al_page   = page;
+  al_loaded = true;
+  const search  = document.getElementById('al_search').value.trim();
+  const groupId = document.getElementById('al_groupFilter').value;
+  const params  = new URLSearchParams({ page, per_page: 20 });
+  if (search)  params.set('search', search);
+  if (groupId) params.set('group_food_id', groupId);
+  document.getElementById('al_tbody').innerHTML = `<tr class="empty-row"><td colspan="7">Cargando…</td></tr>`;
+  try {
+    const r = await fetch(`${API}/aliments/search?${params}`, { headers: h() });
+    if (r.status === 401) { logout(); return; }
+    const j   = await r.json();
+    const res = j.data || {};
+    const items = res.data || [];
+    al_totalPages = res.last_page || 1;
+    al_total      = res.total || 0;
+    renderAlimentsTable(items);
+    renderAlimentsPagination();
+    document.getElementById('al_total').textContent = `${al_total} alimento${al_total !== 1 ? 's' : ''}`;
+  } catch { toast('Error al cargar alimentos', 'error'); }
 }
 
-function renderTable(tbodyId, items, catalog) {
-  const tbody = document.getElementById(tbodyId);
+function alGroupName(id) {
+  const g = al_groups.find(x => x.id === id);
+  return g ? g.name : null;
+}
+
+function renderAlimentsTable(items) {
+  const tbody = document.getElementById('al_tbody');
   if (!items.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Sin registros — haz clic en Agregar para crear uno</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Sin alimentos — agrega uno o importa un CSV.</td></tr>`;
     return;
   }
-  tbody.innerHTML = items.map(item => `
-    <tr>
-      <td style="font-weight:600;">${esc(item.name)}</td>
-      <td class="desc">${esc(item.description || '—')}</td>
+  tbody.innerHTML = items.map(a => {
+    const gn = alGroupName(a.group_food_id);
+    return `<tr>
+      <td>
+        <div style="font-weight:600;">${esc(a.name)}</div>
+        ${a.brand ? `<div style="font-size:12px;color:#6B7280;">${esc(a.brand)}</div>` : ''}
+      </td>
+      <td>${gn ? `<span class="td-group">${esc(gn)}</span>` : '<span style="color:#D1D5DB;">—</span>'}</td>
+      <td class="td-macro">${fmt(a.proteins)}<span>prot</span></td>
+      <td class="td-macro">${fmt(a.carbohydrates)}<span>carbs</span></td>
+      <td class="td-macro">${fmt(a.fats)}<span>grasas</span></td>
+      <td class="td-macro" style="font-weight:700;color:#5B2D8E;">${a.calories != null ? Math.round(a.calories) : '—'}<span>kcal</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn-icon" onclick="openEdit('${catalog}', ${item.id})" title="Editar">
+          <button class="btn-icon" onclick="openAlimentEdit('${esc(a.id)}')" title="Editar">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="btn-icon danger" onclick="openConfirm('${catalog}', ${item.id}, '${esc(item.name)}')" title="Eliminar">
+          <button class="btn-icon danger" onclick="openConfirm('aliment','${esc(a.id)}','${esc(a.name)}')" title="Eliminar">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
+}
+
+function renderAlimentsPagination() {
+  const from = Math.min((al_page - 1) * 20 + 1, al_total);
+  const to   = Math.min(al_page * 20, al_total);
+  document.getElementById('al_pageInfo').textContent = al_total ? `Mostrando ${from}–${to} de ${al_total}` : '';
+  const btns = document.getElementById('al_pageBtns');
+  btns.innerHTML = '';
+  const add = (label, page, disabled, active = false) => {
+    const b = document.createElement('button');
+    b.className = `page-btn${active ? ' active' : ''}`;
+    b.textContent = label; b.disabled = disabled;
+    if (!disabled) b.onclick = () => loadAliments(page);
+    btns.appendChild(b);
+  };
+  add('←', al_page - 1, al_page === 1);
+  const s = Math.max(1, al_page - 2), e = Math.min(al_totalPages, al_page + 2);
+  for (let p = s; p <= e; p++) add(p, p, false, p === al_page);
+  add('→', al_page + 1, al_page === al_totalPages);
+}
+
+function alOnSearch() {
+  clearTimeout(al_searchTimer);
+  al_searchTimer = setTimeout(() => loadAliments(1), 350);
+}
+
+function openAlimentNew() { openAlimentModalWith(null); }
+
+async function openAlimentEdit(id) {
+  try {
+    const r = await fetch(`${API}/aliments/${id}/edit`, { headers: h() });
+    if (!r.ok) { toast('Error al cargar alimento', 'error'); return; }
+    openAlimentModalWith((await r.json()).data);
+  } catch { toast('Error de conexión', 'error'); }
+}
+
+function openAlimentModalWith(item) {
+  document.getElementById('al_modalTitle').textContent     = item ? 'Editar alimento' : 'Nuevo alimento';
+  document.getElementById('al_editId').value               = item?.id ?? '';
+  document.getElementById('al_fName').value                = item?.name ?? '';
+  document.getElementById('al_fBrand').value               = item?.brand ?? '';
+  document.getElementById('al_fGroup').value               = item?.group_food_id ?? '';
+  document.getElementById('al_fQty').value                 = item?.quantity ?? '';
+  document.getElementById('al_fProteins').value            = item?.proteins ?? '';
+  document.getElementById('al_fCarbs').value               = item?.carbohydrates ?? '';
+  document.getElementById('al_fFats').value                = item?.fats ?? '';
+  document.getElementById('al_fCalories').value            = item?.calories ?? '';
+  document.getElementById('al_fComments').value            = item?.comments ?? '';
+  document.getElementById('al_modalError').textContent     = '';
+  document.getElementById('al_saveBtn').disabled           = false;
+  document.getElementById('al_saveBtnLabel').textContent   = 'Guardar';
+  document.getElementById('al_overlay').classList.add('open');
+  setTimeout(() => document.getElementById('al_fName').focus(), 120);
+}
+
+function closeAlimentModal() { document.getElementById('al_overlay').classList.remove('open'); }
+
+async function saveAliment() {
+  const id   = document.getElementById('al_editId').value;
+  const name = document.getElementById('al_fName').value.trim();
+  if (!name) {
+    document.getElementById('al_modalError').textContent = 'El nombre es requerido.';
+    document.getElementById('al_fName').focus(); return;
+  }
+  const btn = document.getElementById('al_saveBtn');
+  const lbl = document.getElementById('al_saveBtnLabel');
+  btn.disabled = true; lbl.textContent = 'Guardando…';
+  document.getElementById('al_modalError').textContent = '';
+  const toF = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+  const body = {
+    name,
+    brand:         document.getElementById('al_fBrand').value.trim() || null,
+    group_food_id: parseInt(document.getElementById('al_fGroup').value) || null,
+    quantity:      toF(document.getElementById('al_fQty').value),
+    proteins:      toF(document.getElementById('al_fProteins').value),
+    carbohydrates: toF(document.getElementById('al_fCarbs').value),
+    fats:          toF(document.getElementById('al_fFats').value),
+    calories:      toF(document.getElementById('al_fCalories').value),
+    comments:      document.getElementById('al_fComments').value.trim() || null,
+  };
+  const url    = id ? `${API}/aliments/${id}/update` : `${API}/aliments`;
+  const method = id ? 'PUT' : 'POST';
+  try {
+    const r = await fetch(url, { method, headers: hj(), body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) { document.getElementById('al_modalError').textContent = j.message || 'Error al guardar.'; return; }
+    closeAlimentModal();
+    toast(id ? 'Alimento actualizado' : 'Alimento creado', 'success');
+    loadAliments(al_page);
+  } catch { document.getElementById('al_modalError').textContent = 'Error de conexión.'; }
+  finally { btn.disabled = false; lbl.textContent = 'Guardar'; }
+}
+
+// ── Import CSV ────────────────────────────────────────────────────────────────
+let al_csvFile = null, al_csvRows = [];
+
+function openImportModal() {
+  al_csvFile = null; al_csvRows = [];
+  document.getElementById('al_importPreview').style.display = 'none';
+  document.getElementById('al_importResult').style.display  = 'none';
+  document.getElementById('al_importError').textContent     = '';
+  document.getElementById('al_importBtn').disabled          = true;
+  document.getElementById('al_importBtnLabel').textContent  = 'Importar';
+  document.getElementById('al_csvFile').value               = '';
+  document.getElementById('al_dropzone').style.display      = 'block';
+  document.getElementById('al_importOverlay').classList.add('open');
+}
+function closeImportModal() { document.getElementById('al_importOverlay').classList.remove('open'); }
+
+function handleAlDrop(e) {
+  e.preventDefault();
+  document.getElementById('al_dropzone').classList.remove('drag');
+  const f = e.dataTransfer.files[0]; if (f) processAlFile(f);
+}
+function handleAlFileSelect(input) { if (input.files[0]) processAlFile(input.files[0]); }
+
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(x => x.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(','); const row = {};
+    headers.forEach((hd, i) => { row[hd] = (vals[i] || '').trim(); });
+    return row;
+  }).filter(r => Object.values(r).some(v => v));
+}
+
+function processAlFile(file) {
+  al_csvFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { al_csvRows = parseCSV(e.target.result); showAlPreview(al_csvRows); }
+    catch { document.getElementById('al_importError').textContent = 'Error al leer el archivo.'; }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function showAlPreview(rows) {
+  if (!rows.length) { document.getElementById('al_importError').textContent = 'Archivo vacío o formato incorrecto.'; return; }
+  document.getElementById('al_importError').textContent = '';
+  const valid = rows.filter(r => r.nombre || r.name);
+  const inv   = rows.length - valid.length;
+  document.getElementById('al_importStats').innerHTML = `
+    <span class="import-stat total">${rows.length} filas</span>
+    <span class="import-stat ok">${valid.length} válidas</span>
+    ${inv ? `<span class="import-stat err">${inv} sin nombre</span>` : ''}`;
+  const cols = Object.keys(rows[0]);
+  document.getElementById('al_previewWrap').innerHTML = `
+    <table class="preview-table">
+      <thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead>
+      <tbody>${rows.slice(0,8).map(r => `<tr>${cols.map(c => `<td>${esc(r[c]||'')}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>
+    ${rows.length > 8 ? `<p style="padding:8px 12px;font-size:11px;color:#9CA3AF;">… y ${rows.length-8} filas más</p>` : ''}`;
+  document.getElementById('al_importPreview').style.display = 'block';
+  document.getElementById('al_importBtnLabel').textContent  = `Importar ${valid.length} alimentos`;
+  document.getElementById('al_importBtn').disabled          = valid.length === 0;
+}
+
+async function doAlImport() {
+  if (!al_csvFile) return;
+  const btn = document.getElementById('al_importBtn');
+  const lbl = document.getElementById('al_importBtnLabel');
+  btn.disabled = true; lbl.textContent = 'Importando…';
+  const form = new FormData(); form.append('file', al_csvFile);
+  try {
+    const r = await fetch(`${API}/aliments/import`, { method: 'POST', headers: h(), body: form });
+    const j = await r.json(); const res = j.data || {};
+    const el = document.getElementById('al_importResult');
+    if (r.ok) {
+      el.style.cssText = 'display:block;background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;padding:12px;border-radius:8px;font-size:13px;';
+      el.innerHTML = `<strong>${res.created} alimentos importados</strong>` +
+        (res.errors?.length ? `<br>Errores:<br>${res.errors.map(e => `• ${esc(e)}`).join('<br>')}` : '');
+      document.getElementById('al_dropzone').style.display  = 'none';
+      document.getElementById('al_importPreview').style.display = 'none';
+      toast(`${res.created} alimentos importados`, 'success');
+      loadAliments(1);
+    } else {
+      el.style.cssText = 'display:block;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;padding:12px;border-radius:8px;font-size:13px;';
+      el.textContent = j.message || 'Error al importar';
+    }
+  } catch { document.getElementById('al_importError').textContent = 'Error de conexión.'; }
+  finally { btn.disabled = false; lbl.textContent = 'Importar'; }
+}
+
+function downloadAlTemplate() {
+  const csv = ['nombre,marca,grupo_id,proteinas,carbohidratos,grasas,calorias,cantidad,comentarios',
+    'Pollo a la plancha,,1,31,0,3.6,165,100,Por 100g','Arroz blanco,,2,2.7,28,0.3,130,100,Por 100g'].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'plantilla_alimentos.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ─── RECETAS ──────────────────────────────────────────────────────────────────
+let rc_page = 1, rc_perPage = 12, rc_total = 0, rc_lastPage = 1;
+let rc_search = '', rc_editId = null, rc_searchTimer = null, rc_loaded = false;
+let rc_ingrRows = [], rc_acTimers = {};
+
+async function loadRecipes(page = 1) {
+  rc_page   = page;
+  rc_loaded = true;
+  const params = new URLSearchParams({ page: rc_page, per_page: rc_perPage });
+  if (rc_search) params.set('search', rc_search);
+  try {
+    const r = await fetch(`${API}/recipes/search?${params}`, { headers: h() });
+    const d = await r.json();
+    const payload = d.data || {};
+    const items   = payload.data || [];
+    rc_total    = payload.total     || 0;
+    rc_lastPage = payload.last_page || 1;
+    renderRecipeCards(items);
+    renderRecipesPagination();
+    document.getElementById('rc_total').textContent = `${rc_total} receta${rc_total !== 1 ? 's' : ''}`;
+  } catch { toast('Error al cargar recetas', 'error'); }
+}
+
+function renderRecipeCards(items) {
+  const grid = document.getElementById('rc_grid');
+  if (!items.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#9CA3AF;">
+      <p style="font-size:15px;">No hay recetas todavía</p>
+      <small style="font-size:13px;">Crea tu primera receta con el botón "Nueva receta"</small></div>`;
+    return;
+  }
+  grid.innerHTML = items.map(r => {
+    const prot = r.proteins != null ? r.proteins.toFixed(1) : '—';
+    const carb = r.carbs    != null ? r.carbs.toFixed(1)    : '—';
+    const fat  = r.fats     != null ? r.fats.toFixed(1)     : '—';
+    const kcal = r.calories != null ? Math.round(r.calories): '—';
+    const ingrs = (r.details || []).length;
+    const meta = [];
+    if (r.servings)  meta.push(`${r.servings} raciones`);
+    if (r.prep_time) meta.push(`${r.prep_time} min`);
+    return `<div class="recipe-card">
+      <div class="card-header">
+        <div class="card-name">${esc(r.name)}</div>
+        ${r.description ? `<div class="card-desc">${esc(r.description)}</div>` : ''}
+        ${meta.length ? `<div class="card-meta">${meta.join(' · ')}</div>` : ''}
+      </div>
+      <div class="card-macros">
+        <div class="macro-cell prot"><div class="val">${prot}</div><div class="lbl">Prot.</div></div>
+        <div class="macro-cell carb"><div class="val">${carb}</div><div class="lbl">Carbs</div></div>
+        <div class="macro-cell fat" ><div class="val">${fat}</div><div class="lbl">Grasas</div></div>
+        <div class="macro-cell kcal"><div class="val">${kcal}</div><div class="lbl">Kcal</div></div>
+      </div>
+      <div class="card-footer">
+        <span style="font-size:12px;color:#6B7280;">${ingrs} ingrediente${ingrs !== 1 ? 's' : ''}</span>
+        <div style="display:flex;gap:4px;">
+          <button class="btn-icon" title="Editar" onclick="openRecipeEdit(${r.id})">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon danger" title="Eliminar" onclick="openConfirm('recipe',${r.id},'${esc(r.name)}')">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRecipesPagination() {
+  const el = document.getElementById('rc_pagination');
+  if (rc_lastPage <= 1) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  const from = (rc_page - 1) * rc_perPage + 1;
+  const to   = Math.min(rc_page * rc_perPage, rc_total);
+  let btns = `<button class="page-btn" onclick="loadRecipes(${rc_page-1})" ${rc_page===1?'disabled':''}>←</button>`;
+  const s = Math.max(1, rc_page-2), e = Math.min(rc_lastPage, rc_page+2);
+  for (let i = s; i <= e; i++) btns += `<button class="page-btn${i===rc_page?' active':''}" onclick="loadRecipes(${i})">${i}</button>`;
+  btns += `<button class="page-btn" onclick="loadRecipes(${rc_page+1})" ${rc_page===rc_lastPage?'disabled':''}>→</button>`;
+  el.innerHTML = `<span class="page-info">${from}–${to} de ${rc_total}</span><div class="page-btns">${btns}</div>`;
+}
+
+function rcOnSearch() {
+  clearTimeout(rc_searchTimer);
+  rc_searchTimer = setTimeout(() => { rc_search = document.getElementById('rc_search').value.trim(); loadRecipes(1); }, 350);
+}
+
+function openRecipeModal(recipe = null) {
+  rc_editId   = recipe ? recipe.id : null;
+  rc_ingrRows = [];
+  document.getElementById('rc_modalTitle').textContent  = recipe ? 'Editar receta' : 'Nueva receta';
+  document.getElementById('rc_fName').value     = recipe?.name        || '';
+  document.getElementById('rc_fDesc').value     = recipe?.description || '';
+  document.getElementById('rc_fInstr').value    = recipe?.instructions|| '';
+  document.getElementById('rc_fServings').value = recipe?.servings    || '';
+  document.getElementById('rc_fPrepTime').value = recipe?.prep_time   || '';
+  document.getElementById('rc_fProteins').value = recipe?.proteins    ?? '';
+  document.getElementById('rc_fCarbs').value    = recipe?.carbs       ?? '';
+  document.getElementById('rc_fFats').value     = recipe?.fats        ?? '';
+  document.getElementById('rc_fCalories').value = recipe?.calories    ?? '';
+  document.getElementById('rc_modalError').textContent = '';
+  document.getElementById('rc_ingrList').innerHTML = '';
+  if (recipe?.details?.length) recipe.details.forEach(d => addIngrRow(d));
+  syncIngrEmpty();
+  document.getElementById('rc_overlay').classList.add('open');
+  setTimeout(() => document.getElementById('rc_fName').focus(), 100);
+}
+
+async function openRecipeEdit(id) {
+  try {
+    const r = await fetch(`${API}/recipes/${id}/edit`, { headers: h() });
+    const d = await r.json();
+    if (d.data) openRecipeModal(d.data);
+  } catch { toast('Error al cargar receta', 'error'); }
+}
+
+function closeRecipeModal() {
+  document.getElementById('rc_overlay').classList.remove('open');
+  closeAllAc();
+}
+
+function addIngrRow(detail = null) {
+  const rowId = Date.now() + Math.random();
+  rc_ingrRows.push({ id: rowId, aliment_id: detail?.aliment_id || null });
+  const div = document.createElement('div');
+  div.className = 'ingr-row'; div.id = `irow-${rowId}`;
+  div.innerHTML = `
+    <div class="ac-wrap">
+      <input type="text" id="iac-${rowId}" placeholder="Buscar alimento…" autocomplete="off"
+        oninput="acSearch('${rowId}',this.value)"
+        onfocus="acSearch('${rowId}',this.value)"
+        onblur="setTimeout(()=>closeAc('${rowId}'),200)"/>
+      <div class="ac-dropdown" id="acdrop-${rowId}"></div>
+    </div>
+    <input type="number" id="iqty-${rowId}" min="0" step="0.1" placeholder="Cant."/>
+    <input type="text" id="inotes-${rowId}" placeholder="Notas (opcional)"/>
+    <button class="btn-icon danger" onclick="removeIngrRow('${rowId}')" title="Quitar">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+  document.getElementById('rc_ingrList').appendChild(div);
+  if (detail) {
+    document.getElementById(`iqty-${rowId}`).value   = detail.quantity || '';
+    document.getElementById(`inotes-${rowId}`).value = detail.notes    || '';
+    if (detail.aliment_id) resolveAlimentName(rowId, detail.aliment_id);
+  }
+  syncIngrEmpty();
+}
+
+async function resolveAlimentName(rowId, alimentId) {
+  try {
+    const r = await fetch(`${API}/aliments/${alimentId}/edit`, { headers: h() });
+    const d = await r.json();
+    if (d.data) {
+      const input = document.getElementById(`iac-${rowId}`);
+      if (input) input.value = d.data.name || alimentId;
+      const row = rc_ingrRows.find(x => x.id == rowId);
+      if (row) row.aliment_name = d.data.name || '';
+    }
+  } catch {}
+}
+
+function removeIngrRow(rowId) {
+  rc_ingrRows = rc_ingrRows.filter(r => r.id != rowId);
+  document.getElementById(`irow-${rowId}`)?.remove();
+  syncIngrEmpty();
+}
+
+function syncIngrEmpty() {
+  const list = document.getElementById('rc_ingrList');
+  document.getElementById('rc_ingrEmpty').style.display = list?.children.length === 0 ? '' : 'none';
+}
+
+async function acSearch(rowId, val) {
+  clearTimeout(rc_acTimers[rowId]);
+  if (!val || val.length < 2) { closeAc(rowId); return; }
+  rc_acTimers[rowId] = setTimeout(async () => {
+    try {
+      const p = new URLSearchParams({ search: val, per_page: 10, page: 1 });
+      const r = await fetch(`${API}/aliments/search?${p}`, { headers: h() });
+      showAcDropdown(rowId, (await r.json()).data?.data || []);
+    } catch {}
+  }, 250);
+}
+
+function showAcDropdown(rowId, items) {
+  const drop = document.getElementById(`acdrop-${rowId}`);
+  if (!drop) return;
+  if (!items.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = items.map(a => `
+    <div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}')">
+      <div class="ac-name">${esc(a.name)}</div>
+      ${a.brand ? `<div class="ac-brand">${esc(a.brand)}</div>` : ''}
+    </div>`).join('');
+  drop.classList.add('open');
+}
+
+function selectAliment(rowId, alimentId, alimentName) {
+  const row = rc_ingrRows.find(r => r.id == rowId);
+  if (row) { row.aliment_id = alimentId; row.aliment_name = alimentName; }
+  const input = document.getElementById(`iac-${rowId}`);
+  if (input) input.value = alimentName;
+  closeAc(rowId);
+}
+
+function closeAc(rowId) { document.getElementById(`acdrop-${rowId}`)?.classList.remove('open'); }
+function closeAllAc()   { document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open')); }
+
+async function saveRecipe() {
+  const name  = document.getElementById('rc_fName').value.trim();
+  const errEl = document.getElementById('rc_modalError');
+  if (!name) { errEl.textContent = 'El nombre es obligatorio.'; return; }
+  errEl.textContent = '';
+  const details = rc_ingrRows.filter(r => r.aliment_id).map((r, i) => ({
+    aliment_id: r.aliment_id,
+    quantity: parseFloat(document.getElementById(`iqty-${r.id}`)?.value) || null,
+    notes:    document.getElementById(`inotes-${r.id}`)?.value.trim() || null,
+    order: i,
+  }));
+  const payload = {
+    name,
+    description:  document.getElementById('rc_fDesc').value.trim()  || null,
+    instructions: document.getElementById('rc_fInstr').value.trim() || null,
+    servings:     parseInt(document.getElementById('rc_fServings').value)  || null,
+    prep_time:    parseInt(document.getElementById('rc_fPrepTime').value)  || null,
+    proteins:     parseFloat(document.getElementById('rc_fProteins').value)|| null,
+    carbs:        parseFloat(document.getElementById('rc_fCarbs').value)   || null,
+    fats:         parseFloat(document.getElementById('rc_fFats').value)    || null,
+    calories:     parseFloat(document.getElementById('rc_fCalories').value)|| null,
+    details,
+  };
+  const btn = document.getElementById('rc_saveBtn');
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  try {
+    const method = rc_editId ? 'PUT' : 'POST';
+    const url    = rc_editId ? `${API}/recipes/${rc_editId}/update` : `${API}/recipes`;
+    const r = await fetch(url, { method, headers: hj(), body: JSON.stringify(payload) });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; return; }
+    closeRecipeModal();
+    toast(rc_editId ? 'Receta actualizada' : 'Receta creada', 'success');
+    loadRecipes(rc_editId ? rc_page : 1);
+  } catch { errEl.textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+}
+
+// ─── TIPOS DE ALIMENTO ────────────────────────────────────────────────────────
+let tf_items = [], tf_loaded = false;
+
+async function loadTypeFood() {
+  tf_loaded = true;
+  try {
+    const r = await fetch(`${API}/typeFood/findAll`, { headers: h() });
+    if (!r.ok) return;
+    tf_items = (await r.json()).data || [];
+  } catch { toast('Error al cargar tipos', 'error'); }
+  renderTypeFood();
 }
 
 function renderTypeFood() {
-  const q = document.getElementById('tfSearch').value.trim();
-  const filtered = filter(tfItems, q);
-  document.getElementById('tfCount').textContent = filtered.length;
-  renderTable('tfBody', filtered, 'typeFood');
+  const q = (document.getElementById('tf_search').value || '').toLowerCase();
+  const items = tf_items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.description||'').toLowerCase().includes(q));
+  document.getElementById('tf_count_badge').textContent = `${items.length} tipo${items.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('tf_tbody');
+  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Sin registros</td></tr>`; return; }
+  tbody.innerHTML = items.map(item => `
+    <tr>
+      <td style="font-weight:600;">${esc(item.name)}</td>
+      <td style="font-size:12px;color:#6B7280;">${esc(item.description || '—')}</td>
+      <td><div class="actions-cell">
+        <button class="btn-icon" onclick="openCatalogEdit('typeFood',${item.id})" title="Editar">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-icon danger" onclick="openConfirm('typeFood',${item.id},'${esc(item.name)}')" title="Eliminar">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ─── GRUPOS DE ALIMENTO ───────────────────────────────────────────────────────
+let gf_items = [], gf_loaded = false;
+
+async function loadGroupFood() {
+  if (gf_loaded && gf_items.length) { renderGroupFood(); return; }
+  gf_loaded = true;
+  try {
+    const r = await fetch(`${API}/groupFood/findAll`, { headers: h() });
+    if (!r.ok) return;
+    gf_items = (await r.json()).data || [];
+  } catch { toast('Error al cargar grupos', 'error'); }
+  renderGroupFood();
 }
 
 function renderGroupFood() {
-  const q = document.getElementById('gfSearch').value.trim();
-  const filtered = filter(gfItems, q);
-  document.getElementById('gfCount').textContent = filtered.length;
-  renderTable('gfBody', filtered, 'groupFood');
+  const q = (document.getElementById('gf_search').value || '').toLowerCase();
+  const items = gf_items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.description||'').toLowerCase().includes(q));
+  document.getElementById('gf_count_badge').textContent = `${items.length} grupo${items.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('gf_tbody');
+  if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Sin registros</td></tr>`; return; }
+  tbody.innerHTML = items.map(item => `
+    <tr>
+      <td style="font-weight:600;">${esc(item.name)}</td>
+      <td style="font-size:12px;color:#6B7280;">${esc(item.description || '—')}</td>
+      <td><div class="actions-cell">
+        <button class="btn-icon" onclick="openCatalogEdit('groupFood',${item.id})" title="Editar">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-icon danger" onclick="openConfirm('groupFood',${item.id},'${esc(item.name)}')" title="Eliminar">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div></td>
+    </tr>`).join('');
 }
 
-// ── Modal open ────────────────────────────────────────────────────────────────
-function openModal(catalog, item = null) {
-  const label = catalog === 'typeFood' ? 'tipo de alimento' : 'grupo de alimento';
-  document.getElementById('modalTitle').textContent  = item ? `Editar ${label}` : `Nuevo ${label}`;
-  document.getElementById('editCatalog').value = catalog;
-  document.getElementById('editId').value      = item?.id ?? '';
-  document.getElementById('fieldName').value   = item?.name ?? '';
-  document.getElementById('fieldDesc').value   = item?.description ?? '';
-  document.getElementById('modalError').textContent  = '';
-  document.getElementById('saveBtn').disabled  = false;
-  document.getElementById('saveBtnLabel').textContent = 'Guardar';
-  document.getElementById('catalogOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('fieldName').focus(), 120);
-}
+// ─── CATALOG MODAL ────────────────────────────────────────────────────────────
+let cat_catalog = null, cat_editId = null;
 
-function openEdit(catalog, id) {
-  const items = catalog === 'typeFood' ? tfItems : gfItems;
+function openCatalogModal(catalog) { openCatalogModalWith(catalog, null); }
+
+function openCatalogEdit(catalog, id) {
+  const items = catalog === 'typeFood' ? tf_items : gf_items;
   const item  = items.find(i => i.id === id);
-  if (item) openModal(catalog, item);
+  if (item) openCatalogModalWith(catalog, item);
 }
 
-function closeModal() {
-  document.getElementById('catalogOverlay').classList.remove('open');
+function openCatalogModalWith(catalog, item) {
+  cat_catalog = catalog; cat_editId = item?.id ?? null;
+  const label = catalog === 'typeFood' ? 'tipo de alimento' : 'grupo de alimento';
+  document.getElementById('cat_modalTitle').textContent    = item ? `Editar ${label}` : `Nuevo ${label}`;
+  document.getElementById('cat_fName').value               = item?.name        ?? '';
+  document.getElementById('cat_fDesc').value               = item?.description ?? '';
+  document.getElementById('cat_modalError').textContent    = '';
+  document.getElementById('cat_saveBtn').disabled          = false;
+  document.getElementById('cat_saveBtnLabel').textContent  = 'Guardar';
+  document.getElementById('cat_overlay').classList.add('open');
+  setTimeout(() => document.getElementById('cat_fName').focus(), 120);
 }
 
-// ── Save ──────────────────────────────────────────────────────────────────────
-async function saveItem() {
-  const catalog = document.getElementById('editCatalog').value;
-  const id      = document.getElementById('editId').value;
-  const name    = document.getElementById('fieldName').value.trim();
-  const desc    = document.getElementById('fieldDesc').value.trim();
+function closeCatalogModal() { document.getElementById('cat_overlay').classList.remove('open'); }
 
+async function saveCatalog() {
+  const name = document.getElementById('cat_fName').value.trim();
+  const desc = document.getElementById('cat_fDesc').value.trim();
   if (!name) {
-    document.getElementById('modalError').textContent = 'El nombre es requerido.';
-    document.getElementById('fieldName').focus();
-    return;
+    document.getElementById('cat_modalError').textContent = 'El nombre es requerido.';
+    document.getElementById('cat_fName').focus(); return;
   }
-
-  const btn = document.getElementById('saveBtn');
-  const lbl = document.getElementById('saveBtnLabel');
+  const btn = document.getElementById('cat_saveBtn');
+  const lbl = document.getElementById('cat_saveBtnLabel');
   btn.disabled = true; lbl.textContent = 'Guardando…';
-  document.getElementById('modalError').textContent = '';
-
-  const prefix  = catalog === 'typeFood' ? 'typeFood' : 'groupFood';
-  const url     = id ? `${API}/${prefix}/${id}/update` : `${API}/${prefix}`;
-  const method  = id ? 'PUT' : 'POST';
-  const body    = { name, description: desc || null };
-
+  document.getElementById('cat_modalError').textContent = '';
+  const url    = cat_editId ? `${API}/${cat_catalog}/${cat_editId}/update` : `${API}/${cat_catalog}`;
+  const method = cat_editId ? 'PUT' : 'POST';
   try {
-    const r = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json', ...h() },
-      body: JSON.stringify(body),
-    });
+    const r = await fetch(url, { method, headers: hj(), body: JSON.stringify({ name, description: desc || null }) });
     const j = await r.json();
-    if (!r.ok) {
-      document.getElementById('modalError').textContent = j.message || j.detail || 'Error al guardar.';
-      return;
-    }
-    closeModal();
-    toast(id ? 'Actualizado correctamente' : 'Creado correctamente', 'success');
-    loadAll();
-  } catch {
-    document.getElementById('modalError').textContent = 'Error de conexión.';
-  } finally {
-    btn.disabled = false; lbl.textContent = 'Guardar';
-  }
+    if (!r.ok) { document.getElementById('cat_modalError').textContent = j.message || 'Error al guardar.'; return; }
+    closeCatalogModal();
+    toast(cat_editId ? 'Actualizado correctamente' : 'Creado correctamente', 'success');
+    if (cat_catalog === 'typeFood') { tf_loaded = false; loadTypeFood(); }
+    else { gf_loaded = false; gf_items = []; loadGroupFood(); }
+  } catch { document.getElementById('cat_modalError').textContent = 'Error de conexión.'; }
+  finally { btn.disabled = false; lbl.textContent = 'Guardar'; }
 }
 
-// ── Delete ────────────────────────────────────────────────────────────────────
-function openConfirm(catalog, id, name) {
-  deletingCatalog = catalog;
-  deletingId      = id;
-  document.getElementById('confirmMsg').textContent = `Se eliminará "${name}". Esta acción no se puede deshacer.`;
-  document.getElementById('confirmOverlay').classList.add('open');
+// ─── CONFIRM DELETE ───────────────────────────────────────────────────────────
+let conf_type = null, conf_id = null;
+
+function openConfirm(type, id, name) {
+  conf_type = type; conf_id = id;
+  document.getElementById('conf_msg').textContent = `Se eliminará "${name}". Esta acción no se puede deshacer.`;
+  document.getElementById('conf_overlay').classList.add('open');
 }
 
 function closeConfirm() {
-  document.getElementById('confirmOverlay').classList.remove('open');
-  deletingId = deletingCatalog = null;
+  document.getElementById('conf_overlay').classList.remove('open');
+  conf_type = conf_id = null;
 }
 
-async function doDelete() {
-  if (!deletingId || !deletingCatalog) return;
-  const btn = document.getElementById('confirmDeleteBtn');
+async function doConfirmDelete() {
+  if (!conf_type || conf_id == null) return;
+  const type = conf_type, id = conf_id;
+  const btn  = document.getElementById('conf_deleteBtn');
   btn.disabled = true; btn.textContent = 'Eliminando…';
-
-  const prefix = deletingCatalog === 'typeFood' ? 'typeFood' : 'groupFood';
   try {
-    const r = await fetch(`${API}/${prefix}/${deletingId}/update`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...h() },
-      body: JSON.stringify({ status: 0 }),
-    });
+    let r;
+    if (type === 'aliment') {
+      r = await fetch(`${API}/aliments/${id}`, { method: 'DELETE', headers: h() });
+    } else if (type === 'recipe') {
+      r = await fetch(`${API}/recipes/${id}`, { method: 'DELETE', headers: h() });
+    } else {
+      r = await fetch(`${API}/${type}/${id}/update`, { method: 'PUT', headers: hj(), body: JSON.stringify({ status: 0 }) });
+    }
     if (r.ok) {
       closeConfirm();
       toast('Registro eliminado', 'success');
-      loadAll();
-    } else {
-      toast('No se pudo eliminar', 'error');
-    }
+      if      (type === 'aliment')   loadAliments(al_page);
+      else if (type === 'recipe')    loadRecipes(rc_page);
+      else if (type === 'typeFood')  { tf_loaded = false; loadTypeFood(); }
+      else                           { gf_loaded = false; gf_items = []; loadGroupFood(); }
+    } else toast('No se pudo eliminar', 'error');
   } catch { toast('Error de conexión', 'error'); }
-  finally  { btn.disabled = false; btn.textContent = 'Eliminar'; }
+  finally { btn.disabled = false; btn.textContent = 'Eliminar'; }
 }
 
-// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+// ─── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    closeModal();
-    closeConfirm();
+    closeAlimentModal(); closeImportModal(); closeRecipeModal(); closeCatalogModal(); closeConfirm();
   }
-  if (e.key === 'Enter' && document.getElementById('catalogOverlay').classList.contains('open')) {
-    if (document.activeElement?.tagName !== 'TEXTAREA') saveItem();
+  if (e.key === 'Enter') {
+    if (document.getElementById('al_overlay').classList.contains('open')  && document.activeElement?.tagName !== 'TEXTAREA') saveAliment();
+    if (document.getElementById('cat_overlay').classList.contains('open') && document.activeElement?.tagName !== 'TEXTAREA') saveCatalog();
   }
 });
 
-// ── User & helpers ────────────────────────────────────────────────────────────
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
 function toast(msg, type) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className   = `toast show ${type || ''}`;
-  clearTimeout(el._t);
-  el._t = setTimeout(() => { el.className = 'toast'; }, 3500);
+  el.textContent = msg; el.className = `toast show ${type || ''}`;
+  clearTimeout(el._t); el._t = setTimeout(() => { el.className = 'toast'; }, 3500);
 }
 
 async function loadUser() {
   try {
     const r = await fetch(`${API}/users/me`, { headers: h() });
     if (r.status === 401) { logout(); return; }
-    const j = await r.json();
-    const u = j.data || j;
-    const detail = u.detail || {};
-    const name   = `${detail.name || ''} ${detail.last_name || ''}`.trim() || u.email || 'Usuario';
+    const u = (await r.json()).data || {};
+    const d = u.detail || {};
+    const name = `${d.name || ''} ${d.last_name || ''}`.trim() || u.email || 'Usuario';
     document.getElementById('sidebarName').textContent   = name;
-    document.getElementById('sidebarRole').textContent   = (u.roles?.[0]?.name) || '—';
+    document.getElementById('sidebarRole').textContent   = u.roles?.[0]?.name || '—';
     document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
   } catch {}
 }
@@ -538,8 +1311,7 @@ async function loadPendingBadge() {
   try {
     const r = await fetch(`${API}/form-assignments/pending-count`, { headers: h() });
     if (!r.ok) return;
-    const j = await r.json();
-    const count = j.data?.count ?? 0;
+    const count = (await r.json()).data?.count ?? 0;
     const badge = document.getElementById('formsBadge');
     if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; }
   } catch {}
@@ -547,10 +1319,10 @@ async function loadPendingBadge() {
 
 function logout() { localStorage.clear(); location.href = 'login.html'; }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 loadUser();
 loadPendingBadge();
-loadAll();
+loadAlGroups().then(() => loadAliments(1));
 </script>
 </body>
 </html>

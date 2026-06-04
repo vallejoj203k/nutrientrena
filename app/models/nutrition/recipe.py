@@ -20,6 +20,7 @@ class Recipe(Base):
     servings = Column(Integer, nullable=True)
     prep_time = Column(Integer, nullable=True)
     image = Column(String(500), nullable=True)
+    meal_type = Column(String(100), nullable=True)
     state = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

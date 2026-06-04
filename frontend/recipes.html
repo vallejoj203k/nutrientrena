@@ -798,7 +798,8 @@ function updateRowMacros(row) {
   const p = ((row.proteins      || 0) / 100) * qty;
   const c = ((row.carbohydrates || 0) / 100) * qty;
   const f = ((row.fats          || 0) / 100) * qty;
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v.toFixed(1); };
+  const fmt = v => v >= 10 ? v.toFixed(1) : v.toFixed(2);
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = fmt(v); };
   set(`ikcal-${row.id}`, k);
   set(`iprot-${row.id}`, p);
   set(`icarb-${row.id}`, c);

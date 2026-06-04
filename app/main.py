@@ -9,8 +9,9 @@ from app.config import settings
 from app.routers import (
     auth, users, roles, menus, parameters, countries,
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
-    analytics, public, session_logs, client_tasks, settings,
+    analytics, public, session_logs, client_tasks,
 )
+from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
 
 app = FastAPI(
@@ -62,7 +63,7 @@ app.include_router(recipes.router, prefix=API_PREFIX)
 app.include_router(session_logs.router, prefix=API_PREFIX)
 app.include_router(client_tasks.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
-app.include_router(settings.router, prefix=API_PREFIX)
+app.include_router(settings_router.router, prefix=API_PREFIX)
 
 
 _frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")

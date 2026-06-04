@@ -687,8 +687,13 @@ function openForm(recipe = null) {
   document.getElementById('ingrTableBody').innerHTML = '';
   (recipe?.details || []).forEach(d => addIngredientRow(d));
 
-  // Circles reset
-  updateCircles(0, 0, 0, 0);
+  // Circles: initialize from stored values if editing
+  updateCircles(
+    recipe?.calories || 0,
+    recipe?.proteins || 0,
+    recipe?.carbs    || 0,
+    recipe?.fats     || 0,
+  );
 
   // Switch view
   document.getElementById('listView').style.display = 'none';
@@ -928,18 +933,20 @@ async function save() {
   const mealType = ['desayuno','almuerzo','cena','merienda']
     .filter(t => document.getElementById(`mc-${t}`).checked).join(',') || null;
 
-  // Collect totals from circles
-  const kcalVal = parseFloat(document.getElementById('cv-kcal').textContent) || null;
-  const protVal = parseFloat(document.getElementById('cv-prot').textContent) || null;
-  const carbVal = parseFloat(document.getElementById('cv-carb').textContent) || null;
-  const fatVal  = parseFloat(document.getElementById('cv-fat').textContent)  || null;
-
-  const details = _ingrRows.filter(r => r.aliment_id).map((r, i) => ({
-    aliment_id: r.aliment_id,
-    quantity:   parseFloat(document.getElementById(`iqty-${r.id}`)?.value) || null,
-    notes:      null,
-    order:      i,
-  }));
+  // Calculate totals directly from ingredient rows
+  let _kcal = 0, _prot = 0, _carb = 0, _fat = 0;
+  const details = _ingrRows.filter(r => r.aliment_id).map((r, i) => {
+    const qty = parseFloat(document.getElementById(`iqty-${r.id}`)?.value) || 0;
+    _kcal += ((r.calories      || 0) / 100) * qty;
+    _prot += ((r.proteins      || 0) / 100) * qty;
+    _carb += ((r.carbohydrates || 0) / 100) * qty;
+    _fat  += ((r.fats          || 0) / 100) * qty;
+    return { aliment_id: r.aliment_id, quantity: qty || null, notes: null, order: i };
+  });
+  const kcalVal = _kcal > 0 ? parseFloat(_kcal.toFixed(1)) : null;
+  const protVal = _prot > 0 ? parseFloat(_prot.toFixed(1)) : null;
+  const carbVal = _carb > 0 ? parseFloat(_carb.toFixed(1)) : null;
+  const fatVal  = _fat  > 0 ? parseFloat(_fat.toFixed(1))  : null;
 
   const payload = {
     name,

@@ -687,10 +687,9 @@ async function doDelete() {
   const btn = document.getElementById('delConfirmBtn');
   btn.textContent = 'Eliminando…'; btn.disabled = true;
   try {
-    const r = await fetch(`${API}/recipes/${_delId}/update`, {
-      method: 'PUT',
+    const r = await fetch(`${API}/recipes/${_delId}`, {
+      method: 'DELETE',
       headers: headers(),
-      body: JSON.stringify({ state: 0 }),
     });
     const d = await r.json();
     if (!r.ok) { toast(d.message || 'Error al eliminar', true); return; }

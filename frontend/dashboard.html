@@ -245,6 +245,11 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analíticas
     </a>
+    <div class="nav-section">Configuración</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
   </nav>
 
   <div class="sidebar-user">
@@ -298,9 +303,9 @@
           <svg width="22" height="22" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </div>
         <div>
-          <div class="stat-label">Columnas Kanban</div>
-          <div class="stat-value" id="statKanban"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
-          <div class="stat-sub">estados activos</div>
+          <div class="stat-label">Nuevos este mes</div>
+          <div class="stat-value" id="statNew"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
+          <div class="stat-sub">registrados</div>
         </div>
       </div>
       <div class="stat-card">
@@ -308,9 +313,9 @@
           <svg width="22" height="22" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.92 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.99 5.99l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         </div>
         <div>
-          <div class="stat-label">Sin estado</div>
-          <div class="stat-value" id="statNoState"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
-          <div class="stat-sub">requieren atención</div>
+          <div class="stat-label">Adherencia check-ins</div>
+          <div class="stat-value" id="statAdherence"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
+          <div class="stat-sub">últimos 30 días</div>
         </div>
       </div>
     </div>
@@ -322,20 +327,28 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title">📋 Estado de clientes</span>
-          <span class="card-link" onclick="setPage('kanban')">Ver kanban completo →</span>
+          <a class="card-link" href="kanban.html">Ver kanban completo →</a>
         </div>
         <div class="kanban-cols" id="kanbanCols">
           <div style="color:#9CA3AF;font-size:13px;padding:20px 0;">Cargando...</div>
         </div>
       </div>
 
-      <!-- Clientes recientes -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">👥 Clientes recientes</span>
+      <!-- Panel derecho -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <!-- Distribución estados -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📊 Distribución de estados</span>
+          </div>
+          <div id="statesPanel" style="font-size:13px;color:#9CA3AF;">Cargando...</div>
         </div>
-        <div class="recent-list" id="recentList">
-          <div style="color:#9CA3AF;font-size:13px;">Cargando...</div>
+        <!-- Coaches -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🏋️ Rendimiento coaches</span>
+          </div>
+          <div id="coachesPanel" style="font-size:13px;color:#9CA3AF;">Cargando...</div>
         </div>
       </div>
 
@@ -396,20 +409,24 @@ async function loadDashboard(){
   document.getElementById('userRole').textContent   = (u.roles&&u.roles[0]?.name)||'—';
   document.getElementById('userAvatar').textContent = initials(u.name||'U');
 
-  // Kanban
-  const kb = await apiFetch('/api/users/kanban');
-  if(!kb) return;
-  const cols    = kb.data?.columns||[];
-  const total   = kb.data?.total_clients||0;
-  const noState = cols.find(c=>c.status_id===null)?.total||0;
-  const active  = cols.find(c=>c.status_name==='En seguimiento')?.total||0;
+  // Analytics overview
+  const [ov, ck, st, co, kb] = await Promise.all([
+    apiFetch('/api/analytics/overview'),
+    apiFetch('/api/analytics/checkins'),
+    apiFetch('/api/analytics/states'),
+    apiFetch('/api/analytics/coaches'),
+    apiFetch('/api/users/kanban'),
+  ]);
 
-  document.getElementById('statTotal').textContent   = total;
-  document.getElementById('statActive').textContent  = active;
-  document.getElementById('statKanban').textContent  = cols.filter(c=>c.total>0).length;
-  document.getElementById('statNoState').textContent = noState;
+  const ovd = ov?.data||{};
+  document.getElementById('statTotal').textContent    = ovd.total_clients ?? '—';
+  document.getElementById('statActive').textContent   = ovd.active_clients ?? '—';
+  document.getElementById('statNew').textContent      = ovd.new_this_month ?? '—';
+  const adh = ck?.data?.adherence_pct;
+  document.getElementById('statAdherence').textContent = adh != null ? adh+'%' : '—';
 
   // Kanban columnas
+  const cols = kb?.data?.columns||[];
   const kbEl = document.getElementById('kanbanCols');
   if(!cols.length){ kbEl.innerHTML='<span style="color:#9CA3AF;font-size:13px;">No hay clientes aún</span>'; }
   else {
@@ -432,24 +449,40 @@ async function loadDashboard(){
     }).join('');
   }
 
-  // Clientes recientes (todos de la lista kanban aplanados)
-  const allClients = cols.flatMap(c=>c.clients||[]).slice(0,8);
-  const rl = document.getElementById('recentList');
-  if(!allClients.length){ rl.innerHTML='<span style="color:#9CA3AF;font-size:13px;">No hay clientes</span>'; }
+  // States distribution
+  const dist = st?.data?.distribution||[];
+  const sEl = document.getElementById('statesPanel');
+  if(!dist.length){ sEl.innerHTML='<span style="color:#9CA3AF;">Sin datos</span>'; }
   else {
-    rl.innerHTML = allClients.map(c=>{
-      const sc = stateClass(c.status_id);
-      const sn = cols.find(col=>(col.clients||[]).some(x=>x.id===c.id))?.status_name||'Sin estado';
-      return `
-        <div class="recent-item">
-          <div class="recent-avatar">${initials((c.name||'')+(c.last_name?' '+c.last_name:''))}</div>
-          <div class="recent-info">
-            <div class="recent-name">${c.name||''} ${c.last_name||''}</div>
-            <div class="recent-email">${c.email||''}</div>
-          </div>
-          <span class="state-pill ${sc}">${sn}</span>
-        </div>`;
-    }).join('');
+    sEl.innerHTML = dist.map(s=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F3F4F6;">
+        <span style="flex:1;font-size:13px;color:#374151;">${s.status_name}</span>
+        <div style="width:80px;background:#F3F4F6;border-radius:4px;height:6px;overflow:hidden;">
+          <div style="width:${s.percentage}%;background:#5B2D8E;height:100%;border-radius:4px;"></div>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:#111;min-width:24px;text-align:right;">${s.count}</span>
+        <span style="font-size:11px;color:#9CA3AF;min-width:36px;">${s.percentage}%</span>
+      </div>`).join('');
+  }
+
+  // Coaches table
+  const coaches = co?.data?.coaches||[];
+  const cEl = document.getElementById('coachesPanel');
+  if(!coaches.length){ cEl.innerHTML='<span style="color:#9CA3AF;">Sin coaches</span>'; }
+  else {
+    cEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="color:#9CA3AF;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+        <th style="text-align:left;padding:6px 8px;">Coach</th>
+        <th style="text-align:center;padding:6px 8px;">Clientes</th>
+        <th style="text-align:center;padding:6px 8px;">Check-ins</th>
+      </tr></thead>
+      <tbody>${coaches.map(c=>`
+        <tr style="border-top:1px solid #F3F4F6;">
+          <td style="padding:8px;">${c.coach_name||'—'}</td>
+          <td style="padding:8px;text-align:center;font-weight:700;">${c.clients_assigned}</td>
+          <td style="padding:8px;text-align:center;color:#5B2D8E;font-weight:700;">${c.checkins_received}</td>
+        </tr>`).join('')}
+      </tbody></table>`;
   }
 }
 

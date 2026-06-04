@@ -85,6 +85,16 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(RecipeOut.model_validate(recipe).model_dump(), "OK")
 
 
+@router.delete("/{id}")
+def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+    recipe = _get_or_404(db, id)
+    if not recipe:
+        return send_error("Receta no encontrada")
+    recipe.state = 0
+    db.commit()
+    return send_response(None, "Receta eliminada")
+
+
 @router.put("/{id}/update")
 def updated(id: int, data: RecipeUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     recipe = _get_or_404(db, id)

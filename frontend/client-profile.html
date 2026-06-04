@@ -462,6 +462,10 @@
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9S3 15.97 3 11a9 9 0 0 1 9-9z"/><path d="M12 8v4l2 2"/></svg>
         Nutrición
       </button>
+      <button class="tab-btn" id="tab-progreso-btn" onclick="showTab('progreso');renderProgresoTab()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Progreso
+      </button>
       <button class="tab-btn" id="tab-notas-btn" onclick="showTab('notas');loadNotes()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Notas
@@ -549,6 +553,11 @@
           </div>
           <div id="notasBody" style="padding:0 16px 16px;"></div>
         </div>
+      </div>
+
+      <!-- ── PROGRESO ── -->
+      <div class="tab-pane" id="tab-progreso">
+        <div id="progresoContent"></div>
       </div>
 
     </div><!-- /content -->
@@ -647,6 +656,10 @@
         <div class="form-group">
           <label>Fecha límite entrega</label>
           <input id="biz_fecha_limite_entrega" type="date"/>
+        </div>
+        <div class="form-group">
+          <label>Fecha de renovación</label>
+          <input id="biz_fecha_renovacion" type="date"/>
         </div>
         <div class="form-group">
           <label>Responsable venta</label>
@@ -1023,6 +1036,19 @@ function renderDeliveriesTab() {
 }
 
 /* ── Comercial tab ── */
+function renewalCountdown(dateStr) {
+  if (!dateStr) return '—';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  const diff = Math.round((d - today) / 86400000);
+  const label = d.toLocaleDateString('es-ES');
+  if (diff < 0) return `<span style="color:#DC2626;font-weight:700;">${label} (vencida hace ${-diff}d)</span>`;
+  if (diff === 0) return `<span style="color:#F59E0B;font-weight:700;">${label} (hoy)</span>`;
+  if (diff <= 7) return `<span style="color:#F59E0B;font-weight:700;">${label} (en ${diff}d ⚠️)</span>`;
+  if (diff <= 30) return `<span style="color:#5B2D8E;font-weight:600;">${label} (en ${diff}d)</span>`;
+  return `${label} (en ${diff}d)`;
+}
+
 function renderBizTab() {
   const c = clientData;
   document.getElementById('bizGrid').innerHTML = `
@@ -1034,6 +1060,7 @@ function renderBizTab() {
     <div class="info-item"><label>Método de pago</label><span>${esc(c.metodo_pago||'—')}</span></div>
     <div class="info-item"><label>Fecha de compra</label><span>${c.fecha_compra?new Date(c.fecha_compra).toLocaleDateString('es-ES'):'—'}</span></div>
     <div class="info-item"><label>Fecha límite entrega</label><span>${c.fecha_limite_entrega?new Date(c.fecha_limite_entrega).toLocaleDateString('es-ES'):'—'}</span></div>
+    <div class="info-item"><label>Fecha de renovación</label><span>${renewalCountdown(c.fecha_renovacion)}</span></div>
     <div class="info-item"><label>Responsable venta</label><span>${esc(c.responsable_venta||'—')}</span></div>
     <div class="info-item"><label>Origen CRM</label><span>${esc(c.crm_origen||'—')}</span></div>
     <div class="info-item"><label>WhatsApp</label><span>${c.whatsapp_link?`<a href="${esc(c.whatsapp_link)}" target="_blank" style="color:var(--purple);">Abrir chat →</a>`:'—'}</span></div>
@@ -1080,6 +1107,140 @@ function showTab(name) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(`tab-${name}`).classList.add('active');
   document.getElementById(`tab-${name}-btn`).classList.add('active');
+}
+
+/* ── Progreso tab ── */
+function renderProgresoTab() {
+  const el = document.getElementById('progresoContent');
+  const ckData = checkins || [];
+
+  // Stats summary
+  const weights = ckData.map(c => c.weight).filter(Boolean);
+  const first = weights.length ? weights[weights.length - 1] : null;
+  const last  = weights.length ? weights[0] : null;
+  const change = (first != null && last != null) ? (last - first) : null;
+  const adherence = ckData.length;
+
+  // Body measurements from latest checkin
+  const latest = ckData[0] || {};
+
+  let html = `
+    <div class="grid-3" style="margin-bottom:16px;">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#F3EEFF;"><svg width="20" height="20" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div><div class="stat-val">${adherence}</div><div class="stat-lbl">Check-ins totales</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#F0FDF4;"><svg width="20" height="20" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <div><div class="stat-val">${last != null ? last + ' kg' : '—'}</div><div class="stat-lbl">Peso actual</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:${change != null && change < 0 ? '#F0FDF4' : '#FFFBEB'};"><svg width="20" height="20" fill="none" stroke="${change != null && change < 0 ? '#16A34A' : '#D97706'}" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+        <div><div class="stat-val" style="color:${change != null && change < 0 ? '#16A34A' : change != null && change > 0 ? '#D97706' : '#111'};">${change != null ? (change > 0 ? '+' : '') + change.toFixed(1) + ' kg' : '—'}</div><div class="stat-lbl">Cambio de peso</div></div>
+      </div>
+    </div>`;
+
+  // Weight chart
+  if (weights.length >= 2) {
+    const reversed = [...weights].reverse();
+    const dates = ckData.map(c => {
+      const d = new Date(c.checkin_date || c.created_at);
+      return d.toLocaleDateString('es-ES', {day:'2-digit', month:'short'});
+    }).reverse();
+    const min = Math.min(...reversed), max = Math.max(...reversed);
+    const range = max - min || 1;
+    const W = 100, H = 60;
+    const pts = reversed.map((v, i) => {
+      const x = (i / (reversed.length - 1)) * W;
+      const y = H - ((v - min) / range) * (H - 10) - 5;
+      return `${x},${y}`;
+    }).join(' ');
+    const lastPt = pts.split(' ').pop();
+    html += `
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head"><span class="card-title">Evolución del peso</span></div>
+        <div style="padding:0 0 8px;">
+          <svg viewBox="0 0 100 60" preserveAspectRatio="none" style="width:100%;height:120px;display:block;">
+            <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5B2D8E" stop-opacity=".15"/><stop offset="100%" stop-color="#5B2D8E" stop-opacity="0"/></linearGradient></defs>
+            <polygon points="${pts} ${lastPt.split(',')[0]},${H} 0,${H}" fill="url(#pg)"/>
+            <polyline points="${pts}" fill="none" stroke="#5B2D8E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="display:flex;justify-content:space-between;padding:0 0 4px;font-size:10px;color:#9CA3AF;">
+            <span>${dates[0]||''}</span>
+            <span>${reversed[Math.floor(reversed.length/2)]?.toFixed(1)||''} kg</span>
+            <span>${dates[dates.length-1]||''}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Measurements table
+  const measFields = [
+    ['Cintura', latest.waist, 'cm'],
+    ['Cadera', latest.hips, 'cm'],
+    ['Pecho', latest.chest, 'cm'],
+    ['Brazo', latest.arm, 'cm'],
+    ['Muslo', latest.thigh, 'cm'],
+    ['Cuello', latest.neck, 'cm'],
+    ['% Grasa corporal', latest.body_fat, '%'],
+  ].filter(([, v]) => v != null);
+
+  if (measFields.length) {
+    html += `
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head"><span class="card-title">Medidas corporales (último check-in)</span></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:0 0 4px;">
+          ${measFields.map(([label, val, unit]) => `
+            <div style="background:#F9FAFB;border-radius:8px;padding:12px;text-align:center;">
+              <div style="font-size:18px;font-weight:800;color:#5B2D8E;">${val}${unit}</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:3px;">${label}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  // Check-ins history list
+  if (ckData.length) {
+    html += `
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Historial de check-ins</span>
+          <a href="checkins.html?client=${clientId}" style="font-size:12px;color:var(--purple);text-decoration:none;">Ver todos →</a>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead><tr style="color:#9CA3AF;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #F3F4F6;">
+              <th style="text-align:left;padding:8px;">Fecha</th>
+              <th style="text-align:center;padding:8px;">Peso</th>
+              <th style="text-align:center;padding:8px;">Cambio</th>
+              <th style="text-align:center;padding:8px;">Grasa</th>
+              <th style="text-align:left;padding:8px;">Notas</th>
+            </tr></thead>
+            <tbody>${ckData.slice(0,10).map(ck => {
+              const d = new Date(ck.checkin_date||ck.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+              const delta = ck.weight_progress;
+              return `<tr style="border-bottom:1px solid #F9FAFB;">
+                <td style="padding:9px 8px;">${d}</td>
+                <td style="padding:9px 8px;text-align:center;font-weight:700;">${ck.weight ? ck.weight + ' kg' : '—'}</td>
+                <td style="padding:9px 8px;text-align:center;">
+                  ${delta != null ? `<span style="font-weight:600;color:${delta < 0 ? '#16A34A' : delta > 0 ? '#D97706' : '#6B7280'};">${delta > 0 ? '+' : ''}${Number(delta).toFixed(1)} kg</span>` : '—'}
+                </td>
+                <td style="padding:9px 8px;text-align:center;">${ck.body_fat != null ? ck.body_fat + '%' : '—'}</td>
+                <td style="padding:9px 8px;color:#6B7280;font-size:12px;">${esc(ck.notes||'')}</td>
+              </tr>`;
+            }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  } else {
+    html += `<div class="card"><div style="text-align:center;padding:40px;color:#9CA3AF;">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block;opacity:.3;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <p>Sin check-ins registrados todavía.</p>
+    </div></div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 /* ── Assign form ── */
@@ -1260,6 +1421,7 @@ function openBizModal() {
   document.getElementById('biz_importe_pendiente').value    = c.importe_pendiente ?? '';
   document.getElementById('biz_fecha_compra').value         = c.fecha_compra?.slice(0,10) || '';
   document.getElementById('biz_fecha_limite_entrega').value = c.fecha_limite_entrega?.slice(0,10) || '';
+  document.getElementById('biz_fecha_renovacion').value     = c.fecha_renovacion?.slice(0,10) || '';
   document.getElementById('biz_responsable_venta').value    = c.responsable_venta || '';
   document.getElementById('biz_crm_origen').value           = c.crm_origen || '';
   document.getElementById('biz_whatsapp_link').value        = c.whatsapp_link || '';
@@ -1285,6 +1447,7 @@ async function saveBiz() {
     importe_pendiente:       pf(document.getElementById('biz_importe_pendiente').value),
     fecha_compra:            document.getElementById('biz_fecha_compra').value || null,
     fecha_limite_entrega:    document.getElementById('biz_fecha_limite_entrega').value || null,
+    fecha_renovacion:        document.getElementById('biz_fecha_renovacion').value || null,
     responsable_venta:       document.getElementById('biz_responsable_venta').value.trim() || null,
     crm_origen:              document.getElementById('biz_crm_origen').value.trim() || null,
     whatsapp_link:           document.getElementById('biz_whatsapp_link').value.trim() || null,

@@ -222,7 +222,65 @@
       .grid-2,.grid-3,.info-grid{grid-template-columns:1fr;}
       .form-row{grid-template-columns:1fr;}
       .tab-btn{padding:12px 14px;font-size:12px;}
+      .cal-grid{grid-template-columns:repeat(4,1fr);}
+      .macro-bar-row{flex-direction:column;gap:4px;}
     }
+
+    /* ── Calendario ── */
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;}
+    .cal-day{background:#fff;border:1px solid #F3F4F6;border-radius:10px;padding:12px 10px;text-align:center;cursor:pointer;transition:.15s;}
+    .cal-day:hover{border-color:#D8B4FE;}
+    .cal-day.has-workout{border-color:#D8B4FE;background:#F3EEFF;}
+    .cal-day.rest-day{opacity:.55;}
+    .cal-day-name{font-size:11px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+    .cal-day-num{font-size:20px;font-weight:800;color:#111;margin-bottom:6px;}
+    .cal-day-label{font-size:11px;color:#5B2D8E;font-weight:600;line-height:1.3;}
+    .cal-day-blocks{font-size:10px;color:#9CA3AF;margin-top:3px;}
+    .cal-detail{background:#fff;border:1px solid #F3F4F6;border-radius:10px;padding:20px;margin-top:4px;}
+    .cal-detail h4{font-size:14px;font-weight:700;color:#111;margin-bottom:12px;}
+    .block-badge-sm{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;margin-bottom:8px;}
+    .block-badge-sm.warmup{background:#FEF3C7;color:#D97706;}
+    .block-badge-sm.normal{background:#EFF6FF;color:#2563EB;}
+    .block-badge-sm.superset{background:#FDF4FF;color:#7C3AED;}
+    .block-badge-sm.circuit{background:#ECFDF5;color:#059669;}
+    .ex-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F9FAFB;font-size:13px;}
+    .ex-row:last-child{border-bottom:none;}
+    .ex-name-col{flex:1;font-weight:500;color:#111;}
+    .ex-meta{color:#9CA3AF;font-size:12px;white-space:nowrap;}
+
+    /* ── Entrenamiento / sesiones ── */
+    .session-card{background:#fff;border:1px solid #F3F4F6;border-radius:10px;padding:16px;display:flex;align-items:center;gap:16px;margin-bottom:8px;}
+    .session-date-box{background:#F3EEFF;border-radius:8px;padding:8px 12px;text-align:center;min-width:52px;}
+    .session-date-box .s-day{font-size:22px;font-weight:800;color:#5B2D8E;line-height:1;}
+    .session-date-box .s-mon{font-size:10px;color:#9CA3AF;font-weight:600;text-transform:uppercase;}
+    .session-info{flex:1;}
+    .session-routine{font-size:14px;font-weight:600;color:#111;}
+    .session-chips{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
+    .s-chip{background:#F3F4F6;border-radius:12px;padding:2px 8px;font-size:11px;color:#6B7280;}
+
+    /* ── Nutrición ── */
+    .diet-card{background:#fff;border:1px solid #F3F4F6;border-radius:12px;padding:20px;margin-bottom:16px;}
+    .diet-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .diet-title{font-size:16px;font-weight:700;color:#111;}
+    .diet-kcal{background:#F3EEFF;color:#5B2D8E;font-weight:700;padding:4px 12px;border-radius:20px;font-size:13px;}
+    .macro-bars{display:flex;gap:12px;margin-bottom:14px;}
+    .macro-bar-item{flex:1;text-align:center;}
+    .macro-bar-label{font-size:11px;color:#9CA3AF;margin-bottom:4px;}
+    .macro-bar-val{font-size:18px;font-weight:700;}
+    .macro-bar-val.prot{color:#2563EB;}
+    .macro-bar-val.carb{color:#D97706;}
+    .macro-bar-val.fat{color:#7C3AED;}
+    .foods-list{display:flex;flex-wrap:wrap;gap:6px;}
+    .food-chip{background:#F9FAFB;border:1px solid #F3F4F6;border-radius:20px;padding:4px 12px;font-size:12px;color:#374151;}
+
+    /* ── Notas ── */
+    .note-item{padding:14px 0;border-bottom:1px solid #F3F4F6;}
+    .note-item:last-child{border-bottom:none;}
+    .note-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    .note-title{font-size:14px;font-weight:700;color:#111;flex:1;}
+    .note-date{font-size:11px;color:#9CA3AF;}
+    .note-body{font-size:13px;color:#374151;line-height:1.6;white-space:pre-wrap;}
+    .note-actions{display:flex;gap:6px;margin-top:8px;}
   </style>
 </head>
 <body>
@@ -392,6 +450,22 @@
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         Metas
       </button>
+      <button class="tab-btn" id="tab-calendario-btn" onclick="showTab('calendario')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendario
+      </button>
+      <button class="tab-btn" id="tab-entrenamiento-btn" onclick="showTab('entrenamiento')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>
+        Entrenamiento
+      </button>
+      <button class="tab-btn" id="tab-nutricion-btn" onclick="showTab('nutricion')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9S3 15.97 3 11a9 9 0 0 1 9-9z"/><path d="M12 8v4l2 2"/></svg>
+        Nutrición
+      </button>
+      <button class="tab-btn" id="tab-notas-btn" onclick="showTab('notas');loadNotes()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Notas
+      </button>
     </div>
 
     <!-- Tab panes -->
@@ -449,6 +523,32 @@
       <!-- ── METAS ── -->
       <div class="tab-pane" id="tab-metas">
         <div id="metasContent"></div>
+      </div>
+
+      <!-- ── CALENDARIO ── -->
+      <div class="tab-pane" id="tab-calendario">
+        <div id="calendarioContent"></div>
+      </div>
+
+      <!-- ── ENTRENAMIENTO ── -->
+      <div class="tab-pane" id="tab-entrenamiento">
+        <div id="entrenamientoContent"></div>
+      </div>
+
+      <!-- ── NUTRICIÓN ── -->
+      <div class="tab-pane" id="tab-nutricion">
+        <div id="nutricionContent"></div>
+      </div>
+
+      <!-- ── NOTAS ── -->
+      <div class="tab-pane" id="tab-notas">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Notas del coach</span>
+            <button class="btn btn-primary btn-sm" onclick="openNoteModal()">+ Nueva nota</button>
+          </div>
+          <div id="notasBody" style="padding:0 16px 16px;"></div>
+        </div>
       </div>
 
     </div><!-- /content -->
@@ -588,6 +688,9 @@ const clientId = params.get('id');
 if (!clientId) location.href = 'clients.html';
 
 let clientData = null;
+let clientDiets = [];
+let clientRoutines = [];
+let clientNotes = [];
 let formAssignment = null;
 let deliveries = [];
 let checkins = [];
@@ -657,12 +760,13 @@ async function loadClient() {
     const [dietR, routineR] = clientPlansRes;
     if (dietR.ok) {
       const arr = ((await dietR.json()).data || []);
-      const flat = Array.isArray(arr) ? arr.flatMap(g => g.diets || g) : arr;
-      if (flat.length) { _clientDietId = flat[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
+      clientDiets = Array.isArray(arr) ? arr.flatMap(g => g.diets || [g]).filter(d => d && d.id) : [];
+      if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
     }
     if (routineR.ok) {
       const arr = ((await routineR.json()).data || []);
-      if (Array.isArray(arr) && arr.length) { _clientRoutineId = arr[0].id; document.getElementById('pdfRoutineBtn').style.display = 'inline-flex'; }
+      clientRoutines = Array.isArray(arr) ? arr : [];
+      if (clientRoutines.length) { _clientRoutineId = clientRoutines[0].id; document.getElementById('pdfRoutineBtn').style.display = 'inline-flex'; }
     }
 
     renderAll();
@@ -778,6 +882,11 @@ function renderAll() {
 
   // Metas tab
   loadTarget();
+
+  // New tabs
+  renderCalendarioTab();
+  renderEntrenamientoTab();
+  renderNutricionTab();
 
   // Update tab badges
   if (formAssignment?.status === 'pending') {
@@ -1492,5 +1601,447 @@ async function saveTarget() {
     </div>
   </div>
 </div>
+<!-- ── Session modal ── -->
+<div class="modal-overlay" id="sessionOverlay" onclick="if(event.target===this)closeSessionModal()">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-head">
+      <h2 id="sessionModalTitle">Registrar sesión</h2>
+      <button class="modal-close" onclick="closeSessionModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha *</label>
+          <input type="date" id="s_date"/>
+        </div>
+        <div class="form-group">
+          <label>Rutina realizada</label>
+          <select id="s_routine"><option value="">— Sin rutina —</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Duración (min)</label>
+          <input type="number" id="s_duration" min="1" placeholder="60"/>
+        </div>
+        <div class="form-group">
+          <label>RPE (1–10)</label>
+          <input type="number" id="s_rpe" min="1" max="10" step="0.5" placeholder="7"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea id="s_notes" rows="3" style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;resize:vertical;font-family:inherit;"></textarea>
+      </div>
+      <div id="s_err" style="color:#DC2626;font-size:12px;margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSessionModal()">Cancelar</button>
+      <button class="btn btn-primary" id="s_saveBtn" onclick="saveSession()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Note modal ── -->
+<div class="modal-overlay" id="noteOverlay" onclick="if(event.target===this)closeNoteModal()">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-head">
+      <h2 id="noteModalTitle">Nueva nota</h2>
+      <button class="modal-close" onclick="closeNoteModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título *</label>
+        <input type="text" id="n_title" placeholder="Ej: Observaciones semana 3"/>
+      </div>
+      <div class="form-group" style="margin-top:14px;">
+        <label>Contenido</label>
+        <textarea id="n_content" rows="5" style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;resize:vertical;font-family:inherit;" placeholder="Escribe tus notas aquí…"></textarea>
+      </div>
+      <div id="n_err" style="color:#DC2626;font-size:12px;margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeNoteModal()">Cancelar</button>
+      <button class="btn btn-primary" id="n_saveBtn" onclick="saveNote()">Guardar nota</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   CALENDARIO TAB
+══════════════════════════════════════════════ */
+const DAY_NAMES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+let calSelectedDay = null;
+
+function renderCalendarioTab() {
+  const el = document.getElementById('calendarioContent');
+  if (!el) return;
+
+  if (!clientRoutines.length) {
+    el.innerHTML = `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
+      <div style="font-size:40px;margin-bottom:12px;">📅</div>
+      <p>Sin rutina asignada. Asigna una rutina al cliente para ver su calendario.</p>
+    </div>`;
+    return;
+  }
+
+  const routine = clientRoutines[0];
+  const days = routine.days_list || [];
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+
+  let gridHtml = DAY_NAMES.map((name, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dayNum = d.getDate();
+    const routineDay = days[i]; // map Mon→Day1, Tue→Day2, etc.
+    const isToday = d.toDateString() === today.toDateString();
+    const hasWorkout = !!routineDay;
+    const totalExercises = routineDay ? (routineDay.blocks || []).reduce((sum, b) => sum + (b.exercises || []).length, 0) : 0;
+    return `<div class="cal-day ${hasWorkout ? 'has-workout' : 'rest-day'}" onclick="calSelectDay(${i})"
+      style="${isToday ? 'box-shadow:0 0 0 2px #5B2D8E;' : ''}">
+      <div class="cal-day-name">${name}</div>
+      <div class="cal-day-num" style="${isToday ? 'color:#5B2D8E;' : ''}">${dayNum}</div>
+      ${hasWorkout
+        ? `<div class="cal-day-label">${esc(routineDay.day_name || `Día ${i+1}`)}</div>
+           <div class="cal-day-blocks">${totalExercises} ejercicio${totalExercises !== 1 ? 's' : ''}</div>`
+        : `<div class="cal-day-label" style="color:#9CA3AF;">Descanso</div>`}
+    </div>`;
+  }).join('');
+
+  let detailHtml = `<div id="calDayDetail" style="display:none;" class="cal-detail"></div>`;
+
+  el.innerHTML = `
+    <div class="card" style="padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="font-size:15px;font-weight:700;color:#111;">Semana actual — ${esc(routine.name)}</h3>
+        <span style="font-size:12px;color:#9CA3AF;">${days.length} día${days.length !== 1 ? 's' : ''} programados</span>
+      </div>
+      <div class="cal-grid">${gridHtml}</div>
+      ${detailHtml}
+    </div>`;
+}
+
+function calSelectDay(idx) {
+  const routine = clientRoutines[0];
+  const days = routine?.days_list || [];
+  const routineDay = days[idx];
+  const box = document.getElementById('calDayDetail');
+  if (!box) return;
+  if (calSelectedDay === idx) { box.style.display = 'none'; calSelectedDay = null; return; }
+  calSelectedDay = idx;
+  if (!routineDay) { box.style.display = 'none'; return; }
+
+  const BLOCK_LABELS = { warmup:'🔥 Calentamiento', normal:'📋 Normal', superset:'🔄 Superserie', circuit:'⭕ Circuito' };
+  const blocks = routineDay.blocks || [];
+  let html = `<h4>${esc(routineDay.day_name || `Día ${idx+1}`)}</h4>`;
+  if (!blocks.length) { html += '<p style="color:#9CA3AF;font-size:13px;">Sin ejercicios cargados.</p>'; }
+  blocks.forEach(blk => {
+    html += `<div style="margin-bottom:12px;">
+      <span class="block-badge-sm ${blk.block_type || 'normal'}">${BLOCK_LABELS[blk.block_type] || blk.block_type}</span>`;
+    (blk.exercises || []).forEach(ex => {
+      const parts = [];
+      if (ex.series) parts.push(`${ex.series} series`);
+      if (ex.repetitions) parts.push(`× ${ex.repetitions} reps`);
+      if (ex.break_time) parts.push(`${ex.break_time}s descanso`);
+      if (ex.intensity_type && ex.intensity_value != null) parts.push(`${ex.intensity_type.toUpperCase()} ${ex.intensity_value}`);
+      html += `<div class="ex-row">
+        <div class="ex-name-col">${esc(ex.training_name || 'Ejercicio')}
+          ${ex.muscle_group_name ? `<span style="font-size:11px;color:#9CA3AF;"> · ${esc(ex.muscle_group_name)}</span>` : ''}</div>
+        <div class="ex-meta">${parts.join(' · ')}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  box.innerHTML = html;
+  box.style.display = 'block';
+}
+
+/* ══════════════════════════════════════════════
+   ENTRENAMIENTO TAB
+══════════════════════════════════════════════ */
+let editingSessionId = null;
+
+function renderEntrenamientoTab() {
+  const el = document.getElementById('entrenamientoContent');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head">
+        <span class="card-title">Rutina asignada</span>
+      </div>
+      <div id="routineSummary" style="padding:0 16px 16px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Historial de sesiones</span>
+        <button class="btn btn-primary btn-sm" onclick="openSessionModal()">+ Registrar sesión</button>
+      </div>
+      <div id="sessionsList" style="padding:0 16px 16px;"></div>
+    </div>`;
+
+  // Routine summary
+  const rsum = document.getElementById('routineSummary');
+  if (!clientRoutines.length) {
+    rsum.innerHTML = '<p style="color:#9CA3AF;font-size:13px;padding-top:8px;">Sin rutina asignada.</p>';
+  } else {
+    const r = clientRoutines[0];
+    const days = r.days_list || [];
+    const totalEx = days.reduce((s, d) => s + (d.blocks || []).reduce((bs, b) => bs + (b.exercises || []).length, 0), 0);
+    rsum.innerHTML = `<div style="padding-top:8px;">
+      <p style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">${esc(r.name)}</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        ${r.days ? `<span style="font-size:13px;color:#6B7280;">📅 ${r.days} días/semana</span>` : ''}
+        ${r.time ? `<span style="font-size:13px;color:#6B7280;">⏱ ${r.time} min/sesión</span>` : ''}
+        <span style="font-size:13px;color:#6B7280;">🏋️ ${totalEx} ejercicios · ${days.length} días</span>
+      </div>
+    </div>`;
+  }
+
+  loadSessions();
+}
+
+async function loadSessions() {
+  const el = document.getElementById('sessionsList');
+  if (!el) return;
+  el.innerHTML = '<p style="color:#9CA3AF;font-size:13px;padding-top:8px;">Cargando…</p>';
+  try {
+    const r = await fetch(`${API}/session-logs/client/${clientId}`, { headers: h() });
+    const j = await r.json();
+    const sessions = Array.isArray(j.data) ? j.data : [];
+    if (!sessions.length) {
+      el.innerHTML = '<p style="color:#9CA3AF;font-size:13px;padding-top:8px;">Sin sesiones registradas aún.</p>';
+      return;
+    }
+    const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    el.innerHTML = sessions.map(s => {
+      const d = new Date(s.session_date + 'T00:00:00');
+      const chips = [];
+      if (s.duration_min) chips.push(`⏱ ${s.duration_min} min`);
+      if (s.rpe) chips.push(`RPE ${s.rpe}`);
+      if (s.routine_name) chips.push(`📋 ${esc(s.routine_name)}`);
+      return `<div class="session-card">
+        <div class="session-date-box">
+          <div class="s-day">${d.getDate()}</div>
+          <div class="s-mon">${MONTHS[d.getMonth()]}</div>
+        </div>
+        <div class="session-info">
+          <div class="session-routine">${s.routine_name ? esc(s.routine_name) : 'Sesión libre'}</div>
+          <div class="session-chips">${chips.map(c => `<span class="s-chip">${c}</span>`).join('')}</div>
+          ${s.notes ? `<div style="font-size:12px;color:#6B7280;margin-top:4px;">${esc(s.notes)}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="btn-icon" onclick="openSessionModal(${s.id})" title="Editar">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon danger" onclick="deleteSession(${s.id})" title="Eliminar">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch { el.innerHTML = '<p style="color:#DC2626;font-size:13px;">Error al cargar sesiones.</p>'; }
+}
+
+function openSessionModal(id = null) {
+  editingSessionId = id;
+  document.getElementById('sessionModalTitle').textContent = id ? 'Editar sesión' : 'Registrar sesión';
+  document.getElementById('s_err').textContent = '';
+
+  // Populate routine select
+  const sel = document.getElementById('s_routine');
+  sel.innerHTML = '<option value="">— Sin rutina —</option>' +
+    clientRoutines.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
+
+  if (id) {
+    // Load existing session data from DOM (from the sessions list)
+    // We'll just clear and let user re-fill; full reload would need another API call
+    document.getElementById('s_date').value = '';
+    document.getElementById('s_duration').value = '';
+    document.getElementById('s_rpe').value = '';
+    document.getElementById('s_notes').value = '';
+  } else {
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('s_date').value = today;
+    document.getElementById('s_duration').value = '';
+    document.getElementById('s_rpe').value = '';
+    document.getElementById('s_notes').value = '';
+  }
+  document.getElementById('sessionOverlay').classList.add('open');
+}
+
+function closeSessionModal() { document.getElementById('sessionOverlay').classList.remove('open'); }
+
+async function saveSession() {
+  const btn = document.getElementById('s_saveBtn');
+  const dateVal = document.getElementById('s_date').value;
+  if (!dateVal) { document.getElementById('s_err').textContent = 'La fecha es obligatoria.'; return; }
+  btn.disabled = true;
+  const body = {
+    client_user_detail_id: clientId,
+    session_date: dateVal,
+    routine_id: parseInt(document.getElementById('s_routine').value) || null,
+    duration_min: parseInt(document.getElementById('s_duration').value) || null,
+    rpe: parseFloat(document.getElementById('s_rpe').value) || null,
+    notes: document.getElementById('s_notes').value.trim() || null,
+  };
+  try {
+    const url = editingSessionId ? `${API}/session-logs/${editingSessionId}` : `${API}/session-logs`;
+    const method = editingSessionId ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', ...h() }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (r.ok) { closeSessionModal(); loadSessions(); showToast('Sesión guardada', 'success'); }
+    else document.getElementById('s_err').textContent = j.message || 'Error al guardar';
+  } catch (e) { document.getElementById('s_err').textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; }
+}
+
+async function deleteSession(id) {
+  if (!confirm('¿Eliminar esta sesión?')) return;
+  try {
+    const r = await fetch(`${API}/session-logs/${id}`, { method: 'DELETE', headers: h() });
+    if (r.ok) { loadSessions(); showToast('Sesión eliminada', 'success'); }
+  } catch { showToast('Error al eliminar', 'error'); }
+}
+
+/* ══════════════════════════════════════════════
+   NUTRICIÓN TAB
+══════════════════════════════════════════════ */
+function renderNutricionTab() {
+  const el = document.getElementById('nutricionContent');
+  if (!el) return;
+
+  if (!clientDiets.length) {
+    el.innerHTML = `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
+      <div style="font-size:40px;margin-bottom:12px;">🥗</div>
+      <p>Sin dieta asignada. Crea y asigna una dieta al cliente desde la sección de Dietas.</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = clientDiets.map(diet => {
+    const detail = diet.detail || diet.diet_detail || {};
+    const proteins = detail.proteins || 0;
+    const carbs = detail.carbs || 0;
+    const fats = detail.fats || 0;
+    const foods = diet.foods || diet.diet_foods || [];
+    return `<div class="diet-card">
+      <div class="diet-card-head">
+        <div class="diet-title">${esc(diet.title || diet.name || 'Dieta')}</div>
+        ${diet.calories ? `<span class="diet-kcal">${Math.round(diet.calories)} kcal/día</span>` : ''}
+      </div>
+      ${(proteins || carbs || fats) ? `
+      <div class="macro-bars">
+        <div class="macro-bar-item"><div class="macro-bar-label">Proteínas</div><div class="macro-bar-val prot">${Math.round(proteins)}g</div></div>
+        <div class="macro-bar-item"><div class="macro-bar-label">Carbohidratos</div><div class="macro-bar-val carb">${Math.round(carbs)}g</div></div>
+        <div class="macro-bar-item"><div class="macro-bar-label">Grasas</div><div class="macro-bar-val fat">${Math.round(fats)}g</div></div>
+      </div>` : ''}
+      ${foods.length ? `
+      <div style="font-size:11px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Alimentos</div>
+      <div class="foods-list">${foods.map(f => `<span class="food-chip">${esc(f.name || '')}</span>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════
+   NOTAS TAB
+══════════════════════════════════════════════ */
+let editingNoteId = null;
+let notesLoaded = false;
+
+async function loadNotes() {
+  if (notesLoaded) return;
+  notesLoaded = false; // allow reload
+  const el = document.getElementById('notasBody');
+  if (!el) return;
+  const uid = clientData?.user_id;
+  if (!uid) { el.innerHTML = '<p style="color:#9CA3AF;font-size:13px;padding-top:8px;">No se pudo obtener el ID del usuario.</p>'; return; }
+  el.innerHTML = '<p style="color:#9CA3AF;font-size:13px;padding-top:8px;">Cargando notas…</p>';
+  try {
+    const r = await fetch(`${API}/note-users/search?user_id=${uid}`, { headers: h() });
+    const j = await r.json();
+    clientNotes = Array.isArray(j.data) ? j.data.filter(n => n.state === 1) : [];
+    renderNotesList();
+    notesLoaded = true;
+  } catch { el.innerHTML = '<p style="color:#DC2626;font-size:13px;">Error al cargar notas.</p>'; }
+}
+
+function renderNotesList() {
+  const el = document.getElementById('notasBody');
+  if (!el) return;
+  if (!clientNotes.length) {
+    el.innerHTML = '<p style="color:#9CA3AF;font-size:13px;padding-top:8px;">Sin notas. Crea la primera nota para este cliente.</p>';
+    return;
+  }
+  el.innerHTML = clientNotes.map(n => {
+    const d = new Date(n.created_at);
+    const dateStr = d.toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
+    return `<div class="note-item">
+      <div class="note-head">
+        <span class="note-title">${esc(n.title)}</span>
+        <span class="note-date">${dateStr}</span>
+        <div class="note-actions">
+          <button class="btn-icon" onclick="openNoteModal(${n.id})" title="Editar">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon danger" onclick="deleteNote(${n.id})" title="Eliminar">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+      ${n.content ? `<div class="note-body">${esc(n.content)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openNoteModal(id = null) {
+  editingNoteId = id;
+  document.getElementById('noteModalTitle').textContent = id ? 'Editar nota' : 'Nueva nota';
+  document.getElementById('n_err').textContent = '';
+  if (id) {
+    const note = clientNotes.find(n => n.id === id);
+    document.getElementById('n_title').value = note?.title || '';
+    document.getElementById('n_content').value = note?.content || '';
+  } else {
+    document.getElementById('n_title').value = '';
+    document.getElementById('n_content').value = '';
+  }
+  document.getElementById('noteOverlay').classList.add('open');
+}
+
+function closeNoteModal() { document.getElementById('noteOverlay').classList.remove('open'); }
+
+async function saveNote() {
+  const btn = document.getElementById('n_saveBtn');
+  const title = document.getElementById('n_title').value.trim();
+  if (!title) { document.getElementById('n_err').textContent = 'El título es obligatorio.'; return; }
+  btn.disabled = true;
+  const uid = clientData?.user_id;
+  const body = { user_id: uid, title, content: document.getElementById('n_content').value.trim() || null };
+  try {
+    const url = editingNoteId ? `${API}/note-users/update/${editingNoteId}` : `${API}/note-users`;
+    const method = editingNoteId ? 'POST' : 'POST';
+    const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', ...h() }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (r.ok) {
+      closeNoteModal();
+      notesLoaded = false;
+      await loadNotes();
+      showToast(editingNoteId ? 'Nota actualizada' : 'Nota guardada', 'success');
+    } else document.getElementById('n_err').textContent = j.message || 'Error al guardar';
+  } catch { document.getElementById('n_err').textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; }
+}
+
+async function deleteNote(id) {
+  if (!confirm('¿Eliminar esta nota?')) return;
+  try {
+    const r = await fetch(`${API}/note-users/delete/${id}`, { method: 'DELETE', headers: h() });
+    if (r.ok) { notesLoaded = false; await loadNotes(); showToast('Nota eliminada', 'success'); }
+  } catch { showToast('Error al eliminar', 'error'); }
+}
+</script>
 </body>
 </html>

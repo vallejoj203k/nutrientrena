@@ -19,3 +19,4 @@ from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAlimen
 from app.models.nutrition.recipe import Recipe, RecipeDetail
 from app.models.form import FormTemplate, FormTemplateField, FormAssignment, FormResponse
 from app.models.checkin import WeeklyCheckin
+from app.models.session_log import WorkoutSession

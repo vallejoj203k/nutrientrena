@@ -128,6 +128,16 @@
     .ingr-add-btn:hover{background:#E9DCFF;}
     .ingr-empty{padding:20px;text-align:center;color:#9CA3AF;font-size:13px;border:1px dashed #E5E7EB;border-radius:8px;}
 
+    /* ── Recipe image upload ── */
+    .img-upload-zone{border:2px dashed #E5E7EB;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:.15s;background:#FAFAFA;color:#9CA3AF;font-size:13px;}
+    .img-upload-zone:hover{border-color:var(--purple);background:#F5F3FF;color:var(--purple);}
+    .img-upload-zone svg{display:block;margin:0 auto 8px;}
+    .img-preview-wrap{position:relative;border-radius:10px;overflow:hidden;}
+    .img-preview-wrap img{width:100%;height:180px;object-fit:cover;display:block;}
+    .img-preview-remove{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:28px;height:28px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;}
+    .img-preview-remove:hover{background:rgba(220,38,38,.8);}
+    .card-img{width:100%;height:140px;object-fit:cover;display:block;}
+
     /* ── Empty state ── */
     .empty-state{text-align:center;padding:80px 20px;color:#9CA3AF;}
     .empty-state svg{margin:0 auto 16px;display:block;opacity:.3;}
@@ -271,6 +281,18 @@
         <input type="text" id="fName" placeholder="Pollo con verduras al horno…"/>
       </div>
       <div class="form-group">
+        <label>Foto de la receta</label>
+        <input type="file" id="fImageFile" accept="image/*" style="display:none" onchange="uploadRecipeImage(this)"/>
+        <div id="fImageZone" class="img-upload-zone" onclick="document.getElementById('fImageFile').click()">
+          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Pulsa para subir una foto (JPG, PNG, WEBP · máx 5 MB)
+        </div>
+        <div id="fImagePreview" class="img-preview-wrap" style="display:none">
+          <img id="fImagePreviewImg" src="" alt=""/>
+          <button class="img-preview-remove" onclick="removeRecipeImage()" title="Quitar foto">×</button>
+        </div>
+      </div>
+      <div class="form-group">
         <label>Descripción</label>
         <textarea id="fDesc" placeholder="Breve descripción de la receta…"></textarea>
       </div>
@@ -357,6 +379,7 @@ let _delId = null;
 let _ingrRows = [];
 let _acTimers = {};
 let _formsBadgeLoaded = false;
+let _imageUrl = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 async function init() {
@@ -431,6 +454,7 @@ function renderCards(items) {
     if (r.servings) meta.push(`<span><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${r.servings} raciones</span>`);
     if (r.prep_time) meta.push(`<span><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${r.prep_time} min</span>`);
     return `<div class="recipe-card">
+      ${r.image ? `<img class="card-img" src="${r.image}" alt="${esc(r.name)}" loading="lazy"/>` : ''}
       <div class="card-header">
         <div>
           <div class="card-name">${esc(r.name)}</div>
@@ -503,6 +527,8 @@ function openModal(recipe = null) {
   document.getElementById('fFats').value     = recipe?.fats ?? '';
   document.getElementById('fCalories').value = recipe?.calories ?? '';
   document.getElementById('modalError').textContent = '';
+  document.getElementById('fImageFile').value = '';
+  setImagePreview(recipe?.image || null);
   const list = document.getElementById('ingrList');
   list.innerHTML = '';
   if (recipe?.details?.length) {
@@ -511,6 +537,50 @@ function openModal(recipe = null) {
   syncIngrEmpty();
   document.getElementById('modalOverlay').classList.add('open');
   setTimeout(() => document.getElementById('fName').focus(), 100);
+}
+
+function setImagePreview(url) {
+  _imageUrl = url || null;
+  const zone    = document.getElementById('fImageZone');
+  const preview = document.getElementById('fImagePreview');
+  const img     = document.getElementById('fImagePreviewImg');
+  if (url) {
+    img.src = url;
+    zone.style.display    = 'none';
+    preview.style.display = '';
+  } else {
+    zone.style.display    = '';
+    preview.style.display = 'none';
+    img.src = '';
+  }
+}
+
+function removeRecipeImage() {
+  setImagePreview(null);
+  document.getElementById('fImageFile').value = '';
+}
+
+async function uploadRecipeImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const zone = document.getElementById('fImageZone');
+  zone.textContent = 'Subiendo…';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('folder', 'recipes');
+  try {
+    const r = await fetch(`${API}/files/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token()}` },
+      body: fd,
+    });
+    const d = await r.json();
+    if (!r.ok || !d.data?.url) throw new Error(d.message || 'Error al subir');
+    setImagePreview(d.data.url);
+  } catch (e) {
+    zone.innerHTML = `<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Pulsa para subir una foto (JPG, PNG, WEBP · máx 5 MB)`;
+    toast(e.message || 'Error al subir la imagen', true);
+  }
 }
 
 async function openEdit(id) {
@@ -694,6 +764,7 @@ async function save() {
     carbs:        parseFloat(document.getElementById('fCarbs').value) || null,
     fats:         parseFloat(document.getElementById('fFats').value) || null,
     calories:     parseFloat(document.getElementById('fCalories').value) || null,
+    image:        _imageUrl || null,
     details,
   };
 

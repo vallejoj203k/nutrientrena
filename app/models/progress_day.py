@@ -20,6 +20,8 @@ class ProgressDay(Base):
     thigh = Column(Float, nullable=True)
     notes = Column(Text, nullable=True)
     photo = Column(String(500), nullable=True)
+    photo2 = Column(String(500), nullable=True)
+    photo3 = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

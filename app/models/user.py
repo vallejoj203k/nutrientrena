@@ -71,6 +71,7 @@ class UserDetail(Base):
     crm_origen = Column(String(255), nullable=True)
     whatsapp_link = Column(String(500), nullable=True)
     consentimiento_evolucion = Column(Boolean, nullable=True, default=False)
+    fecha_renovacion = Column(Date, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

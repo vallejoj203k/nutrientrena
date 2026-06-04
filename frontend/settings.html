@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Ajustes</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* Main */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar-left h1{font-size:18px;font-weight:700;color:#111;}
+    .topbar-left p{font-size:12px;color:#9CA3AF;margin-top:2px;}
+
+    .content{flex:1;overflow-y:auto;padding:28px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* Settings card */
+    .settings-card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;max-width:720px;margin:0 auto;}
+    .section-head{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin:24px 0 14px;padding-bottom:10px;border-bottom:1px solid #F3F4F6;}
+    .section-head:first-child{margin-top:0;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .form-group input,.form-group select{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;background:#fff;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--purple);}
+    .form-group input[type=number]{-moz-appearance:textfield;}
+
+    /* Buttons */
+    .btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+
+    .footer-actions{margin-top:24px;padding-top:20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .save-note{font-size:12px;color:#9CA3AF;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(20px);opacity:0;transition:.25s;}
+    .toast.show{transform:none;opacity:1;}
+    .toast.ok{background:#111;color:#fff;}
+    .toast.err{background:#DC2626;color:#fff;}
+
+    @media(max-width:680px){.form-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de administración</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="kanban.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+      Kanban
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <a class="nav-item" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Formularios
+      <span class="nav-badge" id="formsBadge" style="display:none"></span>
+    </a>
+    <div class="nav-section">Nutrición</div>
+    <a class="nav-item" href="diets.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Dietas
+    </a>
+    <a class="nav-item" href="aliments.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Alimentos
+    </a>
+    <a class="nav-item" href="recipes.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+      Recetas
+    </a>
+    <a class="nav-item" href="nutrition-catalog.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Catálogos
+    </a>
+    <div class="nav-section">Entrenamiento</div>
+    <a class="nav-item" href="routines.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Rutinas
+    </a>
+    <div class="nav-section">Análisis</div>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analíticas
+    </a>
+    <div class="nav-section">Configuración</div>
+    <a class="nav-item active" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Ajustes</h1>
+      <p>Configura los datos de tu negocio y preferencias</p>
+    </div>
+  </div>
+  <div class="content">
+    <div class="settings-card">
+
+      <div class="section-head">Información del negocio</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre del negocio</label>
+          <input id="s_business_name" type="text" placeholder="NutriEntrena Studio"/>
+        </div>
+        <div class="form-group">
+          <label>Email de contacto</label>
+          <input id="s_business_email" type="email" placeholder="hola@tunegocio.com"/>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input id="s_business_phone" type="tel" placeholder="+34 600 000 000"/>
+        </div>
+        <div class="form-group">
+          <label>País</label>
+          <input id="s_country" type="text" placeholder="España"/>
+        </div>
+        <div class="form-group">
+          <label>Moneda</label>
+          <select id="s_currency">
+            <option value="EUR">€ Euro (EUR)</option>
+            <option value="USD">$ Dólar (USD)</option>
+            <option value="MXN">$ Peso mexicano (MXN)</option>
+            <option value="COP">$ Peso colombiano (COP)</option>
+            <option value="ARS">$ Peso argentino (ARS)</option>
+            <option value="CLP">$ Peso chileno (CLP)</option>
+            <option value="GBP">£ Libra (GBP)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Zona horaria</label>
+          <select id="s_timezone">
+            <option value="Europe/Madrid">Europa/Madrid</option>
+            <option value="America/Mexico_City">América/México</option>
+            <option value="America/Bogota">América/Bogotá</option>
+            <option value="America/Argentina/Buenos_Aires">América/Buenos Aires</option>
+            <option value="America/Santiago">América/Santiago</option>
+            <option value="America/Lima">América/Lima</option>
+            <option value="America/New_York">América/Nueva York</option>
+            <option value="America/Los_Angeles">América/Los Ángeles</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-head">Alertas y notificaciones</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Alerta renovación (días de antelación)</label>
+          <input id="s_renewal_alert_days" type="number" min="1" max="365" placeholder="30"/>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <span class="save-note" id="saveNote"></span>
+        <button class="btn btn-primary" id="saveBtn" onclick="saveSettings()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Guardar ajustes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+const tok = () => localStorage.getItem('token');
+const hdrs = () => ({ 'Authorization': `Bearer ${tok()}`, 'Content-Type': 'application/json' });
+
+async function init() {
+  if (!tok()) { location.href = 'login.html'; return; }
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: hdrs() });
+    if (r.status === 401) { location.href = 'login.html'; return; }
+    const d = await r.json();
+    const me = d.data || {};
+    document.getElementById('sidebarName').textContent = me.name || me.email || '';
+    document.getElementById('sidebarRole').textContent = me.roles?.[0]?.name || '';
+    document.getElementById('sidebarAvatar').textContent = (me.name || '?')[0].toUpperCase();
+    loadFormsBadge();
+  } catch { location.href = 'login.html'; }
+  loadSettings();
+}
+
+async function loadFormsBadge() {
+  try {
+    const r = await fetch(`${API}/form-assignments/pending-count`, { headers: hdrs() });
+    if (!r.ok) return;
+    const d = await r.json();
+    const count = d.data?.count || 0;
+    const badge = document.getElementById('formsBadge');
+    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+  } catch {}
+}
+
+async function loadSettings() {
+  try {
+    const r = await fetch(`${API}/settings`, { headers: hdrs() });
+    if (!r.ok) { toast('No se pudieron cargar los ajustes', true); return; }
+    const d = await r.json();
+    const s = d.data || {};
+    document.getElementById('s_business_name').value    = s.business_name || '';
+    document.getElementById('s_business_email').value   = s.business_email || '';
+    document.getElementById('s_business_phone').value   = s.business_phone || '';
+    document.getElementById('s_country').value          = s.country || '';
+    document.getElementById('s_currency').value         = s.currency || 'EUR';
+    document.getElementById('s_timezone').value         = s.timezone || 'Europe/Madrid';
+    document.getElementById('s_renewal_alert_days').value = s.renewal_alert_days ?? 30;
+    if (s.updated_at) {
+      document.getElementById('saveNote').textContent = `Última actualización: ${new Date(s.updated_at).toLocaleString('es-ES')}`;
+    }
+  } catch { toast('Error al cargar ajustes', true); }
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ Guardando…';
+  const pInt = id => { const v = document.getElementById(id).value; return v !== '' ? parseInt(v) : null; };
+  const body = {
+    business_name:      document.getElementById('s_business_name').value.trim() || null,
+    business_email:     document.getElementById('s_business_email').value.trim() || null,
+    business_phone:     document.getElementById('s_business_phone').value.trim() || null,
+    country:            document.getElementById('s_country').value.trim() || null,
+    currency:           document.getElementById('s_currency').value || 'EUR',
+    timezone:           document.getElementById('s_timezone').value || 'Europe/Madrid',
+    renewal_alert_days: pInt('s_renewal_alert_days'),
+  };
+  try {
+    const r = await fetch(`${API}/settings`, { method: 'PUT', headers: hdrs(), body: JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) { toast(d.message || 'Error al guardar', true); return; }
+    toast('Ajustes guardados correctamente');
+    document.getElementById('saveNote').textContent = `Última actualización: ${new Date().toLocaleString('es-ES')}`;
+  } catch { toast('Error de conexión', true); }
+  finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Guardar ajustes`;
+  }
+}
+
+function logout() {
+  fetch(`${API}/auth/logout`, { method: 'POST', headers: hdrs() }).finally(() => {
+    localStorage.clear(); location.href = 'login.html';
+  });
+}
+
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${err ? 'err' : 'ok'}`;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+init();
+</script>
+</body>
+</html>

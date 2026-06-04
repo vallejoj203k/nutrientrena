@@ -35,6 +35,7 @@ class UserCreateRequest(BaseModel):
     crm_origen: Optional[str] = None
     whatsapp_link: Optional[str] = None
     consentimiento_evolucion: Optional[bool] = None
+    fecha_renovacion: Optional[date] = None
 
 
 class UserUpdateRequest(BaseModel):
@@ -68,6 +69,7 @@ class UserUpdateRequest(BaseModel):
     crm_origen: Optional[str] = None
     whatsapp_link: Optional[str] = None
     consentimiento_evolucion: Optional[bool] = None
+    fecha_renovacion: Optional[date] = None
 
 
 class UserStateRequest(BaseModel):
@@ -136,6 +138,7 @@ class UserDetailOut(BaseModel):
     crm_origen: Optional[str] = None
     whatsapp_link: Optional[str] = None
     consentimiento_evolucion: Optional[bool] = None
+    fecha_renovacion: Optional[date] = None
 
     status: Optional[ParameterDetailOut] = None
     gender: Optional[ParameterDetailOut] = None

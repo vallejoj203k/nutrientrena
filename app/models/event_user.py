@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -15,6 +15,9 @@ class EventUser(Base):
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=True)
     all_day = Column(Integer, default=0)
+    recurrence = Column(String(20), nullable=True)        # none / daily / weekly / monthly
+    recurrence_end_date = Column(Date, nullable=True)     # last date to generate occurrences
+    recurrence_group_id = Column(Integer, nullable=True)  # links all instances of a recurring event
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

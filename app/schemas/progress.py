@@ -16,6 +16,8 @@ class ProgressCreate(BaseModel):
     thigh: Optional[float] = None
     notes: Optional[str] = None
     photo: Optional[str] = None
+    photo2: Optional[str] = None
+    photo3: Optional[str] = None
 
 
 class ProgressOut(BaseModel):
@@ -32,6 +34,8 @@ class ProgressOut(BaseModel):
     thigh: Optional[float] = None
     notes: Optional[str] = None
     photo: Optional[str] = None
+    photo2: Optional[str] = None
+    photo3: Optional[str] = None
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

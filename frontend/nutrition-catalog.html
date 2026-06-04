@@ -93,6 +93,14 @@
     .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
     .recipe-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;transition:.15s;}
     .recipe-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#D1D5DB;}
+    .card-img{width:100%;height:140px;object-fit:cover;display:block;}
+    .img-upload-zone{border:2px dashed #E5E7EB;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:.15s;background:#FAFAFA;color:#9CA3AF;font-size:13px;}
+    .img-upload-zone:hover{border-color:var(--purple);background:#F5F3FF;color:var(--purple);}
+    .img-upload-zone svg{display:block;margin:0 auto 8px;}
+    .img-preview-wrap{position:relative;border-radius:10px;overflow:hidden;}
+    .img-preview-wrap img{width:100%;height:180px;object-fit:cover;display:block;}
+    .img-preview-remove{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:28px;height:28px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;}
+    .img-preview-remove:hover{background:rgba(220,38,38,.8);}
     .card-header{padding:16px 16px 12px;}
     .card-name{font-size:15px;font-weight:700;color:#111;line-height:1.3;}
     .card-desc{font-size:12px;color:#6B7280;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
@@ -518,6 +526,18 @@
     </div>
     <div class="modal-body">
       <div class="form-group"><label>Nombre *</label><input type="text" id="rc_fName" placeholder="Pollo con verduras al horno…"/></div>
+      <div class="form-group">
+        <label>Foto de la receta</label>
+        <input type="file" id="rc_fImageFile" accept="image/*" style="display:none" onchange="rcUploadImage(this)"/>
+        <div id="rc_fImageZone" class="img-upload-zone" onclick="document.getElementById('rc_fImageFile').click()">
+          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Pulsa para subir una foto (JPG, PNG, WEBP · máx 5 MB)
+        </div>
+        <div id="rc_fImagePreview" class="img-preview-wrap" style="display:none">
+          <img id="rc_fImagePreviewImg" src="" alt=""/>
+          <button class="img-preview-remove" onclick="rcRemoveImage()" title="Quitar foto">×</button>
+        </div>
+      </div>
       <div class="form-group"><label>Descripción</label><textarea id="rc_fDesc" placeholder="Breve descripción…"></textarea></div>
       <div class="form-group"><label>Instrucciones</label><textarea id="rc_fInstr" style="min-height:90px;" placeholder="Pasos de preparación…"></textarea></div>
       <div class="form-row">
@@ -914,6 +934,7 @@ function renderRecipeCards(items) {
     if (r.servings)  meta.push(`${r.servings} raciones`);
     if (r.prep_time) meta.push(`${r.prep_time} min`);
     return `<div class="recipe-card">
+      ${r.image ? `<img class="card-img" src="${r.image}" alt="${esc(r.name)}" loading="lazy"/>` : ''}
       <div class="card-header">
         <div class="card-name">${esc(r.name)}</div>
         ${r.description ? `<div class="card-desc">${esc(r.description)}</div>` : ''}
@@ -958,6 +979,41 @@ function rcOnSearch() {
   rc_searchTimer = setTimeout(() => { rc_search = document.getElementById('rc_search').value.trim(); loadRecipes(1); }, 350);
 }
 
+let rc_imageUrl = null;
+
+function rcSetImagePreview(url) {
+  rc_imageUrl = url || null;
+  const zone    = document.getElementById('rc_fImageZone');
+  const preview = document.getElementById('rc_fImagePreview');
+  const img     = document.getElementById('rc_fImagePreviewImg');
+  if (url) { img.src = url; zone.style.display = 'none'; preview.style.display = ''; }
+  else      { img.src = ''; zone.style.display = '';     preview.style.display = 'none'; }
+}
+
+function rcRemoveImage() {
+  rcSetImagePreview(null);
+  document.getElementById('rc_fImageFile').value = '';
+}
+
+async function rcUploadImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const zone = document.getElementById('rc_fImageZone');
+  zone.textContent = 'Subiendo…';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('folder', 'recipes');
+  try {
+    const r = await fetch(`${API}/files/upload`, { method: 'POST', headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, body: fd });
+    const d = await r.json();
+    if (!r.ok || !d.data?.url) throw new Error(d.message || 'Error al subir');
+    rcSetImagePreview(d.data.url);
+  } catch (e) {
+    zone.innerHTML = `<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Pulsa para subir una foto (JPG, PNG, WEBP · máx 5 MB)`;
+    showToast(e.message || 'Error al subir la imagen', 'error');
+  }
+}
+
 function openRecipeModal(recipe = null) {
   rc_editId   = recipe ? recipe.id : null;
   rc_ingrRows = [];
@@ -972,6 +1028,8 @@ function openRecipeModal(recipe = null) {
   document.getElementById('rc_fFats').value     = recipe?.fats        ?? '';
   document.getElementById('rc_fCalories').value = recipe?.calories    ?? '';
   document.getElementById('rc_modalError').textContent = '';
+  document.getElementById('rc_fImageFile').value = '';
+  rcSetImagePreview(recipe?.image || null);
   document.getElementById('rc_ingrList').innerHTML = '';
   if (recipe?.details?.length) recipe.details.forEach(d => addIngrRow(d));
   syncIngrEmpty();
@@ -1137,6 +1195,7 @@ async function saveRecipe() {
     carbs:        parseFloat(document.getElementById('rc_fCarbs').value)   || null,
     fats:         parseFloat(document.getElementById('rc_fFats').value)    || null,
     calories:     parseFloat(document.getElementById('rc_fCalories').value)|| null,
+    image:        rc_imageUrl || null,
     details,
   };
   const btn = document.getElementById('rc_saveBtn');

@@ -130,3 +130,101 @@ class RoutineOut(BaseModel):
     days_list: List[RoutineDayOut] = []
 
     model_config = {"from_attributes": True}
+
+
+# ── V2 Block-aware schemas ──────────────────────────────────────────────────
+
+class ExerciseInBlockCreate(BaseModel):
+    training_id: Optional[int] = None
+    series: Optional[int] = None
+    repetitions: Optional[str] = None
+    break_time: Optional[int] = None
+    intensity_type: Optional[str] = None  # rpe/rir/pct1rm/weight
+    intensity_value: Optional[float] = None
+    notes: Optional[str] = None
+    order_index: Optional[int] = 0
+
+
+class BlockCreate(BaseModel):
+    block_type: str = "normal"  # warmup/normal/superset/circuit
+    order_index: int = 0
+    exercises: List[ExerciseInBlockCreate] = []
+
+
+class RoutineDayCreateV2(BaseModel):
+    day_name: Optional[str] = None
+    description: Optional[str] = None
+    blocks: List[BlockCreate] = []
+    # Keep old fields for backward compat
+    content_html: Optional[str] = None
+    details: Optional[List[RoutineDayDetailCreate]] = []
+
+
+class RoutineCreateV2(BaseModel):
+    name: str
+    gender_id: Optional[int] = None
+    training: Optional[str] = None
+    training_level_id: Optional[int] = None
+    time: Optional[int] = None
+    days: Optional[int] = None
+    notes: Optional[str] = None
+    days_list: Optional[List[RoutineDayCreateV2]] = []
+
+
+class RoutineUpdateV2(BaseModel):
+    name: Optional[str] = None
+    gender_id: Optional[int] = None
+    training: Optional[str] = None
+    training_level_id: Optional[int] = None
+    time: Optional[int] = None
+    days: Optional[int] = None
+    notes: Optional[str] = None
+    days_list: Optional[List[RoutineDayCreateV2]] = None
+
+
+# ── V2 Output schemas ───────────────────────────────────────────────────────
+
+class ExerciseInBlockOut(BaseModel):
+    id: int
+    training_id: Optional[int] = None
+    training_name: Optional[str] = None
+    muscle_group_name: Optional[str] = None
+    series: Optional[int] = None
+    repetitions: Optional[str] = None
+    break_time: Optional[int] = None
+    intensity_type: Optional[str] = None
+    intensity_value: Optional[float] = None
+    notes: Optional[str] = None
+    order_index: int = 0
+    model_config = {"from_attributes": True}
+
+
+class BlockOut(BaseModel):
+    id: Optional[int] = None
+    block_type: str
+    order_index: int
+    exercises: List[ExerciseInBlockOut] = []
+    model_config = {"from_attributes": True}
+
+
+class RoutineDayOutV2(BaseModel):
+    id: int
+    day_name: Optional[str] = None
+    description: Optional[str] = None
+    blocks: List[BlockOut] = []
+    model_config = {"from_attributes": True}
+
+
+class RoutineOutV2(BaseModel):
+    id: int
+    name: str
+    user_id: Optional[int] = None
+    gender_id: Optional[int] = None
+    training: Optional[str] = None
+    training_level_id: Optional[int] = None
+    time: Optional[int] = None
+    days: Optional[int] = None
+    notes: Optional[str] = None
+    created_at: Optional[datetime] = None
+    days_list: List[RoutineDayOutV2] = []
+    model_config = {"from_attributes": True}

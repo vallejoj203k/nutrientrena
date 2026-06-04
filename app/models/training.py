@@ -11,13 +11,17 @@ class Training(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id"), nullable=True)
+    secondary_muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id"), nullable=True)
     image = Column(String(500), nullable=True)
     video_url = Column(String(500), nullable=True)
+    exercise_type = Column(String(20), nullable=True)  # compound/isolation/cardio/mobility
+    location = Column(String(20), nullable=True)  # gym/home/outdoor/both
     state = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    muscle_group = relationship("MuscleGroup", back_populates="trainings")
+    muscle_group = relationship("MuscleGroup", foreign_keys=[muscle_group_id], back_populates="trainings")
+    secondary_muscle_group = relationship("MuscleGroup", foreign_keys=[secondary_muscle_group_id])
     routine_day_details = relationship("RoutineDayDetail", back_populates="training")
 
 

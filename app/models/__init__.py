@@ -5,7 +5,7 @@ from app.models.country import Country
 from app.models.parameter import Parameter, ParameterDetail
 from app.models.muscle_group import MuscleGroup, MuscleGroupClient
 from app.models.training import Training, TrainingClient
-from app.models.routine import Routine, RoutineDay, RoutineDayDetail
+from app.models.routine import Routine, RoutineDay, RoutineDayDetail, RoutineBlock
 from app.models.client_target import ClientTarget
 from app.models.event_user import EventUser
 from app.models.type_event import TypeEvent

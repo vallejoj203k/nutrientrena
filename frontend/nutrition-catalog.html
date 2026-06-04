@@ -896,7 +896,7 @@ function downloadAlTemplate() {
 // ─── RECETAS ──────────────────────────────────────────────────────────────────
 let rc_page = 1, rc_perPage = 12, rc_total = 0, rc_lastPage = 1;
 let rc_search = '', rc_editId = null, rc_searchTimer = null, rc_loaded = false;
-let rc_ingrRows = [], rc_acTimers = {};
+let rc_ingrRows = [], rc_acTimers = {}, rc_macroCache = {};
 
 async function loadRecipes(page = 1) {
   rc_page   = page;
@@ -1126,32 +1126,27 @@ function showAcDropdown(rowId, items) {
   const drop = document.getElementById(`acdrop-${rowId}`);
   if (!drop) return;
   if (!items.length) { drop.classList.remove('open'); return; }
-  drop.innerHTML = items.map(a => {
-    const m = encodeURIComponent(JSON.stringify({
-      p: a.proteins ?? null,
-      c: a.carbohydrates ?? null,
-      f: a.fats ?? null,
-      k: a.calories ?? null,
-    }));
-    return `<div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}','${m}')">
+  items.forEach(a => {
+    rc_macroCache[a.id] = { proteins: a.proteins ?? null, carbohydrates: a.carbohydrates ?? null, fats: a.fats ?? null, calories: a.calories ?? null };
+  });
+  drop.innerHTML = items.map(a =>
+    `<div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}')">
       <div class="ac-name">${esc(a.name)}</div>
       ${a.brand ? `<div class="ac-brand">${esc(a.brand)}</div>` : ''}
-    </div>`;
-  }).join('');
+    </div>`
+  ).join('');
   drop.classList.add('open');
 }
 
-function selectAliment(rowId, alimentId, alimentName, macroEncoded) {
+function selectAliment(rowId, alimentId, alimentName) {
   const row = rc_ingrRows.find(r => r.id == rowId);
   if (row) {
     row.aliment_id = alimentId; row.aliment_name = alimentName;
-    try {
-      const m = JSON.parse(decodeURIComponent(macroEncoded || '{}'));
-      row.proteins      = m.p ?? null;
-      row.carbohydrates = m.c ?? null;
-      row.fats          = m.f ?? null;
-      row.calories      = m.k ?? null;
-    } catch {}
+    const m = rc_macroCache[alimentId] || {};
+    row.proteins      = m.proteins      ?? null;
+    row.carbohydrates = m.carbohydrates ?? null;
+    row.fats          = m.fats          ?? null;
+    row.calories      = m.calories      ?? null;
   }
   const input = document.getElementById(`iac-${rowId}`);
   if (input) input.value = alimentName;

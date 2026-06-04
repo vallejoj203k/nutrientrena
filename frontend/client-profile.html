@@ -1076,11 +1076,12 @@ async function openEmailDiag() {
     } else {
       box.style.background = '#FEE2E2';
       box.style.borderColor = '#FCA5A5';
+      const provider = d.provider === 'gmail' ? `Gmail (${d.gmail_user})` : `Resend (${d.mail_from})`;
       box.innerHTML = `❌ <strong>Fallo al enviar email</strong><br>
         <b>Destino:</b> ${clientEmail}<br>
-        <b>API Key configurada:</b> ${d.resend_api_key_set ? 'Sí ✓' : 'NO — falta RESEND_API_KEY en Railway'}<br>
-        <b>Remitente (MAIL_FROM):</b> <code>${d.mail_from}</code><br>
-        <b>Error Resend:</b> <code>${d.error || 'desconocido'}</code>`;
+        <b>Proveedor activo:</b> ${provider}<br>
+        ${d.provider !== 'gmail' ? `<b>API Key configurada:</b> ${d.resend_api_key_set ? 'Sí ✓' : 'NO — falta RESEND_API_KEY en Railway'}<br>` : ''}
+        <b>Error:</b> <code>${d.error || 'desconocido'}</code>`;
     }
   } catch (e) {
     box.style.background = '#FEE2E2';

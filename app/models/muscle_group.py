@@ -11,11 +11,12 @@ class MuscleGroup(Base):
     name = Column(String(255), nullable=False)
     description = Column(String(500), nullable=True)
     image = Column(String(500), nullable=True)
+    icon = Column(String(10), nullable=True)
     state = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    trainings = relationship("Training", back_populates="muscle_group")
+    trainings = relationship("Training", foreign_keys="Training.muscle_group_id", back_populates="muscle_group")
 
 
 class MuscleGroupClient(Base):

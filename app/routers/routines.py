@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
-from app.models.routine import Routine, RoutineDay, RoutineDayDetail
+from app.models.routine import Routine, RoutineBlock, RoutineDay, RoutineDayDetail
 from app.pdf.routine_pdf import generate_routine_pdf
 from app.schemas.routine import (
     RoutineCreate, RoutineUpdate, RoutineOut, RoutineCloneRequest,
     RoutineAssignRequest, RoutineListRequest, BulkCreateClientRequest,
-    RoutineDayOut,
+    RoutineDayOut, RoutineCreateV2, RoutineUpdateV2,
 )
 
 router = APIRouter(prefix="/routines", tags=["Routines"])
@@ -20,13 +20,67 @@ def _get_or_404(db: Session, routine_id: int):
     return db.query(Routine).filter(Routine.id == routine_id).first()
 
 
+def _serialize_day(day: RoutineDay) -> dict:
+    blocks = []
+    # New-style: has blocks
+    if day.blocks:
+        for blk in sorted(day.blocks, key=lambda b: b.order_index):
+            exercises = []
+            for ex in blk.exercises:
+                exercises.append({
+                    "id": ex.id,
+                    "training_id": ex.training_id,
+                    "training_name": ex.training.name if ex.training else None,
+                    "muscle_group_name": ex.training.muscle_group.name if (ex.training and ex.training.muscle_group) else None,
+                    "series": ex.series,
+                    "repetitions": ex.repetitions,
+                    "break_time": ex.break_time,
+                    "intensity_type": ex.intensity_type,
+                    "intensity_value": ex.intensity_value,
+                    "notes": ex.notes,
+                    "order_index": ex.order_index or 0,
+                })
+            blocks.append({
+                "id": blk.id,
+                "block_type": blk.block_type,
+                "order_index": blk.order_index,
+                "exercises": exercises,
+            })
+    # Old-style: flat details without blocks → group into a default normal block
+    old_details = [d for d in day.details if d.block_id is None]
+    if old_details:
+        exercises = [{
+            "id": d.id,
+            "training_id": d.training_id,
+            "training_name": d.training.name if d.training else None,
+            "muscle_group_name": d.training.muscle_group.name if (d.training and d.training.muscle_group) else None,
+            "series": d.series,
+            "repetitions": d.repetitions,
+            "break_time": d.break_time,
+            "intensity_type": getattr(d, 'intensity_type', None),
+            "intensity_value": getattr(d, 'intensity_value', None),
+            "notes": getattr(d, 'notes', None),
+            "order_index": 0,
+        } for d in old_details]
+        blocks.insert(0, {"id": None, "block_type": "normal", "order_index": -1, "exercises": exercises})
+
+    return {
+        "id": day.id,
+        "day_name": day.day_name,
+        "description": day.description,
+        "blocks": blocks,
+    }
+
+
 def _serialize(routine: Routine) -> dict:
     out = RoutineOut.model_validate(routine).model_dump(exclude={"days_list"})
-    out["days_list"] = [RoutineDayOut.from_orm_day(d).model_dump() for d in routine.days_list]
+    out["notes"] = routine.notes
+    out["days_list"] = [_serialize_day(d) for d in routine.days_list]
     return out
 
 
 def _create_days(db: Session, routine_id: int, days_data: list):
+    """Old-style backward-compat day creation (no blocks)."""
     for day_data in days_data:
         day = RoutineDay(
             routine_id=routine_id,
@@ -47,6 +101,54 @@ def _create_days(db: Session, routine_id: int, days_data: list):
             ))
 
 
+def _create_days_v2(db: Session, routine_id: int, days_data: list):
+    """V2 block-aware day creation."""
+    for day_data in days_data:
+        day = RoutineDay(
+            routine_id=routine_id,
+            day_name=day_data.day_name,
+            description=day_data.description or day_data.content_html,
+        )
+        db.add(day)
+        db.flush()
+        # New-style blocks
+        for blk_data in (day_data.blocks or []):
+            blk = RoutineBlock(
+                routine_id=routine_id,
+                routine_day_id=day.id,
+                block_type=blk_data.block_type or "normal",
+                order_index=blk_data.order_index or 0,
+            )
+            db.add(blk)
+            db.flush()
+            for ex_idx, ex_data in enumerate(blk_data.exercises or []):
+                db.add(RoutineDayDetail(
+                    routine_id=routine_id,
+                    routine_day_id=day.id,
+                    block_id=blk.id,
+                    training_id=ex_data.training_id,
+                    series=ex_data.series,
+                    repetitions=ex_data.repetitions,
+                    break_time=ex_data.break_time,
+                    intensity_type=ex_data.intensity_type,
+                    intensity_value=ex_data.intensity_value,
+                    notes=ex_data.notes,
+                    order_index=ex_data.order_index if ex_data.order_index is not None else ex_idx,
+                ))
+        # Old-style details fallback (backward compat for existing callers)
+        for det in (day_data.details or []):
+            db.add(RoutineDayDetail(
+                routine_id=routine_id,
+                routine_day_id=day.id,
+                block_id=None,
+                muscle_group_id=det.muscle_group_id,
+                training_id=det.training_id,
+                series=det.series,
+                repetitions=det.repetitions,
+                break_time=det.break_time,
+            ))
+
+
 def _clone_days(db: Session, source: Routine, new_routine_id: int):
     for day in source.days_list:
         new_day = RoutineDay(
@@ -56,16 +158,42 @@ def _clone_days(db: Session, source: Routine, new_routine_id: int):
         )
         db.add(new_day)
         db.flush()
-        for detail in day.details:
-            db.add(RoutineDayDetail(
+        # Clone blocks
+        for blk in day.blocks:
+            new_blk = RoutineBlock(
                 routine_id=new_routine_id,
                 routine_day_id=new_day.id,
-                muscle_group_id=detail.muscle_group_id,
-                training_id=detail.training_id,
-                series=detail.series,
-                repetitions=detail.repetitions,
-                break_time=detail.break_time,
-            ))
+                block_type=blk.block_type,
+                order_index=blk.order_index,
+            )
+            db.add(new_blk)
+            db.flush()
+            for ex in blk.exercises:
+                db.add(RoutineDayDetail(
+                    routine_id=new_routine_id,
+                    routine_day_id=new_day.id,
+                    block_id=new_blk.id,
+                    training_id=ex.training_id,
+                    series=ex.series,
+                    repetitions=ex.repetitions,
+                    break_time=ex.break_time,
+                    intensity_type=ex.intensity_type,
+                    intensity_value=ex.intensity_value,
+                    notes=ex.notes,
+                    order_index=ex.order_index,
+                ))
+        # Clone old-style flat details
+        for detail in day.details:
+            if detail.block_id is None:
+                db.add(RoutineDayDetail(
+                    routine_id=new_routine_id,
+                    routine_day_id=new_day.id,
+                    muscle_group_id=detail.muscle_group_id,
+                    training_id=detail.training_id,
+                    series=detail.series,
+                    repetitions=detail.repetitions,
+                    break_time=detail.break_time,
+                ))
 
 
 @router.get("/findAll")
@@ -87,6 +215,7 @@ def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user
         training_level_id=source.training_level_id,
         time=source.time,
         days=source.days,
+        notes=source.notes,
     )
     db.add(new_routine)
     db.flush()
@@ -214,7 +343,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
 
 
 @router.post("")
-def create(data: RoutineCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def create(data: RoutineCreateV2, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = Routine(
         name=data.name,
         user_id=current_user.id,
@@ -223,22 +352,23 @@ def create(data: RoutineCreate, db: Session = Depends(get_db), current_user=Depe
         training_level_id=data.training_level_id,
         time=data.time,
         days=data.days,
+        notes=data.notes,
     )
     db.add(routine)
     db.flush()
-    _create_days(db, routine.id, data.days_list or [])
+    _create_days_v2(db, routine.id, data.days_list or [])
     db.commit()
     db.refresh(routine)
     return send_response(_serialize(routine), "Rutina creada")
 
 
 @router.put("/{id}/update")
-def updated(id: int, data: RoutineUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def updated(id: int, data: RoutineUpdateV2, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
 
-    for f in ("name", "gender_id", "training", "training_level_id", "time", "days"):
+    for f in ("name", "gender_id", "training", "training_level_id", "time", "days", "notes"):
         v = getattr(data, f, None)
         if v is not None:
             setattr(routine, f, v)
@@ -247,7 +377,7 @@ def updated(id: int, data: RoutineUpdate, db: Session = Depends(get_db), _=Depen
         for day in list(routine.days_list):
             db.delete(day)
         db.flush()
-        _create_days(db, routine.id, data.days_list)
+        _create_days_v2(db, routine.id, data.days_list)
 
     db.commit()
     db.refresh(routine)

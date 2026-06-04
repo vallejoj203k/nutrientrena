@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NutriEntrena — Eventos</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar-left h1{font-size:18px;font-weight:700;color:#111;}
+    .topbar-left p{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .topbar-actions{display:flex;gap:8px;}
+
+    /* ── Body layout ── */
+    .body-area{flex:1;display:flex;overflow:hidden;}
+
+    /* ── Calendar ── */
+    .cal-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:20px;}
+    .cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .cal-nav-btn{background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px;color:#374151;transition:.15s;display:flex;align-items:center;gap:4px;}
+    .cal-nav-btn:hover{border-color:var(--purple);color:var(--purple);}
+    .cal-month-label{font-size:17px;font-weight:700;color:#111;flex:1;text-align:center;}
+    .cal-today-btn{background:var(--purple-pale);color:var(--purple);border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s;}
+    .cal-today-btn:hover{background:#E9DCFF;}
+
+    .cal-grid{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .cal-head{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #F3F4F6;}
+    .cal-head-cell{padding:10px 0;text-align:center;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
+    .cal-head-cell.weekend{color:#C084FC;}
+
+    .cal-body{flex:1;display:grid;grid-template-rows:repeat(6,1fr);overflow:hidden;}
+    .cal-week{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #F3F4F6;}
+    .cal-week:last-child{border-bottom:none;}
+    .cal-day{border-right:1px solid #F3F4F6;padding:6px 6px 4px;cursor:pointer;transition:.1s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:2px;}
+    .cal-day:last-child{border-right:none;}
+    .cal-day:hover{background:#FAFAFA;}
+    .cal-day.other-month{background:#FAFAFA;}
+    .cal-day.other-month .day-num{color:#D1D5DB;}
+    .cal-day.today .day-num{background:var(--purple);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+    .cal-day.weekend-day{background:#FEFCFF;}
+    .day-num{font-size:12px;font-weight:600;color:#374151;line-height:1;margin-bottom:2px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+    .cal-event{font-size:11px;font-weight:500;padding:2px 6px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.4;color:#fff;}
+    .cal-event:hover{opacity:.85;}
+    .more-events{font-size:10px;color:#9CA3AF;padding:1px 4px;cursor:pointer;}
+    .more-events:hover{color:var(--purple);}
+
+    /* ── Types panel ── */
+    .types-panel{width:260px;min-width:260px;background:#fff;border-left:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;}
+    .types-head{padding:16px 18px 12px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .types-head h3{font-size:13px;font-weight:700;color:#111;}
+    .types-body{flex:1;overflow-y:auto;padding:10px 12px;}
+    .types-body::-webkit-scrollbar{width:4px;}
+    .types-body::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px;}
+    .type-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;margin-bottom:4px;cursor:pointer;transition:.15s;}
+    .type-item:hover{background:#F9FAFB;}
+    .type-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
+    .type-name{flex:1;font-size:13px;color:#374151;}
+    .type-actions{display:flex;gap:2px;opacity:0;transition:.15s;}
+    .type-item:hover .type-actions{opacity:1;}
+    .type-btn{background:none;border:none;cursor:pointer;padding:3px 5px;border-radius:5px;color:#9CA3AF;font-size:12px;transition:.15s;}
+    .type-btn:hover{background:#F3F4F6;color:#374151;}
+    .type-btn.del:hover{background:#FEE2E2;color:#DC2626;}
+    .type-empty{text-align:center;padding:32px 12px;color:#9CA3AF;font-size:13px;}
+
+    /* ── Buttons ── */
+    .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:5px 11px;font-size:12px;}
+    .btn-icon{background:none;border:none;cursor:pointer;padding:5px;border-radius:7px;color:#6B7280;transition:.15s;display:flex;}
+    .btn-icon:hover{background:#F3F4F6;color:#374151;}
+
+    /* ── Modal ── */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#fff;border-radius:16px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .overlay.open .modal{transform:translateY(0);}
+    .modal-sm{width:380px;}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;padding:2px 6px;}
+    .modal-close:hover{color:#374151;}
+    .modal-body{padding:20px 24px;}
+    .modal-footer{padding:14px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;background:#fff;font-family:inherit;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-group textarea{min-height:64px;resize:vertical;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+    .form-error{color:#DC2626;font-size:12px;margin-top:6px;}
+
+    /* Color swatches */
+    .color-swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+    .swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s;flex-shrink:0;}
+    .swatch.active,.swatch:hover{border-color:#111;transform:scale(1.1);}
+
+    /* Recurrence end field */
+    #recurEndGroup{display:none;}
+
+    /* Delete dialog */
+    .del-dialog{background:#fff;border-radius:14px;padding:28px;width:360px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .overlay.open .del-dialog{transform:translateY(0);}
+    .del-dialog h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .del-dialog p{font-size:13px;color:#6B7280;line-height:1.5;margin-bottom:20px;}
+    .del-dialog-btns{display:flex;flex-direction:column;gap:8px;}
+
+    /* Event tooltip / popover */
+    .ev-popover{position:fixed;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);border:1px solid #E5E7EB;padding:14px;width:240px;z-index:300;display:none;}
+    .ev-popover.open{display:block;}
+    .ev-pop-title{font-size:14px;font-weight:700;color:#111;margin-bottom:4px;}
+    .ev-pop-type{font-size:12px;margin-bottom:8px;}
+    .ev-pop-meta{font-size:12px;color:#6B7280;margin-bottom:10px;line-height:1.5;}
+    .ev-pop-recur{font-size:11px;color:#5B2D8E;font-weight:600;background:var(--purple-pale);padding:3px 8px;border-radius:12px;display:inline-block;margin-bottom:8px;}
+    .ev-pop-actions{display:flex;gap:8px;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(20px);opacity:0;transition:.25s;}
+    .toast.show{transform:none;opacity:1;}
+    .toast.ok{background:#111;color:#fff;}
+    .toast.err{background:#DC2626;color:#fff;}
+
+    @media(max-width:900px){.types-panel{display:none;}}
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>Nutri<em>Entrena</em></span>
+    <small>Panel de administración</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="kanban.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+      Kanban
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item active" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Eventos
+    </a>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <a class="nav-item" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Formularios
+      <span class="nav-badge" id="formsBadge" style="display:none"></span>
+    </a>
+    <div class="nav-section">Nutrición</div>
+    <a class="nav-item" href="diets.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Dietas
+    </a>
+    <a class="nav-item" href="aliments.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Alimentos
+    </a>
+    <a class="nav-item" href="recipes.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+      Recetas
+    </a>
+    <a class="nav-item" href="nutrition-catalog.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Catálogos
+    </a>
+    <div class="nav-section">Entrenamiento</div>
+    <a class="nav-item" href="routines.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Rutinas
+    </a>
+    <div class="nav-section">Análisis</div>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analíticas
+    </a>
+    <div class="nav-section">Configuración</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Eventos</h1>
+      <p>Calendario de eventos y citas</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openTypeModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Tipos
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openEventModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo evento
+      </button>
+    </div>
+  </div>
+
+  <div class="body-area">
+
+    <!-- ── Calendar ── -->
+    <div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="changeMonth(-1)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <div class="cal-month-label" id="calMonthLabel">—</div>
+        <button class="cal-today-btn" onclick="goToday()">Hoy</button>
+        <button class="cal-nav-btn" onclick="changeMonth(1)">
+          Siguiente
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <div class="cal-grid">
+        <div class="cal-head">
+          <div class="cal-head-cell">Lun</div>
+          <div class="cal-head-cell">Mar</div>
+          <div class="cal-head-cell">Mié</div>
+          <div class="cal-head-cell">Jue</div>
+          <div class="cal-head-cell">Vie</div>
+          <div class="cal-head-cell weekend">Sáb</div>
+          <div class="cal-head-cell weekend">Dom</div>
+        </div>
+        <div class="cal-body" id="calBody"></div>
+      </div>
+    </div>
+
+    <!-- ── Types panel ── -->
+    <div class="types-panel">
+      <div class="types-head">
+        <h3>Tipos de evento</h3>
+        <button class="btn-icon" onclick="openTypeModal()" title="Nuevo tipo">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="types-body" id="typesBody">
+        <div class="type-empty">Cargando tipos…</div>
+      </div>
+    </div>
+
+  </div><!-- /body-area -->
+</div><!-- /main -->
+
+<!-- ── Event Modal ── -->
+<div class="overlay" id="eventOverlay" onclick="if(event.target===this)closeEventModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="eventModalTitle">Nuevo evento</h2>
+      <button class="modal-close" onclick="closeEventModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título *</label>
+        <input id="ev_title" type="text" placeholder="Ej: Sesión de coaching, Cita médica…"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de evento</label>
+          <select id="ev_type"></select>
+        </div>
+        <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:0;">
+            <input type="checkbox" id="ev_allday" style="width:16px;height:16px;accent-color:#5B2D8E;" onchange="toggleAllDay()"/>
+            Todo el día
+          </label>
+        </div>
+      </div>
+      <div class="form-row" id="datetimeRow">
+        <div class="form-group">
+          <label>Inicio *</label>
+          <input id="ev_start" type="datetime-local"/>
+        </div>
+        <div class="form-group">
+          <label>Fin</label>
+          <input id="ev_end" type="datetime-local"/>
+        </div>
+      </div>
+      <div class="form-row" id="dateOnlyRow" style="display:none;">
+        <div class="form-group">
+          <label>Fecha inicio *</label>
+          <input id="ev_start_date" type="date"/>
+        </div>
+        <div class="form-group">
+          <label>Fecha fin</label>
+          <input id="ev_end_date" type="date"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="ev_desc" placeholder="Notas o detalles adicionales…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Repetición</label>
+          <select id="ev_recur" onchange="toggleRecurEnd()">
+            <option value="none">Sin repetición</option>
+            <option value="daily">Diaria</option>
+            <option value="weekly">Semanal</option>
+            <option value="monthly">Mensual</option>
+          </select>
+        </div>
+        <div class="form-group" id="recurEndGroup">
+          <label>Repetir hasta</label>
+          <input id="ev_recur_end" type="date"/>
+        </div>
+      </div>
+      <div class="form-error" id="eventError"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEventModal()">Cancelar</button>
+      <button class="btn btn-primary" id="eventSaveBtn" onclick="saveEvent()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Type Modal ── -->
+<div class="overlay" id="typeOverlay" onclick="if(event.target===this)closeTypeModal()">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h2 id="typeModalTitle">Nuevo tipo</h2>
+      <button class="modal-close" onclick="closeTypeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input id="tp_name" type="text" placeholder="Ej: Sesión, Cita, Festivo…"/>
+      </div>
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-swatches" id="colorSwatches"></div>
+      </div>
+      <div class="form-error" id="typeError"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTypeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="typeSaveBtn" onclick="saveType()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete event dialog ── -->
+<div class="overlay" id="delEventOverlay">
+  <div class="del-dialog">
+    <h3>¿Eliminar evento?</h3>
+    <p id="delEventMsg">Esta acción no se puede deshacer.</p>
+    <div class="del-dialog-btns">
+      <button class="btn btn-danger" id="delOnlyBtn" onclick="confirmDeleteEvent(false)">Eliminar solo este evento</button>
+      <button class="btn btn-danger" id="delSeriesBtn" onclick="confirmDeleteEvent(true)" style="display:none;">Eliminar toda la serie</button>
+      <button class="btn btn-ghost" onclick="closeDelEvent()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete type dialog ── -->
+<div class="overlay" id="delTypeOverlay">
+  <div class="del-dialog">
+    <h3>¿Eliminar tipo?</h3>
+    <p>Los eventos de este tipo no se eliminarán, solo perderán el tipo asignado.</p>
+    <div class="del-dialog-btns">
+      <button class="btn btn-danger" onclick="confirmDeleteType()">Eliminar tipo</button>
+      <button class="btn btn-ghost" onclick="closeDelType()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Event popover ── -->
+<div class="ev-popover" id="evPopover">
+  <div class="ev-pop-title" id="popTitle"></div>
+  <div class="ev-pop-type" id="popType"></div>
+  <div class="ev-pop-meta" id="popMeta"></div>
+  <div id="popRecur"></div>
+  <div class="ev-pop-actions">
+    <button class="btn btn-ghost btn-sm" id="popEditBtn" onclick="editEventFromPop()">✏️ Editar</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteEventFromPop()">🗑️ Eliminar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+const tok = () => localStorage.getItem('token');
+const hdrs = () => ({ 'Authorization': `Bearer ${tok()}`, 'Content-Type': 'application/json' });
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let curYear, curMonth;   // currently displayed month (0-based)
+let events = [];         // all events for current month
+let types = [];          // all event types
+let _editEventId = null;
+let _editTypeId = null;
+let _delEventId = null;
+let _delGroupId = null;
+let _delTypeId = null;
+let _popEventId = null;
+let _selectedColor = '#5B2D8E';
+let _currentUserId = null;
+
+const PRESET_COLORS = [
+  '#5B2D8E','#7C3AED','#2563EB','#0891B2','#059669',
+  '#65A30D','#D97706','#DC2626','#DB2777','#64748B',
+];
+
+const RECUR_LABELS = { none:'Sin repetición', daily:'Diaria', weekly:'Semanal', monthly:'Mensual' };
+const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// ── Auth / Init ───────────────────────────────────────────────────────────────
+async function init() {
+  if (!tok()) { location.href = 'login.html'; return; }
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: hdrs() });
+    if (r.status === 401) { location.href = 'login.html'; return; }
+    const d = await r.json();
+    const me = d.data || {};
+    _currentUserId = me.id;
+    document.getElementById('sidebarName').textContent = me.name || me.email || '';
+    document.getElementById('sidebarRole').textContent = me.roles?.[0]?.name || '';
+    document.getElementById('sidebarAvatar').textContent = (me.name || '?')[0].toUpperCase();
+    loadFormsBadge();
+  } catch { location.href = 'login.html'; return; }
+
+  const today = new Date();
+  curYear = today.getFullYear();
+  curMonth = today.getMonth();
+
+  buildColorSwatches();
+  await loadTypes();
+  renderCalendar();
+  await loadEvents();
+  document.addEventListener('click', closePop);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeEventModal(); closeTypeModal(); closeDelEvent(); closeDelType(); closePop(); } });
+}
+
+async function loadFormsBadge() {
+  try {
+    const r = await fetch(`${API}/form-assignments/pending-count`, { headers: hdrs() });
+    if (!r.ok) return;
+    const d = await r.json();
+    const c = d.data?.count || 0;
+    const b = document.getElementById('formsBadge');
+    if (c > 0) { b.textContent = c; b.style.display = ''; }
+  } catch {}
+}
+
+function logout() { fetch(`${API}/auth/logout`, { method:'POST', headers:hdrs() }).finally(() => { localStorage.clear(); location.href='login.html'; }); }
+
+// ── Load types ────────────────────────────────────────────────────────────────
+async function loadTypes() {
+  try {
+    const r = await fetch(`${API}/type-events/find-all`, { headers: hdrs() });
+    const d = await r.json();
+    types = d.data || [];
+  } catch { types = []; }
+  renderTypes();
+  populateTypeSelect();
+}
+
+function renderTypes() {
+  const el = document.getElementById('typesBody');
+  if (!types.length) {
+    el.innerHTML = '<div class="type-empty">Sin tipos aún.<br>Crea uno con el botón +</div>';
+    return;
+  }
+  el.innerHTML = types.map(t => `
+    <div class="type-item">
+      <div class="type-dot" style="background:${t.color || '#9CA3AF'};"></div>
+      <div class="type-name">${esc(t.name)}</div>
+      <div class="type-actions">
+        <button class="type-btn" onclick="openTypeModal(${t.id})" title="Editar">✏️</button>
+        <button class="type-btn del" onclick="openDelType(${t.id})" title="Eliminar">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function populateTypeSelect() {
+  const sel = document.getElementById('ev_type');
+  sel.innerHTML = '<option value="">— Sin tipo —</option>' +
+    types.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+}
+
+function typeColor(id) {
+  const t = types.find(x => x.id === id);
+  return t?.color || '#9CA3AF';
+}
+
+function typeName(id) {
+  const t = types.find(x => x.id === id);
+  return t?.name || '';
+}
+
+// ── Load events ───────────────────────────────────────────────────────────────
+async function loadEvents() {
+  const start = new Date(curYear, curMonth, 1);
+  const end   = new Date(curYear, curMonth + 1, 0, 23, 59, 59);
+  const p = new URLSearchParams({
+    start: start.toISOString(),
+    end:   end.toISOString(),
+  });
+  try {
+    const r = await fetch(`${API}/events/search?${p}`, { headers: hdrs() });
+    const d = await r.json();
+    events = d.data || [];
+  } catch { events = []; }
+  placeEvents();
+}
+
+// ── Calendar render ───────────────────────────────────────────────────────────
+function renderCalendar() {
+  document.getElementById('calMonthLabel').textContent = `${MONTH_NAMES[curMonth]} ${curYear}`;
+  const body = document.getElementById('calBody');
+  const today = new Date();
+  const firstDay = new Date(curYear, curMonth, 1);
+  // Monday-first: 0=Mon … 6=Sun. JS: 0=Sun,1=Mon…6=Sat → remap
+  let startDow = firstDay.getDay(); // 0=Sun
+  startDow = startDow === 0 ? 6 : startDow - 1; // Mon=0 … Sun=6
+  const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+  const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
+
+  let html = '';
+  let dayCounter = 1;
+  let nextCounter = 1;
+
+  for (let week = 0; week < 6; week++) {
+    html += '<div class="cal-week">';
+    for (let dow = 0; dow < 7; dow++) {
+      const cellIndex = week * 7 + dow;
+      const isWeekend = dow >= 5;
+      if (cellIndex < startDow) {
+        const d = daysInPrev - startDow + cellIndex + 1;
+        html += `<div class="cal-day other-month${isWeekend?' weekend-day':''}" data-date="${prevMonthDate(d)}" onclick="dayClick(this)">
+          <div class="day-num">${d}</div>
+          <div class="day-events" id="dev-prev-${d}"></div>
+        </div>`;
+      } else if (dayCounter <= daysInMonth) {
+        const dateStr = `${curYear}-${pad(curMonth+1)}-${pad(dayCounter)}`;
+        const isToday = today.getFullYear()===curYear && today.getMonth()===curMonth && today.getDate()===dayCounter;
+        html += `<div class="cal-day${isToday?' today':''}${isWeekend?' weekend-day':''}" data-date="${dateStr}" onclick="dayClick(this)">
+          <div class="day-num">${dayCounter}</div>
+          <div class="day-events" id="dev-${dateStr}"></div>
+        </div>`;
+        dayCounter++;
+      } else {
+        const dateStr = `${nextMonthYear()}-${pad(nextMonthNum())}-${pad(nextCounter)}`;
+        html += `<div class="cal-day other-month${isWeekend?' weekend-day':''}" data-date="${dateStr}" onclick="dayClick(this)">
+          <div class="day-num">${nextCounter}</div>
+          <div class="day-events" id="dev-next-${nextCounter}"></div>
+        </div>`;
+        nextCounter++;
+      }
+    }
+    html += '</div>';
+    if (dayCounter > daysInMonth && week >= 4) break;
+  }
+  body.innerHTML = html;
+}
+
+function placeEvents() {
+  // Clear existing chips
+  document.querySelectorAll('.day-events').forEach(el => el.innerHTML = '');
+  // Group events by date
+  const byDate = {};
+  events.forEach(ev => {
+    const d = ev.start_date?.slice(0, 10);
+    if (!d) return;
+    if (!byDate[d]) byDate[d] = [];
+    byDate[d].push(ev);
+  });
+  Object.entries(byDate).forEach(([date, evs]) => {
+    const container = document.getElementById(`dev-${date}`);
+    if (!container) return;
+    const shown = evs.slice(0, 3);
+    const rest  = evs.length - 3;
+    shown.forEach(ev => {
+      const color = typeColor(ev.type_event_id);
+      const chip = document.createElement('div');
+      chip.className = 'cal-event';
+      chip.style.background = color;
+      chip.title = ev.title;
+      chip.textContent = ev.title;
+      chip.dataset.evId = ev.id;
+      chip.addEventListener('click', e => { e.stopPropagation(); showPop(ev, e); });
+      container.appendChild(chip);
+    });
+    if (rest > 0) {
+      const more = document.createElement('div');
+      more.className = 'more-events';
+      more.textContent = `+${rest} más`;
+      container.appendChild(more);
+    }
+  });
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function changeMonth(delta) {
+  curMonth += delta;
+  if (curMonth > 11) { curMonth = 0; curYear++; }
+  if (curMonth < 0)  { curMonth = 11; curYear--; }
+  renderCalendar();
+  loadEvents();
+}
+
+function goToday() {
+  const t = new Date();
+  curYear  = t.getFullYear();
+  curMonth = t.getMonth();
+  renderCalendar();
+  loadEvents();
+}
+
+function dayClick(cell) {
+  const date = cell.dataset.date;
+  openEventModal(null, date);
+}
+
+// ── Event modal ───────────────────────────────────────────────────────────────
+function openEventModal(ev = null, defaultDate = null) {
+  _editEventId = ev?.id || null;
+  document.getElementById('eventModalTitle').textContent = ev ? 'Editar evento' : 'Nuevo evento';
+  document.getElementById('eventError').textContent = '';
+  document.getElementById('ev_title').value   = ev?.title || '';
+  document.getElementById('ev_type').value    = ev?.type_event_id || '';
+  document.getElementById('ev_desc').value    = ev?.description || '';
+  document.getElementById('ev_recur').value   = ev?.recurrence || 'none';
+  document.getElementById('ev_recur_end').value = ev?.recurrence_end_date?.slice(0,10) || '';
+  document.getElementById('ev_allday').checked = !!ev?.all_day;
+
+  if (ev) {
+    const s = ev.start_date?.slice(0,16) || '';
+    const e = ev.end_date?.slice(0,16) || '';
+    document.getElementById('ev_start').value = s;
+    document.getElementById('ev_end').value   = e;
+    document.getElementById('ev_start_date').value = s.slice(0,10);
+    document.getElementById('ev_end_date').value   = e.slice(0,10);
+  } else if (defaultDate) {
+    document.getElementById('ev_start').value = `${defaultDate}T09:00`;
+    document.getElementById('ev_end').value   = `${defaultDate}T10:00`;
+    document.getElementById('ev_start_date').value = defaultDate;
+    document.getElementById('ev_end_date').value   = defaultDate;
+  } else {
+    const now = new Date();
+    const ds = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+    document.getElementById('ev_start').value = `${ds}T09:00`;
+    document.getElementById('ev_end').value   = `${ds}T10:00`;
+    document.getElementById('ev_start_date').value = ds;
+    document.getElementById('ev_end_date').value   = ds;
+  }
+
+  toggleAllDay();
+  toggleRecurEnd();
+  document.getElementById('eventOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('ev_title').focus(), 100);
+}
+
+function closeEventModal() { document.getElementById('eventOverlay').classList.remove('open'); }
+
+function toggleAllDay() {
+  const allDay = document.getElementById('ev_allday').checked;
+  document.getElementById('datetimeRow').style.display = allDay ? 'none' : '';
+  document.getElementById('dateOnlyRow').style.display = allDay ? '' : 'none';
+}
+
+function toggleRecurEnd() {
+  const v = document.getElementById('ev_recur').value;
+  document.getElementById('recurEndGroup').style.display = (v && v !== 'none') ? '' : 'none';
+}
+
+async function saveEvent() {
+  const title = document.getElementById('ev_title').value.trim();
+  const errEl = document.getElementById('eventError');
+  if (!title) { errEl.textContent = 'El título es obligatorio.'; return; }
+
+  const allDay = document.getElementById('ev_allday').checked;
+  let startVal, endVal;
+  if (allDay) {
+    const sd = document.getElementById('ev_start_date').value;
+    const ed = document.getElementById('ev_end_date').value;
+    if (!sd) { errEl.textContent = 'La fecha de inicio es obligatoria.'; return; }
+    startVal = sd + 'T00:00:00';
+    endVal   = ed ? ed + 'T23:59:59' : null;
+  } else {
+    startVal = document.getElementById('ev_start').value;
+    endVal   = document.getElementById('ev_end').value || null;
+    if (!startVal) { errEl.textContent = 'La fecha de inicio es obligatoria.'; return; }
+  }
+
+  const recur    = document.getElementById('ev_recur').value;
+  const recurEnd = document.getElementById('ev_recur_end').value || null;
+  if (recur && recur !== 'none' && !recurEnd) {
+    errEl.textContent = 'Indica hasta cuándo se repite el evento.'; return;
+  }
+
+  const body = {
+    title,
+    description:        document.getElementById('ev_desc').value.trim() || null,
+    type_event_id:      parseInt(document.getElementById('ev_type').value) || null,
+    start_date:         startVal,
+    end_date:           endVal,
+    all_day:            allDay ? 1 : 0,
+    recurrence:         recur || 'none',
+    recurrence_end_date: recurEnd,
+  };
+
+  const btn = document.getElementById('eventSaveBtn');
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  errEl.textContent = '';
+
+  try {
+    const url    = _editEventId ? `${API}/events/update/${_editEventId}` : `${API}/events`;
+    const method = _editEventId ? 'POST' : 'POST';
+    const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; return; }
+    const msg = d.data?.count ? `${d.data.count} eventos creados` : (_editEventId ? 'Evento actualizado' : 'Evento creado');
+    closeEventModal();
+    toast(msg);
+    await loadEvents();
+  } catch { errEl.textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+}
+
+// ── Event popover ─────────────────────────────────────────────────────────────
+function showPop(ev, mouseEvent) {
+  _popEventId = ev.id;
+  const pop = document.getElementById('evPopover');
+  document.getElementById('popTitle').textContent = ev.title;
+  const tColor = typeColor(ev.type_event_id);
+  const tName  = typeName(ev.type_event_id);
+  document.getElementById('popType').innerHTML = tName
+    ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${tColor};margin-right:5px;"></span>${esc(tName)}`
+    : '';
+  const s = ev.start_date ? fmtDateTime(ev.start_date, !!ev.all_day) : '';
+  const e = ev.end_date   ? ' — ' + fmtDateTime(ev.end_date, !!ev.all_day) : '';
+  document.getElementById('popMeta').textContent = s + e + (ev.description ? '\n' + ev.description : '');
+  const recurEl = document.getElementById('popRecur');
+  if (ev.recurrence && ev.recurrence !== 'none') {
+    recurEl.innerHTML = `<span class="ev-pop-recur">🔄 ${RECUR_LABELS[ev.recurrence] || ev.recurrence}</span>`;
+  } else { recurEl.innerHTML = ''; }
+  // Store group id on popover
+  pop.dataset.groupId = ev.recurrence_group_id || '';
+
+  // Position
+  const rect = mouseEvent.target.getBoundingClientRect();
+  let left = rect.right + 8;
+  let top  = rect.top;
+  if (left + 250 > window.innerWidth) left = rect.left - 258;
+  if (top + 200 > window.innerHeight) top = window.innerHeight - 210;
+  pop.style.left = left + 'px';
+  pop.style.top  = top + 'px';
+  pop.classList.add('open');
+}
+
+function closePop(e) {
+  if (e && document.getElementById('evPopover').contains(e.target)) return;
+  document.getElementById('evPopover').classList.remove('open');
+}
+
+function editEventFromPop() {
+  const ev = events.find(x => x.id === _popEventId);
+  if (ev) { closePop(); openEventModal(ev); }
+}
+
+function deleteEventFromPop() {
+  const pop = document.getElementById('evPopover');
+  const groupId = pop.dataset.groupId ? parseInt(pop.dataset.groupId) : null;
+  closePop();
+  openDelEvent(_popEventId, groupId);
+}
+
+// ── Delete event ──────────────────────────────────────────────────────────────
+function openDelEvent(id, groupId = null) {
+  _delEventId = id;
+  _delGroupId = groupId;
+  const ev = events.find(x => x.id === id);
+  document.getElementById('delEventMsg').textContent = ev
+    ? `¿Eliminar "${ev.title}"?`
+    : '¿Eliminar este evento?';
+  document.getElementById('delSeriesBtn').style.display = groupId ? '' : 'none';
+  document.getElementById('delEventOverlay').classList.add('open');
+}
+
+function closeDelEvent() {
+  document.getElementById('delEventOverlay').classList.remove('open');
+  _delEventId = null; _delGroupId = null;
+}
+
+async function confirmDeleteEvent(wholeGroup) {
+  const url = wholeGroup
+    ? `${API}/events/delete-group/${_delGroupId}`
+    : `${API}/events/delete/${_delEventId}`;
+  try {
+    const r = await fetch(url, { method: 'DELETE', headers: hdrs() });
+    if (!r.ok) { toast('Error al eliminar', true); return; }
+    closeDelEvent();
+    toast(wholeGroup ? 'Serie eliminada' : 'Evento eliminado');
+    await loadEvents();
+  } catch { toast('Error de conexión', true); }
+}
+
+// ── Type modal ────────────────────────────────────────────────────────────────
+function buildColorSwatches() {
+  const el = document.getElementById('colorSwatches');
+  el.innerHTML = PRESET_COLORS.map(c => `
+    <div class="swatch${c === _selectedColor ? ' active' : ''}" style="background:${c};" data-color="${c}" onclick="selectColor('${c}')"></div>
+  `).join('');
+}
+
+function selectColor(c) {
+  _selectedColor = c;
+  document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.color === c));
+}
+
+function openTypeModal(id = null) {
+  _editTypeId = id;
+  document.getElementById('typeModalTitle').textContent = id ? 'Editar tipo' : 'Nuevo tipo';
+  document.getElementById('typeError').textContent = '';
+  const t = id ? types.find(x => x.id === id) : null;
+  document.getElementById('tp_name').value = t?.name || '';
+  _selectedColor = t?.color || '#5B2D8E';
+  buildColorSwatches();
+  document.getElementById('typeOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('tp_name').focus(), 100);
+}
+
+function closeTypeModal() { document.getElementById('typeOverlay').classList.remove('open'); }
+
+async function saveType() {
+  const name = document.getElementById('tp_name').value.trim();
+  const errEl = document.getElementById('typeError');
+  if (!name) { errEl.textContent = 'El nombre es obligatorio.'; return; }
+
+  const body = { name, color: _selectedColor };
+  const btn = document.getElementById('typeSaveBtn');
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  errEl.textContent = '';
+
+  try {
+    const url    = _editTypeId ? `${API}/type-events/update/${_editTypeId}` : `${API}/type-events`;
+    const r = await fetch(url, { method: 'POST', headers: hdrs(), body: JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; return; }
+    closeTypeModal();
+    toast(_editTypeId ? 'Tipo actualizado' : 'Tipo creado');
+    await loadTypes();
+    placeEvents(); // re-render with new colors
+  } catch { errEl.textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+}
+
+// ── Delete type ───────────────────────────────────────────────────────────────
+function openDelType(id) {
+  _delTypeId = id;
+  document.getElementById('delTypeOverlay').classList.add('open');
+}
+
+function closeDelType() {
+  document.getElementById('delTypeOverlay').classList.remove('open');
+  _delTypeId = null;
+}
+
+async function confirmDeleteType() {
+  try {
+    const r = await fetch(`${API}/type-events/delete/${_delTypeId}`, { method: 'DELETE', headers: hdrs() });
+    if (!r.ok) { toast('Error al eliminar tipo', true); return; }
+    closeDelType();
+    toast('Tipo eliminado');
+    await loadTypes();
+    placeEvents();
+  } catch { toast('Error de conexión', true); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function pad(n) { return String(n).padStart(2, '0'); }
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fmtDateTime(isoStr, dateOnly = false) {
+  const d = new Date(isoStr);
+  if (dateOnly) return d.toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+  return d.toLocaleString('es-ES', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+function prevMonthDate(day) {
+  const y = curMonth === 0 ? curYear - 1 : curYear;
+  const m = curMonth === 0 ? 12 : curMonth;
+  return `${y}-${pad(m)}-${pad(day)}`;
+}
+
+function nextMonthNum() { return curMonth === 11 ? 1 : curMonth + 2; }
+function nextMonthYear() { return curMonth === 11 ? curYear + 1 : curYear; }
+
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${err ? 'err' : 'ok'}`;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+init();
+</script>
+</body>
+</html>

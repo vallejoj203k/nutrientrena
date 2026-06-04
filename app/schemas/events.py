@@ -1,6 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
+from typing import Optional, Literal
+from datetime import datetime, date
+
+
+RECURRENCE_VALUES = Literal["none", "daily", "weekly", "monthly"]
 
 
 class TypeEventCreate(BaseModel):
@@ -31,6 +34,8 @@ class EventCreate(BaseModel):
     start_date: datetime
     end_date: Optional[datetime] = None
     all_day: Optional[int] = 0
+    recurrence: Optional[RECURRENCE_VALUES] = "none"
+    recurrence_end_date: Optional[date] = None  # required when recurrence != none
 
 
 class EventUpdate(BaseModel):
@@ -40,6 +45,8 @@ class EventUpdate(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     all_day: Optional[int] = None
+    recurrence: Optional[RECURRENCE_VALUES] = None
+    recurrence_end_date: Optional[date] = None
 
 
 class EventOut(BaseModel):
@@ -51,5 +58,9 @@ class EventOut(BaseModel):
     start_date: datetime
     end_date: Optional[datetime] = None
     all_day: int
+    recurrence: Optional[str] = None
+    recurrence_end_date: Optional[date] = None
+    recurrence_group_id: Optional[int] = None
+    type_event: Optional[TypeEventOut] = None
 
     model_config = {"from_attributes": True}

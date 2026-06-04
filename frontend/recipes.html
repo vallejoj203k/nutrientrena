@@ -515,7 +515,7 @@ const headers = () => ({ 'Authorization': `Bearer ${token()}`, 'Content-Type': '
 // ── State ─────────────────────────────────────────────────────────────────────
 let _page = 1, _perPage = 12, _total = 0, _lastPage = 1, _search = '';
 let _editId = null, _delId = null;
-let _ingrRows = [], _acTimers = {};
+let _ingrRows = [], _acTimers = {}, _rowSeq = 0, _macroCache = {};
 let _imageUrl = null;
 
 // ── Auth / Init ───────────────────────────────────────────────────────────────
@@ -729,7 +729,7 @@ function setCircle(id, val, max, label) {
 
 // ── Ingredient rows ───────────────────────────────────────────────────────────
 function addIngredientRow(detail = null) {
-  const rowId = Date.now() + Math.random();
+  const rowId = ++_rowSeq;
   const row = { id: rowId, aliment_id: null, aliment_name: '',
                 proteins: null, carbohydrates: null, fats: null, calories: null };
   _ingrRows.push(row);
@@ -859,24 +859,27 @@ function showAcDropdown(rowId, items) {
   const drop = document.getElementById(`acdrop-${rowId}`);
   if (!drop) return;
   if (!items.length) { drop.classList.remove('open'); return; }
-  drop.innerHTML = items.map(a => {
-    const m = encodeURIComponent(JSON.stringify({ p: a.proteins??null, c: a.carbohydrates??null, f: a.fats??null, k: a.calories??null }));
-    return `<div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}','${m}')">
+  items.forEach(a => {
+    _macroCache[a.id] = { proteins: a.proteins ?? null, carbohydrates: a.carbohydrates ?? null, fats: a.fats ?? null, calories: a.calories ?? null };
+  });
+  drop.innerHTML = items.map(a =>
+    `<div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}')">
       <div class="ac-name">${esc(a.name)}</div>
       ${a.brand ? `<div class="ac-brand">${esc(a.brand)}</div>` : ''}
-    </div>`;
-  }).join('');
+    </div>`
+  ).join('');
   drop.classList.add('open');
 }
 
-function selectAliment(rowId, alimentId, alimentName, macroEncoded) {
+function selectAliment(rowId, alimentId, alimentName) {
   const row = _ingrRows.find(r => r.id == rowId);
   if (row) {
     row.aliment_id = alimentId; row.aliment_name = alimentName;
-    try {
-      const m = JSON.parse(decodeURIComponent(macroEncoded || '{}'));
-      row.proteins = m.p??null; row.carbohydrates = m.c??null; row.fats = m.f??null; row.calories = m.k??null;
-    } catch {}
+    const m = _macroCache[alimentId] || {};
+    row.proteins      = m.proteins      ?? null;
+    row.carbohydrates = m.carbohydrates ?? null;
+    row.fats          = m.fats          ?? null;
+    row.calories      = m.calories      ?? null;
     updateRowMacros(row);
   }
   const input = document.getElementById(`iac-${rowId}`);

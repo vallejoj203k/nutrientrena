@@ -729,7 +729,7 @@ function toggleAllDay() {
 
 function toggleRecurEnd() {
   const v = document.getElementById('ev_recur').value;
-  document.getElementById('recurEndGroup').style.display = (v && v !== 'none') ? '' : 'none';
+  document.getElementById('recurEndGroup').style.display = (v && v !== 'none') ? 'block' : 'none';
 }
 
 async function saveEvent() {

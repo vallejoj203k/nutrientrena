@@ -995,7 +995,7 @@ function wizardGo(step) {
   document.querySelectorAll('.wizard-panel').forEach((el, i) => {
     el.classList.toggle('active', i + 1 === step);
   });
-  if (step === 2) renderDaysList();
+  if (step === 2) { renderDaysList(); renderBlocks(); }
 }
 
 function wizardNext() {

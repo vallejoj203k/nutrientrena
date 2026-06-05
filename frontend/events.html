@@ -337,7 +337,7 @@
       <div class="form-row" id="datetimeRow">
         <div class="form-group">
           <label>Inicio *</label>
-          <input id="ev_start" type="datetime-local"/>
+          <input id="ev_start" type="datetime-local" oninput="updateRecurPreview()"/>
         </div>
         <div class="form-group">
           <label>Fin</label>
@@ -347,7 +347,7 @@
       <div class="form-row" id="dateOnlyRow" style="display:none;">
         <div class="form-group">
           <label>Fecha inicio *</label>
-          <input id="ev_start_date" type="date"/>
+          <input id="ev_start_date" type="date" oninput="updateRecurPreview()"/>
         </div>
         <div class="form-group">
           <label>Fecha fin</label>
@@ -370,7 +370,8 @@
         </div>
         <div class="form-group" id="recurEndGroup">
           <label>Repetir hasta</label>
-          <input id="ev_recur_end" type="date"/>
+          <input id="ev_recur_end" type="date" oninput="updateRecurPreview()"/>
+          <div id="recurPreview" style="font-size:11px;color:#5B2D8E;margin-top:4px;font-weight:600;"></div>
         </div>
       </div>
       <div class="form-error" id="eventError"></div>
@@ -730,6 +731,29 @@ function toggleAllDay() {
 function toggleRecurEnd() {
   const v = document.getElementById('ev_recur').value;
   document.getElementById('recurEndGroup').style.display = (v && v !== 'none') ? 'block' : 'none';
+  updateRecurPreview();
+}
+
+function updateRecurPreview() {
+  const prev = document.getElementById('recurPreview');
+  if (!prev) return;
+  const recur   = document.getElementById('ev_recur').value;
+  const endVal  = document.getElementById('ev_recur_end').value;
+  const startEl = document.getElementById('ev_allday').checked
+    ? document.getElementById('ev_start_date').value
+    : document.getElementById('ev_start').value?.slice(0, 10);
+  if (!recur || recur === 'none' || !endVal || !startEl) { prev.textContent = ''; return; }
+  const start = new Date(startEl + 'T00:00:00');
+  const end   = new Date(endVal  + 'T00:00:00');
+  if (isNaN(start) || isNaN(end) || end < start) { prev.textContent = ''; return; }
+  let count = 0, cur = new Date(start);
+  while (cur <= end && count < 500) {
+    count++;
+    if (recur === 'daily')   cur.setDate(cur.getDate() + 1);
+    else if (recur === 'weekly') cur.setDate(cur.getDate() + 7);
+    else if (recur === 'monthly') cur.setMonth(cur.getMonth() + 1);
+  }
+  prev.textContent = count === 1 ? '1 evento (solo el día de inicio)' : `Se crearán ${count} eventos`;
 }
 
 async function saveEvent() {

@@ -101,7 +101,7 @@
     /* Muscle group cards */
     .mg-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;transition:.15s;display:flex;align-items:center;gap:14px;cursor:pointer;}
     .mg-card:hover{border-color:#D8B4FE;}
-    .mg-icon{width:48px;height:48px;border-radius:12px;background:var(--purple-pale);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+    .mg-icon{width:48px;height:48px;border-radius:12px;background:var(--purple-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--purple);}
     .mg-info{flex:1;min-width:0;}
     .mg-name{font-size:14px;font-weight:700;color:#111;}
     .mg-desc{font-size:12px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -617,15 +617,9 @@
       <button class="modal-close" onclick="closeMgModal()">×</button>
     </div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nombre *</label>
-          <input id="mg_name" placeholder="Ej: Pecho"/>
-        </div>
-        <div class="form-group">
-          <label>Icono (emoji)</label>
-          <input id="mg_icon" placeholder="&#128170;" maxlength="10"/>
-        </div>
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input id="mg_name" placeholder="Ej: Pecho"/>
       </div>
       <div class="form-group">
         <label>Descripción</label>
@@ -1255,7 +1249,7 @@ function renderPickerPills() {
   container.innerHTML = `
     <button class="picker-pill${!pickerMgFilter?' active':''}" onclick="setPickerMg(null)">Todos</button>
     ${allMuscleGroups.map(mg => `
-      <button class="picker-pill${pickerMgFilter===mg.id?' active':''}" onclick="setPickerMg(${mg.id})">${esc(mg.icon||'')} ${esc(mg.name)}</button>
+      <button class="picker-pill${pickerMgFilter===mg.id?' active':''}" onclick="setPickerMg(${mg.id})">${esc(mg.name)}</button>
     `).join('')}`;
 }
 
@@ -1345,7 +1339,7 @@ function renderExMgPills() {
   container.innerHTML = `
     <button class="pill${!exMgFilter?' active':''}" onclick="setExMg(null)">Todos</button>
     ${allMuscleGroups.map(mg => `
-      <button class="pill${exMgFilter===mg.id?' active':''}" onclick="setExMg(${mg.id})">${esc(mg.icon||'')} ${esc(mg.name)}</button>
+      <button class="pill${exMgFilter===mg.id?' active':''}" onclick="setExMg(${mg.id})">${esc(mg.name)}</button>
     `).join('')}`;
 }
 
@@ -1527,7 +1521,7 @@ function renderMuscleGroups(items) {
   }
   container.innerHTML = items.map(mg => `
     <div class="mg-card" onclick="openMgModal(${mg.id})">
-      <div class="mg-icon">${esc(mg.icon) || '&#128170;'}</div>
+      <div class="mg-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l-3 5h6l-3-5V7"/><path d="M7 10c-1.5.5-2 1.5-2 3s.5 2.5 2 3"/><path d="M17 10c1.5.5 2 1.5 2 3s-.5 2.5-2 3"/></svg></div>
       <div class="mg-info">
         <div class="mg-name">${esc(mg.name)}</div>
         <div class="mg-desc">${esc(mg.description || 'Sin descripción')}</div>
@@ -1539,7 +1533,7 @@ function renderMuscleGroups(items) {
 async function openMgModal(id = null) {
   editingMgId = id;
   document.getElementById('mgModalTitle').textContent = id ? 'Editar grupo muscular' : 'Nuevo grupo muscular';
-  ['mg_name','mg_icon','mg_desc'].forEach(f => document.getElementById(f).value = '');
+  ['mg_name','mg_desc'].forEach(f => document.getElementById(f).value = '');
 
   if (id) {
     try {
@@ -1547,7 +1541,6 @@ async function openMgModal(id = null) {
       const d = await r.json();
       const mg = d.data || d;
       document.getElementById('mg_name').value = mg.name || '';
-      document.getElementById('mg_icon').value = mg.icon || '';
       document.getElementById('mg_desc').value = mg.description || '';
     } catch { showToast('Error al cargar grupo', 'error'); return; }
   }
@@ -1566,7 +1559,6 @@ async function saveMuscleGroup() {
 
   const payload = {
     name,
-    icon: document.getElementById('mg_icon').value.trim() || null,
     description: document.getElementById('mg_desc').value.trim() || null,
   };
 

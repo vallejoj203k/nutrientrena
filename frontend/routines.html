@@ -483,10 +483,10 @@
               <div class="add-block-wrap">
                 <button class="btn btn-sm btn-purple" onclick="toggleBlockMenu()">+ Bloque</button>
                 <div class="block-type-menu" id="blockTypeMenu">
-                  <button onclick="addBlock('warmup');toggleBlockMenu()">&#128293; Calentamiento</button>
-                  <button onclick="addBlock('normal');toggleBlockMenu()">&#128203; Normal</button>
-                  <button onclick="addBlock('superset');toggleBlockMenu()">&#128260; Superserie</button>
-                  <button onclick="addBlock('circuit');toggleBlockMenu()">&#11093; Circuito</button>
+                  <button onclick="addBlock('warmup');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/><path d="M12 12c0 3-2 4-2 7a2 2 0 0 0 4 0c0-3-2-4-2-7z"/></svg> Calentamiento</button>
+                  <button onclick="addBlock('normal');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h2a2 2 0 0 1 2 2v0a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Normal</button>
+                  <button onclick="addBlock('superset');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Superserie</button>
+                  <button onclick="addBlock('circuit');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Circuito</button>
                 </div>
               </div>
             </div>
@@ -1057,10 +1057,10 @@ function renderDaysList() {
 
 /* ── Blocks ── */
 const BLOCK_LABELS = {
-  warmup: '&#128293; Calentamiento',
-  normal: '&#128203; Normal',
-  superset: '&#128260; Superserie',
-  circuit: '&#11093; Circuito',
+  warmup:   '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/><path d="M12 12c0 3-2 4-2 7a2 2 0 0 0 4 0c0-3-2-4-2-7z"/></svg> Calentamiento',
+  normal:   '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h2a2 2 0 0 1 2 2v0a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Normal',
+  superset: '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Superserie',
+  circuit:  '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Circuito',
 };
 
 function toggleBlockMenu() {
@@ -1132,14 +1132,14 @@ function renderBlocks() {
         </td>
         <td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td>
         <td><input type="text" style="width:90px" value="${esc(ex.notes)}" placeholder="Notas…" onchange="updateEx(${bi},${ei},'notes',this.value)"/></td>
-        <td><button style="background:none;border:none;cursor:pointer;color:#EF4444;font-size:16px;padding:4px;" onclick="removeExercise(${bi},${ei})">✕</button></td>
+        <td><button style="background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;display:flex;align-items:center;" onclick="removeExercise(${bi},${ei})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
       </tr>`).join('');
 
     return `
       <div class="block" data-block-idx="${bi}">
         <div class="block-header">
           <span class="block-badge ${blk.block_type}">${label}</span>
-          <button class="block-rm" onclick="removeBlock(${bi})">✕</button>
+          <button class="block-rm" onclick="removeBlock(${bi})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         ${blk.exercises.length ? `
         <table class="exercise-table">

@@ -21,6 +21,39 @@ from app.routers.nutrition import type_food, group_food, aliments, diets, recipe
 # ── CORS origins ──────────────────────────────────────────────────────────────
 _origins = settings.cors_origins
 
+_tags_metadata = [
+    {"name": "Auth", "description": "Autenticación JWT — login, refresh token, recuperación de contraseña."},
+    {"name": "Users", "description": "Gestión de usuarios, clientes y coaches."},
+    {"name": "Roles", "description": "Roles de usuario y asignación de menús (solo superadmin)."},
+    {"name": "Menus", "description": "Menús del sistema para control de acceso."},
+    {"name": "Parameters", "description": "Parámetros del sistema (estados, géneros, niveles de actividad)."},
+    {"name": "Countries", "description": "Catálogo de países."},
+    {"name": "Events", "description": "Eventos del calendario — individuales y recurrentes."},
+    {"name": "Type Events", "description": "Tipos de evento para el calendario."},
+    {"name": "Routines", "description": "Rutinas de entrenamiento con días, bloques y ejercicios."},
+    {"name": "Trainings", "description": "Catálogo de ejercicios."},
+    {"name": "Muscle Groups", "description": "Grupos musculares para clasificar ejercicios."},
+    {"name": "Check-ins", "description": "Check-ins semanales de clientes con métricas y feedback del coach."},
+    {"name": "Progress", "description": "Progreso diario y objetivos físicos del cliente."},
+    {"name": "Client Targets", "description": "Objetivos físicos del cliente (peso meta, grasa corporal, etc.)."},
+    {"name": "Plans", "description": "Entrega de planes (dieta + rutina) al cliente por email."},
+    {"name": "Analytics", "description": "Estadísticas y métricas del negocio para el dashboard."},
+    {"name": "Files", "description": "Subida y gestión de archivos en Cloudflare R2."},
+    {"name": "Forms - Templates", "description": "Plantillas de formularios de intake para clientes."},
+    {"name": "Forms - Assignments", "description": "Asignación y envío de formularios a clientes."},
+    {"name": "Public", "description": "Endpoints públicos — formularios sin autenticación para clientes."},
+    {"name": "Template Notes", "description": "Plantillas de notas reutilizables para instructores."},
+    {"name": "Note Users", "description": "Notas del instructor sobre sus clientes."},
+    {"name": "Session Logs", "description": "Registro de sesiones de entrenamiento completadas."},
+    {"name": "Client Tasks", "description": "Tareas semanales asignadas a clientes."},
+    {"name": "Settings", "description": "Configuración global de la aplicación."},
+    {"name": "Nutrition - Aliments", "description": "Catálogo de alimentos con valores nutricionales."},
+    {"name": "Nutrition - Diets", "description": "Planes de alimentación con comidas y macros."},
+    {"name": "Nutrition - Recipes", "description": "Recetas compuestas por múltiples alimentos."},
+    {"name": "Nutrition - TypeFood", "description": "Tipos de alimento (proteína, carbohidrato, grasa, etc.)."},
+    {"name": "Nutrition - GroupFood", "description": "Grupos de alimentos (carnes, verduras, lácteos, etc.)."},
+]
+
 app = FastAPI(
     title=settings.APP_NAME,
     version="1.0.0",
@@ -28,6 +61,7 @@ app = FastAPI(
     redoc_url=None,
     openapi_url="/api/openapi.json",
     swagger_ui_parameters={"persistAuthorization": True},
+    openapi_tags=_tags_metadata,
 )
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────

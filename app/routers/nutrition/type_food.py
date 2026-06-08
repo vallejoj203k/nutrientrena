@@ -15,13 +15,13 @@ def _get_or_404(db: Session, obj_id: int):
     return db.query(TypeFood).filter(TypeFood.id == obj_id).first()
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar tipos de alimento", description="Retorna todos los tipos de alimento activos (ej: proteína, carbohidrato).")
 def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(TypeFood).filter(TypeFood.status == 1).all()
     return send_response([TypeFoodOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router.get("/search")
+@router.get("/search", summary="Buscar tipos de alimento", description="Búsqueda paginada de tipos de alimento por nombre.")
 def search(
     search: Optional[str] = Query(None),
     page: int = Query(1),
@@ -40,7 +40,7 @@ def search(
     )
 
 
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver tipo de alimento", description="Retorna el detalle de un tipo de alimento por su ID.")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
@@ -48,7 +48,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(TypeFoodOut.model_validate(obj).model_dump(), "OK")
 
 
-@router.post("")
+@router.post("", summary="Crear tipo de alimento", description="Agrega un nuevo tipo de alimento al catálogo.")
 def create(data: TypeFoodCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = TypeFood(**data.model_dump())
     db.add(obj)
@@ -57,7 +57,7 @@ def create(data: TypeFoodCreate, db: Session = Depends(get_db), _=Depends(requir
     return send_response(TypeFoodOut.model_validate(obj).model_dump(), "Creado")
 
 
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar tipo de alimento", description="Modifica los datos de un tipo de alimento existente.")
 def updated(id: int, data: TypeFoodUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:

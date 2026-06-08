@@ -10,7 +10,7 @@ from app.models.country import Country
 router = APIRouter(prefix="/countries", tags=["Countries"])
 
 
-@router.get("/search")
+@router.get("/search", summary="Buscar países", description="Busca países por nombre, retorna máximo 50 resultados.")
 def search(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),

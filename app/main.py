@@ -19,8 +19,7 @@ from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
 
 # ── CORS origins ──────────────────────────────────────────────────────────────
-_raw_origins = settings.ALLOWED_ORIGINS
-_origins = [o.strip() for o in _raw_origins.split(",")] if _raw_origins != "*" else ["*"]
+_origins = settings.cors_origins
 
 app = FastAPI(
     title=settings.APP_NAME,

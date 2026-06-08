@@ -58,6 +58,8 @@ class Settings(BaseSettings):
     AWS_ENDPOINT_URL: Optional[str] = None   # R2 endpoint
     R2_PUBLIC_URL: Optional[str] = None       # public r2.dev URL
 
+    ALLOWED_ORIGINS: str = "*"          # comma-separated list or "*" for dev
+
     RESEND_API_KEY: Optional[str] = None
     MAIL_FROM: str = "onboarding@resend.dev"
     FRONTEND_URL: str = "http://localhost:3000"

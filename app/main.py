@@ -1,12 +1,15 @@
 import os
-import traceback
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.config import settings
+from app.core.limiter import limiter
 from app.routers import (
     auth, users, roles, menus, parameters, countries,
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
@@ -14,6 +17,10 @@ from app.routers import (
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
+
+# ── CORS origins ──────────────────────────────────────────────────────────────
+_raw_origins = settings.ALLOWED_ORIGINS
+_origins = [o.strip() for o in _raw_origins.split(",")] if _raw_origins != "*" else ["*"]
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -24,13 +31,30 @@ app = FastAPI(
     swagger_ui_parameters={"persistAuthorization": True},
 )
 
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+# ── CORS ──────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_origins,
+    allow_credentials=_origins != ["*"],   # credentials only when origins are explicit
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
 )
+
+# ── Security headers ──────────────────────────────────────────────────────────
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    return response
 
 API_PREFIX = "/api"
 
@@ -67,15 +91,23 @@ app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(settings_router.router, prefix=API_PREFIX)
 
 
+# ── Global exception handler (no stack traces in production) ──────────────────
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    tb = traceback.format_exc()
+    if settings.DEBUG:
+        import traceback
+        detail = traceback.format_exc()[-2000:]
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": str(exc), "detail": detail},
+        )
     return JSONResponse(
         status_code=500,
-        content={"success": False, "message": str(exc), "detail": tb[-2000:]},
+        content={"success": False, "message": "Error interno del servidor"},
     )
 
 
+# ── Frontend static files ─────────────────────────────────────────────────────
 _frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.isdir(_frontend_dir):
     app.mount("/app", StaticFiles(directory=_frontend_dir, html=True), name="frontend")

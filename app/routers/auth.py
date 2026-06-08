@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.core.limiter import limiter
 from app.database import get_db
 from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token, hash_password
 from app.core.dependencies import get_current_user
@@ -29,7 +30,8 @@ def _build_menu_tree(menu_list: list) -> list:
 
 
 @router.post("/login")
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.password):
         return send_error("Usuario y contraseña incorrectos.", {"error": "Unauthorised"}, code=401)
@@ -75,7 +77,8 @@ def refresh_token_endpoint(data: RefreshTokenRequest, db: Session = Depends(get_
 
 
 @router.post("/recover-password")
-def recover_password(data: RecoverPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def recover_password(request: Request, data: RecoverPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user:
         # Respuesta genérica para no revelar si el email existe

@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.core.limiter import limiter
 from app.database import get_db
 from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token, hash_password
 from app.core.dependencies import get_current_user
@@ -28,8 +29,9 @@ def _build_menu_tree(menu_list: list) -> list:
     return result
 
 
-@router.post("/login")
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+@router.post("/login", summary="Iniciar sesión", description="Autentica con email y contraseña. Retorna tokens JWT de acceso y refresco.")
+@limiter.limit("10/minute")
+def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.password):
         return send_error("Usuario y contraseña incorrectos.", {"error": "Unauthorised"}, code=401)
@@ -58,7 +60,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     )
 
 
-@router.put("/refresh-token")
+@router.put("/refresh-token", summary="Renovar tokens", description="Genera un nuevo par de tokens de acceso y refresco usando el refresh token.")
 def refresh_token_endpoint(data: RefreshTokenRequest, db: Session = Depends(get_db)):
     payload = decode_token(data.refresh_token)
     if payload is None or payload.get("type") != "refresh":
@@ -74,8 +76,9 @@ def refresh_token_endpoint(data: RefreshTokenRequest, db: Session = Depends(get_
     )
 
 
-@router.post("/recover-password")
-def recover_password(data: RecoverPasswordRequest, db: Session = Depends(get_db)):
+@router.post("/recover-password", summary="Solicitar recuperación de contraseña", description="Envía un email con enlace para resetear la contraseña. Respuesta genérica para no revelar si el email existe.")
+@limiter.limit("5/minute")
+def recover_password(request: Request, data: RecoverPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user:
         # Respuesta genérica para no revelar si el email existe
@@ -90,7 +93,7 @@ def recover_password(data: RecoverPasswordRequest, db: Session = Depends(get_db)
     return send_response([], "Se envio un correo electronico.")
 
 
-@router.post("/reset-password")
+@router.post("/reset-password", summary="Restablecer contraseña", description="Cambia la contraseña del usuario usando el token recibido por email.")
 def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
     payload = decode_token(data.token)
     if payload is None:
@@ -110,7 +113,7 @@ def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
     return send_response(None, "Contraseña actualizada correctamente")
 
 
-@router.get("/me")
+@router.get("/me", summary="Perfil del usuario autenticado", description="Retorna el perfil completo y roles del usuario autenticado.")
 def me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     user_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
     if not user_detail:
@@ -125,12 +128,12 @@ def me(current_user: User = Depends(get_current_user), db: Session = Depends(get
     return send_response(data, "Successfully.")
 
 
-@router.get("/logout")
+@router.get("/logout", summary="Cerrar sesión", description="Invalida la sesión del usuario autenticado.")
 def logout(current_user: User = Depends(get_current_user)):
     return send_response([], "Successfully logged out.")
 
 
-@router.get("/menus")
+@router.get("/menus", summary="Menús del usuario", description="Retorna el árbol de menús accesibles según los roles del usuario autenticado.")
 def menus(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
         role_users = db.query(RoleUser).filter(RoleUser.user_id == current_user.id).all()

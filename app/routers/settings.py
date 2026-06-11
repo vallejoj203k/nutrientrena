@@ -45,7 +45,7 @@ class SettingsUpdate(BaseModel):
     timezone: Optional[str] = None
 
 
-@router.get("")
+@router.get("", summary="Ver configuración", description="Retorna la configuración global de la aplicación (moneda, zona horaria, alertas).")
 def get_settings(
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN)),
@@ -54,7 +54,7 @@ def get_settings(
     return send_response(_out(s), "OK")
 
 
-@router.put("")
+@router.put("", summary="Actualizar configuración", description="Modifica la configuración global de la aplicación.")
 def update_settings(
     data: SettingsUpdate,
     db: Session = Depends(get_db),

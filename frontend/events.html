@@ -457,6 +457,7 @@ let curYear, curMonth;   // currently displayed month (0-based)
 let events = [];         // all events for current month
 let types = [];          // all event types
 let _editEventId = null;
+let _editGroupId = null;   // recurrence_group_id of the event being edited
 let _editTypeId = null;
 let _delEventId = null;
 let _delGroupId = null;
@@ -684,6 +685,7 @@ function dayClick(cell) {
 // ── Event modal ───────────────────────────────────────────────────────────────
 function openEventModal(ev = null, defaultDate = null) {
   _editEventId = ev?.id || null;
+  _editGroupId = ev?.recurrence_group_id || null;
   document.getElementById('eventModalTitle').textContent = ev ? 'Editar evento' : 'Nuevo evento';
   document.getElementById('eventError').textContent = '';
   document.getElementById('ev_title').value   = ev?.title || '';
@@ -753,7 +755,10 @@ function updateRecurPreview() {
     else if (recur === 'weekly') cur.setDate(cur.getDate() + 7);
     else if (recur === 'monthly') cur.setMonth(cur.getMonth() + 1);
   }
-  prev.textContent = count === 1 ? '1 evento (solo el día de inicio)' : `Se crearán ${count} eventos`;
+  const editing = !!_editEventId;
+  prev.textContent = count === 1
+    ? '1 evento (solo el día de inicio — extiende la fecha)'
+    : (editing ? `Se regenerará la serie: ${count} eventos` : `Se crearán ${count} eventos`);
 }
 
 async function saveEvent() {
@@ -796,13 +801,28 @@ async function saveEvent() {
   btn.textContent = 'Guardando…'; btn.disabled = true;
   errEl.textContent = '';
 
+  // If editing a recurring event (has recurrence + end date), delete old series and recreate
+  const isEditingRecurring = _editEventId && recur && recur !== 'none' && recurEnd;
+  if (isEditingRecurring) {
+    try {
+      if (_editGroupId) {
+        await fetch(`${API}/events/delete-group/${_editGroupId}`, { method: 'DELETE', headers: hdrs() });
+      } else {
+        await fetch(`${API}/events/delete/${_editEventId}`, { method: 'DELETE', headers: hdrs() });
+      }
+    } catch { /* ignore delete errors, proceed to create */ }
+    _editEventId = null;
+    _editGroupId = null;
+  }
+
   try {
     const url    = _editEventId ? `${API}/events/update/${_editEventId}` : `${API}/events`;
-    const method = _editEventId ? 'POST' : 'POST';
-    const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(body) });
+    const r = await fetch(url, { method: 'POST', headers: hdrs(), body: JSON.stringify(body) });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; return; }
-    const msg = d.data?.count ? `${d.data.count} eventos creados` : (_editEventId ? 'Evento actualizado' : 'Evento creado');
+    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; btn.textContent = 'Guardar'; btn.disabled = false; return; }
+    const msg = d.data?.count
+      ? `${d.data.count} eventos creados`
+      : (isEditingRecurring ? 'Serie regenerada' : (_editEventId ? 'Evento actualizado' : 'Evento creado'));
     closeEventModal();
     toast(msg);
     await loadEvents();

@@ -50,7 +50,7 @@ def _get_client_state_id(db: Session, description: str) -> int | None:
 
 # ── Maintenance ───────────────────────────────────────────────────────────────
 
-@router_templates.post("/update-default")
+@router_templates.post("/update-default", summary="Actualizar plantilla por defecto", description="Operación idempotente que agrega campos faltantes a la plantilla de intake por defecto.")
 def update_default_template(
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN)),
@@ -65,7 +65,7 @@ def update_default_template(
 
 # ── Templates ─────────────────────────────────────────────────────────────────
 
-@router_templates.post("")
+@router_templates.post("", summary="Crear plantilla de formulario", description="Crea una nueva plantilla de formulario con campos personalizados.")
 def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     if data.is_default:
         db.query(FormTemplate).filter(
@@ -99,7 +99,7 @@ def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), cur
     return send_response(FormTemplateOut.model_validate(template).model_dump(), "Plantilla creada")
 
 
-@router_templates.get("/default")
+@router_templates.get("/default", summary="Plantilla por defecto", description="Retorna la plantilla marcada como predeterminada para nuevos clientes.")
 def get_default(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(
         FormTemplate.is_default.is_(True),
@@ -109,13 +109,13 @@ def get_default(db: Session = Depends(get_db), current_user=Depends(require_role
     return send_response(FormTemplateOut.model_validate(template).model_dump(), "OK")
 
 
-@router_templates.get("")
+@router_templates.get("", summary="Listar plantillas", description="Retorna todas las plantillas de formulario creadas por el usuario autenticado.")
 def list_templates(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     templates = db.query(FormTemplate).filter(FormTemplate.created_by == current_user.id).all()
     return send_response([FormTemplateOut.model_validate(t).model_dump() for t in templates], "OK")
 
 
-@router_templates.get("/{id}")
+@router_templates.get("/{id}", summary="Ver plantilla", description="Retorna el detalle de una plantilla con todos sus campos.")
 def get_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
@@ -123,7 +123,7 @@ def get_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_
     return send_response(FormTemplateOut.model_validate(template).model_dump(), "OK")
 
 
-@router_templates.put("/{id}")
+@router_templates.put("/{id}", summary="Actualizar plantilla", description="Modifica una plantilla de formulario y reemplaza sus campos.")
 def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
@@ -161,7 +161,7 @@ def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get
     return send_response(FormTemplateOut.model_validate(template).model_dump(), "Plantilla actualizada")
 
 
-@router_templates.delete("/{id}")
+@router_templates.delete("/{id}", summary="Eliminar plantilla", description="Elimina una plantilla de formulario por su ID.")
 def delete_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
@@ -173,7 +173,7 @@ def delete_template(id: int, db: Session = Depends(get_db), _=Depends(require_ro
 
 # ── Assignments ───────────────────────────────────────────────────────────────
 
-@router_assignments.post("")
+@router_assignments.post("", summary="Asignar formulario a cliente", description="Asigna una plantilla de formulario a un cliente y envía el enlace por email.")
 def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     template = db.query(FormTemplate).filter(FormTemplate.id == data.form_template_id).first()
     if not template:
@@ -219,7 +219,7 @@ def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "Formulario asignado")
 
 
-@router_assignments.get("/pending-count")
+@router_assignments.get("/pending-count", summary="Conteo de formularios pendientes", description="Retorna el número de formularios pendientes de respuesta asignados por el usuario.")
 def pending_count(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     count = db.query(FormAssignment).filter(
         FormAssignment.assigned_by == current_user.id,
@@ -228,7 +228,7 @@ def pending_count(db: Session = Depends(get_db), current_user=Depends(require_ro
     return send_response({"count": count}, "OK")
 
 
-@router_assignments.get("/pending")
+@router_assignments.get("/pending", summary="Formularios pendientes", description="Lista todos los formularios pendientes de respuesta asignados por el usuario.")
 def pending_assignments(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignments = db.query(FormAssignment).filter(
         FormAssignment.assigned_by == current_user.id,
@@ -237,7 +237,7 @@ def pending_assignments(db: Session = Depends(get_db), current_user=Depends(requ
     return send_response([FormAssignmentOut.model_validate(a).model_dump() for a in assignments], "OK")
 
 
-@router_assignments.get("/client/{client_id}")
+@router_assignments.get("/client/{client_id}", summary="Formulario del cliente", description="Retorna el formulario más reciente asignado a un cliente.")
 def client_assignment(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignment = db.query(FormAssignment).filter(
         FormAssignment.client_user_detail_id == client_id,
@@ -247,7 +247,7 @@ def client_assignment(client_id: str, db: Session = Depends(get_db), _=Depends(r
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "OK")
 
 
-@router_assignments.post("/{id}/submit")
+@router_assignments.post("/{id}/submit", summary="Enviar respuestas del formulario", description="Guarda las respuestas y actualiza el perfil del cliente con los datos del formulario.")
 def submit_form(id: str, data: FormSubmitRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignment = db.query(FormAssignment).filter(FormAssignment.id == id).first()
     if not assignment:
@@ -308,7 +308,7 @@ def submit_form(id: str, data: FormSubmitRequest, db: Session = Depends(get_db),
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "Formulario enviado correctamente")
 
 
-@router_assignments.get("/{id}/responses")
+@router_assignments.get("/{id}/responses", summary="Ver respuestas del formulario", description="Retorna el formulario con todas las respuestas enviadas por el cliente.")
 def get_responses(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     assignment = db.query(FormAssignment).filter(FormAssignment.id == id).first()
     if not assignment:

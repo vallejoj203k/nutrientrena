@@ -90,7 +90,7 @@ class PlanDeliveryOut(BaseModel):
 
 # ── Deliver ───────────────────────────────────────────────────────────────────
 
-@router.post("/deliver")
+@router.post("/deliver", summary="Entregar plan al cliente", description="Envía por email y registra la entrega de dieta y/o rutina al cliente.")
 def deliver_plan(
     data: PlanDeliverRequest,
     db: Session = Depends(get_db),
@@ -160,7 +160,7 @@ def deliver_plan(
 
 # ── History ───────────────────────────────────────────────────────────────────
 
-@router.get("/history/{client_id}")
+@router.get("/history/{client_id}", summary="Historial de entregas", description="Retorna el historial de planes entregados a un cliente.")
 def delivery_history(
     client_id: str,
     db: Session = Depends(get_db),
@@ -191,7 +191,7 @@ def delivery_history(
 
 # ── Resend ────────────────────────────────────────────────────────────────────
 
-@router.post("/resend/{delivery_id}")
+@router.post("/resend/{delivery_id}", summary="Reenviar plan por email", description="Reenvía el email de una entrega de plan previamente registrada.")
 def resend_delivery(
     delivery_id: str,
     db: Session = Depends(get_db),
@@ -233,7 +233,7 @@ def resend_delivery(
 class TestEmailRequest(BaseModel):
     to: str
 
-@router.post("/test-email")
+@router.post("/test-email", summary="Probar envío de email", description="Envía un email de prueba para verificar la configuración del proveedor de correo.")
 def test_email(
     data: TestEmailRequest,
     db: Session = Depends(get_db),

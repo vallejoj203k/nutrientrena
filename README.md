@@ -12,6 +12,7 @@ Plataforma de gestión de clientes, planes de entrenamiento y nutrición para co
 | **Dashboard** | https://nutrientrena-production.up.railway.app/app/dashboard.html |
 | **Swagger (API docs)** | https://nutrientrena-production.up.railway.app/api/docs |
 | **Health check** | https://nutrientrena-production.up.railway.app/api/health |
+| **Guía de despliegue** | [DEPLOY.md](./DEPLOY.md) |
 
 ---
 
@@ -444,6 +445,25 @@ Carpetas: `profiles`, `checkins`, `aliments`, `uploads`, `progress`
 | `/api/settings` | GET | Obtener configuración actual |
 | `/api/settings` | PUT | Actualizar configuración |
 
+#### Sesiones de entrenamiento (`/api/session-logs`)
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/session-logs/client/{id}` | GET | Historial de sesiones del cliente |
+| `/api/session-logs` | POST | Registrar sesión completada |
+| `/api/session-logs/{id}` | PUT | Actualizar datos de sesión |
+| `/api/session-logs/{id}` | DELETE | Eliminar sesión |
+
+#### Tareas semanales del cliente (`/api/client-tasks`)
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/client-tasks/client/{id}` | GET | Tareas del cliente (filtrable por semana) |
+| `/api/client-tasks/week` | GET | Todas las tareas de la semana, agrupadas por cliente |
+| `/api/client-tasks` | POST | Crear tarea (tipos: `rutina`, `cardio`, `descanso`, `nutricion`, `checkin`, `foto`, `mensaje`, `video`, `sesion`) |
+| `/api/client-tasks/{id}` | PUT | Actualizar o marcar como completada |
+| `/api/client-tasks/{id}` | DELETE | Eliminar tarea |
+
 ---
 
 ## Base de datos
@@ -466,23 +486,44 @@ python -m app.seeds.run_seeds
 | `h7i8j9k0l1m2` | Módulo nutrición (alimentos, recetas, dietas) |
 | `i8j9k0l1m2n3` | Tabla app_settings + fecha_renovacion en user_details |
 | `j9k0l1m2n3o4` | Fotos x3 en progress_day_users + recurrencia en event_users |
+| `m1n2o3p4q5r6` | Índices de performance (10 índices en tablas críticas) |
 
 ---
 
 ## Variables de entorno
 
+### Obligatorias en producción
+
+| Variable | Ejemplo | Descripción |
+|----------|---------|-------------|
+| `DATABASE_URL` | `mysql+pymysql://user:pass@host:3306/db` | URL completa de MySQL (Railway la provee como `MYSQL_URL`) |
+| `SECRET_KEY` | `openssl rand -hex 32` | Clave secreta JWT — cambiar antes del primer deploy |
+| `FRONTEND_URL` | `https://tuapp.up.railway.app` | URL pública del frontend (para links en emails) |
+| `ALLOWED_ORIGINS` | `https://tuapp.up.railway.app` | Orígenes CORS permitidos. Si se omite, usa `FRONTEND_URL` automáticamente |
+| `RESEND_API_KEY` | `re_xxxx` | API key de Resend para emails transaccionales |
+| `MAIL_FROM` | `noreply@tudominio.com` | Dirección de envío verificada en Resend |
+
+### Almacenamiento de archivos (Cloudflare R2)
+
 | Variable | Descripción |
 |----------|-------------|
-| `MYSQL_URL` | URL de conexión a MySQL |
-| `SECRET_KEY` | Clave secreta para JWT |
-| `RESEND_API_KEY` | API key de Resend (emails) |
-| `MAIL_FROM` | Dirección de envío de emails |
-| `ADMIN_EMAIL` | Email del administrador inicial |
-| `FRONTEND_URL` | URL pública del frontend (para links en emails) |
-| `AWS_ACCESS_KEY_ID` | Access key de Cloudflare R2 |
-| `AWS_SECRET_ACCESS_KEY` | Secret key de Cloudflare R2 |
-| `AWS_BUCKET` | Nombre del bucket R2 |
-| `R2_PUBLIC_URL` | URL pública del bucket |
+| `AWS_ACCESS_KEY_ID` | Access key del token R2 |
+| `AWS_SECRET_ACCESS_KEY` | Secret key del token R2 |
+| `AWS_BUCKET` | Nombre del bucket (ej. `nutrientrena-files`) |
+| `AWS_ENDPOINT_URL` | Endpoint R2: `https://<account-id>.r2.cloudflarestorage.com` |
+| `R2_PUBLIC_URL` | URL pública del bucket: `https://pub-xxx.r2.dev` |
+| `AWS_DEFAULT_REGION` | Siempre `auto` para R2 |
+
+### Opcionales
+
+| Variable | Defecto | Descripción |
+|----------|---------|-------------|
+| `ALGORITHM` | `HS256` | Algoritmo de firma JWT |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` (24 h) | Tiempo de expiración del access token |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | `30` | Tiempo de expiración del refresh token |
+| `DEBUG` | `false` | En `true` incluye stack traces en errores 500 |
+| `PORT` | `8000` | Puerto del servidor |
+| `ADMIN_EMAIL` | — | Email del administrador inicial (para seeds) |
 
 ---
 
@@ -515,13 +556,14 @@ Servidor en `http://localhost:8000` — Swagger en `http://localhost:8000/api/do
 
 ```
 app/
-├── main.py               # Entry point, routers, archivos estáticos
-├── config.py             # Variables de entorno
+├── main.py               # Entry point, routers, CORS, security headers
+├── config.py             # Variables de entorno + cors_origins property
 ├── database.py           # Conexión SQLAlchemy
 ├── core/
 │   ├── security.py       # JWT y hash de contraseñas
 │   ├── dependencies.py   # require_role_ids, verify_client_access
-│   ├── email.py          # Emails transaccionales (Resend)
+│   ├── email.py          # Emails transaccionales (Resend / Gmail)
+│   ├── limiter.py        # Rate limiting (slowapi)
 │   └── responses.py      # send_response / send_error
 ├── models/               # Modelos SQLAlchemy
 ├── schemas/              # Schemas Pydantic v2
@@ -529,13 +571,22 @@ app/
 │   ├── auth.py, users.py, checkins.py, plans.py
 │   ├── forms.py, analytics.py, files.py, public.py
 │   ├── events.py, notes.py, progress.py, settings.py
+│   ├── session_logs.py   # Sesiones de entrenamiento
+│   ├── client_tasks.py   # Tareas semanales
+│   ├── roles.py, menus.py, parameters.py, countries.py
 │   └── nutrition/
 │       ├── diets.py, aliments.py, recipes.py
 │       └── type_food.py, group_food.py
 ├── pdf/                  # Generación de PDFs (WeasyPrint)
 └── seeds/                # Datos iniciales idempotentes
 alembic/
-└── versions/             # 9 migraciones aplicadas
+└── versions/             # 10 migraciones aplicadas
+tests/
+├── conftest.py           # Fixtures: DB SQLite en memoria, admin/coach headers
+├── test_auth.py          # Login, tokens, endpoints protegidos
+├── test_events.py        # Tipos de evento, eventos únicos y recurrentes
+├── test_nutrition.py     # Alimentos, tipos, grupos, recetas
+└── test_security.py      # Headers, RBAC, validación de inputs
 frontend/
 ├── login.html, dashboard.html, kanban.html
 ├── clients.html, client-profile.html
@@ -552,12 +603,18 @@ frontend/
 
 ## CI/CD
 
-Cada push a `main` ejecuta en GitHub Actions:
+Cada push ejecuta dos jobs en GitHub Actions:
 
+### Job 1 — Lint & Import Check
 1. **Lint** con `ruff` (`E`, `F`, `W` — ignora `E501`, `F401`)
-2. **Validación de modelos** — tablas registradas en SQLAlchemy
-3. **Validación de rutas** — endpoints registrados en FastAPI
+2. **Validación de modelos** — ≥33 tablas registradas en SQLAlchemy
+3. **Validación de rutas** — ≥50 endpoints registrados en FastAPI
 4. **Validación de migraciones** — archivos de migración presentes
+
+### Job 2 — Pytest Suite _(requiere Job 1 exitoso)_
+5. **47 tests** sobre base SQLite en memoria
+6. **Cobertura ≥ 40%** — falla el pipeline si baja de ese umbral
+7. Reporte `.coverage` guardado como artefacto descargable
 
 ---
 
@@ -569,7 +626,8 @@ Cada push a `main` ejecuta en GitHub Actions:
 | **Fase 1** | Clientes, kanban, check-ins, planes, formularios, frontend base | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 2** | Analytics, imágenes R2, PDFs, frontend avanzado, roles, emails, CRM | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 4** | Eventos recurrentes, notas, progreso con fotos | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 4** | Eventos recurrentes, notas, progreso con fotos _(con fixes post-entrega)_ | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 5** | Seguridad, testing, documentación API, optimización de BD | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 
 ### Fase 3 — Detalle
 
@@ -597,6 +655,23 @@ Cada push a `main` ejecuta en GitHub Actions:
 | `progress.html`: medidas corporales + gráfica SVG de peso | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
 | `progress.html`: subida de hasta 3 fotos a R2 + lightbox | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
 | Sidebar unificado en las 16 páginas | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| **Fix:** campo "Repetir hasta" visible en modal de creación de eventos | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
+| **Fix:** preview de N eventos al configurar recurrencia | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
+| **Fix:** al editar un evento recurrente regenera toda la serie | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
+| **Fix:** subida de imágenes en ejercicios de rutina | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
+
+### Fase 5 — Detalle
+
+| Ítem | Estado |
+|------|--------|
+| CORS hardening — sin wildcard en producción, fallback automático a `FRONTEND_URL` | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Rate limiting — 10/min en login, 5/min en recuperar contraseña | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Security headers en todas las respuestas (CSP, X-Frame, Referrer-Policy…) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Global exception handler — sin stack traces en producción | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Suite pytest — 47 tests, cobertura ≥ 40% | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| 10 índices de performance en tablas críticas (Alembic idempotente) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| CI actualizado con job de pytest + reporte de cobertura | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Swagger: `summary` + `description` en 111+ endpoints, 30 secciones con tags | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
 
 ---
 

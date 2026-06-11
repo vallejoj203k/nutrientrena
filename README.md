@@ -223,46 +223,70 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 2. Navegar a la pestaña **Progreso**
 3. Verificar que aparecen las tarjetas de peso, grasa y músculo, la gráfica de peso y la tabla de registros
 
+#### 4.7 Correcciones aplicadas tras la entrega
+
+**Campo "Repetir hasta" en eventos recurrentes**
+
+1. Ir a **Eventos** → hacer clic en cualquier día del calendario para crear un evento
+2. En el campo **Repetición**, seleccionar "Semanal" (o diaria/mensual)
+3. Debe aparecer inmediatamente el campo **"Repetir hasta"** para indicar la fecha de fin de la serie
+4. Rellenar la fecha → debe aparecer un texto indicando cuántos eventos se van a crear (ej. "Se crearán 5 eventos")
+
+**Editar una serie de eventos recurrentes**
+
+1. Hacer clic sobre cualquier chip de evento que pertenezca a una serie recurrente
+2. En el popover, hacer clic en **Editar**
+3. Modificar el título u horario → guardar
+4. El sistema debe eliminar la serie antigua y recrear todos los eventos con los nuevos datos → verificar en el calendario que los chips actualizados aparecen en los días correctos
+
+**Subida de imágenes en ejercicios**
+
+1. Ir a **Rutinas** → pestaña **Ejercicios**
+2. Hacer clic en editar sobre cualquier ejercicio → se abre el modal de edición
+3. En el campo **Imagen**, hacer clic en la zona de subida → seleccionar una imagen del dispositivo
+4. Esperar a que suba → debe aparecer la miniatura de la imagen dentro del modal
+5. Guardar → volver a abrir el ejercicio → la imagen debe seguir guardada
+
 ---
 
 ### FASE 5 — Seguridad, rendimiento y documentación
 
-#### 5.1 Rate limiting
+#### 5.1 Bloqueo por intentos de login fallidos
 
-1. Abrir una pestaña con las DevTools (F12) → pestaña **Network**
-2. Ir a `/app/login.html` e intentar hacer login con credenciales incorrectas **11 veces seguidas** en menos de un minuto
-3. En el intento 11 el servidor debe responder **HTTP 429** — el mensaje de error en pantalla debe decir algo como "Demasiadas peticiones"
-4. Esperar 60 segundos → el login debe volver a funcionar con normalidad
+1. Ir a la pantalla de **Login** (`/app/login.html`)
+2. Dejar el campo de contraseña con un valor incorrecto y hacer clic en **Login** repetidamente — **10 veces seguidas** en menos de 1 minuto
+3. En el intento 11 debe aparecer un mensaje de error indicando que se han hecho demasiados intentos y que el acceso está bloqueado temporalmente
+4. Esperar 1 minuto y volver a intentar con las credenciales correctas → el login debe funcionar con normalidad
 
-#### 5.2 Headers de seguridad
+#### 5.2 Redirección automática sin sesión
 
-1. Abrir las DevTools → pestaña **Network** → hacer login
-2. Clic en la petición `login` → pestaña **Response Headers**
-3. Verificar que aparecen los siguientes headers:
-   - `X-Frame-Options: DENY`
-   - `X-Content-Type-Options: nosniff`
-   - `Referrer-Policy: strict-origin-when-cross-origin`
-   - `Content-Security-Policy` (debe existir el header)
+1. Abrir una ventana en **modo incógnito** (Ctrl+Shift+N en Chrome / ⌘+Shift+N en Mac)
+2. Escribir directamente en la barra de direcciones: `https://nutrientrena-production.up.railway.app/app/dashboard.html`
+3. El panel debe redirigirte automáticamente a la pantalla de login sin mostrar ningún dato del panel
+4. Iniciar sesión → navegar normalmente → cerrar sesión usando el botón de salida del menú lateral
+5. Pulsar el botón **Atrás** del navegador → debe redirigir de nuevo al login, no mostrar el panel
 
-#### 5.3 Sesión y control de acceso
+#### 5.3 Recuperación de contraseña
 
-1. Abrir en modo incógnito cualquier URL del panel (ej. `/app/dashboard.html`) sin haber iniciado sesión → debe redirigir automáticamente a `login.html`
-2. Iniciar sesión → copiar el token de `localStorage` → cerrar sesión → pegar el mismo token manualmente en `localStorage` de una nueva pestaña → abrir el dashboard → debe funcionar (el token sigue vigente 60 min)
-3. Borrar el token de `localStorage` mientras estás dentro del panel → recargar → debe redirigir a `login.html`
+1. En la pantalla de login, escribir tu email en el campo superior
+2. Hacer clic en **"¿Olvidaste tu contraseña?"**
+3. Debe aparecer un mensaje en verde confirmando que se envió el correo
+4. Verificar que el correo llega a la bandeja de entrada con el enlace para restablecer la contraseña
+5. *(Opcional — prueba de bloqueo)* Hacer clic en "¿Olvidaste tu contraseña?" **6 veces seguidas** en menos de 1 minuto → en el sexto intento debe aparecer un mensaje de bloqueo temporal
 
-#### 5.4 Documentación Swagger
+#### 5.4 Documentación de la API (Swagger)
 
-1. Ir a `/api/docs`
-2. Verificar que los endpoints están organizados por secciones con tags (Auth, Users, Checkins, Events, etc.)
-3. Expandir cualquier endpoint → debe tener descripción, parámetros documentados y ejemplo de respuesta
-4. Hacer clic en **Authorize** → pegar el token → probar un endpoint directamente desde la UI → debe devolver datos reales
+1. Abrir en el navegador: `https://nutrientrena-production.up.railway.app/api/docs`
+2. Debe cargarse una página con todos los endpoints organizados por secciones (Auth, Clientes, Eventos, Dietas, Rutinas, Analytics, etc.)
+3. Expandir cualquier sección → hacer clic en un endpoint → debe mostrar una descripción clara y los parámetros que acepta
+4. Comprobar que existen al menos las secciones: **Auth**, **Events**, **Diets**, **Routines**, **Analytics**
 
-#### 5.5 Rendimiento de base de datos
+#### 5.5 Velocidad de respuesta
 
-1. Abrir el panel de **Rutinas** (`/app/routines.html`) → pestaña Ejercicios
-2. Escribir letras en el buscador → los resultados deben aparecer sin retraso notable (< 500 ms) gracias a los índices en la tabla `trainings`
-3. Ir a **Clientes** → buscar por nombre → misma experiencia fluida
-4. Ir a **Analytics** → las métricas deben cargarse en < 2 segundos
+1. Ir a **Rutinas** → pestaña **Ejercicios** → escribir cualquier letra en el buscador → los resultados deben aparecer de inmediato, sin esperar
+2. Ir a **Clientes** → escribir en el buscador → misma respuesta rápida
+3. Ir a **Analytics** → las estadísticas y gráficas deben cargarse en menos de 2 segundos
+4. Navegar entre distintas páginas del panel → ninguna debería tardar más de 3 segundos en cargar completamente
 
 ---
 

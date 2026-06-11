@@ -409,7 +409,7 @@
 </div>
 
 <!-- ── Delete event dialog ── -->
-<div class="overlay" id="delEventOverlay">
+<div class="overlay" id="delEventOverlay" onclick="if(event.target===this)closeDelEvent()">
   <div class="del-dialog">
     <h3>¿Eliminar evento?</h3>
     <p id="delEventMsg">Esta acción no se puede deshacer.</p>
@@ -422,7 +422,7 @@
 </div>
 
 <!-- ── Delete type dialog ── -->
-<div class="overlay" id="delTypeOverlay">
+<div class="overlay" id="delTypeOverlay" onclick="if(event.target===this)closeDelType()">
   <div class="del-dialog">
     <h3>¿Eliminar tipo?</h3>
     <p>Los eventos de este tipo no se eliminarán, solo perderán el tipo asignado.</p>
@@ -464,7 +464,6 @@ let _delGroupId = null;
 let _delTypeId = null;
 let _popEventId = null;
 let _selectedColor = '#5B2D8E';
-let _currentUserId = null;
 
 const PRESET_COLORS = [
   '#5B2D8E','#7C3AED','#2563EB','#0891B2','#059669',
@@ -482,10 +481,10 @@ async function init() {
     if (r.status === 401) { location.href = 'login.html'; return; }
     const d = await r.json();
     const me = d.data || {};
-    _currentUserId = me.id;
-    document.getElementById('sidebarName').textContent = me.name || me.email || '';
-    document.getElementById('sidebarRole').textContent = me.roles?.[0]?.name || '';
-    document.getElementById('sidebarAvatar').textContent = (me.name || '?')[0].toUpperCase();
+    const name = me.name || me.full_name || `${me.first_name||''} ${me.last_name||''}`.trim() || me.email || 'Usuario';
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarRole').textContent = me.role?.name || me.role || '';
+    document.getElementById('sidebarAvatar').textContent = name[0].toUpperCase();
     loadFormsBadge();
   } catch { location.href = 'login.html'; return; }
 
@@ -503,12 +502,12 @@ async function init() {
 
 async function loadFormsBadge() {
   try {
-    const r = await fetch(`${API}/form-assignments/pending-count`, { headers: hdrs() });
+    const r = await fetch(`${API}/form-assignments?status=pending&per_page=1`, { headers: hdrs() });
     if (!r.ok) return;
     const d = await r.json();
-    const c = d.data?.count || 0;
+    const c = d?.data?.total || d?.total || 0;
     const b = document.getElementById('formsBadge');
-    if (c > 0) { b.textContent = c; b.style.display = ''; }
+    if (c > 0) { b.textContent = c > 99 ? '99+' : c; b.style.display = ''; }
   } catch {}
 }
 
@@ -589,6 +588,7 @@ function renderCalendar() {
   let html = '';
   let dayCounter = 1;
   let nextCounter = 1;
+  let weeksRendered = 0;
 
   for (let week = 0; week < 6; week++) {
     html += '<div class="cal-week">';
@@ -619,8 +619,10 @@ function renderCalendar() {
       }
     }
     html += '</div>';
+    weeksRendered++;
     if (dayCounter > daysInMonth && week >= 4) break;
   }
+  body.style.gridTemplateRows = `repeat(${weeksRendered},1fr)`;
   body.innerHTML = html;
 }
 

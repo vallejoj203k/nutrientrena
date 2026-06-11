@@ -225,15 +225,58 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 
 ---
 
+### FASE 5 — Seguridad, rendimiento y documentación
+
+#### 5.1 Rate limiting
+
+1. Abrir una pestaña con las DevTools (F12) → pestaña **Network**
+2. Ir a `/app/login.html` e intentar hacer login con credenciales incorrectas **11 veces seguidas** en menos de un minuto
+3. En el intento 11 el servidor debe responder **HTTP 429** — el mensaje de error en pantalla debe decir algo como "Demasiadas peticiones"
+4. Esperar 60 segundos → el login debe volver a funcionar con normalidad
+
+#### 5.2 Headers de seguridad
+
+1. Abrir las DevTools → pestaña **Network** → hacer login
+2. Clic en la petición `login` → pestaña **Response Headers**
+3. Verificar que aparecen los siguientes headers:
+   - `X-Frame-Options: DENY`
+   - `X-Content-Type-Options: nosniff`
+   - `Referrer-Policy: strict-origin-when-cross-origin`
+   - `Content-Security-Policy` (debe existir el header)
+
+#### 5.3 Sesión y control de acceso
+
+1. Abrir en modo incógnito cualquier URL del panel (ej. `/app/dashboard.html`) sin haber iniciado sesión → debe redirigir automáticamente a `login.html`
+2. Iniciar sesión → copiar el token de `localStorage` → cerrar sesión → pegar el mismo token manualmente en `localStorage` de una nueva pestaña → abrir el dashboard → debe funcionar (el token sigue vigente 60 min)
+3. Borrar el token de `localStorage` mientras estás dentro del panel → recargar → debe redirigir a `login.html`
+
+#### 5.4 Documentación Swagger
+
+1. Ir a `/api/docs`
+2. Verificar que los endpoints están organizados por secciones con tags (Auth, Users, Checkins, Events, etc.)
+3. Expandir cualquier endpoint → debe tener descripción, parámetros documentados y ejemplo de respuesta
+4. Hacer clic en **Authorize** → pegar el token → probar un endpoint directamente desde la UI → debe devolver datos reales
+
+#### 5.5 Rendimiento de base de datos
+
+1. Abrir el panel de **Rutinas** (`/app/routines.html`) → pestaña Ejercicios
+2. Escribir letras en el buscador → los resultados deben aparecer sin retraso notable (< 500 ms) gracias a los índices en la tabla `trainings`
+3. Ir a **Clientes** → buscar por nombre → misma experiencia fluida
+4. Ir a **Analytics** → las métricas deben cargarse en < 2 segundos
+
+---
+
 ### Verificaciones finales
 
 | Comprobación | Cómo verificar |
 |---|---|
-| Menú lateral consistente | Cada página debe mostrar los mismos links en el sidebar |
-| Notas y Progreso en sidebar | Visible en todas las páginas (dashboard, clientes, dietas, etc.) |
+| Menú lateral consistente | Cada página muestra los mismos links en el sidebar, incluyendo **Eventos** |
+| Enlace Eventos visible | Aparece entre "Clientes" y "Check-ins" en todas las páginas |
 | Toast de confirmación | Cada acción guardar/eliminar muestra notificación verde o roja |
-| Sesión expirada | Abrir en incógnito sin token → redirige a login.html |
+| Sesión expirada | Abrir en incógnito sin token → redirige a `login.html` |
 | Datos persistentes | Recargar la página tras guardar → los datos siguen ahí |
+| Contador de formularios pendientes | El badge rojo sobre "Formularios" muestra el número correcto |
+| Formularios de página completa | "Nueva dieta", "Nueva rutina" y "Nuevo cliente" abren página completa, no modal |
 
 ---
 

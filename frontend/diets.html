@@ -87,26 +87,15 @@
     .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
     .empty p{font-size:13px;}
 
-    /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
-    .modal-overlay.open{opacity:1;pointer-events:all;}
-    .modal{background:#fff;border-radius:16px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
-    .modal-overlay.open .modal{transform:translateY(0);}
-    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
-    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
-    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
-    .modal-close:hover{color:#374151;}
-    .modal-body{padding:20px 24px;}
-    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    /* Form elements shared */
     .form-group{margin-bottom:16px;}
     .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
     .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
     .form-group input:focus,.form-group select:focus{border-color:var(--purple);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
-    .section-title{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
 
-    /* Foods section in modal */
+    /* Foods section */
     .foods-editor{border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;}
     .food-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #F3F4F6;}
     .food-item:last-child{border-bottom:none;}
@@ -116,6 +105,33 @@
     .food-remove:hover{background:#FEF2F2;}
     .add-food-btn{display:flex;align-items:center;gap:6px;padding:10px 12px;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;width:100%;}
     .add-food-btn:hover{background:var(--purple-pale);}
+
+    /* Full-page form view */
+    #listView{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    #formView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #formView.active{display:flex;}
+    .fv-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+    .fv-back{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:#6B7280;font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;transition:.15s;}
+    .fv-back:hover{background:#F3F4F6;color:#111;}
+    .fv-title{font-size:18px;font-weight:700;color:#111;}
+    .fv-body{display:flex;flex:1;overflow:hidden;}
+    .fv-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;}
+    .fv-main::-webkit-scrollbar{width:6px;}
+    .fv-main::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    .fv-sidebar{width:300px;min-width:300px;background:#fff;border-left:1px solid #E5E7EB;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+    .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
+    .sec-card-head{padding:16px 20px;border-bottom:1px solid #F3F4F6;font-size:14px;font-weight:700;color:#111;}
+    .sec-card-body{padding:20px;}
+    .sb-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:16px;}
+    .sb-card-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+    .sb-diet-title{font-size:15px;font-weight:700;color:#111;margin-bottom:10px;min-height:20px;}
+    .sb-macro-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+    .sb-macro{display:flex;flex-direction:column;align-items:center;padding:6px 10px;border-radius:8px;flex:1;}
+    .sb-macro .v{font-size:14px;font-weight:800;line-height:1;}
+    .sb-macro .l{font-size:10px;margin-top:2px;}
+    .save-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--purple);color:#fff;transition:.15s;}
+    .save-btn:hover{background:var(--purple-dark);}
+    .save-btn:disabled{opacity:.6;cursor:not-allowed;}
 
     /* Delete confirm */
     .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
@@ -138,6 +154,8 @@
       .sidebar-nav,.sidebar-user{display:none;}
       .cards-grid{grid-template-columns:1fr;}
       .form-row,.form-row-4{grid-template-columns:1fr;}
+      .fv-body{flex-direction:column;}
+      .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;}
     }
   </style>
 </head>
@@ -149,7 +167,6 @@
     <span>Nutri<em>Entrena</em></span>
     <small>Panel de administración</small>
   </div>
-  <div class="sidebar-nav">
   <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
@@ -229,85 +246,116 @@
 
 <!-- Main -->
 <div class="main">
-  <div class="topbar">
-    <h1>Dietas</h1>
-    <button class="btn btn-primary" onclick="openModal()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nueva dieta
-    </button>
-  </div>
-  <div class="toolbar">
-    <div class="search-wrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="searchInput" placeholder="Buscar dieta…" oninput="applyFilter()"/>
-    </div>
-    <span class="total-label" id="totalLabel"></span>
-  </div>
-  <div class="content" id="content">
-    <div class="empty">
-      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
-      <h3>Cargando dietas…</h3>
-    </div>
-  </div>
-</div>
 
-<!-- Diet modal -->
-<div class="modal-overlay" id="dietOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="modalTitle">Nueva dieta</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group" style="grid-column:1/-1">
-          <label>Título *</label>
-          <input id="f_title" placeholder="Ej: Dieta de definición — 1800 kcal"/>
-        </div>
-      </div>
-      <div class="section-title">Macros y calorías</div>
-      <div class="form-row-4">
-        <div class="form-group">
-          <label>Calorías (kcal)</label>
-          <input id="f_calories" type="number" placeholder="1800"/>
-        </div>
-        <div class="form-group">
-          <label>Proteínas (g)</label>
-          <input id="f_proteins" type="number" placeholder="150"/>
-        </div>
-        <div class="form-group">
-          <label>Carbos (g)</label>
-          <input id="f_carbs" type="number" placeholder="180"/>
-        </div>
-        <div class="form-group">
-          <label>Grasas (g)</label>
-          <input id="f_fats" type="number" placeholder="60"/>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Déficit (kcal)</label>
-          <input id="f_deficit" type="number" placeholder="300"/>
-        </div>
-        <div class="form-group">
-          <label>Superávit (kcal)</label>
-          <input id="f_surplus" type="number" placeholder="0"/>
-        </div>
-      </div>
-      <div class="section-title">Comidas del plan</div>
-      <div class="foods-editor" id="foodsEditor"></div>
-      <button class="add-food-btn" onclick="addFood()">
+  <!-- List View -->
+  <div id="listView">
+    <div class="topbar">
+      <h1>Dietas</h1>
+      <button class="btn btn-primary" onclick="openForm()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Añadir comida
+        Nueva dieta
       </button>
-      <div id="modalError" style="color:#DC2626;font-size:13px;margin-top:8px;"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" id="saveBtn" onclick="saveDiet()">Guardar</button>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar dieta…" oninput="applyFilter()"/>
+      </div>
+      <span class="total-label" id="totalLabel"></span>
     </div>
-  </div>
-</div>
+    <div class="content" id="content">
+      <div class="empty">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
+        <h3>Cargando dietas…</h3>
+      </div>
+    </div>
+  </div><!-- #listView -->
+
+  <!-- Form View -->
+  <div id="formView">
+    <div class="fv-bar">
+      <button class="fv-back" onclick="closeForm()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver a dietas
+      </button>
+      <h2 class="fv-title" id="formViewTitle">Nueva dieta</h2>
+    </div>
+    <div class="fv-body">
+      <div class="fv-main">
+
+        <div class="sec-card">
+          <div class="sec-card-head">Información general</div>
+          <div class="sec-card-body">
+            <div class="form-group">
+              <label>Título *</label>
+              <input id="f_title" placeholder="Ej: Dieta de definición — 1800 kcal" oninput="updatePreview()"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-card">
+          <div class="sec-card-head">Macros y calorías</div>
+          <div class="sec-card-body">
+            <div class="form-row-4">
+              <div class="form-group">
+                <label>Calorías (kcal)</label>
+                <input id="f_calories" type="number" placeholder="1800" oninput="updatePreview()"/>
+              </div>
+              <div class="form-group">
+                <label>Proteínas (g)</label>
+                <input id="f_proteins" type="number" placeholder="150" oninput="updatePreview()"/>
+              </div>
+              <div class="form-group">
+                <label>Carbos (g)</label>
+                <input id="f_carbs" type="number" placeholder="180" oninput="updatePreview()"/>
+              </div>
+              <div class="form-group">
+                <label>Grasas (g)</label>
+                <input id="f_fats" type="number" placeholder="60" oninput="updatePreview()"/>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Déficit (kcal)</label>
+                <input id="f_deficit" type="number" placeholder="300"/>
+              </div>
+              <div class="form-group">
+                <label>Superávit (kcal)</label>
+                <input id="f_surplus" type="number" placeholder="0"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-card">
+          <div class="sec-card-head">Comidas del plan</div>
+          <div class="sec-card-body" style="padding-bottom:0;">
+            <div class="foods-editor" id="foodsEditor"></div>
+            <button class="add-food-btn" onclick="addFood()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Añadir comida
+            </button>
+          </div>
+        </div>
+
+        <div id="formError" style="color:#DC2626;font-size:13px;"></div>
+
+      </div><!-- .fv-main -->
+
+      <div class="fv-sidebar">
+        <div class="sb-card">
+          <div class="sb-card-title">Vista previa</div>
+          <div class="sb-diet-title" id="previewTitle">Sin título</div>
+          <div class="sb-macro-row" id="previewMacros"></div>
+          <div id="previewFoods" style="font-size:12px;color:#6B7280;line-height:1.8;"></div>
+        </div>
+        <button class="save-btn" id="saveBtn" onclick="saveDiet()">Guardar dieta</button>
+      </div>
+
+    </div><!-- .fv-body -->
+  </div><!-- #formView -->
+
+</div><!-- .main -->
 
 <!-- Delete confirm -->
 <div class="confirm-overlay" id="confirmOverlay">
@@ -339,9 +387,9 @@ async function loadUser() {
     if (r.status === 401) { logout(); return; }
     const j = await r.json();
     const u = j.data || j;
-    const name = u.name || u.full_name || 'Usuario';
+    const name = u.name || u.full_name || `${u.first_name||''} ${u.last_name||''}`.trim() || u.email || 'Usuario';
     document.getElementById('sidebarName').textContent = name;
-    document.getElementById('sidebarRole').textContent = (u.roles?.[0]?.name) || '—';
+    document.getElementById('sidebarRole').textContent = u.role?.name || u.role || '';
     document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
   } catch {}
 }
@@ -350,10 +398,10 @@ function logout() { localStorage.clear(); location.href = 'login.html'; }
 
 async function loadPendingBadge() {
   try {
-    const r = await fetch(`${API}/form-assignments/pending`, { headers: { Authorization: `Bearer ${token}` }});
+    const r = await fetch(`${API}/form-assignments?status=pending&per_page=1`, { headers: { Authorization: `Bearer ${token}` }});
     if (!r.ok) return;
     const j = await r.json();
-    const count = (j.data || j || []).length;
+    const count = j.data?.total ?? (Array.isArray(j.data) ? j.data.length : 0);
     const badge = document.getElementById('formsBadge');
     if (count > 0) { badge.textContent = count; badge.style.display = 'inline-block'; }
   } catch {}
@@ -429,7 +477,7 @@ function dietCard(d) {
           <button class="btn-icon" title="Descargar PDF" onclick="downloadPdf('${d.id}', '${esc(d.title)}')">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
           </button>
-          <button class="btn-icon" title="Editar" onclick="openModal('${d.id}')">
+          <button class="btn-icon" title="Editar" onclick="openForm('${d.id}')">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
           <button class="btn-icon" title="Eliminar" onclick="openConfirm('${d.id}')" style="color:#EF4444;">
@@ -442,11 +490,11 @@ function dietCard(d) {
     </div>`;
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
-async function openModal(id = null) {
+// ── Form View ─────────────────────────────────────────────────────────────────
+async function openForm(id = null) {
   editingId = id;
-  document.getElementById('modalTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
-  document.getElementById('modalError').textContent = '';
+  document.getElementById('formViewTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
+  document.getElementById('formError').textContent = '';
   clearForm();
 
   if (id) {
@@ -469,15 +517,50 @@ async function openModal(id = null) {
     document.getElementById('foodsEditor').innerHTML = '';
   }
 
-  document.getElementById('dietOverlay').classList.add('open');
+  updatePreview();
+  document.getElementById('listView').style.display = 'none';
+  document.getElementById('formView').classList.add('active');
 }
 
-function closeModal() { document.getElementById('dietOverlay').classList.remove('open'); }
+function closeForm() {
+  document.getElementById('formView').classList.remove('active');
+  document.getElementById('listView').style.display = '';
+  editingId = null;
+}
 
 function clearForm() {
   ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_deficit','f_surplus'].forEach(id => {
     document.getElementById(id).value = '';
   });
+  document.getElementById('foodsEditor').innerHTML = '';
+}
+
+function updatePreview() {
+  const title = document.getElementById('f_title').value.trim();
+  const kcal  = parseFloat(document.getElementById('f_calories').value) || null;
+  const prot  = parseFloat(document.getElementById('f_proteins').value) || null;
+  const carb  = parseFloat(document.getElementById('f_carbs').value)    || null;
+  const fat   = parseFloat(document.getElementById('f_fats').value)     || null;
+
+  document.getElementById('previewTitle').textContent = title || 'Sin título';
+
+  const macroEl = document.getElementById('previewMacros');
+  if (kcal || prot || carb || fat) {
+    macroEl.innerHTML =
+      (kcal ? `<div class="sb-macro macro-kcal"><span class="v">${Math.round(kcal)}</span><span class="l">kcal</span></div>` : '') +
+      (prot ? `<div class="sb-macro macro-p"><span class="v">${Math.round(prot)}g</span><span class="l">Prot.</span></div>` : '') +
+      (carb ? `<div class="sb-macro macro-c"><span class="v">${Math.round(carb)}g</span><span class="l">Carbs</span></div>` : '') +
+      (fat  ? `<div class="sb-macro macro-f"><span class="v">${Math.round(fat)}g</span><span class="l">Grasas</span></div>` : '');
+  } else {
+    macroEl.innerHTML = '';
+  }
+
+  const foods = Array.from(document.querySelectorAll('#foodsEditor .food-item input'))
+    .map(i => i.value.trim()).filter(Boolean);
+  const foodsEl = document.getElementById('previewFoods');
+  foodsEl.innerHTML = foods.length
+    ? foods.map(f => `<div>· ${esc(f)}</div>`).join('')
+    : '<span style="color:#D1D5DB">Sin comidas aún</span>';
 }
 
 function addFood(name = '') {
@@ -485,8 +568,8 @@ function addFood(name = '') {
   const div = document.createElement('div');
   div.className = 'food-item';
   div.innerHTML = `
-    <input type="text" placeholder="Ej: Desayuno — Avena con fruta" value="${esc(name)}"/>
-    <button class="food-remove" onclick="this.parentElement.remove()" title="Eliminar comida">
+    <input type="text" placeholder="Ej: Desayuno — Avena con fruta" value="${esc(name)}" oninput="updatePreview()"/>
+    <button class="food-remove" onclick="this.parentElement.remove();updatePreview()" title="Eliminar comida">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>`;
   editor.appendChild(div);
@@ -494,11 +577,11 @@ function addFood(name = '') {
 
 async function saveDiet() {
   const title = document.getElementById('f_title').value.trim();
-  if (!title) { document.getElementById('modalError').textContent = 'El título es obligatorio'; return; }
+  if (!title) { document.getElementById('formError').textContent = 'El título es obligatorio'; return; }
 
   const btn = document.getElementById('saveBtn');
   btn.textContent = 'Guardando…'; btn.disabled = true;
-  document.getElementById('modalError').textContent = '';
+  document.getElementById('formError').textContent = '';
 
   const foodInputs = document.querySelectorAll('#foodsEditor .food-item input');
   const foods = Array.from(foodInputs)
@@ -528,12 +611,12 @@ async function saveDiet() {
       body: JSON.stringify(body),
     });
     const j = await r.json();
-    if (!r.ok) { document.getElementById('modalError').textContent = j.detail || j.message || 'Error al guardar'; return; }
-    closeModal();
+    if (!r.ok) { document.getElementById('formError').textContent = j.detail || j.message || 'Error al guardar'; return; }
+    closeForm();
     toast(editingId ? 'Dieta actualizada' : 'Dieta creada', 'success');
     loadDiets();
-  } catch { document.getElementById('modalError').textContent = 'Error de conexión'; }
-  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+  } catch { document.getElementById('formError').textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar dieta'; btn.disabled = false; }
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────────

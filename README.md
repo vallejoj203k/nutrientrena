@@ -628,6 +628,7 @@ Cada push ejecuta dos jobs en GitHub Actions:
 | **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 4** | Eventos recurrentes, notas, progreso con fotos _(con fixes post-entrega)_ | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 5** | Seguridad, testing, documentación API, optimización de BD | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 6** | Formularios de página completa, corrección de bugs frontend | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 
 ### Fase 3 — Detalle
 
@@ -672,6 +673,31 @@ Cada push ejecuta dos jobs en GitHub Actions:
 | 10 índices de performance en tablas críticas (Alembic idempotente) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
 | CI actualizado con job de pytest + reporte de cobertura | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
 | Swagger: `summary` + `description` en 111+ endpoints, 30 secciones con tags | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+
+### Fase 6 — Formularios de página completa y corrección de bugs frontend
+
+#### Formularios de página completa (patrón list/form)
+
+Las páginas de creación de registros complejos dejaron de usar ventanas emergentes (modales) y ahora usan un formulario de página completa con panel lateral de vista previa en vivo. El patrón consiste en un `#listView` (lista + barra de herramientas) y un `#formView` (formulario a pantalla completa), ambos dentro del mismo `.main`, que se alternan ocultando/mostrando según la acción.
+
+| Ítem | Estado |
+|------|--------|
+| `clients.html`: formulario de página completa con 3 secciones (Acceso, Perfil físico, Asignación) + panel lateral con avatar y resumen en vivo | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `diets.html`: formulario con secciones Información, Macros y Comidas + panel lateral con preview de macros y lista de comidas en tiempo real | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `routines.html`: formulario en 2 pasos — Paso 1 (info + sidebar resumen) y Paso 2 (constructor de días y bloques a ancho completo, sin sidebar) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+
+Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flotantes (son seleccionadores contextuales, no flujos de creación primarios).
+
+#### Corrección de bugs frontend
+
+| Bug | Páginas afectadas | Estado |
+|-----|------------------|--------|
+| `loadPendingBadge` usaba endpoint inexistente `/form-assignments/pending` → corregido a `/form-assignments?status=pending&per_page=1` | `events.html`, `diets.html`, `routines.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| `sidebarRole` usaba `u.roles?.[0]?.name` (incorrecto, la API devuelve `role` como objeto) → corregido a `u.role?.name \|\| u.role` | `events.html`, `diets.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| Calendario de eventos: `grid-template-rows: repeat(6, 1fr)` hardcodeado generaba fila vacía en meses de 5 semanas → ahora se calcula dinámicamente con `weeksRendered` | `events.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| Overlays de confirmación de borrado (`delEventOverlay`, `delTypeOverlay`) no cerraban al hacer clic en el fondo → añadido `onclick="if(event.target===this)close*()"` | `events.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| HTML duplicado `<div class="sidebar-nav"><nav class="sidebar-nav">` causaba contenedor sin cerrar → eliminado el `<div>` redundante | `diets.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| Enlace **Eventos** ausente en la barra lateral de 12 páginas → añadido en todas | todas las páginas | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
 
 ---
 

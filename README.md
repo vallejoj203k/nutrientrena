@@ -82,7 +82,7 @@ Authorization: Bearer <token>
 
 ---
 
-## Guía de pruebas — Fase 3 y Fase 4
+## Guía de pruebas — Fases 3, 4 y 5
 
 Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo completo.
 

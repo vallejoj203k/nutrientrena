@@ -124,24 +124,25 @@
     .circle-val{font-size:17px;font-weight:800;text-anchor:middle;dominant-baseline:middle;}
     .circle-unit{font-size:9px;fill:#9CA3AF;text-anchor:middle;}
 
-    /* Ingredient table */
-    .ingr-table-wrap{overflow-x:auto;}
-    .ingr-table{width:100%;border-collapse:collapse;font-size:13px;}
-    .ingr-table th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #F3F4F6;white-space:nowrap;}
-    .ingr-table td{padding:8px 6px;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
-    .ingr-table td.num{text-align:right;font-variant-numeric:tabular-nums;color:#374151;}
-    .ingr-table td.num.prot{color:var(--c-prot);}
-    .ingr-table td.num.carb{color:var(--c-carb);}
-    .ingr-table td.num.fat{color:var(--c-fat);}
-    .ingr-table td.num.kcal{color:var(--c-kcal);}
-    .ingr-table tr:last-child td{border-bottom:none;}
-    .ingr-table .ac-wrap{position:relative;min-width:180px;}
-    .ingr-table .ac-wrap input{width:100%;padding:7px 9px;border:1px solid #E5E7EB;border-radius:7px;font-size:13px;outline:none;}
-    .ingr-table .ac-wrap input:focus{border-color:var(--purple);}
-    .ingr-table input[type=number]{width:72px;padding:7px 9px;border:1px solid #E5E7EB;border-radius:7px;font-size:13px;outline:none;text-align:center;}
-    .ingr-table input[type=number]:focus{border-color:var(--purple);}
-    .ingr-table select{padding:7px 9px;border:1px solid #E5E7EB;border-radius:7px;font-size:12px;outline:none;color:#374151;background:#fff;}
-    .ingr-table select:focus{border-color:var(--purple);}
+    /* Ingredient cards */
+    .ingr-list{display:flex;flex-direction:column;gap:8px;}
+    .ingr-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;}
+    .ingr-card-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .ingr-card-top .ac-wrap{flex:1;position:relative;}
+    .ingr-card-top .ac-wrap input{width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;background:#fff;}
+    .ingr-card-top .ac-wrap input:focus{border-color:var(--purple);}
+    .ingr-card-bottom{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .ingr-qty-wrap{display:flex;align-items:center;gap:6px;}
+    .ingr-qty-wrap input[type=number]{width:82px;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;text-align:center;transition:.15s;background:#fff;}
+    .ingr-qty-wrap input[type=number]:focus{border-color:var(--purple);}
+    .ingr-qty-wrap select{padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#fff;transition:.15s;}
+    .ingr-qty-wrap select:focus{border-color:var(--purple);}
+    .ingr-macros{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap;}
+    .ingr-macro-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+    .ingr-macro-chip.kcal{background:#FEF3C7;color:#D97706;}
+    .ingr-macro-chip.prot{background:#EDE9FE;color:#5B2D8E;}
+    .ingr-macro-chip.carb{background:#FED7AA;color:#C2410C;}
+    .ingr-macro-chip.fat{background:#FEE2E2;color:#DC2626;}
     .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;display:none;}
     .ac-dropdown.open{display:block;}
     .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #F9FAFB;}
@@ -416,23 +417,7 @@
         <div class="sec-card">
           <div class="sec-card-head">Lista de Alimentos</div>
           <div class="sec-card-body">
-            <div class="ingr-table-wrap">
-              <table class="ingr-table">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Unidad</th>
-                    <th style="text-align:right">Calorías</th>
-                    <th style="text-align:right">Proteínas</th>
-                    <th style="text-align:right">Carbohidratos</th>
-                    <th style="text-align:right">Grasas</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="ingrTableBody"></tbody>
-              </table>
-            </div>
+            <div class="ingr-list" id="ingrList"></div>
             <button class="add-food-btn" onclick="addIngredientRow()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               AGREGAR ALIMENTO
@@ -543,10 +528,10 @@ function logout() { localStorage.removeItem('token'); location.href = 'login.htm
 
 async function loadFormsBadge() {
   try {
-    const r = await fetch(`${API}/form-assignments/pending`, { headers: headers() });
+    const r = await fetch(`${API}/form-assignments?status=pending&per_page=1`, { headers: headers() });
     if (!r.ok) return;
-    const d = await r.json();
-    const n = (d.data || []).length;
+    const j = await r.json();
+    const n = j.data?.total || 0;
     const badge = document.getElementById('formsBadge');
     if (n > 0) { badge.textContent = n; badge.style.display = 'inline-block'; }
   } catch { /* ignore */ }
@@ -688,7 +673,7 @@ function openForm(recipe = null) {
   setImagePreview(recipe?.image || null);
 
   // Ingredients
-  document.getElementById('ingrTableBody').innerHTML = '';
+  document.getElementById('ingrList').innerHTML = '';
   (recipe?.details || []).forEach(d => addIngredientRow(d));
 
   // Circles: initialize from stored values if editing
@@ -738,10 +723,11 @@ function addIngredientRow(detail = null) {
                 proteins: null, carbohydrates: null, fats: null, calories: null };
   _ingrRows.push(row);
 
-  const tr = document.createElement('tr');
-  tr.id = `irow-${rowId}`;
-  tr.innerHTML = `
-    <td>
+  const card = document.createElement('div');
+  card.className = 'ingr-card';
+  card.id = `irow-${rowId}`;
+  card.innerHTML = `
+    <div class="ingr-card-top">
       <div class="ac-wrap">
         <input type="text" id="iac-${rowId}" placeholder="Buscar alimento…" autocomplete="off"
           oninput="acSearch('${rowId}',this.value)"
@@ -749,30 +735,32 @@ function addIngredientRow(detail = null) {
           onblur="setTimeout(()=>closeAc('${rowId}'),200)"/>
         <div class="ac-dropdown" id="acdrop-${rowId}"></div>
       </div>
-    </td>
-    <td><input type="number" id="iqty-${rowId}" min="0" step="0.1" placeholder="0" oninput="onQtyChange('${rowId}')"/></td>
-    <td>
-      <select id="iunit-${rowId}">
-        <option value="gr">gr</option>
-        <option value="kg">kg</option>
-        <option value="ml">ml</option>
-        <option value="l">l</option>
-        <option value="unidad">unidad</option>
-        <option value="cucharada">cucharada</option>
-        <option value="taza">taza</option>
-      </select>
-    </td>
-    <td class="num kcal" id="ikcal-${rowId}">0.0</td>
-    <td class="num prot" id="iprot-${rowId}">0.0</td>
-    <td class="num carb" id="icarb-${rowId}">0.0</td>
-    <td class="num fat"  id="ifat-${rowId}">0.0</td>
-    <td>
       <button class="btn-icon danger" onclick="removeIngredient('${rowId}')" title="Quitar">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-    </td>`;
+    </div>
+    <div class="ingr-card-bottom">
+      <div class="ingr-qty-wrap">
+        <input type="number" id="iqty-${rowId}" min="0" step="0.1" placeholder="0" oninput="onQtyChange('${rowId}')"/>
+        <select id="iunit-${rowId}">
+          <option value="gr">gr</option>
+          <option value="kg">kg</option>
+          <option value="ml">ml</option>
+          <option value="l">l</option>
+          <option value="unidad">unidad</option>
+          <option value="cucharada">cucharada</option>
+          <option value="taza">taza</option>
+        </select>
+      </div>
+      <div class="ingr-macros">
+        <span class="ingr-macro-chip kcal" id="ikcal-${rowId}">— kcal</span>
+        <span class="ingr-macro-chip prot" id="iprot-${rowId}">— P</span>
+        <span class="ingr-macro-chip carb" id="icarb-${rowId}">— C</span>
+        <span class="ingr-macro-chip fat"  id="ifat-${rowId}">— G</span>
+      </div>
+    </div>`;
 
-  document.getElementById('ingrTableBody').appendChild(tr);
+  document.getElementById('ingrList').appendChild(card);
 
   if (detail) {
     const qty = detail.quantity || '';
@@ -803,11 +791,11 @@ function updateRowMacros(row) {
   const c = ((row.carbohydrates || 0) / 100) * qty;
   const f = ((row.fats          || 0) / 100) * qty;
   const fmt = v => v >= 10 ? v.toFixed(1) : v.toFixed(2);
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = fmt(v); };
-  set(`ikcal-${row.id}`, k);
-  set(`iprot-${row.id}`, p);
-  set(`icarb-${row.id}`, c);
-  set(`ifat-${row.id}`,  f);
+  const el = id => document.getElementById(id);
+  if (el(`ikcal-${row.id}`)) el(`ikcal-${row.id}`).textContent = `${Math.round(k)} kcal`;
+  if (el(`iprot-${row.id}`)) el(`iprot-${row.id}`).textContent = `${fmt(p)}g P`;
+  if (el(`icarb-${row.id}`)) el(`icarb-${row.id}`).textContent = `${fmt(c)}g C`;
+  if (el(`ifat-${row.id}`))  el(`ifat-${row.id}`).textContent  = `${fmt(f)}g G`;
 }
 
 function recalcMacros() {

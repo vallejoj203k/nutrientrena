@@ -992,6 +992,17 @@ loadParamSelect('Nivel de Actividad', 'fActivity');
 loadParamSelect('Objetivo', 'fObjective');
 loadStatuses().then(() => load());
 loadPendingBadge();
+
+// ── Sidebar role adaptation ───────────────────────────────────────────────────
+function adaptSidebar() {
+  const rid = parseInt(localStorage.getItem('role_id') || '0');
+  if (rid !== 5) return; // only restrict coaches
+  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
+    const el = document.querySelector('.nav-item[href="' + href + '"]');
+    if (el) el.style.display = 'none';
+  });
+}
+adaptSidebar();
 </script>
 </body>
 </html>

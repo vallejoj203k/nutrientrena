@@ -616,6 +616,7 @@ function logout() {
   fetch(API.replace('/api', '') + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token() } }).catch(() => {});
   localStorage.removeItem('token');
   localStorage.removeItem('refresh_token');
+  localStorage.removeItem('role_id');
   window.location.href = 'login.html';
 }
 
@@ -1154,6 +1155,17 @@ function openPhoto(url) {
    Boot
 ───────────────────────────────────────────── */
 init();
+
+// ── Sidebar role adaptation ───────────────────────────────────────────────────
+function adaptSidebar() {
+  const rid = parseInt(localStorage.getItem('role_id') || '0');
+  if (rid !== 5) return; // only restrict coaches
+  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
+    const el = document.querySelector('.nav-item[href="' + href + '"]');
+    if (el) el.style.display = 'none';
+  });
+}
+adaptSidebar();
 </script>
 </body>
 </html>

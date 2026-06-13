@@ -248,6 +248,20 @@
     .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.5;}
     .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
 
+    /* Multi-select (grupos musculares secundarios) */
+    .ms-wrap{position:relative;}
+    .ms-btn{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;text-align:left;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:#6B7280;transition:.15s;font-family:inherit;}
+    .ms-btn:hover,.ms-btn.open{border-color:var(--purple);}
+    .ms-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.1);z-index:150;max-height:200px;overflow-y:auto;display:none;}
+    .ms-dropdown.open{display:block;}
+    .ms-option{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;font-size:13px;color:#374151;transition:.1s;}
+    .ms-option:hover{background:var(--purple-pale);}
+    .ms-option input[type=checkbox]{accent-color:var(--purple);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+    .ms-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+    .ms-chip{display:inline-flex;align-items:center;gap:3px;background:var(--purple-pale);color:var(--purple);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;}
+    .ms-chip-x{background:none;border:none;cursor:pointer;color:var(--purple);font-size:14px;line-height:1;padding:0 1px;opacity:.7;}
+    .ms-chip-x:hover{opacity:1;}
+
     /* Toast */
     .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:400;}
     .toast.show{transform:translateY(0);opacity:1;}
@@ -614,7 +628,14 @@
         </div>
         <div class="form-group">
           <label>Grupo muscular secundario</label>
-          <select id="ex_mg2"></select>
+          <div class="ms-wrap" id="ms2Wrap">
+            <button type="button" class="ms-btn" id="ms2Btn" onclick="toggleMs2(event)">
+              <span id="ms2Label">Sin especificar</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="ms-dropdown" id="ms2Dropdown"></div>
+          </div>
+          <div class="ms-chips" id="ms2Chips"></div>
         </div>
       </div>
       <div class="form-row">
@@ -1557,10 +1578,9 @@ async function openExerciseModal(id = null) {
   // Load muscle groups into selects
   await loadMuscleGroupsForFilters();
   const mgSelect = document.getElementById('ex_mg');
-  const mgSelect2 = document.getElementById('ex_mg2');
-  const options = `<option value="">Sin especificar</option>` + allMuscleGroups.map(mg => `<option value="${mg.id}">${esc(mg.name)}</option>`).join('');
-  mgSelect.innerHTML = options;
-  mgSelect2.innerHTML = options;
+  mgSelect.innerHTML = `<option value="">Sin especificar</option>` + allMuscleGroups.map(mg => `<option value="${mg.id}">${esc(mg.name)}</option>`).join('');
+  _ms2Selected = [];
+  renderMs2Dropdown();
 
   if (id) {
     try {
@@ -1570,7 +1590,10 @@ async function openExerciseModal(id = null) {
       document.getElementById('ex_name').value = ex.name || '';
       document.getElementById('ex_desc').value = ex.description || '';
       document.getElementById('ex_mg').value = ex.muscle_group_id || '';
-      document.getElementById('ex_mg2').value = ex.secondary_muscle_group_id || '';
+      const sec = ex.secondary_muscle_group_ids?.length
+        ? ex.secondary_muscle_group_ids
+        : (ex.secondary_muscle_group_id ? [ex.secondary_muscle_group_id] : []);
+      setMs2Values(sec);
       document.getElementById('ex_type').value = ex.exercise_type || '';
       document.getElementById('ex_location').value = ex.location || '';
       setExImagePreview(ex.image || null);
@@ -1587,6 +1610,61 @@ function closeExerciseModal() {
   editingExerciseId = null;
 }
 
+// ── Multi-select grupo muscular secundario ────────────────────────────────────
+let _ms2Selected = [];
+
+function renderMs2Dropdown() {
+  const drop = document.getElementById('ms2Dropdown');
+  if (!drop) return;
+  drop.innerHTML = allMuscleGroups.map(mg => `
+    <label class="ms-option">
+      <input type="checkbox" value="${mg.id}" ${_ms2Selected.includes(mg.id) ? 'checked' : ''}
+        onchange="onMs2Change(${mg.id}, this.checked, '${esc(mg.name)}')"/>
+      ${esc(mg.name)}
+    </label>`).join('');
+}
+
+function onMs2Change(id, checked, name) {
+  if (checked) { if (!_ms2Selected.includes(id)) _ms2Selected.push(id); }
+  else { _ms2Selected = _ms2Selected.filter(x => x !== id); }
+  updateMs2Ui();
+}
+
+function updateMs2Ui() {
+  const btn = document.getElementById('ms2Label');
+  const chips = document.getElementById('ms2Chips');
+  if (!btn || !chips) return;
+  btn.textContent = _ms2Selected.length === 0
+    ? 'Sin especificar'
+    : `${_ms2Selected.length} seleccionado${_ms2Selected.length > 1 ? 's' : ''}`;
+  chips.innerHTML = _ms2Selected.map(id => {
+    const mg = allMuscleGroups.find(m => m.id === id);
+    return mg ? `<span class="ms-chip">${esc(mg.name)}<button class="ms-chip-x" onclick="onMs2Change(${id},false,'${esc(mg.name)}');renderMs2Dropdown()">×</button></span>` : '';
+  }).join('');
+}
+
+function setMs2Values(ids) {
+  _ms2Selected = (ids || []).map(Number).filter(Boolean);
+  renderMs2Dropdown();
+  updateMs2Ui();
+}
+
+function toggleMs2(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('ms2Dropdown');
+  const btn  = document.getElementById('ms2Btn');
+  const open = drop.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('ms2Wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('ms2Dropdown')?.classList.remove('open');
+    document.getElementById('ms2Btn')?.classList.remove('open');
+  }
+});
+
 async function saveExercise() {
   const name = document.getElementById('ex_name').value.trim();
   if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
@@ -1595,7 +1673,8 @@ async function saveExercise() {
     name,
     description: document.getElementById('ex_desc').value.trim() || null,
     muscle_group_id: parseInt(document.getElementById('ex_mg').value) || null,
-    secondary_muscle_group_id: parseInt(document.getElementById('ex_mg2').value) || null,
+    secondary_muscle_group_id: _ms2Selected[0] || null,
+    secondary_muscle_group_ids: _ms2Selected.length ? _ms2Selected : null,
     exercise_type: document.getElementById('ex_type').value || null,
     location: document.getElementById('ex_location').value || null,
     image: _exImageUrl || null,

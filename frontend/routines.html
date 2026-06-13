@@ -177,7 +177,11 @@
     .day-chip:hover{background:#EDE9FE;}
     .day-chip.active{background:var(--purple);color:#fff;}
     .day-chip .day-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .day-chip .day-rm{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;display:flex;color:inherit;opacity:.6;}
+    .day-chip .day-chip-input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13px;font-weight:600;color:inherit;font-family:inherit;}
+    .day-chip .day-edit-btn{background:none;border:none;cursor:pointer;padding:2px 3px;border-radius:4px;display:flex;color:inherit;opacity:0;transition:.15s;flex-shrink:0;}
+    .day-chip:hover .day-edit-btn,.day-chip.active .day-edit-btn{opacity:.55;}
+    .day-chip .day-edit-btn:hover{opacity:1;}
+    .day-chip .day-rm{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;display:flex;color:inherit;opacity:.6;flex-shrink:0;}
     .day-chip .day-rm:hover{opacity:1;}
     .days-panel-footer{padding:10px 8px;border-top:1px solid #E5E7EB;}
     .add-day-chip-btn{width:100%;padding:8px;border-radius:8px;border:1.5px dashed #C084FC;background:#F3EEFF;color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
@@ -1154,14 +1158,44 @@ function renderDaysList() {
     const chip = document.createElement('div');
     chip.className = `day-chip${i === selectedDayIdx ? ' active' : ''}`;
     chip.innerHTML = `
-      <span class="day-chip-name" onclick="selectDay(${i})" style="cursor:pointer">${esc(day.day_name)}</span>
-      <button class="day-rm" onclick="removeDay(${i})" title="Eliminar día">
+      <span class="day-chip-name" title="Doble clic para renombrar">${esc(day.day_name)}</span>
+      <button class="day-edit-btn" title="Renombrar día">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="day-rm" title="Eliminar día">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>`;
-    chip.addEventListener('click', (e) => {
-      if (!e.target.closest('.day-rm')) selectDay(i);
-    });
+    chip.querySelector('.day-chip-name').addEventListener('dblclick', (e) => { e.stopPropagation(); startRenameDay(i, chip); });
+    chip.querySelector('.day-edit-btn').addEventListener('click',    (e) => { e.stopPropagation(); startRenameDay(i, chip); });
+    chip.querySelector('.day-rm').addEventListener('click',          (e) => { e.stopPropagation(); removeDay(i); });
+    chip.addEventListener('click', () => selectDay(i));
     container.appendChild(chip);
+  });
+}
+
+function startRenameDay(idx, chip) {
+  const nameSpan = chip.querySelector('.day-chip-name');
+  if (!nameSpan) return;
+  const input = document.createElement('input');
+  input.className = 'day-chip-input';
+  input.value = routineData.days_list[idx].day_name;
+  nameSpan.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const newName = input.value.trim() || routineData.days_list[idx].day_name;
+    routineData.days_list[idx].day_name = newName;
+    renderDaysList();
+    if (idx === selectedDayIdx) {
+      const titleEl = document.getElementById('selectedDayName');
+      if (titleEl) titleEl.textContent = newName;
+    }
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { input.value = routineData.days_list[idx].day_name; input.blur(); }
   });
 }
 

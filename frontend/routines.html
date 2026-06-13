@@ -975,15 +975,86 @@ async function deleteRoutine(id) {
 }
 
 async function downloadPdf(id, title) {
+  showToast('Preparando impresión…');
   try {
-    const r = await fetch(`${API}/routines/${id}/pdf`, { headers: authHeaders() });
+    const r = await fetch(`${API}/routines/${id}/edit`, { headers: authHeaders() });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `${title.replace(/\s+/g,'_').toLowerCase()}.pdf`; a.click();
-    URL.revokeObjectURL(url);
-  } catch { showToast('Error al descargar PDF', 'error'); }
+    const d = await r.json();
+    const rt = d.data || d;
+    printRoutineHtml(rt);
+  } catch { showToast('Error al cargar la rutina', 'error'); }
+}
+
+function printRoutineHtml(rt) {
+  const BLOCK_TYPE_LABEL = { warmup:'Calentamiento', normal:'Normal', superset:'Superserie', circuit:'Circuito' };
+  const esc2 = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const daysSections = (rt.days_list || []).map(day => {
+    const blocks = (day.blocks || []).map(blk => {
+      const typeLabel = BLOCK_TYPE_LABEL[blk.block_type] || blk.block_type || 'Normal';
+      const exRows = (blk.exercises || []).map(ex => {
+        const cols = [
+          esc2(ex.training_name || '—'),
+          esc2(ex.muscle_group_name || ''),
+          ex.series      ? `${ex.series} series`   : '',
+          ex.repetitions ? `${ex.repetitions} reps` : '',
+          ex.break_time  ? `${ex.break_time}s desc` : '',
+        ].filter(Boolean);
+        return `<tr><td>${cols.join('</td><td>')}</td></tr>`;
+      }).join('');
+      return `
+        <div class="block">
+          <div class="block-label">${typeLabel}</div>
+          <table>
+            <thead><tr><th>Ejercicio</th><th>Músculo</th><th>Series</th><th>Reps</th><th>Descanso</th></tr></thead>
+            <tbody>${exRows || '<tr><td colspan="5" style="color:#999">Sin ejercicios</td></tr>'}</tbody>
+          </table>
+        </div>`;
+    }).join('');
+    return `
+      <div class="day-section">
+        <h2>${esc2(day.day_name)}</h2>
+        ${blocks || '<p style="color:#999;font-size:13px;">Sin bloques</p>'}
+      </div>`;
+  }).join('');
+
+  const GENDERS = { 1:'Masculino', 2:'Femenino', 3:'Unisex' };
+  const meta = [
+    rt.days   ? `${rt.days} días/semana`   : '',
+    rt.time   ? `${rt.time} min`           : '',
+    rt.gender_id ? GENDERS[rt.gender_id]   : '',
+  ].filter(Boolean).join(' · ');
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+  <title>${esc2(rt.name)} — Rutina</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;color:#111;padding:32px;max-width:800px;margin:0 auto;}
+    h1{font-size:22px;font-weight:800;margin-bottom:4px;}
+    .meta{font-size:13px;color:#6B7280;margin-bottom:6px;}
+    .notes{font-size:13px;color:#374151;background:#F9FAFB;border-left:3px solid #5B2D8E;padding:8px 12px;border-radius:4px;margin-bottom:24px;}
+    .day-section{margin-bottom:28px;break-inside:avoid;}
+    h2{font-size:15px;font-weight:700;color:#5B2D8E;border-bottom:2px solid #EDE9FE;padding-bottom:6px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;}
+    .block{margin-bottom:14px;}
+    .block-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{text-align:left;padding:6px 10px;background:#F3EEFF;color:#5B2D8E;font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+    td{padding:7px 10px;border-bottom:1px solid #F3F4F6;color:#374151;}
+    tr:last-child td{border-bottom:none;}
+    .footer{margin-top:32px;font-size:11px;color:#D1D5DB;text-align:center;}
+    @media print{body{padding:16px;}@page{margin:1.5cm;}}
+  </style></head><body>
+  <h1>${esc2(rt.name)}</h1>
+  ${meta ? `<div class="meta">${meta}</div>` : ''}
+  ${rt.notes ? `<div class="notes">${esc2(rt.notes)}</div>` : ''}
+  ${daysSections || '<p style="color:#999">Sin días definidos.</p>'}
+  <div class="footer">NutriEntrena · ${new Date().toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'})}</div>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
 }
 
 /* ══════════════════════════════════════════════

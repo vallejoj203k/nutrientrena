@@ -619,7 +619,7 @@ function showTab(name) {
   if (name === 'alimentos' && !al_loaded) loadAliments(1);
   if (name === 'recetas'   && !rc_loaded) loadRecipes(1);
   if (name === 'tipos'     && !tf_loaded) loadTypeFood();
-  if (name === 'grupos'    && !gf_loaded) loadGroupFood();
+  if (name === 'grupos') { if (!gf_loaded) loadGroupFood(); else renderGroupFood(); }
 }
 
 // ─── ALIMENTOS ────────────────────────────────────────────────────────────────

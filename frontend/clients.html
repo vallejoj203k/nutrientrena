@@ -323,7 +323,7 @@
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Volver
       </button>
-      <span class="fv-title">Nuevo cliente</span>
+      <span class="fv-title" id="formTitle">Nuevo cliente</span>
     </div>
 
     <!-- Body: main + sidebar -->
@@ -713,6 +713,10 @@ function renderTable() {
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               Ver
             </button>
+            <button class="icon-btn" onclick="openForm('${c.id}')" title="Editar cliente">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Editar
+            </button>
             <button class="icon-btn" onclick="goKanban('${c.id}')" title="Ver en Kanban">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="12"/><rect x="17" y="3" width="5" height="15"/></svg>
               Kanban
@@ -760,17 +764,57 @@ function viewClient(id) { location.href = `client-profile.html?id=${id}`; }
 function goKanban()      { location.href = 'kanban.html'; }
 
 // ── Form view toggle ──────────────────────────────────────────────────────────
-function openForm() {
+let editingClientId = null;
+
+async function openForm(id = null) {
+  editingClientId = id || null;
+  const isEdit = !!editingClientId;
+
+  // Reset fields
   ['fFirstName','fLastName','fEmail','fPassword','fPhone','fOccupation',
    'fHeight','fWeight','fGender','fActivity','fObjective','fCountry',
-   'fDeficit','fExcedente','fStatus','fCoach'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
+   'fDeficit','fExcedente','fStatus','fCoach'].forEach(fid => {
+    const el = document.getElementById(fid); if (el) el.value = '';
   });
-  ['errFirstName','errLastName','errEmail','errPassword'].forEach(id => {
-    document.getElementById(id).textContent = '';
+  ['errFirstName','errLastName','errEmail','errPassword'].forEach(fid => {
+    document.getElementById(fid).textContent = '';
   });
   document.getElementById('errGeneral').textContent = '';
+
+  // Title & button
+  document.getElementById('formTitle').textContent = isEdit ? 'Editar cliente' : 'Nuevo cliente';
+  document.getElementById('saveBtn').textContent   = isEdit ? 'Guardar cambios' : 'Crear cliente';
+
+  // Password hint
+  const pwdEl = document.getElementById('fPassword');
+  if (pwdEl) pwdEl.placeholder = isEdit ? 'Dejar vacío para no cambiar' : 'Mín. 8 caracteres';
+
+  if (isEdit) {
+    try {
+      const r = await fetch(`${API}/users/${editingClientId}/edit`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const j = await r.json();
+      const c = j.data || j;
+      const d = c.detail || c;
+      document.getElementById('fFirstName').value  = d.name       || c.name       || '';
+      document.getElementById('fLastName').value   = d.last_name  || c.last_name  || '';
+      document.getElementById('fEmail').value      = c.email      || '';
+      document.getElementById('fPhone').value      = d.phone      || c.phone      || '';
+      document.getElementById('fOccupation').value = d.occupation || c.occupation || '';
+      document.getElementById('fHeight').value     = d.height     || c.height     || '';
+      document.getElementById('fWeight').value     = d.weight     || c.weight     || '';
+      document.getElementById('fGender').value     = d.gender_id  || c.gender_id  || '';
+      document.getElementById('fActivity').value   = d.activity_id   || c.activity_id   || '';
+      document.getElementById('fObjective').value  = d.objective_id  || c.objective_id  || '';
+      document.getElementById('fCountry').value    = d.country_code  || c.country_code  || '';
+      document.getElementById('fDeficit').value    = d.defecit       || c.defecit       || '';
+      document.getElementById('fExcedente').value  = d.excedente     || c.excedente     || '';
+      document.getElementById('fStatus').value     = c.status_id     || '';
+      document.getElementById('fCoach').value      = c.instructor     || '';
+    } catch { toast('Error al cargar cliente', 'error'); return; }
+  }
+
   updatePreview();
   document.getElementById('listView').style.display = 'none';
   document.getElementById('formView').classList.add('active');
@@ -780,6 +824,7 @@ function openForm() {
 function closeForm() {
   document.getElementById('formView').classList.remove('active');
   document.getElementById('listView').style.display = '';
+  editingClientId = null;
 }
 
 // ── Live preview ──────────────────────────────────────────────────────────────
@@ -829,21 +874,25 @@ async function saveClient() {
   const statusId   = document.getElementById('fStatus').value;
   const coachId    = document.getElementById('fCoach').value;
 
+  const isEdit = !!editingClientId;
+
   let ok = true;
   const setErr = (id, msg) => { document.getElementById(id).textContent = msg; if (msg) ok = false; };
   setErr('errFirstName', firstName ? '' : 'Campo requerido');
   setErr('errLastName',  lastName  ? '' : 'Campo requerido');
   setErr('errEmail',     email     ? '' : 'Campo requerido');
-  setErr('errPassword',  password.length >= 8 ? '' : 'Mínimo 8 caracteres');
+  setErr('errPassword',  (!isEdit && password.length < 8) ? 'Mínimo 8 caracteres' : '');
   document.getElementById('errGeneral').textContent = '';
   if (!ok) return;
 
   const btn = document.getElementById('saveBtn');
-  btn.textContent = 'Creando…';
+  btn.textContent = isEdit ? 'Guardando…' : 'Creando…';
   btn.disabled = true;
 
   try {
-    const body = { name: firstName, last_name: lastName, email, password, role_id: 6 };
+    const body = { name: firstName, last_name: lastName, email };
+    if (!isEdit) { body.password = password; body.role_id = 6; }
+    else if (password) { body.password = password; }
     if (phone)        body.phone         = phone;
     if (occupation)   body.occupation    = occupation;
     if (height)       body.height        = parseFloat(height);
@@ -857,14 +906,16 @@ async function saveClient() {
     if (statusId)     body.status_id     = parseInt(statusId);
     if (coachId)      body.instructor    = parseInt(coachId);
 
-    const r = await fetch(`${API}/users`, {
-      method: 'POST',
+    const url    = isEdit ? `${API}/users/${editingClientId}/update` : `${API}/users`;
+    const method = isEdit ? 'PUT' : 'POST';
+    const r = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     });
     const j = await r.json();
     if (!r.ok) {
-      let msg = 'Error al crear el cliente';
+      let msg = isEdit ? 'Error al actualizar el cliente' : 'Error al crear el cliente';
       if (j.detail) {
         msg = Array.isArray(j.detail)
           ? j.detail.map(e => e.msg || e.message || JSON.stringify(e)).join(', ')
@@ -876,12 +927,12 @@ async function saveClient() {
       return;
     }
     closeForm();
-    toast('Cliente creado correctamente', 'success');
+    toast(isEdit ? 'Cliente actualizado correctamente' : 'Cliente creado correctamente', 'success');
     await load();
   } catch {
     document.getElementById('errGeneral').textContent = 'Error de conexión';
   } finally {
-    btn.textContent = 'Crear cliente';
+    btn.textContent = isEdit ? 'Guardar cambios' : 'Crear cliente';
     btn.disabled = false;
   }
 }

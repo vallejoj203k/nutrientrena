@@ -274,6 +274,15 @@
         localStorage.setItem('token',         data.data.token);
         localStorage.setItem('refresh_token', data.data.refresh_token);
 
+        // Fetch role to adapt sidebar on all pages
+        try {
+          const me = await fetch(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${data.data.token}` } });
+          const mj = await me.json();
+          const md = mj.data || mj;
+          const roleId = md.roles?.[0]?.id || 0;
+          localStorage.setItem('role_id', roleId);
+        } catch {}
+
         showSuccess('¡Bienvenido! Redirigiendo...');
         setTimeout(() => {
           window.location.href = 'dashboard.html';

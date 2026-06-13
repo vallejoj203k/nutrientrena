@@ -95,16 +95,34 @@
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
 
-    /* Foods section */
-    .foods-editor{border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;}
-    .food-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #F3F4F6;}
-    .food-item:last-child{border-bottom:none;}
-    .food-item input{flex:1;padding:6px 8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;outline:none;}
-    .food-item input:focus{border-color:var(--purple);}
-    .food-remove{background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;border-radius:4px;display:flex;}
-    .food-remove:hover{background:#FEF2F2;}
-    .add-food-btn{display:flex;align-items:center;gap:6px;padding:10px 12px;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;width:100%;}
-    .add-food-btn:hover{background:var(--purple-pale);}
+    /* Food rows (autocomplete) */
+    .food-rows{display:flex;flex-direction:column;gap:8px;}
+    .food-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;}
+    .food-card-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .food-card-top .ac-wrap{flex:1;position:relative;}
+    .food-card-top .ac-wrap input{width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;background:#fff;}
+    .food-card-top .ac-wrap input:focus{border-color:var(--purple);}
+    .food-card-bottom{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .food-qty-wrap{display:flex;align-items:center;gap:6px;}
+    .food-qty-wrap input[type=number]{width:82px;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;text-align:center;transition:.15s;background:#fff;}
+    .food-qty-wrap input[type=number]:focus{border-color:var(--purple);}
+    .food-qty-wrap select{padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#fff;transition:.15s;}
+    .food-qty-wrap select:focus{border-color:var(--purple);}
+    .food-macros{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap;}
+    .food-macro-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+    .food-macro-chip.kcal{background:#FEF3C7;color:#D97706;}
+    .food-macro-chip.prot{background:#EDE9FE;color:#5B2D8E;}
+    .food-macro-chip.carb{background:#FED7AA;color:#C2410C;}
+    .food-macro-chip.fat{background:#FEE2E2;color:#DC2626;}
+    .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;display:none;}
+    .ac-dropdown.open{display:block;}
+    .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #F9FAFB;}
+    .ac-item:last-child{border-bottom:none;}
+    .ac-item:hover{background:var(--purple-pale);}
+    .ac-item .ac-name{font-weight:600;color:#111;}
+    .ac-item .ac-brand{font-size:11px;color:#9CA3AF;}
+    .add-food-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;margin-top:12px;transition:.15s;}
+    .add-food-btn:hover{background:var(--purple-dark);}
 
     /* Full-page form view */
     #listView{flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -328,12 +346,12 @@
         </div>
 
         <div class="sec-card">
-          <div class="sec-card-head">Comidas del plan</div>
-          <div class="sec-card-body" style="padding-bottom:0;">
-            <div class="foods-editor" id="foodsEditor"></div>
-            <button class="add-food-btn" onclick="addFood()">
+          <div class="sec-card-head">Alimentos del plan</div>
+          <div class="sec-card-body">
+            <div class="food-rows" id="foodRows"></div>
+            <button class="add-food-btn" onclick="addFoodRow()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Añadir comida
+              AGREGAR ALIMENTO
             </button>
           </div>
         </div>
@@ -379,6 +397,7 @@ if (!token) location.href = 'login.html';
 let allDiets = [];
 let editingId = null;
 let deletingId = null;
+let _foodRows = [], _acTimers = {}, _rowSeq = 0, _macroCache = {};
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 async function loadUser() {
@@ -510,11 +529,13 @@ async function openForm(id = null) {
       document.getElementById('f_fats').value     = det.fats     || '';
       document.getElementById('f_deficit').value  = det.deficit  || '';
       document.getElementById('f_surplus').value  = det.surplus  || '';
-      document.getElementById('foodsEditor').innerHTML = '';
-      (d.foods || []).forEach(f => addFood(f.name));
+      document.getElementById('foodRows').innerHTML = '';
+      _foodRows = []; _rowSeq = 0;
+      (d.foods || []).forEach(f => addFoodRow(f));
     } catch { toast('Error al cargar la dieta', 'error'); return; }
   } else {
-    document.getElementById('foodsEditor').innerHTML = '';
+    document.getElementById('foodRows').innerHTML = '';
+    _foodRows = []; _rowSeq = 0;
   }
 
   updatePreview();
@@ -532,7 +553,8 @@ function clearForm() {
   ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_deficit','f_surplus'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('foodsEditor').innerHTML = '';
+  document.getElementById('foodRows').innerHTML = '';
+  _foodRows = []; _rowSeq = 0;
 }
 
 function updatePreview() {
@@ -555,24 +577,190 @@ function updatePreview() {
     macroEl.innerHTML = '';
   }
 
-  const foods = Array.from(document.querySelectorAll('#foodsEditor .food-item input'))
-    .map(i => i.value.trim()).filter(Boolean);
+  const foodNames = _foodRows
+    .map(r => r.aliment_name || document.getElementById(`fiac-${r.id}`)?.value?.trim())
+    .filter(Boolean);
   const foodsEl = document.getElementById('previewFoods');
-  foodsEl.innerHTML = foods.length
-    ? foods.map(f => `<div>· ${esc(f)}</div>`).join('')
-    : '<span style="color:#D1D5DB">Sin comidas aún</span>';
+  foodsEl.innerHTML = foodNames.length
+    ? foodNames.map(f => `<div>· ${esc(f)}</div>`).join('')
+    : '<span style="color:#D1D5DB">Sin alimentos aún</span>';
 }
 
-function addFood(name = '') {
-  const editor = document.getElementById('foodsEditor');
-  const div = document.createElement('div');
-  div.className = 'food-item';
-  div.innerHTML = `
-    <input type="text" placeholder="Ej: Desayuno — Avena con fruta" value="${esc(name)}" oninput="updatePreview()"/>
-    <button class="food-remove" onclick="this.parentElement.remove();updatePreview()" title="Eliminar comida">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>`;
-  editor.appendChild(div);
+// ── Food rows (autocomplete) ──────────────────────────────────────────────────
+function addFoodRow(detail = null) {
+  const rowId = ++_rowSeq;
+  const row = { id: rowId, aliment_id: null, aliment_name: '',
+                proteins: null, carbohydrates: null, fats: null, calories: null };
+  _foodRows.push(row);
+
+  const card = document.createElement('div');
+  card.className = 'food-card';
+  card.id = `frow-${rowId}`;
+  card.innerHTML = `
+    <div class="food-card-top">
+      <div class="ac-wrap">
+        <input type="text" id="fiac-${rowId}" placeholder="Buscar alimento…" autocomplete="off"
+          oninput="acSearch('${rowId}',this.value)"
+          onfocus="acSearch('${rowId}',this.value)"
+          onblur="setTimeout(()=>closeAc('${rowId}'),200)"/>
+        <div class="ac-dropdown" id="facdrop-${rowId}"></div>
+      </div>
+      <button class="btn-icon" style="color:#EF4444;" onclick="removeFoodRow('${rowId}')" title="Quitar">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="food-card-bottom">
+      <div class="food-qty-wrap">
+        <input type="number" id="fqty-${rowId}" min="0" step="0.1" placeholder="0" oninput="onFoodQtyChange('${rowId}')"/>
+        <select id="funit-${rowId}">
+          <option value="gr">gr</option>
+          <option value="kg">kg</option>
+          <option value="ml">ml</option>
+          <option value="l">l</option>
+          <option value="unidad">unidad</option>
+          <option value="cucharada">cucharada</option>
+          <option value="taza">taza</option>
+        </select>
+      </div>
+      <div class="food-macros">
+        <span class="food-macro-chip kcal" id="fkcal-${rowId}">— kcal</span>
+        <span class="food-macro-chip prot" id="fprot-${rowId}">— P</span>
+        <span class="food-macro-chip carb" id="fcarb-${rowId}">— C</span>
+        <span class="food-macro-chip fat"  id="ffat-${rowId}">— G</span>
+      </div>
+    </div>`;
+
+  document.getElementById('foodRows').appendChild(card);
+
+  if (detail) {
+    if (detail.quantity) document.getElementById(`fqty-${rowId}`).value = detail.quantity;
+    if (detail.unit)     document.getElementById(`funit-${rowId}`).value = detail.unit;
+    if (detail.aliment_id) {
+      row.aliment_id = detail.aliment_id;
+      resolveAlimentName(rowId, detail.aliment_id);
+    } else if (detail.name) {
+      document.getElementById(`fiac-${rowId}`).value = detail.name;
+      row.aliment_name = detail.name;
+      updatePreview();
+    }
+  }
+}
+
+function removeFoodRow(rowId) {
+  _foodRows = _foodRows.filter(r => r.id != rowId);
+  document.getElementById(`frow-${rowId}`)?.remove();
+  recalcDietMacros();
+  updatePreview();
+}
+
+function onFoodQtyChange(rowId) {
+  const row = _foodRows.find(r => r.id == rowId);
+  if (row) updateFoodRowMacros(row);
+  recalcDietMacros();
+}
+
+function updateFoodRowMacros(row) {
+  const qty = parseFloat(document.getElementById(`fqty-${row.id}`)?.value) || 0;
+  const k = ((row.calories      || 0) / 100) * qty;
+  const p = ((row.proteins      || 0) / 100) * qty;
+  const c = ((row.carbohydrates || 0) / 100) * qty;
+  const f = ((row.fats          || 0) / 100) * qty;
+  const fmt = v => v >= 10 ? v.toFixed(1) : v.toFixed(2);
+  const el = id => document.getElementById(id);
+  if (el(`fkcal-${row.id}`)) el(`fkcal-${row.id}`).textContent = `${Math.round(k)} kcal`;
+  if (el(`fprot-${row.id}`)) el(`fprot-${row.id}`).textContent = `${fmt(p)}g P`;
+  if (el(`fcarb-${row.id}`)) el(`fcarb-${row.id}`).textContent = `${fmt(c)}g C`;
+  if (el(`ffat-${row.id}`))  el(`ffat-${row.id}`).textContent  = `${fmt(f)}g G`;
+}
+
+function recalcDietMacros() {
+  let kcal = 0, prot = 0, carb = 0, fat = 0;
+  _foodRows.forEach(row => {
+    if (!row.aliment_id) return;
+    const qty = parseFloat(document.getElementById(`fqty-${row.id}`)?.value) || 0;
+    kcal += ((row.calories      || 0) / 100) * qty;
+    prot += ((row.proteins      || 0) / 100) * qty;
+    carb += ((row.carbohydrates || 0) / 100) * qty;
+    fat  += ((row.fats          || 0) / 100) * qty;
+  });
+  if (kcal || prot || carb || fat) {
+    document.getElementById('f_calories').value = Math.round(kcal) || '';
+    document.getElementById('f_proteins').value = prot.toFixed(1);
+    document.getElementById('f_carbs').value    = carb.toFixed(1);
+    document.getElementById('f_fats').value     = fat.toFixed(1);
+    updatePreview();
+  }
+}
+
+async function acSearch(rowId, val) {
+  clearTimeout(_acTimers[rowId]);
+  if (!val || val.length < 2) { closeAc(rowId); return; }
+  _acTimers[rowId] = setTimeout(async () => {
+    try {
+      const p = new URLSearchParams({ search: val, per_page: 10, page: 1 });
+      const r = await fetch(`${API}/aliments/search?${p}`, { headers: { Authorization: `Bearer ${token}` }});
+      const d = await r.json();
+      showAcDropdown(rowId, d.data?.data || []);
+    } catch {}
+  }, 250);
+}
+
+function showAcDropdown(rowId, items) {
+  const drop = document.getElementById(`facdrop-${rowId}`);
+  if (!drop) return;
+  if (!items.length) { drop.classList.remove('open'); return; }
+  items.forEach(a => {
+    _macroCache[a.id] = { proteins: a.proteins ?? null, carbohydrates: a.carbohydrates ?? null, fats: a.fats ?? null, calories: a.calories ?? null };
+  });
+  drop.innerHTML = items.map(a =>
+    `<div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}')">
+      <div class="ac-name">${esc(a.name)}</div>
+      ${a.brand ? `<div class="ac-brand">${esc(a.brand)}</div>` : ''}
+    </div>`
+  ).join('');
+  drop.classList.add('open');
+}
+
+function selectAliment(rowId, alimentId, alimentName) {
+  const row = _foodRows.find(r => r.id == rowId);
+  if (row) {
+    row.aliment_id = alimentId; row.aliment_name = alimentName;
+    const m = _macroCache[alimentId] || {};
+    row.proteins      = m.proteins      ?? null;
+    row.carbohydrates = m.carbohydrates ?? null;
+    row.fats          = m.fats          ?? null;
+    row.calories      = m.calories      ?? null;
+    updateFoodRowMacros(row);
+  }
+  const input = document.getElementById(`fiac-${rowId}`);
+  if (input) input.value = alimentName;
+  closeAc(rowId);
+  recalcDietMacros();
+  updatePreview();
+}
+
+function closeAc(rowId) { document.getElementById(`facdrop-${rowId}`)?.classList.remove('open'); }
+
+async function resolveAlimentName(rowId, alimentId) {
+  try {
+    const r = await fetch(`${API}/aliments/${alimentId}/edit`, { headers: { Authorization: `Bearer ${token}` }});
+    const d = await r.json();
+    if (d.data) {
+      const input = document.getElementById(`fiac-${rowId}`);
+      if (input) input.value = d.data.name || alimentId;
+      const row = _foodRows.find(x => x.id == rowId);
+      if (row) {
+        row.aliment_name  = d.data.name || '';
+        row.proteins      = d.data.proteins      ?? null;
+        row.carbohydrates = d.data.carbohydrates ?? null;
+        row.fats          = d.data.fats          ?? null;
+        row.calories      = d.data.calories      ?? null;
+        updateFoodRowMacros(row);
+        recalcDietMacros();
+        updatePreview();
+      }
+    }
+  } catch {}
 }
 
 async function saveDiet() {
@@ -583,11 +771,15 @@ async function saveDiet() {
   btn.textContent = 'Guardando…'; btn.disabled = true;
   document.getElementById('formError').textContent = '';
 
-  const foodInputs = document.querySelectorAll('#foodsEditor .food-item input');
-  const foods = Array.from(foodInputs)
-    .map(i => i.value.trim())
-    .filter(Boolean)
-    .map(name => ({ name }));
+  const foods = _foodRows
+    .filter(r => r.aliment_id || document.getElementById(`fiac-${r.id}`)?.value?.trim())
+    .map((r, i) => ({
+      aliment_id: r.aliment_id || null,
+      name:       r.aliment_name || document.getElementById(`fiac-${r.id}`)?.value?.trim() || '',
+      quantity:   parseFloat(document.getElementById(`fqty-${r.id}`)?.value) || null,
+      unit:       document.getElementById(`funit-${r.id}`)?.value || null,
+      order:      i,
+    }));
 
   const pNum = id => { const v = document.getElementById(id).value; return v !== '' ? parseFloat(v) : null; };
 

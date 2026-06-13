@@ -306,7 +306,7 @@
   <div class="tab-nav">
     <button id="tabnav-alimentos" class="tab-btn active" onclick="showTab('alimentos')">Alimentos</button>
     <button id="tabnav-recetas"   class="tab-btn" onclick="showTab('recetas')">Recetas</button>
-    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Alimento</button>
+    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Dieta</button>
     <button id="tabnav-grupos"    class="tab-btn" onclick="showTab('grupos')">Grupos de Alimento</button>
   </div>
 
@@ -379,18 +379,18 @@
       </div>
     </div>
 
-    <!-- ── Tab: Tipos de Alimento ── -->
+    <!-- ── Tab: Tipos de Dieta ── -->
     <div id="tab-tipos" class="tab-pane" style="display:none">
       <div class="toolbar">
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="tf_search" placeholder="Buscar tipo…" oninput="renderTypeFood()"/>
+          <input type="text" id="tf_search" placeholder="Buscar tipo de dieta…" oninput="renderTypeFood()"/>
         </div>
         <span class="total-badge" id="tf_count_badge"></span>
         <div class="toolbar-right">
           <button class="btn btn-primary btn-sm" onclick="openCatalogModal('typeFood')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuevo tipo
+            Nuevo tipo de dieta
           </button>
         </div>
       </div>
@@ -1296,7 +1296,7 @@ function openCatalogEdit(catalog, id) {
 
 function openCatalogModalWith(catalog, item) {
   cat_catalog = catalog; cat_editId = item?.id ?? null;
-  const label = catalog === 'typeFood' ? 'tipo de alimento' : 'grupo de alimento';
+  const label = catalog === 'typeFood' ? 'tipo de dieta' : 'grupo de alimento';
   document.getElementById('cat_modalTitle').textContent    = item ? `Editar ${label}` : `Nuevo ${label}`;
   document.getElementById('cat_fName').value               = item?.name        ?? '';
   document.getElementById('cat_fDesc').value               = item?.description ?? '';

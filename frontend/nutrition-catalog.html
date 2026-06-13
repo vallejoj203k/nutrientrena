@@ -306,7 +306,7 @@
   <div class="tab-nav">
     <button id="tabnav-alimentos" class="tab-btn active" onclick="showTab('alimentos')">Alimentos</button>
     <button id="tabnav-recetas"   class="tab-btn" onclick="showTab('recetas')">Recetas</button>
-    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Alimento</button>
+    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Dieta</button>
     <button id="tabnav-grupos"    class="tab-btn" onclick="showTab('grupos')">Grupos de Alimento</button>
   </div>
 
@@ -379,18 +379,18 @@
       </div>
     </div>
 
-    <!-- ── Tab: Tipos de Alimento ── -->
+    <!-- ── Tab: Tipos de Dieta ── -->
     <div id="tab-tipos" class="tab-pane" style="display:none">
       <div class="toolbar">
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="tf_search" placeholder="Buscar tipo…" oninput="renderTypeFood()"/>
+          <input type="text" id="tf_search" placeholder="Buscar tipo de dieta…" oninput="renderTypeFood()"/>
         </div>
         <span class="total-badge" id="tf_count_badge"></span>
         <div class="toolbar-right">
           <button class="btn btn-primary btn-sm" onclick="openCatalogModal('typeFood')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuevo tipo
+            Nuevo tipo de dieta
           </button>
         </div>
       </div>
@@ -463,7 +463,21 @@
       </div>
       <div class="form-row">
         <div class="form-group"><label>Grupo de alimento</label><select id="al_fGroup"><option value="">— Sin grupo —</option></select></div>
-        <div class="form-group"><label>Cantidad (g / ml)</label><input id="al_fQty" type="number" step="0.1" min="0" placeholder="100"/></div>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <div style="display:flex;gap:6px;">
+            <input id="al_fQty" type="number" step="0.1" min="0" placeholder="100" style="flex:1;min-width:0;"/>
+            <select id="al_fUnit" style="width:110px;padding:10px 8px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;background:#fff;">
+              <option value="gr">gr</option>
+              <option value="kg">kg</option>
+              <option value="ml">ml</option>
+              <option value="l">l</option>
+              <option value="unidad">unidad</option>
+              <option value="cucharada">cucharada</option>
+              <option value="taza">taza</option>
+            </select>
+          </div>
+        </div>
       </div>
       <div class="section-title">Macronutrientes (por porción)</div>
       <div class="form-row-4">
@@ -744,6 +758,7 @@ function openAlimentModalWith(item) {
   document.getElementById('al_fBrand').value               = item?.brand ?? '';
   document.getElementById('al_fGroup').value               = item?.group_food_id ?? '';
   document.getElementById('al_fQty').value                 = item?.quantity ?? '';
+  document.getElementById('al_fUnit').value                = item?.unit     ?? 'gr';
   document.getElementById('al_fProteins').value            = item?.proteins ?? '';
   document.getElementById('al_fCarbs').value               = item?.carbohydrates ?? '';
   document.getElementById('al_fFats').value                = item?.fats ?? '';
@@ -775,6 +790,7 @@ async function saveAliment() {
     brand:         document.getElementById('al_fBrand').value.trim() || null,
     group_food_id: parseInt(document.getElementById('al_fGroup').value) || null,
     quantity:      toF(document.getElementById('al_fQty').value),
+    unit:          document.getElementById('al_fUnit').value || null,
     proteins:      toF(document.getElementById('al_fProteins').value),
     carbohydrates: toF(document.getElementById('al_fCarbs').value),
     fats:          toF(document.getElementById('al_fFats').value),
@@ -1296,7 +1312,7 @@ function openCatalogEdit(catalog, id) {
 
 function openCatalogModalWith(catalog, item) {
   cat_catalog = catalog; cat_editId = item?.id ?? null;
-  const label = catalog === 'typeFood' ? 'tipo de alimento' : 'grupo de alimento';
+  const label = catalog === 'typeFood' ? 'tipo de dieta' : 'grupo de alimento';
   document.getElementById('cat_modalTitle').textContent    = item ? `Editar ${label}` : `Nuevo ${label}`;
   document.getElementById('cat_fName').value               = item?.name        ?? '';
   document.getElementById('cat_fDesc').value               = item?.description ?? '';

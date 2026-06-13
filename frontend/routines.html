@@ -1438,7 +1438,11 @@ function renderPickerResults(items) {
   }
   container.innerHTML = items.map(ex => `
     <div class="picker-item" onclick="selectExercise(${ex.id},'${esc(ex.name)}','${esc(ex.muscle_group_name)}')">
-      <div class="picker-item-icon">${ex.muscle_group_name ? ex.muscle_group_name[0] : '?'}</div>
+      <div class="picker-item-icon">
+        ${ex.image
+          ? `<img src="${esc(ex.image)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
+          : (ex.muscle_group_name ? ex.muscle_group_name[0] : '?')}
+      </div>
       <div>
         <div class="picker-item-name">${esc(ex.name)}</div>
         <div class="picker-item-muscle">${esc(ex.muscle_group_name || '—')}</div>

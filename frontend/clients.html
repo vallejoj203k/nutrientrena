@@ -325,7 +325,7 @@
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/></svg>
           Filtros
         </button>
-        <button class="btn-new" onclick="openForm()">
+        <button class="btn-new" onclick="location.href='client-form.html'">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nuevo cliente
         </button>
@@ -430,125 +430,6 @@
     </div>
   </div>
 
-  <!-- ══ MODAL ══ -->
-  <div class="modal-overlay" id="clientModal" onclick="if(event.target===this)closeForm()">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h2 id="formTitle">Nuevo cliente</h2>
-        <button class="modal-close" onclick="closeForm()">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
-
-        <div class="form-section">
-          <div class="form-section-title">Datos de acceso</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Nombre *</label>
-              <input type="text" id="fFirstName" placeholder="Juan"/>
-              <div class="form-error" id="errFirstName"></div>
-            </div>
-            <div class="form-group">
-              <label>Apellido *</label>
-              <input type="text" id="fLastName" placeholder="Pérez"/>
-              <div class="form-error" id="errLastName"></div>
-            </div>
-          </div>
-          <div class="form-row full">
-            <div class="form-group">
-              <label>Email *</label>
-              <input type="email" id="fEmail" placeholder="cliente@email.com"/>
-              <div class="form-error" id="errEmail"></div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Contraseña</label>
-              <input type="password" id="fPassword" placeholder="Mín. 8 caracteres"/>
-              <div class="form-error" id="errPassword"></div>
-            </div>
-            <div class="form-group">
-              <label>Teléfono</label>
-              <input type="text" id="fPhone" placeholder="+57 300 000 0000"/>
-            </div>
-          </div>
-          <div class="form-row full">
-            <div class="form-group">
-              <label>Ocupación</label>
-              <input type="text" id="fOccupation" placeholder="Ej: Ingeniero, Estudiante…"/>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Perfil físico</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Altura (cm)</label>
-              <input type="number" id="fHeight" placeholder="170" min="100" max="250"/>
-            </div>
-            <div class="form-group">
-              <label>Peso (kg)</label>
-              <input type="number" id="fWeight" placeholder="70" min="30" max="300" step="0.1"/>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Género</label>
-              <select id="fGender"><option value="">— Seleccionar —</option></select>
-            </div>
-            <div class="form-group">
-              <label>Nivel de actividad</label>
-              <select id="fActivity"><option value="">— Seleccionar —</option></select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Objetivo</label>
-              <select id="fObjective"><option value="">— Seleccionar —</option></select>
-            </div>
-            <div class="form-group">
-              <label>País</label>
-              <select id="fCountry"><option value="">— Seleccionar —</option></select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Déficit calórico</label>
-              <input type="number" id="fDeficit" placeholder="0" min="0" max="2000"/>
-            </div>
-            <div class="form-group">
-              <label>Excedente calórico</label>
-              <input type="number" id="fExcedente" placeholder="0" min="0" max="2000"/>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Asignación</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Estado inicial</label>
-              <select id="fStatus"><option value="">— Seleccionar —</option></select>
-            </div>
-            <div class="form-group">
-              <label>Coach asignado</label>
-              <select id="fCoach"><option value="">— Sin asignar —</option></select>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      <div class="modal-foot">
-        <span class="err-general" id="errGeneral"></span>
-        <div style="display:flex;gap:10px;">
-          <button onclick="closeForm()" style="padding:9px 18px;border:1.5px solid #E5E7EB;background:#fff;border-radius:8px;font-size:14px;font-weight:600;color:#374151;cursor:pointer;">Cancelar</button>
-          <button id="saveBtn" onclick="saveClient()" style="padding:9px 18px;background:#4F46E5;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Crear cliente</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </div>
 
@@ -568,7 +449,6 @@ let coaches     = [];
 let searchTimer = null;
 let activeTab   = 'all';
 let filtersOpen = false;
-let editingClientId = null;
 
 const AVATAR_PALETTE = ['#4F46E5','#2563EB','#059669','#D97706','#DC2626','#7C3AED','#DB2777','#0D9488','#EA580C','#0284C7'];
 
@@ -881,7 +761,7 @@ function renderTable(){
       </td>
       <td>
         <div class="cell-actions" onclick="event.stopPropagation()">
-          <button class="icon-btn" onclick="openForm('${c.id}')">
+          <button class="icon-btn" onclick="location.href='client-form.html?id=${c.id}'">
             <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Editar
           </button>
@@ -920,114 +800,6 @@ function goPage(p){
 }
 
 function viewClient(id){location.href=`client-profile.html?id=${id}`;}
-
-// ── Form ──────────────────────────────────────────────────────────────────────
-async function openForm(id=null){
-  editingClientId=id||null;
-  const isEdit=!!editingClientId;
-  ['fFirstName','fLastName','fEmail','fPassword','fPhone','fOccupation',
-   'fHeight','fWeight','fGender','fActivity','fObjective','fCountry',
-   'fDeficit','fExcedente','fStatus','fCoach'].forEach(fid=>{
-    const el=document.getElementById(fid); if(el) el.value='';
-  });
-  ['errFirstName','errLastName','errEmail','errPassword','errGeneral'].forEach(fid=>{
-    const el=document.getElementById(fid); if(el) el.textContent='';
-  });
-  document.getElementById('formTitle').textContent=isEdit?'Editar cliente':'Nuevo cliente';
-  document.getElementById('saveBtn').textContent=isEdit?'Guardar cambios':'Crear cliente';
-  document.getElementById('fPassword').placeholder=isEdit?'Dejar vacío para no cambiar':'Mín. 8 caracteres';
-
-  if(isEdit){
-    try{
-      const r=await fetch(`${API}/users/${editingClientId}/edit`,{headers:{Authorization:`Bearer ${token}`}});
-      const j=await r.json(); const c=j.data||j; const d=c.detail||c;
-      document.getElementById('fFirstName').value  =d.name||c.name||'';
-      document.getElementById('fLastName').value   =d.last_name||c.last_name||'';
-      document.getElementById('fEmail').value      =c.email||'';
-      document.getElementById('fPhone').value      =d.phone||c.phone||'';
-      document.getElementById('fOccupation').value =d.occupation||c.occupation||'';
-      document.getElementById('fHeight').value     =d.height||c.height||'';
-      document.getElementById('fWeight').value     =d.weight||c.weight||'';
-      document.getElementById('fGender').value     =d.gender_id||c.gender_id||'';
-      document.getElementById('fActivity').value   =d.activity_id||c.activity_id||'';
-      document.getElementById('fObjective').value  =d.objective_id||c.objective_id||'';
-      document.getElementById('fCountry').value    =d.country_code||c.country_code||'';
-      document.getElementById('fDeficit').value    =d.defecit||c.defecit||'';
-      document.getElementById('fExcedente').value  =d.excedente||c.excedente||'';
-      document.getElementById('fStatus').value     =c.status_id||'';
-      document.getElementById('fCoach').value      =c.instructor||'';
-    }catch{toast('Error al cargar cliente','error');return;}
-  }
-
-  document.getElementById('clientModal').classList.add('open');
-  setTimeout(()=>document.getElementById('fFirstName').focus(),100);
-}
-
-function closeForm(){
-  document.getElementById('clientModal').classList.remove('open');
-  editingClientId=null;
-}
-
-async function saveClient(){
-  const firstName  =document.getElementById('fFirstName').value.trim();
-  const lastName   =document.getElementById('fLastName').value.trim();
-  const email      =document.getElementById('fEmail').value.trim();
-  const password   =document.getElementById('fPassword').value;
-  const isEdit=!!editingClientId;
-
-  let ok=true;
-  const setErr=(id,msg)=>{document.getElementById(id).textContent=msg;if(msg)ok=false;};
-  setErr('errFirstName',firstName?'':'Campo requerido');
-  setErr('errLastName', lastName ?'':'Campo requerido');
-  setErr('errEmail',    email    ?'':'Campo requerido');
-  setErr('errPassword', (!isEdit&&password.length<8)?'Mínimo 8 caracteres':'');
-  document.getElementById('errGeneral').textContent='';
-  if(!ok) return;
-
-  const btn=document.getElementById('saveBtn');
-  btn.textContent=isEdit?'Guardando…':'Creando…'; btn.disabled=true;
-
-  try{
-    const body={name:firstName,last_name:lastName,email};
-    if(!isEdit){body.password=password;body.role_id=6;}
-    else if(password){body.password=password;}
-    const fields={
-      fPhone:'phone',fOccupation:'occupation',fHeight:'height',fWeight:'weight',
-      fGender:'gender_id',fActivity:'activity_id',fObjective:'objective_id',
-      fCountry:'country_code',fDeficit:'defecit',fExcedente:'excedente',
-      fStatus:'status_id',fCoach:'instructor'
-    };
-    Object.entries(fields).forEach(([elId,key])=>{
-      const v=document.getElementById(elId).value;
-      if(!v) return;
-      if(['height','weight'].includes(key)) body[key]=parseFloat(v);
-      else if(['gender_id','activity_id','objective_id','status_id','instructor'].includes(key)) body[key]=parseInt(v);
-      else body[key]=v;
-    });
-
-    const url=isEdit?`${API}/users/${editingClientId}/update`:`${API}/users`;
-    const r=await fetch(url,{
-      method:isEdit?'PUT':'POST',
-      headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
-      body:JSON.stringify(body),
-    });
-    const j=await r.json();
-    if(!r.ok){
-      let msg=isEdit?'Error al actualizar':'Error al crear cliente';
-      if(j.detail) msg=Array.isArray(j.detail)?j.detail.map(e=>e.msg||String(e)).join(', '):String(j.detail);
-      else if(j.message) msg=j.message;
-      document.getElementById('errGeneral').textContent=msg;
-      return;
-    }
-    closeForm();
-    toast(isEdit?'Cliente actualizado':'Cliente creado','success');
-    await load();
-  }catch{
-    document.getElementById('errGeneral').textContent='Error de conexión';
-  }finally{
-    btn.textContent=isEdit?'Guardar cambios':'Crear cliente'; btn.disabled=false;
-  }
-}
 
 function exportCSV(){
   if(!filtered.length){toast('No hay clientes para exportar','error');return;}

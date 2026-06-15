@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NutriEntrena — Login</title>
+  <title>ALZUM.io — Login</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -50,7 +50,7 @@
 
     /* Logo */
     .logo-banner {
-      background: #5B2D8E;
+      background: #4F46E5;
       border-radius: 10px;
       padding: 18px 24px;
       text-align: center;
@@ -64,7 +64,7 @@
       font-style: italic;
     }
     .logo-text span {
-      color: #C084FC;
+      color: #818CF8;
     }
 
     /* Inputs */
@@ -91,13 +91,13 @@
       transition: border-color .2s;
     }
     .input-group input::placeholder { color: #9CA3AF; }
-    .input-group input:focus { border-color: #5B2D8E; }
+    .input-group input:focus { border-color: #4F46E5; }
 
     /* Botón login */
     .btn-login {
       width: 100%;
       padding: 15px;
-      background: #5B2D8E;
+      background: #4F46E5;
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -111,7 +111,7 @@
       transition: background .2s, transform .1s;
       letter-spacing: .5px;
     }
-    .btn-login:hover   { background: #4A2475; }
+    .btn-login:hover   { background: #4338CA; }
     .btn-login:active  { transform: scale(.98); }
     .btn-login:disabled { opacity: .6; cursor: not-allowed; }
 
@@ -133,7 +133,7 @@
       color: #6B7280;
     }
     .forgot a {
-      color: #5B2D8E;
+      color: #4F46E5;
       text-decoration: none;
       font-weight: 500;
     }
@@ -167,12 +167,34 @@
       .right { width: 100%; }
     }
   </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
+  </style>
 </head>
 <body>
 
   <!-- Panel izquierdo -->
   <div class="left">
-    <img src="panel_login.jpg" alt="NutriEntrena" />
+    <img src="panel_login.jpg" alt="ALZUM.io" />
   </div>
 
   <!-- Panel derecho -->
@@ -180,7 +202,7 @@
     <div class="form-box">
 
       <div class="logo-banner">
-        <div class="logo-text">Nutri<span>Entrena</span></div>
+        <div class="logo-text">ALZUM<span>.io</span></div>
       </div>
 
       <div class="error-msg"   id="errorMsg"></div>

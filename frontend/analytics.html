@@ -87,8 +87,8 @@
 
     /* Coaches table */
     .coaches-table{width:100%;border-collapse:collapse;}
-    .coaches-table th{padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #F3F4F6;}
-    .coaches-table td{padding:12px;font-size:13px;color:#374151;border-bottom:1px solid #F9FAFB;}
+    .coaches-table th{padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #EBEBEB;}
+    .coaches-table td{padding:12px;font-size:13px;color:#374151;border-bottom:1px solid #EBEBEB;}
     .coaches-table tr:last-child td{border-bottom:none;}
     .coaches-table tr:hover td{background:#FAFAFA;}
     .coach-name-cell{display:flex;align-items:center;gap:10px;}
@@ -503,14 +503,14 @@ async function fillCheckinStats() {
         <div>
           <div style="font-size:28px;font-weight:800;color:var(--purple);">${ck.adherence_pct ?? 0}%</div>
           <div style="font-size:12px;color:#6B7280;margin-top:4px;">Adherencia general</div>
-          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${ck.clients_with_checkin ?? 0} clientes con check-in</div>
+          <div style="font-size:11px;color:#6B7280;margin-top:2px;">${ck.clients_with_checkin ?? 0} clientes con check-in</div>
         </div>
         <div>
           <div style="font-size:28px;font-weight:800;color:${(ck.avg_weight_change_kg??0)<=0?'#059669':'#DC2626'};">
             ${ck.avg_weight_change_kg != null ? (ck.avg_weight_change_kg>0?'+':'')+ck.avg_weight_change_kg+' kg' : '—'}
           </div>
           <div style="font-size:12px;color:#6B7280;margin-top:4px;">Cambio peso promedio</div>
-          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${ck.clients_losing_weight??0} bajando · ${ck.clients_gaining_weight??0} subiendo</div>
+          <div style="font-size:11px;color:#6B7280;margin-top:2px;">${ck.clients_losing_weight??0} bajando · ${ck.clients_gaining_weight??0} subiendo</div>
         </div>
       </div>
     `;

@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Analíticas</title>
+  <title>ALZUM.io — Analíticas</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-light:#7C3AED;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-light:#6366F1;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
     /* Sidebar */
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
     .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
     .sidebar-nav{flex:1;padding:16px 0;}
     .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
     .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
     .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .user-role{font-size:11px;color:rgba(255,255,255,.5);}
@@ -105,14 +105,36 @@
     .toast.show{transform:translateY(0);opacity:1;}
     .toast.error{background:#DC2626;}
   </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
+  </style>
 </head>
 <body>
 
 <!-- Sidebar -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <span>Nutri<em>Entrena</em></span>
-    <small>Panel de administración</small>
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
   </div>
     <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
@@ -237,7 +259,7 @@ const API = 'https://nutrientrena-production.up.railway.app/api';
 let token = localStorage.getItem('token');
 if (!token) location.href = 'login.html';
 
-const COLORS = ['#5B2D8E','#7C3AED','#3B82F6','#10B981','#F59E0B','#EF4444','#6366F1','#EC4899','#14B8A6','#F97316','#84CC16','#06B6D4','#A855F7','#22C55E','#EAB308'];
+const COLORS = ['#4F46E5','#6366F1','#3B82F6','#10B981','#F59E0B','#EF4444','#6366F1','#EC4899','#14B8A6','#F97316','#84CC16','#06B6D4','#A855F7','#22C55E','#EAB308'];
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 async function loadUser() {
@@ -301,7 +323,7 @@ async function loadAll() {
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats(ov, ck) {
   const cards = [
-    { icon:'#5B2D8E', bg:'#F3EEFF', val: ov.total_clients ?? '—', label:'Total clientes',
+    { icon:'#4F46E5', bg:'#EEF2FF', val: ov.total_clients ?? '—', label:'Total clientes',
       sub: `+${ov.new_this_month ?? 0} este mes`, cls:'neutral',
       svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
     { icon:'#059669', bg:'#ECFDF5', val: ov.active_clients ?? '—', label:'Clientes activos',
@@ -439,7 +461,7 @@ function renderTrend(weekly) {
   const area = `${pts[0].x},${H} ` + pts.map(p => `${p.x},${p.y}`).join(' ') + ` ${pts[pts.length-1].x},${H}`;
 
   const xLabels = pts.map(p => `<text x="${p.x}" y="${H}" text-anchor="middle" font-size="9" fill="#9CA3AF">${p.w.week.replace(/^\d+-/,'')}</text>`).join('');
-  const dots = pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#5B2D8E" stroke="#fff" stroke-width="1.5"/>`).join('');
+  const dots = pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#4F46E5" stroke="#fff" stroke-width="1.5"/>`).join('');
 
   document.getElementById('chartsRow2').innerHTML = `
     <div class="card">
@@ -448,12 +470,12 @@ function renderTrend(weekly) {
         <svg viewBox="0 0 ${W} ${H+12}" width="100%" height="100%" preserveAspectRatio="none">
           <defs>
             <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#5B2D8E" stop-opacity=".18"/>
-              <stop offset="100%" stop-color="#5B2D8E" stop-opacity="0"/>
+              <stop offset="0%" stop-color="#4F46E5" stop-opacity=".18"/>
+              <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
             </linearGradient>
           </defs>
           <polygon points="${area}" fill="url(#lg)"/>
-          <polyline points="${polyline}" fill="none" stroke="#5B2D8E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="${polyline}" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           ${dots}
           ${xLabels}
         </svg>

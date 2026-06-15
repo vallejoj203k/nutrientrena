@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Check-ins</title>
+  <title>ALZUM.io — Check-ins</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{
-      --purple:#5B2D8E;--purple-dark:#4A2475;--purple-light:#7C3AED;
-      --purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;
+      --purple:#4F46E5;--purple-dark:#4338CA;--purple-light:#6366F1;
+      --purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;
     }
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
@@ -16,17 +16,17 @@
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
     .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
     .sidebar-nav{flex:1;padding:16px 0;}
     .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
     .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
     .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .user-role{font-size:11px;color:rgba(255,255,255,.5);}
@@ -177,14 +177,36 @@
       .summary-grid{grid-template-columns:1fr;}
     }
   </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
+  </style>
 </head>
 <body>
 
 <!-- ══════════════════ SIDEBAR ══════════════════ -->
 <div class="sidebar">
   <div class="sidebar-logo">
-    <span>Nutri<em>Entrena</em></span>
-    <small>Panel de administración</small>
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
   </div>
 
     <nav class="sidebar-nav">
@@ -287,7 +309,7 @@
 
     <!-- Client selector -->
     <div class="selector-bar">
-      <svg width="18" height="18" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <svg width="18" height="18" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       <label for="clientSelect">Cliente:</label>
       <select class="client-select" id="clientSelect" onchange="onClientChange()">
         <option value="">— Selecciona un cliente —</option>
@@ -309,7 +331,7 @@
     <div class="summary-grid" id="summaryGrid" style="display:none;">
       <div class="summary-card">
         <div class="summary-icon si-purple">
-          <svg width="20" height="20" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <svg width="20" height="20" fill="none" stroke="#6366F1" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
         <div>
           <div class="summary-label">Total check-ins</div>
@@ -395,7 +417,7 @@
 <div class="modal-overlay" id="newCheckinModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="newModalTitle">
     <div class="modal-title">
-      <svg width="18" height="18" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <svg width="18" height="18" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       <span id="newModalTitle">Nuevo check-in</span>
       <button class="modal-close" onclick="closeModal('newCheckinModal')" aria-label="Cerrar">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -423,7 +445,7 @@
       <textarea id="ncNotes" rows="3" placeholder="Cómo se sintió esta semana, observaciones..."></textarea>
     </div>
     <!-- Measurements -->
-    <div style="font-size:11px;font-weight:700;color:#5B2D8E;text-transform:uppercase;letter-spacing:.8px;margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid #F3EEFF;">Medidas corporales (opcional)</div>
+    <div style="font-size:11px;font-weight:700;color:#4F46E5;text-transform:uppercase;letter-spacing:.8px;margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid #EEF2FF;">Medidas corporales (opcional)</div>
     <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
       <div class="form-group">
         <label for="ncBodyFat">% Grasa corporal</label>
@@ -452,7 +474,7 @@
     </div>
 
     <!-- Photo -->
-    <div style="font-size:11px;font-weight:700;color:#5B2D8E;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px;padding-bottom:6px;border-bottom:2px solid #F3EEFF;">Foto de progreso (opcional)</div>
+    <div style="font-size:11px;font-weight:700;color:#4F46E5;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px;padding-bottom:6px;border-bottom:2px solid #EEF2FF;">Foto de progreso (opcional)</div>
     <div class="form-group" style="margin-bottom:0;">
       <div id="photoPreviewWrap" style="display:none;margin-bottom:8px;">
         <img id="photoPreview" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;"/>
@@ -476,7 +498,7 @@
 <div class="modal-overlay" id="coachNotesModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cnModalTitle">
     <div class="modal-title">
-      <svg width="18" height="18" fill="none" stroke="#5B2D8E" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <svg width="18" height="18" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       <span id="cnModalTitle">Notas del coach</span>
       <button class="modal-close" onclick="closeModal('coachNotesModal')" aria-label="Cerrar">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -490,7 +512,7 @@
       <textarea id="cnNotes" rows="4" placeholder="Escribe las notas, recomendaciones o feedback para el cliente..."></textarea>
     </div>
 
-    <div style="font-size:11px;font-weight:700;color:#5B2D8E;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px;padding-bottom:6px;border-bottom:2px solid #F3EEFF;">Actualizar medidas (opcional)</div>
+    <div style="font-size:11px;font-weight:700;color:#4F46E5;text-transform:uppercase;letter-spacing:.8px;margin:4px 0 10px;padding-bottom:6px;border-bottom:2px solid #EEF2FF;">Actualizar medidas (opcional)</div>
     <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
       <div class="form-group">
         <label for="cnWeight">Peso (kg)</label>

@@ -43,7 +43,7 @@ def _out(s: WorkoutSession) -> dict:
     }
 
 
-@router.get("/client/{client_user_detail_id}")
+@router.get("/client/{client_user_detail_id}", summary="Sesiones del cliente", description="Retorna el historial de sesiones de entrenamiento de un cliente.")
 def list_sessions(
     client_user_detail_id: str,
     db: Session = Depends(get_db),
@@ -58,7 +58,7 @@ def list_sessions(
     return send_response([_out(s) for s in sessions], "OK")
 
 
-@router.post("")
+@router.post("", summary="Registrar sesión", description="Registra una nueva sesión de entrenamiento completada por el cliente.")
 def create_session(
     data: SessionCreate,
     db: Session = Depends(get_db),
@@ -71,7 +71,7 @@ def create_session(
     return send_response(_out(s), "Sesión registrada")
 
 
-@router.put("/{id}")
+@router.put("/{id}", summary="Actualizar sesión", description="Modifica los datos de una sesión de entrenamiento registrada.")
 def update_session(
     id: int,
     data: SessionUpdate,
@@ -88,7 +88,7 @@ def update_session(
     return send_response(_out(s), "Sesión actualizada")
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", summary="Eliminar sesión", description="Elimina un registro de sesión de entrenamiento.")
 def delete_session(
     id: int,
     db: Session = Depends(get_db),

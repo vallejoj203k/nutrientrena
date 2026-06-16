@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Dietas</title>
+  <title>ALZUM.io — Dietas</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
     /* Sidebar */
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
     .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
     .sidebar-nav{flex:1;padding:16px 0;}
     .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
     .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
     .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .user-role{font-size:11px;color:rgba(255,255,255,.5);}
@@ -63,7 +63,7 @@
     .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
 
     /* Diet card */
-    .diet-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;transition:.15s;position:relative;}
+    .diet-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5E7EB;transition:.15s;position:relative;}
     .diet-card:hover{border-color:#D8B4FE;box-shadow:0 4px 12px rgba(91,45,142,.1);}
     .diet-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
     .diet-card-title{font-size:15px;font-weight:700;color:#111;line-height:1.3;}
@@ -73,10 +73,10 @@
     .macro-chip{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:8px;min-width:60px;flex:1;}
     .macro-chip .val{font-size:16px;font-weight:800;line-height:1;}
     .macro-chip .lbl{font-size:10px;margin-top:3px;font-weight:500;}
-    .macro-kcal{background:#F3EEFF;color:#5B2D8E;}
+    .macro-kcal{background:#EEF2FF;color:#4F46E5;}
     .macro-p{background:#EFF6FF;color:#2563EB;}
     .macro-c{background:#FEFCE8;color:#D97706;}
-    .macro-f{background:#FDF4FF;color:#7C3AED;}
+    .macro-f{background:#FDF4FF;color:#6366F1;}
     .foods-list{font-size:12px;color:#6B7280;border-top:1px solid #F3F4F6;padding-top:10px;}
     .foods-list strong{color:#374151;font-size:11px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;}
     .food-tag{display:inline-block;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:20px;padding:2px 8px;font-size:11px;margin:2px 3px 2px 0;}
@@ -87,35 +87,69 @@
     .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
     .empty p{font-size:13px;}
 
-    /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
-    .modal-overlay.open{opacity:1;pointer-events:all;}
-    .modal{background:#fff;border-radius:16px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
-    .modal-overlay.open .modal{transform:translateY(0);}
-    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
-    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
-    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
-    .modal-close:hover{color:#374151;}
-    .modal-body{padding:20px 24px;}
-    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    /* Form elements shared */
     .form-group{margin-bottom:16px;}
     .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
     .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
     .form-group input:focus,.form-group select:focus{border-color:var(--purple);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
-    .section-title{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
 
-    /* Foods section in modal */
-    .foods-editor{border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;}
-    .food-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #F3F4F6;}
-    .food-item:last-child{border-bottom:none;}
-    .food-item input{flex:1;padding:6px 8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;outline:none;}
-    .food-item input:focus{border-color:var(--purple);}
-    .food-remove{background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;border-radius:4px;display:flex;}
-    .food-remove:hover{background:#FEF2F2;}
-    .add-food-btn{display:flex;align-items:center;gap:6px;padding:10px 12px;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;width:100%;}
-    .add-food-btn:hover{background:var(--purple-pale);}
+    /* Food rows (autocomplete) */
+    .food-rows{display:flex;flex-direction:column;gap:8px;}
+    .food-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;}
+    .food-card-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .food-card-top .ac-wrap{flex:1;position:relative;}
+    .food-card-top .ac-wrap input{width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;background:#fff;}
+    .food-card-top .ac-wrap input:focus{border-color:var(--purple);}
+    .food-card-bottom{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .food-qty-wrap{display:flex;align-items:center;gap:6px;}
+    .food-qty-wrap input[type=number]{width:82px;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;text-align:center;transition:.15s;background:#fff;}
+    .food-qty-wrap input[type=number]:focus{border-color:var(--purple);}
+    .food-qty-wrap select{padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#fff;transition:.15s;}
+    .food-qty-wrap select:focus{border-color:var(--purple);}
+    .food-macros{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap;}
+    .food-macro-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+    .food-macro-chip.kcal{background:#FEF3C7;color:#D97706;}
+    .food-macro-chip.prot{background:#EDE9FE;color:#4F46E5;}
+    .food-macro-chip.carb{background:#FED7AA;color:#C2410C;}
+    .food-macro-chip.fat{background:#FEE2E2;color:#DC2626;}
+    .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;display:none;}
+    .ac-dropdown.open{display:block;}
+    .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #EBEBEB;}
+    .ac-item:last-child{border-bottom:none;}
+    .ac-item:hover{background:var(--purple-pale);}
+    .ac-item .ac-name{font-weight:600;color:#111;}
+    .ac-item .ac-brand{font-size:11px;color:#9CA3AF;}
+    .add-food-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;margin-top:12px;transition:.15s;}
+    .add-food-btn:hover{background:var(--purple-dark);}
+
+    /* Full-page form view */
+    #listView{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    #formView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #formView.active{display:flex;}
+    .fv-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+    .fv-back{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:#6B7280;font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;transition:.15s;}
+    .fv-back:hover{background:#F3F4F6;color:#111;}
+    .fv-title{font-size:18px;font-weight:700;color:#111;}
+    .fv-body{display:flex;flex:1;overflow:hidden;}
+    .fv-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;}
+    .fv-main::-webkit-scrollbar{width:6px;}
+    .fv-main::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    .fv-sidebar{width:300px;min-width:300px;background:#fff;border-left:1px solid #E5E7EB;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+    .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
+    .sec-card-head{padding:16px 20px;border-bottom:1px solid #EBEBEB;font-size:14px;font-weight:700;color:#111;}
+    .sec-card-body{padding:20px;}
+    .sb-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:16px;}
+    .sb-card-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+    .sb-diet-title{font-size:15px;font-weight:700;color:#111;margin-bottom:10px;min-height:20px;}
+    .sb-macro-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+    .sb-macro{display:flex;flex-direction:column;align-items:center;padding:6px 10px;border-radius:8px;flex:1;}
+    .sb-macro .v{font-size:14px;font-weight:800;line-height:1;}
+    .sb-macro .l{font-size:10px;margin-top:2px;}
+    .save-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--purple);color:#fff;transition:.15s;}
+    .save-btn:hover{background:var(--purple-dark);}
+    .save-btn:disabled{opacity:.6;cursor:not-allowed;}
 
     /* Delete confirm */
     .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
@@ -138,7 +172,31 @@
       .sidebar-nav,.sidebar-user{display:none;}
       .cards-grid{grid-template-columns:1fr;}
       .form-row,.form-row-4{grid-template-columns:1fr;}
+      .fv-body{flex-direction:column;}
+      .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;}
     }
+  </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
   </style>
 </head>
 <body>
@@ -146,10 +204,9 @@
 <!-- Sidebar -->
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <span>Nutri<em>Entrena</em></span>
-    <small>Panel de administración</small>
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
   </div>
-  <div class="sidebar-nav">
   <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
@@ -163,6 +220,14 @@
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Coaches
+    </a>
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Eventos
     </a>
     <a class="nav-item" href="checkins.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -225,85 +290,116 @@
 
 <!-- Main -->
 <div class="main">
-  <div class="topbar">
-    <h1>Dietas</h1>
-    <button class="btn btn-primary" onclick="openModal()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nueva dieta
-    </button>
-  </div>
-  <div class="toolbar">
-    <div class="search-wrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="searchInput" placeholder="Buscar dieta…" oninput="applyFilter()"/>
-    </div>
-    <span class="total-label" id="totalLabel"></span>
-  </div>
-  <div class="content" id="content">
-    <div class="empty">
-      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
-      <h3>Cargando dietas…</h3>
-    </div>
-  </div>
-</div>
 
-<!-- Diet modal -->
-<div class="modal-overlay" id="dietOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="modalTitle">Nueva dieta</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group" style="grid-column:1/-1">
-          <label>Título *</label>
-          <input id="f_title" placeholder="Ej: Dieta de definición — 1800 kcal"/>
-        </div>
-      </div>
-      <div class="section-title">Macros y calorías</div>
-      <div class="form-row-4">
-        <div class="form-group">
-          <label>Calorías (kcal)</label>
-          <input id="f_calories" type="number" placeholder="1800"/>
-        </div>
-        <div class="form-group">
-          <label>Proteínas (g)</label>
-          <input id="f_proteins" type="number" placeholder="150"/>
-        </div>
-        <div class="form-group">
-          <label>Carbos (g)</label>
-          <input id="f_carbs" type="number" placeholder="180"/>
-        </div>
-        <div class="form-group">
-          <label>Grasas (g)</label>
-          <input id="f_fats" type="number" placeholder="60"/>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Déficit (kcal)</label>
-          <input id="f_deficit" type="number" placeholder="300"/>
-        </div>
-        <div class="form-group">
-          <label>Superávit (kcal)</label>
-          <input id="f_surplus" type="number" placeholder="0"/>
-        </div>
-      </div>
-      <div class="section-title">Comidas del plan</div>
-      <div class="foods-editor" id="foodsEditor"></div>
-      <button class="add-food-btn" onclick="addFood()">
+  <!-- List View -->
+  <div id="listView">
+    <div class="topbar">
+      <h1>Dietas</h1>
+      <button class="btn btn-primary" onclick="openForm()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Añadir comida
+        Nueva dieta
       </button>
-      <div id="modalError" style="color:#DC2626;font-size:13px;margin-top:8px;"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" id="saveBtn" onclick="saveDiet()">Guardar</button>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar dieta…" oninput="applyFilter()"/>
+      </div>
+      <span class="total-label" id="totalLabel"></span>
     </div>
-  </div>
-</div>
+    <div class="content" id="content">
+      <div class="empty">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2h18v7a9 9 0 0 1-18 0V2z"/><line x1="12" y1="9" x2="12" y2="22"/><path d="M7 22h10"/></svg>
+        <h3>Cargando dietas…</h3>
+      </div>
+    </div>
+  </div><!-- #listView -->
+
+  <!-- Form View -->
+  <div id="formView">
+    <div class="fv-bar">
+      <button class="fv-back" onclick="closeForm()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver a dietas
+      </button>
+      <h2 class="fv-title" id="formViewTitle">Nueva dieta</h2>
+    </div>
+    <div class="fv-body">
+      <div class="fv-main">
+
+        <div class="sec-card">
+          <div class="sec-card-head">Información general</div>
+          <div class="sec-card-body">
+            <div class="form-group">
+              <label>Título *</label>
+              <input id="f_title" placeholder="Ej: Dieta de definición — 1800 kcal" oninput="updatePreview()"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-card">
+          <div class="sec-card-head">Macros y calorías</div>
+          <div class="sec-card-body">
+            <div class="form-row-4">
+              <div class="form-group">
+                <label>Calorías (kcal)</label>
+                <input id="f_calories" type="number" placeholder="1800" oninput="updatePreview()"/>
+              </div>
+              <div class="form-group">
+                <label>Proteínas (g)</label>
+                <input id="f_proteins" type="number" placeholder="150" oninput="updatePreview()"/>
+              </div>
+              <div class="form-group">
+                <label>Carbos (g)</label>
+                <input id="f_carbs" type="number" placeholder="180" oninput="updatePreview()"/>
+              </div>
+              <div class="form-group">
+                <label>Grasas (g)</label>
+                <input id="f_fats" type="number" placeholder="60" oninput="updatePreview()"/>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Déficit (kcal)</label>
+                <input id="f_deficit" type="number" placeholder="300"/>
+              </div>
+              <div class="form-group">
+                <label>Superávit (kcal)</label>
+                <input id="f_surplus" type="number" placeholder="0"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-card">
+          <div class="sec-card-head">Alimentos del plan</div>
+          <div class="sec-card-body">
+            <div class="food-rows" id="foodRows"></div>
+            <button class="add-food-btn" onclick="addFoodRow()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              AGREGAR ALIMENTO
+            </button>
+          </div>
+        </div>
+
+        <div id="formError" style="color:#DC2626;font-size:13px;"></div>
+
+      </div><!-- .fv-main -->
+
+      <div class="fv-sidebar">
+        <div class="sb-card">
+          <div class="sb-card-title">Vista previa</div>
+          <div class="sb-diet-title" id="previewTitle">Sin título</div>
+          <div class="sb-macro-row" id="previewMacros"></div>
+          <div id="previewFoods" style="font-size:12px;color:#6B7280;line-height:1.8;"></div>
+        </div>
+        <button class="save-btn" id="saveBtn" onclick="saveDiet()">Guardar dieta</button>
+      </div>
+
+    </div><!-- .fv-body -->
+  </div><!-- #formView -->
+
+</div><!-- .main -->
 
 <!-- Delete confirm -->
 <div class="confirm-overlay" id="confirmOverlay">
@@ -327,6 +423,7 @@ if (!token) location.href = 'login.html';
 let allDiets = [];
 let editingId = null;
 let deletingId = null;
+let _foodRows = [], _acTimers = {}, _rowSeq = 0, _macroCache = {};
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 async function loadUser() {
@@ -335,9 +432,9 @@ async function loadUser() {
     if (r.status === 401) { logout(); return; }
     const j = await r.json();
     const u = j.data || j;
-    const name = u.name || u.full_name || 'Usuario';
+    const name = u.name || u.full_name || `${u.first_name||''} ${u.last_name||''}`.trim() || u.email || 'Usuario';
     document.getElementById('sidebarName').textContent = name;
-    document.getElementById('sidebarRole').textContent = (u.roles?.[0]?.name) || '—';
+    document.getElementById('sidebarRole').textContent = u.role?.name || u.role || '';
     document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
   } catch {}
 }
@@ -346,10 +443,10 @@ function logout() { localStorage.clear(); location.href = 'login.html'; }
 
 async function loadPendingBadge() {
   try {
-    const r = await fetch(`${API}/form-assignments/pending`, { headers: { Authorization: `Bearer ${token}` }});
+    const r = await fetch(`${API}/form-assignments?status=pending&per_page=1`, { headers: { Authorization: `Bearer ${token}` }});
     if (!r.ok) return;
     const j = await r.json();
-    const count = (j.data || j || []).length;
+    const count = j.data?.total ?? (Array.isArray(j.data) ? j.data.length : 0);
     const badge = document.getElementById('formsBadge');
     if (count > 0) { badge.textContent = count; badge.style.display = 'inline-block'; }
   } catch {}
@@ -425,7 +522,7 @@ function dietCard(d) {
           <button class="btn-icon" title="Descargar PDF" onclick="downloadPdf('${d.id}', '${esc(d.title)}')">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
           </button>
-          <button class="btn-icon" title="Editar" onclick="openModal('${d.id}')">
+          <button class="btn-icon" title="Editar" onclick="openForm('${d.id}')">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
           <button class="btn-icon" title="Eliminar" onclick="openConfirm('${d.id}')" style="color:#EF4444;">
@@ -438,11 +535,11 @@ function dietCard(d) {
     </div>`;
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
-async function openModal(id = null) {
+// ── Form View ─────────────────────────────────────────────────────────────────
+async function openForm(id = null) {
   editingId = id;
-  document.getElementById('modalTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
-  document.getElementById('modalError').textContent = '';
+  document.getElementById('formViewTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
+  document.getElementById('formError').textContent = '';
   clearForm();
 
   if (id) {
@@ -458,49 +555,257 @@ async function openModal(id = null) {
       document.getElementById('f_fats').value     = det.fats     || '';
       document.getElementById('f_deficit').value  = det.deficit  || '';
       document.getElementById('f_surplus').value  = det.surplus  || '';
-      document.getElementById('foodsEditor').innerHTML = '';
-      (d.foods || []).forEach(f => addFood(f.name));
+      document.getElementById('foodRows').innerHTML = '';
+      _foodRows = []; _rowSeq = 0;
+      (d.foods || []).forEach(f => addFoodRow(f));
     } catch { toast('Error al cargar la dieta', 'error'); return; }
   } else {
-    document.getElementById('foodsEditor').innerHTML = '';
+    document.getElementById('foodRows').innerHTML = '';
+    _foodRows = []; _rowSeq = 0;
   }
 
-  document.getElementById('dietOverlay').classList.add('open');
+  updatePreview();
+  document.getElementById('listView').style.display = 'none';
+  document.getElementById('formView').classList.add('active');
 }
 
-function closeModal() { document.getElementById('dietOverlay').classList.remove('open'); }
+function closeForm() {
+  document.getElementById('formView').classList.remove('active');
+  document.getElementById('listView').style.display = '';
+  editingId = null;
+}
 
 function clearForm() {
   ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_deficit','f_surplus'].forEach(id => {
     document.getElementById(id).value = '';
   });
+  document.getElementById('foodRows').innerHTML = '';
+  _foodRows = []; _rowSeq = 0;
 }
 
-function addFood(name = '') {
-  const editor = document.getElementById('foodsEditor');
-  const div = document.createElement('div');
-  div.className = 'food-item';
-  div.innerHTML = `
-    <input type="text" placeholder="Ej: Desayuno — Avena con fruta" value="${esc(name)}"/>
-    <button class="food-remove" onclick="this.parentElement.remove()" title="Eliminar comida">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>`;
-  editor.appendChild(div);
+function updatePreview() {
+  const title = document.getElementById('f_title').value.trim();
+  const kcal  = parseFloat(document.getElementById('f_calories').value) || null;
+  const prot  = parseFloat(document.getElementById('f_proteins').value) || null;
+  const carb  = parseFloat(document.getElementById('f_carbs').value)    || null;
+  const fat   = parseFloat(document.getElementById('f_fats').value)     || null;
+
+  document.getElementById('previewTitle').textContent = title || 'Sin título';
+
+  const macroEl = document.getElementById('previewMacros');
+  if (kcal || prot || carb || fat) {
+    macroEl.innerHTML =
+      (kcal ? `<div class="sb-macro macro-kcal"><span class="v">${Math.round(kcal)}</span><span class="l">kcal</span></div>` : '') +
+      (prot ? `<div class="sb-macro macro-p"><span class="v">${Math.round(prot)}g</span><span class="l">Prot.</span></div>` : '') +
+      (carb ? `<div class="sb-macro macro-c"><span class="v">${Math.round(carb)}g</span><span class="l">Carbs</span></div>` : '') +
+      (fat  ? `<div class="sb-macro macro-f"><span class="v">${Math.round(fat)}g</span><span class="l">Grasas</span></div>` : '');
+  } else {
+    macroEl.innerHTML = '';
+  }
+
+  const foodNames = _foodRows
+    .map(r => r.aliment_name || document.getElementById(`fiac-${r.id}`)?.value?.trim())
+    .filter(Boolean);
+  const foodsEl = document.getElementById('previewFoods');
+  foodsEl.innerHTML = foodNames.length
+    ? foodNames.map(f => `<div>· ${esc(f)}</div>`).join('')
+    : '<span style="color:#D1D5DB">Sin alimentos aún</span>';
+}
+
+// ── Food rows (autocomplete) ──────────────────────────────────────────────────
+function addFoodRow(detail = null) {
+  const rowId = ++_rowSeq;
+  const row = { id: rowId, aliment_id: null, aliment_name: '',
+                proteins: null, carbohydrates: null, fats: null, calories: null };
+  _foodRows.push(row);
+
+  const card = document.createElement('div');
+  card.className = 'food-card';
+  card.id = `frow-${rowId}`;
+  card.innerHTML = `
+    <div class="food-card-top">
+      <div class="ac-wrap">
+        <input type="text" id="fiac-${rowId}" placeholder="Buscar alimento…" autocomplete="off"
+          oninput="acSearch('${rowId}',this.value)"
+          onfocus="acSearch('${rowId}',this.value)"
+          onblur="setTimeout(()=>closeAc('${rowId}'),200)"/>
+        <div class="ac-dropdown" id="facdrop-${rowId}"></div>
+      </div>
+      <button class="btn-icon" style="color:#EF4444;" onclick="removeFoodRow('${rowId}')" title="Quitar">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="food-card-bottom">
+      <div class="food-qty-wrap">
+        <input type="number" id="fqty-${rowId}" min="0" step="0.1" placeholder="0" oninput="onFoodQtyChange('${rowId}')"/>
+        <select id="funit-${rowId}">
+          <option value="gr">gr</option>
+          <option value="kg">kg</option>
+          <option value="ml">ml</option>
+          <option value="l">l</option>
+          <option value="unidad">unidad</option>
+          <option value="cucharada">cucharada</option>
+          <option value="taza">taza</option>
+        </select>
+      </div>
+      <div class="food-macros">
+        <span class="food-macro-chip kcal" id="fkcal-${rowId}">— kcal</span>
+        <span class="food-macro-chip prot" id="fprot-${rowId}">— P</span>
+        <span class="food-macro-chip carb" id="fcarb-${rowId}">— C</span>
+        <span class="food-macro-chip fat"  id="ffat-${rowId}">— G</span>
+      </div>
+    </div>`;
+
+  document.getElementById('foodRows').appendChild(card);
+
+  if (detail) {
+    if (detail.quantity) document.getElementById(`fqty-${rowId}`).value = detail.quantity;
+    if (detail.unit)     document.getElementById(`funit-${rowId}`).value = detail.unit;
+    if (detail.aliment_id) {
+      row.aliment_id = detail.aliment_id;
+      resolveAlimentName(rowId, detail.aliment_id);
+    } else if (detail.name) {
+      document.getElementById(`fiac-${rowId}`).value = detail.name;
+      row.aliment_name = detail.name;
+      updatePreview();
+    }
+  }
+}
+
+function removeFoodRow(rowId) {
+  _foodRows = _foodRows.filter(r => r.id != rowId);
+  document.getElementById(`frow-${rowId}`)?.remove();
+  recalcDietMacros();
+  updatePreview();
+}
+
+function onFoodQtyChange(rowId) {
+  const row = _foodRows.find(r => r.id == rowId);
+  if (row) updateFoodRowMacros(row);
+  recalcDietMacros();
+}
+
+function updateFoodRowMacros(row) {
+  const qty = parseFloat(document.getElementById(`fqty-${row.id}`)?.value) || 0;
+  const k = ((row.calories      || 0) / 100) * qty;
+  const p = ((row.proteins      || 0) / 100) * qty;
+  const c = ((row.carbohydrates || 0) / 100) * qty;
+  const f = ((row.fats          || 0) / 100) * qty;
+  const fmt = v => v >= 10 ? v.toFixed(1) : v.toFixed(2);
+  const el = id => document.getElementById(id);
+  if (el(`fkcal-${row.id}`)) el(`fkcal-${row.id}`).textContent = `${Math.round(k)} kcal`;
+  if (el(`fprot-${row.id}`)) el(`fprot-${row.id}`).textContent = `${fmt(p)}g P`;
+  if (el(`fcarb-${row.id}`)) el(`fcarb-${row.id}`).textContent = `${fmt(c)}g C`;
+  if (el(`ffat-${row.id}`))  el(`ffat-${row.id}`).textContent  = `${fmt(f)}g G`;
+}
+
+function recalcDietMacros() {
+  let kcal = 0, prot = 0, carb = 0, fat = 0;
+  _foodRows.forEach(row => {
+    if (!row.aliment_id) return;
+    const qty = parseFloat(document.getElementById(`fqty-${row.id}`)?.value) || 0;
+    kcal += ((row.calories      || 0) / 100) * qty;
+    prot += ((row.proteins      || 0) / 100) * qty;
+    carb += ((row.carbohydrates || 0) / 100) * qty;
+    fat  += ((row.fats          || 0) / 100) * qty;
+  });
+  if (kcal || prot || carb || fat) {
+    document.getElementById('f_calories').value = Math.round(kcal) || '';
+    document.getElementById('f_proteins').value = prot.toFixed(1);
+    document.getElementById('f_carbs').value    = carb.toFixed(1);
+    document.getElementById('f_fats').value     = fat.toFixed(1);
+    updatePreview();
+  }
+}
+
+async function acSearch(rowId, val) {
+  clearTimeout(_acTimers[rowId]);
+  if (!val || val.length < 2) { closeAc(rowId); return; }
+  _acTimers[rowId] = setTimeout(async () => {
+    try {
+      const p = new URLSearchParams({ search: val, per_page: 10, page: 1 });
+      const r = await fetch(`${API}/aliments/search?${p}`, { headers: { Authorization: `Bearer ${token}` }});
+      const d = await r.json();
+      showAcDropdown(rowId, d.data?.data || []);
+    } catch {}
+  }, 250);
+}
+
+function showAcDropdown(rowId, items) {
+  const drop = document.getElementById(`facdrop-${rowId}`);
+  if (!drop) return;
+  if (!items.length) { drop.classList.remove('open'); return; }
+  items.forEach(a => {
+    _macroCache[a.id] = { proteins: a.proteins ?? null, carbohydrates: a.carbohydrates ?? null, fats: a.fats ?? null, calories: a.calories ?? null };
+  });
+  drop.innerHTML = items.map(a =>
+    `<div class="ac-item" onmousedown="selectAliment('${rowId}','${a.id}','${esc(a.name).replace(/'/g,"\\'")}')">
+      <div class="ac-name">${esc(a.name)}</div>
+      ${a.brand ? `<div class="ac-brand">${esc(a.brand)}</div>` : ''}
+    </div>`
+  ).join('');
+  drop.classList.add('open');
+}
+
+function selectAliment(rowId, alimentId, alimentName) {
+  const row = _foodRows.find(r => r.id == rowId);
+  if (row) {
+    row.aliment_id = alimentId; row.aliment_name = alimentName;
+    const m = _macroCache[alimentId] || {};
+    row.proteins      = m.proteins      ?? null;
+    row.carbohydrates = m.carbohydrates ?? null;
+    row.fats          = m.fats          ?? null;
+    row.calories      = m.calories      ?? null;
+    updateFoodRowMacros(row);
+  }
+  const input = document.getElementById(`fiac-${rowId}`);
+  if (input) input.value = alimentName;
+  closeAc(rowId);
+  recalcDietMacros();
+  updatePreview();
+}
+
+function closeAc(rowId) { document.getElementById(`facdrop-${rowId}`)?.classList.remove('open'); }
+
+async function resolveAlimentName(rowId, alimentId) {
+  try {
+    const r = await fetch(`${API}/aliments/${alimentId}/edit`, { headers: { Authorization: `Bearer ${token}` }});
+    const d = await r.json();
+    if (d.data) {
+      const input = document.getElementById(`fiac-${rowId}`);
+      if (input) input.value = d.data.name || alimentId;
+      const row = _foodRows.find(x => x.id == rowId);
+      if (row) {
+        row.aliment_name  = d.data.name || '';
+        row.proteins      = d.data.proteins      ?? null;
+        row.carbohydrates = d.data.carbohydrates ?? null;
+        row.fats          = d.data.fats          ?? null;
+        row.calories      = d.data.calories      ?? null;
+        updateFoodRowMacros(row);
+        recalcDietMacros();
+        updatePreview();
+      }
+    }
+  } catch {}
 }
 
 async function saveDiet() {
   const title = document.getElementById('f_title').value.trim();
-  if (!title) { document.getElementById('modalError').textContent = 'El título es obligatorio'; return; }
+  if (!title) { document.getElementById('formError').textContent = 'El título es obligatorio'; return; }
 
   const btn = document.getElementById('saveBtn');
   btn.textContent = 'Guardando…'; btn.disabled = true;
-  document.getElementById('modalError').textContent = '';
+  document.getElementById('formError').textContent = '';
 
-  const foodInputs = document.querySelectorAll('#foodsEditor .food-item input');
-  const foods = Array.from(foodInputs)
-    .map(i => i.value.trim())
-    .filter(Boolean)
-    .map(name => ({ name }));
+  const foods = _foodRows
+    .filter(r => r.aliment_id || document.getElementById(`fiac-${r.id}`)?.value?.trim())
+    .map((r, i) => ({
+      aliment_id: r.aliment_id || null,
+      name:       r.aliment_name || document.getElementById(`fiac-${r.id}`)?.value?.trim() || '',
+      quantity:   parseFloat(document.getElementById(`fqty-${r.id}`)?.value) || null,
+      unit:       document.getElementById(`funit-${r.id}`)?.value || null,
+      order:      i,
+    }));
 
   const pNum = id => { const v = document.getElementById(id).value; return v !== '' ? parseFloat(v) : null; };
 
@@ -524,12 +829,12 @@ async function saveDiet() {
       body: JSON.stringify(body),
     });
     const j = await r.json();
-    if (!r.ok) { document.getElementById('modalError').textContent = j.detail || j.message || 'Error al guardar'; return; }
-    closeModal();
+    if (!r.ok) { document.getElementById('formError').textContent = j.detail || j.message || 'Error al guardar'; return; }
+    closeForm();
     toast(editingId ? 'Dieta actualizada' : 'Dieta creada', 'success');
     loadDiets();
-  } catch { document.getElementById('modalError').textContent = 'Error de conexión'; }
-  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+  } catch { document.getElementById('formError').textContent = 'Error de conexión'; }
+  finally { btn.textContent = 'Guardar dieta'; btn.disabled = false; }
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────────
@@ -580,6 +885,17 @@ function toast(msg, type) {
 loadUser();
 loadDiets();
 loadPendingBadge();
+
+// ── Sidebar role adaptation ───────────────────────────────────────────────────
+function adaptSidebar() {
+  const rid = parseInt(localStorage.getItem('role_id') || '0');
+  if (rid !== 5) return; // only restrict coaches
+  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
+    const el = document.querySelector('.nav-item[href="' + href + '"]');
+    if (el) el.style.display = 'none';
+  });
+}
+adaptSidebar();
 </script>
 </body>
 </html>

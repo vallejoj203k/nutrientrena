@@ -15,13 +15,13 @@ def _get_or_404(db: Session, obj_id: int):
     return db.query(GroupFood).filter(GroupFood.id == obj_id).first()
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar grupos de alimentos", description="Retorna todos los grupos de alimentos activos (ej: carnes, verduras, lácteos).")
 def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(GroupFood).filter(GroupFood.status == 1).all()
     return send_response([GroupFoodOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router.get("/search")
+@router.get("/search", summary="Buscar grupos de alimentos", description="Búsqueda paginada de grupos de alimentos por nombre.")
 def search(
     search: Optional[str] = Query(None),
     page: int = Query(1),
@@ -40,7 +40,7 @@ def search(
     )
 
 
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver grupo de alimentos", description="Retorna el detalle de un grupo de alimentos por su ID.")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
@@ -48,7 +48,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(GroupFoodOut.model_validate(obj).model_dump(), "OK")
 
 
-@router.post("")
+@router.post("", summary="Crear grupo de alimentos", description="Agrega un nuevo grupo de alimentos al catálogo.")
 def create(data: GroupFoodCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = GroupFood(**data.model_dump())
     db.add(obj)
@@ -57,7 +57,7 @@ def create(data: GroupFoodCreate, db: Session = Depends(get_db), _=Depends(requi
     return send_response(GroupFoodOut.model_validate(obj).model_dump(), "Creado")
 
 
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar grupo de alimentos", description="Modifica los datos de un grupo de alimentos existente.")
 def updated(id: int, data: GroupFoodUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:

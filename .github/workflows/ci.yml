@@ -32,10 +32,7 @@ jobs:
 
       - name: Verify all models import cleanly
         env:
-          DB_HOST: localhost
-          DB_USER: root
-          DB_PASSWORD: ""
-          DB_NAME: nutrientrena
+          DATABASE_URL: "sqlite:///./ci_check.db"
           SECRET_KEY: ci-secret-key
         run: |
           python -c "
@@ -48,10 +45,7 @@ jobs:
 
       - name: Verify app loads all routes
         env:
-          DB_HOST: localhost
-          DB_USER: root
-          DB_PASSWORD: ""
-          DB_NAME: nutrientrena
+          DATABASE_URL: "sqlite:///./ci_check.db"
           SECRET_KEY: ci-secret-key
         run: |
           python -c "
@@ -69,3 +63,41 @@ jobs:
           assert len(files) >= 1, 'No migration files found'
           print(f'✅ {len(files)} migracion(es) encontrada(s)')
           "
+
+  test:
+    name: Pytest Suite
+    runs-on: ubuntu-latest
+    needs: lint-and-verify
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: "sqlite:///./test_nutrientrena.db"
+          SECRET_KEY: "ci-test-secret-key-not-for-production"
+          AWS_ACCESS_KEY_ID: "test"
+          AWS_SECRET_ACCESS_KEY: "test"
+          AWS_BUCKET: "test-bucket"
+          RESEND_API_KEY: "test"
+        run: |
+          pytest tests/ --tb=short -q \
+            --cov=app --cov-report=term-missing \
+            --cov-fail-under=40
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: .coverage

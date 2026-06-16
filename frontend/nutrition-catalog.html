@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Biblioteca de Nutrición</title>
+  <title>ALZUM.io — Biblioteca de Nutrición</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
     /* ── Sidebar ── */
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
     .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
     .sidebar-nav{flex:1;padding:16px 0;}
     .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
     .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
     .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .user-role{font-size:11px;color:rgba(255,255,255,.5);}
@@ -70,7 +70,7 @@
     /* ── Tables ── */
     table{width:100%;border-collapse:collapse;}
     thead th{padding:10px 16px;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;background:#FAFAFA;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
-    tbody td{padding:13px 16px;font-size:13px;color:#111;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
+    tbody td{padding:13px 16px;font-size:13px;color:#111;border-bottom:1px solid #EBEBEB;vertical-align:middle;}
     tbody tr:last-child td{border-bottom:none;}
     tbody tr:hover td{background:#FAFAFA;}
     .empty-row td{text-align:center;padding:60px 20px;color:#9CA3AF;}
@@ -137,7 +137,7 @@
     .modal-overlay.open .modal{transform:translateY(0);}
     .modal-lg{width:640px;}
     .modal-sm{width:440px;}
-    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EBEBEB;position:sticky;top:0;background:#fff;z-index:1;}
     .modal-head h2{font-size:16px;font-weight:700;color:#111;}
     .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
     .modal-close:hover{color:#374151;}
@@ -150,7 +150,7 @@
     .form-group textarea{min-height:72px;resize:vertical;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
-    .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;display:flex;align-items:center;justify-content:space-between;}
     .form-error{color:#DC2626;font-size:12px;margin-top:6px;}
 
     /* ── Ingredient rows ── */
@@ -161,7 +161,7 @@
     .ingr-row input:focus{border-color:var(--purple);}
     .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;display:none;}
     .ac-dropdown.open{display:block;}
-    .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #F9FAFB;}
+    .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #EBEBEB;}
     .ac-item:last-child{border-bottom:none;}
     .ac-item:hover{background:var(--purple-pale);}
     .ac-item .ac-name{font-weight:600;color:#111;}
@@ -177,10 +177,10 @@
     .preview-table-wrap{max-height:220px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;margin-top:14px;}
     .preview-table{width:100%;border-collapse:collapse;font-size:12px;}
     .preview-table th{padding:8px 12px;background:#FAFAFA;font-weight:700;color:#6B7280;border-bottom:1px solid #E5E7EB;text-transform:uppercase;font-size:10px;white-space:nowrap;}
-    .preview-table td{padding:8px 12px;border-bottom:1px solid #F9FAFB;color:#374151;}
+    .preview-table td{padding:8px 12px;border-bottom:1px solid #EBEBEB;color:#374151;}
     .import-stats{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
     .import-stat{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;}
-    .import-stat.total{background:#F3EEFF;color:var(--purple);}
+    .import-stat.total{background:#EEF2FF;color:var(--purple);}
     .import-stat.ok{background:#ECFDF5;color:#059669;}
     .import-stat.err{background:#FEF2F2;color:#DC2626;}
 
@@ -199,14 +199,36 @@
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
   </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
+  </style>
 </head>
 <body>
 
 <!-- ── Sidebar ── -->
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <span>Nutri<em>Entrena</em></span>
-    <small>Panel de administración</small>
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
   </div>
   <div class="sidebar-nav">
     <div class="nav-section">Principal</div>
@@ -221,6 +243,10 @@
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Coaches
     </a>
     <a class="nav-item" href="events.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -306,7 +332,7 @@
   <div class="tab-nav">
     <button id="tabnav-alimentos" class="tab-btn active" onclick="showTab('alimentos')">Alimentos</button>
     <button id="tabnav-recetas"   class="tab-btn" onclick="showTab('recetas')">Recetas</button>
-    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Alimento</button>
+    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Dieta</button>
     <button id="tabnav-grupos"    class="tab-btn" onclick="showTab('grupos')">Grupos de Alimento</button>
   </div>
 
@@ -379,18 +405,18 @@
       </div>
     </div>
 
-    <!-- ── Tab: Tipos de Alimento ── -->
+    <!-- ── Tab: Tipos de Dieta ── -->
     <div id="tab-tipos" class="tab-pane" style="display:none">
       <div class="toolbar">
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="tf_search" placeholder="Buscar tipo…" oninput="renderTypeFood()"/>
+          <input type="text" id="tf_search" placeholder="Buscar tipo de dieta…" oninput="renderTypeFood()"/>
         </div>
         <span class="total-badge" id="tf_count_badge"></span>
         <div class="toolbar-right">
           <button class="btn btn-primary btn-sm" onclick="openCatalogModal('typeFood')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuevo tipo
+            Nuevo tipo de dieta
           </button>
         </div>
       </div>
@@ -463,7 +489,21 @@
       </div>
       <div class="form-row">
         <div class="form-group"><label>Grupo de alimento</label><select id="al_fGroup"><option value="">— Sin grupo —</option></select></div>
-        <div class="form-group"><label>Cantidad (g / ml)</label><input id="al_fQty" type="number" step="0.1" min="0" placeholder="100"/></div>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <div style="display:flex;gap:6px;">
+            <input id="al_fQty" type="number" step="0.1" min="0" placeholder="100" style="flex:1;min-width:0;"/>
+            <select id="al_fUnit" style="width:110px;padding:10px 8px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;background:#fff;">
+              <option value="gr">gr</option>
+              <option value="kg">kg</option>
+              <option value="ml">ml</option>
+              <option value="l">l</option>
+              <option value="unidad">unidad</option>
+              <option value="cucharada">cucharada</option>
+              <option value="taza">taza</option>
+            </select>
+          </div>
+        </div>
       </div>
       <div class="section-title">Macronutrientes (por porción)</div>
       <div class="form-row-4">
@@ -619,7 +659,7 @@ function showTab(name) {
   if (name === 'alimentos' && !al_loaded) loadAliments(1);
   if (name === 'recetas'   && !rc_loaded) loadRecipes(1);
   if (name === 'tipos'     && !tf_loaded) loadTypeFood();
-  if (name === 'grupos'    && !gf_loaded) loadGroupFood();
+  if (name === 'grupos') { if (!gf_loaded) loadGroupFood(); else renderGroupFood(); }
 }
 
 // ─── ALIMENTOS ────────────────────────────────────────────────────────────────
@@ -688,7 +728,7 @@ function renderAlimentsTable(items) {
       <td class="td-macro">${fmt(a.proteins)}<span>prot</span></td>
       <td class="td-macro">${fmt(a.carbohydrates)}<span>carbs</span></td>
       <td class="td-macro">${fmt(a.fats)}<span>grasas</span></td>
-      <td class="td-macro" style="font-weight:700;color:#5B2D8E;">${a.calories != null ? Math.round(a.calories) : '—'}<span>kcal</span></td>
+      <td class="td-macro" style="font-weight:700;color:#4F46E5;">${a.calories != null ? Math.round(a.calories) : '—'}<span>kcal</span></td>
       <td>
         <div class="actions-cell">
           <button class="btn-icon" onclick="openAlimentEdit('${esc(a.id)}')" title="Editar">
@@ -744,6 +784,7 @@ function openAlimentModalWith(item) {
   document.getElementById('al_fBrand').value               = item?.brand ?? '';
   document.getElementById('al_fGroup').value               = item?.group_food_id ?? '';
   document.getElementById('al_fQty').value                 = item?.quantity ?? '';
+  document.getElementById('al_fUnit').value                = item?.unit     ?? 'gr';
   document.getElementById('al_fProteins').value            = item?.proteins ?? '';
   document.getElementById('al_fCarbs').value               = item?.carbohydrates ?? '';
   document.getElementById('al_fFats').value                = item?.fats ?? '';
@@ -775,6 +816,7 @@ async function saveAliment() {
     brand:         document.getElementById('al_fBrand').value.trim() || null,
     group_food_id: parseInt(document.getElementById('al_fGroup').value) || null,
     quantity:      toF(document.getElementById('al_fQty').value),
+    unit:          document.getElementById('al_fUnit').value || null,
     proteins:      toF(document.getElementById('al_fProteins').value),
     carbohydrates: toF(document.getElementById('al_fCarbs').value),
     fats:          toF(document.getElementById('al_fFats').value),
@@ -1296,7 +1338,7 @@ function openCatalogEdit(catalog, id) {
 
 function openCatalogModalWith(catalog, item) {
   cat_catalog = catalog; cat_editId = item?.id ?? null;
-  const label = catalog === 'typeFood' ? 'tipo de alimento' : 'grupo de alimento';
+  const label = catalog === 'typeFood' ? 'tipo de dieta' : 'grupo de alimento';
   document.getElementById('cat_modalTitle').textContent    = item ? `Editar ${label}` : `Nuevo ${label}`;
   document.getElementById('cat_fName').value               = item?.name        ?? '';
   document.getElementById('cat_fDesc').value               = item?.description ?? '';
@@ -1421,6 +1463,17 @@ function logout() { localStorage.clear(); location.href = 'login.html'; }
 loadUser();
 loadPendingBadge();
 loadAlGroups().then(() => loadAliments(1));
+
+// ── Sidebar role adaptation ───────────────────────────────────────────────────
+function adaptSidebar() {
+  const rid = parseInt(localStorage.getItem('role_id') || '0');
+  if (rid !== 5) return; // only restrict coaches
+  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
+    const el = document.querySelector('.nav-item[href="' + href + '"]');
+    if (el) el.style.display = 'none';
+  });
+}
+adaptSidebar();
 </script>
 </body>
 </html>

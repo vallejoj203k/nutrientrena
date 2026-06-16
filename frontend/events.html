@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Eventos</title>
+  <title>ALZUM.io — Eventos</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
     /* ── Sidebar ── */
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
     .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
     .sidebar-nav{flex:1;padding:16px 0;}
     .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
     .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
     .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .user-role{font-size:11px;color:rgba(255,255,255,.5);}
@@ -50,13 +50,13 @@
     .cal-today-btn{background:var(--purple-pale);color:var(--purple);border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;transition:.15s;}
     .cal-today-btn:hover{background:#E9DCFF;}
 
-    .cal-grid{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #F3F4F6;flex:1;display:flex;flex-direction:column;overflow:hidden;}
-    .cal-head{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #F3F4F6;}
+    .cal-grid{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5E7EB;flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .cal-head{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #EBEBEB;}
     .cal-head-cell{padding:10px 0;text-align:center;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
-    .cal-head-cell.weekend{color:#C084FC;}
+    .cal-head-cell.weekend{color:#818CF8;}
 
     .cal-body{flex:1;display:grid;grid-template-rows:repeat(6,1fr);overflow:hidden;}
-    .cal-week{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #F3F4F6;}
+    .cal-week{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #EBEBEB;}
     .cal-week:last-child{border-bottom:none;}
     .cal-day{border-right:1px solid #F3F4F6;padding:6px 6px 4px;cursor:pointer;transition:.1s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:2px;}
     .cal-day:last-child{border-right:none;}
@@ -73,7 +73,7 @@
 
     /* ── Types panel ── */
     .types-panel{width:260px;min-width:260px;background:#fff;border-left:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;}
-    .types-head{padding:16px 18px 12px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .types-head{padding:16px 18px 12px;border-bottom:1px solid #EBEBEB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
     .types-head h3{font-size:13px;font-weight:700;color:#111;}
     .types-body{flex:1;overflow-y:auto;padding:10px 12px;}
     .types-body::-webkit-scrollbar{width:4px;}
@@ -107,7 +107,7 @@
     .modal{background:#fff;border-radius:16px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .overlay.open .modal{transform:translateY(0);}
     .modal-sm{width:380px;}
-    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EBEBEB;position:sticky;top:0;background:#fff;z-index:1;}
     .modal-head h2{font-size:16px;font-weight:700;color:#111;}
     .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;padding:2px 6px;}
     .modal-close:hover{color:#374151;}
@@ -142,7 +142,7 @@
     .ev-pop-title{font-size:14px;font-weight:700;color:#111;margin-bottom:4px;}
     .ev-pop-type{font-size:12px;margin-bottom:8px;}
     .ev-pop-meta{font-size:12px;color:#6B7280;margin-bottom:10px;line-height:1.5;}
-    .ev-pop-recur{font-size:11px;color:#5B2D8E;font-weight:600;background:var(--purple-pale);padding:3px 8px;border-radius:12px;display:inline-block;margin-bottom:8px;}
+    .ev-pop-recur{font-size:11px;color:#4F46E5;font-weight:600;background:var(--purple-pale);padding:3px 8px;border-radius:12px;display:inline-block;margin-bottom:8px;}
     .ev-pop-actions{display:flex;gap:8px;}
 
     /* Toast */
@@ -153,14 +153,36 @@
 
     @media(max-width:900px){.types-panel{display:none;}}
   </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
+  </style>
 </head>
 <body>
 
 <!-- ── Sidebar ── -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <span>Nutri<em>Entrena</em></span>
-    <small>Panel de administración</small>
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
@@ -175,6 +197,10 @@
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Coaches
     </a>
     <a class="nav-item active" href="events.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -329,7 +355,7 @@
         </div>
         <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end;">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:0;">
-            <input type="checkbox" id="ev_allday" style="width:16px;height:16px;accent-color:#5B2D8E;" onchange="toggleAllDay()"/>
+            <input type="checkbox" id="ev_allday" style="width:16px;height:16px;accent-color:#4F46E5;" onchange="toggleAllDay()"/>
             Todo el día
           </label>
         </div>
@@ -371,7 +397,7 @@
         <div class="form-group" id="recurEndGroup">
           <label>Repetir hasta</label>
           <input id="ev_recur_end" type="date" oninput="updateRecurPreview()"/>
-          <div id="recurPreview" style="font-size:11px;color:#5B2D8E;margin-top:4px;font-weight:600;"></div>
+          <div id="recurPreview" style="font-size:11px;color:#4F46E5;margin-top:4px;font-weight:600;"></div>
         </div>
       </div>
       <div class="form-error" id="eventError"></div>
@@ -409,7 +435,7 @@
 </div>
 
 <!-- ── Delete event dialog ── -->
-<div class="overlay" id="delEventOverlay">
+<div class="overlay" id="delEventOverlay" onclick="if(event.target===this)closeDelEvent()">
   <div class="del-dialog">
     <h3>¿Eliminar evento?</h3>
     <p id="delEventMsg">Esta acción no se puede deshacer.</p>
@@ -422,7 +448,7 @@
 </div>
 
 <!-- ── Delete type dialog ── -->
-<div class="overlay" id="delTypeOverlay">
+<div class="overlay" id="delTypeOverlay" onclick="if(event.target===this)closeDelType()">
   <div class="del-dialog">
     <h3>¿Eliminar tipo?</h3>
     <p>Los eventos de este tipo no se eliminarán, solo perderán el tipo asignado.</p>
@@ -457,16 +483,16 @@ let curYear, curMonth;   // currently displayed month (0-based)
 let events = [];         // all events for current month
 let types = [];          // all event types
 let _editEventId = null;
+let _editGroupId = null;   // recurrence_group_id of the event being edited
 let _editTypeId = null;
 let _delEventId = null;
 let _delGroupId = null;
 let _delTypeId = null;
 let _popEventId = null;
-let _selectedColor = '#5B2D8E';
-let _currentUserId = null;
+let _selectedColor = '#4F46E5';
 
 const PRESET_COLORS = [
-  '#5B2D8E','#7C3AED','#2563EB','#0891B2','#059669',
+  '#4F46E5','#6366F1','#2563EB','#0891B2','#059669',
   '#65A30D','#D97706','#DC2626','#DB2777','#64748B',
 ];
 
@@ -481,10 +507,10 @@ async function init() {
     if (r.status === 401) { location.href = 'login.html'; return; }
     const d = await r.json();
     const me = d.data || {};
-    _currentUserId = me.id;
-    document.getElementById('sidebarName').textContent = me.name || me.email || '';
-    document.getElementById('sidebarRole').textContent = me.roles?.[0]?.name || '';
-    document.getElementById('sidebarAvatar').textContent = (me.name || '?')[0].toUpperCase();
+    const name = me.name || me.full_name || `${me.first_name||''} ${me.last_name||''}`.trim() || me.email || 'Usuario';
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarRole').textContent = me.role?.name || me.role || '';
+    document.getElementById('sidebarAvatar').textContent = name[0].toUpperCase();
     loadFormsBadge();
   } catch { location.href = 'login.html'; return; }
 
@@ -502,12 +528,12 @@ async function init() {
 
 async function loadFormsBadge() {
   try {
-    const r = await fetch(`${API}/form-assignments/pending-count`, { headers: hdrs() });
+    const r = await fetch(`${API}/form-assignments?status=pending&per_page=1`, { headers: hdrs() });
     if (!r.ok) return;
     const d = await r.json();
-    const c = d.data?.count || 0;
+    const c = d?.data?.total || d?.total || 0;
     const b = document.getElementById('formsBadge');
-    if (c > 0) { b.textContent = c; b.style.display = ''; }
+    if (c > 0) { b.textContent = c > 99 ? '99+' : c; b.style.display = ''; }
   } catch {}
 }
 
@@ -588,6 +614,7 @@ function renderCalendar() {
   let html = '';
   let dayCounter = 1;
   let nextCounter = 1;
+  let weeksRendered = 0;
 
   for (let week = 0; week < 6; week++) {
     html += '<div class="cal-week">';
@@ -618,8 +645,10 @@ function renderCalendar() {
       }
     }
     html += '</div>';
+    weeksRendered++;
     if (dayCounter > daysInMonth && week >= 4) break;
   }
+  body.style.gridTemplateRows = `repeat(${weeksRendered},1fr)`;
   body.innerHTML = html;
 }
 
@@ -684,6 +713,7 @@ function dayClick(cell) {
 // ── Event modal ───────────────────────────────────────────────────────────────
 function openEventModal(ev = null, defaultDate = null) {
   _editEventId = ev?.id || null;
+  _editGroupId = ev?.recurrence_group_id || null;
   document.getElementById('eventModalTitle').textContent = ev ? 'Editar evento' : 'Nuevo evento';
   document.getElementById('eventError').textContent = '';
   document.getElementById('ev_title').value   = ev?.title || '';
@@ -753,7 +783,10 @@ function updateRecurPreview() {
     else if (recur === 'weekly') cur.setDate(cur.getDate() + 7);
     else if (recur === 'monthly') cur.setMonth(cur.getMonth() + 1);
   }
-  prev.textContent = count === 1 ? '1 evento (solo el día de inicio)' : `Se crearán ${count} eventos`;
+  const editing = !!_editEventId;
+  prev.textContent = count === 1
+    ? '1 evento (solo el día de inicio — extiende la fecha)'
+    : (editing ? `Se regenerará la serie: ${count} eventos` : `Se crearán ${count} eventos`);
 }
 
 async function saveEvent() {
@@ -796,13 +829,28 @@ async function saveEvent() {
   btn.textContent = 'Guardando…'; btn.disabled = true;
   errEl.textContent = '';
 
+  // If editing a recurring event (has recurrence + end date), delete old series and recreate
+  const isEditingRecurring = _editEventId && recur && recur !== 'none' && recurEnd;
+  if (isEditingRecurring) {
+    try {
+      if (_editGroupId) {
+        await fetch(`${API}/events/delete-group/${_editGroupId}`, { method: 'DELETE', headers: hdrs() });
+      } else {
+        await fetch(`${API}/events/delete/${_editEventId}`, { method: 'DELETE', headers: hdrs() });
+      }
+    } catch { /* ignore delete errors, proceed to create */ }
+    _editEventId = null;
+    _editGroupId = null;
+  }
+
   try {
     const url    = _editEventId ? `${API}/events/update/${_editEventId}` : `${API}/events`;
-    const method = _editEventId ? 'POST' : 'POST';
-    const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(body) });
+    const r = await fetch(url, { method: 'POST', headers: hdrs(), body: JSON.stringify(body) });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; return; }
-    const msg = d.data?.count ? `${d.data.count} eventos creados` : (_editEventId ? 'Evento actualizado' : 'Evento creado');
+    if (!r.ok) { errEl.textContent = d.message || 'Error al guardar'; btn.textContent = 'Guardar'; btn.disabled = false; return; }
+    const msg = d.data?.count
+      ? `${d.data.count} eventos creados`
+      : (isEditingRecurring ? 'Serie regenerada' : (_editEventId ? 'Evento actualizado' : 'Evento creado'));
     closeEventModal();
     toast(msg);
     await loadEvents();
@@ -907,7 +955,7 @@ function openTypeModal(id = null) {
   document.getElementById('typeError').textContent = '';
   const t = id ? types.find(x => x.id === id) : null;
   document.getElementById('tp_name').value = t?.name || '';
-  _selectedColor = t?.color || '#5B2D8E';
+  _selectedColor = t?.color || '#4F46E5';
   buildColorSwatches();
   document.getElementById('typeOverlay').classList.add('open');
   setTimeout(() => document.getElementById('tp_name').focus(), 100);
@@ -989,6 +1037,17 @@ function toast(msg, err = false) {
 }
 
 init();
+
+// ── Sidebar role adaptation ───────────────────────────────────────────────────
+function adaptSidebar() {
+  const rid = parseInt(localStorage.getItem('role_id') || '0');
+  if (rid !== 5) return; // only restrict coaches
+  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
+    const el = document.querySelector('.nav-item[href="' + href + '"]');
+    if (el) el.style.display = 'none';
+  });
+}
+adaptSidebar();
 </script>
 </body>
 </html>

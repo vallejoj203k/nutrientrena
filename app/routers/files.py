@@ -28,7 +28,7 @@ def _public_url(key: str) -> str:
     return f"{base}/{key}"
 
 
-@router.post("/upload")
+@router.post("/upload", summary="Subir archivo", description="Sube una imagen a Cloudflare R2. Formatos: JPG, PNG, WEBP, GIF. Máximo 10 MB.")
 async def upload_file(
     file: UploadFile = File(...),
     folder: Optional[str] = Form("uploads"),
@@ -79,7 +79,7 @@ async def upload_file(
     )
 
 
-@router.delete("/delete")
+@router.delete("/delete", summary="Eliminar archivo", description="Elimina un archivo de Cloudflare R2 usando su key.")
 def delete_file(key: str, _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     """Elimina un archivo de R2 por su key."""
     if not settings.AWS_BUCKET:
@@ -92,7 +92,7 @@ def delete_file(key: str, _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, 
     return send_response({"key": key}, "Archivo eliminado")
 
 
-@router.get("/list")
+@router.get("/list", summary="Listar archivos", description="Lista todos los archivos de una carpeta en el bucket de Cloudflare R2.")
 def list_files(folder: str = "uploads", _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     """Lista los archivos de una carpeta en R2."""
     if not settings.AWS_BUCKET:

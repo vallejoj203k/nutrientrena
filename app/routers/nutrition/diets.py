@@ -105,13 +105,13 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
             kept_ids.add(dfa.id)
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar dietas", description="Retorna todas las dietas del coach autenticado.")
 def find_all(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Diet).filter(Diet.user_id == current_user.id).all()
     return send_response([_serialize(i) for i in items], "OK")
 
 
-@router.get("/client/{client_id}")
+@router.get("/client/{client_id}", summary="Dietas del cliente", description="Retorna las dietas de un cliente agrupadas por tipo de alimentación.")
 def client_diets(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     from app.models.user import UserDetail
     from app.models.nutrition.type_food import TypeFood
@@ -136,7 +136,7 @@ def client_diets(client_id: str, db: Session = Depends(get_db), _=Depends(requir
     return send_response(grouped, "OK")
 
 
-@router.get("/{id}/pdf")
+@router.get("/{id}/pdf", summary="Exportar dieta a PDF", description="Genera y descarga la dieta en formato PDF.")
 def pdf(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     diet = _get_or_404(db, id)
     if not diet:
@@ -153,7 +153,7 @@ def pdf(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPER
     )
 
 
-@router.post("/{client_id}/assigned")
+@router.post("/{client_id}/assigned", summary="Asignar dieta a cliente", description="Crea y asigna una dieta directamente a un cliente.")
 def assigned(
     client_id: str,
     data: DietCreate,
@@ -183,7 +183,7 @@ def assigned(
     return send_response(_serialize(diet), "Dieta asignada")
 
 
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver dieta", description="Retorna el detalle completo de una dieta con alimentos y macros.")
 def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     diet = _get_or_404(db, id)
     if not diet:
@@ -212,7 +212,7 @@ def _save_detail(db: Session, diet_id: str, data: DietCreate):
         db.add(DietDetail(diet_id=diet_id, **detail_fields))
 
 
-@router.post("")
+@router.post("", summary="Crear dieta", description="Crea una nueva dieta con sus comidas, alimentos y distribución de macros.")
 def create(data: DietCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     diet = Diet(
         title=data.title,
@@ -232,7 +232,7 @@ def create(data: DietCreate, db: Session = Depends(get_db), current_user=Depends
     return send_response(_serialize(diet), "Dieta creada")
 
 
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar dieta", description="Modifica una dieta existente, incluyendo sus comidas y alimentos.")
 def updated(id: str, data: DietUpdate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     diet = _get_or_404(db, id)
     if not diet:
@@ -255,7 +255,7 @@ def updated(id: str, data: DietUpdate, db: Session = Depends(get_db), current_us
     return send_response(_serialize(diet), "Dieta actualizada")
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", summary="Eliminar dieta", description="Elimina una dieta y todas sus comidas y alimentos asociados.")
 def delete(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     diet = _get_or_404(db, id)
     if not diet:

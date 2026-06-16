@@ -15,13 +15,13 @@ def _get_or_404(db: Session, training_id: int):
     return db.query(Training).filter(Training.id == training_id).first()
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar ejercicios", description="Retorna todos los ejercicios activos del catálogo.")
 def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(Training).filter(Training.state == 1).all()
     return send_response([TrainingOut.from_orm_training(i).model_dump() for i in items], "OK")
 
 
-@router.get("/search")
+@router.get("/search", summary="Buscar ejercicios", description="Búsqueda paginada de ejercicios con filtro por nombre o grupo muscular.")
 def search(
     search: Optional[str] = Query(None),
     muscle_group_id: Optional[int] = Query(None),
@@ -49,7 +49,7 @@ def search(
     )
 
 
-@router.post("/assign")
+@router.post("/assign", summary="Asignar ejercicios a usuario", description="Asigna múltiples ejercicios a un usuario específico.")
 def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     for training_id in data.training_ids:
         exists = db.query(TrainingClient).filter_by(training_id=training_id, user_id=data.user_id).first()
@@ -59,7 +59,7 @@ def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depen
     return send_response(None, "Ejercicios asignados")
 
 
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver ejercicio", description="Retorna el detalle de un ejercicio por su ID.")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
@@ -67,7 +67,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(TrainingOut.from_orm_training(obj).model_dump(), "OK")
 
 
-@router.post("")
+@router.post("", summary="Crear ejercicio", description="Agrega un nuevo ejercicio al catálogo.")
 def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = Training(**data.model_dump())
     db.add(obj)
@@ -76,7 +76,7 @@ def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(requir
     return send_response(TrainingOut.from_orm_training(obj).model_dump(), "Ejercicio creado")
 
 
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar ejercicio", description="Modifica los datos de un ejercicio existente.")
 def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_or_404(db, id)
     if not obj:

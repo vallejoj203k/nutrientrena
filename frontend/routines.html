@@ -319,62 +319,87 @@
       .fv-wizard-steps{margin-left:0;}
     }
 
-    /* ══ LIBRERÍA LAYOUT ══ */
-    .lib-topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .lib-title{font-size:24px;font-weight:800;color:#111827;margin-bottom:2px;}
-    .lib-sub{font-size:13px;color:#6B7280;}
+    /* ══════════════════════════════════════════════
+       LIBRERÍA LAYOUT
+    ══════════════════════════════════════════════ */
 
-    /* Main tabs (Entrenamiento / Nutrición / …) */
-    .main-tabs-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;display:flex;gap:4px;flex-shrink:0;}
-    .main-tab{display:flex;align-items:center;gap:7px;padding:14px 16px;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;transition:.15s;}
-    .main-tab:hover{color:#374151;}
-    .main-tab.active{color:var(--indigo);border-bottom-color:var(--indigo);}
-    .main-tab svg{opacity:.7;}
-    .main-tab.active svg{opacity:1;}
+    /* Page header */
+    .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:68px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
+    .page-header-left{display:flex;align-items:center;gap:14px;}
+    .page-header-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;flex-shrink:0;}
+    .page-header-back:hover{background:#F3F4F6;color:#374151;border-color:#D1D5DB;}
+    .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
+    .page-header-title{font-size:17px;font-weight:800;color:#111827;}
+    .page-header-sub{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .page-header-right{display:flex;align-items:center;gap:10px;}
+
+    /* Main tabs bar */
+    .main-tabs-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;display:flex;gap:0;flex-shrink:0;}
+    .main-tab-btn{display:inline-flex;align-items:center;gap:7px;padding:15px 18px;font-size:13px;font-weight:600;color:#9CA3AF;cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;transition:.15s;white-space:nowrap;}
+    .main-tab-btn:hover{color:#374151;}
+    .main-tab-btn.active{color:var(--indigo);border-bottom-color:var(--indigo);}
+
+    /* Main tab content panels */
     .main-tab-content{display:none;flex:1;flex-direction:column;overflow:hidden;}
     .main-tab-content.active{display:flex;}
 
-    /* Sub-tabs (Rutinas / Ejercicios / Grupos musculares) */
-    .sub-tabs-bar{padding:0 28px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;gap:0;flex-shrink:0;}
-    .stab-count{display:inline-block;background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:5px;}
-    .tab-btn.active .stab-count{background:#EEF2FF;color:var(--indigo);}
+    /* Sub-tabs bar */
+    .sub-tabs-bar{padding:0 28px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;display:flex;gap:0;flex-shrink:0;}
+    .sub-tab-btn{display:inline-flex;align-items:center;gap:6px;padding:11px 16px;font-size:13px;font-weight:600;color:#9CA3AF;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:.15s;white-space:nowrap;}
+    .sub-tab-btn:hover{color:#374151;}
+    .sub-tab-btn.active{color:var(--indigo);border-bottom-color:var(--indigo);}
+    .sub-tab-count{display:inline-flex;align-items:center;justify-content:center;background:#E5E7EB;color:#6B7280;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;min-width:22px;transition:.15s;}
+    .sub-tab-btn.active .sub-tab-count{background:var(--indigo-pale);color:var(--indigo);}
+
+    /* Sub-tab content panels */
+    .sub-tab-content{display:none;}
+    .sub-tab-content.active{display:flex;flex-direction:column;flex:1;overflow:hidden;}
 
     /* Info banner */
-    .info-banner{display:flex;align-items:flex-start;gap:12px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 16px;margin:16px 28px 0;font-size:13px;color:#0369A1;line-height:1.5;flex-shrink:0;}
-    .info-banner strong{color:#0C4A6E;margin-right:4px;}
-    .info-banner-icon{width:20px;height:20px;flex-shrink:0;margin-top:1px;color:#0284C7;}
-    .info-banner-close{margin-left:auto;background:none;border:none;cursor:pointer;color:#0284C7;padding:2px;border-radius:4px;flex-shrink:0;display:flex;opacity:.7;}
-    .info-banner-close:hover{opacity:1;}
+    .info-banner{display:flex;align-items:flex-start;gap:12px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:14px 18px;margin:18px 28px 0;font-size:13px;color:#0369A1;line-height:1.6;flex-shrink:0;}
+    .info-banner strong{color:#0C4A6E;margin-right:2px;}
+    .info-banner svg{flex-shrink:0;margin-top:1px;color:#0284C7;}
 
-    /* Lib toolbar (filter row above table) */
-    .lib-toolbar{padding:14px 28px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;}
-    .lib-toolbar-left{display:flex;align-items:center;gap:10px;}
-    .lib-toolbar-right{display:flex;align-items:center;gap:10px;}
-    .filter-select{padding:8px 32px 8px 12px;border:1.5px solid #E5E7EB;border-radius:9px;font-size:13px;font-weight:600;color:#374151;background:#fff;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
-    .filter-select:focus{border-color:var(--indigo);}
+    /* Filter row */
+    .filter-row{padding:12px 28px;background:#fff;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .filter-row select{padding:7px 28px 7px 10px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:12px;font-weight:600;color:#374151;background:#fff;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;transition:.15s;}
+    .filter-row select:focus{border-color:var(--indigo);outline:none;}
+    .view-toggle{display:inline-flex;border:1.5px solid #E5E7EB;border-radius:8px;overflow:hidden;margin-left:auto;}
+    .view-btn{padding:6px 10px;background:#fff;border:none;cursor:pointer;color:#9CA3AF;display:inline-flex;align-items:center;transition:.15s;}
+    .view-btn+.view-btn{border-left:1px solid #E5E7EB;}
+    .view-btn:hover{background:#F9FAFB;color:#374151;}
+    .view-btn.active{background:var(--indigo-pale);color:var(--indigo);}
 
-    /* Routines table */
-    #routinesContent table{width:100%;border-collapse:collapse;background:#fff;}
-    #routinesContent thead th{padding:11px 16px;text-align:left;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
-    #routinesContent thead th:first-child{padding-left:20px;}
-    #routinesContent tbody tr{border-bottom:1px solid #EBEBEB;transition:background .1s;cursor:pointer;}
-    #routinesContent tbody tr:last-child{border-bottom:none;}
-    #routinesContent tbody tr:hover{background:#FAFAFA;}
-    #routinesContent tbody td{padding:14px 16px;font-size:13px;color:#374151;vertical-align:middle;}
-    #routinesContent tbody td:first-child{padding-left:20px;}
+    /* Toolbar (search + filter pills) */
+    .toolbar{padding:12px 28px;background:#fff;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+
+    /* Table wrapper */
+    .table-wrap{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 16px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;text-align:left;white-space:nowrap;}
+    thead th:first-child{padding-left:20px;}
+    tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s;cursor:pointer;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover td{background:#FAFBFF;}
+    tbody td{padding:14px 16px;font-size:13px;color:#374151;vertical-align:middle;}
+    tbody td:first-child{padding-left:20px;}
 
     /* Level pills */
-    .lvl-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+    .lvl-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.2px;}
     .lvl-1{background:#DCFCE7;color:#166534;}
     .lvl-2{background:#FEF3C7;color:#92400E;}
     .lvl-3{background:#FEE2E2;color:#991B1B;}
 
     /* Row action buttons */
-    .btn-assign{padding:6px 14px;background:var(--indigo);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;}
+    .btn-assign{padding:6px 14px;background:var(--indigo);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;white-space:nowrap;}
     .btn-assign:hover{background:var(--indigo-dark);}
-    .btn-row-icon{width:30px;height:30px;border:1px solid #E5E7EB;background:#fff;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
-    .btn-row-icon:hover{background:#EEF2FF;color:var(--indigo);border-color:var(--indigo);}
+    .btn-row-icon{width:30px;height:30px;border:1.5px solid #E5E7EB;background:#fff;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;flex-shrink:0;}
+    .btn-row-icon:hover{background:var(--indigo-pale);color:var(--indigo);border-color:var(--indigo);}
     .row-actions{display:flex;align-items:center;gap:5px;}
+
+    /* Muscle group cards */
+    .mg-card:hover{border-color:var(--indigo);box-shadow:0 4px 12px rgba(79,70,229,.1);}
+    .routine-card:hover{border-color:var(--indigo);box-shadow:0 4px 12px rgba(79,70,229,.1);}
   </style>
 </head>
 <body>
@@ -456,11 +481,18 @@
   <!-- Page header -->
   <div class="page-header">
     <div class="page-header-left">
-      <h1>Librería</h1>
-      <p>Contenido reutilizable para asignar a tus clientes.</p>
+      <a class="page-header-back" href="library.html">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Librería
+      </a>
+      <div class="page-header-divider"></div>
+      <div>
+        <div class="page-header-title">Entrenamiento</div>
+        <div class="page-header-sub">Rutinas, ejercicios y grupos musculares</div>
+      </div>
     </div>
     <div class="page-header-right">
-      <button class="btn btn-primary" onclick="openForm()">
+      <button class="btn btn-primary" id="btnNuevaRutina" onclick="openForm()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Nueva rutina
       </button>
@@ -470,16 +502,20 @@
   <!-- Main 4 tabs -->
   <div class="main-tabs-bar">
     <button class="main-tab-btn active" id="mainTab-entrenamiento" onclick="switchMainTab('entrenamiento')">
-      🏋️ Entrenamiento
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Entrenamiento
     </button>
     <button class="main-tab-btn" id="mainTab-nutricion" onclick="switchMainTab('nutricion')">
-      🍃 Nutrición
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Nutrición
     </button>
     <button class="main-tab-btn" id="mainTab-formularios" onclick="switchMainTab('formularios')">
-      📋 Formularios
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Formularios
     </button>
     <button class="main-tab-btn" id="mainTab-documentos" onclick="switchMainTab('documentos')">
-      📄 Documentos
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+      Documentos
     </button>
   </div>
 
@@ -487,9 +523,9 @@
   <div class="main-tab-content active" id="mtab-entrenamiento" style="overflow:hidden;display:flex;flex-direction:column;flex:1;">
 
     <!-- Sub-tabs -->
-    <div class="sub-tabs-bar" style="padding-bottom:12px;">
+    <div class="sub-tabs-bar">
       <button class="sub-tab-btn active" id="subTab-rutinas" onclick="switchSubTab('rutinas')">
-        Rutinas <span class="sub-tab-count" id="cnt-rutinas">0</span>
+        Rutinas <span class="sub-tab-count" id="cnt-rutinas">—</span>
       </button>
       <button class="sub-tab-btn" id="subTab-ejercicios" onclick="switchSubTab('ejercicios')">
         Ejercicios <span class="sub-tab-count" id="cnt-ejercicios">—</span>
@@ -531,11 +567,11 @@
       <div class="toolbar">
         <div class="search-wrap">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="searchRoutines" placeholder="Buscar en rutinas…" oninput="applyRoutineFilter()"/>
+          <input type="text" id="searchRoutines" placeholder="Buscar rutinas…" oninput="applyRoutineFilter()"/>
         </div>
         <button class="pill" id="filterNivel" onclick="toggleFilterPill(this,'nivel')">Nivel</button>
         <button class="pill" id="filterMaterial" onclick="toggleFilterPill(this,'material')">Material</button>
-        <span class="total-label" id="routineTotalLabel"></span>
+        <span class="total-label" id="routineTotalLabel" style="margin-left:auto;"></span>
       </div>
 
       <!-- Table -->
@@ -1011,6 +1047,8 @@ function switchMainTab(tab) {
   document.getElementById('mainTab-' + tab)?.classList.add('active');
   document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('mtab-' + tab)?.classList.add('active');
+  const nuevaBtn = document.getElementById('btnNuevaRutina');
+  if (nuevaBtn) nuevaBtn.style.display = tab === 'entrenamiento' ? '' : 'none';
 }
 
 // ── Sub-tabs (under Entrenamiento) ──
@@ -1252,27 +1290,6 @@ function printRoutineHtml(rt) {
     tr:last-child td{border-bottom:none;}
     .footer{margin-top:32px;font-size:11px;color:#D1D5DB;text-align:center;}
     @media print{body{padding:16px;}@page{margin:1.5cm;}}
-  </style>  <style>
-    /* ALZUM.io — theme overrides */
-    body { background: #F8FAFC !important; }
-    .sidebar {
-      background: #fff !important;
-      border-right: 1px solid #E5E7EB !important;
-    }
-    .sidebar-logo span { color: #111827 !important; }
-    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
-    .sidebar-logo small { color: #6B7280 !important; }
-    .nav-section { color: #9CA3AF !important; }
-    .nav-item { color: #374151 !important; }
-    .nav-item svg { color: inherit !important; opacity: 1 !important; }
-    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
-    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
-    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
-    .avatar, .user-avatar { background: #4F46E5 !important; }
-    .user-name { color: #111827 !important; }
-    .user-role { color: #6B7280 !important; }
-    .btn-logout { color: #6B7280 !important; }
-    .btn-logout:hover { color: #4F46E5 !important; }
   </style>
 </head><body>
   <h1>${esc2(rt.name)}</h1>

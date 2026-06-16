@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Grupos Musculares</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:68px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
+    .page-header-left{display:flex;align-items:center;gap:14px;}
+    .page-header-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;flex-shrink:0;}
+    .page-header-back:hover{background:#F3F4F6;color:#374151;border-color:#D1D5DB;}
+    .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
+    .page-header-title{font-size:17px;font-weight:800;color:#111827;}
+    .page-header-sub{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .page-header-right{display:flex;align-items:center;gap:10px;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--indigo);color:#fff;}
+    .btn-primary:hover{background:var(--indigo-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+    .toolbar{padding:12px 28px;background:#fff;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+    .total-label{font-size:13px;color:#6B7280;}
+    .content{flex:1;overflow-y:auto;padding:24px 28px;}
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+    .mg-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5E7EB;transition:.15s;display:flex;align-items:center;gap:14px;cursor:pointer;}
+    .mg-card:hover{border-color:var(--indigo);box-shadow:0 4px 12px rgba(79,70,229,.1);}
+    .mg-icon{width:48px;height:48px;border-radius:12px;background:var(--indigo-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);}
+    .mg-info{flex:1;min-width:0;}
+    .mg-name{font-size:14px;font-weight:700;color:#111;}
+    .mg-desc{font-size:12px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+    .badge-green{background:#D1FAE5;color:#059669;}
+    .badge-gray{background:#F3F4F6;color:#6B7280;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#fff;border-radius:16px;width:480px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EBEBEB;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
+    .modal-close:hover{color:#374151;}
+    .modal-body{padding:20px 24px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group input,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group textarea:focus{border-color:var(--indigo);}
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .confirm-overlay.open{opacity:1;pointer-events:all;}
+    .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .confirm-overlay.open .confirm-box{transform:translateY(0);}
+    .confirm-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.5;}
+    .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:400;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+    .empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .empty p{font-size:13px;}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Inicio</a>
+    <a class="nav-item" href="events.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mi Calendario</a>
+    <a class="nav-item" href="clients.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clientes</a>
+    <a class="nav-item" href="checkins.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-ins</a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item active" href="library.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Librería</a>
+    <a class="nav-item" href="diets.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrición</a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item" href="forms.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Formularios<span class="nav-badge" id="formsBadge" style="display:none"></span></a>
+    <a class="nav-item" href="notes.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Notas</a>
+    <div class="nav-section">Negocio</div>
+    <a class="nav-item" href="analytics.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analíticas</a>
+    <a class="nav-item" href="coaches.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Equipo</a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Ajustes</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarAvatar">U</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Cargando…</div>
+      <div class="user-role" id="sidebarRole"></div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="page-header">
+    <div class="page-header-left">
+      <a class="page-header-back" href="routines.html">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Entrenamiento
+      </a>
+      <div class="page-header-divider"></div>
+      <div>
+        <div class="page-header-title">Grupos musculares</div>
+      </div>
+    </div>
+    <div class="page-header-right">
+      <button class="btn btn-primary" onclick="openMgModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo grupo
+      </button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <span class="total-label" id="mgTotalLabel"></span>
+  </div>
+
+  <div class="content">
+    <div class="cards-grid" id="mgContent">
+      <div style="text-align:center;padding:48px;color:#9CA3AF;">Cargando…</div>
+    </div>
+  </div>
+</div>
+
+<!-- Muscle Group Modal -->
+<div class="modal-overlay" id="mgOverlay" onclick="if(event.target===this)closeMgModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="mgModalTitle">Nuevo grupo muscular</h2>
+      <button class="modal-close" onclick="closeMgModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input id="mg_name" placeholder="Ej: Pecho"/>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="mg_desc" rows="3" placeholder="Descripción del grupo muscular…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeMgModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMuscleGroup()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">Eliminar</h3>
+    <p id="confirmText">¿Estás seguro?</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteFn()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='https://nutrientrena-production.up.railway.app/api';
+let token=localStorage.getItem('token')||'';
+function authHeaders(){return{'Content-Type':'application/json',Authorization:`Bearer ${token}`};}
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+let toastTimer;
+function showToast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500);}
+let confirmDeleteFn=()=>{};
+function openConfirm(title,text,fn){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmText').textContent=text;confirmDeleteFn=fn;document.getElementById('confirmOverlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');}
+
+async function initUser(){
+  if(!token){location.href='login.html';return;}
+  try{
+    const r=await fetch(`${API}/auth/me`,{headers:authHeaders()});
+    if(!r.ok)throw new Error();
+    const d=await r.json();const u=d.data||d;
+    document.getElementById('sidebarName').textContent=u.name||u.email||'—';
+    document.getElementById('sidebarRole').textContent=u.role?.name||'';
+    document.getElementById('sidebarAvatar').textContent=(u.name||u.email||'U')[0].toUpperCase();
+  }catch{}
+}
+function logout(){localStorage.removeItem('token');localStorage.removeItem('role_id');location.href='login.html';}
+async function loadPendingBadge(){
+  try{
+    const r=await fetch(`${API}/form-assignments?status=pending&per_page=1`,{headers:authHeaders()});
+    if(!r.ok)return;const d=await r.json();
+    const n=d.data?.total??(Array.isArray(d.data)?d.data.length:0);
+    const badge=document.getElementById('formsBadge');
+    if(n>0){badge.textContent=n;badge.style.display='inline-block';}
+  }catch{}
+}
+function adaptSidebar(){
+  const rid=parseInt(localStorage.getItem('role_id')||'0');
+  if(rid!==5)return;
+  ['coaches.html','settings.html','analytics.html'].forEach(href=>{
+    const el=document.querySelector('.nav-item[href="'+href+'"]');
+    if(el)el.style.display='none';
+  });
+}
+
+let editingMgId=null;
+
+async function loadMuscleGroups(){
+  try{
+    const r=await fetch(`${API}/muscle-groups/findAll`,{headers:authHeaders()});
+    const d=await r.json();
+    const items=d.data||[];
+    document.getElementById('mgTotalLabel').textContent=`${items.length} grupo${items.length!==1?'s':''}`;
+    renderMuscleGroups(items);
+  }catch(e){
+    document.getElementById('mgContent').innerHTML=`<div class="empty"><h3>Error al cargar</h3></div>`;
+  }
+}
+
+function renderMuscleGroups(items){
+  const container=document.getElementById('mgContent');
+  if(!items.length){
+    container.innerHTML=`<div class="empty"><h3>Sin grupos musculares</h3><p>Crea el primer grupo muscular.</p></div>`;
+    return;
+  }
+  container.innerHTML=items.map(mg=>`
+    <div class="mg-card" onclick="openMgModal(${mg.id})">
+      <div class="mg-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l-3 5h6l-3-5V7"/><path d="M7 10c-1.5.5-2 1.5-2 3s.5 2.5 2 3"/><path d="M17 10c1.5.5 2 1.5 2 3s-.5 2.5-2 3"/></svg></div>
+      <div class="mg-info">
+        <div class="mg-name">${esc(mg.name)}</div>
+        <div class="mg-desc">${esc(mg.description||'Sin descripción')}</div>
+      </div>
+      <span class="badge ${mg.state?'badge-green':'badge-gray'}" style="flex-shrink:0">${mg.state?'Activo':'Inactivo'}</span>
+    </div>`).join('');
+}
+
+async function openMgModal(id=null){
+  editingMgId=id;
+  document.getElementById('mgModalTitle').textContent=id?'Editar grupo muscular':'Nuevo grupo muscular';
+  ['mg_name','mg_desc'].forEach(f=>document.getElementById(f).value='');
+  if(id){
+    try{
+      const r=await fetch(`${API}/muscle-groups/${id}/edit`,{headers:authHeaders()});
+      const d=await r.json();const mg=d.data||d;
+      document.getElementById('mg_name').value=mg.name||'';
+      document.getElementById('mg_desc').value=mg.description||'';
+    }catch{showToast('Error al cargar grupo','error');return;}
+  }
+  document.getElementById('mgOverlay').classList.add('open');
+}
+
+function closeMgModal(){document.getElementById('mgOverlay').classList.remove('open');editingMgId=null;}
+
+async function saveMuscleGroup(){
+  const name=document.getElementById('mg_name').value.trim();
+  if(!name){showToast('El nombre es obligatorio','error');return;}
+  const payload={name,description:document.getElementById('mg_desc').value.trim()||null};
+  try{
+    const url=editingMgId?`${API}/muscle-groups/${editingMgId}/update`:`${API}/muscle-groups`;
+    const method=editingMgId?'PUT':'POST';
+    const r=await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||`HTTP ${r.status}`);
+    showToast(editingMgId?'Grupo actualizado':'Grupo creado','success');
+    closeMgModal();loadMuscleGroups();
+  }catch(e){showToast(e.message||'Error al guardar','error');}
+}
+
+initUser();loadMuscleGroups();loadPendingBadge();adaptSidebar();
+</script>
+</body>
+</html>

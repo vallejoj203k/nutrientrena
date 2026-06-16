@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Rutinas</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:68px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
+    .page-header-left{display:flex;align-items:center;gap:14px;}
+    .page-header-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;flex-shrink:0;}
+    .page-header-back:hover{background:#F3F4F6;color:#374151;border-color:#D1D5DB;}
+    .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
+    .page-header-title{font-size:17px;font-weight:800;color:#111827;}
+    .page-header-right{display:flex;align-items:center;gap:10px;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--indigo);color:#fff;}
+    .btn-primary:hover{background:var(--indigo-dark);}
+    .btn-ghost{background:#F3F4F6;color:#374151;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+    .btn-icon{padding:7px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:inline-flex;color:#6B7280;transition:.15s;}
+    .btn-icon:hover{background:#E5E7EB;color:#111;}
+    .btn-purple{background:var(--indigo);color:#fff;}
+    .btn-purple:hover{background:var(--indigo-dark);}
+    .toolbar{padding:12px 28px;background:#fff;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+    .search-wrap{position:relative;flex:1;min-width:200px;max-width:320px;}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;}
+    .search-wrap input:focus{border-color:var(--indigo);}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .total-label{font-size:13px;color:#6B7280;margin-left:auto;}
+    .filter-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    .pill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
+    .pill:hover{border-color:var(--indigo);color:var(--indigo);}
+    .pill.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+    .table-wrap{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 16px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;text-align:left;white-space:nowrap;}
+    thead th:first-child{padding-left:20px;}
+    tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s;cursor:pointer;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover td{background:#FAFBFF;}
+    tbody td{padding:14px 16px;font-size:13px;color:#374151;vertical-align:middle;}
+    tbody td:first-child{padding-left:20px;}
+    .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+    .badge-green{background:#D1FAE5;color:#059669;}
+    .badge-gray{background:#F3F4F6;color:#6B7280;}
+    .lvl-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.2px;}
+    .lvl-1{background:#DCFCE7;color:#166534;}
+    .lvl-2{background:#FEF3C7;color:#92400E;}
+    .lvl-3{background:#FEE2E2;color:#991B1B;}
+    .btn-assign{padding:6px 14px;background:var(--indigo);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;white-space:nowrap;}
+    .btn-assign:hover{background:var(--indigo-dark);}
+    .btn-row-icon{width:30px;height:30px;border:1.5px solid #E5E7EB;background:#fff;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;flex-shrink:0;}
+    .btn-row-icon:hover{background:var(--indigo-pale);color:var(--indigo);border-color:var(--indigo);}
+    .row-actions{display:flex;align-items:center;gap:5px;}
+    .empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .empty svg{margin-bottom:16px;opacity:.3;}
+    .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .empty p{font-size:13px;}
+    #listView{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    #formView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #formView.active{display:flex;}
+    .fv-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+    .fv-back{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:#6B7280;font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;transition:.15s;}
+    .fv-back:hover{background:#F3F4F6;color:#111;}
+    .fv-title{font-size:18px;font-weight:700;color:#111;}
+    .fv-wizard-steps{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid #E5E7EB;margin-left:auto;}
+    .fv-wstep{padding:8px 20px;font-size:13px;font-weight:600;color:#9CA3AF;background:#F9FAFB;transition:.15s;user-select:none;}
+    .fv-wstep.active{background:var(--indigo);color:#fff;}
+    .fv-wstep.done{background:#D1FAE5;color:#059669;}
+    .fv-body{display:flex;flex:1;overflow:hidden;}
+    .fv-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;}
+    .fv-sidebar{width:300px;min-width:300px;background:#fff;border-left:1px solid #E5E7EB;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+    .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
+    .sec-card-head{padding:16px 20px;border-bottom:1px solid #EBEBEB;font-size:14px;font-weight:700;color:#111;}
+    .sec-card-body{padding:20px;}
+    .sb-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:16px;}
+    .sb-card-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+    .sb-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#374151;padding:4px 0;border-bottom:1px solid #EBEBEB;}
+    .sb-row:last-child{border-bottom:none;}
+    .sb-row span:first-child{color:#9CA3AF;font-size:12px;}
+    .save-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--indigo);color:#fff;transition:.15s;}
+    .save-btn:hover{background:var(--indigo-dark);}
+    .save-btn:disabled{opacity:.6;cursor:not-allowed;}
+    #fvBuilderBody{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #fvBuilderBody.active{display:flex;}
+    .fv-builder-footer{background:#fff;border-top:1px solid #E5E7EB;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .builder-layout{display:flex;gap:0;min-height:400px;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;}
+    .days-panel{width:180px;min-width:180px;background:#F9FAFB;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;}
+    .days-panel-header{padding:12px 14px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB;}
+    .days-list{flex:1;overflow-y:auto;padding:8px;}
+    .day-chip{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#374151;cursor:pointer;transition:.15s;margin-bottom:4px;}
+    .day-chip:hover{background:#EDE9FE;}
+    .day-chip.active{background:var(--indigo);color:#fff;}
+    .day-chip .day-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .day-chip .day-chip-input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13px;font-weight:600;color:inherit;font-family:inherit;}
+    .day-chip .day-edit-btn{background:none;border:none;cursor:pointer;padding:2px 3px;border-radius:4px;display:flex;color:inherit;opacity:0;transition:.15s;flex-shrink:0;}
+    .day-chip:hover .day-edit-btn,.day-chip.active .day-edit-btn{opacity:.55;}
+    .day-chip .day-edit-btn:hover{opacity:1;}
+    .day-chip .day-rm{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;display:flex;color:inherit;opacity:.6;flex-shrink:0;}
+    .day-chip .day-rm:hover{opacity:1;}
+    .days-panel-footer{padding:10px 8px;border-top:1px solid #E5E7EB;}
+    .add-day-chip-btn{width:100%;padding:8px;border-radius:8px;border:1.5px dashed #818CF8;background:#EEF2FF;color:var(--indigo);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
+    .add-day-chip-btn:hover{background:#EDE9FE;}
+    .blocks-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .blocks-header{padding:12px 16px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .blocks-header .day-title{font-size:14px;font-weight:700;color:#111;flex:1;}
+    .add-block-wrap{position:relative;}
+    .block-type-menu{position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:10;min-width:160px;display:none;overflow:hidden;}
+    .block-type-menu.open{display:block;}
+    .block-type-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;font-weight:500;color:#374151;background:none;border:none;cursor:pointer;text-align:left;transition:.15s;}
+    .block-type-menu button:hover{background:#EEF2FF;color:var(--indigo);}
+    .blocks-list{flex:1;overflow-y:auto;padding:12px 16px;}
+    .block{background:#fff;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:12px;overflow:hidden;}
+    .block-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;}
+    .block-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+    .block-badge.warmup{background:#FEF3C7;color:#D97706;}
+    .block-badge.normal{background:#EFF6FF;color:#2563EB;}
+    .block-badge.superset{background:#EEF2FF;color:#4F46E5;}
+    .block-badge.circuit{background:#D1FAE5;color:#059669;}
+    .block-rm{margin-left:auto;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:18px;line-height:1;padding:2px 6px;border-radius:4px;}
+    .block-rm:hover{color:#EF4444;background:#FEF2F2;}
+    .exercise-table{width:100%;border-collapse:collapse;}
+    .exercise-table th{padding:8px 10px;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.3px;background:#FAFAFA;border-bottom:1px solid #EBEBEB;text-align:left;white-space:nowrap;}
+    .exercise-table td{padding:6px 8px;border-bottom:1px solid #EBEBEB;vertical-align:middle;}
+    .exercise-table tr:last-child td{border-bottom:none;}
+    .exercise-table input,.exercise-table select{border:1px solid #E5E7EB;border-radius:6px;padding:5px 7px;font-size:12px;outline:none;font-family:inherit;background:#fff;color:#111;transition:.15s;}
+    .exercise-table input:focus,.exercise-table select:focus{border-color:var(--indigo);}
+    .ex-name{font-size:13px;font-weight:600;color:#111;display:block;}
+    .ex-muscle{font-size:11px;color:#9CA3AF;display:block;}
+    .add-exercise-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;color:var(--indigo);font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;border-top:1px solid #F3F4F6;width:100%;transition:.15s;}
+    .add-exercise-btn:hover{background:#EEF2FF;}
+    .empty-day{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 16px;color:#9CA3AF;text-align:center;gap:10px;}
+    .empty-day svg{opacity:.3;}
+    .empty-day p{font-size:13px;}
+    .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .picker-overlay.open{opacity:1;pointer-events:all;}
+    .picker-modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;}
+    .picker-overlay.open .picker-modal{transform:translateY(0);}
+    .picker-head{padding:18px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .picker-head h3{font-size:15px;font-weight:700;color:#111;}
+    .picker-filters{padding:12px 16px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
+    .picker-search{width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;margin-bottom:10px;font-family:inherit;}
+    .picker-search:focus{border-color:var(--indigo);}
+    .picker-pills{display:flex;gap:6px;flex-wrap:wrap;}
+    .picker-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
+    .picker-pill:hover{border-color:var(--indigo);color:var(--indigo);}
+    .picker-pill.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+    .picker-results{flex:1;overflow-y:auto;padding:8px 0;}
+    .picker-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid #EBEBEB;}
+    .picker-item:hover{background:#EEF2FF;}
+    .picker-item-icon{width:36px;height:36px;border-radius:8px;background:var(--indigo-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .picker-item-name{font-size:13px;font-weight:600;color:#111;}
+    .picker-item-muscle{font-size:11px;color:#9CA3AF;}
+    .picker-empty{padding:32px;text-align:center;color:#9CA3AF;font-size:13px;}
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .confirm-overlay.open{opacity:1;pointer-events:all;}
+    .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .confirm-overlay.open .confirm-box{transform:translateY(0);}
+    .confirm-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
+    .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.5;}
+    .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:400;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--indigo);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px;}
+    .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
+    .modal-close:hover{color:#374151;}
+    @media(max-width:768px){body{flex-direction:column;}.sidebar{width:100%;min-width:unset;height:auto;}.sidebar-nav,.sidebar-user{display:none;}.form-row,.form-row-3{grid-template-columns:1fr;}.builder-layout{flex-direction:column;}.days-panel{width:100%;min-width:unset;}.fv-body{flex-direction:column;}.fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;}.fv-wizard-steps{margin-left:0;}}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Inicio</a>
+    <a class="nav-item" href="events.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mi Calendario</a>
+    <a class="nav-item" href="clients.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clientes</a>
+    <a class="nav-item" href="checkins.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-ins</a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item active" href="library.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Librería</a>
+    <a class="nav-item" href="diets.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrición</a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item" href="forms.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Formularios<span class="nav-badge" id="formsBadge" style="display:none"></span></a>
+    <a class="nav-item" href="notes.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Notas</a>
+    <div class="nav-section">Negocio</div>
+    <a class="nav-item" href="analytics.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analíticas</a>
+    <a class="nav-item" href="coaches.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Equipo</a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Ajustes</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarAvatar">U</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Cargando…</div>
+      <div class="user-role" id="sidebarRole"></div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+<div id="listView">
+  <div class="page-header">
+    <div class="page-header-left">
+      <a class="page-header-back" href="routines.html">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Entrenamiento
+      </a>
+      <div class="page-header-divider"></div>
+      <div>
+        <div class="page-header-title">Rutinas</div>
+      </div>
+    </div>
+    <div class="page-header-right">
+      <button class="btn btn-primary" onclick="openForm()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nueva rutina
+      </button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchRoutines" placeholder="Buscar rutinas…" oninput="applyRoutineFilter()"/>
+    </div>
+    <button class="pill" id="filterNivel" onclick="this.classList.toggle('active')">Nivel</button>
+    <button class="pill" id="filterMaterial" onclick="this.classList.toggle('active')">Material</button>
+    <span class="total-label" id="routineTotalLabel"></span>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:16px 28px 28px;">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Objetivo</th>
+            <th>Nivel</th>
+            <th>Duración</th>
+            <th>Asignados</th>
+            <th>Actualizado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="routinesTbody">
+          <tr><td colspan="7" style="text-align:center;padding:48px;color:#9CA3AF;">Cargando rutinas…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- #listView -->
+
+<div id="formView">
+  <div class="fv-bar">
+    <button class="fv-back" onclick="closeForm()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver a rutinas
+    </button>
+    <h2 class="fv-title" id="formViewTitle">Nueva rutina</h2>
+    <div class="fv-wizard-steps">
+      <div class="fv-wstep active" id="wStep1">1. Información</div>
+      <div class="fv-wstep" id="wStep2">2. Ejercicios</div>
+    </div>
+  </div>
+
+  <div class="fv-body" id="fvInfoBody">
+    <div class="fv-main">
+      <div class="sec-card">
+        <div class="sec-card-head">Información de la rutina</div>
+        <div class="sec-card-body">
+          <div class="form-group">
+            <label>Nombre *</label>
+            <input id="f_name" placeholder="Ej: Rutina fuerza 4 días — Upper/Lower" oninput="updateRoutinePreview()"/>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>Días por semana</label>
+              <input id="f_days" type="number" min="1" max="7" placeholder="4" oninput="updateRoutinePreview()"/>
+            </div>
+            <div class="form-group">
+              <label>Duración (min)</label>
+              <input id="f_time" type="number" min="15" placeholder="60" oninput="updateRoutinePreview()"/>
+            </div>
+            <div class="form-group">
+              <label>Género</label>
+              <select id="f_gender" onchange="updateRoutinePreview()">
+                <option value="">Cualquiera</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Notas</label>
+            <textarea id="f_notes" rows="3" placeholder="Observaciones generales de la rutina…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fv-sidebar">
+      <div class="sb-card">
+        <div class="sb-card-title">Resumen</div>
+        <div id="previewName" style="font-size:15px;font-weight:700;color:#111;margin-bottom:10px;min-height:20px;">Sin nombre</div>
+        <div id="previewMeta" style="display:flex;flex-direction:column;gap:2px;"></div>
+      </div>
+      <button class="save-btn" onclick="wizardNext()">
+        Continuar — Ejercicios
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-left:4px"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="fvBuilderBody">
+    <div class="builder-layout" style="flex:1;min-height:0;">
+      <div class="days-panel">
+        <div class="days-panel-header">Días</div>
+        <div class="days-list" id="daysList"></div>
+        <div class="days-panel-footer">
+          <button class="add-day-chip-btn" onclick="addDay()">+ Agregar día</button>
+        </div>
+      </div>
+      <div class="blocks-area">
+        <div class="blocks-header">
+          <span class="day-title" id="selectedDayName">Selecciona un día</span>
+          <div class="add-block-wrap">
+            <button class="btn btn-sm btn-purple" onclick="toggleBlockMenu()">+ Bloque</button>
+            <div class="block-type-menu" id="blockTypeMenu">
+              <button onclick="addBlock('warmup');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/><path d="M12 12c0 3-2 4-2 7a2 2 0 0 0 4 0c0-3-2-4-2-7z"/></svg> Calentamiento</button>
+              <button onclick="addBlock('normal');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h2a2 2 0 0 1 2 2v0a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Normal</button>
+              <button onclick="addBlock('superset');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Superserie</button>
+              <button onclick="addBlock('circuit');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Circuito</button>
+            </div>
+          </div>
+        </div>
+        <div class="blocks-list" id="blocksList">
+          <div class="empty-day">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+            <p>Agrega un día y crea bloques de ejercicios.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fv-builder-footer">
+      <button class="btn btn-ghost" onclick="wizardGo(1)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Anterior
+      </button>
+      <button class="btn btn-primary" id="saveRoutineBtn" onclick="saveRoutine()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar rutina
+      </button>
+    </div>
+  </div>
+</div><!-- #formView -->
+</div><!-- .main -->
+
+<!-- Exercise Picker -->
+<div class="picker-overlay" id="pickerOverlay" onclick="if(event.target===this)closePicker()">
+  <div class="picker-modal">
+    <div class="picker-head">
+      <h3>Seleccionar ejercicio</h3>
+      <button class="modal-close" onclick="closePicker()">×</button>
+    </div>
+    <div class="picker-filters">
+      <input class="picker-search" id="pickerSearch" placeholder="Buscar ejercicio…" oninput="searchPicker()"/>
+      <div class="picker-pills" id="pickerPills"></div>
+    </div>
+    <div class="picker-results" id="pickerResults">
+      <div class="picker-empty">Busca un ejercicio para comenzar.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">Eliminar</h3>
+    <p id="confirmText">¿Estás seguro?</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteFn()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='https://nutrientrena-production.up.railway.app/api';
+let token=localStorage.getItem('token')||'';
+function authHeaders(){return{'Content-Type':'application/json',Authorization:`Bearer ${token}`};}
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+let toastTimer;
+function showToast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500);}
+let confirmDeleteFn=()=>{};
+function openConfirm(title,text,fn){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmText').textContent=text;confirmDeleteFn=fn;document.getElementById('confirmOverlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');}
+function timeAgo(dateStr){if(!dateStr)return'—';const d=new Date(dateStr);const now=new Date();const diff=Math.floor((now-d)/86400000);if(diff<0)return'Futuro';if(diff===0)return'Hoy';if(diff===1)return'Ayer';if(diff<7)return`Hace ${diff} días`;if(diff<30)return`Hace ${Math.floor(diff/7)} sem`;return`Hace ${Math.floor(diff/30)} mes`;}
+
+async function initUser(){
+  if(!token){location.href='login.html';return;}
+  try{
+    const r=await fetch(`${API}/auth/me`,{headers:authHeaders()});
+    if(!r.ok)throw new Error();
+    const d=await r.json();const u=d.data||d;
+    document.getElementById('sidebarName').textContent=u.name||u.email||'—';
+    document.getElementById('sidebarRole').textContent=u.role?.name||'';
+    document.getElementById('sidebarAvatar').textContent=(u.name||u.email||'U')[0].toUpperCase();
+  }catch{}
+}
+function logout(){localStorage.removeItem('token');localStorage.removeItem('role_id');location.href='login.html';}
+async function loadPendingBadge(){
+  try{
+    const r=await fetch(`${API}/form-assignments?status=pending&per_page=1`,{headers:authHeaders()});
+    if(!r.ok)return;const d=await r.json();
+    const n=d.data?.total??(Array.isArray(d.data)?d.data.length:0);
+    const badge=document.getElementById('formsBadge');
+    if(n>0){badge.textContent=n;badge.style.display='inline-block';}
+  }catch{}
+}
+function adaptSidebar(){
+  const rid=parseInt(localStorage.getItem('role_id')||'0');
+  if(rid!==5)return;
+  ['coaches.html','settings.html','analytics.html'].forEach(href=>{
+    const el=document.querySelector('.nav-item[href="'+href+'"]');
+    if(el)el.style.display='none';
+  });
+}
+
+const LEVELS={1:'Principiante',2:'Intermedio',3:'Avanzado'};
+const GENDERS={1:'Masculino',2:'Femenino'};
+let allRoutines=[];
+
+async function loadParamSelects(){
+  try{
+    const r=await fetch(`${API}/parameters/search`,{headers:authHeaders()});
+    if(!r.ok)return;const d=await r.json();const params=d.data||[];
+    const genderParam=params.find(p=>/g[eé]nero|gender/i.test(p.description));
+    if(genderParam){
+      const dr=await fetch(`${API}/parameters-detail/search?parameter_id=${genderParam.id}`,{headers:authHeaders()});
+      if(dr.ok){const dd=await dr.json();const sel=document.getElementById('f_gender');sel.innerHTML='<option value="">Cualquiera</option>';(dd.data||[]).forEach(item=>{sel.innerHTML+=`<option value="${item.id}">${item.description}</option>`;GENDERS[item.id]=item.description;});}
+    }
+    const levelParam=params.find(p=>/nivel|level/i.test(p.description));
+    if(levelParam){
+      const dr=await fetch(`${API}/parameters-detail/search?parameter_id=${levelParam.id}`,{headers:authHeaders()});
+      if(dr.ok){const dd=await dr.json();Object.keys(LEVELS).forEach(k=>delete LEVELS[k]);(dd.data||[]).forEach(item=>{LEVELS[item.id]=item.description;});}
+    }
+  }catch{}
+}
+
+async function loadRoutines(){
+  try{
+    const r=await fetch(`${API}/routines/findAll`,{headers:authHeaders()});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const d=await r.json();allRoutines=d.data||[];renderRoutines(allRoutines);
+  }catch(e){
+    const tbody=document.getElementById('routinesTbody');
+    if(tbody)tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:48px;color:#DC2626;">Error al cargar: ${esc(e.message)}</td></tr>`;
+  }
+}
+
+function applyRoutineFilter(){
+  const q=(document.getElementById('searchRoutines')?.value||'').toLowerCase();
+  renderRoutines(allRoutines.filter(r=>(r.name||'').toLowerCase().includes(q)||(r.training||'').toLowerCase().includes(q)));
+}
+
+function renderRoutines(list){
+  document.getElementById('routineTotalLabel').textContent=`${list.length} rutina${list.length!==1?'s':''}`;
+  const tbody=document.getElementById('routinesTbody');
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:48px;color:#9CA3AF;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Sin rutinas. Crea tu primera rutina con el botón "+ Nueva rutina".</td></tr>`;return;}
+  tbody.innerHTML=list.map(routineRow).join('');
+}
+
+function routineRow(r){
+  const levelName=r.training_level_id?(LEVELS[r.training_level_id]||`Nivel ${r.training_level_id}`):null;
+  const levelCls=r.training_level_id?`lvl-${r.training_level_id}`:'';
+  const days=r.days_list||[];const sessionCount=days.length;const tags=[r.training].filter(Boolean);
+  return `<tr onclick="openForm(${r.id})">
+    <td><div style="display:flex;align-items:center;gap:12px;"><div style="width:38px;height:38px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div style="font-weight:700;color:#111827;font-size:13px;">${esc(r.name)}</div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:3px;">${sessionCount?`<span style="font-size:11px;color:#6B7280;">${sessionCount} sesione${sessionCount!==1?'s':''}</span>`:''} ${tags.map(t=>`<span style="font-size:11px;background:#F3F4F6;color:#374151;padding:1px 8px;border-radius:20px;">${esc(t)}</span>`).join('')}</div></div></div></td>
+    <td style="color:#374151;font-size:13px;">${esc(r.objective||r.training||'—')}</td>
+    <td>${levelName?`<span class="lvl-pill ${levelCls}">${esc(levelName)}</span>`:'<span style="color:#9CA3AF;font-size:12px;">—</span>'}</td>
+    <td style="font-size:13px;color:#374151;white-space:nowrap;">${r.time?`<span style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${r.time} min</span>`:'—'}</td>
+    <td style="font-size:13px;color:#374151;">${r.clients_count!=null?`<span style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${r.clients_count}</span>`:'—'}</td>
+    <td style="font-size:12px;color:#9CA3AF;">${timeAgo(r.updated_at)}</td>
+    <td onclick="event.stopPropagation()"><div class="row-actions">
+      <button class="btn-assign" onclick="showToast('Asignación próximamente','')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>
+      <button class="btn-row-icon" onclick="openForm(${r.id})" title="Editar"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button class="btn-row-icon" onclick="showRowMenu(event,${r.id},'${esc(r.name)}')" title="Más opciones"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    </div></td>
+  </tr>`;
+}
+
+function showRowMenu(e,id,name){
+  e.stopPropagation();document.querySelectorAll('.row-menu').forEach(m=>m.remove());
+  const btn=e.currentTarget;const rect=btn.getBoundingClientRect();
+  const menu=document.createElement('div');menu.className='row-menu';
+  menu.style.cssText=`position:fixed;top:${rect.bottom+4}px;right:${window.innerWidth-rect.right}px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:300;min-width:160px;overflow:hidden;`;
+  menu.innerHTML=`
+    <button onclick="openForm(${id});this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar</button>
+    <button onclick="downloadPdf(${id},'${esc(name)}');this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</button>
+    <button onclick="cloneRoutine(${id});this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Clonar</button>
+    <div style="height:1px;background:#F3F4F6;margin:4px 0;"></div>
+    <button onclick="openConfirm('Eliminar rutina','¿Eliminar esta rutina? No se puede deshacer.',()=>deleteRoutine(${id}));this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#DC2626;background:none;border:none;cursor:pointer;text-align:left;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Eliminar</button>`;
+  document.body.appendChild(menu);document.addEventListener('click',()=>menu.remove(),{once:true});
+}
+
+async function cloneRoutine(id){
+  try{const r=await fetch(`${API}/routines/clone`,{method:'POST',headers:authHeaders(),body:JSON.stringify({id})});const d=await r.json();if(!r.ok)throw new Error(d.message||`HTTP ${r.status}`);showToast('Rutina clonada','success');await loadRoutines();}
+  catch(e){showToast(e.message||'Error al clonar','error');}
+}
+async function deleteRoutine(id){
+  closeConfirm();
+  try{const r=await fetch(`${API}/routines/${id}`,{method:'DELETE',headers:authHeaders()});const d=await r.json();if(!r.ok)throw new Error(d.message);showToast('Rutina eliminada','success');await loadRoutines();}
+  catch(e){showToast(e.message||'Error','error');}
+}
+async function downloadPdf(id,title){
+  showToast('Preparando impresión…');
+  try{const r=await fetch(`${API}/routines/${id}/edit`,{headers:authHeaders()});if(!r.ok)throw new Error(`HTTP ${r.status}`);const d=await r.json();printRoutineHtml(d.data||d);}
+  catch{showToast('Error al cargar la rutina','error');}
+}
+function printRoutineHtml(rt){
+  const BLOCK_TYPE_LABEL={warmup:'Calentamiento',normal:'Normal',superset:'Superserie',circuit:'Circuito'};
+  const e2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const daysSections=(rt.days_list||[]).map(day=>{
+    const blocks=(day.blocks||[]).map(blk=>{
+      const typeLabel=BLOCK_TYPE_LABEL[blk.block_type]||blk.block_type||'Normal';
+      const exRows=(blk.exercises||[]).map(ex=>{const cols=[e2(ex.training_name||'—'),e2(ex.muscle_group_name||''),ex.series?`${ex.series} series`:'',ex.repetitions?`${ex.repetitions} reps`:'',ex.break_time?`${ex.break_time}s desc`:''].filter(Boolean);return`<tr><td>${cols.join('</td><td>')}</td></tr>`;}).join('');
+      return`<div class="block"><div class="block-label">${typeLabel}</div><table><thead><tr><th>Ejercicio</th><th>Músculo</th><th>Series</th><th>Reps</th><th>Descanso</th></tr></thead><tbody>${exRows||'<tr><td colspan="5" style="color:#999">Sin ejercicios</td></tr>'}</tbody></table></div>`;
+    }).join('');
+    return`<div class="day-section"><h2>${e2(day.day_name)}</h2>${blocks||'<p style="color:#999;font-size:13px;">Sin bloques</p>'}</div>`;
+  }).join('');
+  const GMAP={1:'Masculino',2:'Femenino',3:'Unisex'};
+  const meta=[rt.days?`${rt.days} días/semana`:'',rt.time?`${rt.time} min`:'',rt.gender_id?GMAP[rt.gender_id]:''].filter(Boolean).join(' · ');
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${e2(rt.name)} — Rutina</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Segoe UI',system-ui,sans-serif;color:#111;padding:32px;max-width:800px;margin:0 auto;}h1{font-size:22px;font-weight:800;margin-bottom:4px;}.meta{font-size:13px;color:#6B7280;margin-bottom:6px;}.notes{font-size:13px;color:#374151;background:#F9FAFB;border-left:3px solid #4F46E5;padding:8px 12px;border-radius:4px;margin-bottom:24px;}.day-section{margin-bottom:28px;break-inside:avoid;}h2{font-size:15px;font-weight:700;color:#4F46E5;border-bottom:2px solid #EDE9FE;padding-bottom:6px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;}.block{margin-bottom:14px;}.block-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}table{width:100%;border-collapse:collapse;font-size:13px;}th{text-align:left;padding:6px 10px;background:#EEF2FF;color:#4F46E5;font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}td{padding:7px 10px;border-bottom:1px solid #EBEBEB;color:#374151;}tr:last-child td{border-bottom:none;}.footer{margin-top:32px;font-size:11px;color:#D1D5DB;text-align:center;}@media print{body{padding:16px;}@page{margin:1.5cm;}}</style></head><body><h1>${e2(rt.name)}</h1>${meta?`<div class="meta">${meta}</div>`:''}${rt.notes?`<div class="notes">${e2(rt.notes)}</div>`:''}${daysSections||'<p style="color:#999">Sin días definidos.</p>'}<div class="footer">ALZUM.io · ${new Date().toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'})}</div><script>window.onload=()=>{window.print();}<\/script></body></html>`;
+  const win=window.open('','_blank');win.document.write(html);win.document.close();
+}
+
+let editingRoutineId=null;let currentWizardStep=1;
+const routineData={name:'',days:0,time:0,gender_id:null,notes:'',days_list:[]};
+let selectedDayIdx=0;let pickerTargetBlockIdx=null;
+function resetRoutineData(){routineData.name='';routineData.days=0;routineData.time=0;routineData.gender_id=null;routineData.notes='';routineData.days_list=[];selectedDayIdx=0;}
+
+async function openForm(id=null){
+  editingRoutineId=id;resetRoutineData();
+  document.getElementById('formViewTitle').textContent=id?'Editar rutina':'Nueva rutina';
+  clearRoutineForm();wizardGo(1);
+  if(id){
+    try{
+      const r=await fetch(`${API}/routines/${id}/edit`,{headers:authHeaders()});
+      const d=await r.json();const rt=d.data||d;
+      document.getElementById('f_name').value=rt.name||'';
+      document.getElementById('f_days').value=rt.days||'';
+      document.getElementById('f_time').value=rt.time||'';
+      document.getElementById('f_gender').value=rt.gender_id||'';
+      document.getElementById('f_notes').value=rt.notes||'';
+      routineData.name=rt.name||'';routineData.days=rt.days||0;routineData.time=rt.time||0;routineData.gender_id=rt.gender_id||null;routineData.notes=rt.notes||'';
+      routineData.days_list=(rt.days_list||[]).map(day=>({day_name:day.day_name||'',description:day.description||'',blocks:(day.blocks||[]).map(blk=>({block_type:blk.block_type||'normal',order_index:blk.order_index||0,exercises:(blk.exercises||[]).map(ex=>({training_id:ex.training_id,training_name:ex.training_name||'',muscle_group_name:ex.muscle_group_name||'',series:ex.series||null,repetitions:ex.repetitions||'',break_time:ex.break_time||null,intensity_type:ex.intensity_type||'',intensity_value:ex.intensity_value||null,notes:ex.notes||'',order_index:ex.order_index||0}))}))})  );
+    }catch{showToast('Error al cargar la rutina','error');return;}
+  }
+  updateRoutinePreview();
+  document.getElementById('listView').style.display='none';
+  document.getElementById('formView').classList.add('active');
+}
+function closeForm(){document.getElementById('formView').classList.remove('active');document.getElementById('listView').style.display='';editingRoutineId=null;resetRoutineData();}
+function clearRoutineForm(){['f_name','f_days','f_time','f_notes'].forEach(id=>{document.getElementById(id).value='';});document.getElementById('f_gender').value='';document.getElementById('daysList').innerHTML='';document.getElementById('blocksList').innerHTML='';document.getElementById('selectedDayName').textContent='Selecciona un día';}
+function wizardGo(step){
+  currentWizardStep=step;
+  document.querySelectorAll('.fv-wstep').forEach((el,i)=>{el.classList.remove('active','done');if(i+1===step)el.classList.add('active');else if(i+1<step)el.classList.add('done');});
+  const infoBody=document.getElementById('fvInfoBody');const builderBody=document.getElementById('fvBuilderBody');
+  if(step===1){infoBody.style.display='';builderBody.classList.remove('active');}
+  else{infoBody.style.display='none';builderBody.classList.add('active');renderDaysList();renderBlocks();}
+}
+function updateRoutinePreview(){
+  const name=document.getElementById('f_name')?.value.trim()||'';
+  const days=document.getElementById('f_days')?.value||'';
+  const time=document.getElementById('f_time')?.value||'';
+  const genderSel=document.getElementById('f_gender');const genderText=genderSel?.options[genderSel.selectedIndex]?.text||'';
+  document.getElementById('previewName').textContent=name||'Sin nombre';
+  const meta=[];if(days)meta.push(['Días/semana',days]);if(time)meta.push(['Duración',`${time} min`]);if(genderSel?.value)meta.push(['Género',genderText]);
+  document.getElementById('previewMeta').innerHTML=meta.map(([k,v])=>`<div class="sb-row"><span>${k}</span><span>${esc(v)}</span></div>`).join('');
+}
+function wizardNext(){
+  const name=document.getElementById('f_name').value.trim();
+  if(!name){showToast('El nombre es obligatorio','error');return;}
+  routineData.name=name;routineData.days=parseInt(document.getElementById('f_days').value)||0;routineData.time=parseInt(document.getElementById('f_time').value)||0;routineData.gender_id=parseInt(document.getElementById('f_gender').value)||null;routineData.notes=document.getElementById('f_notes').value.trim();
+  wizardGo(2);
+}
+
+function addDay(){const idx=routineData.days_list.length;routineData.days_list.push({day_name:`Día ${idx+1}`,description:'',blocks:[]});renderDaysList();selectDay(routineData.days_list.length-1);}
+function removeDay(idx){routineData.days_list.splice(idx,1);if(selectedDayIdx>=routineData.days_list.length)selectedDayIdx=Math.max(0,routineData.days_list.length-1);renderDaysList();renderBlocks();}
+function selectDay(idx){selectedDayIdx=idx;renderDaysList();renderBlocks();}
+function renderDaysList(){
+  const container=document.getElementById('daysList');container.innerHTML='';
+  routineData.days_list.forEach((day,i)=>{
+    const chip=document.createElement('div');chip.className=`day-chip${i===selectedDayIdx?' active':''}`;
+    chip.innerHTML=`<span class="day-chip-name" title="Doble clic para renombrar">${esc(day.day_name)}</span><button class="day-edit-btn" title="Renombrar día"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="day-rm" title="Eliminar día"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    chip.querySelector('.day-chip-name').addEventListener('dblclick',(e)=>{e.stopPropagation();startRenameDay(i,chip);});
+    chip.querySelector('.day-edit-btn').addEventListener('click',(e)=>{e.stopPropagation();startRenameDay(i,chip);});
+    chip.querySelector('.day-rm').addEventListener('click',(e)=>{e.stopPropagation();removeDay(i);});
+    chip.addEventListener('click',()=>selectDay(i));
+    container.appendChild(chip);
+  });
+}
+function startRenameDay(idx,chip){
+  const nameSpan=chip.querySelector('.day-chip-name');if(!nameSpan)return;
+  const input=document.createElement('input');input.className='day-chip-input';input.value=routineData.days_list[idx].day_name;
+  nameSpan.replaceWith(input);input.focus();input.select();
+  const commit=()=>{const newName=input.value.trim()||routineData.days_list[idx].day_name;routineData.days_list[idx].day_name=newName;renderDaysList();if(idx===selectedDayIdx){const titleEl=document.getElementById('selectedDayName');if(titleEl)titleEl.textContent=newName;}};
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur();}if(e.key==='Escape'){input.value=routineData.days_list[idx].day_name;input.blur();}});
+}
+
+const BLOCK_LABELS={
+  warmup:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/><path d="M12 12c0 3-2 4-2 7a2 2 0 0 0 4 0c0-3-2-4-2-7z"/></svg> Calentamiento',
+  normal:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h2a2 2 0 0 1 2 2v0a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Normal',
+  superset:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Superserie',
+  circuit:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Circuito',
+};
+function toggleBlockMenu(){document.getElementById('blockTypeMenu').classList.toggle('open');}
+document.addEventListener('click',(e)=>{if(!e.target.closest('.add-block-wrap'))document.getElementById('blockTypeMenu')?.classList.remove('open');});
+function addBlock(type='normal'){if(!routineData.days_list.length){showToast('Agrega un día primero','error');return;}const day=routineData.days_list[selectedDayIdx];day.blocks.push({block_type:type,order_index:day.blocks.length,exercises:[]});renderBlocks();}
+function removeBlock(blockIdx){routineData.days_list[selectedDayIdx].blocks.splice(blockIdx,1);renderBlocks();}
+function renderBlocks(){
+  const container=document.getElementById('blocksList');const titleEl=document.getElementById('selectedDayName');
+  if(!routineData.days_list.length){titleEl.textContent='Selecciona un día';container.innerHTML=`<div class="empty-day"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg><p>Agrega un día y crea bloques de ejercicios.</p></div>`;return;}
+  const day=routineData.days_list[selectedDayIdx];titleEl.textContent=day.day_name;
+  if(!day.blocks.length){container.innerHTML=`<div class="empty-day"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>Usa el botón "+ Bloque" para agregar bloques de ejercicios.</p></div>`;return;}
+  container.innerHTML=day.blocks.map((blk,bi)=>{
+    const label=BLOCK_LABELS[blk.block_type]||blk.block_type;
+    const rows=blk.exercises.map((ex,ei)=>`<tr data-bi="${bi}" data-ei="${ei}"><td><span class="ex-name">${esc(ex.training_name)||'<em style="color:#9CA3AF">Sin nombre</em>'}</span><span class="ex-muscle">${esc(ex.muscle_group_name)}</span></td><td><input type="number" min="1" max="20" style="width:52px" value="${esc(ex.series)}" placeholder="—" onchange="updateEx(${bi},${ei},'series',this.value)"/></td><td><input type="text" style="width:64px" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateEx(${bi},${ei},'repetitions',this.value)"/></td><td><input type="number" style="width:60px" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateEx(${bi},${ei},'break_time',this.value)"/></td><td><select style="width:72px" onchange="updateEx(${bi},${ei},'intensity_type',this.value)"><option value=""${!ex.intensity_type?' selected':''}>—</option><option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option><option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option><option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option><option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option></select></td><td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td><td><input type="text" style="width:90px" value="${esc(ex.notes)}" placeholder="Notas…" onchange="updateEx(${bi},${ei},'notes',this.value)"/></td><td><button style="background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;display:flex;align-items:center;" onclick="removeExercise(${bi},${ei})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>`).join('');
+    return`<div class="block" data-block-idx="${bi}"><div class="block-header"><span class="block-badge ${blk.block_type}">${label}</span><button class="block-rm" onclick="removeBlock(${bi})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>${blk.exercises.length?`<table class="exercise-table"><thead><tr><th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Intensidad</th><th>Valor</th><th>Notas</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:''}<button class="add-exercise-btn" onclick="openPicker(${bi})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar ejercicio</button></div>`;
+  }).join('');
+}
+function updateEx(bi,ei,field,value){const ex=routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei];if(field==='series'||field==='break_time')ex[field]=parseInt(value)||null;else if(field==='intensity_value')ex[field]=parseFloat(value)||null;else ex[field]=value;}
+function removeExercise(bi,ei){routineData.days_list[selectedDayIdx].blocks[bi].exercises.splice(ei,1);renderBlocks();}
+
+async function saveRoutine(){
+  routineData.name=document.getElementById('f_name').value.trim();routineData.days=parseInt(document.getElementById('f_days').value)||null;routineData.time=parseInt(document.getElementById('f_time').value)||null;routineData.gender_id=parseInt(document.getElementById('f_gender').value)||null;routineData.notes=document.getElementById('f_notes').value.trim();
+  if(!routineData.name){showToast('El nombre es obligatorio','error');return;}
+  const payload={name:routineData.name,days:routineData.days,time:routineData.time,gender_id:routineData.gender_id,notes:routineData.notes||null,days_list:routineData.days_list.map((day,i)=>({day_name:day.day_name,description:day.description||null,blocks:day.blocks.map((blk,bi)=>({block_type:blk.block_type,order_index:bi,exercises:blk.exercises.map((ex,ei)=>({training_id:ex.training_id||null,series:parseInt(ex.series)||null,repetitions:ex.repetitions||null,break_time:parseInt(ex.break_time)||null,intensity_type:ex.intensity_type||null,intensity_value:parseFloat(ex.intensity_value)||null,notes:ex.notes||null,order_index:ei}))}))})  )};
+  const btn=document.getElementById('saveRoutineBtn');btn.disabled=true;btn.textContent='Guardando…';
+  try{
+    const url=editingRoutineId?`${API}/routines/${editingRoutineId}/update`:`${API}/routines`;const method=editingRoutineId?'PUT':'POST';
+    const r=await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(payload)});
+    let d;try{d=await r.json();}catch{d={};}
+    if(!r.ok)throw new Error(d.message||d.detail?.split('\n').slice(-2).join(' ')||`Error HTTP ${r.status}`);
+    showToast(editingRoutineId?'Rutina actualizada':'Rutina creada','success');closeForm();await loadRoutines();
+  }catch(e){showToast(e.message||'Error al guardar','error');}
+  finally{btn.disabled=false;btn.textContent='Guardar rutina';}
+}
+
+let pickerMgFilter=null;let pickerSearchTimeout=null;let allMuscleGroups=[];
+function openPicker(blockIdx){pickerTargetBlockIdx=blockIdx;document.getElementById('pickerSearch').value='';pickerMgFilter=null;document.getElementById('pickerOverlay').classList.add('open');renderPickerPills();fetchPickerResults('');}
+function closePicker(){document.getElementById('pickerOverlay').classList.remove('open');}
+function renderPickerPills(){
+  const container=document.getElementById('pickerPills');
+  container.innerHTML=`<button class="picker-pill${!pickerMgFilter?' active':''}" onclick="setPickerMg(null)">Todos</button>${allMuscleGroups.map(mg=>`<button class="picker-pill${pickerMgFilter===mg.id?' active':''}" onclick="setPickerMg(${mg.id})">${esc(mg.name)}</button>`).join('')}`;
+}
+function setPickerMg(id){pickerMgFilter=id;renderPickerPills();fetchPickerResults(document.getElementById('pickerSearch').value);}
+function searchPicker(){clearTimeout(pickerSearchTimeout);pickerSearchTimeout=setTimeout(()=>{fetchPickerResults(document.getElementById('pickerSearch').value);},300);}
+async function fetchPickerResults(search){
+  const params=new URLSearchParams({per_page:30});if(search)params.set('search',search);if(pickerMgFilter)params.set('muscle_group_id',pickerMgFilter);
+  try{const r=await fetch(`${API}/trainings/search?${params}`,{headers:authHeaders()});const d=await r.json();renderPickerResults(d.data?.data||d.data||[]);}
+  catch{document.getElementById('pickerResults').innerHTML='<div class="picker-empty">Error al buscar.</div>';}
+}
+function renderPickerResults(items){
+  const container=document.getElementById('pickerResults');
+  if(!items.length){container.innerHTML='<div class="picker-empty">No se encontraron ejercicios.</div>';return;}
+  container.innerHTML=items.map(ex=>`<div class="picker-item" onclick="selectExercise(${ex.id},'${esc(ex.name)}','${esc(ex.muscle_group_name)}')"><div class="picker-item-icon">${ex.image?`<img src="${esc(ex.image)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`:(ex.muscle_group_name?ex.muscle_group_name[0]:'?')}</div><div><div class="picker-item-name">${esc(ex.name)}</div><div class="picker-item-muscle">${esc(ex.muscle_group_name||'—')}</div></div></div>`).join('');
+}
+function selectExercise(trainingId,name,muscleName){
+  if(pickerTargetBlockIdx===null)return;
+  const day=routineData.days_list[selectedDayIdx];const blk=day.blocks[pickerTargetBlockIdx];
+  blk.exercises.push({training_id:trainingId,training_name:name,muscle_group_name:muscleName,series:null,repetitions:'',break_time:null,intensity_type:'',intensity_value:null,notes:'',order_index:blk.exercises.length});
+  closePicker();renderBlocks();
+}
+
+async function loadMuscleGroupsForFilters(){
+  if(allMuscleGroups.length){renderPickerPills();return;}
+  try{const r=await fetch(`${API}/muscle-groups/findAll`,{headers:authHeaders()});const d=await r.json();allMuscleGroups=d.data||[];renderPickerPills();}catch{}
+}
+
+initUser();loadParamSelects();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();adaptSidebar();
+</script>
+</body>
+</html>

@@ -6,30 +6,30 @@
   <title>ALZUM.io — Rutinas</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--gray-bg:#F8FAFC;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
     /* Sidebar */
-    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
-    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
-    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
-    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
-    .sidebar-nav{flex:1;padding:16px 0;}
-    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
-    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
-    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
-    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
-    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
-    .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
-    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
-    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
-    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
 
     /* Main */
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
@@ -40,12 +40,12 @@
     .tabs-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;display:flex;gap:0;flex-shrink:0;}
     .tab-btn{padding:14px 20px;font-size:14px;font-weight:600;color:#6B7280;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;transition:.15s;}
     .tab-btn:hover{color:#111;}
-    .tab-btn.active{color:var(--purple);border-bottom-color:var(--purple);}
+    .tab-btn.active{color:var(--indigo);border-bottom-color:var(--indigo);}
 
     /* Buttons */
     .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
-    .btn-primary{background:var(--purple);color:#fff;}
-    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-primary{background:var(--indigo);color:#fff;}
+    .btn-primary:hover{background:var(--indigo-dark);}
     .btn-ghost{background:#F3F4F6;color:#374151;}
     .btn-ghost:hover{background:#E5E7EB;}
     .btn-danger{background:#FEE2E2;color:#DC2626;}
@@ -54,22 +54,22 @@
     .btn-xs{padding:4px 8px;font-size:11px;border-radius:6px;}
     .btn-icon{padding:7px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:inline-flex;color:#6B7280;transition:.15s;}
     .btn-icon:hover{background:#E5E7EB;color:#111;}
-    .btn-purple{background:var(--purple);color:#fff;}
-    .btn-purple:hover{background:var(--purple-dark);}
+    .btn-purple{background:var(--indigo);color:#fff;}
+    .btn-purple:hover{background:var(--indigo-dark);}
 
     /* Toolbar */
     .toolbar{padding:14px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
     .search-wrap{position:relative;flex:1;min-width:200px;max-width:320px;}
     .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;}
-    .search-wrap input:focus{border-color:var(--purple);}
+    .search-wrap input:focus{border-color:var(--indigo);}
     .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
     .total-label{font-size:13px;color:#6B7280;margin-left:auto;}
 
     /* Filter pills */
     .filter-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
     .pill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
-    .pill:hover{border-color:var(--purple);color:var(--purple);}
-    .pill.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+    .pill:hover{border-color:var(--indigo);color:var(--indigo);}
+    .pill.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
 
     /* Content */
     .content{flex:1;overflow-y:auto;padding:24px;}
@@ -101,7 +101,7 @@
     /* Muscle group cards */
     .mg-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5E7EB;transition:.15s;display:flex;align-items:center;gap:14px;cursor:pointer;}
     .mg-card:hover{border-color:#D8B4FE;}
-    .mg-icon{width:48px;height:48px;border-radius:12px;background:var(--purple-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--purple);}
+    .mg-icon{width:48px;height:48px;border-radius:12px;background:var(--indigo-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);}
     .mg-info{flex:1;min-width:0;}
     .mg-name{font-size:14px;font-weight:700;color:#111;}
     .mg-desc{font-size:12px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -123,8 +123,8 @@
     /* Pagination */
     .pagination{display:flex;align-items:center;gap:8px;padding:16px;justify-content:flex-end;}
     .page-btn{padding:6px 12px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;cursor:pointer;background:#fff;color:#374151;transition:.15s;}
-    .page-btn:hover:not(:disabled){border-color:var(--purple);color:var(--purple);}
-    .page-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+    .page-btn:hover:not(:disabled){border-color:var(--indigo);color:var(--indigo);}
+    .page-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
     .page-btn:disabled{opacity:.4;cursor:not-allowed;}
 
     /* Empty state */
@@ -146,7 +146,7 @@
     .modal-body{padding:20px 24px;}
     .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}
     .img-upload-zone{border:2px dashed #E5E7EB;border-radius:10px;padding:20px 12px;text-align:center;cursor:pointer;transition:.15s;background:#FAFAFA;color:#9CA3AF;font-size:12px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
-    .img-upload-zone:hover{border-color:var(--purple);background:#F5F3FF;color:var(--purple);}
+    .img-upload-zone:hover{border-color:var(--indigo);background:#F5F3FF;color:var(--indigo);}
     .img-upload-zone svg{opacity:.4;}
     .img-preview-wrap{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1/1;}
     .img-preview-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -155,7 +155,7 @@
     .form-group{margin-bottom:16px;}
     .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
     .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
-    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--indigo);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px;}
     .section-title{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
@@ -163,7 +163,7 @@
     /* Wizard */
     .wizard-steps{display:flex;gap:0;margin-bottom:24px;border-radius:10px;overflow:hidden;border:1px solid #E5E7EB;}
     .wizard-step{flex:1;padding:12px 16px;text-align:center;font-size:13px;font-weight:600;color:#9CA3AF;background:#F9FAFB;cursor:pointer;transition:.15s;}
-    .wizard-step.active{background:var(--purple);color:#fff;}
+    .wizard-step.active{background:var(--indigo);color:#fff;}
     .wizard-step.done{background:#D1FAE5;color:#059669;}
     .wizard-panel{display:none;}
     .wizard-panel.active{display:block;}
@@ -175,7 +175,7 @@
     .days-list{flex:1;overflow-y:auto;padding:8px;}
     .day-chip{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#374151;cursor:pointer;transition:.15s;margin-bottom:4px;}
     .day-chip:hover{background:#EDE9FE;}
-    .day-chip.active{background:var(--purple);color:#fff;}
+    .day-chip.active{background:var(--indigo);color:#fff;}
     .day-chip .day-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .day-chip .day-chip-input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13px;font-weight:600;color:inherit;font-family:inherit;}
     .day-chip .day-edit-btn{background:none;border:none;cursor:pointer;padding:2px 3px;border-radius:4px;display:flex;color:inherit;opacity:0;transition:.15s;flex-shrink:0;}
@@ -184,7 +184,7 @@
     .day-chip .day-rm{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;display:flex;color:inherit;opacity:.6;flex-shrink:0;}
     .day-chip .day-rm:hover{opacity:1;}
     .days-panel-footer{padding:10px 8px;border-top:1px solid #E5E7EB;}
-    .add-day-chip-btn{width:100%;padding:8px;border-radius:8px;border:1.5px dashed #818CF8;background:#EEF2FF;color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
+    .add-day-chip-btn{width:100%;padding:8px;border-radius:8px;border:1.5px dashed #818CF8;background:#EEF2FF;color:var(--indigo);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
     .add-day-chip-btn:hover{background:#EDE9FE;}
 
     .blocks-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -194,7 +194,7 @@
     .block-type-menu{position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:10;min-width:160px;display:none;overflow:hidden;}
     .block-type-menu.open{display:block;}
     .block-type-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;font-weight:500;color:#374151;background:none;border:none;cursor:pointer;text-align:left;transition:.15s;}
-    .block-type-menu button:hover{background:#EEF2FF;color:var(--purple);}
+    .block-type-menu button:hover{background:#EEF2FF;color:var(--indigo);}
     .blocks-list{flex:1;overflow-y:auto;padding:12px 16px;}
 
     /* Blocks */
@@ -212,10 +212,10 @@
     .exercise-table td{padding:6px 8px;border-bottom:1px solid #EBEBEB;vertical-align:middle;}
     .exercise-table tr:last-child td{border-bottom:none;}
     .exercise-table input,.exercise-table select{border:1px solid #E5E7EB;border-radius:6px;padding:5px 7px;font-size:12px;outline:none;font-family:inherit;background:#fff;color:#111;transition:.15s;}
-    .exercise-table input:focus,.exercise-table select:focus{border-color:var(--purple);}
+    .exercise-table input:focus,.exercise-table select:focus{border-color:var(--indigo);}
     .ex-name{font-size:13px;font-weight:600;color:#111;display:block;}
     .ex-muscle{font-size:11px;color:#9CA3AF;display:block;}
-    .add-exercise-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;border-top:1px solid #F3F4F6;width:100%;transition:.15s;}
+    .add-exercise-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;color:var(--indigo);font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;border-top:1px solid #F3F4F6;width:100%;transition:.15s;}
     .add-exercise-btn:hover{background:#EEF2FF;}
     .empty-day{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 16px;color:#9CA3AF;text-align:center;gap:10px;}
     .empty-day svg{opacity:.3;}
@@ -230,15 +230,15 @@
     .picker-head h3{font-size:15px;font-weight:700;color:#111;}
     .picker-filters{padding:12px 16px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
     .picker-search{width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;margin-bottom:10px;font-family:inherit;}
-    .picker-search:focus{border-color:var(--purple);}
+    .picker-search:focus{border-color:var(--indigo);}
     .picker-pills{display:flex;gap:6px;flex-wrap:wrap;}
     .picker-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
-    .picker-pill:hover{border-color:var(--purple);color:var(--purple);}
-    .picker-pill.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+    .picker-pill:hover{border-color:var(--indigo);color:var(--indigo);}
+    .picker-pill.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
     .picker-results{flex:1;overflow-y:auto;padding:8px 0;}
     .picker-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid #EBEBEB;}
     .picker-item:hover{background:#EEF2FF;}
-    .picker-item-icon{width:36px;height:36px;border-radius:8px;background:var(--purple-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .picker-item-icon{width:36px;height:36px;border-radius:8px;background:var(--indigo-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
     .picker-item-name{font-size:13px;font-weight:600;color:#111;}
     .picker-item-muscle{font-size:11px;color:#9CA3AF;}
     .picker-empty{padding:32px;text-align:center;color:#9CA3AF;font-size:13px;}
@@ -255,15 +255,15 @@
     /* Multi-select (grupos musculares secundarios) */
     .ms-wrap{position:relative;}
     .ms-btn{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;text-align:left;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:#6B7280;transition:.15s;font-family:inherit;}
-    .ms-btn:hover,.ms-btn.open{border-color:var(--purple);}
+    .ms-btn:hover,.ms-btn.open{border-color:var(--indigo);}
     .ms-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.1);z-index:150;max-height:200px;overflow-y:auto;display:none;}
     .ms-dropdown.open{display:block;}
     .ms-option{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;font-size:13px;color:#374151;transition:.1s;}
-    .ms-option:hover{background:var(--purple-pale);}
-    .ms-option input[type=checkbox]{accent-color:var(--purple);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+    .ms-option:hover{background:var(--indigo-pale);}
+    .ms-option input[type=checkbox]{accent-color:var(--indigo);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
     .ms-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
-    .ms-chip{display:inline-flex;align-items:center;gap:3px;background:var(--purple-pale);color:var(--purple);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;}
-    .ms-chip-x{background:none;border:none;cursor:pointer;color:var(--purple);font-size:14px;line-height:1;padding:0 1px;opacity:.7;}
+    .ms-chip{display:inline-flex;align-items:center;gap:3px;background:var(--indigo-pale);color:var(--indigo);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;}
+    .ms-chip-x{background:none;border:none;cursor:pointer;color:var(--indigo);font-size:14px;line-height:1;padding:0 1px;opacity:.7;}
     .ms-chip-x:hover{opacity:1;}
 
     /* Toast */
@@ -282,7 +282,7 @@
     .fv-title{font-size:18px;font-weight:700;color:#111;}
     .fv-wizard-steps{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid #E5E7EB;margin-left:auto;}
     .fv-wstep{padding:8px 20px;font-size:13px;font-weight:600;color:#9CA3AF;background:#F9FAFB;transition:.15s;user-select:none;}
-    .fv-wstep.active{background:var(--purple);color:#fff;}
+    .fv-wstep.active{background:var(--indigo);color:#fff;}
     .fv-wstep.done{background:#D1FAE5;color:#059669;}
     .fv-body{display:flex;flex:1;overflow:hidden;}
     .fv-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;}
@@ -297,8 +297,8 @@
     .sb-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#374151;padding:4px 0;border-bottom:1px solid #EBEBEB;}
     .sb-row:last-child{border-bottom:none;}
     .sb-row span:first-child{color:#9CA3AF;font-size:12px;}
-    .save-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--purple);color:#fff;transition:.15s;}
-    .save-btn:hover{background:var(--purple-dark);}
+    .save-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--indigo);color:#fff;transition:.15s;}
+    .save-btn:hover{background:var(--indigo-dark);}
     .save-btn:disabled{opacity:.6;cursor:not-allowed;}
     /* Builder body (step 2) */
     #fvBuilderBody{display:none;flex:1;flex-direction:column;overflow:hidden;}
@@ -328,7 +328,7 @@
     .main-tabs-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;display:flex;gap:4px;flex-shrink:0;}
     .main-tab{display:flex;align-items:center;gap:7px;padding:14px 16px;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;transition:.15s;}
     .main-tab:hover{color:#374151;}
-    .main-tab.active{color:var(--purple);border-bottom-color:var(--purple);}
+    .main-tab.active{color:var(--indigo);border-bottom-color:var(--indigo);}
     .main-tab svg{opacity:.7;}
     .main-tab.active svg{opacity:1;}
     .main-tab-content{display:none;flex:1;flex-direction:column;overflow:hidden;}
@@ -337,7 +337,7 @@
     /* Sub-tabs (Rutinas / Ejercicios / Grupos musculares) */
     .sub-tabs-bar{padding:0 28px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;gap:0;flex-shrink:0;}
     .stab-count{display:inline-block;background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:5px;}
-    .tab-btn.active .stab-count{background:#EEF2FF;color:var(--purple);}
+    .tab-btn.active .stab-count{background:#EEF2FF;color:var(--indigo);}
 
     /* Info banner */
     .info-banner{display:flex;align-items:flex-start;gap:12px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 16px;margin:16px 28px 0;font-size:13px;color:#0369A1;line-height:1.5;flex-shrink:0;}
@@ -351,7 +351,7 @@
     .lib-toolbar-left{display:flex;align-items:center;gap:10px;}
     .lib-toolbar-right{display:flex;align-items:center;gap:10px;}
     .filter-select{padding:8px 32px 8px 12px;border:1.5px solid #E5E7EB;border-radius:9px;font-size:13px;font-weight:600;color:#374151;background:#fff;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
-    .filter-select:focus{border-color:var(--purple);}
+    .filter-select:focus{border-color:var(--indigo);}
 
     /* Routines table */
     #routinesContent table{width:100%;border-collapse:collapse;background:#fff;}
@@ -370,33 +370,11 @@
     .lvl-3{background:#FEE2E2;color:#991B1B;}
 
     /* Row action buttons */
-    .btn-assign{padding:6px 14px;background:var(--purple);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;}
-    .btn-assign:hover{background:var(--purple-dark);}
+    .btn-assign{padding:6px 14px;background:var(--indigo);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;}
+    .btn-assign:hover{background:var(--indigo-dark);}
     .btn-row-icon{width:30px;height:30px;border:1px solid #E5E7EB;background:#fff;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
-    .btn-row-icon:hover{background:#EEF2FF;color:var(--purple);border-color:var(--purple);}
+    .btn-row-icon:hover{background:#EEF2FF;color:var(--indigo);border-color:var(--indigo);}
     .row-actions{display:flex;align-items:center;gap:5px;}
-  </style>
-  <style>
-    /* ALZUM.io — theme overrides */
-    body { background: #F8FAFC !important; }
-    .sidebar {
-      background: #fff !important;
-      border-right: 1px solid #E5E7EB !important;
-    }
-    .sidebar-logo span { color: #111827 !important; }
-    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
-    .sidebar-logo small { color: #6B7280 !important; }
-    .nav-section { color: #9CA3AF !important; }
-    .nav-item { color: #374151 !important; }
-    .nav-item svg { color: inherit !important; opacity: 1 !important; }
-    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
-    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
-    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
-    .avatar, .user-avatar { background: #4F46E5 !important; }
-    .user-name { color: #111827 !important; }
-    .user-role { color: #6B7280 !important; }
-    .btn-logout { color: #6B7280 !important; }
-    .btn-logout:hover { color: #4F46E5 !important; }
   </style>
 </head>
 <body>
@@ -460,16 +438,14 @@
     </a>
   </nav>
   <div class="sidebar-user">
-    <div class="user-row">
-      <div class="user-avatar" id="sidebarAvatar">U</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebarName">Cargando…</div>
-        <div class="user-role" id="sidebarRole"></div>
-      </div>
-      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
+    <div class="s-avatar" id="sidebarAvatar">U</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Cargando…</div>
+      <div class="user-role" id="sidebarRole"></div>
     </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
   </div>
 </aside>
 
@@ -477,93 +453,95 @@
 <div class="main">
 <div id="listView">
 
-  <!-- ── Page topbar ── -->
-  <div class="lib-topbar">
-    <div>
-      <h1 class="lib-title">Librería</h1>
-      <p class="lib-sub">Contenido reutilizable para asignar a tus clientes.</p>
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1>Librería</h1>
+      <p>Contenido reutilizable para asignar a tus clientes.</p>
     </div>
-    <button class="btn btn-primary" onclick="openForm()" id="btnNuevaRutina">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nueva rutina
-    </button>
+    <div class="page-header-right">
+      <button class="btn btn-primary" onclick="openForm()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nueva rutina
+      </button>
+    </div>
   </div>
 
-  <!-- ── Main tabs (Entrenamiento / Nutrición / Formularios / Documentos) ── -->
+  <!-- Main 4 tabs -->
   <div class="main-tabs-bar">
-    <button class="main-tab active" onclick="switchMainTab('entrenamiento')">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 2h18v4H3zM3 18h18v4H3z"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
-      Entrenamiento
+    <button class="main-tab-btn active" id="mainTab-entrenamiento" onclick="switchMainTab('entrenamiento')">
+      🏋️ Entrenamiento
     </button>
-    <button class="main-tab" onclick="switchMainTab('nutricion')">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-      Nutrición
+    <button class="main-tab-btn" id="mainTab-nutricion" onclick="switchMainTab('nutricion')">
+      🍃 Nutrición
     </button>
-    <button class="main-tab" onclick="switchMainTab('formularios')">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Formularios
+    <button class="main-tab-btn" id="mainTab-formularios" onclick="switchMainTab('formularios')">
+      📋 Formularios
     </button>
-    <button class="main-tab" onclick="switchMainTab('documentos')">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-      Documentos
+    <button class="main-tab-btn" id="mainTab-documentos" onclick="switchMainTab('documentos')">
+      📄 Documentos
     </button>
   </div>
 
-  <!-- ── ENTRENAMIENTO panel ── -->
-  <div class="main-tab-content active" id="mtab-entrenamiento">
+  <!-- Main tab: Entrenamiento -->
+  <div class="main-tab-content active" id="mtab-entrenamiento" style="overflow:hidden;display:flex;flex-direction:column;flex:1;">
 
     <!-- Sub-tabs -->
-    <div class="sub-tabs-bar">
-      <button class="tab-btn active" id="stab-routines" onclick="switchTab('routines')">
-        Rutinas <span class="stab-count" id="cnt-rutinas">—</span>
+    <div class="sub-tabs-bar" style="padding-bottom:12px;">
+      <button class="sub-tab-btn active" id="subTab-rutinas" onclick="switchSubTab('rutinas')">
+        Rutinas <span class="sub-tab-count" id="cnt-rutinas">0</span>
       </button>
-      <button class="tab-btn" id="stab-exercises" onclick="switchTab('exercises')">
-        Ejercicios <span class="stab-count" id="cnt-ejercicios">—</span>
+      <button class="sub-tab-btn" id="subTab-ejercicios" onclick="switchSubTab('ejercicios')">
+        Ejercicios <span class="sub-tab-count" id="cnt-ejercicios">—</span>
       </button>
-      <button class="tab-btn" id="stab-mg" onclick="switchTab('muscle-groups')">
-        Grupos musculares <span class="stab-count" id="cnt-mg">—</span>
+      <button class="sub-tab-btn" id="subTab-muscle-groups" onclick="switchSubTab('muscle-groups')">
+        Grupos musculares <span class="sub-tab-count" id="cnt-mg">—</span>
       </button>
     </div>
 
-    <!-- ── Sub-tab: Rutinas ── -->
-    <div class="tab-content active" id="tab-routines">
+    <!-- Sub-tab: Rutinas -->
+    <div class="sub-tab-content active" id="stab-rutinas" style="overflow:hidden;display:flex;flex-direction:column;flex:1;">
       <!-- Info banner -->
-      <div class="info-banner" id="routineInfoBanner">
-        <div class="info-banner-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div>
+      <div class="info-banner">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="info-banner-body">
           <strong>¿Qué es una rutina?</strong>
-          Un programa de entrenamiento completo (varios días/semanas) que se asigna entero al cliente. Se compone de sesiones con ejercicios, series y repeticiones.
+          <span>Una rutina es un programa de entrenamiento estructurado por días y bloques de ejercicios. Puedes crearla una vez y asignarla a múltiples clientes.</span>
         </div>
-        <button class="info-banner-close" onclick="document.getElementById('routineInfoBanner').style.display='none'">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
       </div>
 
-      <!-- Filter + search -->
-      <div class="lib-toolbar">
-        <div class="lib-toolbar-left">
-          <select class="filter-select" id="routineLevelFilter" onchange="applyRoutineFilter()">
-            <option value="">Mostrando: Todas</option>
-            <option value="1">Principiante</option>
-            <option value="2">Intermedio</option>
-            <option value="3">Avanzado</option>
-          </select>
+      <!-- Filter row -->
+      <div class="filter-row">
+        <select id="routineFilterShow" onchange="applyRoutineFilter()">
+          <option value="">Mostrando: Todas</option>
+          <option value="mias">Mis rutinas</option>
+          <option value="plantillas">Plantillas</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" title="Vista lista">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+          <button class="view-btn" title="Vista cuadrícula">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </button>
         </div>
-        <div class="lib-toolbar-right">
-          <div class="search-wrap">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="searchRoutines" placeholder="Buscar en rutinas…" oninput="applyRoutineFilter()"/>
-          </div>
-          <span class="total-label" id="routineTotalLabel"></span>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchRoutines" placeholder="Buscar en rutinas…" oninput="applyRoutineFilter()"/>
         </div>
+        <button class="pill" id="filterNivel" onclick="toggleFilterPill(this,'nivel')">Nivel</button>
+        <button class="pill" id="filterMaterial" onclick="toggleFilterPill(this,'material')">Material</button>
+        <span class="total-label" id="routineTotalLabel"></span>
       </div>
 
       <!-- Table -->
-      <div class="content">
-        <div class="table-wrap" id="routinesContent">
-          <table id="routinesTable" style="display:none">
+      <div style="flex:1;overflow-y:auto;padding:16px 28px 28px;">
+        <div class="table-wrap">
+          <table>
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -572,125 +550,81 @@
                 <th>Duración</th>
                 <th>Asignados</th>
                 <th>Actualizado</th>
-                <th></th>
+                <th>Acciones</th>
               </tr>
             </thead>
-            <tbody id="routinesTbody"></tbody>
+            <tbody id="routinesTbody">
+              <tr><td colspan="7" style="text-align:center;padding:48px;color:#9CA3AF;">Cargando rutinas…</td></tr>
+            </tbody>
           </table>
-          <div class="empty" id="routinesEmpty" style="display:none">
-            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <h3>Sin rutinas</h3><p>Crea tu primera rutina con el botón "+ Nueva rutina".</p>
-          </div>
-          <div class="empty" id="routinesLoading">
-            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <h3>Cargando rutinas…</h3>
-          </div>
         </div>
       </div>
-    </div>
+    </div><!-- #stab-rutinas -->
 
-    <!-- ── Sub-tab: Ejercicios ── -->
-    <div class="tab-content" id="tab-exercises">
-      <!-- Info banner -->
-      <div class="info-banner">
-        <div class="info-banner-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <!-- Sub-tab: Ejercicios -->
+    <div class="sub-tab-content" id="stab-ejercicios" style="overflow:hidden;display:flex;flex-direction:column;flex:1;">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchExercises" placeholder="Buscar ejercicio…" oninput="loadExercises(1)"/>
         </div>
-        <div>
-          <strong>¿Qué es un ejercicio?</strong>
-          Un movimiento individual (sentadilla, press banca…) que se agrega a los bloques de una rutina. Puedes filtrarlos por grupo muscular.
-        </div>
+        <div class="filter-pills" id="exMgPills"></div>
+        <span class="total-label" id="exTotalLabel"></span>
+        <button class="btn btn-primary" onclick="openExerciseModal()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo ejercicio
+        </button>
       </div>
-
-      <div class="lib-toolbar">
-        <div class="lib-toolbar-left">
-          <div class="filter-pills" id="exMgPills"></div>
-        </div>
-        <div class="lib-toolbar-right">
-          <div class="search-wrap">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="searchExercises" placeholder="Buscar ejercicio…" oninput="loadExercises(1)"/>
-          </div>
-          <span class="total-label" id="exTotalLabel"></span>
-          <button class="btn btn-primary btn-sm" onclick="openExerciseModal()">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuevo
-          </button>
-        </div>
-      </div>
-      <div class="content">
+      <div style="flex:1;overflow-y:auto;padding:16px 28px 28px;">
         <div class="table-wrap" id="exercisesTable">
-          <div class="empty"><h3>Cargando…</h3></div>
+          <div style="text-align:center;padding:48px;color:#9CA3AF;">Cargando…</div>
         </div>
         <div class="pagination" id="exPagination"></div>
       </div>
-    </div>
+    </div><!-- #stab-ejercicios -->
 
-    <!-- ── Sub-tab: Grupos musculares ── -->
-    <div class="tab-content" id="tab-muscle-groups">
-      <!-- Info banner -->
-      <div class="info-banner">
-        <div class="info-banner-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div>
-          <strong>Grupos musculares</strong>
-          Categorías usadas para clasificar ejercicios (pecho, espalda, piernas…). Se usan como filtros en el catálogo de ejercicios.
-        </div>
+    <!-- Sub-tab: Grupos musculares -->
+    <div class="sub-tab-content" id="stab-muscle-groups" style="overflow:hidden;display:flex;flex-direction:column;flex:1;">
+      <div class="toolbar">
+        <span class="total-label" id="mgTotalLabel"></span>
+        <button class="btn btn-primary" onclick="openMgModal()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo grupo
+        </button>
       </div>
-
-      <div class="lib-toolbar">
-        <div class="lib-toolbar-left">
-          <span class="total-label" id="mgTotalLabel"></span>
-        </div>
-        <div class="lib-toolbar-right">
-          <button class="btn btn-primary btn-sm" onclick="openMgModal()">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuevo grupo
-          </button>
-        </div>
-      </div>
-      <div class="content">
+      <div style="flex:1;overflow-y:auto;padding:16px 28px 28px;">
         <div class="cards-grid" id="mgContent">
-          <div class="empty"><h3>Cargando…</h3></div>
+          <div style="text-align:center;padding:48px;color:#9CA3AF;">Cargando…</div>
         </div>
       </div>
-    </div>
+    </div><!-- #stab-muscle-groups -->
 
   </div><!-- #mtab-entrenamiento -->
 
-  <!-- ── NUTRICIÓN placeholder ── -->
+  <!-- Main tab: Nutrición -->
   <div class="main-tab-content" id="mtab-nutricion">
-    <div class="content" style="display:flex;align-items:center;justify-content:center;flex:1;">
-      <div class="empty">
-        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-        <h3>Módulo de Nutrición</h3>
-        <p>Próximamente — gestión de dietas y planes alimenticios.</p>
-        <a href="diets.html" class="btn btn-primary btn-sm" style="margin-top:16px;text-decoration:none;">Ver dietas actuales →</a>
-      </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px;color:#9CA3AF;text-align:center;">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="margin-bottom:16px;opacity:.3"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+      <h3 style="font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;">Nutrición</h3>
+      <p style="font-size:13px;">Próximamente disponible.</p>
     </div>
   </div>
 
-  <!-- ── FORMULARIOS placeholder ── -->
+  <!-- Main tab: Formularios -->
   <div class="main-tab-content" id="mtab-formularios">
-    <div class="content" style="display:flex;align-items:center;justify-content:center;flex:1;">
-      <div class="empty">
-        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <h3>Formularios</h3>
-        <p>Cuestionarios reutilizables para tus clientes.</p>
-        <a href="forms.html" class="btn btn-primary btn-sm" style="margin-top:16px;text-decoration:none;">Ver formularios →</a>
-      </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px;color:#9CA3AF;text-align:center;">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="margin-bottom:16px;opacity:.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <h3 style="font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;">Formularios</h3>
+      <p style="font-size:13px;">Próximamente disponible.</p>
     </div>
   </div>
 
-  <!-- ── DOCUMENTOS placeholder ── -->
+  <!-- Main tab: Documentos -->
   <div class="main-tab-content" id="mtab-documentos">
-    <div class="content" style="display:flex;align-items:center;justify-content:center;flex:1;">
-      <div class="empty">
-        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-        <h3>Documentos</h3>
-        <p>Próximamente — adjuntos y archivos para tus clientes.</p>
-      </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:60px;color:#9CA3AF;text-align:center;">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="margin-bottom:16px;opacity:.3"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+      <h3 style="font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;">Documentos</h3>
+      <p style="font-size:13px;">Próximamente disponible.</p>
     </div>
   </div>
 
@@ -1068,26 +1002,33 @@ async function loadParamSelects() {
 /* ══════════════════════════════════════════════
    Tabs
 ════════════════════════════════════════════════ */
-let activeTab = 'routines';
+
+// ── Main tabs (4 top-level) ──
+let activeMainTab = 'entrenamiento';
 function switchMainTab(tab) {
-  document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
+  activeMainTab = tab;
+  document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mainTab-' + tab)?.classList.add('active');
   document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  document.getElementById('mtab-' + tab).classList.add('active');
-  // Show/hide "Nueva rutina" button
-  document.getElementById('btnNuevaRutina').style.display = tab === 'entrenamiento' ? '' : 'none';
+  document.getElementById('mtab-' + tab)?.classList.add('active');
 }
 
-function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('stab-' + (tab === 'routines' ? 'routines' : tab === 'exercises' ? 'exercises' : 'mg')).classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
+// ── Sub-tabs (under Entrenamiento) ──
+let activeSubTab = 'rutinas';
+function switchSubTab(tab) {
+  activeSubTab = tab;
+  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('subTab-' + tab)?.classList.add('active');
+  document.querySelectorAll('.sub-tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('stab-' + tab)?.classList.add('active');
 
-  if (tab === 'routines' && allRoutines.length === 0) loadRoutines();
-  if (tab === 'exercises') { loadMuscleGroupsForFilters(); loadExercises(1); }
+  if (tab === 'rutinas' && allRoutines.length === 0) loadRoutines();
+  if (tab === 'ejercicios') { loadMuscleGroupsForFilters(); loadExercises(1); }
   if (tab === 'muscle-groups') loadMuscleGroups();
+}
+
+function toggleFilterPill(btn, type) {
+  btn.classList.toggle('active');
 }
 
 function timeAgo(dateStr) {
@@ -1143,43 +1084,33 @@ async function loadRoutines() {
     allRoutines = d.data || [];
     renderRoutines(allRoutines);
   } catch (e) {
-    document.getElementById('routinesContent').innerHTML = `
-      <div class="empty">
-        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <h3>Error al cargar</h3><p>${esc(e.message)}</p>
-      </div>`;
+    const tbody = document.getElementById('routinesTbody');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px;color:#DC2626;">Error al cargar: ${esc(e.message)}</td></tr>`;
   }
 }
 
 function applyRoutineFilter() {
-  const q = document.getElementById('searchRoutines').value.toLowerCase();
-  const lvl = document.getElementById('routineLevelFilter').value;
-  const filtered = allRoutines.filter(r => {
-    const matchQ = (r.name || '').toLowerCase().includes(q) || (r.training || '').toLowerCase().includes(q);
-    const matchLvl = !lvl || String(r.training_level_id) === lvl;
-    return matchQ && matchLvl;
-  });
+  const q = (document.getElementById('searchRoutines')?.value || '').toLowerCase();
+  const filtered = allRoutines.filter(r =>
+    (r.name || '').toLowerCase().includes(q) ||
+    (r.training || '').toLowerCase().includes(q)
+  );
   renderRoutines(filtered);
 }
 
 function renderRoutines(list) {
   const total = list.length;
   document.getElementById('routineTotalLabel').textContent = `${total} rutina${total !== 1 ? 's' : ''}`;
-  document.getElementById('cnt-rutinas').textContent = allRoutines.length || '—';
+  document.getElementById('cnt-rutinas').textContent = total;
 
-  const loading = document.getElementById('routinesLoading');
-  const empty   = document.getElementById('routinesEmpty');
-  const table   = document.getElementById('routinesTable');
-  const tbody   = document.getElementById('routinesTbody');
-
-  loading.style.display = 'none';
-  if (!total) {
-    table.style.display = 'none';
-    empty.style.display = 'block';
+  const tbody = document.getElementById('routinesTbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px;color:#9CA3AF;">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sin rutinas. Crea tu primera rutina con el botón "+ Nueva rutina".
+    </td></tr>`;
     return;
   }
-  empty.style.display = 'none';
-  table.style.display = '';
   tbody.innerHTML = list.map(routineRow).join('');
 }
 
@@ -1193,7 +1124,7 @@ function routineRow(r) {
   return `<tr onclick="openForm(${r.id})">
     <td>
       <div style="display:flex;align-items:center;gap:12px;">
-        <div style="width:38px;height:38px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--purple);">
+        <div style="width:38px;height:38px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
         <div>

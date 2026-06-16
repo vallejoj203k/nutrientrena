@@ -318,6 +318,63 @@
       .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;}
       .fv-wizard-steps{margin-left:0;}
     }
+
+    /* ══ LIBRERÍA LAYOUT ══ */
+    .lib-topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .lib-title{font-size:24px;font-weight:800;color:#111827;margin-bottom:2px;}
+    .lib-sub{font-size:13px;color:#6B7280;}
+
+    /* Main tabs (Entrenamiento / Nutrición / …) */
+    .main-tabs-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;display:flex;gap:4px;flex-shrink:0;}
+    .main-tab{display:flex;align-items:center;gap:7px;padding:14px 16px;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;transition:.15s;}
+    .main-tab:hover{color:#374151;}
+    .main-tab.active{color:var(--purple);border-bottom-color:var(--purple);}
+    .main-tab svg{opacity:.7;}
+    .main-tab.active svg{opacity:1;}
+    .main-tab-content{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    .main-tab-content.active{display:flex;}
+
+    /* Sub-tabs (Rutinas / Ejercicios / Grupos musculares) */
+    .sub-tabs-bar{padding:0 28px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;gap:0;flex-shrink:0;}
+    .stab-count{display:inline-block;background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:5px;}
+    .tab-btn.active .stab-count{background:#EEF2FF;color:var(--purple);}
+
+    /* Info banner */
+    .info-banner{display:flex;align-items:flex-start;gap:12px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 16px;margin:16px 28px 0;font-size:13px;color:#0369A1;line-height:1.5;flex-shrink:0;}
+    .info-banner strong{color:#0C4A6E;margin-right:4px;}
+    .info-banner-icon{width:20px;height:20px;flex-shrink:0;margin-top:1px;color:#0284C7;}
+    .info-banner-close{margin-left:auto;background:none;border:none;cursor:pointer;color:#0284C7;padding:2px;border-radius:4px;flex-shrink:0;display:flex;opacity:.7;}
+    .info-banner-close:hover{opacity:1;}
+
+    /* Lib toolbar (filter row above table) */
+    .lib-toolbar{padding:14px 28px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;}
+    .lib-toolbar-left{display:flex;align-items:center;gap:10px;}
+    .lib-toolbar-right{display:flex;align-items:center;gap:10px;}
+    .filter-select{padding:8px 32px 8px 12px;border:1.5px solid #E5E7EB;border-radius:9px;font-size:13px;font-weight:600;color:#374151;background:#fff;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+    .filter-select:focus{border-color:var(--purple);}
+
+    /* Routines table */
+    #routinesContent table{width:100%;border-collapse:collapse;background:#fff;}
+    #routinesContent thead th{padding:11px 16px;text-align:left;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
+    #routinesContent thead th:first-child{padding-left:20px;}
+    #routinesContent tbody tr{border-bottom:1px solid #EBEBEB;transition:background .1s;cursor:pointer;}
+    #routinesContent tbody tr:last-child{border-bottom:none;}
+    #routinesContent tbody tr:hover{background:#FAFAFA;}
+    #routinesContent tbody td{padding:14px 16px;font-size:13px;color:#374151;vertical-align:middle;}
+    #routinesContent tbody td:first-child{padding-left:20px;}
+
+    /* Level pills */
+    .lvl-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+    .lvl-1{background:#DCFCE7;color:#166534;}
+    .lvl-2{background:#FEF3C7;color:#92400E;}
+    .lvl-3{background:#FEE2E2;color:#991B1B;}
+
+    /* Row action buttons */
+    .btn-assign{padding:6px 14px;background:var(--purple);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;}
+    .btn-assign:hover{background:var(--purple-dark);}
+    .btn-row-icon{width:30px;height:30px;border:1px solid #E5E7EB;background:#fff;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
+    .btn-row-icon:hover{background:#EEF2FF;color:var(--purple);border-color:var(--purple);}
+    .row-actions{display:flex;align-items:center;gap:5px;}
   </style>
   <style>
     /* ALZUM.io — theme overrides */
@@ -345,78 +402,63 @@
 <body>
 
 <!-- Sidebar -->
-<nav class="sidebar">
+<aside class="sidebar">
   <div class="sidebar-logo">
     <span>ALZUM<em>.io</em></span>
     <small>Panel del Coach</small>
   </div>
-  <div class="sidebar-nav">
+  <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
+      Inicio
     </a>
-    <a class="nav-item" href="kanban.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
-      Kanban
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Calendario
     </a>
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
     </a>
-    <a class="nav-item" href="coaches.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Coaches
-    </a>
-    <a class="nav-item" href="events.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Eventos
-    </a>
     <a class="nav-item" href="checkins.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       Check-ins
     </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item active" href="routines.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Librería
+    </a>
+    <a class="nav-item" href="diets.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Nutrición
+    </a>
+    <div class="nav-section">Comunicación</div>
     <a class="nav-item" href="forms.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Formularios
       <span class="nav-badge" id="formsBadge" style="display:none"></span>
     </a>
     <a class="nav-item" href="notes.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Notas
     </a>
-    <a class="nav-item" href="progress.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Progreso
-    </a>
-    <div class="nav-section">Nutrición</div>
-    <a class="nav-item" href="diets.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-      Dietas
-    </a>
-    <a class="nav-item" href="aliments.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      Alimentos
-    </a>
-    <a class="nav-item" href="recipes.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
-      Recetas
-    </a>
-    <a class="nav-item" href="nutrition-catalog.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      Catálogos
-    </a>
-    <div class="nav-section">Entrenamiento</div>
-    <a class="nav-item active" href="routines.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Rutinas
-    </a>
-    <div class="nav-section">Análisis</div>
+    <div class="nav-section">Negocio</div>
     <a class="nav-item" href="analytics.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analíticas
     </a>
-  </div>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Equipo
+    </a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </nav>
   <div class="sidebar-user">
     <div class="user-row">
       <div class="user-avatar" id="sidebarAvatar">U</div>
@@ -429,82 +471,229 @@
       </button>
     </div>
   </div>
-</nav>
+</aside>
 
 <!-- Main -->
 <div class="main">
 <div id="listView">
-  <div class="topbar">
-    <h1>Entrenamiento</h1>
+
+  <!-- ── Page topbar ── -->
+  <div class="lib-topbar">
+    <div>
+      <h1 class="lib-title">Librería</h1>
+      <p class="lib-sub">Contenido reutilizable para asignar a tus clientes.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openForm()" id="btnNuevaRutina">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nueva rutina
+    </button>
   </div>
 
-  <!-- Tab bar -->
-  <div class="tabs-bar">
-    <button class="tab-btn active" onclick="switchTab('routines')">Rutinas</button>
-    <button class="tab-btn" onclick="switchTab('exercises')">Ejercicios</button>
-    <button class="tab-btn" onclick="switchTab('muscle-groups')">Grupos musculares</button>
+  <!-- ── Main tabs (Entrenamiento / Nutrición / Formularios / Documentos) ── -->
+  <div class="main-tabs-bar">
+    <button class="main-tab active" onclick="switchMainTab('entrenamiento')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 2h18v4H3zM3 18h18v4H3z"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+      Entrenamiento
+    </button>
+    <button class="main-tab" onclick="switchMainTab('nutricion')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Nutrición
+    </button>
+    <button class="main-tab" onclick="switchMainTab('formularios')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Formularios
+    </button>
+    <button class="main-tab" onclick="switchMainTab('documentos')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+      Documentos
+    </button>
   </div>
 
-  <!-- Tab: Rutinas -->
-  <div class="tab-content active" id="tab-routines">
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchRoutines" placeholder="Buscar rutina…" oninput="applyRoutineFilter()"/>
-      </div>
-      <span class="total-label" id="routineTotalLabel"></span>
-      <button class="btn btn-primary" onclick="openForm()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nueva rutina
+  <!-- ── ENTRENAMIENTO panel ── -->
+  <div class="main-tab-content active" id="mtab-entrenamiento">
+
+    <!-- Sub-tabs -->
+    <div class="sub-tabs-bar">
+      <button class="tab-btn active" id="stab-routines" onclick="switchTab('routines')">
+        Rutinas <span class="stab-count" id="cnt-rutinas">—</span>
+      </button>
+      <button class="tab-btn" id="stab-exercises" onclick="switchTab('exercises')">
+        Ejercicios <span class="stab-count" id="cnt-ejercicios">—</span>
+      </button>
+      <button class="tab-btn" id="stab-mg" onclick="switchTab('muscle-groups')">
+        Grupos musculares <span class="stab-count" id="cnt-mg">—</span>
       </button>
     </div>
-    <div class="content">
-      <div id="routinesContent">
-        <div class="empty">
-          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <h3>Cargando rutinas…</h3>
+
+    <!-- ── Sub-tab: Rutinas ── -->
+    <div class="tab-content active" id="tab-routines">
+      <!-- Info banner -->
+      <div class="info-banner" id="routineInfoBanner">
+        <div class="info-banner-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <strong>¿Qué es una rutina?</strong>
+          Un programa de entrenamiento completo (varios días/semanas) que se asigna entero al cliente. Se compone de sesiones con ejercicios, series y repeticiones.
+        </div>
+        <button class="info-banner-close" onclick="document.getElementById('routineInfoBanner').style.display='none'">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Filter + search -->
+      <div class="lib-toolbar">
+        <div class="lib-toolbar-left">
+          <select class="filter-select" id="routineLevelFilter" onchange="applyRoutineFilter()">
+            <option value="">Mostrando: Todas</option>
+            <option value="1">Principiante</option>
+            <option value="2">Intermedio</option>
+            <option value="3">Avanzado</option>
+          </select>
+        </div>
+        <div class="lib-toolbar-right">
+          <div class="search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchRoutines" placeholder="Buscar en rutinas…" oninput="applyRoutineFilter()"/>
+          </div>
+          <span class="total-label" id="routineTotalLabel"></span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="content">
+        <div class="table-wrap" id="routinesContent">
+          <table id="routinesTable" style="display:none">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Objetivo</th>
+                <th>Nivel</th>
+                <th>Duración</th>
+                <th>Asignados</th>
+                <th>Actualizado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="routinesTbody"></tbody>
+          </table>
+          <div class="empty" id="routinesEmpty" style="display:none">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <h3>Sin rutinas</h3><p>Crea tu primera rutina con el botón "+ Nueva rutina".</p>
+          </div>
+          <div class="empty" id="routinesLoading">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <h3>Cargando rutinas…</h3>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- ── Sub-tab: Ejercicios ── -->
+    <div class="tab-content" id="tab-exercises">
+      <!-- Info banner -->
+      <div class="info-banner">
+        <div class="info-banner-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <strong>¿Qué es un ejercicio?</strong>
+          Un movimiento individual (sentadilla, press banca…) que se agrega a los bloques de una rutina. Puedes filtrarlos por grupo muscular.
+        </div>
+      </div>
+
+      <div class="lib-toolbar">
+        <div class="lib-toolbar-left">
+          <div class="filter-pills" id="exMgPills"></div>
+        </div>
+        <div class="lib-toolbar-right">
+          <div class="search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchExercises" placeholder="Buscar ejercicio…" oninput="loadExercises(1)"/>
+          </div>
+          <span class="total-label" id="exTotalLabel"></span>
+          <button class="btn btn-primary btn-sm" onclick="openExerciseModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo
+          </button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="table-wrap" id="exercisesTable">
+          <div class="empty"><h3>Cargando…</h3></div>
+        </div>
+        <div class="pagination" id="exPagination"></div>
+      </div>
+    </div>
+
+    <!-- ── Sub-tab: Grupos musculares ── -->
+    <div class="tab-content" id="tab-muscle-groups">
+      <!-- Info banner -->
+      <div class="info-banner">
+        <div class="info-banner-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <strong>Grupos musculares</strong>
+          Categorías usadas para clasificar ejercicios (pecho, espalda, piernas…). Se usan como filtros en el catálogo de ejercicios.
+        </div>
+      </div>
+
+      <div class="lib-toolbar">
+        <div class="lib-toolbar-left">
+          <span class="total-label" id="mgTotalLabel"></span>
+        </div>
+        <div class="lib-toolbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openMgModal()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo grupo
+          </button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="cards-grid" id="mgContent">
+          <div class="empty"><h3>Cargando…</h3></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- #mtab-entrenamiento -->
+
+  <!-- ── NUTRICIÓN placeholder ── -->
+  <div class="main-tab-content" id="mtab-nutricion">
+    <div class="content" style="display:flex;align-items:center;justify-content:center;flex:1;">
+      <div class="empty">
+        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        <h3>Módulo de Nutrición</h3>
+        <p>Próximamente — gestión de dietas y planes alimenticios.</p>
+        <a href="diets.html" class="btn btn-primary btn-sm" style="margin-top:16px;text-decoration:none;">Ver dietas actuales →</a>
+      </div>
+    </div>
   </div>
 
-  <!-- Tab: Ejercicios -->
-  <div class="tab-content" id="tab-exercises">
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchExercises" placeholder="Buscar ejercicio…" oninput="loadExercises(1)"/>
+  <!-- ── FORMULARIOS placeholder ── -->
+  <div class="main-tab-content" id="mtab-formularios">
+    <div class="content" style="display:flex;align-items:center;justify-content:center;flex:1;">
+      <div class="empty">
+        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <h3>Formularios</h3>
+        <p>Cuestionarios reutilizables para tus clientes.</p>
+        <a href="forms.html" class="btn btn-primary btn-sm" style="margin-top:16px;text-decoration:none;">Ver formularios →</a>
       </div>
-      <div class="filter-pills" id="exMgPills"></div>
-      <span class="total-label" id="exTotalLabel"></span>
-      <button class="btn btn-primary" onclick="openExerciseModal()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo ejercicio
-      </button>
-    </div>
-    <div class="content">
-      <div class="table-wrap" id="exercisesTable">
-        <div class="empty"><h3>Cargando…</h3></div>
-      </div>
-      <div class="pagination" id="exPagination"></div>
     </div>
   </div>
 
-  <!-- Tab: Grupos musculares -->
-  <div class="tab-content" id="tab-muscle-groups">
-    <div class="toolbar">
-      <span class="total-label" id="mgTotalLabel"></span>
-      <button class="btn btn-primary" onclick="openMgModal()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo grupo
-      </button>
-    </div>
-    <div class="content">
-      <div class="cards-grid" id="mgContent">
-        <div class="empty"><h3>Cargando…</h3></div>
+  <!-- ── DOCUMENTOS placeholder ── -->
+  <div class="main-tab-content" id="mtab-documentos">
+    <div class="content" style="display:flex;align-items:center;justify-content:center;flex:1;">
+      <div class="empty">
+        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        <h3>Documentos</h3>
+        <p>Próximamente — adjuntos y archivos para tus clientes.</p>
       </div>
     </div>
   </div>
+
 </div><!-- #listView -->
 
 <!-- ══════════════════════════════════════════════
@@ -880,18 +1069,63 @@ async function loadParamSelects() {
    Tabs
 ════════════════════════════════════════════════ */
 let activeTab = 'routines';
+function switchMainTab(tab) {
+  document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('mtab-' + tab).classList.add('active');
+  // Show/hide "Nueva rutina" button
+  document.getElementById('btnNuevaRutina').style.display = tab === 'entrenamiento' ? '' : 'none';
+}
+
 function switchTab(tab) {
   activeTab = tab;
-  document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    const tabs = ['routines','exercises','muscle-groups'];
-    b.classList.toggle('active', tabs[i] === tab);
-  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('stab-' + (tab === 'routines' ? 'routines' : tab === 'exercises' ? 'exercises' : 'mg')).classList.add('active');
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
 
   if (tab === 'routines' && allRoutines.length === 0) loadRoutines();
   if (tab === 'exercises') { loadMuscleGroupsForFilters(); loadExercises(1); }
   if (tab === 'muscle-groups') loadMuscleGroups();
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr); const now = new Date();
+  const diff = Math.floor((now - d) / 86400000);
+  if (diff < 0) return 'Futuro';
+  if (diff === 0) return 'Hoy';
+  if (diff === 1) return 'Ayer';
+  if (diff < 7) return `Hace ${diff} días`;
+  if (diff < 30) return `Hace ${Math.floor(diff/7)} sem`;
+  return `Hace ${Math.floor(diff/30)} mes`;
+}
+
+function showRowMenu(e, id, name) {
+  e.stopPropagation();
+  document.querySelectorAll('.row-menu').forEach(m => m.remove());
+  const btn = e.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'row-menu';
+  menu.style.cssText = `position:fixed;top:${rect.bottom+4}px;right:${window.innerWidth-rect.right}px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:300;min-width:160px;overflow:hidden;`;
+  menu.innerHTML = `
+    <button onclick="openForm(${id});this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar
+    </button>
+    <button onclick="downloadPdf(${id},'${esc(name)}');this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF
+    </button>
+    <button onclick="cloneRoutine(${id});this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Clonar
+    </button>
+    <div style="height:1px;background:#F3F4F6;margin:4px 0;"></div>
+    <button onclick="openConfirm('Eliminar rutina','¿Eliminar esta rutina? No se puede deshacer.',()=>deleteRoutine(${id}));this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#DC2626;background:none;border:none;cursor:pointer;text-align:left;">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Eliminar
+    </button>`;
+  document.body.appendChild(menu);
+  document.addEventListener('click', () => menu.remove(), {once:true});
 }
 
 /* ══════════════════════════════════════════════
@@ -919,65 +1153,82 @@ async function loadRoutines() {
 
 function applyRoutineFilter() {
   const q = document.getElementById('searchRoutines').value.toLowerCase();
-  const filtered = allRoutines.filter(r =>
-    (r.name || '').toLowerCase().includes(q) ||
-    (r.training || '').toLowerCase().includes(q)
-  );
+  const lvl = document.getElementById('routineLevelFilter').value;
+  const filtered = allRoutines.filter(r => {
+    const matchQ = (r.name || '').toLowerCase().includes(q) || (r.training || '').toLowerCase().includes(q);
+    const matchLvl = !lvl || String(r.training_level_id) === lvl;
+    return matchQ && matchLvl;
+  });
   renderRoutines(filtered);
 }
 
 function renderRoutines(list) {
-  const el = document.getElementById('routinesContent');
-  document.getElementById('routineTotalLabel').textContent = `${list.length} rutina${list.length !== 1 ? 's' : ''}`;
-  if (!list.length) {
-    el.innerHTML = `<div class="empty">
-      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <h3>Sin rutinas</h3><p>Crea tu primera rutina con el botón "Nueva rutina".</p>
-    </div>`;
+  const total = list.length;
+  document.getElementById('routineTotalLabel').textContent = `${total} rutina${total !== 1 ? 's' : ''}`;
+  document.getElementById('cnt-rutinas').textContent = allRoutines.length || '—';
+
+  const loading = document.getElementById('routinesLoading');
+  const empty   = document.getElementById('routinesEmpty');
+  const table   = document.getElementById('routinesTable');
+  const tbody   = document.getElementById('routinesTbody');
+
+  loading.style.display = 'none';
+  if (!total) {
+    table.style.display = 'none';
+    empty.style.display = 'block';
     return;
   }
-  el.innerHTML = `<div class="cards-grid">${list.map(routineCard).join('')}</div>`;
+  empty.style.display = 'none';
+  table.style.display = '';
+  tbody.innerHTML = list.map(routineRow).join('');
 }
 
-function routineCard(r) {
+function routineRow(r) {
   const levelName = r.training_level_id ? (LEVELS[r.training_level_id] || `Nivel ${r.training_level_id}`) : null;
+  const levelCls  = r.training_level_id ? `lvl-${r.training_level_id}` : '';
   const days = r.days_list || [];
-  // Count total blocks across all days
-  const totalBlocks = days.reduce((s, d) => s + (d.blocks || []).length, 0);
-  const dayTags = days.slice(0, 5).map(d =>
-    `<span class="day-tag">${esc(d.day_name || 'Día')}</span>`
-  ).join('') + (days.length > 5 ? `<span class="day-tag">+${days.length - 5}</span>` : '');
+  const sessionCount = days.length;
+  const tags = [r.training].filter(Boolean);
 
-  return `
-    <div class="routine-card">
-      <div class="routine-card-header">
+  return `<tr onclick="openForm(${r.id})">
+    <td>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:38px;height:38px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--purple);">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
         <div>
-          <div class="routine-card-title">${esc(r.name)}</div>
-          <div class="routine-card-sub">${days.length} día${days.length !== 1 ? 's' : ''}${totalBlocks ? ` · ${totalBlocks} bloques` : ''}${r.gender_id ? ' · ' + GENDERS[r.gender_id] : ''}</div>
-        </div>
-        <div class="routine-card-actions">
-          <button class="btn-icon" onclick="downloadPdf(${r.id}, '${esc(r.name)}')" title="PDF">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
-          <button class="btn-icon" onclick="cloneRoutine(${r.id})" title="Clonar">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          </button>
-          <button class="btn-icon" onclick="openForm(${r.id})" title="Editar">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn-icon" onclick="openConfirm('Eliminar rutina','¿Eliminar &quot;${esc(r.name)}&quot;? No se puede deshacer.',()=>deleteRoutine(${r.id}))" title="Eliminar" style="color:#EF4444;">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </button>
+          <div style="font-weight:700;color:#111827;font-size:13px;">${esc(r.name)}</div>
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:3px;">
+            ${sessionCount ? `<span style="font-size:11px;color:#6B7280;">${sessionCount} sesione${sessionCount!==1?'s':''}</span>` : ''}
+            ${tags.map(t=>`<span style="font-size:11px;background:#F3F4F6;color:#374151;padding:1px 8px;border-radius:20px;">${esc(t)}</span>`).join('')}
+          </div>
         </div>
       </div>
-      <div class="meta-row">
-        ${r.days ? `<span class="meta-chip meta-days">${r.days} días/sem</span>` : ''}
-        ${r.time ? `<span class="meta-chip meta-time">${r.time} min</span>` : ''}
-        ${levelName ? `<span class="meta-chip meta-level">${esc(levelName)}</span>` : ''}
-        ${r.training ? `<span class="meta-chip meta-training">${esc(r.training)}</span>` : ''}
+    </td>
+    <td style="color:#374151;font-size:13px;">${esc(r.objective || r.training || '—')}</td>
+    <td>${levelName ? `<span class="lvl-pill ${levelCls}">${esc(levelName)}</span>` : '<span style="color:#9CA3AF;font-size:12px;">—</span>'}</td>
+    <td style="font-size:13px;color:#374151;white-space:nowrap;">
+      ${r.time ? `<span style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${r.time} min</span>` : '—'}
+    </td>
+    <td style="font-size:13px;color:#374151;">
+      ${r.clients_count != null ? `<span style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${r.clients_count}</span>` : '—'}
+    </td>
+    <td style="font-size:12px;color:#9CA3AF;">${timeAgo(r.updated_at)}</td>
+    <td onclick="event.stopPropagation()">
+      <div class="row-actions">
+        <button class="btn-assign" onclick="showToast('Asignación próximamente','')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Asignar
+        </button>
+        <button class="btn-row-icon" onclick="openForm(${r.id})" title="Editar">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button class="btn-row-icon" onclick="showRowMenu(event,${r.id},'${esc(r.name)}')" title="Más opciones">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </button>
       </div>
-      ${days.length ? `<div class="days-list-preview"><strong>Días</strong>${dayTags}</div>` : ''}
-    </div>`;
+    </td>
+  </tr>`;
 }
 
 async function cloneRoutine(id) {

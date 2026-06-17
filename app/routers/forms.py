@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import datetime
+from typing import Optional
 
 from app.database import get_db
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
@@ -314,3 +315,30 @@ def get_responses(id: str, db: Session = Depends(get_db), _=Depends(require_role
     if not assignment:
         return send_error("Formulario no encontrado")
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "OK")
+
+
+@router_assignments.get("", summary="Listar todas las asignaciones", description="Retorna todas las asignaciones de formularios del coach autenticado, con nombre del cliente.")
+def list_assignments(
+    status: Optional[str] = Query(None, description="Filtrar por estado: pending | submitted"),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    q = db.query(FormAssignment).filter(FormAssignment.assigned_by == current_user.id)
+    if status:
+        q = q.filter(FormAssignment.status == status)
+    assignments = q.order_by(FormAssignment.created_at.desc()).all()
+
+    result = []
+    for a in assignments:
+        item = FormAssignmentOut.model_validate(a).model_dump()
+        client = db.query(UserDetail).filter(UserDetail.id == a.client_user_detail_id).first()
+        if client:
+            item["client_name"] = f"{client.name or ''} {client.last_name or ''}".strip() or "Sin nombre"
+            client_user = db.query(User).filter(User.id == client.user_id).first()
+            item["client_email"] = client_user.email if client_user else ""
+        else:
+            item["client_name"] = "Cliente"
+            item["client_email"] = ""
+        result.append(item)
+
+    return send_response(result, "OK")

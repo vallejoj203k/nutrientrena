@@ -13,7 +13,7 @@ from app.core.limiter import limiter
 from app.routers import (
     auth, users, roles, menus, parameters, countries,
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
-    analytics, public, session_logs, client_tasks,
+    analytics, public, session_logs, client_tasks, programs,
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
@@ -46,6 +46,7 @@ _tags_metadata = [
     {"name": "Note Users", "description": "Notas del instructor sobre sus clientes."},
     {"name": "Session Logs", "description": "Registro de sesiones de entrenamiento completadas."},
     {"name": "Client Tasks", "description": "Tareas semanales asignadas a clientes."},
+    {"name": "Programs", "description": "Programas de entrenamiento con fases y asignación de clientes."},
     {"name": "Settings", "description": "Configuración global de la aplicación."},
     {"name": "Nutrition - Aliments", "description": "Catálogo de alimentos con valores nutricionales."},
     {"name": "Nutrition - Diets", "description": "Planes de alimentación con comidas y macros."},
@@ -120,6 +121,7 @@ app.include_router(diets.router, prefix=API_PREFIX)
 app.include_router(recipes.router, prefix=API_PREFIX)
 app.include_router(session_logs.router, prefix=API_PREFIX)
 app.include_router(client_tasks.router, prefix=API_PREFIX)
+app.include_router(programs.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(settings_router.router, prefix=API_PREFIX)
 

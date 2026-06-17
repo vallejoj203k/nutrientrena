@@ -98,7 +98,7 @@
 const API='https://nutrientrena-production.up.railway.app/api';
 let token=localStorage.getItem('token')||'';
 function authHeaders(){return{'Content-Type':'application/json',Authorization:`Bearer ${token}`};}
-async function initUser(){if(!token){location.href='login.html';return;}try{const r=await fetch(`${API}/auth/me`,{headers:authHeaders()});if(!r.ok)throw new Error();const u=(await r.json()).data||{};document.getElementById('sidebarName').textContent=u.name||u.email||'—';document.getElementById('sidebarRole').textContent=u.role?.name||'';document.getElementById('sidebarAvatar').textContent=(u.name||u.email||'U')[0].toUpperCase();}catch{}}
+async function initUser(){if(!token){location.href='login.html';return;}try{const r=await fetch(`${API}/auth/me`,{headers:authHeaders()});if(!r.ok)throw new Error();const u=(await r.json()).data||{};document.getElementById('sidebarName').textContent=u.name||u.email||'—';document.getElementById('sidebarRole').textContent=u.role?.name||'';(function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name||u.email||'U')[0].toUpperCase();}})()}catch{}}
 function logout(){localStorage.removeItem('token');localStorage.removeItem('role_id');location.href='login.html';}
 initUser();
 </script>

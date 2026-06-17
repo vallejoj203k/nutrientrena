@@ -16,6 +16,11 @@ from app.schemas.user import (
     UserCreateRequest, UserUpdateRequest, UserStateRequest,
     UserAssignRequest, WeeksTrainingRequest, UserDetailOut,
 )
+from pydantic import BaseModel as _BaseModel
+
+
+class _PhotoRequest(_BaseModel):
+    photo: str
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -325,6 +330,23 @@ def updated(
     db.commit()
     db.refresh(detail)
     return send_response(_serialize(detail, db), "Usuario actualizado")
+
+
+# ── Update photo ─────────────────────────────────────────────────────────────
+@router.patch("/{id}/photo", summary="Actualizar foto de perfil", description="Actualiza la URL de la foto de perfil del usuario.")
+def update_photo(
+    id: str,
+    data: _PhotoRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    detail = _get_detail_or_404(db, id)
+    if not detail:
+        return send_error("Usuario no encontrado", code=404)
+    detail.photo = data.photo
+    db.commit()
+    db.refresh(detail)
+    return send_response(_serialize(detail, db), "Foto actualizada")
 
 
 # ── Change state: admin, setter, closer ───────────────────────────────────────

@@ -72,6 +72,7 @@ class UserDetail(Base):
     whatsapp_link = Column(String(500), nullable=True)
     consentimiento_evolucion = Column(Boolean, nullable=True, default=False)
     fecha_renovacion = Column(Date, nullable=True)
+    photo = Column(String(500), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

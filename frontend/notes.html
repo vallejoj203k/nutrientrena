@@ -23,7 +23,7 @@
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
     .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .user-role{font-size:11px;color:rgba(255,255,255,.5);}
@@ -373,7 +373,7 @@ async function boot() {
     document.getElementById('sidebarName').textContent = _me.name || _me.email || '—';
     document.getElementById('sidebarRole').textContent = _me.role?.name || '—';
     const initials = (_me.name || _me.email || '?').charAt(0).toUpperCase();
-    document.getElementById('sidebarAvatar').textContent = initials;
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials;}})()
   } catch { location.href = 'login.html'; return; }
   await Promise.all([loadClients(), loadTemplates()]);
   renderTab();

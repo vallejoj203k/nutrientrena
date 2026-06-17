@@ -70,6 +70,7 @@ class UserUpdateRequest(BaseModel):
     whatsapp_link: Optional[str] = None
     consentimiento_evolucion: Optional[bool] = None
     fecha_renovacion: Optional[date] = None
+    photo: Optional[str] = None
 
 
 class UserStateRequest(BaseModel):
@@ -139,6 +140,7 @@ class UserDetailOut(BaseModel):
     whatsapp_link: Optional[str] = None
     consentimiento_evolucion: Optional[bool] = None
     fecha_renovacion: Optional[date] = None
+    photo: Optional[str] = None
 
     status: Optional[ParameterDetailOut] = None
     gender: Optional[ParameterDetailOut] = None

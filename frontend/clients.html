@@ -490,7 +490,7 @@ async function loadUser(){
     const name=u.name||u.full_name||'Usuario';
     document.getElementById('sidebarName').textContent=name;
     document.getElementById('sidebarRole').textContent=u.role?.name||u.role||'—';
-    document.getElementById('sidebarAvatar').textContent=initials(name);
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials(name);}})()
   }catch{}
 }
 

@@ -1234,7 +1234,7 @@ async function loadSidebarUser() {
     const u = json.data || json;
     const name = u.name || u.email || '';
     const initials = makeInitials(name);
-    document.getElementById('sidebarAvatar').textContent = initials;
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials;}})()
     document.getElementById('sidebarName').textContent = name;
     document.getElementById('sidebarRole').textContent = (u.roles && u.roles[0]) ? u.roles[0].name : '';
   } catch {}

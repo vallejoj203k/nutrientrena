@@ -1,7 +1,9 @@
 import os
 import smtplib
+import base64
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 import resend
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
@@ -12,14 +14,21 @@ GMAIL_USER     = os.environ.get("GMAIL_USER", "")
 GMAIL_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 
 
-def _send_gmail(to: str, subject: str, html: str) -> tuple[bool, str]:
-    """Send via Gmail SMTP using an App Password. Returns (ok, error)."""
+def _send_gmail(
+    to: str, subject: str, html: str,
+    attachments: list[tuple[bytes, str]] | None = None,
+) -> tuple[bool, str]:
+    """Send via Gmail SMTP. attachments: list of (pdf_bytes, filename)."""
     try:
-        msg = MIMEMultipart("alternative")
+        msg = MIMEMultipart("mixed")
         msg["Subject"] = subject
         msg["From"]    = f"{APP_NAME} <{GMAIL_USER}>"
         msg["To"]      = to
         msg.attach(MIMEText(html, "html", "utf-8"))
+        for pdf_bytes, filename in (attachments or []):
+            part = MIMEApplication(pdf_bytes, _subtype="pdf")
+            part.add_header("Content-Disposition", "attachment", filename=filename)
+            msg.attach(part)
 
         with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
             smtp.ehlo()
@@ -35,20 +44,29 @@ def _send_gmail(to: str, subject: str, html: str) -> tuple[bool, str]:
         return False, msg_err
 
 
-def _send_resend(to: str, subject: str, html: str) -> tuple[bool, str]:
-    """Returns (success, error_message)."""
+def _send_resend(
+    to: str, subject: str, html: str,
+    attachments: list[tuple[bytes, str]] | None = None,
+) -> tuple[bool, str]:
+    """Returns (success, error_message). attachments: list of (pdf_bytes, filename)."""
     if not RESEND_API_KEY:
         msg = "RESEND_API_KEY no configurado"
         print(f"EMAIL ERROR: {msg}")
         return False, msg
     try:
         resend.api_key = RESEND_API_KEY
-        r = resend.Emails.send({
+        payload: dict = {
             "from": f"{APP_NAME} <{MAIL_FROM}>",
             "to": [to],
             "subject": subject,
             "html": html,
-        })
+        }
+        if attachments:
+            payload["attachments"] = [
+                {"filename": fname, "content": base64.b64encode(data).decode()}
+                for data, fname in attachments
+            ]
+        r = resend.Emails.send(payload)
         email_id = r.get("id") if isinstance(r, dict) else getattr(r, "id", str(r))
         print(f"EMAIL OK (Resend): enviado a {to} — id {email_id}")
         return True, ""
@@ -58,11 +76,14 @@ def _send_resend(to: str, subject: str, html: str) -> tuple[bool, str]:
         return False, msg
 
 
-def _send(to: str, subject: str, html: str) -> tuple[bool, str]:
+def _send(
+    to: str, subject: str, html: str,
+    attachments: list[tuple[bytes, str]] | None = None,
+) -> tuple[bool, str]:
     """Use Gmail if configured, otherwise fall back to Resend."""
     if GMAIL_USER and GMAIL_PASSWORD:
-        return _send_gmail(to, subject, html)
-    return _send_resend(to, subject, html)
+        return _send_gmail(to, subject, html, attachments)
+    return _send_resend(to, subject, html, attachments)
 
 
 def send_plan_email(
@@ -72,7 +93,8 @@ def send_plan_email(
     routine: dict | None,
     coach_message: str = "",
     loom_link: str = "",
-) -> bool:
+    attachments: list[tuple[bytes, str]] | None = None,
+) -> tuple[bool, str]:
     diet_section = ""
     if diet:
         macros = ""
@@ -263,7 +285,7 @@ def send_plan_email(
     </body>
     </html>
     """
-    return _send(to, f"Tu plan personalizado está listo — {APP_NAME}", html)
+    return _send(to, f"Tu plan personalizado está listo — {APP_NAME}", html, attachments)
 
 
 def send_recover_password_email(to: str, name: str, token: str) -> bool:

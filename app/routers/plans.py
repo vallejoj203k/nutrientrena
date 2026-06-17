@@ -14,8 +14,8 @@ from app.core.email import send_plan_email, _send, GMAIL_USER
 from app.models.plan import PlanDelivery
 from app.models.user import UserDetail, User
 from app.models.parameter import ParameterDetail
-from app.models.nutrition.diet import Diet, DietDetail, DietFood
-from app.models.routine import Routine, RoutineDay
+from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment
+from app.models.routine import Routine, RoutineDay, RoutineDayDetail
 
 router = APIRouter(prefix="/plans", tags=["Plans"])
 
@@ -43,7 +43,21 @@ def _build_diet_payload(diet_id: Optional[str], db: Session) -> dict | None:
             "carbs":    detail.carbs    if detail else None,
             "fats":     detail.fats     if detail else None,
         } if detail else None,
-        "foods": [{"name": f.name} for f in foods],
+        "foods": [
+            {
+                "name": f.name,
+                "aliments": [
+                    {
+                        "name":     fa.aliment.name     if fa.aliment else "—",
+                        "quantity": fa.quantity,
+                        "unit":     fa.aliment.unit     if fa.aliment else None,
+                        "calories": fa.aliment.calories if fa.aliment else None,
+                    }
+                    for fa in f.detail
+                ],
+            }
+            for f in foods
+        ],
     }
 
 
@@ -57,7 +71,22 @@ def _build_routine_payload(routine_id: Optional[int], db: Session) -> dict | Non
     return {
         "name":       routine.name,
         "days_count": routine.days,
-        "days": [{"day_name": d.day_name, "description": d.description} for d in days],
+        "days": [
+            {
+                "day_name":    d.day_name,
+                "description": d.description,
+                "exercises": [
+                    {
+                        "name":        det.training.name if det.training else "—",
+                        "series":      det.series,
+                        "repetitions": det.repetitions,
+                        "break_time":  det.break_time,
+                    }
+                    for det in d.details
+                ],
+            }
+            for d in days
+        ],
     }
 
 

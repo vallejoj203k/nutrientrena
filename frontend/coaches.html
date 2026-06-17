@@ -122,12 +122,15 @@
     .sb-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:16px;}
     .sb-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
 
-    .preview-avatar{width:56px;height:56px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;margin:0 auto 8px;cursor:pointer;position:relative;overflow:hidden;}
+    .preview-avatar{width:56px;height:56px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;margin:0 auto 0;cursor:pointer;position:relative;overflow:hidden;flex-shrink:0;}
     .preview-avatar:hover .av-overlay{opacity:1;}
     .av-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;border-radius:50%;}
     .av-overlay svg{color:#fff;}
-    .av-upload-hint{text-align:center;font-size:11px;color:#9CA3AF;margin-bottom:12px;cursor:pointer;}
-    .av-upload-hint:hover{color:#4F46E5;}
+    .drop-zone{border:2px dashed #D1D5DB;border-radius:12px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:.2s;margin-bottom:12px;background:#FAFAFA;}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:#4F46E5;background:#EEF2FF;}
+    .drop-zone-text{text-align:center;}
+    .drop-zone-text strong{display:block;font-size:12px;font-weight:600;color:#374151;}
+    .drop-zone-text span{font-size:11px;color:#9CA3AF;}
     .preview-name{font-size:15px;font-weight:700;color:#111;text-align:center;min-height:22px;}
     .preview-email{font-size:12px;color:#9CA3AF;text-align:center;margin-top:3px;min-height:16px;word-break:break-all;}
     .preview-rows{margin-top:14px;display:flex;flex-direction:column;gap:6px;}
@@ -361,11 +364,16 @@
         <!-- Preview -->
         <div class="sb-card">
           <div class="sb-title">Vista previa</div>
-          <div class="preview-avatar" id="previewAvatar" onclick="document.getElementById('photoInput').click()">
-            ?
-            <div class="av-overlay"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          <div class="drop-zone" id="dropZone" onclick="document.getElementById('photoInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+            <div class="preview-avatar" id="previewAvatar">
+              ?
+              <div class="av-overlay"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+            </div>
+            <div class="drop-zone-text">
+              <strong>Foto de perfil</strong>
+              <span>Haz clic o arrastra una imagen</span>
+            </div>
           </div>
-          <div class="av-upload-hint" onclick="document.getElementById('photoInput').click()">Subir foto</div>
           <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)"/>
           <div class="preview-name" id="previewName">Nombre del coach</div>
           <div class="preview-email" id="previewEmail">email@ejemplo.com</div>
@@ -650,6 +658,13 @@ function updatePreview() {
 // ── Save coach ────────────────────────────────────────────────────────────────
 // ── Photo upload ──────────────────────────────────────────────────────────────
 let _photoUrl = null;
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) handlePhotoSelect({ files: [file] });
+}
 
 async function handlePhotoSelect(input) {
   const file = input.files[0];

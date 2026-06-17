@@ -145,9 +145,12 @@ def send_plan_email(
             ex_html = ""
             for ex in exercises:
                 parts = []
-                if ex.get("series"):      parts.append(f"{ex['series']} series")
-                if ex.get("repetitions"): parts.append(f"{ex['repetitions']} reps")
-                if ex.get("break_time"):  parts.append(f"{ex['break_time']}s descanso")
+                if ex.get("series"):
+                    parts.append(f"{ex['series']} series")
+                if ex.get("repetitions"):
+                    parts.append(f"{ex['repetitions']} reps")
+                if ex.get("break_time"):
+                    parts.append(f"{ex['break_time']}s descanso")
                 detail_str = " · ".join(parts)
                 ex_html += f"""
                 <tr>

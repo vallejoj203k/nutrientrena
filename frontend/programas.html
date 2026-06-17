@@ -1193,13 +1193,13 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 /* ═══════════════════════════════════════════
    AUTH
 ═══════════════════════════════════════════ */
-const API = 'https://nutrientrena-production.up.railway.app/api';
+const API = 'https://nutrientrena-production.up.railway.app';
 
 async function loadSidebarUser() {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('token');
   if (!token) { window.location.href='login.html'; return; }
   try {
-    const res = await fetch(`${API}/users/me`, {headers:{Authorization:`Bearer ${token}`}});
+    const res = await fetch(`${API}/api/users/me`, {headers:{Authorization:`Bearer ${token}`}});
     if (res.status === 401) { window.location.href='login.html'; return; }
     const u = await res.json();
     const initials = ((u.first_name||'')[0]||(u.email||'')[0]||'U').toUpperCase();
@@ -1210,7 +1210,7 @@ async function loadSidebarUser() {
 }
 
 function logout() {
-  localStorage.removeItem('access_token');
+  localStorage.removeItem('token');
   window.location.href = 'login.html';
 }
 

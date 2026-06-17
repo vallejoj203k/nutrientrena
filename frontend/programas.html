@@ -620,7 +620,7 @@ async function loadPrograms() {
 }
 
 async function loadClients() {
-  const data = await apiFetch('/api/client/findAll');
+  const data = await apiFetch('/api/users/client/findAll');
   if (data && data.success) {
     allClients = (data.data || []).map(d => ({
       id: d.user_id,

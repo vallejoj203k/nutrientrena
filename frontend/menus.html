@@ -432,7 +432,7 @@ function logout() { localStorage.clear(); location.href = 'login.html'; }
 // ── Load data ─────────────────────────────────────────────────────────────────
 async function loadMenus() {
   try {
-    const r = await fetch(`${API}/menus`, { headers: { Authorization: `Bearer ${token}` } });
+    const r = await fetch(`${API}/weekly-menus`, { headers: { Authorization: `Bearer ${token}` } });
     const j = await r.json();
     allMenus = Array.isArray(j.data) ? j.data : (Array.isArray(j) ? j : []);
     document.getElementById('menuCount').textContent = allMenus.length;
@@ -548,7 +548,7 @@ function menuCard(m) {
 // ── Toggle favorite ───────────────────────────────────────────────────────────
 async function toggleFav(id, newVal, btn) {
   try {
-    await fetch(`${API}/menus/${id}`, {
+    await fetch(`${API}/weekly-menus/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ is_favorite: newVal }),
@@ -602,7 +602,7 @@ async function openDrawer(id = null) {
   let existingDays = [];
   if (id) {
     try {
-      const r = await fetch(`${API}/menus/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const r = await fetch(`${API}/weekly-menus/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       const j = await r.json();
       const m = j.data || j;
       document.getElementById('f_name').value = m.name || '';
@@ -638,7 +638,7 @@ async function saveMenu() {
   };
 
   try {
-    const url = editingId ? `${API}/menus/${editingId}` : `${API}/menus`;
+    const url = editingId ? `${API}/weekly-menus/${editingId}` : `${API}/weekly-menus`;
     const method = editingId ? 'PUT' : 'POST';
     const r = await fetch(url, {
       method,
@@ -673,7 +673,7 @@ async function confirmAssign() {
   const clientId = document.getElementById('assignClientSel').value;
   if (!clientId) { toast('Selecciona un cliente', 'error'); return; }
   try {
-    const r = await fetch(`${API}/menus/${assigningId}/assign`, {
+    const r = await fetch(`${API}/weekly-menus/${assigningId}/assign`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ client_id: parseInt(clientId) }),

@@ -52,7 +52,6 @@ def _build_diet_payload(diet_id: Optional[str], db: Session) -> dict | None:
                     {
                         "name":     fa.aliment.name     if fa.aliment else "—",
                         "quantity": fa.quantity,
-                        "unit":     fa.aliment.unit     if fa.aliment else None,
                         "calories": fa.aliment.calories if fa.aliment else None,
                     }
                     for fa in f.detail
@@ -70,6 +69,14 @@ def _build_routine_payload(routine_id: Optional[int], db: Session) -> dict | Non
     if not routine:
         return None
     days = db.query(RoutineDay).filter(RoutineDay.routine_id == routine.id).all()
+
+    def _all_details(day):
+        details = list(day.details or [])
+        for block in (day.blocks or []):
+            details.extend(block.exercises or [])
+        details.sort(key=lambda d: d.order_index or 0)
+        return details
+
     return {
         "name":       routine.name,
         "days_count": routine.days,
@@ -84,7 +91,7 @@ def _build_routine_payload(routine_id: Optional[int], db: Session) -> dict | Non
                         "repetitions": det.repetitions,
                         "break_time":  det.break_time,
                     }
-                    for det in d.details
+                    for det in _all_details(d)
                 ],
             }
             for d in days

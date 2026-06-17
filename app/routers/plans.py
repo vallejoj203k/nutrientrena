@@ -11,6 +11,8 @@ from app.core.dependencies import (
 )
 from app.core.responses import send_response, send_error
 from app.core.email import send_plan_email, _send, GMAIL_USER
+from app.pdf.diet_pdf import generate_diet_pdf
+from app.pdf.routine_pdf import generate_routine_pdf
 from app.models.plan import PlanDelivery
 from app.models.user import UserDetail, User
 from app.models.parameter import ParameterDetail
@@ -140,6 +142,23 @@ def deliver_plan(
     diet_payload    = _build_diet_payload(data.diet_id, db)
     routine_payload = _build_routine_payload(data.routine_id, db)
 
+    # ── Build PDF attachments ─────────────────────────────────────────────────
+    attachments: list[tuple[bytes, str]] = []
+    if data.diet_id:
+        diet_obj = db.query(Diet).filter(Diet.id == data.diet_id).first()
+        if diet_obj:
+            try:
+                attachments.append((generate_diet_pdf(diet_obj), "dieta.pdf"))
+            except Exception as e:
+                print(f"PDF diet error: {e}")
+    if data.routine_id:
+        routine_obj = db.query(Routine).filter(Routine.id == data.routine_id).first()
+        if routine_obj:
+            try:
+                attachments.append((generate_routine_pdf(routine_obj), "rutina.pdf"))
+            except Exception as e:
+                print(f"PDF routine error: {e}")
+
     # ── Send email (optional) ─────────────────────────────────────────────────
     sent = False
     email_error = ""
@@ -151,6 +170,7 @@ def deliver_plan(
             routine=routine_payload,
             coach_message=data.message or "",
             loom_link=data.loom_link or "",
+            attachments=attachments or None,
         )
 
     # ── Save delivery record ──────────────────────────────────────────────────
@@ -242,13 +262,30 @@ def resend_delivery(
     diet_payload    = _build_diet_payload(delivery.diet_id, db)
     routine_payload = _build_routine_payload(delivery.routine_id, db)
 
-    sent = send_plan_email(
+    attachments: list[tuple[bytes, str]] = []
+    if delivery.diet_id:
+        diet_obj = db.query(Diet).filter(Diet.id == delivery.diet_id).first()
+        if diet_obj:
+            try:
+                attachments.append((generate_diet_pdf(diet_obj), "dieta.pdf"))
+            except Exception as e:
+                print(f"PDF diet error: {e}")
+    if delivery.routine_id:
+        routine_obj = db.query(Routine).filter(Routine.id == delivery.routine_id).first()
+        if routine_obj:
+            try:
+                attachments.append((generate_routine_pdf(routine_obj), "rutina.pdf"))
+            except Exception as e:
+                print(f"PDF routine error: {e}")
+
+    sent, _ = send_plan_email(
         to=client_user.email,
         client_name=client_detail.name,
         diet=diet_payload,
         routine=routine_payload,
         coach_message=delivery.message or "",
         loom_link=delivery.loom_link or "",
+        attachments=attachments or None,
     )
 
     return send_response(

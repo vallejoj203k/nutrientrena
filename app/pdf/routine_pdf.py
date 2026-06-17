@@ -3,6 +3,7 @@ Generador de PDF para rutinas usando ReportLab.
 """
 import io
 import urllib.request
+import ssl
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib.colors import HexColor, white
@@ -82,16 +83,43 @@ IMG_SIZE = 1.8 * cm  # thumbnail size in the PDF
 
 
 def _fetch_image(url: str):
-    """Download image from URL and return a ReportLab Image flowable, or None."""
+    """Download image and return a ReportLab Image flowable, or None."""
     if not url:
         return None
+
+    # Try boto3 directly from R2 (no public URL dependency)
     try:
-        with urllib.request.urlopen(url, timeout=5) as resp:
+        from app.config import settings
+        import boto3
+        base = (settings.R2_PUBLIC_URL or "").rstrip("/")
+        if settings.AWS_ACCESS_KEY_ID and settings.AWS_BUCKET and base and url.startswith(base):
+            key = url[len(base):].lstrip("/")
+            r2 = boto3.client(
+                "s3",
+                endpoint_url="https://77925e3b1a6f6513bce155f71f6aa790.r2.cloudflarestorage.com",
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name="auto",
+            )
+            obj = r2.get_object(Bucket=settings.AWS_BUCKET, Key=key)
+            data = obj["Body"].read()
+            img = Image(io.BytesIO(data), width=IMG_SIZE, height=IMG_SIZE)
+            img.hAlign = "CENTER"
+            return img
+    except Exception as e:
+        print(f"PDF image R2 error ({url}): {e}")
+
+    # Fallback: HTTP with SSL context
+    try:
+        ctx = ssl.create_default_context()
+        req = urllib.request.Request(url, headers={"User-Agent": "Nutrientrena/1.0"})
+        with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
             data = resp.read()
         img = Image(io.BytesIO(data), width=IMG_SIZE, height=IMG_SIZE)
         img.hAlign = "CENTER"
         return img
-    except Exception:
+    except Exception as e:
+        print(f"PDF image HTTP error ({url}): {e}")
         return None
 
 

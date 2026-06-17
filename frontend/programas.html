@@ -626,6 +626,7 @@ async function loadClients() {
       id: d.user_id,
       name: [d.name, d.last_name].filter(Boolean).join(' ') || d.email || '?',
       email: d.email || '',
+      photo: d.photo || null,
       initials: makeInitials([d.name, d.last_name].filter(Boolean).join(' ') || d.email || '?'),
     }));
   }
@@ -754,7 +755,9 @@ function renderCardAvatars(clients) {
   let html = '<div class="avatars">';
   show.forEach(c => {
     const color = clientColor(c.id);
-    html += `<div class="avatar" style="background:${color}" title="${esc(c.name)}">${esc(c.initials)}</div>`;
+    html += c.photo
+      ? `<div class="avatar" style="background:${color};overflow:hidden;" title="${esc(c.name)}"><img src="${esc(c.photo)}" style="width:100%;height:100%;object-fit:cover;"></div>`
+      : `<div class="avatar" style="background:${color}" title="${esc(c.name)}">${esc(c.initials)}</div>`;
   });
   if (extra > 0) html += `<div class="avatar avatar-more">+${extra}</div>`;
   if (!clients.length) html += `<span style="font-size:12px;color:#9CA3AF">Nadie aún</span>`;
@@ -947,7 +950,7 @@ function renderDrawerAssigned(p) {
   list.innerHTML = p.clients.map(c => {
     const color = clientColor(c.id);
     return `<div class="assigned-row">
-      <div class="assigned-avatar" style="background:${color}">${esc(c.initials)}</div>
+      <div class="assigned-avatar" style="background:${color};overflow:hidden;">${c.photo ? `<img src="${esc(c.photo)}" style="width:100%;height:100%;object-fit:cover;">` : esc(c.initials)}</div>
       <div>
         <div class="assigned-name">${esc(c.name)}</div>
         <div class="assigned-since">${esc(c.email)}</div>
@@ -1130,7 +1133,7 @@ function openAssignModal(id) {
       const color = clientColor(c.id);
       return `
       <div class="assign-client-row${already ? ' already' : ''}" id="acr-${c.id}" onclick="${already ? '' : `toggleAssignClient(${c.id})`}">
-        <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background:${color}">${esc(c.initials)}</div>
+        <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background:${color};overflow:hidden;">${c.photo ? `<img src="${esc(c.photo)}" style="width:100%;height:100%;object-fit:cover;">` : esc(c.initials)}</div>
         <div style="flex:1;">
           <div class="assign-client-name">${esc(c.name)}</div>
           <div class="assign-client-meta">${esc(c.email)}${already ? ' · Ya asignado' : ''}</div>

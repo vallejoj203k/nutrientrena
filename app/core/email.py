@@ -109,10 +109,21 @@ def send_plan_email(
 
         foods_rows = ""
         for food in diet.get("foods", []):
+            aliments_html = ""
+            for al in food.get("aliments", []):
+                qty = f"{int(al['quantity'])}g" if al.get("quantity") else ""
+                kcal = f" · {int(al['calories'])} kcal" if al.get("calories") else ""
+                aliments_html += f"""
+                <tr>
+                  <td style="padding:3px 0 3px 16px;color:#6B7280;font-size:13px;">
+                    &bull; {al.get('name','')}{' ' + qty if qty else ''}{kcal}
+                  </td>
+                </tr>"""
             foods_rows += f"""
             <tr>
-              <td style="padding:8px 0; border-bottom:1px solid #f9fafb; color:#374151; font-size:14px;">
-                🍽️ {food.get('name', '')}
+              <td style="padding:8px 0 4px; border-top:1px solid #f0f0f0;">
+                <span style="color:#111827;font-size:14px;font-weight:600;">🍽️ {food.get('name', '')}</span>
+                <table width="100%" cellpadding="0" cellspacing="0">{aliments_html}</table>
               </td>
             </tr>"""
 
@@ -130,11 +141,31 @@ def send_plan_email(
     if routine:
         days_rows = ""
         for day in routine.get("days", []):
+            exercises = day.get("exercises", [])
+            ex_html = ""
+            for ex in exercises:
+                parts = []
+                if ex.get("series"):
+                    parts.append(f"{ex['series']} series")
+                if ex.get("repetitions"):
+                    parts.append(f"{ex['repetitions']} reps")
+                if ex.get("break_time"):
+                    parts.append(f"{ex['break_time']}s descanso")
+                detail_str = " · ".join(parts)
+                ex_html += f"""
+                <tr>
+                  <td style="padding:3px 0 3px 16px;color:#6B7280;font-size:13px;">
+                    &bull; {ex.get('name','')}{' — ' + detail_str if detail_str else ''}
+                  </td>
+                </tr>"""
+            desc = day.get('description','')
+            if not exercises and desc:
+                ex_html = f'<tr><td style="padding:3px 0 3px 16px;color:#6B7280;font-size:13px;">{desc}</td></tr>'
             days_rows += f"""
             <tr>
-              <td style="padding:8px 0;border-bottom:1px solid #f9fafb;color:#374151;font-size:14px;">
-                💪 {day.get('day_name', '')}
-                {"— " + day.get('description','') if day.get('description') else ''}
+              <td style="padding:8px 0 4px;border-top:1px solid #f0f0f0;">
+                <span style="color:#111827;font-size:14px;font-weight:600;">💪 {day.get('day_name', '')}</span>
+                <table width="100%" cellpadding="0" cellspacing="0">{ex_html}</table>
               </td>
             </tr>"""
 

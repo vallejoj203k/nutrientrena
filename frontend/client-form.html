@@ -100,7 +100,12 @@
     .sb-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;}
 
     /* Avatar preview */
-    .preview-avatar{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;color:#fff;margin:0 auto 14px;transition:background .3s;}
+    .preview-avatar{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;color:#fff;margin:0 auto 10px;transition:background .3s;cursor:pointer;position:relative;overflow:hidden;}
+    .preview-avatar:hover .av-overlay{opacity:1;}
+    .av-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;border-radius:50%;}
+    .av-overlay svg{color:#fff;}
+    .av-upload-hint{text-align:center;font-size:11px;color:#9CA3AF;margin-bottom:14px;cursor:pointer;}
+    .av-upload-hint:hover{color:#4F46E5;}
     .preview-name{text-align:center;font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;}
     .preview-email{text-align:center;font-size:12px;color:#9CA3AF;margin-bottom:16px;word-break:break-all;}
     .preview-divider{height:1px;background:#F3F4F6;margin-bottom:14px;}
@@ -406,7 +411,12 @@
         <!-- Avatar preview card -->
         <div class="sb-card">
           <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px;">Vista previa</div>
-          <div class="preview-avatar" id="previewAvatar" style="background:#E5E7EB;color:#9CA3AF;">?</div>
+          <div class="preview-avatar" id="previewAvatar" style="background:#E5E7EB;color:#9CA3AF;" onclick="document.getElementById('photoInput').click()">
+            ?
+            <div class="av-overlay"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          </div>
+          <div class="av-upload-hint" onclick="document.getElementById('photoInput').click()">Subir foto de perfil</div>
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)"/>
           <div class="preview-name" id="previewName">Nombre del cliente</div>
           <div class="preview-email" id="previewEmail">email@ejemplo.com</div>
           <div class="preview-divider"></div>
@@ -555,10 +565,38 @@ async function loadClient(){
     document.getElementById('fExcedente').value  =d.excedente||c.excedente||'';
     document.getElementById('fStatus').value     =c.status_id||'';
     document.getElementById('fCoach').value      =c.instructor||'';
+    if (d.photo || c.photo) {
+      _photoUrl = d.photo || c.photo;
+      const av = document.getElementById('previewAvatar');
+      av.innerHTML = `<img src="${_photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"><div class="av-overlay"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+      av.style.background = 'transparent';
+    }
     updatePreview();
   }catch{
     showError('No se pudo cargar la información del cliente.');
   }
+}
+
+// ── Photo upload ──────────────────────────────────────────────────────────────
+let _photoUrl = null;
+
+async function handlePhotoSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const av = document.getElementById('previewAvatar');
+  av.innerHTML = '<div style="font-size:11px;color:#9CA3AF;">Subiendo…</div>';
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('folder', 'profiles');
+    const r = await fetch(`${API}/files/upload`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
+    const j = await r.json();
+    if (!r.ok) { alert(j.message || 'Error al subir foto'); return; }
+    _photoUrl = (j.data || j).url;
+    av.innerHTML = `<img src="${_photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"><div class="av-overlay"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+    av.style.background = 'transparent';
+  } catch { alert('Error de conexión al subir foto'); }
+  finally { input.value = ''; }
 }
 
 // ── Preview ───────────────────────────────────────────────────────────────────
@@ -671,6 +709,16 @@ async function saveClient(){
       else if(j.message) msg=j.message;
       showError(msg);
       return;
+    }
+
+    // Save photo if one was selected
+    const savedId = (j.data||j).id || editingId;
+    if (_photoUrl && savedId) {
+      await fetch(`${API}/users/${savedId}/photo`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ photo: _photoUrl }),
+      });
     }
 
     toast(isEdit?'Cliente actualizado correctamente':'Cliente creado correctamente','success');

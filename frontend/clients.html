@@ -720,7 +720,7 @@ function renderTable(){
     return `<tr onclick="viewClient('${c.id}')">
       <td>
         <div class="cell-client">
-          <div class="c-avatar" style="background:${bgColor};">${init}</div>
+          <div class="c-avatar" style="background:${bgColor};overflow:hidden;">${c.photo ? `<img src="${esc(c.photo)}" style="width:100%;height:100%;object-fit:cover;">` : init}</div>
           <div>
             <div class="c-name">${esc(fullName)}</div>
             <div class="c-email">${esc(c.email||'—')}</div>

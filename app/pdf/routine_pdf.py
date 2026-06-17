@@ -205,7 +205,12 @@ def generate_routine_pdf(routine) -> bytes:
             Paragraph("<b>Descanso (s)</b>",     styles["body"]),
         ]]
 
-        for detail in (day.details or []):
+        all_details = list(day.details or [])
+        for block in (day.blocks or []):
+            all_details.extend(block.exercises or [])
+        all_details.sort(key=lambda d: d.order_index or 0)
+
+        for detail in all_details:
             training = detail.training
             exercise_name = training.name if training else "—"
             muscle_name = (
@@ -226,7 +231,7 @@ def generate_routine_pdf(routine) -> bytes:
             ])
 
         # Si el día solo tiene descripción libre (sin detalles estructurados)
-        if len(rows) == 1 and day.description:
+        if len(rows) == 1 and not all_details and day.description:
             rows.append([
                 "", Paragraph(day.description, styles["body"]),
                 "", "", "", "",

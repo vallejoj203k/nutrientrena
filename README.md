@@ -697,6 +697,7 @@ Cada push ejecuta dos jobs en GitHub Actions:
 | **Fase 5** | Seguridad, testing, documentación API, optimización de BD | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 6** | Formularios de página completa, corrección de bugs frontend | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 7** | Chat en tiempo real, base USDA de alimentos, PDFs en emails, correcciones | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 8** | Librería de contenido, módulo de programas con fases y asignación de clientes | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 
 ### Fase 3 — Detalle
 
@@ -909,6 +910,121 @@ alembic upgrade head
 ```
 
 Aplica la revisión `q5r6s7t8u9v0` que crea las tablas de chat.
+
+---
+
+### Fase 8 — Librería de contenido y módulo de Programas
+
+#### 8.1 Librería (`/app/library.html`)
+
+Página de acceso rápido que centraliza todos los módulos de contenido reutilizable del coach en tarjetas visuales. No tiene backend propio: es un hub de navegación.
+
+| Tarjeta | Descripción | Enlace destino |
+|---------|-------------|----------------|
+| **Entrenamiento** | Rutinas y ejercicios del catálogo | `routines.html` |
+| **Nutrición** | Dietas, recetas y alimentos | `nutricion.html` |
+| **Formularios** | Plantillas de intake para clientes | `formularios.html` |
+| **Documentos** | Archivos y documentos de referencia | `documentos.html` |
+
+La librería está disponible en el menú lateral para coaches, admins y superadmins.
+
+---
+
+#### 8.2 Programas (`/app/programas.html`)
+
+Módulo completo para crear programas de entrenamiento estructurados con fases y asignación de clientes.
+
+**Backend — endpoints**
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `GET /api/programs` | GET | Listar todos los programas del coach autenticado |
+| `POST /api/programs` | POST | Crear programa con nombre, categoría, descripción y fases |
+| `GET /api/programs/{id}` | GET | Ver detalle completo (fases + clientes asignados) |
+| `PUT /api/programs/{id}` | PUT | Actualizar nombre, categoría, descripción, estado o fases |
+| `DELETE /api/programs/{id}` | DELETE | Eliminar programa |
+| `POST /api/programs/{id}/assign` | POST | Asignar uno o varios clientes al programa |
+| `DELETE /api/programs/{id}/clients/{client_id}` | DELETE | Quitar un cliente del programa |
+| `POST /api/programs/{id}/duplicate` | POST | Duplicar programa (copia fases, sin clientes) |
+
+**Modelo de datos**
+
+| Tabla | Campos principales |
+|-------|--------------------|
+| `programs` | `name`, `category`, `description`, `status`, `checkins_count`, `coach_id` |
+| `program_phases` | `program_id`, `name`, `weeks`, `order` |
+| `program_clients` | `program_id`, `client_id`, `assigned_at` |
+
+**Categorías disponibles:** `recomposicion` · `perdida_grasa` · `ganancia_muscular` · `mantenimiento`
+
+**Frontend — funcionalidades**
+
+| Funcionalidad | Descripción |
+|---------------|-------------|
+| Grid de tarjetas | Muestra todos los programas del coach con nombre, categoría, semanas totales y clientes asignados |
+| Filtro por categoría | Pestañas: Todos · Recomposición · Pérdida de grasa · Ganancia muscular · Mantenimiento; cada una muestra el contador |
+| Crear programa | Formulario con nombre, categoría, descripción y constructor de fases (nombre + semanas por fase) |
+| Drawer de detalle | Panel lateral con 3 pestañas: **Info** (datos generales + semanas totales), **Fases** (lista de fases en orden), **Asignados** (avatares y nombres de clientes) |
+| Editar programa | Edición inline dentro del drawer — modifica nombre, descripción y fases |
+| Asignar clientes | Modal de búsqueda y selección de clientes para añadirlos al programa |
+| Quitar cliente | Botón × junto a cada cliente asignado en la pestaña Asignados |
+| Duplicar | Crea una copia del programa con todas sus fases (sin clientes) |
+| Archivar / Activar | Cambia el estado del programa entre `activo` y `archivado` |
+| Eliminar | Confirmación antes de borrar |
+
+---
+
+#### Guía de pruebas — Fase 8
+
+##### 8.A Librería
+
+1. Ir a **Librería** en el menú lateral (`/app/library.html`)
+2. Deben verse 4 tarjetas: **Entrenamiento**, **Nutrición**, **Formularios**, **Documentos**
+3. Hacer clic en **Entrenamiento** → redirige a `routines.html`
+4. Volver y hacer clic en **Nutrición** → redirige a la página de nutrición
+5. Verificar que la tarjeta activa en el sidebar es **Librería**
+
+##### 8.B Crear programa
+
+1. Ir a **Programas** en el menú lateral (`/app/programas.html`)
+2. Hacer clic en la tarjeta punteada **"+ Nuevo programa"**
+3. Rellenar: nombre (ej. "Transformación 12 semanas"), categoría **Pérdida de grasa**, descripción breve
+4. En la sección **Fases**, hacer clic en **+ Fase**:
+   - Fase 1: "Adaptación" — 4 semanas
+   - Fase 2: "Intensidad" — 4 semanas
+   - Fase 3: "Peak" — 4 semanas
+5. El total de semanas (12) debe actualizarse automáticamente
+6. Hacer clic en **Crear** → el programa aparece como tarjeta en el grid
+7. La tarjeta debe mostrar la categoría, el total de semanas y 0 clientes asignados
+
+##### 8.C Filtrar por categoría
+
+1. En la barra de pestañas superior, hacer clic en **Pérdida de grasa**
+2. Solo deben verse los programas de esa categoría; el contador de la pestaña debe coincidir
+3. Hacer clic en **Todos** → vuelven a aparecer todos los programas
+
+##### 8.D Ver detalle y editar
+
+1. Hacer clic sobre la tarjeta del programa recién creado → se abre el **drawer** lateral
+2. Pestaña **Info**: muestra nombre, categoría, descripción y semanas totales
+3. Pestaña **Fases**: lista las 3 fases en orden con sus semanas
+4. Hacer clic en **Editar** → modificar el nombre o añadir una fase nueva → guardar
+5. Verificar que los cambios se reflejan en el drawer y en la tarjeta del grid
+
+##### 8.E Asignar y quitar clientes
+
+1. En el drawer del programa, hacer clic en **Asignar clientes**
+2. Se abre un modal con buscador → escribir el nombre de un cliente → seleccionarlo
+3. Hacer clic en **Asignar** → en la pestaña **Asignados** aparece el avatar y nombre del cliente
+4. La tarjeta del grid debe actualizar el contador de clientes asignados
+5. En la pestaña Asignados, hacer clic en el botón **×** junto al cliente → confirmar → el cliente desaparece
+
+##### 8.F Duplicar y eliminar
+
+1. En la tarjeta de un programa, hacer clic en el menú (**⋮**) → seleccionar **Duplicar**
+2. Aparece una copia del programa con las mismas fases pero sin clientes asignados
+3. En el menú (**⋮**) de la copia → seleccionar **Eliminar** → confirmar en el diálogo
+4. El programa desaparece del grid y los contadores de las pestañas se actualizan
 
 ---
 

@@ -36,23 +36,50 @@
     /* ── Chat layout ── */
     .chat-container{flex:1;display:flex;height:100vh;overflow:hidden;}
 
-    /* Conversation list panel */
-    .conv-panel{width:320px;min-width:280px;background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;}
-    .conv-header{padding:20px 16px 12px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
-    .conv-header h2{font-size:18px;font-weight:800;color:#111827;margin-bottom:10px;}
-    .conv-search{position:relative;}
-    .conv-search input{width:100%;padding:8px 12px 8px 34px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#F9FAFB;}
-    .conv-search input:focus{border-color:var(--indigo);background:#fff;}
-    .conv-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;}
-    .btn-new-conv{width:100%;margin-top:10px;padding:9px;background:var(--indigo);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s;}
-    .btn-new-conv:hover{background:var(--indigo-dark);}
-    .conv-list{flex:1;overflow-y:auto;padding:8px 0;}
-    .conv-list::-webkit-scrollbar{width:4px;}
-    .conv-list::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px;}
-    .conv-item{padding:12px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;transition:background .1s;border-bottom:1px solid #F3F4F6;}
-    .conv-item:hover{background:#F8FAFC;}
-    .conv-item.active{background:#EEF2FF;}
-    .conv-avatar{width:40px;height:40px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;overflow:hidden;}
+    /* ── Conversations panel ── */
+    .conv-panel{width:300px;min-width:300px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;}
+    .conv-header{padding:16px;border-bottom:1px solid var(--border);}
+    .conv-header h2{font-size:16px;font-weight:700;color:#111827;margin-bottom:10px;}
+
+    /* ── New chat buttons ── */
+    .new-chat-btns{display:flex;gap:8px;}
+    .new-chat-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#374151;transition:all .15s;}
+    .new-chat-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-light);}
+    .new-chat-btn.active{border-color:var(--purple);color:var(--purple);background:var(--purple-light);}
+
+    /* ── Inline new chat panel ── */
+    .new-chat-panel{border-bottom:1px solid var(--border);background:#FAFAFA;animation:slideDown .15s ease;}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+    .new-chat-panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;font-size:13px;font-weight:700;color:#374151;}
+    .new-chat-panel-header button{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:18px;line-height:1;padding:0;}
+    .new-chat-panel-header button:hover{color:#374151;}
+    .new-chat-panel-body{padding:0 14px 12px;}
+    .new-chat-panel-body input[type=text]{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;}
+    .new-chat-panel-body input[type=text]:focus{border-color:var(--purple);}
+    .panel-user-results{max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:6px;background:#fff;}
+    .panel-user-item{padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;}
+    .panel-user-item:hover{background:#F9FAFB;}
+    .panel-user-item.selected{background:var(--purple-light);color:var(--purple);}
+    .panel-selected-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+    .sel-tag{background:var(--purple-light);color:var(--purple);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;}
+    .sel-tag button{background:none;border:none;color:var(--purple);cursor:pointer;font-size:14px;line-height:1;}
+    .btn-start{display:block;width:100%;margin-top:10px;padding:9px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
+    .btn-start:hover{background:var(--purple-mid);}
+    .btn-start:disabled{opacity:.5;cursor:not-allowed;}
+    .target-opts{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
+    .target-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;background:#fff;}
+    .target-opt:hover{border-color:var(--purple-mid);}
+    .target-opt.active{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
+    .grp-name-input{margin-bottom:10px;}
+
+    .conv-search{padding:10px 16px;border-bottom:1px solid var(--border);}
+    .conv-search input{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;outline:none;}
+    .conv-search input:focus{border-color:var(--purple);}
+    .conv-list{flex:1;overflow-y:auto;}
+    .conv-item{padding:14px 16px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:background .1s;display:flex;gap:12px;align-items:center;}
+    .conv-item:hover{background:#F9FAFB;}
+    .conv-item.active{background:var(--purple-light);}
+    .conv-avatar{width:40px;height:40px;border-radius:50%;background:var(--purple-light);color:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;overflow:hidden;}
     .conv-avatar img{width:100%;height:100%;object-fit:cover;}
     .conv-info{flex:1;min-width:0;}
     .conv-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -98,49 +125,10 @@
     .btn-send:hover{background:var(--indigo-dark);}
     .btn-send:disabled{background:#E5E7EB;cursor:not-allowed;}
 
-    /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center;}
-    .modal-overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:16px;width:480px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.15);}
-    .modal-header{padding:20px 24px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .modal-header h3{font-size:17px;font-weight:700;color:#111827;}
-    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#9CA3AF;padding:4px;}
-    .modal-close:hover{color:#111827;}
-    .modal-body{flex:1;overflow-y:auto;padding:20px 24px;}
-    .modal-footer{padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;}
-    .type-toggle{display:flex;gap:8px;margin-bottom:16px;}
-    .type-btn{flex:1;padding:9px;border:1.5px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#374151;transition:.15s;}
-    .type-btn.active{border-color:var(--indigo);background:#EEF2FF;color:var(--indigo);}
-    .form-label{font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;display:block;}
-    .form-input{width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;}
-    .form-input:focus{border-color:var(--indigo);}
-    .form-select{width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#111827;background:#fff;}
-    .form-select:focus{border-color:var(--indigo);}
-    .user-search-results{margin-top:8px;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;max-height:200px;overflow-y:auto;}
-    .user-result-item{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;color:#374151;border-bottom:1px solid #F3F4F6;transition:background .1s;}
-    .user-result-item:last-child{border-bottom:none;}
-    .user-result-item:hover{background:#F8FAFC;}
-    .user-result-item.selected{background:#EEF2FF;color:var(--indigo);}
-    .selected-users{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-    .selected-user-chip{background:#EEF2FF;color:var(--indigo);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;}
-    .chip-remove{background:none;border:none;cursor:pointer;color:var(--indigo);font-size:14px;padding:0;line-height:1;}
-    .mb-16{margin-bottom:16px;}
-    .btn-primary{padding:9px 18px;background:var(--indigo);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
-    .btn-primary:hover{background:var(--indigo-dark);}
-    .btn-ghost{padding:9px 18px;background:#F3F4F6;color:#374151;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
-    .btn-ghost:hover{background:#E5E7EB;}
-
-    /* Toast */
-    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:200;}
-    .toast.show{transform:translateY(0);opacity:1;}
-    .toast.success{background:#059669;}
-    .toast.error{background:#DC2626;}
-
-    .ws-status{font-size:10px;display:flex;align-items:center;gap:4px;}
-    .ws-dot{width:6px;height:6px;border-radius:50%;background:#9CA3AF;}
-    .ws-dot.connected{background:#22C55E;}
-
-    @media(max-width:768px){.sidebar{display:none;}.conv-panel{width:100%;}.msg-panel{display:none;}.msg-panel.open{display:flex;}}
+    /* ── Empty state ── */
+    .no-conv{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9CA3AF;gap:12px;}
+    .no-conv svg{opacity:.3;}
+    .no-conv p{font-size:15px;}
   </style>
 </head>
 <body>
@@ -224,21 +212,43 @@
   <!-- Conversation list -->
   <div class="conv-panel">
     <div class="conv-header">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <h2>Mensajes</h2>
-        <div class="ws-status">
-          <div class="ws-dot" id="wsDot"></div>
-          <span id="wsLabel">Desconectado</span>
-        </div>
+      <h2>Mensajes</h2>
+      <!-- New chat type buttons -->
+      <div class="new-chat-btns">
+        <button class="new-chat-btn" id="btnInd" onclick="showNewPanel('individual')">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Individual
+        </button>
+        <button class="new-chat-btn" id="btnGrp" onclick="showNewPanel('group')" style="display:none;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Grupal
+        </button>
       </div>
-      <div class="conv-search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="convSearch" placeholder="Buscar conversación…" oninput="filterConversations()"/>
+    </div>
+
+    <!-- Inline panel (shown when a button is active) -->
+    <div class="new-chat-panel" id="newChatPanel" style="display:none;">
+      <div class="new-chat-panel-header">
+        <span id="newChatPanelTitle">Nueva conversación</span>
+        <button onclick="closeNewPanel()">×</button>
       </div>
-      <button class="btn-new-conv" id="btnNewConv" onclick="openModal()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nueva conversación
-      </button>
+      <!-- Individual sub-panel -->
+      <div class="new-chat-panel-body" id="indPanel">
+        <input type="text" id="userSearchInput" placeholder="Buscar por nombre o email…" oninput="searchUsers(this.value)"/>
+        <div class="panel-user-results" id="userResults" style="display:none;"></div>
+        <div class="panel-selected-tags" id="selectedUsers"></div>
+        <button class="btn-start" id="btnStartInd" onclick="createConversation()" style="display:none;">Iniciar conversación</button>
+      </div>
+      <!-- Group sub-panel -->
+      <div class="new-chat-panel-body" id="grpPanel" style="display:none;">
+        <input type="text" class="grp-name-input" id="grpName" placeholder="Nombre del grupo (opcional)"/>
+        <div class="target-opts" id="targetOpts"></div>
+        <button class="btn-start" id="btnStartGrp" onclick="createConversation()">Crear grupo</button>
+      </div>
+    </div>
+
+    <div class="conv-search">
+      <input type="text" id="convSearch" placeholder="Buscar conversación…" oninput="filterConvs(this.value)"/>
     </div>
     <div class="conv-list" id="convList">
       <div style="text-align:center;padding:40px 20px;color:#9CA3AF;font-size:13px;">Cargando…</div>
@@ -251,7 +261,7 @@
       <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <p>Selecciona una conversación</p>
     </div>
-    <div id="msgActive" style="display:none;flex:1;display:none;flex-direction:column;height:100vh;">
+    <div id="convState" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
       <div class="msg-header" id="msgHeader">
         <div class="msg-header-avatar" id="msgHeaderAvatar">?</div>
         <div class="msg-header-info">
@@ -272,59 +282,6 @@
 
 </div>
 
-<!-- New Conversation Modal -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Nueva conversación</h3>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="type-toggle" id="typeToggle">
-        <button class="type-btn active" id="btnTypeIndividual" onclick="setConvType('individual')">Individual</button>
-        <button class="type-btn" id="btnTypeGroup" onclick="setConvType('group')">Grupo</button>
-      </div>
-
-      <!-- Individual: search user -->
-      <div id="sectionIndividual">
-        <label class="form-label">Buscar usuario</label>
-        <input class="form-input" id="userSearch" placeholder="Nombre o email…" oninput="searchUsers()" autocomplete="off"/>
-        <div class="user-search-results" id="userSearchResults" style="display:none;"></div>
-        <div class="selected-users" id="selectedUsers"></div>
-      </div>
-
-      <!-- Group: config -->
-      <div id="sectionGroup" style="display:none;">
-        <div class="mb-16">
-          <label class="form-label">Nombre del grupo (opcional)</label>
-          <input class="form-input" id="groupName" placeholder="Ej: Equipo Alpha…"/>
-        </div>
-        <div id="groupTargetSection">
-          <label class="form-label">Añadir participantes</label>
-          <select class="form-select" id="groupTarget">
-            <option value="my_clients">Mis clientes</option>
-            <option value="coaches">Todos los coaches</option>
-            <option value="all_clients">Todos los clientes</option>
-          </select>
-        </div>
-        <div id="groupCustomSection" style="display:none;">
-          <label class="form-label" style="margin-top:12px;">O buscar usuarios específicos</label>
-          <input class="form-input" id="groupUserSearch" placeholder="Buscar…" oninput="searchGroupUsers()" autocomplete="off"/>
-          <div class="user-search-results" id="groupSearchResults" style="display:none;"></div>
-          <div class="selected-users" id="groupSelectedUsers"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" onclick="createConversation()">Crear</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
 const WS_URL = 'wss://nutrientrena-production.up.railway.app/ws/chat';
@@ -340,8 +297,17 @@ let selectedIndividualUsers = [];
 let groupSelectedUsers = [];
 let allUsers = [];
 
-// ── Auth guard ────────────────────────────────────────────────────────────────
-if (!token) { location.href = 'login.html'; }
+let _me = null;
+let _token = null;
+let _convs = [];
+let _activeConv = null;
+let _ws = null;
+let _wsReconnectTimer = null;
+let _convType = 'individual';
+let _selectedUsers = [];
+let _target = null;
+let _typingTimer = null;
+let _activePanel = null; // 'individual' | 'group' | null
 
 function logout() {
   fetch(`${API}/auth/logout`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }}).catch(()=>{});
@@ -352,17 +318,106 @@ function logout() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   try {
-    const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` }});
-    if (!r.ok) { localStorage.clear(); location.href = 'login.html'; return; }
-    const d = await r.json();
-    currentUser = d.data || d;
-    currentUserRoles = (currentUser.roles || []).map(ro => ro.id || ro);
-    renderSidebarUser();
-    adjustUIForRole();
-    await loadConversations();
-    connectWebSocket();
-  } catch(e) {
-    showToast('Error al cargar', 'error');
+    const r = await apiFetch('/auth/me');
+    if (!r.success) { location.href = 'login.html'; return; }
+    _me = r.data;
+  } catch { location.href = 'login.html'; return; }
+
+  // Sidebar
+  const av = document.getElementById('sidebarAvatar');
+  if (_me.photo) {
+    av.innerHTML = `<img src="${_me.photo}" alt="">`;
+  } else {
+    av.textContent = (_me.name || '?')[0].toUpperCase();
+  }
+  document.getElementById('sidebarName').textContent = _me.name || _me.email || '';
+  document.getElementById('sidebarRole').textContent = _me.roles?.[0]?.name || '';
+
+  // Show Grupal button only for non-client roles
+  const roles = (_me.roles || []).map(r => r.id || r.role_id);
+  const canGroup = roles.includes(1) || roles.includes(2) || roles.includes(5);
+  if (canGroup) {
+    document.getElementById('btnGrp').style.display = '';
+  }
+
+  await loadConversations();
+  connectWS();
+}
+
+// ── New chat panel ─────────────────────────────────────────────────────────
+
+function showNewPanel(type) {
+  const panel = document.getElementById('newChatPanel');
+  const indPanel = document.getElementById('indPanel');
+  const grpPanel = document.getElementById('grpPanel');
+  const title = document.getElementById('newChatPanelTitle');
+
+  // Toggle off if same button clicked again
+  if (_activePanel === type) {
+    closeNewPanel();
+    return;
+  }
+
+  _activePanel = type;
+  _convType = type;
+  _selectedUsers = [];
+
+  // Update button active states
+  document.getElementById('btnInd').classList.toggle('active', type === 'individual');
+  document.getElementById('btnGrp').classList.toggle('active', type === 'group');
+
+  if (type === 'individual') {
+    title.textContent = 'Nueva conversación individual';
+    indPanel.style.display = '';
+    grpPanel.style.display = 'none';
+    document.getElementById('userSearchInput').value = '';
+    document.getElementById('userResults').style.display = 'none';
+    document.getElementById('selectedUsers').innerHTML = '';
+    document.getElementById('btnStartInd').style.display = 'none';
+  } else {
+    title.textContent = 'Nuevo grupo';
+    indPanel.style.display = 'none';
+    grpPanel.style.display = '';
+    document.getElementById('grpName').value = '';
+    _target = null;
+    renderTargetOpts();
+  }
+
+  panel.style.display = '';
+}
+
+function closeNewPanel() {
+  _activePanel = null;
+  document.getElementById('newChatPanel').style.display = 'none';
+  document.getElementById('btnInd').classList.remove('active');
+  document.getElementById('btnGrp').classList.remove('active');
+}
+
+// ── WebSocket ──────────────────────────────────────────────────────────────
+
+function connectWS() {
+  if (_ws) { try { _ws.close(); } catch(e) {} }
+  _ws = new WebSocket(`${WS_BASE}?token=${_token}`);
+
+  _ws.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.type === 'message') {
+        handleIncomingMessage(data.message);
+      } else if (data.type === 'typing') {
+        showTyping(data);
+      }
+    } catch(err) {}
+  };
+
+  _ws.onclose = () => {
+    _wsReconnectTimer = setTimeout(connectWS, 3000);
+  };
+}
+
+function wsSend(data) {
+  if (_ws && _ws.readyState === WebSocket.OPEN) {
+    _ws.send(JSON.stringify(data));
   }
 }
 
@@ -386,18 +441,28 @@ function adjustUIForRole() {
     document.getElementById('btnNewConv').style.display = 'none';
   }
 
-  // Setup group target options based on role
-  const groupTarget = document.getElementById('groupTarget');
-  if (isAdmin) {
-    groupTarget.innerHTML = `
-      <option value="coaches">Todos los coaches</option>
-      <option value="all_clients">Todos los clientes</option>
-      <option value="custom">Usuarios específicos</option>`;
-  } else if (isCoach) {
-    groupTarget.innerHTML = `
-      <option value="my_clients">Mis clientes</option>
-      <option value="custom">Usuarios específicos</option>`;
+async function selectConversation(id) {
+  _activeConv = _convs.find(c => c.id === id) || { id };
+  closeNewPanel();
+  renderConvList(_convs);
+
+  document.getElementById('noConvState').style.display = 'none';
+  const cs = document.getElementById('convState');
+  cs.style.display = 'flex';
+
+  // Header
+  const isGroup = _activeConv.type === 'group';
+  const others = (_activeConv.participants || []).filter(p => p.user_id !== _me?.user_id);
+  const photo = !isGroup && others[0]?.photo;
+  const av = document.getElementById('msgAvatar');
+  if (photo) {
+    av.innerHTML = `<img src="${photo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  } else {
+    av.textContent = isGroup ? '👥' : (_activeConv.name || '?')[0].toUpperCase();
   }
+  document.getElementById('msgHeaderName').textContent = _activeConv.name || '—';
+  const sub = isGroup ? `${(_activeConv.participants || []).length} participantes` : '';
+  document.getElementById('msgHeaderSub').textContent = sub;
 
   groupTarget.addEventListener('change', () => {
     const custom = groupTarget.value === 'custom';
@@ -455,70 +520,22 @@ function convItemHtml(c) {
   </div>`;
 }
 
-function filterConversations() {
-  const q = document.getElementById('convSearch').value.toLowerCase();
-  if (!q) { renderConversations(conversations); return; }
-  const filtered = conversations.filter(c => {
-    const name = c.name || (c.participants||[]).map(p=>p.name).join(' ');
-    return name.toLowerCase().includes(q);
-  });
-  renderConversations(filtered);
-}
-
-// ── Select conversation ───────────────────────────────────────────────────────
-async function selectConversation(id) {
-  activeConvId = id;
-  renderConversations(conversations);
-
-  const conv = conversations.find(c => c.id === id);
-  if (!conv) return;
-
-  // Show active panel
-  document.getElementById('msgEmpty').style.display = 'none';
-  const msgActive = document.getElementById('msgActive');
-  msgActive.style.display = 'flex';
-  msgActive.style.flexDirection = 'column';
-  msgActive.style.height = '100vh';
-
-  // Header
-  const isGroup = conv.type === 'group';
-  let displayName = conv.name || '';
-  if (!displayName) {
-    const others = (conv.participants || []).filter(p => p.user_id !== (currentUser && currentUser.id));
-    displayName = others.map(p => p.name).join(', ') || 'Sin nombre';
-  }
-
-  const headerAvatar = document.getElementById('msgHeaderAvatar');
-  const firstP = conv.participants && conv.participants.find(p => p.user_id !== (currentUser && currentUser.id));
-  if (isGroup) {
-    headerAvatar.style.background = '#7C3AED';
-    headerAvatar.textContent = 'GRP';
-  } else if (firstP && firstP.photo) {
-    headerAvatar.innerHTML = `<img src="${firstP.photo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`;
+function handleIncomingMessage(msg) {
+  const conv = _convs.find(c => c.id === msg.conversation_id);
+  if (conv) {
+    conv.last_message = msg;
+    renderConvList(_convs);
   } else {
-    headerAvatar.textContent = initials(displayName);
+    loadConversations();
   }
-  document.getElementById('msgHeaderName').textContent = displayName;
-  const sub = isGroup
-    ? `Grupo · ${(conv.participants||[]).length} participantes`
-    : 'Chat individual';
-  document.getElementById('msgHeaderSub').textContent = sub;
-
-  await loadMessages(id);
-}
-
-async function loadMessages(convId) {
-  const thread = document.getElementById('msgThread');
-  thread.innerHTML = '<div style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">Cargando…</div>';
-  try {
-    const r = await fetch(`${API}/chat/conversations/${convId}/messages?per_page=100`, { headers: { Authorization: `Bearer ${token}` }});
-    const d = await r.json();
-    const msgs = (d.data && d.data.messages) || [];
-    thread.innerHTML = '';
-    msgs.forEach(m => appendMessage(m, false));
-    scrollToBottom();
-  } catch(e) {
-    thread.innerHTML = '<div style="text-align:center;padding:20px;color:#DC2626;font-size:13px;">Error al cargar mensajes</div>';
+  if (_activeConv?.id === msg.conversation_id) {
+    const body = document.getElementById('msgBody');
+    const emptyDiv = body.querySelector('div[style]');
+    if (emptyDiv) emptyDiv.remove();
+    const div = document.createElement('div');
+    div.innerHTML = renderMessage(msg);
+    body.appendChild(div.firstElementChild);
+    body.scrollTop = body.scrollHeight;
   }
 }
 
@@ -565,135 +582,88 @@ function handleTyping() {
   typingTimer = setTimeout(() => {}, 2000);
 }
 
-async function sendMessage() {
-  const input = document.getElementById('msgInput');
-  const content = input.value.trim();
-  if (!content || !activeConvId) return;
-  input.value = '';
-
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ conversation_id: activeConvId, content }));
+  if (_ws && _ws.readyState === WebSocket.OPEN) {
+    wsSend({ conversation_id: _activeConv.id, content });
   } else {
-    try {
-      const r = await fetch(`${API}/chat/conversations/${activeConvId}/messages`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
-      });
-      const d = await r.json();
-      if (d.data) {
-        appendMessage(d.data, true);
-        updateConvPreview(activeConvId, d.data);
-      }
-    } catch(e) {
-      showToast('Error al enviar', 'error');
-    }
-  }
-}
-
-// ── WebSocket ─────────────────────────────────────────────────────────────────
-function connectWebSocket() {
-  if (ws) { try { ws.close(); } catch(e) {} }
-  ws = new WebSocket(`${WS_URL}?token=${token}`);
-
-  ws.onopen = () => {
-    document.getElementById('wsDot').classList.add('connected');
-    document.getElementById('wsLabel').textContent = 'En línea';
-    clearTimeout(wsReconnectTimer);
-  };
-
-  ws.onclose = () => {
-    document.getElementById('wsDot').classList.remove('connected');
-    document.getElementById('wsLabel').textContent = 'Desconectado';
-    wsReconnectTimer = setTimeout(() => connectWebSocket(), 3000);
-  };
-
-  ws.onerror = () => {
-    ws.close();
-  };
-
-  ws.onmessage = (evt) => {
-    try {
-      const data = JSON.parse(evt.data);
-      if (data.type === 'message') {
-        appendMessage(data.message, true);
-        updateConvPreview(data.conversation_id, data.message);
-      } else if (data.type === 'typing') {
-        showTyping(data.conversation_id, data.user_id);
-      }
-    } catch(e) {}
-  };
-}
-
-function showTyping(convId, userId) {
-  if (convId !== activeConvId) return;
-  const el = document.getElementById('typingIndicator');
-  const conv = conversations.find(c => c.id === convId);
-  const p = conv && (conv.participants||[]).find(p => p.user_id === userId);
-  const name = p ? p.name : 'Alguien';
-  el.style.display = 'block';
-  el.textContent = `${name} está escribiendo…`;
-  clearTimeout(el._timer);
-  el._timer = setTimeout(() => { el.style.display = 'none'; }, 3000);
-}
-
-function updateConvPreview(convId, msg) {
-  const conv = conversations.find(c => c.id === convId);
-  if (conv) {
-    conv.last_message = msg;
-    // Move to top
-    conversations = [conv, ...conversations.filter(c => c.id !== convId)];
-    renderConversations(conversations);
-  }
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
-let convType = 'individual';
-
-function openModal() {
-  convType = 'individual';
-  selectedIndividualUsers = [];
-  groupSelectedUsers = [];
-  document.getElementById('userSearch').value = '';
-  document.getElementById('userSearchResults').style.display = 'none';
-  document.getElementById('selectedUsers').innerHTML = '';
-  document.getElementById('groupName').value = '';
-  document.getElementById('groupUserSearch') && (document.getElementById('groupUserSearch').value = '');
-  document.getElementById('groupSearchResults') && (document.getElementById('groupSearchResults').style.display = 'none');
-  document.getElementById('groupSelectedUsers') && (document.getElementById('groupSelectedUsers').innerHTML = '');
-  setConvType('individual');
-  document.getElementById('modalOverlay').classList.add('open');
-  loadAllUsers();
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-
-function setConvType(t) {
-  convType = t;
-  document.getElementById('btnTypeIndividual').classList.toggle('active', t === 'individual');
-  document.getElementById('btnTypeGroup').classList.toggle('active', t === 'group');
-  document.getElementById('sectionIndividual').style.display = t === 'individual' ? 'block' : 'none';
-  document.getElementById('sectionGroup').style.display = t === 'group' ? 'block' : 'none';
-}
-
-async function loadAllUsers() {
-  try {
-    const r = await fetch(`${API}/users/client/findAll`, { headers: { Authorization: `Bearer ${token}` }});
-    const d = await r.json();
-    allUsers = d.data || [];
-  } catch(e) {}
-  try {
-    const r2 = await fetch(`${API}/users/coach/findAll`, { headers: { Authorization: `Bearer ${token}` }});
-    const d2 = await r2.json();
-    const coaches = d2.data || [];
-    const existingIds = new Set(allUsers.map(u => u.user_id || u.id));
-    coaches.forEach(c => {
-      const uid = c.user_id || c.id;
-      if (!existingIds.has(uid)) { allUsers.push(c); }
+    const r = await apiFetch(`/chat/conversations/${_activeConv.id}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
     });
-  } catch(e) {}
+    if (r.success) handleIncomingMessage(r.data);
+  }
+}
+
+// ── User search (individual) ───────────────────────────────────────────────
+
+let _searchTimer = null;
+async function searchUsers(q) {
+  clearTimeout(_searchTimer);
+  if (!q) { document.getElementById('userResults').style.display = 'none'; return; }
+  _searchTimer = setTimeout(async () => {
+    const [rc, rch] = await Promise.all([
+      apiFetch(`/users/client/search?search=${encodeURIComponent(q)}&per_page=20`),
+      apiFetch(`/users/coach/search?search=${encodeURIComponent(q)}&per_page=20`),
+    ]);
+    const items = [
+      ...(rc.data?.data || []),
+      ...(rch.data?.data || []),
+    ].filter(u => u.user_id !== _me?.user_id);
+    const el = document.getElementById('userResults');
+    if (!items.length) { el.style.display = 'none'; return; }
+    el.style.display = '';
+    el.innerHTML = items.map(u => {
+      const sel = _selectedUsers.find(s => s.user_id === u.user_id);
+      const uJson = JSON.stringify(u).replace(/"/g, '&quot;');
+      return `<div class="panel-user-item ${sel ? 'selected' : ''}" onclick="toggleUser(${uJson})">
+        ${u.photo
+          ? `<img src="${u.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" alt="">`
+          : `<div style="width:28px;height:28px;border-radius:50%;background:#EDE7F6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#5B2D8E;">${(u.name||'?')[0]}</div>`}
+        <div><div style="font-weight:600;">${escHtml(u.name||'')}</div><div style="font-size:11px;color:#9CA3AF;">${escHtml(u.email||'')}</div></div>
+      </div>`;
+    }).join('');
+  }, 300);
+}
+
+function toggleUser(u) {
+  const idx = _selectedUsers.findIndex(s => s.user_id === u.user_id);
+  if (idx >= 0) _selectedUsers.splice(idx, 1);
+  else _selectedUsers.push(u);
+  renderSelectedUsers();
+  searchUsers(document.getElementById('userSearchInput').value);
+}
+
+function renderSelectedUsers() {
+  document.getElementById('selectedUsers').innerHTML = _selectedUsers.map(u => {
+    const uJson = JSON.stringify(u).replace(/"/g, '&quot;');
+    return `<span class="sel-tag">
+      ${escHtml(u.name || u.email || '')}
+      <button onclick="toggleUser(${uJson})">×</button>
+    </span>`;
+  }).join('');
+  document.getElementById('btnStartInd').style.display = _selectedUsers.length ? '' : 'none';
+}
+
+// ── Group targets ──────────────────────────────────────────────────────────
+
+function renderTargetOpts() {
+  const roles = (_me?.roles || []).map(r => r.id || r.role_id);
+  const isAdmin = roles.includes(1) || roles.includes(2);
+  const isCoach = roles.includes(5);
+  const opts = [];
+  if (isCoach || isAdmin) {
+    opts.push({ value: 'my_clients', label: '👤 Mis clientes', desc: 'Todos tus clientes asignados' });
+  }
+  if (isAdmin) {
+    opts.push({ value: 'all_coaches', label: '🏋️ Todos los coaches', desc: 'Mensaje a todo el equipo' });
+    opts.push({ value: 'all_clients', label: '👥 Todos los clientes', desc: 'Mensaje masivo a clientes' });
+  }
+  document.getElementById('targetOpts').innerHTML = opts.map(o => `
+    <div class="target-opt ${_target === o.value ? 'active' : ''}" onclick="selectTarget('${o.value}')">
+      <div>
+        <div>${o.label}</div>
+        <div style="font-size:11px;color:#9CA3AF;font-weight:400;">${o.desc}</div>
+      </div>
+    </div>`).join('');
 }
 
 function searchUsers() {
@@ -718,66 +688,23 @@ function searchUsers() {
   }).join('');
 }
 
-function toggleIndividualUser(uid, name) {
-  const idx = selectedIndividualUsers.findIndex(u => u.user_id === uid);
-  if (idx > -1) {
-    selectedIndividualUsers.splice(idx, 1);
-  } else {
-    selectedIndividualUsers.push({ user_id: uid, name: name.trim() });
-  }
-  renderSelectedUsers();
-  searchUsers();
-}
-
-function renderSelectedUsers() {
-  const el = document.getElementById('selectedUsers');
-  el.innerHTML = selectedIndividualUsers.map(u =>
-    `<div class="selected-user-chip">${esc(u.name)}<button class="chip-remove" onclick="toggleIndividualUser(${u.user_id}, '${esc(u.name)}')">×</button></div>`
-  ).join('');
-}
-
-function searchGroupUsers() {
-  const q = document.getElementById('groupUserSearch').value.toLowerCase();
-  const res = document.getElementById('groupSearchResults');
-  if (!q) { res.style.display = 'none'; return; }
-  const filtered = allUsers.filter(u => {
-    const name = `${u.name || ''} ${u.last_name || ''}`.toLowerCase();
-    return name.includes(q);
-  }).slice(0, 8);
-  if (!filtered.length) { res.style.display = 'none'; return; }
-  const alreadySelected = new Set(groupSelectedUsers.map(u => u.user_id));
-  res.style.display = 'block';
-  res.innerHTML = filtered.map(u => {
-    const uid = u.user_id || u.id;
-    const selected = alreadySelected.has(uid);
-    return `<div class="user-result-item ${selected ? 'selected' : ''}" onclick="toggleGroupUser(${uid}, '${esc(u.name)} ${esc(u.last_name||'')}')">
-      <span>${esc(u.name)} ${esc(u.last_name||'')}</span>
-    </div>`;
-  }).join('');
-}
-
-function toggleGroupUser(uid, name) {
-  const idx = groupSelectedUsers.findIndex(u => u.user_id === uid);
-  if (idx > -1) {
-    groupSelectedUsers.splice(idx, 1);
-  } else {
-    groupSelectedUsers.push({ user_id: uid, name: name.trim() });
-  }
-  const el = document.getElementById('groupSelectedUsers');
-  el.innerHTML = groupSelectedUsers.map(u =>
-    `<div class="selected-user-chip">${esc(u.name)}<button class="chip-remove" onclick="toggleGroupUser(${u.user_id}, '${esc(u.name)}')">×</button></div>`
-  ).join('');
-  searchGroupUsers();
-}
+// ── Create conversation ────────────────────────────────────────────────────
 
 async function createConversation() {
   const body = { type: convType };
 
-  if (convType === 'individual') {
-    if (!selectedIndividualUsers.length) {
-      showToast('Selecciona al menos un usuario', 'error'); return;
-    }
-    body.participant_user_ids = selectedIndividualUsers.map(u => u.user_id);
+  const body = {
+    type: _convType,
+    participant_user_ids: _selectedUsers.map(u => u.user_id),
+    name: _convType === 'group' ? (document.getElementById('grpName').value.trim() || null) : null,
+    target: _convType === 'group' ? _target : null,
+  };
+
+  const r = await apiFetch('/chat/conversations', { method: 'POST', body: JSON.stringify(body) });
+  if (r.success) {
+    closeNewPanel();
+    await loadConversations();
+    selectConversation(r.data.id);
   } else {
     const target = document.getElementById('groupTarget').value;
     const name = document.getElementById('groupName').value.trim();

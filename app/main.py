@@ -13,10 +13,11 @@ from app.core.limiter import limiter
 from app.routers import (
     auth, users, roles, menus, parameters, countries,
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
-    analytics, public, session_logs, client_tasks, programs, weekly_menus, chat,
+    analytics, public, session_logs, client_tasks, programs, weekly_menus,
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
+from app.routers.chat import router as chat_router, router_ws as chat_ws_router
 
 # ── CORS origins ──────────────────────────────────────────────────────────────
 _origins = settings.cors_origins
@@ -124,9 +125,10 @@ app.include_router(session_logs.router, prefix=API_PREFIX)
 app.include_router(client_tasks.router, prefix=API_PREFIX)
 app.include_router(programs.router, prefix=API_PREFIX)
 app.include_router(weekly_menus.router, prefix=API_PREFIX)
-app.include_router(chat.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(settings_router.router, prefix=API_PREFIX)
+app.include_router(chat_router, prefix=API_PREFIX)
+app.include_router(chat_ws_router)
 
 
 # ── Global exception handler (no stack traces in production) ──────────────────

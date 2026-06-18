@@ -1,56 +1,86 @@
-import json
 import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.database import get_db
 from app.core.dependencies import (
-    require_role_ids, SUPERADMIN, ADMIN, COACH, CLIENT,
+    ADMIN,
+    CLIENT,
+    COACH,
+    SUPERADMIN,
+    _coach_client_ids,
+    _get_coach_detail,
     _user_role_ids,
+    get_current_user,
+    get_db,
 )
-from app.core.responses import send_response, send_error
+from app.core.responses import send_error, send_response
 from app.core.security import decode_token
 from app.core.ws_manager import manager
-from app.models.chat import ChatConversation, ChatParticipant, ChatMessage
-from app.models.user import User, UserDetail, RoleUser
+from app.database import SessionLocal
+from app.models.chat import ChatConversation, ChatMessage, ChatParticipant
+from app.models.user import RoleUser, User, UserDetail
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
+# ── Pydantic schemas ──────────────────────────────────────────────────────────
+
+class ConversationCreate(BaseModel):
+    type: str  # 'individual' | 'group'
+    participant_user_ids: Optional[list[int]] = None
+    name: Optional[str] = None
+    target: Optional[str] = None  # 'coaches' | 'clients' (admin group)
+
+
+class MessageCreate(BaseModel):
+    content: str
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _get_detail(user_id: int, db: Session) -> Optional[UserDetail]:
+def _user_detail(db: Session, user_id: int) -> Optional[UserDetail]:
     return db.query(UserDetail).filter(UserDetail.user_id == user_id).first()
 
 
 def _serialize_message(msg: ChatMessage, db: Session) -> dict:
-    detail = _get_detail(msg.sender_user_id, db)
+    sender_detail = _user_detail(db, msg.sender_user_id)
+    sender_name = ""
+    sender_photo = None
+    if sender_detail:
+        sender_name = f"{sender_detail.name} {sender_detail.last_name or ''}".strip()
+        sender_photo = sender_detail.photo
+    elif msg.sender:
+        sender_name = msg.sender.name
     return {
-        "id":             msg.id,
+        "id": msg.id,
         "conversation_id": msg.conversation_id,
+        "content": msg.content,
         "sender_user_id": msg.sender_user_id,
-        "sender_name":    detail.name if detail else "Usuario",
-        "sender_photo":   detail.photo if detail else None,
-        "content":        msg.content,
-        "created_at":     msg.created_at.isoformat() if msg.created_at else None,
+        "sender_name": sender_name,
+        "sender_photo": sender_photo,
+        "created_at": msg.created_at.isoformat() if msg.created_at else None,
     }
 
 
 def _serialize_conversation(conv: ChatConversation, current_user_id: int, db: Session) -> dict:
-    participant_ids = [p.user_id for p in conv.participants]
-    participants = []
-    for uid in participant_ids:
-        d = _get_detail(uid, db)
-        if d:
-            participants.append({
+    participant_user_ids = [p.user_id for p in conv.participants]
+    participants_info = []
+    for uid in participant_user_ids:
+        detail = _user_detail(db, uid)
+        if detail:
+            participants_info.append({
                 "user_id": uid,
-                "name": d.name,
-                "photo": d.photo,
+                "name": f"{detail.name} {detail.last_name or ''}".strip(),
+                "photo": detail.photo,
             })
+        else:
+            u = db.query(User).filter(User.id == uid).first()
+            if u:
+                participants_info.append({"user_id": uid, "name": u.name, "photo": None})
 
     last_msg = (
         db.query(ChatMessage)
@@ -58,51 +88,41 @@ def _serialize_conversation(conv: ChatConversation, current_user_id: int, db: Se
         .order_by(ChatMessage.created_at.desc())
         .first()
     )
-
-    name = conv.name
-    if not name and conv.type == "individual":
-        other = next((p for p in participants if p["user_id"] != current_user_id), None)
-        name = other["name"] if other else "Conversación"
+    last_message = _serialize_message(last_msg, db) if last_msg else None
 
     return {
-        "id":           conv.id,
-        "type":         conv.type,
-        "name":         name,
-        "participants": participants,
-        "last_message": _serialize_message(last_msg, db) if last_msg else None,
-        "updated_at":   conv.updated_at.isoformat() if conv.updated_at else None,
+        "id": conv.id,
+        "type": conv.type,
+        "name": conv.name,
+        "created_by_user_id": conv.created_by_user_id,
+        "created_at": conv.created_at.isoformat() if conv.created_at else None,
+        "updated_at": conv.updated_at.isoformat() if conv.updated_at else None,
+        "participants": participants_info,
+        "last_message": last_message,
     }
 
 
-def _is_participant(conv_id: str, user_id: int, db: Session) -> bool:
-    return db.query(ChatParticipant).filter(
-        ChatParticipant.conversation_id == conv_id,
-        ChatParticipant.user_id == user_id,
-    ).first() is not None
+def _get_client_user_ids_for_coach(coach_user_id: int, db: Session) -> list[int]:
+    coach_detail = _get_coach_detail(coach_user_id, db)
+    if not coach_detail:
+        return []
+    client_detail_ids = _coach_client_ids(coach_detail.id, db)
+    result = []
+    for detail_id in client_detail_ids:
+        detail = db.query(UserDetail).filter(UserDetail.id == detail_id).first()
+        if detail:
+            result.append(detail.user_id)
+    return result
 
 
-def _coach_client_ids(coach_user_id: int, db: Session) -> list[int]:
-    from app.core.dependencies import filter_clients_by_role
-    client_role_users = db.query(RoleUser).filter(RoleUser.role_id == CLIENT).all()
-    client_user_ids = [ru.user_id for ru in client_role_users]
-
-    from app.models.user import UserDetail as UD
-    all_details = db.query(UD).filter(UD.user_id.in_(client_user_ids)).all()
-    filtered = filter_clients_by_role(all_details, db.query(User).filter(User.id == coach_user_id).first(), db)
-    return [d.user_id for d in filtered]
+def _get_all_coach_user_ids(db: Session) -> list[int]:
+    rows = db.query(RoleUser).filter(RoleUser.role_id == COACH).all()
+    return [r.user_id for r in rows]
 
 
-# ── Schemas ───────────────────────────────────────────────────────────────────
-
-class CreateConversationRequest(BaseModel):
-    type: str = "individual"
-    participant_user_ids: list[int] = []
-    name: Optional[str] = None
-    target: Optional[str] = None  # "my_clients" | "all_coaches" | "all_clients"
-
-
-class SendMessageRequest(BaseModel):
-    content: str
+def _get_all_client_user_ids(db: Session) -> list[int]:
+    rows = db.query(RoleUser).filter(RoleUser.role_id == CLIENT).all()
+    return [r.user_id for r in rows]
 
 
 # ── REST endpoints ────────────────────────────────────────────────────────────
@@ -110,67 +130,75 @@ class SendMessageRequest(BaseModel):
 @router.get("/conversations")
 def list_conversations(
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+    current_user=Depends(get_current_user),
 ):
-    part_rows = db.query(ChatParticipant).filter(
-        ChatParticipant.user_id == current_user.id
-    ).all()
-    conv_ids = [p.conversation_id for p in part_rows]
-    convs = db.query(ChatConversation).filter(
-        ChatConversation.id.in_(conv_ids)
-    ).order_by(ChatConversation.updated_at.desc()).all()
-    return send_response(
-        [_serialize_conversation(c, current_user.id, db) for c in convs], "OK"
+    participations = (
+        db.query(ChatParticipant)
+        .filter(ChatParticipant.user_id == current_user.id)
+        .all()
     )
+    conv_ids = [p.conversation_id for p in participations]
+    convs = (
+        db.query(ChatConversation)
+        .filter(ChatConversation.id.in_(conv_ids))
+        .order_by(ChatConversation.updated_at.desc())
+        .all()
+    )
+    data = [_serialize_conversation(c, current_user.id, db) for c in convs]
+    return send_response(data, "Conversaciones obtenidas")
 
 
 @router.post("/conversations")
 def create_conversation(
-    data: CreateConversationRequest,
+    body: ConversationCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+    current_user=Depends(get_current_user),
 ):
-    user_ids: list[int] = list(set(data.participant_user_ids))
-    if current_user.id not in user_ids:
-        user_ids.append(current_user.id)
+    user_roles = _user_role_ids(current_user.id, db)
 
-    if data.type == "group" and data.target:
-        roles = _user_role_ids(current_user.id, db)
-        if data.target == "my_clients" and COACH in roles:
-            client_ids = _coach_client_ids(current_user.id, db)
-            user_ids = list(set(user_ids + client_ids))
-        elif data.target == "all_coaches" and (ADMIN in roles or SUPERADMIN in roles):
-            coach_users = db.query(RoleUser).filter(RoleUser.role_id == COACH).all()
-            user_ids = list(set(user_ids + [ru.user_id for ru in coach_users]))
-        elif data.target == "all_clients" and (ADMIN in roles or SUPERADMIN in roles):
-            client_users = db.query(RoleUser).filter(RoleUser.role_id == CLIENT).all()
-            user_ids = list(set(user_ids + [ru.user_id for ru in client_users]))
+    if body.type not in ("individual", "group"):
+        return send_error("Tipo debe ser 'individual' o 'group'", code=400)
 
-    if data.type == "individual" and len(user_ids) == 2:
-        existing = (
-            db.query(ChatConversation)
-            .join(ChatParticipant, ChatParticipant.conversation_id == ChatConversation.id)
-            .filter(
-                ChatConversation.type == "individual",
-                ChatParticipant.user_id == user_ids[0],
-            ).all()
-        )
-        for conv in existing:
-            ids = {p.user_id for p in conv.participants}
-            if ids == set(user_ids):
-                return send_response(_serialize_conversation(conv, current_user.id, db), "OK")
+    if body.type == "group" and CLIENT in user_roles and COACH not in user_roles and ADMIN not in user_roles and SUPERADMIN not in user_roles:
+        return send_error("Los clientes no pueden crear grupos", code=403)
 
+    participant_ids: list[int] = list(body.participant_user_ids or [])
+
+    if body.type == "group" and not participant_ids:
+        is_coach = COACH in user_roles
+        is_admin = ADMIN in user_roles or SUPERADMIN in user_roles
+        if is_admin:
+            target = body.target or "clients"
+            if target == "coaches":
+                participant_ids = _get_all_coach_user_ids(db)
+            else:
+                participant_ids = _get_all_client_user_ids(db)
+        elif is_coach:
+            participant_ids = _get_client_user_ids_for_coach(current_user.id, db)
+        else:
+            return send_error("No se puede determinar los participantes", code=400)
+
+    if current_user.id not in participant_ids:
+        participant_ids.append(current_user.id)
+
+    now = datetime.utcnow()
     conv = ChatConversation(
         id=str(uuid.uuid4()),
-        type=data.type,
-        name=data.name,
+        type=body.type,
+        name=body.name,
         created_by_user_id=current_user.id,
+        created_at=now,
+        updated_at=now,
     )
     db.add(conv)
     db.flush()
 
-    for uid in user_ids:
-        db.add(ChatParticipant(conversation_id=conv.id, user_id=uid))
+    for uid in set(participant_ids):
+        db.add(ChatParticipant(
+            conversation_id=conv.id,
+            user_id=uid,
+            joined_at=now,
+        ))
 
     db.commit()
     db.refresh(conv)
@@ -178,17 +206,26 @@ def create_conversation(
 
 
 @router.get("/conversations/{conv_id}/messages")
-def get_messages(
+def list_messages(
     conv_id: str,
-    page: int = Query(1),
-    per_page: int = Query(50),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+    current_user=Depends(get_current_user),
 ):
-    if not _is_participant(conv_id, current_user.id, db):
-        return send_error("No tienes acceso a esta conversación", code=403)
+    part = (
+        db.query(ChatParticipant)
+        .filter(
+            ChatParticipant.conversation_id == conv_id,
+            ChatParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not part:
+        return send_error("Conversación no encontrada", code=404)
+
     total = db.query(ChatMessage).filter(ChatMessage.conversation_id == conv_id).count()
-    msgs = (
+    messages = (
         db.query(ChatMessage)
         .filter(ChatMessage.conversation_id == conv_id)
         .order_by(ChatMessage.created_at.asc())
@@ -196,34 +233,42 @@ def get_messages(
         .limit(per_page)
         .all()
     )
-    return send_response({
-        "messages":  [_serialize_message(m, db) for m in msgs],
-        "total":     total,
-        "page":      page,
-        "per_page":  per_page,
-        "last_page": max(1, (total + per_page - 1) // per_page),
-    }, "OK")
+    data = [_serialize_message(m, db) for m in messages]
+    return send_response({"messages": data, "total": total, "page": page, "per_page": per_page}, "Mensajes obtenidos")
 
 
 @router.post("/conversations/{conv_id}/messages")
 def send_message_rest(
     conv_id: str,
-    data: SendMessageRequest,
+    body: MessageCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+    current_user=Depends(get_current_user),
 ):
-    if not _is_participant(conv_id, current_user.id, db):
-        return send_error("No tienes acceso a esta conversación", code=403)
+    part = (
+        db.query(ChatParticipant)
+        .filter(
+            ChatParticipant.conversation_id == conv_id,
+            ChatParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not part:
+        return send_error("Conversación no encontrada", code=404)
+
+    now = datetime.utcnow()
     msg = ChatMessage(
         id=str(uuid.uuid4()),
         conversation_id=conv_id,
         sender_user_id=current_user.id,
-        content=data.content,
+        content=body.content,
+        created_at=now,
     )
     db.add(msg)
+
     conv = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
     if conv:
-        conv.updated_at = datetime.utcnow()
+        conv.updated_at = now
+
     db.commit()
     db.refresh(msg)
     return send_response(_serialize_message(msg, db), "Mensaje enviado")
@@ -233,95 +278,125 @@ def send_message_rest(
 def delete_conversation(
     conv_id: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+    current_user=Depends(get_current_user),
 ):
     conv = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
     if not conv:
         return send_error("Conversación no encontrada", code=404)
-    roles = _user_role_ids(current_user.id, db)
-    if conv.created_by_user_id != current_user.id and not (ADMIN in roles or SUPERADMIN in roles):
-        return send_error("Sin permiso para eliminar", code=403)
+
+    user_roles = _user_role_ids(current_user.id, db)
+    is_admin = ADMIN in user_roles or SUPERADMIN in user_roles
+    if conv.created_by_user_id != current_user.id and not is_admin:
+        return send_error("No tienes permisos para eliminar esta conversación", code=403)
+
     db.delete(conv)
     db.commit()
-    return send_response({}, "Conversación eliminada")
+    return send_response(None, "Conversación eliminada")
 
 
-# ── WebSocket ─────────────────────────────────────────────────────────────────
+# ── WebSocket endpoint ────────────────────────────────────────────────────────
 
-@router.websocket("/ws")
-async def websocket_endpoint(
-    websocket: WebSocket,
-    token: str = Query(...),
-    db: Session = Depends(get_db),
-):
+router_ws = APIRouter(tags=["Chat"])
+
+
+@router_ws.websocket("/ws/chat")
+async def websocket_chat(websocket: WebSocket, token: str = Query(...)):
     payload = decode_token(token)
-    if not payload or payload.get("type") != "access":
+    if payload is None or payload.get("type") != "access":
         await websocket.close(code=4001)
         return
 
-    user_id: int = int(payload.get("sub", 0))
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
+    user_id_raw = payload.get("sub")
+    if user_id_raw is None:
         await websocket.close(code=4001)
         return
+
+    user_id = int(user_id_raw)
 
     await manager.connect(websocket, user_id)
     try:
         while True:
-            raw = await websocket.receive_text()
-            try:
-                data = json.loads(raw)
-            except Exception:
-                continue
+            data = await websocket.receive_json()
+            msg_type = data.get("type", "message")
 
-            event_type = data.get("type", "message")
-
-            if event_type == "typing":
+            if msg_type == "typing":
                 conv_id = data.get("conversation_id")
-                if conv_id and _is_participant(conv_id, user_id, db):
-                    participant_ids = [
-                        p.user_id for p in
-                        db.query(ChatParticipant).filter(
-                            ChatParticipant.conversation_id == conv_id
-                        ).all()
-                    ]
-                    await manager.broadcast_to_users(
-                        [uid for uid in participant_ids if uid != user_id],
-                        {"type": "typing", "conversation_id": conv_id, "user_id": user_id},
-                    )
+                if not conv_id:
+                    continue
+                db = SessionLocal()
+                try:
+                    participants = db.query(ChatParticipant).filter(
+                        ChatParticipant.conversation_id == conv_id
+                    ).all()
+                    recipient_ids = [p.user_id for p in participants if p.user_id != user_id]
+                finally:
+                    db.close()
+                await manager.broadcast_to_users(
+                    recipient_ids,
+                    {"type": "typing", "conversation_id": conv_id, "user_id": user_id},
+                )
                 continue
 
             conv_id = data.get("conversation_id")
-            content = (data.get("content") or "").strip()
+            content = data.get("content", "").strip()
             if not conv_id or not content:
                 continue
-            if not _is_participant(conv_id, user_id, db):
-                continue
 
-            msg = ChatMessage(
-                id=str(uuid.uuid4()),
-                conversation_id=conv_id,
-                sender_user_id=user_id,
-                content=content,
-            )
-            db.add(msg)
-            conv = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
-            if conv:
-                conv.updated_at = datetime.utcnow()
-            db.commit()
-            db.refresh(msg)
+            db = SessionLocal()
+            try:
+                part = db.query(ChatParticipant).filter(
+                    ChatParticipant.conversation_id == conv_id,
+                    ChatParticipant.user_id == user_id,
+                ).first()
+                if not part:
+                    continue
 
-            payload_out = {
-                "type":    "message",
-                "message": _serialize_message(msg, db),
-            }
-            participant_ids = [
-                p.user_id for p in
-                db.query(ChatParticipant).filter(
+                now = datetime.utcnow()
+                msg = ChatMessage(
+                    id=str(uuid.uuid4()),
+                    conversation_id=conv_id,
+                    sender_user_id=user_id,
+                    content=content,
+                    created_at=now,
+                )
+                db.add(msg)
+
+                conv = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
+                if conv:
+                    conv.updated_at = now
+
+                db.commit()
+                db.refresh(msg)
+
+                msg_data = {
+                    "id": msg.id,
+                    "conversation_id": msg.conversation_id,
+                    "content": msg.content,
+                    "sender_user_id": msg.sender_user_id,
+                    "sender_name": "",
+                    "sender_photo": None,
+                    "created_at": msg.created_at.isoformat() if msg.created_at else None,
+                }
+                sender_detail = _user_detail(db, user_id)
+                if sender_detail:
+                    msg_data["sender_name"] = f"{sender_detail.name} {sender_detail.last_name or ''}".strip()
+                    msg_data["sender_photo"] = sender_detail.photo
+
+                participants = db.query(ChatParticipant).filter(
                     ChatParticipant.conversation_id == conv_id
                 ).all()
-            ]
-            await manager.broadcast_to_users(participant_ids, payload_out)
+                recipient_ids = [p.user_id for p in participants]
+            finally:
+                db.close()
+
+            broadcast_payload = {
+                "type": "message",
+                "conversation_id": conv_id,
+                "message": msg_data,
+            }
+            await manager.broadcast_to_users(recipient_ids, broadcast_payload)
 
     except WebSocketDisconnect:
+        manager.disconnect(websocket, user_id)
+    except Exception:
         manager.disconnect(websocket, user_id)

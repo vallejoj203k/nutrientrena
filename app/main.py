@@ -14,6 +14,7 @@ from app.routers import (
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
+from app.routers.chat import router as chat_router, router_ws as chat_ws_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -65,6 +66,8 @@ app.include_router(session_logs.router, prefix=API_PREFIX)
 app.include_router(client_tasks.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(settings_router.router, prefix=API_PREFIX)
+app.include_router(chat_router, prefix=API_PREFIX)
+app.include_router(chat_ws_router)
 
 
 @app.exception_handler(Exception)

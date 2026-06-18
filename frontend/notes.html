@@ -456,8 +456,8 @@ async function loadNotes(query = '') {
 
 async function loadClients() {
   try {
-    const r = await apiFetch('/users/search?role_id=6&limit=200');
-    _clients = r.data?.items || r.data || [];
+    const r = await apiFetch('/users/client/search?per_page=200');
+    _clients = r.data?.data || r.data?.items || r.data || [];
   } catch { _clients = []; }
 }
 

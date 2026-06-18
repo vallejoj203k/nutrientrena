@@ -38,3 +38,4 @@ build/
 
 # Claude Code internal
 .claude/
+scripts/aliments_usda.sql

@@ -17,6 +17,7 @@ from app.routers import (
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes
+from app.routers.chat import router as chat_router, router_ws as chat_ws_router
 
 # ── CORS origins ──────────────────────────────────────────────────────────────
 _origins = settings.cors_origins
@@ -126,6 +127,8 @@ app.include_router(programs.router, prefix=API_PREFIX)
 app.include_router(weekly_menus.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(settings_router.router, prefix=API_PREFIX)
+app.include_router(chat_router, prefix=API_PREFIX)
+app.include_router(chat_ws_router)
 
 
 # ── Global exception handler (no stack traces in production) ──────────────────

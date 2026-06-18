@@ -480,6 +480,7 @@ let _me = null;
 let _records = [];
 let _clients = [];
 let _selectedUserId = null;
+let _selectedUserName = null;
 let _editId = null;
 let _deleteId = null;
 let _photoUrls = [null, null, null]; // photo, photo2, photo3
@@ -498,6 +499,7 @@ async function boot() {
   const isClient = _me.role?.id === 6;
   if (isClient) {
     _selectedUserId = _me.id;
+    _selectedUserName = _me.name || _me.email || 'cliente';
     document.getElementById('clientSelectorWrap').style.display = 'none';
   } else {
     await loadClients();
@@ -525,7 +527,10 @@ async function apiFetch(path, opts = {}) {
 async function apiUpload(file) {
   const fd = new FormData();
   fd.append('file', file);
-  fd.append('folder', 'progress');
+  const clientSlug = (_selectedUserName || 'cliente').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  fd.append('folder', 'progress/' + clientSlug);
   const res = await fetch(API + '/files/upload', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + _token },
@@ -537,8 +542,8 @@ async function apiUpload(file) {
 // ── Client selector ────────────────────────────────────────────────────────────
 async function loadClients() {
   try {
-    const r = await apiFetch('/users/search?role_id=6&limit=200');
-    _clients = r.data?.items || r.data || [];
+    const r = await apiFetch('/users/client/search?per_page=200');
+    _clients = r.data?.data || r.data?.items || r.data || [];
   } catch { _clients = []; }
 }
 
@@ -550,30 +555,32 @@ function onClientSearch() {
   ).slice(0, 20);
   if (!filtered.length) { dd.classList.remove('open'); return; }
   dd.innerHTML = filtered.map(c => `
-    <div class="client-option" onclick="selectClient(${c.id})">
+    <div class="client-option" onclick="selectClient(${c.user_id || c.id})">
       ${esc(c.name || c.email)} <span style="color:#9CA3AF;font-size:11px;">${esc(c.email || '')}</span>
     </div>`).join('');
   dd.classList.add('open');
 }
 
 async function selectClient(id) {
-  const client = _clients.find(c => c.id === id);
+  const client = _clients.find(c => (c.user_id || c.id) === id);
   if (!client) return;
   _selectedUserId = id;
+  _selectedUserName = client.name || client.email || 'cliente';
   document.getElementById('clientSearchInput').value = '';
   document.getElementById('clientDropdown').classList.remove('open');
   document.getElementById('clientSelectorWrap').style.display = 'none';
   document.getElementById('clientTagWrap').innerHTML = `
     <span class="client-tag">
-      ${esc(client.name || client.email)}
+      ${esc(_selectedUserName)}
       <button onclick="clearClient()" title="Cambiar cliente">×</button>
     </span>`;
-  document.getElementById('topbarSub').textContent = `Progreso de ${client.name || client.email}`;
+  document.getElementById('topbarSub').textContent = `Progreso de ${_selectedUserName}`;
   await loadRecords();
 }
 
 function clearClient() {
   _selectedUserId = null;
+  _selectedUserName = null;
   _records = [];
   document.getElementById('clientTagWrap').innerHTML = '';
   document.getElementById('clientSelectorWrap').style.display = '';

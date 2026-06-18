@@ -696,6 +696,7 @@ Cada push ejecuta dos jobs en GitHub Actions:
 | **Fase 4** | Eventos recurrentes, notas, progreso con fotos _(con fixes post-entrega)_ | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 5** | Seguridad, testing, documentación API, optimización de BD | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 | **Fase 6** | Formularios de página completa, corrección de bugs frontend | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 7** | Chat en tiempo real, base USDA de alimentos, PDFs en emails, correcciones | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
 
 ### Fase 3 — Detalle
 
@@ -765,6 +766,149 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 | Overlays de confirmación de borrado (`delEventOverlay`, `delTypeOverlay`) no cerraban al hacer clic en el fondo → añadido `onclick="if(event.target===this)close*()"` | `events.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
 | HTML duplicado `<div class="sidebar-nav"><nav class="sidebar-nav">` causaba contenedor sin cerrar → eliminado el `<div>` redundante | `diets.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
 | Enlace **Eventos** ausente en la barra lateral de 12 páginas → añadido en todas | todas las páginas | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+
+---
+
+### Fase 7 — Chat en tiempo real, base USDA de alimentos, PDFs en emails y correcciones
+
+#### 7.1 Chat en tiempo real (`/app/chat.html`)
+
+**Backend**
+
+| Ítem | Estado |
+|------|--------|
+| Nuevas tablas: `chat_conversations`, `chat_participants`, `chat_messages` | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Migración Alembic `q5r6s7t8u9v0` | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `GET /api/chat/conversations` — lista conversaciones del usuario autenticado | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `POST /api/chat/conversations` — crea conversación individual o grupal (auto-poblado por rol) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `GET /api/chat/conversations/{id}/messages` — historial paginado | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `POST /api/chat/conversations/{id}/messages` — envío REST (fallback sin WebSocket) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `DELETE /api/chat/conversations/{id}` — solo el creador o admin | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `WS /api/chat/ws?token=<jwt>` — WebSocket autenticado con JWT | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Indicador de "escribiendo..." entre participantes via WebSocket | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Reconexión automática del WebSocket (cada 3 s si se pierde la conexión) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+
+**Frontend**
+
+| Ítem | Estado |
+|------|--------|
+| `chat.html`: panel de conversaciones + hilo de mensajes + barra de envío | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Botones **Individual** / **Grupal** con panel inline (no modal) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Individual: buscador de personas (clientes + coaches) con selección múltiple | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Grupal: opciones auto-generadas según rol — coach ve "Mis clientes"; admin ve las 3 opciones | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Botón **Grupal** oculto para clientes (rol 6) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Mensajes propios a la derecha (morado), mensajes ajenos a la izquierda | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Separadores de fecha (Hoy / Ayer / fecha corta) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Enter para enviar, Shift+Enter para salto de línea | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Enlace **Chat** añadido al sidebar de todas las páginas | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+
+**Grupos auto-generados por rol:**
+
+| Rol del usuario | Opciones de grupo disponibles |
+|-----------------|-------------------------------|
+| Coach (5) | Mis clientes (clientes asignados a ese coach) |
+| Admin (2) / Superadmin (1) | Mis clientes · Todos los coaches · Todos los clientes |
+| Cliente (6) | Sin acceso a grupos |
+
+---
+
+#### 7.2 Base de datos de alimentos USDA
+
+| Ítem | Estado |
+|------|--------|
+| 8 192 alimentos importados desde USDA FoodData Central (Foundation + SR Legacy) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Nombres traducidos al español con DeepL API (lotes de 50, ~500 k caracteres) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| 30 grupos de alimentos en español (carnes, lácteos, verduras, legumbres, etc.) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| 27 campos de micronutrientes: vitaminas A, B1, B2, B3, B5, B6, B9, B12, C, D, E, K + minerales calcio, fósforo, potasio, sodio, hierro, zinc, magnesio, manganeso, cobre, selenio + fibra, colesterol, agua, alcohol, cafeína | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Script idempotente `scripts/import_usda.py` — no duplica si se ejecuta varias veces | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Exportación a Excel `scripts/aliments_usda.xlsx` para revisión con el cliente | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+
+---
+
+#### 7.3 PDFs adjuntos en emails de entrega de planes
+
+| Ítem | Estado |
+|------|--------|
+| Email de entrega ahora incluye el PDF de **dieta** y el PDF de **rutina** como adjuntos | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `send_plan_email` acepta `attachments: list[tuple[bytes, str]]` (bytes + nombre del archivo) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Compatible con Resend (base64) y Gmail SMTP (`MIMEApplication`) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| **Fix:** imágenes de ejercicios en PDFs descargadas directamente desde R2 (boto3) con fallback HTTP | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| **Fix:** ejercicios dentro de **bloques** (agrupaciones) no aparecían en PDF ni en email → ahora se itera `day.details + day.blocks → block.exercises` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| **Fix:** `AttributeError: aliment.unit` en dietas → campo `unit` no existe en el modelo; eliminado de `_build_diet_payload` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+
+---
+
+#### 7.4 Correcciones generales
+
+| Bug | Archivo | Estado |
+|-----|---------|--------|
+| `notes.html`: buscador de clientes usaba `/users/search?role_id=6` (no existe) → corregido a `/users/client/search?per_page=200` con parseo `r.data.data` | `notes.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| `progress.html`: `loadClients()` usaba endpoint incorrecto, no aparecían clientes en el selector | `progress.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| `progress.html`: `selectClient()` usaba `c.id` en lugar de `c.user_id` (campo real de la respuesta) | `progress.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| `progress.html`: fotos subidas a carpeta genérica `progress/` → ahora se guardan en `progress/<nombre-cliente>` en R2 | `progress.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+
+---
+
+#### Guía de pruebas — Fase 7
+
+##### 7.A Chat individual
+
+1. Ir a **Chat** en el menú lateral (`/app/chat.html`)
+2. Hacer clic en el botón **Individual** → aparece un panel inline debajo de los botones
+3. Escribir el nombre de un cliente o coach en el buscador → seleccionarlo de la lista
+4. Hacer clic en **Iniciar conversación** → se abre el hilo de mensajes
+5. Escribir un mensaje y pulsar **Enter** (o el botón Enviar) → el mensaje aparece a la derecha en morado
+6. Desde otra sesión (con el otro usuario) verificar que el mensaje llega en tiempo real sin recargar
+7. El indicador **"Escribiendo…"** debe aparecer cuando el otro usuario está tecleando
+8. Comprobar que los mensajes persisten al recargar la página
+
+##### 7.B Chat grupal (coach)
+
+1. Iniciar sesión como **coach**
+2. Ir a **Chat** → el botón **Grupal** es visible (no para clientes)
+3. Hacer clic en **Grupal** → aparece la opción **"👤 Mis clientes"**
+4. (Opcional) Escribir un nombre de grupo → hacer clic en **Mis clientes** para seleccionarlo
+5. Hacer clic en **Crear grupo** → se crea una conversación con todos los clientes asignados a ese coach
+6. Enviar un mensaje → todos los clientes del grupo deben recibirlo en tiempo real
+
+##### 7.C Chat grupal (admin)
+
+1. Iniciar sesión como **admin**
+2. Ir a **Chat** → hacer clic en **Grupal**
+3. Aparecen 3 opciones: **Mis clientes**, **Todos los coaches**, **Todos los clientes**
+4. Seleccionar **Todos los coaches** → crear grupo → verificar que se añaden todos los coaches como participantes
+
+##### 7.D Alimentos con micronutrientes
+
+1. Ir a **Alimentos** (`/app/aliments.html`)
+2. Buscar cualquier alimento (ej. "pollo") → deben aparecer resultados en español
+3. Abrir el detalle de un alimento → verificar que los campos de micronutrientes (vitaminas, minerales) están rellenos
+4. Verificar que hay al menos 8 000 alimentos disponibles en la biblioteca
+
+##### 7.E Entrega de plan con PDFs adjuntos
+
+1. Ir al **perfil de un cliente** → pestaña **Entregas**
+2. Seleccionar una dieta y una rutina → hacer clic en **Entregar plan**
+3. El cliente debe recibir un email con **dos archivos adjuntos**: `dieta.pdf` y `rutina.pdf`
+4. Abrir el PDF de rutina → verificar que los ejercicios de todos los días aparecen, incluyendo los que están dentro de bloques/agrupaciones
+5. Verificar que las imágenes de los ejercicios aparecen dentro del PDF
+
+##### 7.F Progreso — selector de clientes
+
+1. Ir a **Progreso** (`/app/progress.html`)
+2. Escribir el nombre de un cliente en el buscador de la barra superior → debe aparecer la lista desplegable
+3. Seleccionar un cliente → se carga su historial de progreso
+4. Hacer clic en **Nuevo registro** → subir una foto → verificar en Cloudflare R2 que la foto quedó en la carpeta `progress/<nombre-del-cliente>/`
+
+---
+
+#### Migración de base de datos requerida (Fase 7)
+
+```bash
+alembic upgrade head
+```
+
+Aplica la revisión `q5r6s7t8u9v0` que crea las tablas de chat.
 
 ---
 

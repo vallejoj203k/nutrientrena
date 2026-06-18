@@ -33,10 +33,40 @@
 
     /* ── Conversations panel ── */
     .conv-panel{width:300px;min-width:300px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;}
-    .conv-header{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-    .conv-header h2{font-size:16px;font-weight:700;color:#111827;}
-    .btn-new-conv{background:var(--purple);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
-    .btn-new-conv:hover{background:var(--purple-mid);}
+    .conv-header{padding:16px;border-bottom:1px solid var(--border);}
+    .conv-header h2{font-size:16px;font-weight:700;color:#111827;margin-bottom:10px;}
+
+    /* ── New chat buttons ── */
+    .new-chat-btns{display:flex;gap:8px;}
+    .new-chat-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#374151;transition:all .15s;}
+    .new-chat-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-light);}
+    .new-chat-btn.active{border-color:var(--purple);color:var(--purple);background:var(--purple-light);}
+
+    /* ── Inline new chat panel ── */
+    .new-chat-panel{border-bottom:1px solid var(--border);background:#FAFAFA;animation:slideDown .15s ease;}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+    .new-chat-panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;font-size:13px;font-weight:700;color:#374151;}
+    .new-chat-panel-header button{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:18px;line-height:1;padding:0;}
+    .new-chat-panel-header button:hover{color:#374151;}
+    .new-chat-panel-body{padding:0 14px 12px;}
+    .new-chat-panel-body input[type=text]{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;}
+    .new-chat-panel-body input[type=text]:focus{border-color:var(--purple);}
+    .panel-user-results{max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:6px;background:#fff;}
+    .panel-user-item{padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;}
+    .panel-user-item:hover{background:#F9FAFB;}
+    .panel-user-item.selected{background:var(--purple-light);color:var(--purple);}
+    .panel-selected-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+    .sel-tag{background:var(--purple-light);color:var(--purple);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;}
+    .sel-tag button{background:none;border:none;color:var(--purple);cursor:pointer;font-size:14px;line-height:1;}
+    .btn-start{display:block;width:100%;margin-top:10px;padding:9px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
+    .btn-start:hover{background:var(--purple-mid);}
+    .btn-start:disabled{opacity:.5;cursor:not-allowed;}
+    .target-opts{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
+    .target-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;background:#fff;}
+    .target-opt:hover{border-color:var(--purple-mid);}
+    .target-opt.active{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
+    .grp-name-input{margin-bottom:10px;}
+
     .conv-search{padding:10px 16px;border-bottom:1px solid var(--border);}
     .conv-search input{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;outline:none;}
     .conv-search input:focus{border-color:var(--purple);}
@@ -85,32 +115,6 @@
     .no-conv{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9CA3AF;gap:12px;}
     .no-conv svg{opacity:.3;}
     .no-conv p{font-size:15px;}
-
-    /* ── Modal ── */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;}
-    .modal-overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:14px;padding:28px;width:460px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;gap:18px;}
-    .modal h3{font-size:17px;font-weight:700;color:#111827;}
-    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#9CA3AF;margin-left:auto;}
-    .type-toggle{display:flex;gap:8px;}
-    .type-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#374151;transition:all .15s;}
-    .type-btn.active{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
-    label{font-size:13px;font-weight:600;color:#374151;}
-    .modal input,.modal select,.modal textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;}
-    .modal input:focus,.modal select:focus{border-color:var(--purple);}
-    .user-results{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:6px;}
-    .user-result-item{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;}
-    .user-result-item:hover{background:#F9FAFB;}
-    .user-result-item.selected{background:var(--purple-light);color:var(--purple);}
-    .selected-users{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
-    .selected-tag{background:var(--purple-light);color:var(--purple);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;}
-    .selected-tag button{background:none;border:none;color:var(--purple);cursor:pointer;font-size:14px;line-height:1;}
-    .btn-primary{background:var(--purple);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
-    .btn-primary:hover{background:var(--purple-mid);}
-    .target-opts{display:flex;flex-direction:column;gap:8px;}
-    .target-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;}
-    .target-opt:hover{border-color:var(--purple-mid);}
-    .target-opt.active{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
   </style>
 </head>
 <body>
@@ -192,11 +196,40 @@
   <div class="conv-panel">
     <div class="conv-header">
       <h2>Mensajes</h2>
-      <button class="btn-new-conv" id="btnNewConv" onclick="openNewConvModal()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo
-      </button>
+      <!-- New chat type buttons -->
+      <div class="new-chat-btns">
+        <button class="new-chat-btn" id="btnInd" onclick="showNewPanel('individual')">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Individual
+        </button>
+        <button class="new-chat-btn" id="btnGrp" onclick="showNewPanel('group')" style="display:none;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Grupal
+        </button>
+      </div>
     </div>
+
+    <!-- Inline panel (shown when a button is active) -->
+    <div class="new-chat-panel" id="newChatPanel" style="display:none;">
+      <div class="new-chat-panel-header">
+        <span id="newChatPanelTitle">Nueva conversación</span>
+        <button onclick="closeNewPanel()">×</button>
+      </div>
+      <!-- Individual sub-panel -->
+      <div class="new-chat-panel-body" id="indPanel">
+        <input type="text" id="userSearchInput" placeholder="Buscar por nombre o email…" oninput="searchUsers(this.value)"/>
+        <div class="panel-user-results" id="userResults" style="display:none;"></div>
+        <div class="panel-selected-tags" id="selectedUsers"></div>
+        <button class="btn-start" id="btnStartInd" onclick="createConversation()" style="display:none;">Iniciar conversación</button>
+      </div>
+      <!-- Group sub-panel -->
+      <div class="new-chat-panel-body" id="grpPanel" style="display:none;">
+        <input type="text" class="grp-name-input" id="grpName" placeholder="Nombre del grupo (opcional)"/>
+        <div class="target-opts" id="targetOpts"></div>
+        <button class="btn-start" id="btnStartGrp" onclick="createConversation()">Crear grupo</button>
+      </div>
+    </div>
+
     <div class="conv-search">
       <input type="text" id="convSearch" placeholder="Buscar conversación…" oninput="filterConvs(this.value)"/>
     </div>
@@ -211,7 +244,7 @@
       <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <p>Selecciona una conversación para comenzar</p>
     </div>
-    <div id="convState" style="display:none;flex:1;display:none;flex-direction:column;overflow:hidden;">
+    <div id="convState" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
       <div class="msg-header" id="msgHeader">
         <div class="conv-avatar" id="msgAvatar"></div>
         <div class="msg-header-info">
@@ -233,41 +266,6 @@
   </div>
 </div>
 
-<!-- ── New conversation modal ──────────────────────────────────────────────── -->
-<div class="modal-overlay" id="newConvModal">
-  <div class="modal">
-    <div style="display:flex;align-items:center;">
-      <h3>Nueva conversación</h3>
-      <button class="modal-close" onclick="closeNewConvModal()">×</button>
-    </div>
-    <div>
-      <label>Tipo</label>
-      <div class="type-toggle" style="margin-top:8px;">
-        <button class="type-btn active" id="btnTypeInd" onclick="setConvType('individual')">💬 Individual</button>
-        <button class="type-btn" id="btnTypeGrp" onclick="setConvType('group')" id="btnTypeGrpEl">👥 Grupal</button>
-      </div>
-    </div>
-
-    <!-- Individual: search user -->
-    <div id="indSection">
-      <label>Buscar persona</label>
-      <input type="text" id="userSearchInput" placeholder="Nombre o email…" oninput="searchUsers(this.value)" style="margin-top:6px;"/>
-      <div class="user-results" id="userResults" style="display:none;"></div>
-      <div class="selected-users" id="selectedUsers"></div>
-    </div>
-
-    <!-- Group -->
-    <div id="grpSection" style="display:none;">
-      <label>Nombre del grupo</label>
-      <input type="text" id="grpName" placeholder="Ej: Clientes enero 2026" style="margin-top:6px;"/>
-      <label style="margin-top:12px;display:block;">Enviar a</label>
-      <div class="target-opts" style="margin-top:8px;" id="targetOpts"></div>
-    </div>
-
-    <button class="btn-primary" onclick="createConversation()">Crear conversación</button>
-  </div>
-</div>
-
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
 const WS_BASE = 'wss://nutrientrena-production.up.railway.app/api/chat/ws';
@@ -282,7 +280,7 @@ let _convType = 'individual';
 let _selectedUsers = [];
 let _target = null;
 let _typingTimer = null;
-let _allUsers = [];
+let _activePanel = null; // 'individual' | 'group' | null
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 
@@ -316,15 +314,64 @@ async function init() {
   document.getElementById('sidebarName').textContent = _me.name || _me.email || '';
   document.getElementById('sidebarRole').textContent = _me.roles?.[0]?.name || '';
 
-  // Clients can't create group chats
+  // Show Grupal button only for non-client roles
   const roles = (_me.roles || []).map(r => r.id || r.role_id);
-  const isClientOnly = roles.length === 1 && roles[0] === 6;
-  if (isClientOnly) {
-    document.getElementById('btnTypeGrp').style.display = 'none';
+  const canGroup = roles.includes(1) || roles.includes(2) || roles.includes(5);
+  if (canGroup) {
+    document.getElementById('btnGrp').style.display = '';
   }
 
   await loadConversations();
   connectWS();
+}
+
+// ── New chat panel ─────────────────────────────────────────────────────────
+
+function showNewPanel(type) {
+  const panel = document.getElementById('newChatPanel');
+  const indPanel = document.getElementById('indPanel');
+  const grpPanel = document.getElementById('grpPanel');
+  const title = document.getElementById('newChatPanelTitle');
+
+  // Toggle off if same button clicked again
+  if (_activePanel === type) {
+    closeNewPanel();
+    return;
+  }
+
+  _activePanel = type;
+  _convType = type;
+  _selectedUsers = [];
+
+  // Update button active states
+  document.getElementById('btnInd').classList.toggle('active', type === 'individual');
+  document.getElementById('btnGrp').classList.toggle('active', type === 'group');
+
+  if (type === 'individual') {
+    title.textContent = 'Nueva conversación individual';
+    indPanel.style.display = '';
+    grpPanel.style.display = 'none';
+    document.getElementById('userSearchInput').value = '';
+    document.getElementById('userResults').style.display = 'none';
+    document.getElementById('selectedUsers').innerHTML = '';
+    document.getElementById('btnStartInd').style.display = 'none';
+  } else {
+    title.textContent = 'Nuevo grupo';
+    indPanel.style.display = 'none';
+    grpPanel.style.display = '';
+    document.getElementById('grpName').value = '';
+    _target = null;
+    renderTargetOpts();
+  }
+
+  panel.style.display = '';
+}
+
+function closeNewPanel() {
+  _activePanel = null;
+  document.getElementById('newChatPanel').style.display = 'none';
+  document.getElementById('btnInd').classList.remove('active');
+  document.getElementById('btnGrp').classList.remove('active');
 }
 
 // ── WebSocket ──────────────────────────────────────────────────────────────
@@ -415,14 +462,12 @@ function renderConvList(convs) {
 
 async function selectConversation(id) {
   _activeConv = _convs.find(c => c.id === id) || { id };
+  closeNewPanel();
   renderConvList(_convs);
 
   document.getElementById('noConvState').style.display = 'none';
   const cs = document.getElementById('convState');
   cs.style.display = 'flex';
-  cs.style.flexDirection = 'column';
-  cs.style.overflow = 'hidden';
-  cs.style.flex = '1';
 
   // Header
   const isGroup = _activeConv.type === 'group';
@@ -435,9 +480,7 @@ async function selectConversation(id) {
     av.textContent = isGroup ? '👥' : (_activeConv.name || '?')[0].toUpperCase();
   }
   document.getElementById('msgHeaderName').textContent = _activeConv.name || '—';
-  const sub = isGroup
-    ? `${(_activeConv.participants || []).length} participantes`
-    : (others[0] ? '' : '');
+  const sub = isGroup ? `${(_activeConv.participants || []).length} participantes` : '';
   document.getElementById('msgHeaderSub').textContent = sub;
 
   await loadMessages(id);
@@ -490,7 +533,6 @@ function renderMessage(m) {
 }
 
 function handleIncomingMessage(msg) {
-  // Update conv list
   const conv = _convs.find(c => c.id === msg.conversation_id);
   if (conv) {
     conv.last_message = msg;
@@ -498,13 +540,10 @@ function handleIncomingMessage(msg) {
   } else {
     loadConversations();
   }
-  // If active conversation, append message
   if (_activeConv?.id === msg.conversation_id) {
     const body = document.getElementById('msgBody');
     const emptyDiv = body.querySelector('div[style]');
-    if (emptyDiv) {
-      emptyDiv.remove();
-    }
+    if (emptyDiv) emptyDiv.remove();
     const div = document.createElement('div');
     div.innerHTML = renderMessage(msg);
     body.appendChild(div.firstElementChild);
@@ -529,50 +568,68 @@ async function sendMessage() {
   input.value = '';
   autoGrow(input);
 
-  // Try WebSocket first
   if (_ws && _ws.readyState === WebSocket.OPEN) {
     wsSend({ conversation_id: _activeConv.id, content });
   } else {
-    // Fallback to REST
     const r = await apiFetch(`/chat/conversations/${_activeConv.id}/messages`, {
       method: 'POST',
       body: JSON.stringify({ content }),
     });
-    if (r.success) {
-      handleIncomingMessage(r.data);
-    }
+    if (r.success) handleIncomingMessage(r.data);
   }
 }
 
-// ── New conversation modal ─────────────────────────────────────────────────
+// ── User search (individual) ───────────────────────────────────────────────
 
-function openNewConvModal() {
-  _selectedUsers = [];
-  _target = null;
-  _convType = 'individual';
-  document.getElementById('btnTypeInd').classList.add('active');
-  document.getElementById('btnTypeGrp').classList.remove('active');
-  document.getElementById('indSection').style.display = '';
-  document.getElementById('grpSection').style.display = 'none';
-  document.getElementById('userSearchInput').value = '';
-  document.getElementById('userResults').style.display = 'none';
-  document.getElementById('selectedUsers').innerHTML = '';
-  document.getElementById('grpName').value = '';
-  renderTargetOpts();
-  document.getElementById('newConvModal').classList.add('open');
+let _searchTimer = null;
+async function searchUsers(q) {
+  clearTimeout(_searchTimer);
+  if (!q) { document.getElementById('userResults').style.display = 'none'; return; }
+  _searchTimer = setTimeout(async () => {
+    const [rc, rch] = await Promise.all([
+      apiFetch(`/users/client/search?search=${encodeURIComponent(q)}&per_page=20`),
+      apiFetch(`/users/coach/search?search=${encodeURIComponent(q)}&per_page=20`),
+    ]);
+    const items = [
+      ...(rc.data?.data || []),
+      ...(rch.data?.data || []),
+    ].filter(u => u.user_id !== _me?.user_id);
+    const el = document.getElementById('userResults');
+    if (!items.length) { el.style.display = 'none'; return; }
+    el.style.display = '';
+    el.innerHTML = items.map(u => {
+      const sel = _selectedUsers.find(s => s.user_id === u.user_id);
+      const uJson = JSON.stringify(u).replace(/"/g, '&quot;');
+      return `<div class="panel-user-item ${sel ? 'selected' : ''}" onclick="toggleUser(${uJson})">
+        ${u.photo
+          ? `<img src="${u.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" alt="">`
+          : `<div style="width:28px;height:28px;border-radius:50%;background:#EDE7F6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#5B2D8E;">${(u.name||'?')[0]}</div>`}
+        <div><div style="font-weight:600;">${escHtml(u.name||'')}</div><div style="font-size:11px;color:#9CA3AF;">${escHtml(u.email||'')}</div></div>
+      </div>`;
+    }).join('');
+  }, 300);
 }
 
-function closeNewConvModal() {
-  document.getElementById('newConvModal').classList.remove('open');
+function toggleUser(u) {
+  const idx = _selectedUsers.findIndex(s => s.user_id === u.user_id);
+  if (idx >= 0) _selectedUsers.splice(idx, 1);
+  else _selectedUsers.push(u);
+  renderSelectedUsers();
+  searchUsers(document.getElementById('userSearchInput').value);
 }
 
-function setConvType(type) {
-  _convType = type;
-  document.getElementById('btnTypeInd').classList.toggle('active', type === 'individual');
-  document.getElementById('btnTypeGrp').classList.toggle('active', type === 'group');
-  document.getElementById('indSection').style.display = type === 'individual' ? '' : 'none';
-  document.getElementById('grpSection').style.display = type === 'group' ? '' : 'none';
+function renderSelectedUsers() {
+  document.getElementById('selectedUsers').innerHTML = _selectedUsers.map(u => {
+    const uJson = JSON.stringify(u).replace(/"/g, '&quot;');
+    return `<span class="sel-tag">
+      ${escHtml(u.name || u.email || '')}
+      <button onclick="toggleUser(${uJson})">×</button>
+    </span>`;
+  }).join('');
+  document.getElementById('btnStartInd').style.display = _selectedUsers.length ? '' : 'none';
 }
+
+// ── Group targets ──────────────────────────────────────────────────────────
 
 function renderTargetOpts() {
   const roles = (_me?.roles || []).map(r => r.id || r.role_id);
@@ -600,48 +657,7 @@ function selectTarget(val) {
   renderTargetOpts();
 }
 
-let _searchTimer = null;
-async function searchUsers(q) {
-  clearTimeout(_searchTimer);
-  if (!q) { document.getElementById('userResults').style.display = 'none'; return; }
-  _searchTimer = setTimeout(async () => {
-    const r = await apiFetch(`/users/client/search?search=${encodeURIComponent(q)}&per_page=20`);
-    const coaches = await apiFetch(`/users/coach/search?search=${encodeURIComponent(q)}&per_page=20`);
-    const items = [
-      ...(r.data?.data || []),
-      ...(coaches.data?.data || []),
-    ].filter(u => u.user_id !== _me?.user_id);
-    const el = document.getElementById('userResults');
-    if (!items.length) { el.style.display = 'none'; return; }
-    el.style.display = '';
-    el.innerHTML = items.map(u => {
-      const sel = _selectedUsers.find(s => s.user_id === u.user_id);
-      return `<div class="user-result-item ${sel ? 'selected' : ''}" onclick="toggleUser(${JSON.stringify(u).replace(/"/g, '&quot;')})">
-        ${u.photo ? `<img src="${u.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" alt="">` : `<div style="width:28px;height:28px;border-radius:50%;background:#EDE7F6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#5B2D8E;">${(u.name||'?')[0]}</div>`}
-        <div><div style="font-weight:600;">${escHtml(u.name||'')}</div><div style="font-size:11px;color:#9CA3AF;">${escHtml(u.email||'')}</div></div>
-      </div>`;
-    }).join('');
-  }, 300);
-}
-
-function toggleUser(u) {
-  const idx = _selectedUsers.findIndex(s => s.user_id === u.user_id);
-  if (idx >= 0) {
-    _selectedUsers.splice(idx, 1);
-  } else {
-    _selectedUsers.push(u);
-  }
-  renderSelectedUsers();
-  searchUsers(document.getElementById('userSearchInput').value);
-}
-
-function renderSelectedUsers() {
-  document.getElementById('selectedUsers').innerHTML = _selectedUsers.map(u => `
-    <span class="selected-tag">
-      ${escHtml(u.name || u.email || '')}
-      <button onclick="toggleUser(${JSON.stringify(u).replace(/"/g, '&quot;')})">×</button>
-    </span>`).join('');
-}
+// ── Create conversation ────────────────────────────────────────────────────
 
 async function createConversation() {
   if (_convType === 'individual' && !_selectedUsers.length) {
@@ -654,13 +670,13 @@ async function createConversation() {
   const body = {
     type: _convType,
     participant_user_ids: _selectedUsers.map(u => u.user_id),
-    name: _convType === 'group' ? (document.getElementById('grpName').value || null) : null,
+    name: _convType === 'group' ? (document.getElementById('grpName').value.trim() || null) : null,
     target: _convType === 'group' ? _target : null,
   };
 
   const r = await apiFetch('/chat/conversations', { method: 'POST', body: JSON.stringify(body) });
   if (r.success) {
-    closeNewConvModal();
+    closeNewPanel();
     await loadConversations();
     selectConversation(r.data.id);
   } else {

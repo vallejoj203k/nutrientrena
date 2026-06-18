@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Librería · Menús</title>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    :root{--indigo:#4F46E5;--indigo-pale:#EEF2FF;--orange:#F59E0B;--orange-dark:#D97706;--orange-pale:#FFFBEB;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;flex-shrink:0;}
+    .sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .logo-icon{width:30px;height:30px;background:var(--indigo);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .logo-text .lg{font-size:16px;font-weight:900;color:#111827;letter-spacing:.5px;font-style:italic;text-transform:uppercase;}
+    .logo-text .lg em{color:var(--indigo);font-style:inherit;}
+    .logo-text small{display:block;color:#9CA3AF;font-size:11px;}
+    .sidebar-nav{flex:1;padding:6px 0;}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:9px 14px;color:#374151;font-size:13.5px;text-decoration:none;transition:all .12s;border-left:3px solid transparent;}
+    .nav-item:hover{background:#F8FAFC;color:#111827;}
+    .nav-item.active{background:var(--indigo-pale);color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.6;}
+    .nav-item:hover svg,.nav-item.active svg{opacity:1;}
+    .nav-divider{height:1px;background:#F3F4F6;margin:6px 14px;}
+    .nav-section-lbl{padding:10px 14px 3px;font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
+    .sidebar-bottom{padding:12px 14px;border-top:1px solid #F3F4F6;}
+    .user-row{display:flex;align-items:center;gap:9px;}
+    .user-avatar{width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:12px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:#9CA3AF;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;transition:color .12s;}
+    .logout-btn:hover{color:#EF4444;}
+
+    /* ── Main wrapper ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;}
+
+    /* ── List view: page header ── */
+    .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:20px 28px 0;flex-shrink:0;}
+    .ph-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+    .ph-title h1{font-size:22px;font-weight:800;color:#111827;}
+    .ph-title p{font-size:13px;color:#6B7280;margin-top:3px;}
+    .btn-new{display:flex;align-items:center;gap:7px;background:#111827;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;white-space:nowrap;}
+    .btn-new:hover{background:#1F2937;}
+    .main-tabs{display:flex;gap:2px;}
+    .main-tab{display:flex;align-items:center;gap:7px;padding:10px 14px;font-size:14px;font-weight:500;color:#6B7280;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;border-radius:6px 6px 0 0;text-decoration:none;}
+    .main-tab:hover{color:#374151;background:#F8FAFC;}
+    .main-tab.active{color:var(--orange);border-bottom-color:var(--orange);font-weight:600;}
+    .tab-icon{width:22px;height:22px;border-radius:6px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .main-tab.active .tab-icon{background:var(--orange-pale);}
+
+    /* ── Content area ── */
+    .content-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .sub-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .sub-tabs{display:flex;}
+    .sub-tab{display:flex;align-items:center;gap:6px;padding:13px 14px;font-size:14px;color:#6B7280;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;text-decoration:none;}
+    .sub-tab:hover{color:#374151;}
+    .sub-tab.active{color:#111827;border-bottom-color:#111827;font-weight:600;}
+    .sub-count{font-size:12px;font-weight:600;color:#9CA3AF;}
+    .sub-tab.active .sub-count{color:#6B7280;}
+    .sub-bar-right{font-size:12px;color:#9CA3AF;}
+    .toolbar{background:#fff;border-bottom:1px solid #EBEBEB;padding:10px 28px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .filter-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid #E5E7EB;border-radius:20px;background:#fff;font-size:13px;color:#374151;cursor:pointer;transition:border-color .12s;white-space:nowrap;}
+    .filter-btn:hover{border-color:#9CA3AF;}
+    .search-wrap{position:relative;margin-left:auto;}
+    .search-wrap input{padding:8px 12px 8px 34px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;width:230px;transition:.15s;background:#F8FAFC;}
+    .search-wrap input:focus{border-color:var(--indigo);background:#fff;}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .view-toggle{display:flex;gap:2px;border:1px solid #E5E7EB;border-radius:8px;padding:3px;}
+    .view-btn{padding:5px 7px;border:none;background:none;border-radius:5px;cursor:pointer;color:#9CA3AF;display:flex;transition:.12s;}
+    .view-btn.active{background:#F3F4F6;color:#374151;}
+    .info-callout{margin:14px 28px 0;background:#F8FAFC;border:1px solid #E5E7EB;border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:10px;flex-shrink:0;}
+    .info-callout svg{flex-shrink:0;color:#6B7280;margin-top:1px;}
+    .info-callout-text strong{font-size:13px;font-weight:600;color:#374151;}
+    .info-callout-text p{font-size:12px;color:#6B7280;margin-top:2px;line-height:1.5;}
+    .scroll-area{flex:1;overflow-y:auto;padding:16px 28px 28px;}
+    .scroll-area::-webkit-scrollbar{width:5px;}
+    .scroll-area::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:3px;}
+
+    /* ── Cards grid ── */
+    .cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+    @media(max-width:1100px){.cards-grid{grid-template-columns:1fr;}}
+    .menu-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;transition:box-shadow .15s,border-color .15s;}
+    .menu-card:hover{border-color:#D1D5DB;box-shadow:0 4px 16px rgba(0,0,0,.07);}
+    .mc-header{display:flex;align-items:flex-start;gap:13px;margin-bottom:16px;}
+    .mc-icon{width:40px;height:40px;border-radius:10px;background:var(--orange-pale);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .mc-info{flex:1;min-width:0;}
+    .mc-name{font-size:15px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mc-sub{font-size:12px;color:#6B7280;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mc-star{background:none;border:none;cursor:pointer;color:#D1D5DB;padding:2px;transition:color .15s;flex-shrink:0;}
+    .mc-star.active,.mc-star:hover{color:#F59E0B;}
+    .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:14px;}
+    .day-col{display:flex;flex-direction:column;align-items:center;gap:5px;}
+    .day-lbl{font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;}
+    .day-bar-wrap{width:100%;height:52px;display:flex;align-items:flex-end;}
+    .day-bar{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#FCD34D 0%,#F59E0B 100%);min-height:8px;}
+    .day-bar.empty{background:#F3F4F6;}
+    .day-kcal{font-size:10px;font-weight:600;color:#374151;}
+    .mc-stats{display:flex;align-items:center;gap:18px;padding:10px 0 14px;border-top:1px solid #F3F4F6;border-bottom:1px solid #F3F4F6;margin-bottom:14px;}
+    .mc-stat{display:flex;align-items:center;gap:5px;font-size:12px;color:#374151;}
+    .mc-stat svg{opacity:.5;}
+    .mc-stat strong{font-weight:700;color:#111827;}
+    .mc-actions{display:flex;gap:8px;}
+    .btn-edit{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;}
+    .btn-edit:hover{background:#F8FAFC;border-color:#D1D5DB;}
+    .btn-asign{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:none;border-radius:9px;background:#111827;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:background .15s;}
+    .btn-asign:hover{background:#1F2937;}
+    .empty-state{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .empty-state svg{opacity:.25;margin-bottom:14px;}
+    .empty-state h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
+    .empty-state p{font-size:13px;}
+
+    /* ── Form View (full page) ── */
+    #formView{display:none;flex:1;flex-direction:column;overflow:hidden;background:var(--gray-bg);}
+    #formView.active{display:flex;}
+
+    .fv-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
+    .fv-header-left{display:flex;align-items:center;gap:14px;}
+    .fv-close{width:32px;height:32px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;transition:background .12s;flex-shrink:0;}
+    .fv-close:hover{background:#E5E7EB;}
+    .fv-htitle{font-size:15px;font-weight:700;color:#111827;}
+    .fv-hsub{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .fv-header-right{display:flex;align-items:center;gap:10px;}
+    .btn-fv-cancel{padding:9px 18px;border:1.5px solid #E5E7EB;border-radius:9px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
+    .btn-fv-cancel:hover{background:#F8FAFC;border-color:#D1D5DB;}
+    .btn-fv-save{display:flex;align-items:center;gap:7px;padding:9px 20px;border:none;border-radius:9px;background:var(--orange);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap;}
+    .btn-fv-save:hover{background:var(--orange-dark);}
+    .btn-fv-save:disabled{opacity:.6;cursor:not-allowed;}
+
+    .fv-body{flex:1;display:grid;grid-template-columns:1fr 320px;gap:24px;padding:24px 28px;overflow-y:auto;}
+    .fv-body::-webkit-scrollbar{width:5px;}
+    .fv-body::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:3px;}
+
+    /* Form sections */
+    .fv-section{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:24px;margin-bottom:16px;}
+    .fv-section:last-child{margin-bottom:0;}
+    .sec-hdr{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;}
+    .sec-num{width:32px;height:32px;border-radius:50%;background:var(--orange);color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .sec-hdr-text h3{font-size:15px;font-weight:700;color:#111827;}
+    .sec-hdr-text p{font-size:12px;color:#6B7280;margin-top:3px;}
+
+    .fg{margin-bottom:14px;}
+    .fg:last-child{margin-bottom:0;}
+    .fg label{display:block;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
+    .fg input,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;outline:none;transition:border-color .15s;color:#111827;font-family:inherit;background:#fff;}
+    .fg input:focus,.fg textarea:focus{border-color:var(--orange);}
+    .fg textarea{resize:vertical;min-height:70px;}
+
+    /* Day rows */
+    .days-list{display:flex;flex-direction:column;gap:8px;}
+    .day-row-item{display:flex;align-items:center;gap:12px;background:#F8FAFC;border:1.5px solid #E5E7EB;border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .15s;}
+    .day-row-item:hover{border-color:#D1D5DB;background:#fff;}
+    .day-row-item.filled{background:#fff;border-color:#E5E7EB;}
+    .day-badge-lbl{width:38px;height:38px;border-radius:8px;background:var(--orange-pale);display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:var(--orange-dark);text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;}
+    .day-diet-icon{width:34px;height:34px;border-radius:8px;background:var(--orange-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .day-diet-info{flex:1;min-width:0;}
+    .day-diet-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .day-diet-meta{font-size:11px;color:#9CA3AF;margin-top:2px;}
+    .day-empty-label{flex:1;font-size:13px;color:#9CA3AF;}
+    .day-row-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .day-btn{width:28px;height:28px;border-radius:6px;border:1px solid #E5E7EB;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9CA3AF;transition:all .12s;}
+    .day-btn:hover{border-color:#9CA3AF;color:#374151;}
+    .day-btn.clear:hover{border-color:#FCA5A5;color:#EF4444;background:#FEF2F2;}
+    .day-add-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px dashed #D1D5DB;border-radius:8px;background:none;color:#9CA3AF;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+    .day-add-btn:hover{border-color:var(--orange);color:var(--orange-dark);background:var(--orange-pale);}
+
+    /* Right sidebar */
+    .fv-right{display:flex;flex-direction:column;gap:16px;align-self:start;position:sticky;top:0;}
+    .fv-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;}
+    .fv-card-title{font-size:14px;font-weight:700;color:#111827;margin-bottom:14px;}
+    .summary-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .sum-stat{text-align:center;padding:12px 8px;background:#F8FAFC;border-radius:10px;}
+    .sum-icon{font-size:18px;margin-bottom:4px;}
+    .sum-val{font-size:18px;font-weight:800;color:#111827;line-height:1;}
+    .sum-unit{font-size:11px;color:#9CA3AF;margin-top:3px;}
+    .shortcut-sub{font-size:12px;color:#6B7280;margin-bottom:12px;}
+    .shortcut-list{display:flex;flex-direction:column;gap:6px;}
+    .shortcut-item{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;background:#F8FAFC;border:1px solid #E5E7EB;border-radius:9px;cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;color:#374151;}
+    .shortcut-item:hover{background:var(--orange-pale);border-color:var(--orange);color:var(--orange-dark);}
+    .shortcut-item svg{opacity:.4;flex-shrink:0;}
+    .shortcut-item:hover svg{opacity:.7;}
+
+    /* ── Diet picker modal ── */
+    .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .picker-overlay.open{opacity:1;pointer-events:all;}
+    .picker-box{background:#fff;border-radius:16px;width:480px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(14px);transition:.2s;overflow:hidden;}
+    .picker-overlay.open .picker-box{transform:translateY(0);}
+    .picker-head{padding:18px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;}
+    .picker-head h3{font-size:15px;font-weight:700;color:#111827;}
+    .picker-close{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:4px;border-radius:6px;display:flex;transition:.12s;}
+    .picker-close:hover{background:#F3F4F6;color:#374151;}
+    .picker-search{padding:12px 16px;border-bottom:1px solid #F3F4F6;position:relative;}
+    .picker-search input{width:100%;padding:9px 12px 9px 34px;border:1.5px solid #E5E7EB;border-radius:9px;font-size:13px;outline:none;transition:.15s;}
+    .picker-search input:focus{border-color:var(--orange);}
+    .picker-search svg{position:absolute;left:28px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .picker-list{flex:1;overflow-y:auto;padding:8px 0;}
+    .picker-list::-webkit-scrollbar{width:4px;}
+    .picker-list::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px;}
+    .picker-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:background .1s;}
+    .picker-item:hover{background:#F8FAFC;}
+    .picker-item-icon{width:34px;height:34px;border-radius:8px;background:var(--orange-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .picker-item-name{font-size:13px;font-weight:600;color:#111827;}
+    .picker-item-meta{font-size:11px;color:#9CA3AF;margin-top:2px;}
+    .picker-empty{padding:32px 16px;text-align:center;color:#9CA3AF;font-size:13px;}
+
+    /* ── Assign modal ── */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{background:#fff;border-radius:16px;padding:26px;width:440px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(14px);transition:.2s;}
+    .overlay.open .modal-box{transform:translateY(0);}
+    .modal-title{font-size:16px;font-weight:700;color:#111827;margin-bottom:5px;}
+    .modal-sub{font-size:13px;color:#6B7280;margin-bottom:18px;}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group select{width:100%;padding:9px 11px;border:1px solid #E5E7EB;border-radius:8px;font-size:13.5px;outline:none;color:#111827;background:#fff;}
+    .btn-mc{background:#F3F4F6;color:#374151;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .btn-mc:hover{background:#E5E7EB;}
+    .btn-mcp{background:#111827;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .btn-mcp:hover{background:#1F2937;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:800;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+
+    @media(max-width:1024px){.fv-body{grid-template-columns:1fr;}.fv-right{position:static;}}
+    @media(max-width:768px){.sidebar{display:none;}.scroll-area{padding:14px;}.fv-body{padding:16px;}}
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div class="logo-text">
+      <div class="lg">ALZUM<em>.io</em></div>
+      <small>Panel del Coach</small>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Inicio
+    </a>
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Calendario
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="programas.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Programas
+    </a>
+    <a class="nav-item active" href="library.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Librería
+    </a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Formularios
+    </a>
+    <a class="nav-item" href="notes.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Notas
+    </a>
+    <a class="nav-item" href="chat.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></svg>
+      Chat
+    </a>
+    <div class="nav-section">Negocio</div>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analíticas
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Equipo
+    </a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </div>
+    <a class="nav-item" href="#"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Negocio</a>
+    <a class="nav-item" href="coaches.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipo</a>
+    <a class="nav-item" href="#"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Ajustes</a>
+    <a class="nav-item" href="#"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Ayuda</a>
+    <div class="nav-divider"></div>
+    <div class="nav-section-lbl" id="adminSection" style="display:none">Admin Global</div>
+    <a class="nav-item" href="#" id="superadminItem" style="display:none"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Superadmin</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+      <button class="logout-btn" onclick="logout()"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- ═══ LIST VIEW ═══ -->
+  <div id="listView">
+    <div class="page-header">
+      <div class="ph-top">
+        <div class="ph-title"><h1>Librería</h1><p>Contenido reutilizable para asignar a tus clientes.</p></div>
+        <button class="btn-new" onclick="openForm()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo menú semanal
+        </button>
+      </div>
+      <div class="main-tabs">
+        <button class="main-tab" onclick="location.href='diets.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Entrenamiento</button>
+        <button class="main-tab active"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="#F59E0B" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span>Nutrición</button>
+        <button class="main-tab"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Formularios</button>
+        <button class="main-tab"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span>Documentos</button>
+      </div>
+    </div>
+    <div class="content-area">
+      <div class="sub-bar">
+        <div class="sub-tabs">
+          <a class="sub-tab" href="diets.html">Dietas <span class="sub-count" id="dietCount">—</span></a>
+          <a class="sub-tab active" href="menus.html">Menús <span class="sub-count" id="menuCount">—</span></a>
+          <a class="sub-tab" href="#">Recetas <span class="sub-count">—</span></a>
+          <a class="sub-tab" href="#">Alimentos <span class="sub-count">—</span></a>
+        </div>
+        <span class="sub-bar-right">Dietas, menús, recetas y alimentos</span>
+      </div>
+      <div class="toolbar">
+        <button class="filter-btn" onclick="cycleFilter()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Mostrando: <span id="filterLabel">Todas</span>
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="search-wrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Buscar en menús..." oninput="applyFilter()"/>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+          <button class="view-btn"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+        </div>
+      </div>
+      <div class="info-callout">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="info-callout-text">
+          <strong>¿Qué es un menú?</strong>
+          <p>Un planificador semanal: 7 dietas (una por día) agrupadas para asignar como bloque dentro de un programa. Ej.: «Semana 1 · Recomposición».</p>
+        </div>
+      </div>
+      <div class="scroll-area"><div id="cardsContent"><div class="empty-state"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>Cargando menús…</h3></div></div></div>
+    </div>
+  </div><!-- #listView -->
+
+  <!-- ═══ FORM VIEW ═══ -->
+  <div id="formView">
+    <div class="fv-header">
+      <div class="fv-header-left">
+        <button class="fv-close" onclick="closeForm()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="fv-htitle" id="formTitle">Nuevo menú semanal</div>
+          <div class="fv-hsub">Un menú agrupa 7 dietas (una por día) para asignar completo a un cliente.</div>
+        </div>
+      </div>
+      <div class="fv-header-right">
+        <button class="btn-fv-cancel" onclick="closeForm()">Cancelar</button>
+        <button class="btn-fv-save" id="saveBtn" onclick="saveMenu()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="saveBtnLabel">Crear menú</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="fv-body">
+      <!-- Left column -->
+      <div class="fv-left">
+        <!-- Section 1: datos -->
+        <div class="fv-section">
+          <div class="sec-hdr">
+            <div class="sec-num">1</div>
+            <div class="sec-hdr-text">
+              <h3>Datos del menú</h3>
+              <p>Dale un nombre claro para encontrarlo después</p>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Nombre del menú</label>
+            <input id="f_name" placeholder="Ej: Recomposición · Semana 1" oninput="updateSummary()"/>
+          </div>
+          <div class="fg">
+            <label>Descripción corta</label>
+            <textarea id="f_desc" placeholder="Ej: 2.200 kcal equilibrado, alta saciedad" rows="2"></textarea>
+          </div>
+          <div id="formError" style="color:#DC2626;font-size:12px;padding-top:4px;"></div>
+        </div>
+
+        <!-- Section 2: days -->
+        <div class="fv-section">
+          <div class="sec-hdr">
+            <div class="sec-num">2</div>
+            <div class="sec-hdr-text">
+              <h3>Asigna una dieta a cada día</h3>
+              <p>Pulsa un día para buscar y asignar dieta. Puedes repetir dietas.</p>
+            </div>
+          </div>
+          <div class="days-list" id="daysList"></div>
+        </div>
+      </div>
+
+      <!-- Right sidebar -->
+      <div class="fv-right">
+        <div class="fv-card">
+          <div class="fv-card-title">Resumen semanal</div>
+          <div class="summary-stats">
+            <div class="sum-stat">
+              <div class="sum-icon">🔥</div>
+              <div class="sum-val" id="sumKcal">—</div>
+              <div class="sum-unit">kcal/día</div>
+            </div>
+            <div class="sum-stat">
+              <div class="sum-icon" style="font-size:16px;color:#6366F1;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <div class="sum-val" id="sumProt">—</div>
+              <div class="sum-unit">prot/día</div>
+            </div>
+            <div class="sum-stat">
+              <div class="sum-icon" style="font-size:16px;color:var(--orange);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="sum-val" id="sumDays">0/7</div>
+              <div class="sum-unit">días</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fv-card">
+          <div class="fv-card-title">Atajos</div>
+          <div class="shortcut-sub">Rellenar toda la semana con la misma dieta:</div>
+          <div class="shortcut-list" id="shortcutList">
+            <div style="font-size:12px;color:#9CA3AF;">Cargando dietas…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- #formView -->
+
+</div><!-- .main -->
+
+<!-- Diet picker modal -->
+<div class="picker-overlay" id="pickerOverlay">
+  <div class="picker-box">
+    <div class="picker-head">
+      <h3 id="pickerTitle">Seleccionar dieta</h3>
+      <button class="picker-close" onclick="closePicker()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="picker-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="pickerSearch" placeholder="Buscar dieta…" oninput="filterPicker()"/>
+    </div>
+    <div class="picker-list" id="pickerList"></div>
+  </div>
+</div>
+
+<!-- Assign modal -->
+<div class="overlay" id="assignOverlay">
+  <div class="modal-box">
+    <div class="modal-title">Asignar menú semanal</div>
+    <div class="modal-sub" id="assignSub">Selecciona el cliente al que deseas asignar este menú.</div>
+    <div class="form-group">
+      <label>Cliente</label>
+      <select id="assignClientSel"><option value="">Selecciona un cliente…</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-mc" onclick="closeAssign()">Cancelar</button>
+      <button class="btn-mcp" onclick="confirmAssign()">Asignar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+const token = localStorage.getItem('token');
+if (!token) location.href = 'login.html';
+
+const DAYS = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+let allMenus = [], allDiets = [], allClients = [];
+let editingId = null, assigningId = null;
+let activeFilter = 'all';
+// daySelections[i] = null | {diet_id, title, calories, proteins, foods_count}
+let daySelections = Array(7).fill(null);
+let pickerDayIdx = -1;
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function loadUser() {
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+    if (r.status === 401) { logout(); return; }
+    const j = await r.json(); const u = j.data || j;
+    const name = u.name || `${u.first_name||''} ${u.last_name||''}`.trim() || u.email || 'Usuario';
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarRole').textContent = (u.roles?.[0]?.name) || u.role?.name || '';
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=name.charAt(0).toUpperCase();}})()
+    const rid = parseInt(localStorage.getItem('role_id') || '0');
+    if (rid === 1 || rid === 2) { document.getElementById('adminSection').style.display=''; document.getElementById('superadminItem').style.display=''; }
+  } catch {}
+}
+function logout() { localStorage.clear(); location.href = 'login.html'; }
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+async function loadMenus() {
+  try {
+    const r = await fetch(`${API}/weekly-menus`, { headers: { Authorization: `Bearer ${token}` } });
+    const j = await r.json();
+    allMenus = Array.isArray(j.data) ? j.data : [];
+    document.getElementById('menuCount').textContent = allMenus.length;
+    applyFilter();
+  } catch {
+    document.getElementById('cardsContent').innerHTML = `<div class="empty-state"><h3>Error al cargar</h3><p>No se pudieron cargar los menús.</p></div>`;
+  }
+}
+
+async function loadDiets() {
+  try {
+    const r = await fetch(`${API}/diets/findAll`, { headers: { Authorization: `Bearer ${token}` } });
+    const j = await r.json();
+    allDiets = Array.isArray(j.data) ? j.data : (Array.isArray(j) ? j : []);
+    document.getElementById('dietCount').textContent = allDiets.length;
+  } catch {}
+}
+
+async function loadClients() {
+  try {
+    const r = await fetch(`${API}/users/client/findAll`, { headers: { Authorization: `Bearer ${token}` } });
+    const j = await r.json();
+    allClients = Array.isArray(j.data) ? j.data : [];
+  } catch {}
+}
+
+// ── Filter / render list ──────────────────────────────────────────────────────
+function cycleFilter() {
+  const opts = ['all','favorito'];
+  activeFilter = opts[(opts.indexOf(activeFilter)+1) % opts.length];
+  document.getElementById('filterLabel').textContent = activeFilter === 'all' ? 'Todas' : 'Favoritos';
+  applyFilter();
+}
+
+function applyFilter() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  let list = allMenus.filter(m => (m.name||'').toLowerCase().includes(q));
+  if (activeFilter === 'favorito') list = list.filter(m => m.is_favorite);
+  renderCards(list);
+}
+
+function renderCards(menus) {
+  const el = document.getElementById('cardsContent');
+  if (!menus.length) {
+    el.innerHTML = `<div class="empty-state"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>No hay menús</h3><p>Crea tu primer menú semanal con el botón "Nuevo menú semanal".</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="cards-grid">${menus.map(menuCard).join('')}</div>`;
+}
+
+function menuCard(m) {
+  const days = m.days || [];
+  const kcals = DAYS.map((_,i) => { const d=days.find(x=>x.day_index===i); return d?.calories||0; });
+  const maxKcal = Math.max(...kcals, 1);
+  const filled = kcals.filter(Boolean).length;
+  const avg = filled ? Math.round(kcals.filter(Boolean).reduce((a,b)=>a+b,0)/filled) : 0;
+  const isFav = m.is_favorite;
+  const id = esc(m.id), name = esc(m.name||'');
+  const bars = DAYS.map((lbl,i)=>{
+    const k=kcals[i], pct=k?Math.round((k/maxKcal)*100):0;
+    const label=k>=1000?`${(k/1000).toFixed(1).replace(/\.0$/,'')}k`:(k?String(k):'—');
+    return `<div class="day-col"><div class="day-lbl">${lbl}</div><div class="day-bar-wrap"><div class="day-bar${k?'':' empty'}" style="height:${pct}%"></div></div><div class="day-kcal">${label}</div></div>`;
+  }).join('');
+  return `<div class="menu-card">
+    <div class="mc-header">
+      <div class="mc-icon">📅</div>
+      <div class="mc-info"><div class="mc-name">${name}</div><div class="mc-sub">${esc(m.description||'')}</div></div>
+      <button class="mc-star${isFav?' active':''}" onclick="toggleFav('${id}',${!isFav},this)">
+        <svg width="16" height="16" fill="${isFav?'#F59E0B':'none'}" stroke="${isFav?'#F59E0B':'currentColor'}" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </button>
+    </div>
+    <div class="week-grid">${bars}</div>
+    <div class="mc-stats">
+      <div class="mc-stat"><span>🔥</span><strong>${avg}</strong> kcal/día</div>
+      <div class="mc-stat"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><strong>${filled}</strong>/7 días</div>
+      <div class="mc-stat"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><strong>${m.assigned_count??0}</strong></div>
+    </div>
+    <div class="mc-actions">
+      <button class="btn-edit" onclick="openForm('${id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
+      <button class="btn-asign" onclick="openAssign('${id}','${name}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>
+    </div>
+  </div>`;
+}
+
+async function toggleFav(id, newVal, btn) {
+  try {
+    await fetch(`${API}/weekly-menus/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({is_favorite:newVal}) });
+    const m = allMenus.find(x=>x.id==id); if(m) m.is_favorite=newVal;
+    btn.className=`mc-star${newVal?' active':''}`;
+    btn.innerHTML=`<svg width="16" height="16" fill="${newVal?'#F59E0B':'none'}" stroke="${newVal?'#F59E0B':'currentColor'}" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+  } catch { toast('Error al actualizar','error'); }
+}
+
+// ── Form View ─────────────────────────────────────────────────────────────────
+async function openForm(id = null) {
+  editingId = id;
+  daySelections = Array(7).fill(null);
+  document.getElementById('f_name').value = '';
+  document.getElementById('f_desc').value = '';
+  document.getElementById('formError').textContent = '';
+  document.getElementById('formTitle').textContent = id ? 'Editar menú' : 'Nuevo menú semanal';
+  document.getElementById('saveBtnLabel').textContent = id ? 'Guardar cambios' : 'Crear menú';
+
+  if (id) {
+    try {
+      const r = await fetch(`${API}/weekly-menus/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const j = await r.json();
+      const m = j.data || j;
+      document.getElementById('f_name').value = m.name || '';
+      document.getElementById('f_desc').value = m.description || '';
+      (m.days || []).forEach(d => {
+        if (d.day_index >= 0 && d.day_index < 7) {
+          daySelections[d.day_index] = d.diet_id ? {
+            diet_id: d.diet_id,
+            title: d.diet_title || d.diet_id,
+            calories: d.calories || null,
+            proteins: null,
+            foods_count: null,
+          } : null;
+        }
+      });
+    } catch { toast('Error al cargar el menú','error'); return; }
+  }
+
+  renderDayRows();
+  renderShortcuts();
+  updateSummary();
+  document.getElementById('listView').style.display = 'none';
+  document.getElementById('formView').classList.add('active');
+}
+
+function closeForm() {
+  document.getElementById('formView').classList.remove('active');
+  document.getElementById('listView').style.display = '';
+  editingId = null;
+}
+
+// ── Day rows ──────────────────────────────────────────────────────────────────
+function renderDayRows() {
+  const list = document.getElementById('daysList');
+  list.innerHTML = DAYS.map((lbl, i) => {
+    const sel = daySelections[i];
+    if (sel) {
+      const meta = [
+        sel.calories ? `${Math.round(sel.calories)} kcal` : '',
+        sel.proteins ? `${Math.round(sel.proteins)}g prot` : '',
+        sel.foods_count != null ? `${sel.foods_count} comidas` : '',
+      ].filter(Boolean).join(' · ');
+      return `<div class="day-row-item filled">
+        <div class="day-badge-lbl">${lbl}</div>
+        <div class="day-diet-icon">🍲</div>
+        <div class="day-diet-info">
+          <div class="day-diet-name">${esc(sel.title)}</div>
+          ${meta ? `<div class="day-diet-meta">${meta}</div>` : ''}
+        </div>
+        <div class="day-row-actions">
+          <button class="day-btn" title="Cambiar dieta" onclick="openPicker(${i})">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="day-btn clear" title="Quitar dieta" onclick="clearDay(${i})">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>`;
+    } else {
+      return `<div class="day-row-item" onclick="openPicker(${i})">
+        <div class="day-badge-lbl">${lbl}</div>
+        <div class="day-empty-label">Sin dieta asignada</div>
+        <div class="day-row-actions">
+          <button class="day-add-btn" onclick="openPicker(${i})">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Asignar
+          </button>
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function clearDay(i) {
+  daySelections[i] = null;
+  renderDayRows();
+  updateSummary();
+}
+
+// ── Diet picker ───────────────────────────────────────────────────────────────
+function openPicker(dayIdx) {
+  pickerDayIdx = dayIdx;
+  document.getElementById('pickerTitle').textContent = `Dieta para ${DAYS[dayIdx]}`;
+  document.getElementById('pickerSearch').value = '';
+  renderPickerList(allDiets);
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+
+function closePicker() {
+  document.getElementById('pickerOverlay').classList.remove('open');
+  pickerDayIdx = -1;
+}
+
+function filterPicker() {
+  const q = document.getElementById('pickerSearch').value.toLowerCase();
+  renderPickerList(allDiets.filter(d => (d.title||'').toLowerCase().includes(q)));
+}
+
+function renderPickerList(diets) {
+  const list = document.getElementById('pickerList');
+  if (!diets.length) { list.innerHTML = `<div class="picker-empty">No hay dietas que coincidan</div>`; return; }
+  list.innerHTML = diets.map(d => {
+    const det = d.detail || {};
+    const meta = [
+      d.calories ? `${Math.round(d.calories)} kcal` : '',
+      det.proteins ? `${Math.round(det.proteins)}g prot` : '',
+      (d.foods||[]).length ? `${d.foods.length} comidas` : '',
+    ].filter(Boolean).join(' · ');
+    return `<div class="picker-item" onclick="selectDietForDay(${pickerDayIdx},'${esc(d.id)}','${esc(d.title||'')}',${d.calories||0},${det.proteins||0},${(d.foods||[]).length})">
+      <div class="picker-item-icon">🍲</div>
+      <div>
+        <div class="picker-item-name">${esc(d.title||'')}</div>
+        ${meta ? `<div class="picker-item-meta">${meta}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectDietForDay(dayIdx, dietId, title, calories, proteins, foodsCount) {
+  daySelections[dayIdx] = { diet_id: dietId, title, calories: calories||null, proteins: proteins||null, foods_count: foodsCount||null };
+  closePicker();
+  renderDayRows();
+  updateSummary();
+}
+
+// ── Shortcuts ─────────────────────────────────────────────────────────────────
+function renderShortcuts() {
+  const list = document.getElementById('shortcutList');
+  const top = allDiets.slice(0, 5);
+  if (!top.length) { list.innerHTML = `<div style="font-size:12px;color:#9CA3AF;">No hay dietas disponibles</div>`; return; }
+  list.innerHTML = top.map(d =>
+    `<div class="shortcut-item" onclick="fillAllDays('${esc(d.id)}','${esc(d.title||'')}',${d.calories||0},${(d.detail||{}).proteins||0},${(d.foods||[]).length})">
+      <span>${esc(d.title||'')}</span>
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`
+  ).join('');
+}
+
+function fillAllDays(dietId, title, calories, proteins, foodsCount) {
+  daySelections = Array(7).fill(null).map(() => ({ diet_id: dietId, title, calories: calories||null, proteins: proteins||null, foods_count: foodsCount||null }));
+  renderDayRows();
+  updateSummary();
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────────
+function updateSummary() {
+  const filled = daySelections.filter(Boolean);
+  const count = filled.length;
+  const avgKcal = count ? Math.round(filled.reduce((a,d) => a+(d.calories||0),0)/count) : 0;
+  const avgProt = count ? Math.round(filled.reduce((a,d) => a+(d.proteins||0),0)/count) : 0;
+  document.getElementById('sumKcal').textContent = count ? avgKcal : '—';
+  document.getElementById('sumProt').textContent = count ? `${avgProt}g` : '—';
+  document.getElementById('sumDays').textContent = `${count}/7`;
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveMenu() {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { document.getElementById('formError').textContent = 'El nombre es obligatorio'; return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  document.getElementById('saveBtnLabel').textContent = 'Guardando…';
+  document.getElementById('formError').textContent = '';
+
+  const days = daySelections.map((sel, i) => ({ day_index: i, diet_id: sel?.diet_id || null }));
+  const body = { name, description: document.getElementById('f_desc').value.trim() || null, days };
+
+  try {
+    const url = editingId ? `${API}/weekly-menus/${editingId}` : `${API}/weekly-menus`;
+    const method = editingId ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers: {'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) { document.getElementById('formError').textContent = j.detail || j.message || 'Error al guardar'; return; }
+    closeForm(); toast(editingId ? 'Menú actualizado' : 'Menú creado', 'success'); loadMenus();
+  } catch { document.getElementById('formError').textContent = 'Error de conexión'; }
+  finally { btn.disabled=false; document.getElementById('saveBtnLabel').textContent = editingId ? 'Guardar cambios' : 'Crear menú'; }
+}
+
+// ── Assign ────────────────────────────────────────────────────────────────────
+function openAssign(id, name) {
+  assigningId = id;
+  document.getElementById('assignSub').textContent = `Asignar: ${name}`;
+  const sel = document.getElementById('assignClientSel');
+  sel.innerHTML = '<option value="">Selecciona un cliente…</option>';
+  allClients.forEach(c => {
+    const n = `${c.name||''} ${c.last_name||''}`.trim() || c.email || `#${c.id}`;
+    const opt = document.createElement('option');
+    opt.value = c.user_id || c.id; opt.textContent = n; sel.appendChild(opt);
+  });
+  document.getElementById('assignOverlay').classList.add('open');
+}
+function closeAssign() { document.getElementById('assignOverlay').classList.remove('open'); assigningId = null; }
+async function confirmAssign() {
+  const clientId = document.getElementById('assignClientSel').value;
+  if (!clientId) { toast('Selecciona un cliente','error'); return; }
+  try {
+    const r = await fetch(`${API}/weekly-menus/${assigningId}/assign`, { method:'POST', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({client_id:parseInt(clientId)}) });
+    if (!r.ok) { const j=await r.json(); toast(j.message||'Error al asignar','error'); return; }
+    closeAssign(); toast('Menú asignado','success');
+  } catch { toast('Error de conexión','error'); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type||''}`;clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',3500);}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadUser();
+loadDiets();
+loadMenus();
+loadClients();
+</script>
+</body>
+</html>

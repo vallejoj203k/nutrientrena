@@ -22,3 +22,5 @@ from app.models.checkin import WeeklyCheckin
 from app.models.session_log import WorkoutSession
 from app.models.client_task import ClientTask
 from app.models.app_setting import AppSetting
+from app.models.program import Program, ProgramPhase, ProgramClient
+from app.models.weekly_menu import WeeklyMenu, WeeklyMenuDay

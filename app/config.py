@@ -58,9 +58,30 @@ class Settings(BaseSettings):
     AWS_ENDPOINT_URL: Optional[str] = None   # R2 endpoint
     R2_PUBLIC_URL: Optional[str] = None       # public r2.dev URL
 
+    # Comma-separated list of allowed origins.
+    # Defaults to "*" only when FRONTEND_URL is still the localhost placeholder
+    # (local dev).  In production set this explicitly, e.g.:
+    #   ALLOWED_ORIGINS=https://nutrientrena-production.up.railway.app
+    ALLOWED_ORIGINS: Optional[str] = None
+
     RESEND_API_KEY: Optional[str] = None
     MAIL_FROM: str = "onboarding@resend.dev"
     FRONTEND_URL: str = "http://localhost:3000"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Return the effective CORS origin list.
+
+        Priority:
+          1. ALLOWED_ORIGINS env var (explicit, comma-separated)
+          2. FRONTEND_URL when it points to a real domain (not localhost)
+          3. Wildcard "*" — only as a last resort for local dev
+        """
+        if self.ALLOWED_ORIGINS:
+            return [o.strip() for o in self.ALLOWED_ORIGINS.split(",")]
+        if "localhost" not in self.FRONTEND_URL and "127.0.0.1" not in self.FRONTEND_URL:
+            return [self.FRONTEND_URL.rstrip("/")]
+        return ["*"]
 
     @property
     def db_url(self) -> str:

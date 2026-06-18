@@ -18,7 +18,7 @@ def _get_or_404(db: Session, role_id: int):
     return db.query(Role).filter(Role.id == role_id).first()
 
 
-@router.post("")
+@router.post("", summary="Crear rol", description="Crea un nuevo rol de usuario (solo superadmin).")
 def create(data: RoleCreateRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     slug = slugify(data.slug or data.name)
     role = Role(name=data.name, slug=slug)
@@ -28,7 +28,7 @@ def create(data: RoleCreateRequest, db: Session = Depends(get_db), _=Depends(req
     return send_response(RoleOut.model_validate(role).model_dump(), "Rol creado")
 
 
-@router.get("/search")
+@router.get("/search", summary="Buscar roles", description="Búsqueda paginada de roles por nombre.")
 def find_all(
     search: Optional[str] = Query(None),
     page: int = Query(1),
@@ -53,13 +53,13 @@ def find_all(
     )
 
 
-@router.get("/menus")
+@router.get("/menus", summary="Listar menús disponibles", description="Retorna todos los menús del sistema para asignar a roles.")
 def menus_find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     menus = db.query(Menu).all()
     return send_response([MenuOut.model_validate(m).model_dump() for m in menus], "OK")
 
 
-@router.post("/menus")
+@router.post("/menus", summary="Asignar menús a rol", description="Asigna o reemplaza los menús accesibles para un rol.")
 def menus_assign(data: MenuAssignRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     if not _get_or_404(db, data.role_id):
         return send_error("Rol no encontrado")
@@ -70,7 +70,7 @@ def menus_assign(data: MenuAssignRequest, db: Session = Depends(get_db), _=Depen
     return send_response(None, "Menús asignados correctamente")
 
 
-@router.get("/{id}/menus")
+@router.get("/{id}/menus", summary="Menús del rol", description="Retorna los IDs de menús asignados a un rol.")
 def menus_edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     if not _get_or_404(db, id):
         return send_error("Rol no encontrado")
@@ -78,7 +78,7 @@ def menus_edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_id
     return send_response([mr.menu_id for mr in menu_roles], "OK")
 
 
-@router.get("/{id}")
+@router.get("/{id}", summary="Ver rol", description="Retorna el detalle de un rol por su ID.")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     role = _get_or_404(db, id)
     if not role:
@@ -86,7 +86,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(RoleOut.model_validate(role).model_dump(), "OK")
 
 
-@router.put("/{id}")
+@router.put("/{id}", summary="Actualizar rol", description="Modifica el nombre o slug de un rol existente.")
 def update(id: int, data: RoleUpdateRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN))):
     role = _get_or_404(db, id)
     if not role:

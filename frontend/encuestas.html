@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Encuestas</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--teal:#0D9488;--teal-dark:#0F766E;--teal-pale:#F0FDFA;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;transition:.1s;}
+    .logout-btn:hover{color:#EF4444;}
+
+    /* ── Main layout ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+    /* ── Page header ── */
+    .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:68px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
+    .page-header-left{display:flex;align-items:center;gap:14px;}
+    .page-header-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;flex-shrink:0;}
+    .page-header-back:hover{background:#F3F4F6;color:#374151;border-color:#D1D5DB;}
+    .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
+    .page-header-title{font-size:17px;font-weight:800;color:#111827;}
+    .page-header-sub{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .page-header-right{display:flex;align-items:center;gap:10px;}
+
+    /* ── Buttons ── */
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--teal);color:#fff;}
+    .btn-primary:hover{background:var(--teal-dark);}
+    .btn-outline{background:#fff;color:#374151;border:1.5px solid #E5E7EB;}
+    .btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+    .btn-ghost{background:#F3F4F6;color:#374151;border:1.5px solid #E5E7EB;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-sm{padding:6px 13px;font-size:12px;}
+    .btn-danger{background:#FEF2F2;color:#DC2626;border:1.5px solid #FEE2E2;}
+    .btn-danger:hover{background:#FEE2E2;}
+
+    /* ── Tab bar ── */
+    .tab-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;display:flex;gap:0;flex-shrink:0;}
+    .tab-btn{padding:14px 4px;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-right:28px;transition:.15s;display:flex;align-items:center;gap:7px;}
+    .tab-btn:hover{color:#374151;}
+    .tab-btn.active{color:var(--teal);border-bottom-color:var(--teal);}
+    .tab-count{background:#F3F4F6;color:#6B7280;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;}
+    .tab-btn.active .tab-count{background:#CCFBF1;color:var(--teal-dark);}
+
+    /* ── Scroll content area ── */
+    .content-area{flex:1;overflow-y:auto;padding:28px;}
+    .content-area::-webkit-scrollbar{width:5px;}
+    .content-area::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Tab panels ── */
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    /* ── Templates grid ── */
+    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+
+    /* ── Template card ── */
+    .tpl-card{background:#fff;border-radius:14px;border:1px solid #E5E7EB;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:box-shadow .2s,border-color .2s;position:relative;}
+    .tpl-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#D1D5DB;}
+    .tpl-card-top{display:flex;align-items:flex-start;gap:10px;}
+    .tpl-icon{width:40px;height:40px;border-radius:10px;background:var(--teal-pale);display:flex;align-items:center;justify-content:center;color:var(--teal);flex-shrink:0;}
+    .tpl-card-info{flex:1;min-width:0;}
+    .tpl-card-title{font-size:15px;font-weight:700;color:#111827;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .tpl-card-desc{font-size:12px;color:#6B7280;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .tpl-card-menu-btn{width:28px;height:28px;border-radius:6px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;flex-shrink:0;}
+    .tpl-card-menu-btn:hover{background:#F3F4F6;color:#374151;}
+    .tpl-badges{display:flex;gap:6px;flex-wrap:wrap;}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+    .badge-teal{background:#CCFBF1;color:#0F766E;}
+    .badge-indigo{background:#EEF2FF;color:#4338CA;}
+    .badge-gray{background:#F3F4F6;color:#6B7280;}
+    .badge-amber{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;}
+    .badge-green{background:#D1FAE5;color:#065F46;}
+    .tpl-card-footer{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid #F3F4F6;}
+    .tpl-send-btn{flex:1;}
+
+    /* ── Ghost card ── */
+    .ghost-card{background:#fff;border-radius:14px;border:2px dashed #E5E7EB;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:36px 20px;cursor:pointer;transition:.15s;min-height:180px;}
+    .ghost-card:hover{border-color:var(--teal);background:var(--teal-pale);}
+    .ghost-card:hover .ghost-icon{border-color:var(--teal);color:var(--teal);}
+    .ghost-card:hover .ghost-label{color:var(--teal);}
+    .ghost-icon{width:40px;height:40px;border-radius:50%;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;}
+    .ghost-label{font-size:14px;font-weight:600;color:#6B7280;transition:.15s;}
+
+    /* ── Assignments table ── */
+    .table-wrap{background:#fff;border-radius:14px;border:1px solid #E5E7EB;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 16px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;text-align:left;white-space:nowrap;}
+    tbody td{padding:13px 16px;font-size:13px;color:#374151;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
+    tbody tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:#FAFAFA;}
+    .client-cell{display:flex;align-items:center;gap:10px;}
+    .client-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+    .client-name{font-weight:600;color:#111827;}
+    .client-email{font-size:11px;color:#9CA3AF;}
+    .td-actions{display:flex;align-items:center;gap:6px;}
+
+    /* ── Context menu ── */
+    .ctx-menu{position:fixed;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:800;min-width:160px;overflow:hidden;display:none;}
+    .ctx-menu.open{display:block;}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;color:#374151;cursor:pointer;transition:.1s;border:none;background:none;width:100%;text-align:left;}
+    .ctx-item:hover{background:#F9FAFB;color:#111;}
+    .ctx-item.danger{color:#DC2626;}
+    .ctx-item.danger:hover{background:#FEF2F2;}
+    .ctx-sep{height:1px;background:#F3F4F6;margin:4px 0;}
+
+    /* ── Modal overlay ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{background:#fff;border-radius:16px;width:640px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.22);transform:translateY(20px);transition:.2s;overflow:hidden;}
+    .modal-overlay.open .modal-box{transform:translateY(0);}
+    .modal-header{padding:20px 24px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .modal-title{font-size:17px;font-weight:800;color:#111827;flex:1;}
+    .modal-close{width:32px;height:32px;border-radius:8px;border:none;background:#F3F4F6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
+    .modal-close:hover{background:#E5E7EB;color:#111;}
+    .modal-body{flex:1;overflow-y:auto;padding:24px;}
+    .modal-body::-webkit-scrollbar{width:4px;}
+    .modal-body::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;}
+
+    /* ── Small send modal ── */
+    .modal-sm .modal-box{width:460px;}
+
+    /* ── Form groups ── */
+    .form-group{margin-bottom:18px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.08);}
+    .form-group textarea{resize:vertical;min-height:72px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+    /* ── Toggle ── */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid #F3F4F6;margin-top:4px;}
+    .toggle-label{font-size:13px;font-weight:600;color:#374151;}
+    .toggle-sub{font-size:12px;color:#9CA3AF;}
+    .toggle{width:44px;height:24px;border-radius:20px;background:#E5E7EB;border:none;cursor:pointer;position:relative;transition:.2s;flex-shrink:0;}
+    .toggle.on{background:var(--teal);}
+    .toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+    .toggle.on::after{left:23px;}
+
+    /* ── Field builder ── */
+    .section-heading{font-size:13px;font-weight:700;color:#374151;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .fields-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+    .field-row{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;}
+    .field-row-top{display:flex;align-items:center;gap:8px;}
+    .field-num{width:22px;height:22px;border-radius:50%;background:#E5E7EB;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#6B7280;flex-shrink:0;}
+    .field-label-inp{flex:1;padding:7px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:13px;outline:none;font-family:inherit;color:#111;background:#fff;transition:.15s;}
+    .field-label-inp:focus{border-color:var(--teal);}
+    .field-type-sel{padding:7px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:13px;outline:none;font-family:inherit;color:#111;background:#fff;transition:.15s;min-width:120px;}
+    .field-type-sel:focus{border-color:var(--teal);}
+    .field-row-btns{display:flex;gap:4px;flex-shrink:0;}
+    .field-btn{width:28px;height:28px;border-radius:6px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;}
+    .field-btn:hover{background:#E5E7EB;color:#374151;}
+    .field-btn.danger:hover{background:#FEE2E2;color:#DC2626;}
+    .field-row-extra{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .field-extra-inp{width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:12px;outline:none;font-family:inherit;color:#111;background:#fff;transition:.15s;}
+    .field-extra-inp:focus{border-color:var(--teal);}
+    .field-required-row{display:flex;align-items:center;gap:8px;}
+    .field-required-row input[type=checkbox]{accent-color:var(--teal);width:14px;height:14px;}
+    .field-required-row label{font-size:12px;color:#6B7280;cursor:pointer;}
+    .add-field-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px;border-radius:9px;border:1.5px dashed #D1D5DB;background:#fff;color:#6B7280;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;justify-content:center;}
+    .add-field-btn:hover{border-color:var(--teal);color:var(--teal);}
+
+    /* ── Preview panel ── */
+    .preview-panel{background:var(--teal-pale);border:1px solid #99F6E4;border-radius:10px;padding:20px;margin-top:20px;}
+    .preview-title{font-size:13px;font-weight:700;color:var(--teal-dark);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+    .preview-field{margin-bottom:14px;}
+    .preview-label{font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;}
+    .preview-label .req{color:#EF4444;margin-left:2px;}
+    .preview-input{width:100%;padding:8px 10px;border:1px solid #D1D5DB;border-radius:7px;font-size:13px;background:#fff;color:#9CA3AF;pointer-events:none;}
+    .preview-textarea{width:100%;padding:8px 10px;border:1px solid #D1D5DB;border-radius:7px;font-size:13px;background:#fff;color:#9CA3AF;pointer-events:none;resize:none;height:64px;}
+    .preview-select{width:100%;padding:8px 10px;border:1px solid #D1D5DB;border-radius:7px;font-size:13px;background:#fff;color:#9CA3AF;pointer-events:none;}
+    .preview-empty{color:#9CA3AF;font-size:13px;text-align:center;padding:12px 0;}
+
+    /* ── Response panel (slide-in) ── */
+    .resp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:900;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .resp-overlay.open{opacity:1;pointer-events:all;}
+    .resp-panel{position:fixed;top:0;right:0;bottom:0;width:520px;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.12);z-index:901;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+    .resp-overlay.open .resp-panel{transform:translateX(0);}
+    .resp-header{padding:20px 24px;border-bottom:1px solid #E5E7EB;display:flex;align-items:flex-start;gap:12px;flex-shrink:0;}
+    .resp-header-info{flex:1;}
+    .resp-client{font-size:16px;font-weight:800;color:#111827;}
+    .resp-form-name{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .resp-close{width:32px;height:32px;border-radius:8px;border:none;background:#F3F4F6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;flex-shrink:0;}
+    .resp-close:hover{background:#E5E7EB;color:#111;}
+    .resp-body{flex:1;overflow-y:auto;padding:24px;}
+    .resp-body::-webkit-scrollbar{width:4px;}
+    .resp-body::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px;}
+    .resp-item{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F3F4F6;}
+    .resp-item:last-child{border-bottom:none;margin-bottom:0;}
+    .resp-q{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+    .resp-a{font-size:14px;color:#111827;line-height:1.6;background:#F9FAFB;border-radius:8px;padding:10px 14px;}
+    .resp-a.empty{color:#9CA3AF;font-style:italic;}
+
+    /* ── Empty state ── */
+    .empty-state{text-align:center;padding:60px 20px;}
+    .empty-icon{width:64px;height:64px;border-radius:18px;background:var(--teal-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--teal);}
+    .empty-title{font-size:17px;font-weight:700;color:#111827;margin-bottom:8px;}
+    .empty-desc{font-size:13px;color:#6B7280;line-height:1.6;max-width:360px;margin:0 auto 20px;}
+
+    /* ── Searchable select ── */
+    .search-select-wrap{position:relative;}
+    .search-select-input{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .search-select-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.08);}
+    .search-select-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;display:none;margin-top:4px;}
+    .search-select-dropdown.open{display:block;}
+    .search-option{padding:10px 14px;font-size:13px;color:#374151;cursor:pointer;transition:.1s;}
+    .search-option:hover{background:#F9FAFB;}
+    .search-option.selected{background:var(--teal-pale);color:var(--teal-dark);font-weight:600;}
+    .search-option.no-results{color:#9CA3AF;pointer-events:none;font-style:italic;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:1000;max-width:340px;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+    .toast.warn{background:#D97706;}
+
+    @media(max-width:768px){.sidebar{display:none;}.templates-grid{grid-template-columns:1fr;}.resp-panel{width:100vw;}.form-row{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
+  </div>
+    <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Inicio
+    </a>
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Calendario
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="programas.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Programas
+    </a>
+    <a class="nav-item" href="library.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Librería
+    </a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item active" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Formularios
+    </a>
+    <a class="nav-item" href="notes.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Notas
+    </a>
+    <a class="nav-item" href="chat.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></svg>
+      Chat
+    </a>
+    <div class="nav-section">Negocio</div>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analíticas
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Equipo
+    </a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarAvatar">U</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Cargando…</div>
+      <div class="user-role" id="sidebarRole"></div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <a class="page-header-back" href="formularios.html">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Formularios
+      </a>
+      <div class="page-header-divider"></div>
+      <div>
+        <div class="page-header-title">Encuestas</div>
+        <div class="page-header-sub">Formularios personalizados para clientes</div>
+      </div>
+    </div>
+    <div class="page-header-right">
+      <button class="btn btn-outline" onclick="openSendModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Enviar encuesta
+      </button>
+      <button class="btn btn-primary" onclick="openEditorModal(null)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nueva plantilla
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabPlantillas" onclick="switchTab('plantillas')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      Plantillas
+      <span class="tab-count" id="cntPlantillas">0</span>
+    </button>
+    <button class="tab-btn" id="tabAsignaciones" onclick="switchTab('asignaciones')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/></svg>
+      Asignaciones
+      <span class="tab-count" id="cntAsignaciones">0</span>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- Tab: Plantillas -->
+    <div class="tab-panel active" id="panelPlantillas">
+      <div class="templates-grid" id="templatesGrid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Tab: Asignaciones -->
+    <div class="tab-panel" id="panelAsignaciones">
+      <div id="assignmentsWrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Context menu ── -->
+<div class="ctx-menu" id="ctxMenu">
+  <button class="ctx-item" id="ctxEdit" onclick="ctxAction('edit')">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Editar
+  </button>
+  <div class="ctx-sep"></div>
+  <button class="ctx-item danger" id="ctxDelete" onclick="ctxAction('delete')">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    Eliminar
+  </button>
+</div>
+
+<!-- ── Template editor modal ── -->
+<div class="modal-overlay" id="editorModal">
+  <div class="modal-box" style="width:700px;">
+    <div class="modal-header">
+      <div class="modal-title" id="editorModalTitle">Nueva plantilla</div>
+      <button class="modal-close" onclick="closeEditorModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título de la plantilla</label>
+        <input type="text" id="edTitle" placeholder="Ej: Evaluación mensual" />
+      </div>
+      <div class="form-group">
+        <label>Descripción (opcional)</label>
+        <textarea id="edDesc" placeholder="Describe el propósito de esta encuesta…"></textarea>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Plantilla por defecto</div>
+          <div class="toggle-sub">Se asignará automáticamente a nuevos clientes</div>
+        </div>
+        <button class="toggle" id="edDefaultToggle" onclick="toggleDefault()"></button>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="section-heading">
+          Campos del formulario
+          <button class="btn btn-sm btn-ghost" onclick="addField()" style="gap:4px;">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Añadir campo
+          </button>
+        </div>
+        <div class="fields-list" id="fieldsList"></div>
+        <button class="add-field-btn" onclick="addField()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Añadir campo
+        </button>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-panel" id="previewPanel">
+        <div class="preview-title">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Vista previa del cliente
+        </div>
+        <div id="previewBody"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEditorModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTemplate()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Guardar plantilla
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Send survey modal ── -->
+<div class="modal-overlay modal-sm" id="sendModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Enviar encuesta</div>
+      <button class="modal-close" onclick="closeSendModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Plantilla</label>
+        <select id="sendTemplate">
+          <option value="">Selecciona una plantilla…</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Cliente</label>
+        <div class="search-select-wrap">
+          <input type="text" class="search-select-input" id="clientSearchInput" placeholder="Buscar cliente por nombre o email…" autocomplete="off" oninput="filterClients()" onfocus="openClientDropdown()" />
+          <div class="search-select-dropdown" id="clientDropdown"></div>
+        </div>
+        <input type="hidden" id="selectedClientId" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSendModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="sendSurvey()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Enviar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Response viewer panel ── -->
+<div class="resp-overlay" id="respOverlay" onclick="closeRespPanel(event)">
+  <div class="resp-panel" onclick="event.stopPropagation()">
+    <div class="resp-header">
+      <div class="resp-header-info">
+        <div class="resp-client" id="respClientName">—</div>
+        <div class="resp-form-name" id="respFormName">—</div>
+      </div>
+      <button class="resp-close" onclick="closeRespPanel()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="resp-body" id="respBody"></div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Script ── -->
+<script>
+const API = 'https://nutrientrena-production.up.railway.app';
+function tok(){ return localStorage.getItem('token') || ''; }
+function authHeaders(){ return { Authorization: `Bearer ${tok()}`, 'Content-Type': 'application/json' }; }
+
+async function apiFetch(path, opts = {}) {
+  try {
+    const res = await fetch(API + path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
+    if (res.status === 401) { window.location.href = 'login.html'; return null; }
+    if (!res.ok) {
+      let msg = `Error ${res.status}`;
+      try { const e = await res.json(); msg = e.detail || e.message || msg; } catch {}
+      throw new Error(msg);
+    }
+    if (res.status === 204) return {};
+    return res.json();
+  } catch (e) {
+    throw e;
+  }
+}
+
+// ── State ──
+let templates = [];
+let assignments = [];
+let clients = [];
+let ctxTargetId = null;
+let editorIsDefault = false;
+let editorFields = [];
+let editingTemplateId = null;
+let selectedClientObj = null;
+
+// ── Init ──
+(async function init() {
+  if (!tok()) { window.location.href = 'login.html'; return; }
+  await initUser();
+  await Promise.all([loadTemplates(), loadAssignments(), loadClients()]);
+})();
+
+async function initUser() {
+  try {
+    const r = await fetch(`${API}/api/auth/me`, { headers: authHeaders() });
+    if (!r.ok) return;
+    const u = (await r.json()).data || {};
+    document.getElementById('sidebarName').textContent = u.name || u.email || '—';
+    document.getElementById('sidebarRole').textContent = u.role?.name || '';
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name || u.email || 'U')[0].toUpperCase();}})()
+  } catch {}
+}
+
+function logout() { localStorage.removeItem('token'); localStorage.removeItem('role_id'); location.href = 'login.html'; }
+
+// ── Data loading ──
+async function loadTemplates() {
+  try {
+    const data = await apiFetch('/api/form-templates');
+    templates = Array.isArray(data) ? data : (data?.items || data?.templates || []);
+    renderTemplates();
+    populateSendTemplateSelect();
+  } catch (e) {
+    toast('Error al cargar plantillas: ' + e.message, 'error');
+  }
+}
+
+async function loadAssignments() {
+  try {
+    const data = await apiFetch('/api/form-assignments');
+    assignments = Array.isArray(data) ? data : (data?.items || data?.assignments || []);
+    renderAssignments();
+  } catch (e) {
+    toast('Error al cargar asignaciones: ' + e.message, 'error');
+  }
+}
+
+async function loadClients() {
+  try {
+    const data = await apiFetch('/api/users/client/findAll');
+    clients = Array.isArray(data) ? data : (data?.items || data?.clients || []);
+  } catch (e) {
+    // silently fail — clients dropdown will be empty
+  }
+}
+
+// ── Tabs ──
+function switchTab(tab) {
+  document.getElementById('tabPlantillas').classList.toggle('active', tab === 'plantillas');
+  document.getElementById('tabAsignaciones').classList.toggle('active', tab === 'asignaciones');
+  document.getElementById('panelPlantillas').classList.toggle('active', tab === 'plantillas');
+  document.getElementById('panelAsignaciones').classList.toggle('active', tab === 'asignaciones');
+}
+
+// ── Helpers ──
+function esc(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return isNaN(d) ? s : d.toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function avatarColor(name) {
+  const colors = ['#7C3AED','#2563EB','#059669','#D97706','#DC2626','#0D9488','#4F46E5'];
+  let h = 0;
+  for (let i = 0; i < (name||'').length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+  return colors[Math.abs(h) % colors.length];
+}
+
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : parts[0][0].toUpperCase();
+}
+
+function assignmentCountForTemplate(id) {
+  return assignments.filter(a => a.form_template_id === id).length;
+}
+
+// ── Render templates ──
+function renderTemplates() {
+  const grid = document.getElementById('templatesGrid');
+  document.getElementById('cntPlantillas').textContent = templates.length;
+
+  if (!templates.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;">
+      <div class="empty-state">
+        <div class="empty-icon"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+        <div class="empty-title">Sin plantillas</div>
+        <div class="empty-desc">Crea tu primera plantilla de encuesta para empezar a recoger feedback de tus clientes.</div>
+        <button class="btn btn-primary" onclick="openEditorModal(null)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva plantilla
+        </button>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const cards = templates.map(t => `
+    <div class="tpl-card" id="tplCard-${t.id}">
+      <div class="tpl-card-top">
+        <div class="tpl-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <div class="tpl-card-info">
+          <div class="tpl-card-title">${esc(t.title)}</div>
+          <div class="tpl-card-desc">${esc(t.description || 'Sin descripción')}</div>
+        </div>
+        <button class="tpl-card-menu-btn" onclick="openCtxMenu(event, ${t.id})" title="Opciones">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+      </div>
+      <div class="tpl-badges">
+        <span class="badge badge-gray">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          ${(t.fields || []).length} campos
+        </span>
+        ${t.is_default ? '<span class="badge badge-teal">Por defecto</span>' : ''}
+        ${assignmentCountForTemplate(t.id) > 0 ? `<span class="badge badge-indigo">${assignmentCountForTemplate(t.id)} enviada${assignmentCountForTemplate(t.id) !== 1 ? 's' : ''}</span>` : ''}
+      </div>
+      <div class="tpl-card-footer">
+        <button class="btn btn-outline btn-sm tpl-send-btn" onclick="openSendModalWithTemplate(${t.id})">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  const ghost = `
+    <div class="ghost-card" onclick="openEditorModal(null)">
+      <div class="ghost-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      <div class="ghost-label">Nueva plantilla</div>
+    </div>`;
+
+  grid.innerHTML = cards + ghost;
+}
+
+// ── Render assignments ──
+function renderAssignments() {
+  const wrap = document.getElementById('assignmentsWrap');
+  document.getElementById('cntAsignaciones').textContent = assignments.length;
+
+  if (!assignments.length) {
+    wrap.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/></svg></div>
+      <div class="empty-title">Sin asignaciones</div>
+      <div class="empty-desc">Aún no has enviado ninguna encuesta. Usa "Enviar encuesta" para compartir un formulario con un cliente.</div>
+      <button class="btn btn-primary" onclick="openSendModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Enviar encuesta
+      </button>
+    </div>`;
+    return;
+  }
+
+  const rows = assignments.map(a => {
+    const clientName = a.client_name || '—';
+    const clientEmail = a.client_email || '';
+    const color = avatarColor(clientName);
+    const ini = initials(clientName);
+    const isPending = a.status === 'pending';
+    const statusBadge = isPending
+      ? '<span class="badge badge-amber">Pendiente</span>'
+      : '<span class="badge badge-green">Recibido</span>';
+    const templateTitle = a.template?.title || templates.find(t => t.id === a.form_template_id)?.title || '—';
+    const sentDate = fmtDate(a.created_at);
+    const respondedDate = a.submitted_at ? fmtDate(a.submitted_at) : '—';
+
+    const actions = `
+      <div class="td-actions">
+        ${!isPending ? `<button class="btn btn-sm btn-outline" onclick="openRespPanel('${a.id}')">Ver respuestas</button>` : ''}
+        <button class="btn btn-sm btn-ghost" title="Copiar enlace" onclick="copyLink('${a.id}')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>`;
+
+    return `<tr>
+      <td><strong style="color:#111827;">${esc(templateTitle)}</strong></td>
+      <td>
+        <div class="client-cell">
+          <div class="client-avatar" style="background:${color};">${esc(ini)}</div>
+          <div>
+            <div class="client-name">${esc(clientName)}</div>
+            ${clientEmail ? `<div class="client-email">${esc(clientEmail)}</div>` : ''}
+          </div>
+        </div>
+      </td>
+      <td>${statusBadge}</td>
+      <td style="color:#6B7280;font-size:12px;">${esc(sentDate)}</td>
+      <td style="color:#6B7280;font-size:12px;">${esc(respondedDate)}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Plantilla</th>
+          <th>Cliente</th>
+          <th>Estado</th>
+          <th>Enviado</th>
+          <th>Respondido</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+// ── Context menu ──
+let ctxOpenBtn = null;
+function openCtxMenu(e, id) {
+  e.stopPropagation();
+  ctxTargetId = id;
+  const menu = document.getElementById('ctxMenu');
+  menu.classList.add('open');
+  const rect = e.currentTarget.getBoundingClientRect();
+  let left = rect.left - menu.offsetWidth + rect.width;
+  let top = rect.bottom + 4;
+  if (left < 8) left = 8;
+  if (top + 120 > window.innerHeight) top = rect.top - 120;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+  ctxOpenBtn = e.currentTarget;
+}
+document.addEventListener('click', () => { document.getElementById('ctxMenu').classList.remove('open'); });
+
+function ctxAction(action) {
+  document.getElementById('ctxMenu').classList.remove('open');
+  if (action === 'edit') openEditorModal(ctxTargetId);
+  if (action === 'delete') deleteTemplate(ctxTargetId);
+}
+
+// ── Template editor ──
+function openEditorModal(id) {
+  editingTemplateId = id;
+  editorFields = [];
+  editorIsDefault = false;
+
+  if (id) {
+    const t = templates.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('editorModalTitle').textContent = 'Editar plantilla';
+    document.getElementById('edTitle').value = t.title || '';
+    document.getElementById('edDesc').value = t.description || '';
+    editorIsDefault = !!t.is_default;
+    editorFields = (t.fields || []).map(f => ({ ...f }));
+  } else {
+    document.getElementById('editorModalTitle').textContent = 'Nueva plantilla';
+    document.getElementById('edTitle').value = '';
+    document.getElementById('edDesc').value = '';
+    editorIsDefault = false;
+  }
+
+  document.getElementById('edDefaultToggle').classList.toggle('on', editorIsDefault);
+  renderFields();
+  document.getElementById('editorModal').classList.add('open');
+}
+
+function closeEditorModal() {
+  document.getElementById('editorModal').classList.remove('open');
+}
+
+function toggleDefault() {
+  editorIsDefault = !editorIsDefault;
+  document.getElementById('edDefaultToggle').classList.toggle('on', editorIsDefault);
+}
+
+// ── Field builder ──
+function slugify(str) {
+  return (str || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 40);
+}
+
+function addField() {
+  editorFields.push({ label: '', field_type: 'text', field_key: '', placeholder: '', options: null, required: false, order: editorFields.length });
+  renderFields();
+}
+
+function removeField(idx) {
+  editorFields.splice(idx, 1);
+  editorFields.forEach((f, i) => f.order = i);
+  renderFields();
+}
+
+function moveField(idx, dir) {
+  const swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= editorFields.length) return;
+  [editorFields[idx], editorFields[swapIdx]] = [editorFields[swapIdx], editorFields[idx]];
+  editorFields.forEach((f, i) => f.order = i);
+  renderFields();
+}
+
+function readFields() {
+  editorFields.forEach((f, idx) => {
+    const el = document.getElementById(`field-${idx}`);
+    if (!el) return;
+    f.label = el.querySelector('.field-label').value;
+    f.field_type = el.querySelector('.field-type').value;
+    f.field_key = el.querySelector('.field-key').value || slugify(f.label);
+    f.placeholder = el.querySelector('.field-placeholder')?.value || '';
+    f.required = el.querySelector('.field-required')?.checked || false;
+    if (f.field_type === 'select') {
+      const raw = el.querySelector('.field-options')?.value || '';
+      f.options = raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : null;
+    } else {
+      f.options = null;
+    }
+  });
+}
+
+function renderFields() {
+  const list = document.getElementById('fieldsList');
+  if (!editorFields.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">Sin campos. Haz clic en «Añadir campo» para comenzar.</div>';
+    renderPreview();
+    return;
+  }
+
+  list.innerHTML = editorFields.map((f, idx) => `
+    <div class="field-row" id="field-${idx}">
+      <div class="field-row-top">
+        <div class="field-num">${idx + 1}</div>
+        <input type="text" class="field-label-inp field-label" value="${esc(f.label)}" placeholder="Pregunta o etiqueta…"
+          oninput="onLabelChange(${idx}, this.value)" />
+        <select class="field-type-sel field-type" onchange="onTypeChange(${idx}, this.value)">
+          <option value="text" ${f.field_type==='text'?'selected':''}>Texto corto</option>
+          <option value="number" ${f.field_type==='number'?'selected':''}>Número</option>
+          <option value="textarea" ${f.field_type==='textarea'?'selected':''}>Texto largo</option>
+          <option value="select" ${f.field_type==='select'?'selected':''}>Selección</option>
+          <option value="date" ${f.field_type==='date'?'selected':''}>Fecha</option>
+        </select>
+        <div class="field-row-btns">
+          <button class="field-btn" onclick="moveField(${idx}, -1)" title="Subir" ${idx===0?'disabled':''}>
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </button>
+          <button class="field-btn" onclick="moveField(${idx}, 1)" title="Bajar" ${idx===editorFields.length-1?'disabled':''}>
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <button class="field-btn danger" onclick="removeField(${idx})" title="Eliminar campo">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field-row-extra">
+        <input type="text" class="field-extra-inp field-key" value="${esc(f.field_key)}" placeholder="Clave (auto)" />
+        <input type="text" class="field-extra-inp field-placeholder" value="${esc(f.placeholder||'')}" placeholder="Placeholder…" />
+      </div>
+      ${f.field_type === 'select' ? `
+      <div>
+        <input type="text" class="field-extra-inp field-options" value="${esc((f.options||[]).join(', '))}" placeholder="Opciones separadas por comas: Bueno, Regular, Malo" style="width:100%;" />
+      </div>` : ''}
+      <div class="field-required-row">
+        <input type="checkbox" id="req-${idx}" class="field-required" ${f.required?'checked':''} />
+        <label for="req-${idx}">Campo obligatorio</label>
+      </div>
+    </div>
+  `).join('');
+
+  renderPreview();
+}
+
+function onLabelChange(idx, val) {
+  editorFields[idx].label = val;
+  const keyInp = document.querySelector(`#field-${idx} .field-key`);
+  if (keyInp && !keyInp.dataset.manual) {
+    const generated = slugify(val);
+    keyInp.value = generated;
+    editorFields[idx].field_key = generated;
+  }
+  renderPreview();
+}
+
+function onTypeChange(idx, val) {
+  readFields();
+  editorFields[idx].field_type = val;
+  renderFields();
+}
+
+function renderPreview() {
+  const body = document.getElementById('previewBody');
+  if (!editorFields.length) {
+    body.innerHTML = '<div class="preview-empty">Los campos aparecerán aquí</div>';
+    return;
+  }
+  body.innerHTML = editorFields.map(f => {
+    const label = f.label || '(sin etiqueta)';
+    const req = f.required ? '<span class="req">*</span>' : '';
+    let input = '';
+    if (f.field_type === 'textarea') {
+      input = `<textarea class="preview-textarea" disabled placeholder="${esc(f.placeholder||'Escribe aquí…')}"></textarea>`;
+    } else if (f.field_type === 'select') {
+      const opts = (f.options || []).map(o => `<option>${esc(o)}</option>`).join('');
+      input = `<select class="preview-select" disabled><option>Selecciona una opción…</option>${opts}</select>`;
+    } else if (f.field_type === 'date') {
+      input = `<input type="text" class="preview-input" disabled placeholder="dd/mm/aaaa" />`;
+    } else if (f.field_type === 'number') {
+      input = `<input type="text" class="preview-input" disabled placeholder="${esc(f.placeholder||'0')}" />`;
+    } else {
+      input = `<input type="text" class="preview-input" disabled placeholder="${esc(f.placeholder||'Tu respuesta…')}" />`;
+    }
+    return `<div class="preview-field"><div class="preview-label">${esc(label)}${req}</div>${input}</div>`;
+  }).join('');
+}
+
+// ── Save template ──
+async function saveTemplate() {
+  readFields();
+  const title = document.getElementById('edTitle').value.trim();
+  if (!title) { toast('El título es obligatorio', 'warn'); return; }
+
+  const payload = {
+    title,
+    description: document.getElementById('edDesc').value.trim() || null,
+    is_default: editorIsDefault,
+    fields: editorFields.map((f, i) => ({
+      label: f.label,
+      field_type: f.field_type,
+      field_key: f.field_key || slugify(f.label) || `field_${i}`,
+      placeholder: f.placeholder || null,
+      options: f.options || null,
+      order: i,
+      required: !!f.required,
+    }))
+  };
+
+  try {
+    if (editingTemplateId) {
+      await apiFetch(`/api/form-templates/${editingTemplateId}`, { method: 'PUT', body: JSON.stringify(payload) });
+      toast('Plantilla actualizada', 'success');
+    } else {
+      await apiFetch('/api/form-templates', { method: 'POST', body: JSON.stringify(payload) });
+      toast('Plantilla creada', 'success');
+    }
+    closeEditorModal();
+    await loadTemplates();
+  } catch (e) {
+    toast('Error al guardar: ' + e.message, 'error');
+  }
+}
+
+// ── Delete template ──
+async function deleteTemplate(id) {
+  const count = assignmentCountForTemplate(id);
+  if (count > 0) {
+    toast(`No puedes eliminar esta plantilla: tiene ${count} asignación${count !== 1 ? 'es' : ''} activa${count !== 1 ? 's' : ''}`, 'warn');
+    return;
+  }
+  if (!confirm('¿Eliminar esta plantilla? Esta acción no se puede deshacer.')) return;
+  try {
+    await apiFetch(`/api/form-templates/${id}`, { method: 'DELETE' });
+    toast('Plantilla eliminada', 'success');
+    await loadTemplates();
+  } catch (e) {
+    toast('Error al eliminar: ' + e.message, 'error');
+  }
+}
+
+// ── Send survey modal ──
+function populateSendTemplateSelect() {
+  const sel = document.getElementById('sendTemplate');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Selecciona una plantilla…</option>' +
+    templates.map(t => `<option value="${t.id}" ${String(t.id) === String(current) ? 'selected' : ''}>${esc(t.title)}</option>`).join('');
+}
+
+function openSendModal() {
+  document.getElementById('sendTemplate').value = '';
+  document.getElementById('clientSearchInput').value = '';
+  document.getElementById('selectedClientId').value = '';
+  selectedClientObj = null;
+  document.getElementById('sendModal').classList.add('open');
+}
+
+function openSendModalWithTemplate(id) {
+  openSendModal();
+  document.getElementById('sendTemplate').value = String(id);
+}
+
+function closeSendModal() {
+  document.getElementById('sendModal').classList.remove('open');
+  document.getElementById('clientDropdown').classList.remove('open');
+}
+
+// ── Client searchable dropdown ──
+function filterClients() {
+  const q = document.getElementById('clientSearchInput').value.toLowerCase();
+  const dd = document.getElementById('clientDropdown');
+  const filtered = clients.filter(c => {
+    const name = ((c.name || '') + ' ' + (c.last_name || '')).toLowerCase();
+    const email = (c.email || '').toLowerCase();
+    return !q || name.includes(q) || email.includes(q);
+  });
+
+  if (!filtered.length) {
+    dd.innerHTML = '<div class="search-option no-results">Sin resultados</div>';
+  } else {
+    dd.innerHTML = filtered.slice(0, 30).map(c => {
+      const name = [c.name, c.last_name].filter(Boolean).join(' ');
+      const selId = document.getElementById('selectedClientId').value;
+      return `<div class="search-option ${c.id === selId ? 'selected' : ''}" onclick="selectClient('${esc(c.id)}', '${esc(name)}', '${esc(c.email||'')}')">
+        <div style="font-weight:600;">${esc(name || c.email || c.id)}</div>
+        ${c.email ? `<div style="font-size:11px;color:#9CA3AF;">${esc(c.email)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+  dd.classList.add('open');
+}
+
+function openClientDropdown() {
+  filterClients();
+}
+
+function selectClient(id, name, email) {
+  document.getElementById('selectedClientId').value = id;
+  document.getElementById('clientSearchInput').value = name || email || id;
+  selectedClientObj = clients.find(c => c.id === id) || { id, name };
+  document.getElementById('clientDropdown').classList.remove('open');
+}
+
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.search-select-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('clientDropdown').classList.remove('open');
+  }
+});
+
+async function sendSurvey() {
+  const templateId = document.getElementById('sendTemplate').value;
+  const clientId = document.getElementById('selectedClientId').value;
+  if (!templateId) { toast('Selecciona una plantilla', 'warn'); return; }
+  if (!clientId) { toast('Selecciona un cliente', 'warn'); return; }
+
+  try {
+    await apiFetch('/api/form-assignments', {
+      method: 'POST',
+      body: JSON.stringify({ form_template_id: parseInt(templateId, 10), client_user_detail_id: clientId })
+    });
+    toast('Encuesta enviada correctamente', 'success');
+    closeSendModal();
+    await loadAssignments();
+    renderTemplates(); // refresh badge counts
+  } catch (e) {
+    toast('Error al enviar: ' + e.message, 'error');
+  }
+}
+
+// ── Response panel ──
+function openRespPanel(assignmentId) {
+  const a = assignments.find(x => x.id === assignmentId);
+  if (!a) return;
+
+  document.getElementById('respClientName').textContent = a.client_name || '—';
+  document.getElementById('respFormName').textContent = a.template?.title || templates.find(t => t.id === a.form_template_id)?.title || '—';
+
+  const fields = a.template?.fields || templates.find(t => t.id === a.form_template_id)?.fields || [];
+  const responses = a.responses || [];
+
+  const byKey = {};
+  responses.forEach(r => { byKey[r.field_key] = r.value; });
+
+  const body = document.getElementById('respBody');
+
+  if (!fields.length && !responses.length) {
+    body.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">Sin datos de respuesta</div>';
+  } else if (fields.length) {
+    body.innerHTML = fields.map(f => {
+      const val = byKey[f.field_key];
+      const isEmpty = val == null || val === '';
+      return `<div class="resp-item">
+        <div class="resp-q">${esc(f.label || f.field_key)}</div>
+        <div class="resp-a ${isEmpty ? 'empty' : ''}">${isEmpty ? 'Sin respuesta' : esc(Array.isArray(val) ? val.join(', ') : String(val))}</div>
+      </div>`;
+    }).join('');
+  } else {
+    // No template fields, just show raw responses
+    body.innerHTML = responses.map(r => `
+      <div class="resp-item">
+        <div class="resp-q">${esc(r.field_key || r.field_label || '—')}</div>
+        <div class="resp-a">${esc(Array.isArray(r.value) ? r.value.join(', ') : String(r.value ?? ''))}</div>
+      </div>`).join('');
+  }
+
+  document.getElementById('respOverlay').classList.add('open');
+}
+
+function closeRespPanel(e) {
+  if (!e || e.target === document.getElementById('respOverlay')) {
+    document.getElementById('respOverlay').classList.remove('open');
+  }
+}
+
+// ── Copy link ──
+function copyLink(assignmentId) {
+  const url = `${window.location.origin}/form-response.html?id=${assignmentId}`;
+  navigator.clipboard.writeText(url).then(() => toast('Enlace copiado', 'success')).catch(() => toast(url, 'success'));
+}
+
+// ── Toast ──
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast' + (type ? ' ' + type : '');
+  void el.offsetWidth;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

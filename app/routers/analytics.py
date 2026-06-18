@@ -37,7 +37,7 @@ def _get_client_details(db: Session, coach_id: Optional[str] = None):
     return q.all()
 
 
-@router.get("/overview")
+@router.get("/overview", summary="Resumen general", description="Totales de clientes, activos, nuevos este mes y coaches.")
 def overview(
     coach_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -91,7 +91,7 @@ def overview(
     }, "ok")
 
 
-@router.get("/states")
+@router.get("/states", summary="Distribución por estado", description="Porcentaje y conteo de clientes agrupados por estado, para gráfico de dona.")
 def states_distribution(
     coach_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -128,7 +128,7 @@ def states_distribution(
     return send_response({"total": len(clients), "distribution": result}, "ok")
 
 
-@router.get("/checkins")
+@router.get("/checkins", summary="Estadísticas de check-ins", description="Adherencia, variación de peso promedio y tendencia semanal de check-ins.")
 def checkin_stats(
     coach_id: Optional[str] = Query(None),
     from_date: Optional[date] = Query(None, alias="from"),
@@ -193,7 +193,7 @@ def checkin_stats(
     }, "ok")
 
 
-@router.get("/coaches")
+@router.get("/coaches", summary="Estadísticas por coach", description="Clientes asignados y check-ins recibidos por cada coach.")
 def coaches_stats(
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),

@@ -39,7 +39,7 @@ def _get_coach_for_client(client_detail_id: str, db: Session):
     return coach_detail, coach_user
 
 
-@router.get("/form/{assignment_id}")
+@router.get("/form/{assignment_id}", summary="Ver formulario público", description="Retorna el formulario asignado sin autenticación (para que el cliente lo complete).")
 def get_public_form(assignment_id: str, db: Session = Depends(get_db)):
     assignment = db.query(FormAssignment).filter(FormAssignment.id == assignment_id).first()
     if not assignment:
@@ -47,7 +47,7 @@ def get_public_form(assignment_id: str, db: Session = Depends(get_db)):
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "OK")
 
 
-@router.post("/form/{assignment_id}/submit")
+@router.post("/form/{assignment_id}/submit", summary="Enviar formulario público", description="El cliente envía sus respuestas sin necesitar autenticación. Actualiza su perfil automáticamente.")
 def submit_public_form(
     assignment_id: str,
     data: FormSubmitRequest,

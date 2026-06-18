@@ -18,7 +18,7 @@ def _out(obj: ProgressDay) -> dict:
     return ProgressOut.model_validate(obj).model_dump()
 
 
-@router_progress.post("/upsert")
+@router_progress.post("/upsert", summary="Crear o actualizar progreso", description="Inserta o actualiza el registro de progreso diario para un usuario y fecha dados.")
 def upsert_progress(
     data: ProgressCreate,
     db: Session = Depends(get_db),
@@ -41,7 +41,7 @@ def upsert_progress(
     return send_response(_out(obj), "Progreso guardado")
 
 
-@router_progress.post("")
+@router_progress.post("", summary="Crear registro de progreso", description="Registra un nuevo punto de progreso diario (peso, medidas).")
 def create_progress(
     data: ProgressCreate,
     db: Session = Depends(get_db),
@@ -54,7 +54,7 @@ def create_progress(
     return send_response(_out(obj), "Progreso registrado")
 
 
-@router_progress.get("/search")
+@router_progress.get("/search", summary="Buscar registros de progreso", description="Retorna el historial de progreso de un usuario filtrando por rango de fechas.")
 def search_progress(
     user_id: Optional[int] = Query(None),
     from_date: Optional[date] = Query(None, alias="from"),
@@ -72,7 +72,7 @@ def search_progress(
     return send_response([_out(i) for i in items], "OK")
 
 
-@router_progress.get("/{id}")
+@router_progress.get("/{id}", summary="Ver registro de progreso", description="Retorna un registro de progreso específico por su ID.")
 def get_progress(
     id: int,
     db: Session = Depends(get_db),
@@ -84,7 +84,7 @@ def get_progress(
     return send_response(_out(obj), "OK")
 
 
-@router_progress.put("/{id}")
+@router_progress.put("/{id}", summary="Actualizar progreso", description="Modifica un registro de progreso existente.")
 def update_progress(
     id: int,
     data: ProgressCreate,
@@ -101,7 +101,7 @@ def update_progress(
     return send_response(_out(obj), "Progreso actualizado")
 
 
-@router_progress.delete("/delete/{id}")
+@router_progress.delete("/delete/{id}", summary="Eliminar registro de progreso", description="Elimina un registro de progreso por su ID.")
 def delete_progress(
     id: int,
     db: Session = Depends(get_db),
@@ -117,7 +117,7 @@ def delete_progress(
 
 # ── Client targets ────────────────────────────────────────────────────────────
 
-@router_targets.get("/search")
+@router_targets.get("/search", summary="Ver objetivos del cliente", description="Retorna los objetivos físicos (peso, grasa corporal, etc.) de un cliente.")
 def search_targets(
     user_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
@@ -130,7 +130,7 @@ def search_targets(
     return send_response(ClientTargetOut.model_validate(obj).model_dump(), "OK")
 
 
-@router_targets.put("")
+@router_targets.put("", summary="Crear o actualizar objetivos", description="Inserta o actualiza los objetivos físicos del cliente.")
 def create_or_update_target(
     data: ClientTargetCreate,
     db: Session = Depends(get_db),

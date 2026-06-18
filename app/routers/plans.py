@@ -11,11 +11,13 @@ from app.core.dependencies import (
 )
 from app.core.responses import send_response, send_error
 from app.core.email import send_plan_email, _send, GMAIL_USER
+from app.pdf.diet_pdf import generate_diet_pdf
+from app.pdf.routine_pdf import generate_routine_pdf
 from app.models.plan import PlanDelivery
 from app.models.user import UserDetail, User
 from app.models.parameter import ParameterDetail
-from app.models.nutrition.diet import Diet, DietDetail, DietFood
-from app.models.routine import Routine, RoutineDay
+from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment
+from app.models.routine import Routine, RoutineDay, RoutineDayDetail
 
 router = APIRouter(prefix="/plans", tags=["Plans"])
 
@@ -43,7 +45,20 @@ def _build_diet_payload(diet_id: Optional[str], db: Session) -> dict | None:
             "carbs":    detail.carbs    if detail else None,
             "fats":     detail.fats     if detail else None,
         } if detail else None,
-        "foods": [{"name": f.name} for f in foods],
+        "foods": [
+            {
+                "name": f.name,
+                "aliments": [
+                    {
+                        "name":     fa.aliment.name     if fa.aliment else "—",
+                        "quantity": fa.quantity,
+                        "calories": fa.aliment.calories if fa.aliment else None,
+                    }
+                    for fa in f.detail
+                ],
+            }
+            for f in foods
+        ],
     }
 
 
@@ -54,10 +69,33 @@ def _build_routine_payload(routine_id: Optional[int], db: Session) -> dict | Non
     if not routine:
         return None
     days = db.query(RoutineDay).filter(RoutineDay.routine_id == routine.id).all()
+
+    def _all_details(day):
+        details = list(day.details or [])
+        for block in (day.blocks or []):
+            details.extend(block.exercises or [])
+        details.sort(key=lambda d: d.order_index or 0)
+        return details
+
     return {
         "name":       routine.name,
         "days_count": routine.days,
-        "days": [{"day_name": d.day_name, "description": d.description} for d in days],
+        "days": [
+            {
+                "day_name":    d.day_name,
+                "description": d.description,
+                "exercises": [
+                    {
+                        "name":        det.training.name if det.training else "—",
+                        "series":      det.series,
+                        "repetitions": det.repetitions,
+                        "break_time":  det.break_time,
+                    }
+                    for det in _all_details(d)
+                ],
+            }
+            for d in days
+        ],
     }
 
 
@@ -90,7 +128,7 @@ class PlanDeliveryOut(BaseModel):
 
 # ── Deliver ───────────────────────────────────────────────────────────────────
 
-@router.post("/deliver")
+@router.post("/deliver", summary="Entregar plan al cliente", description="Envía por email y registra la entrega de dieta y/o rutina al cliente.")
 def deliver_plan(
     data: PlanDeliverRequest,
     db: Session = Depends(get_db),
@@ -111,6 +149,23 @@ def deliver_plan(
     diet_payload    = _build_diet_payload(data.diet_id, db)
     routine_payload = _build_routine_payload(data.routine_id, db)
 
+    # ── Build PDF attachments ─────────────────────────────────────────────────
+    attachments: list[tuple[bytes, str]] = []
+    if data.diet_id:
+        diet_obj = db.query(Diet).filter(Diet.id == data.diet_id).first()
+        if diet_obj:
+            try:
+                attachments.append((generate_diet_pdf(diet_obj), "dieta.pdf"))
+            except Exception as e:
+                print(f"PDF diet error: {e}")
+    if data.routine_id:
+        routine_obj = db.query(Routine).filter(Routine.id == data.routine_id).first()
+        if routine_obj:
+            try:
+                attachments.append((generate_routine_pdf(routine_obj), "rutina.pdf"))
+            except Exception as e:
+                print(f"PDF routine error: {e}")
+
     # ── Send email (optional) ─────────────────────────────────────────────────
     sent = False
     email_error = ""
@@ -122,6 +177,7 @@ def deliver_plan(
             routine=routine_payload,
             coach_message=data.message or "",
             loom_link=data.loom_link or "",
+            attachments=attachments or None,
         )
 
     # ── Save delivery record ──────────────────────────────────────────────────
@@ -160,7 +216,7 @@ def deliver_plan(
 
 # ── History ───────────────────────────────────────────────────────────────────
 
-@router.get("/history/{client_id}")
+@router.get("/history/{client_id}", summary="Historial de entregas", description="Retorna el historial de planes entregados a un cliente.")
 def delivery_history(
     client_id: str,
     db: Session = Depends(get_db),
@@ -191,7 +247,7 @@ def delivery_history(
 
 # ── Resend ────────────────────────────────────────────────────────────────────
 
-@router.post("/resend/{delivery_id}")
+@router.post("/resend/{delivery_id}", summary="Reenviar plan por email", description="Reenvía el email de una entrega de plan previamente registrada.")
 def resend_delivery(
     delivery_id: str,
     db: Session = Depends(get_db),
@@ -213,13 +269,30 @@ def resend_delivery(
     diet_payload    = _build_diet_payload(delivery.diet_id, db)
     routine_payload = _build_routine_payload(delivery.routine_id, db)
 
-    sent = send_plan_email(
+    attachments: list[tuple[bytes, str]] = []
+    if delivery.diet_id:
+        diet_obj = db.query(Diet).filter(Diet.id == delivery.diet_id).first()
+        if diet_obj:
+            try:
+                attachments.append((generate_diet_pdf(diet_obj), "dieta.pdf"))
+            except Exception as e:
+                print(f"PDF diet error: {e}")
+    if delivery.routine_id:
+        routine_obj = db.query(Routine).filter(Routine.id == delivery.routine_id).first()
+        if routine_obj:
+            try:
+                attachments.append((generate_routine_pdf(routine_obj), "rutina.pdf"))
+            except Exception as e:
+                print(f"PDF routine error: {e}")
+
+    sent, _ = send_plan_email(
         to=client_user.email,
         client_name=client_detail.name,
         diet=diet_payload,
         routine=routine_payload,
         coach_message=delivery.message or "",
         loom_link=delivery.loom_link or "",
+        attachments=attachments or None,
     )
 
     return send_response(
@@ -233,7 +306,7 @@ def resend_delivery(
 class TestEmailRequest(BaseModel):
     to: str
 
-@router.post("/test-email")
+@router.post("/test-email", summary="Probar envío de email", description="Envía un email de prueba para verificar la configuración del proveedor de correo.")
 def test_email(
     data: TestEmailRequest,
     db: Session = Depends(get_db),

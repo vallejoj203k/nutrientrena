@@ -196,13 +196,13 @@ def _clone_days(db: Session, source: Routine, new_routine_id: int):
                 ))
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar rutinas", description="Retorna todas las rutinas del coach autenticado.")
 def find_all(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Routine).filter(Routine.user_id == current_user.id).all()
     return send_response([_serialize(i) for i in items], "OK")
 
 
-@router.post("/clone")
+@router.post("/clone", summary="Clonar rutina", description="Crea una copia de una rutina existente con todos sus días y ejercicios.")
 def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     source = _get_or_404(db, data.id)
     if not source:
@@ -225,7 +225,7 @@ def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user
     return send_response(_serialize(new_routine), "Rutina clonada")
 
 
-@router.post("/assigned")
+@router.post("/assigned", summary="Asignar rutina a cliente", description="Crea y asigna una rutina directamente a un cliente.")
 def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     from app.models.user import UserDetail
     client_detail = db.query(UserDetail).filter(UserDetail.id == data.client_id).first()
@@ -249,13 +249,13 @@ def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), current_
     return send_response(_serialize(routine), "Rutina asignada")
 
 
-@router.post("/list")
+@router.post("/list", summary="Listar rutinas por IDs", description="Retorna múltiples rutinas por sus IDs.")
 def list_ids(data: RoutineListRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Routine).filter(Routine.id.in_(data.ids)).all()
     return send_response([_serialize(i) for i in items], "OK")
 
 
-@router.post("/client/bulkCreate")
+@router.post("/client/bulkCreate", summary="Crear rutinas en lote para cliente", description="Crea o actualiza múltiples rutinas asignadas a un cliente en una sola operación.")
 def bulk_create_client(
     data: BulkCreateClientRequest,
     db: Session = Depends(get_db),
@@ -302,7 +302,7 @@ def bulk_create_client(
     return send_response({"created": created}, "Rutinas creadas")
 
 
-@router.get("/client/{client_id}")
+@router.get("/client/{client_id}", summary="Rutinas del cliente", description="Retorna todas las rutinas asignadas a un cliente.")
 def client_routines(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     from app.models.user import UserDetail
     client_detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
@@ -312,12 +312,12 @@ def client_routines(client_id: str, db: Session = Depends(get_db), _=Depends(req
     return send_response([_serialize(i) for i in items], "OK")
 
 
-@router.get("/client/{customer_id}/mail")
+@router.get("/client/{customer_id}/mail", summary="Enviar rutina por email", description="Envía la rutina del cliente por correo electrónico.")
 def mail(customer_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     return send_response(None, f"Correo enviado al cliente {customer_id}")
 
 
-@router.get("/{id}/pdf")
+@router.get("/{id}/pdf", summary="Exportar rutina a PDF", description="Genera y descarga la rutina en formato PDF.")
 def pdf(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:
@@ -334,7 +334,7 @@ def pdf(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPER
     )
 
 
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver rutina", description="Retorna el detalle completo de una rutina con todos sus días y bloques de ejercicios.")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:
@@ -342,7 +342,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(_serialize(routine), "OK")
 
 
-@router.post("")
+@router.post("", summary="Crear rutina", description="Crea una nueva rutina con días y bloques de ejercicios (formato V2).")
 def create(data: RoutineCreateV2, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = Routine(
         name=data.name,
@@ -362,7 +362,7 @@ def create(data: RoutineCreateV2, db: Session = Depends(get_db), current_user=De
     return send_response(_serialize(routine), "Rutina creada")
 
 
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar rutina", description="Modifica una rutina existente, reemplazando sus días y ejercicios.")
 def updated(id: int, data: RoutineUpdateV2, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:
@@ -387,7 +387,7 @@ def updated(id: int, data: RoutineUpdateV2, db: Session = Depends(get_db), _=Dep
     return send_response(_serialize(routine), "Rutina actualizada")
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", summary="Eliminar rutina", description="Elimina una rutina y todos sus días y ejercicios.")
 def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     routine = _get_or_404(db, id)
     if not routine:

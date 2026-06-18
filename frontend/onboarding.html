@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Onboarding</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--amber:#D97706;--amber-pale:#FFFBEB;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
+
+    /* ── Main layout ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+    /* ── Page header ── */
+    .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:68px;display:flex;align-items:center;flex-shrink:0;gap:16px;}
+    .page-header-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;flex-shrink:0;}
+    .page-header-back:hover{background:#F3F4F6;color:#374151;border-color:#D1D5DB;}
+    .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
+    .page-header-title{font-size:17px;font-weight:800;color:#111827;flex:1;}
+    .btn{padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--amber);color:#fff;}
+    .btn-primary:hover{background:#B45309;}
+    .btn-ghost{background:#F3F4F6;color:#374151;border:1.5px solid #E5E7EB;}
+    .btn-ghost:hover{background:#E5E7EB;}
+    .btn-sm{padding:7px 14px;font-size:12px;}
+    .btn-xs{padding:5px 11px;font-size:11px;font-weight:600;border-radius:7px;}
+    .btn-outline{background:#fff;color:#374151;border:1.5px solid #E5E7EB;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:4px;padding:5px 11px;}
+    .btn-outline:hover{border-color:var(--indigo);color:var(--indigo);}
+
+    /* ── Content area ── */
+    .content{flex:1;overflow-y:auto;padding:24px 28px 40px;}
+    .content::-webkit-scrollbar{width:5px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Stats row ── */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+    .stat-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:14px;}
+    .stat-icon-wrap{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .stat-icon-amber{background:#FFFBEB;color:#D97706;}
+    .stat-icon-indigo{background:#EEF2FF;color:#4F46E5;}
+    .stat-icon-green{background:#ECFDF5;color:#059669;}
+    .stat-text-val{font-size:24px;font-weight:800;color:#111827;line-height:1;}
+    .stat-text-label{font-size:12px;color:#6B7280;margin-top:3px;}
+
+    /* ── Filter bar ── */
+    .filter-bar{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+    .pill{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;white-space:nowrap;}
+    .pill:hover{color:#374151;border-color:#D1D5DB;}
+    .pill.active{background:#111827;color:#fff;border-color:#111827;}
+    .filter-sep{width:1px;height:20px;background:#E5E7EB;flex-shrink:0;}
+    .search-wrap{position:relative;margin-left:auto;}
+    .search-wrap input{padding:8px 12px 8px 34px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;background:#F9FAFB;width:220px;}
+    .search-wrap input:focus{border-color:var(--indigo);background:#fff;}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;}
+
+    /* ── Table ── */
+    .table-wrap{background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
+    tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:#FAFAFA;}
+    td{padding:13px 16px;font-size:13px;color:#374151;vertical-align:middle;}
+    .td-client{display:flex;align-items:center;gap:10px;}
+    .td-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+    .td-name{font-weight:600;color:#111827;}
+    .td-email{font-size:11px;color:#9CA3AF;margin-top:1px;}
+
+    /* ── Badges ── */
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+    .badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+    .badge-gray{background:#F3F4F6;color:#6B7280;}
+    .badge-gray::before{background:#9CA3AF;}
+    .badge-amber{background:#FEF3C7;color:#92400E;}
+    .badge-amber::before{background:#D97706;}
+    .badge-green{background:#D1FAE5;color:#065F46;}
+    .badge-green::before{background:#059669;}
+
+    /* ── Actions cell ── */
+    .actions-cell{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;}
+
+    /* ── Empty state ── */
+    .empty-state{text-align:center;padding:56px 20px;}
+    .empty-state svg{opacity:.2;margin-bottom:16px;}
+    .empty-state h3{font-size:16px;font-weight:700;color:#374151;margin-bottom:6px;}
+    .empty-state p{font-size:13px;color:#9CA3AF;}
+
+    /* ── Sliding Panel ── */
+    .panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:600;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .panel-overlay.open{opacity:1;pointer-events:all;}
+    .panel{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:100vw;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.12);z-index:601;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+    .panel-overlay.open .panel{transform:translateX(0);}
+    .panel-header{padding:20px 24px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .panel-title-wrap{flex:1;min-width:0;}
+    .panel-title{font-size:16px;font-weight:800;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .panel-sub{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .panel-close{width:32px;height:32px;border-radius:8px;border:none;background:#F3F4F6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6B7280;flex-shrink:0;transition:.15s;}
+    .panel-close:hover{background:#E5E7EB;color:#111;}
+    .panel-body{flex:1;overflow-y:auto;padding:24px;}
+    .panel-body::-webkit-scrollbar{width:4px;}
+    .panel-body::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    .response-group{margin-bottom:24px;}
+    .response-group-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
+    .response-item{margin-bottom:14px;}
+    .response-label{font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+    .response-value{font-size:14px;color:#111827;background:#F9FAFB;border:1px solid #F3F4F6;border-radius:8px;padding:10px 12px;line-height:1.5;word-break:break-word;min-height:38px;}
+    .response-empty{text-align:center;padding:48px 20px;}
+    .response-empty svg{opacity:.18;margin-bottom:14px;}
+    .response-empty p{font-size:13px;color:#9CA3AF;}
+
+    /* ── Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{background:#fff;border-radius:16px;width:480px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.22);transform:translateY(20px);transition:.2s;overflow:hidden;}
+    .modal-overlay.open .modal-box{transform:translateY(0);}
+    .modal-header{padding:20px 24px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .modal-icon{width:40px;height:40px;border-radius:10px;background:#FFFBEB;display:flex;align-items:center;justify-content:center;color:#D97706;flex-shrink:0;}
+    .modal-title{font-size:16px;font-weight:800;color:#111827;flex:1;}
+    .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:#F3F4F6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
+    .modal-close:hover{background:#E5E7EB;color:#111;}
+    .modal-body{padding:24px;overflow-y:auto;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #E5E7EB;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;}
+    .form-group{margin-bottom:18px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .form-group select,.form-group input{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .form-group select:focus,.form-group input:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(79,70,229,.08);}
+    .template-preview{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+    .template-preview-icon{width:36px;height:36px;background:#FEF3C7;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#D97706;flex-shrink:0;}
+    .template-preview-name{font-size:14px;font-weight:700;color:#92400E;}
+    .template-preview-sub{font-size:12px;color:#B45309;margin-top:1px;}
+    .warning-note{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;display:flex;align-items:flex-start;gap:8px;margin-top:8px;}
+    .warning-note svg{flex-shrink:0;margin-top:1px;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:900;display:flex;align-items:center;gap:8px;max-width:320px;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+
+    /* ── Loading spinner ── */
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    @media(max-width:900px){.sidebar{display:none;}.stats-row{grid-template-columns:1fr 1fr;}}
+    @media(max-width:600px){.stats-row{grid-template-columns:1fr;}.panel{width:100%;}}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span>AL<em>ZUM</em>.io</span>
+    <small>Panel del entrenador</small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="clients.html" class="nav-item">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>
+      Clientes
+    </a>
+    <div class="nav-section">Herramientas</div>
+    <a href="programas.html" class="nav-item">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      Programas
+    </a>
+    <a href="formularios.html" class="nav-item active">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Formularios
+    </a>
+  </div>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarInitials">C</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Coach</div>
+      <div class="user-role">Entrenador</div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<div class="main">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <a href="formularios.html" class="page-header-back">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Formularios
+    </a>
+    <div class="page-header-divider"></div>
+    <div class="page-header-title">Onboarding</div>
+    <button class="btn btn-primary btn-sm" onclick="openSendModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Enviar formulario
+    </button>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="content">
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon-indigo">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>
+        </div>
+        <div>
+          <div class="stat-text-val" id="statTotal">—</div>
+          <div class="stat-text-label">Total clientes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon-amber">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <div class="stat-text-val" id="statPending">—</div>
+          <div class="stat-text-label">Formularios pendientes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon-green">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div class="stat-text-val" id="statSubmitted">—</div>
+          <div class="stat-text-label">Formularios recibidos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <button class="pill active" onclick="setFilter('all',this)">Todos</button>
+      <button class="pill" onclick="setFilter('none',this)">Sin enviar</button>
+      <button class="pill" onclick="setFilter('pending',this)">Pendiente</button>
+      <button class="pill" onclick="setFilter('submitted',this)">Recibido</button>
+      <div class="filter-sep"></div>
+      <div class="search-wrap">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar cliente…" oninput="renderTable()"/>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Formulario</th>
+            <th>Enviado</th>
+            <th>Respondido</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="6" style="text-align:center;padding:52px;color:#9CA3AF;font-size:13px;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+              <div style="width:16px;height:16px;border:2px solid #E5E7EB;border-top-color:#D97706;border-radius:50%;animation:spin .6s linear infinite;"></div>
+              Cargando clientes…
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══════════════════════ RESPONSE PANEL ═══════════════════════ -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanelOutside(event)">
+  <div class="panel" id="responsePanel">
+    <div class="panel-header">
+      <div class="panel-title-wrap">
+        <div class="panel-title" id="panelTitle">Respuestas</div>
+        <div class="panel-sub" id="panelSub"></div>
+      </div>
+      <button class="panel-close" onclick="closePanelDirect()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEND MODAL ═══════════════════════ -->
+<div class="modal-overlay" id="sendModalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </div>
+      <div class="modal-title">Enviar formulario de onboarding</div>
+      <button class="modal-close" onclick="closeSendModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="template-preview">
+        <div class="template-preview-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="template-preview-name" id="templateName">Cargando…</div>
+          <div class="template-preview-sub" id="templateFieldCount"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Seleccionar cliente</label>
+        <select id="modalClientSelect" onchange="checkModalWarning()">
+          <option value="">— Elige un cliente —</option>
+        </select>
+      </div>
+      <div id="pendingWarning" class="warning-note" style="display:none;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Este cliente ya tiene un formulario pendiente. Puedes enviar un recordatorio desde la tabla.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeSendModal()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="sendConfirmBtn" onclick="confirmSend()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Enviar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://nutrientrena-production.up.railway.app';
+
+  function tok() { return localStorage.getItem('token'); }
+
+  function authHeaders() {
+    return { Authorization: 'Bearer ' + tok(), 'Content-Type': 'application/json' };
+  }
+
+  async function apiFetch(path, opts) {
+    opts = opts || {};
+    try {
+      const res = await fetch(API + path, Object.assign({}, opts, { headers: Object.assign({}, authHeaders(), opts.headers || {}) }));
+      if (res.status === 401) { window.location.href = 'login.html'; return null; }
+      if (!res.ok) {
+        const txt = await res.text().catch(function(){ return ''; });
+        throw new Error(txt || res.statusText);
+      }
+      const ct = res.headers.get('content-type') || '';
+      if (ct.indexOf('application/json') !== -1) return res.json();
+      return null;
+    } catch(e) {
+      throw e;
+    }
+  }
+
+  function esc(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function showToast(msg, type) {
+    type = type || '';
+    var el = document.getElementById('toast');
+    el.className = 'toast ' + type;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(function(){ el.classList.remove('show'); }, 3500);
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function avatarColor(name) {
+    var colors = ['#4F46E5','#059669','#D97706','#DC2626','#7C3AED','#0891B2','#9D174D'];
+    var h = 0;
+    var s = name || 'X';
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) & 0xFFFF;
+    return colors[h % colors.length];
+  }
+
+  function initials(name, last) {
+    var a = (name || '?')[0] || '?';
+    var b = (last || '')[0] || '';
+    return (a + b).toUpperCase();
+  }
+
+  /* ─── State ─── */
+  var allClients = [];
+  var allAssignments = [];
+  var defaultTemplate = null;
+  var currentFilter = 'all';
+
+  /* ─── Boot ─── */
+  async function init() {
+    if (!tok()) { window.location.href = 'login.html'; return; }
+    loadSidebarUser();
+    try {
+      await Promise.all([loadClients(), loadAssignments(), loadDefaultTemplate()]);
+    } catch(e) {
+      showToast('Error al cargar los datos', 'error');
+      console.error(e);
+    }
+    updateStats();
+    renderTable();
+  }
+
+  function loadSidebarUser() {
+    try {
+      var parts = tok().split('.');
+      var payload = JSON.parse(atob(parts[1]));
+      var name = payload.name || payload.sub || 'Coach';
+      document.getElementById('sidebarName').textContent = name;
+      document.getElementById('sidebarInitials').textContent = name[0].toUpperCase();
+    } catch(e) {}
+  }
+
+  async function loadClients() {
+    var data = await apiFetch('/api/users/client/findAll');
+    if (data) allClients = Array.isArray(data) ? data : [];
+  }
+
+  async function loadAssignments() {
+    var data = await apiFetch('/api/form-assignments');
+    if (data) allAssignments = Array.isArray(data) ? data : [];
+  }
+
+  async function loadDefaultTemplate() {
+    var data = await apiFetch('/api/form-templates/default');
+    if (data) defaultTemplate = data;
+  }
+
+  /* ─── Per-client latest assignment ─── */
+  function clientAssignment(clientDetailId) {
+    var mine = allAssignments.filter(function(a){ return a.client_user_detail_id === clientDetailId; });
+    if (!mine.length) return null;
+    mine.sort(function(a, b){ return new Date(b.created_at) - new Date(a.created_at); });
+    return mine[0];
+  }
+
+  function clientStatus(clientDetailId) {
+    var a = clientAssignment(clientDetailId);
+    if (!a) return 'none';
+    return a.status === 'submitted' ? 'submitted' : 'pending';
+  }
+
+  /* ─── Stats ─── */
+  function updateStats() {
+    document.getElementById('statTotal').textContent = allClients.length;
+    var pending = allClients.filter(function(c){ return clientStatus(c.id) === 'pending'; }).length;
+    var submitted = allClients.filter(function(c){ return clientStatus(c.id) === 'submitted'; }).length;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statSubmitted').textContent = submitted;
+  }
+
+  /* ─── Filter ─── */
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    renderTable();
+  }
+
+  /* ─── Table render ─── */
+  function renderTable() {
+    var query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+    var tbody = document.getElementById('tableBody');
+
+    var rows = allClients.filter(function(c) {
+      var fullName = ((c.name || '') + ' ' + (c.last_name || '')).toLowerCase();
+      if (query && fullName.indexOf(query) === -1 && (c.email || '').toLowerCase().indexOf(query) === -1) return false;
+      if (currentFilter === 'none' && clientStatus(c.id) !== 'none') return false;
+      if (currentFilter === 'pending' && clientStatus(c.id) !== 'pending') return false;
+      if (currentFilter === 'submitted' && clientStatus(c.id) !== 'submitted') return false;
+      return true;
+    });
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">' +
+        '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>' +
+        '<h3>Sin resultados</h3>' +
+        '<p>No hay clientes que coincidan con los filtros seleccionados.</p>' +
+        '</div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rows.map(buildRow).join('');
+  }
+
+  function buildRow(c) {
+    var status = clientStatus(c.id);
+    var assignment = clientAssignment(c.id);
+    var fullName = esc(((c.name || '') + ' ' + (c.last_name || '')).trim());
+    var email = esc(c.email || '');
+    var color = avatarColor(c.name);
+    var inits = initials(c.name, c.last_name);
+    var templateTitle = assignment && assignment.template
+      ? esc(assignment.template.title)
+      : (defaultTemplate ? esc(defaultTemplate.title) : '—');
+
+    var badgeHtml = '';
+    var actionsHtml = '';
+    var escapedId = esc(c.id);
+
+    if (status === 'none') {
+      badgeHtml = '<span class="badge badge-gray">Sin enviar</span>';
+      actionsHtml = '<button class="btn-outline" onclick="openSendModal(\'' + escapedId + '\')">' +
+        '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+        'Enviar formulario</button>';
+    } else if (status === 'pending') {
+      badgeHtml = '<span class="badge badge-amber">Pendiente</span>';
+      var assignId = assignment ? esc(assignment.id) : '';
+      actionsHtml =
+        '<button class="btn-outline" onclick="remindClient(\'' + escapedId + '\',\'' + fullName + '\')">' +
+        '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+        'Recordar</button>' +
+        '<button class="btn-outline" onclick="copyLink(\'' + assignId + '\')" title="Copiar enlace">' +
+        '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>' +
+        'Link</button>';
+    } else {
+      badgeHtml = '<span class="badge badge-green">Recibido</span>';
+      actionsHtml = '<button class="btn-outline" onclick="viewResponses(\'' + escapedId + '\')">' +
+        '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
+        'Ver respuestas</button>';
+    }
+
+    var sentAt = assignment ? fmtDate(assignment.created_at) : '—';
+    var submittedAt = assignment && assignment.submitted_at ? fmtDate(assignment.submitted_at) : '—';
+
+    return '<tr>' +
+      '<td><div class="td-client">' +
+        '<div class="td-avatar" style="background:' + color + '">' + esc(inits) + '</div>' +
+        '<div><div class="td-name">' + fullName + '</div><div class="td-email">' + email + '</div></div>' +
+      '</div></td>' +
+      '<td>' + badgeHtml + '</td>' +
+      '<td style="color:#6B7280;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + templateTitle + '">' + templateTitle + '</td>' +
+      '<td style="color:#6B7280;white-space:nowrap;">' + sentAt + '</td>' +
+      '<td style="color:#6B7280;white-space:nowrap;">' + submittedAt + '</td>' +
+      '<td><div class="actions-cell">' + actionsHtml + '</div></td>' +
+    '</tr>';
+  }
+
+  /* ─── Remind (re-assign) ─── */
+  async function remindClient(clientId, clientName) {
+    if (!defaultTemplate) { showToast('Formulario por defecto no disponible', 'error'); return; }
+    try {
+      await apiFetch('/api/form-assignments', {
+        method: 'POST',
+        body: JSON.stringify({ form_template_id: defaultTemplate.id, client_user_detail_id: clientId })
+      });
+      showToast('Recordatorio enviado', 'success');
+      await loadAssignments();
+      updateStats();
+      renderTable();
+    } catch(e) {
+      showToast('Error al enviar recordatorio', 'error');
+    }
+  }
+
+  /* ─── Copy link ─── */
+  function copyLink(assignmentId) {
+    if (!assignmentId) { showToast('ID de asignación no disponible', 'error'); return; }
+    var link = API + '/app/public/form.html?id=' + assignmentId;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(function(){
+        showToast('Enlace copiado al portapapeles', 'success');
+      }).catch(function(){
+        showToast('No se pudo copiar automáticamente', 'error');
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = link;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Enlace copiado al portapapeles', 'success');
+    }
+  }
+
+  /* ─── View responses panel ─── */
+  function viewResponses(clientId) {
+    var c = allClients.find(function(x){ return x.id === clientId; });
+    if (!c) return;
+    var assignment = clientAssignment(clientId);
+    if (!assignment) return;
+
+    var fullName = ((c.name || '') + ' ' + (c.last_name || '')).trim();
+    document.getElementById('panelTitle').textContent = fullName;
+    document.getElementById('panelSub').textContent = 'Formulario: ' + (assignment.template ? assignment.template.title : 'Onboarding');
+
+    var body = document.getElementById('panelBody');
+    var responses = assignment.responses || [];
+    var fields = assignment.template ? (assignment.template.fields || []) : [];
+
+    if (!responses.length) {
+      body.innerHTML = '<div class="response-empty">' +
+        '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
+        '<p>Este cliente aún no ha respondido el formulario.</p></div>';
+      document.getElementById('panelOverlay').classList.add('open');
+      return;
+    }
+
+    /* Build grouped output */
+    var sections = {};
+    var GENERAL = '_general';
+
+    if (fields.length) {
+      fields.forEach(function(f) {
+        var sec = f.section || GENERAL;
+        if (!sections[sec]) sections[sec] = [];
+        var resp = responses.find(function(r){
+          return r.field_id === f.id || r.field_key === f.key || r.field_name === f.name;
+        });
+        sections[sec].push({
+          label: f.label || f.name || f.key || 'Campo',
+          value: resp ? (resp.value != null ? resp.value : resp.answer) : null,
+          answered: !!resp
+        });
+      });
+    } else {
+      /* No field schema — just dump responses */
+      sections[GENERAL] = responses.map(function(r){
+        return {
+          label: r.field_label || r.field_name || r.field_key || 'Campo',
+          value: r.value != null ? r.value : r.answer,
+          answered: true
+        };
+      });
+    }
+
+    var html = '';
+    Object.keys(sections).forEach(function(sec) {
+      var items = sections[sec].filter(function(i){ return i.answered; });
+      if (!items.length) return;
+      html += '<div class="response-group">';
+      if (sec !== GENERAL) {
+        html += '<div class="response-group-title">' + esc(sec) + '</div>';
+      }
+      items.forEach(function(i) {
+        var val = i.value != null ? esc(String(i.value)) : '<em style="color:#9CA3AF;font-style:italic;">Sin respuesta</em>';
+        html += '<div class="response-item">' +
+          '<div class="response-label">' + esc(i.label) + '</div>' +
+          '<div class="response-value">' + val + '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+    });
+
+    if (!html) {
+      html = '<div class="response-empty"><p>No hay respuestas detalladas disponibles.</p></div>';
+    }
+    body.innerHTML = html;
+    document.getElementById('panelOverlay').classList.add('open');
+  }
+
+  function closePanelOutside(e) {
+    if (e.target === document.getElementById('panelOverlay')) closePanelDirect();
+  }
+
+  function closePanelDirect() {
+    document.getElementById('panelOverlay').classList.remove('open');
+  }
+
+  /* ─── Send modal ─── */
+  function openSendModal(preSelectClientId) {
+    if (!defaultTemplate) {
+      showToast('El formulario por defecto no está disponible', 'error');
+      return;
+    }
+
+    document.getElementById('templateName').textContent = defaultTemplate.title || 'Formulario de Onboarding';
+    var fieldCount = defaultTemplate.fields ? defaultTemplate.fields.length : 0;
+    document.getElementById('templateFieldCount').textContent = fieldCount + ' campo' + (fieldCount !== 1 ? 's' : '');
+
+    var sel = document.getElementById('modalClientSelect');
+    sel.innerHTML = '<option value="">— Elige un cliente —</option>';
+    allClients.forEach(function(c) {
+      var fullName = ((c.name || '') + ' ' + (c.last_name || '')).trim();
+      var status = clientStatus(c.id);
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.dataset.status = status;
+      if (status === 'pending') {
+        opt.textContent = fullName + ' (pendiente)';
+      } else if (status === 'submitted') {
+        opt.textContent = fullName + ' (ya recibido)';
+      } else {
+        opt.textContent = fullName;
+      }
+      sel.appendChild(opt);
+    });
+
+    if (preSelectClientId) {
+      sel.value = preSelectClientId;
+    }
+
+    checkModalWarning();
+    document.getElementById('sendModalOverlay').classList.add('open');
+  }
+
+  function checkModalWarning() {
+    var sel = document.getElementById('modalClientSelect');
+    var opt = sel.options[sel.selectedIndex];
+    var warning = document.getElementById('pendingWarning');
+    var btn = document.getElementById('sendConfirmBtn');
+
+    if (opt && opt.dataset.status === 'pending') {
+      warning.style.display = 'flex';
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+    } else {
+      warning.style.display = 'none';
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+    }
+  }
+
+  function closeSendModal() {
+    document.getElementById('sendModalOverlay').classList.remove('open');
+    document.getElementById('modalClientSelect').value = '';
+    document.getElementById('pendingWarning').style.display = 'none';
+    var btn = document.getElementById('sendConfirmBtn');
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('sendModalOverlay')) closeSendModal();
+  }
+
+  async function confirmSend() {
+    var sel = document.getElementById('modalClientSelect');
+    var clientId = sel.value;
+    if (!clientId) { showToast('Selecciona un cliente', 'error'); return; }
+    if (!defaultTemplate) { showToast('Formulario por defecto no disponible', 'error'); return; }
+
+    var opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.status === 'pending') {
+      showToast('Este cliente ya tiene un formulario pendiente', 'error');
+      return;
+    }
+
+    var btn = document.getElementById('sendConfirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Enviando…';
+
+    try {
+      await apiFetch('/api/form-assignments', {
+        method: 'POST',
+        body: JSON.stringify({ form_template_id: defaultTemplate.id, client_user_detail_id: clientId })
+      });
+      var clientName = opt ? opt.textContent.replace(/\s*\(.*\)$/, '').trim() : 'el cliente';
+      showToast('Formulario enviado a ' + clientName, 'success');
+      closeSendModal();
+      await loadAssignments();
+      updateStats();
+      renderTable();
+    } catch(e) {
+      showToast('Error al enviar el formulario', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar';
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closePanelDirect();
+      closeSendModal();
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>

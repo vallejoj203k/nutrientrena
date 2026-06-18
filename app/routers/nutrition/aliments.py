@@ -31,13 +31,13 @@ def _to_int(v: str) -> Optional[int]:
         return None
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar alimentos", description="Retorna todos los alimentos del catálogo (sin clones).")
 def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Aliment).filter(Aliment.parent_id.is_(None)).all()
     return send_response([AlimentOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router.get("/search")
+@router.get("/search", summary="Buscar alimentos", description="Búsqueda paginada de alimentos por nombre o grupo de alimentos.")
 def search(
     search: Optional[str] = Query(None),
     group_food_id: Optional[int] = Query(None),
@@ -65,7 +65,7 @@ def search(
     )
 
 
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver alimento", description="Retorna el detalle completo de un alimento con sus macros.")
 def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
@@ -73,7 +73,7 @@ def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(AlimentOut.model_validate(obj).model_dump(), "OK")
 
 
-@router.post("")
+@router.post("", summary="Crear alimento", description="Agrega un nuevo alimento al catálogo con sus valores nutricionales.")
 def create(
     data: AlimentCreate,
     db: Session = Depends(get_db),
@@ -86,7 +86,7 @@ def create(
     return send_response(AlimentOut.model_validate(obj).model_dump(), "Alimento creado")
 
 
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar alimento", description="Modifica los datos nutricionales de un alimento existente.")
 def updated(
     id: str,
     data: AlimentUpdate,
@@ -104,7 +104,7 @@ def updated(
     return send_response(AlimentOut.model_validate(obj).model_dump(), "Actualizado")
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", summary="Eliminar alimento", description="Elimina un alimento del catálogo. Falla si está en uso en alguna dieta o receta.")
 def delete_aliment(
     id: str,
     db: Session = Depends(get_db),
@@ -122,7 +122,7 @@ def delete_aliment(
     return send_response(None, "Alimento eliminado")
 
 
-@router.post("/import")
+@router.post("/import", summary="Importar alimentos desde CSV", description="Importa alimentos masivamente desde un archivo CSV con columnas: nombre, proteinas, carbohidratos, grasas, calorias.")
 async def import_aliments(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),

@@ -16,6 +16,11 @@ from app.schemas.user import (
     UserCreateRequest, UserUpdateRequest, UserStateRequest,
     UserAssignRequest, WeeksTrainingRequest, UserDetailOut,
 )
+from pydantic import BaseModel as _BaseModel
+
+
+class _PhotoRequest(_BaseModel):
+    photo: str
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -33,7 +38,7 @@ def _serialize(detail: UserDetail, db: Session) -> dict:
 
 
 # ── Create: superadmin, admin, setter ─────────────────────────────────────────
-@router.post("")
+@router.post("", summary="Crear usuario", description="Crea un nuevo usuario con rol, perfil e instructor asignado.")
 def create(
     data: UserCreateRequest,
     db: Session = Depends(get_db),
@@ -85,7 +90,7 @@ def create(
 
 
 # ── Assign coach: superadmin, admin ───────────────────────────────────────────
-@router.post("/assign")
+@router.post("/assign", summary="Asignar coach a cliente", description="Asigna o reasigna un coach a un cliente existente.")
 def assigned(
     data: UserAssignRequest,
     db: Session = Depends(get_db),
@@ -114,7 +119,7 @@ def assigned(
 
 
 # ── Update training weeks: admin, coach ───────────────────────────────────────
-@router.post("/weeks")
+@router.post("/weeks", summary="Actualizar semanas de entrenamiento", description="Establece las fechas de inicio y fin del periodo de entrenamiento del cliente.")
 def weeks_training(
     data: WeeksTrainingRequest,
     db: Session = Depends(get_db),
@@ -131,7 +136,7 @@ def weeks_training(
 
 
 # ── Find all by role slug: staff only ─────────────────────────────────────────
-@router.get("/{slug}/findAll")
+@router.get("/{slug}/findAll", summary="Listar usuarios por rol", description="Retorna todos los usuarios del rol indicado (slug). Coaches solo ven sus clientes.")
 def find_all(
     slug: str,
     db: Session = Depends(get_db),
@@ -153,7 +158,7 @@ def find_all(
 
 
 # ── Search: staff only ────────────────────────────────────────────────────────
-@router.get("/{slug}/search")
+@router.get("/{slug}/search", summary="Buscar usuarios", description="Búsqueda paginada de usuarios por nombre dentro de un rol.")
 def search(
     slug: str,
     search: Optional[str] = Query(None),
@@ -198,7 +203,7 @@ def search(
 
 
 # ── Kanban: staff only (coaches see only their clients) ───────────────────────
-@router.get("/kanban")
+@router.get("/kanban", summary="Vista kanban de clientes", description="Clientes agrupados por estado para la vista kanban. Coaches solo ven sus clientes.")
 def kanban(
     coach_id: Optional[str] = Query(None, description="Filtrar por UserDetail UUID del coach"),
     db: Session = Depends(get_db),
@@ -256,7 +261,7 @@ def kanban(
 
 
 # ── Report: any staff ─────────────────────────────────────────────────────────
-@router.get("/report")
+@router.get("/report", summary="Reporte de usuarios", description="Total de clientes asignados al coach o administrador.")
 def report_users(
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
@@ -277,7 +282,7 @@ def report_users(
 
 
 # ── Get by ID: staff only, coaches restricted to own clients ──────────────────
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver perfil de usuario", description="Retorna el perfil completo de un usuario por su ID (UserDetail UUID).")
 def edit(
     id: str,
     db: Session = Depends(get_db),
@@ -291,7 +296,7 @@ def edit(
 
 
 # ── Update: admin, coach (own clients only) ───────────────────────────────────
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar usuario", description="Modifica datos del perfil, email, contraseña o rol del usuario.")
 def updated(
     id: str,
     data: UserUpdateRequest,
@@ -327,8 +332,25 @@ def updated(
     return send_response(_serialize(detail, db), "Usuario actualizado")
 
 
+# ── Update photo ─────────────────────────────────────────────────────────────
+@router.patch("/{id}/photo", summary="Actualizar foto de perfil", description="Actualiza la URL de la foto de perfil del usuario.")
+def update_photo(
+    id: str,
+    data: _PhotoRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    detail = _get_detail_or_404(db, id)
+    if not detail:
+        return send_error("Usuario no encontrado", code=404)
+    detail.photo = data.photo
+    db.commit()
+    db.refresh(detail)
+    return send_response(_serialize(detail, db), "Foto actualizada")
+
+
 # ── Change state: admin, setter, closer ───────────────────────────────────────
-@router.put("/{id}/change")
+@router.put("/{id}/change", summary="Cambiar estado de usuario", description="Actualiza el estado del usuario (activo, inactivo, etc.).")
 def change_state(
     id: str,
     data: UserStateRequest,

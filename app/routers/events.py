@@ -65,7 +65,7 @@ def _generate_occurrences(data: EventCreate, user_id: int, group_id: int) -> lis
 
 # ── Events ────────────────────────────────────────────────────────────────────
 
-@router_events.post("")
+@router_events.post("", summary="Crear evento", description="Crea un evento único o una serie recurrente (diaria, semanal o mensual).")
 def create_event(
     data: EventCreate,
     db: Session = Depends(get_db),
@@ -106,7 +106,7 @@ def create_event(
     return send_response(_out(event), "Evento creado")
 
 
-@router_events.get("/search")
+@router_events.get("/search", summary="Buscar eventos", description="Retorna eventos de un usuario filtrando por rango de fechas.")
 def search_events(
     user_id: Optional[int] = Query(None),
     start: Optional[datetime] = Query(None),
@@ -124,7 +124,7 @@ def search_events(
     return send_response([_out(e) for e in q.all()], "OK")
 
 
-@router_events.post("/update/{id}")
+@router_events.post("/update/{id}", summary="Actualizar evento", description="Modifica los datos de un evento existente.")
 def update_event(
     id: int,
     data: EventUpdate,
@@ -141,7 +141,7 @@ def update_event(
     return send_response(_out(event), "Evento actualizado")
 
 
-@router_events.delete("/delete/{id}")
+@router_events.delete("/delete/{id}", summary="Eliminar evento", description="Elimina un evento específico.")
 def delete_event(
     id: int,
     db: Session = Depends(get_db),
@@ -155,7 +155,7 @@ def delete_event(
     return send_response(None, "Evento eliminado")
 
 
-@router_events.delete("/delete-group/{group_id}")
+@router_events.delete("/delete-group/{group_id}", summary="Eliminar serie recurrente", description="Elimina todos los eventos que pertenecen a un grupo de recurrencia.")
 def delete_event_group(
     group_id: int,
     db: Session = Depends(get_db),
@@ -169,7 +169,7 @@ def delete_event_group(
 
 # ── Type Events ───────────────────────────────────────────────────────────────
 
-@router_type_events.post("")
+@router_type_events.post("", summary="Crear tipo de evento", description="Crea un nuevo tipo de evento (ej: consulta, entrenamiento, seguimiento).")
 def create_type(
     data: TypeEventCreate,
     db: Session = Depends(get_db),
@@ -182,7 +182,7 @@ def create_type(
     return send_response(TypeEventOut.model_validate(obj).model_dump(), "Tipo de evento creado")
 
 
-@router_type_events.post("/update/{id}")
+@router_type_events.post("/update/{id}", summary="Actualizar tipo de evento", description="Modifica un tipo de evento existente.")
 def update_type(
     id: int,
     data: TypeEventUpdate,
@@ -199,7 +199,7 @@ def update_type(
     return send_response(TypeEventOut.model_validate(obj).model_dump(), "Actualizado")
 
 
-@router_type_events.get("/find-all")
+@router_type_events.get("/find-all", summary="Listar tipos de evento", description="Retorna todos los tipos de evento activos.")
 def find_all_types(
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
@@ -208,7 +208,7 @@ def find_all_types(
     return send_response([TypeEventOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router_type_events.get("/search")
+@router_type_events.get("/search", summary="Buscar tipos de evento", description="Busca tipos de evento por nombre.")
 def search_types(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -220,7 +220,7 @@ def search_types(
     return send_response([TypeEventOut.model_validate(i).model_dump() for i in q.all()], "OK")
 
 
-@router_type_events.delete("/delete/{id}")
+@router_type_events.delete("/delete/{id}", summary="Eliminar tipo de evento", description="Elimina un tipo de evento por su ID.")
 def delete_type(
     id: int,
     db: Session = Depends(get_db),

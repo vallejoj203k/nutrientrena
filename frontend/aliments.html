@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Alimentos</title>
+  <title>ALZUM.io — Alimentos</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
     /* ── Sidebar ── */
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
+    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
     .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
     .sidebar-nav{flex:1;padding:16px 0;}
     .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
     .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;background:#C084FC;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
     .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .user-role{font-size:11px;color:rgba(255,255,255,.5);}
@@ -55,7 +55,7 @@
     .table-wrap{background:#fff;border-bottom:1px solid #E5E7EB;}
     table{width:100%;border-collapse:collapse;}
     thead th{padding:10px 16px;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;background:#FAFAFA;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
-    tbody td{padding:13px 16px;font-size:13px;color:#111;border-bottom:1px solid #F9FAFB;vertical-align:middle;}
+    tbody td{padding:13px 16px;font-size:13px;color:#111;border-bottom:1px solid #EBEBEB;vertical-align:middle;}
     tbody tr:last-child td{border-bottom:none;}
     tbody tr:hover td{background:#FAFAFA;}
     .td-name{font-weight:600;}
@@ -95,7 +95,7 @@
     .modal-overlay.open{opacity:1;pointer-events:all;}
     .modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .modal-overlay.open .modal{transform:translateY(0);}
-    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1;}
+    .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EBEBEB;position:sticky;top:0;background:#fff;z-index:1;}
     .modal-head h2{font-size:16px;font-weight:700;color:#111;}
     .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
     .modal-close:hover{color:#374151;}
@@ -108,7 +108,7 @@
     .form-group textarea{min-height:64px;resize:vertical;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
-    .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
+    .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 12px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
     .form-error{color:#DC2626;font-size:12px;margin-top:8px;}
 
     /* ── Import modal ── */
@@ -121,11 +121,11 @@
     .preview-table-wrap{max-height:260px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;margin-top:16px;}
     .preview-table{width:100%;border-collapse:collapse;font-size:12px;}
     .preview-table th{padding:8px 12px;background:#FAFAFA;font-weight:700;color:#6B7280;border-bottom:1px solid #E5E7EB;text-transform:uppercase;font-size:10px;white-space:nowrap;}
-    .preview-table td{padding:8px 12px;border-bottom:1px solid #F9FAFB;color:#374151;}
+    .preview-table td{padding:8px 12px;border-bottom:1px solid #EBEBEB;color:#374151;}
     .preview-table tr:last-child td{border-bottom:none;}
     .import-stats{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;}
     .import-stat{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;}
-    .import-stat.total{background:#F3EEFF;color:var(--purple);}
+    .import-stat.total{background:#EEF2FF;color:var(--purple);}
     .import-stat.ok{background:#ECFDF5;color:#059669;}
     .import-stat.err{background:#FEF2F2;color:#DC2626;}
     .template-link{font-size:12px;color:var(--purple);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;}
@@ -145,25 +145,47 @@
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
   </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
+  </style>
 </head>
 <body>
 
 <!-- ── Sidebar ── -->
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <span>Nutri<em>Entrena</em></span>
-    <small>Panel de administración</small>
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
   </div>
   <div class="sidebar-nav">
-  <nav class="sidebar-nav">
+    <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
+      Inicio
     </a>
-    <a class="nav-item" href="kanban.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
-      Kanban
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Calendario
     </a>
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -173,13 +195,22 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       Check-ins
     </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="programas.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Programas
+    </a>
+    <a class="nav-item active" href="library.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Librería
+    </a>
+    <div class="nav-section">Comunicación</div>
     <a class="nav-item" href="forms.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Formularios
-      <span class="nav-badge" id="formsBadge" style="display:none"></span>
     </a>
     <a class="nav-item" href="notes.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Notas
     </a>
     <a class="nav-item" href="chat.html">
@@ -190,32 +221,19 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Progreso
     </a>
-    <div class="nav-section">Nutrición</div>
-    <a class="nav-item" href="diets.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-      Dietas
-    </a>
-    <a class="nav-item active" href="aliments.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      Alimentos
-    </a>
-    <a class="nav-item" href="recipes.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
-      Recetas
-    </a>
-    <a class="nav-item" href="nutrition-catalog.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      Catálogos
-    </a>
-    <div class="nav-section">Entrenamiento</div>
-    <a class="nav-item" href="routines.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Rutinas
-    </a>
-    <div class="nav-section">Análisis</div>
+    <div class="nav-section">Negocio</div>
     <a class="nav-item" href="analytics.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analíticas
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Equipo
+    </a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
     </a>
   </nav>
   <div class="sidebar-user">
@@ -498,7 +516,7 @@ function renderTable(items) {
       <td class="td-macro">${fmt(a.proteins)}<span>prot</span></td>
       <td class="td-macro">${fmt(a.carbohydrates)}<span>carbs</span></td>
       <td class="td-macro">${fmt(a.fats)}<span>grasas</span></td>
-      <td class="td-macro" style="font-weight:700;color:#5B2D8E;">${a.calories != null ? Math.round(a.calories) : '—'}<span>kcal</span></td>
+      <td class="td-macro" style="font-weight:700;color:#4F46E5;">${a.calories != null ? Math.round(a.calories) : '—'}<span>kcal</span></td>
       <td>
         <div class="actions-cell">
           <button class="btn-icon" onclick="openEdit('${esc(a.id)}')" title="Editar">
@@ -794,7 +812,7 @@ async function loadUser() {
     const name = `${d.name || ''} ${d.last_name || ''}`.trim() || u.email || 'Usuario';
     document.getElementById('sidebarName').textContent   = name;
     document.getElementById('sidebarRole').textContent   = u.roles?.[0]?.name || '—';
-    document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=name.charAt(0).toUpperCase();}})()
   } catch {}
 }
 
@@ -809,6 +827,17 @@ async function loadPendingBadge() {
 }
 
 function logout() { localStorage.clear(); location.href = 'login.html'; }
+
+// ── Sidebar role adaptation ───────────────────────────────────────────────────
+function adaptSidebar() {
+  const rid = parseInt(localStorage.getItem('role_id') || '0');
+  if (rid !== 5) return; // only restrict coaches
+  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
+    const el = document.querySelector('.nav-item[href="' + href + '"]');
+    if (el) el.style.display = 'none';
+  });
+}
+adaptSidebar();
 </script>
 </body>
 </html>

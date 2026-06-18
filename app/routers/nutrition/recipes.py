@@ -15,13 +15,13 @@ def _get_or_404(db: Session, recipe_id: int):
     return db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar recetas", description="Retorna todas las recetas activas del catálogo.")
 def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     items = db.query(Recipe).filter(Recipe.state == 1).all()
     return send_response([RecipeOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router.get("/search")
+@router.get("/search", summary="Buscar recetas", description="Búsqueda paginada de recetas por nombre.")
 def search(
     search: Optional[str] = Query(None),
     page: int = Query(1),
@@ -46,14 +46,14 @@ def search(
     )
 
 
-@router.post("/assign")
+@router.post("/assign", summary="Asignar receta a usuario", description="Asigna una receta del catálogo a un usuario.")
 def assign(data: RecipeAssignRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     if not _get_or_404(db, data.recipe_id):
         return send_error("Receta no encontrada")
     return send_response(None, "Receta asignada")
 
 
-@router.get("/client/{client_id}")
+@router.get("/client/{client_id}", summary="Recetas del cliente", description="Retorna las recetas asignadas a un cliente específico.")
 def clients(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     from app.models.user import UserDetail
     client_detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
@@ -63,7 +63,7 @@ def clients(client_id: str, db: Session = Depends(get_db), _=Depends(require_rol
     return send_response([RecipeOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router.post("")
+@router.post("", summary="Crear receta", description="Crea una nueva receta con su lista de ingredientes.")
 def create(data: RecipeCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     recipe_data = data.model_dump(exclude={"details"})
     recipe_data["instructor_id"] = current_user.id
@@ -77,7 +77,7 @@ def create(data: RecipeCreate, db: Session = Depends(get_db), current_user=Depen
     return send_response(RecipeOut.model_validate(recipe).model_dump(), "Receta creada")
 
 
-@router.get("/{id}/edit")
+@router.get("/{id}/edit", summary="Ver receta", description="Retorna el detalle completo de una receta con sus ingredientes.")
 def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     recipe = _get_or_404(db, id)
     if not recipe:
@@ -85,7 +85,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(RecipeOut.model_validate(recipe).model_dump(), "OK")
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", summary="Eliminar receta", description="Desactiva una receta (soft delete).")
 def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     recipe = _get_or_404(db, id)
     if not recipe:
@@ -95,7 +95,7 @@ def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SU
     return send_response(None, "Receta eliminada")
 
 
-@router.put("/{id}/update")
+@router.put("/{id}/update", summary="Actualizar receta", description="Modifica una receta y reemplaza su lista de ingredientes.")
 def updated(id: int, data: RecipeUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     recipe = _get_or_404(db, id)
     if not recipe:

@@ -10,7 +10,7 @@ from app.schemas.auth import MenuOut
 router = APIRouter(prefix="/menus", tags=["Menus"])
 
 
-@router.get("/findAll")
+@router.get("/findAll", summary="Listar menús", description="Retorna todos los menús del sistema (solo admin).")
 def find_all(
     db: Session = Depends(get_db),
     _=Depends(require_roles("admin")),

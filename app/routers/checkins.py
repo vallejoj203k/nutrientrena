@@ -37,7 +37,7 @@ def _get_coach_detail(db: Session, user_id: int) -> Optional[UserDetail]:
 
 
 # ── Create: admin, coach ───────────────────────────────────────────────────────
-@router.post("")
+@router.post("", summary="Registrar check-in", description="Registra un check-in semanal del cliente con peso, medidas y foto.")
 def create_checkin(
     data: CheckinCreate,
     db: Session = Depends(get_db),
@@ -86,7 +86,7 @@ def create_checkin(
 
 
 # ── Get by client: admin, coach (own clients only) ────────────────────────────
-@router.get("/client/{client_id}")
+@router.get("/client/{client_id}", summary="Historial de check-ins", description="Retorna el historial de check-ins de un cliente con progreso de peso.")
 def client_checkins(
     client_id: str,
     limit: int = Query(10, ge=1, le=100),
@@ -112,7 +112,7 @@ def client_checkins(
 
 
 # ── Summary: admin, coach (own clients only) ──────────────────────────────────
-@router.get("/summary/{client_id}")
+@router.get("/summary/{client_id}", summary="Resumen de check-ins", description="Totales y variación de peso desde el primer al último check-in del cliente.")
 def client_summary(
     client_id: str,
     db: Session = Depends(get_db),
@@ -145,7 +145,7 @@ def client_summary(
 
 
 # ── Coach notes: admin, coach ─────────────────────────────────────────────────
-@router.put("/{id}/coach-notes")
+@router.put("/{id}/coach-notes", summary="Agregar notas del coach", description="El coach añade retroalimentación y actualiza medidas en un check-in.")
 def add_coach_notes(
     id: str,
     data: CheckinCoachUpdate,
@@ -198,7 +198,7 @@ def add_coach_notes(
 
 
 # ── Delete: admin only ────────────────────────────────────────────────────────
-@router.delete("/{id}")
+@router.delete("/{id}", summary="Eliminar check-in", description="Elimina un check-in (solo administradores).")
 def delete_checkin(
     id: str,
     db: Session = Depends(get_db),

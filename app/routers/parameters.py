@@ -11,7 +11,7 @@ router_params = APIRouter(prefix="/parameters", tags=["Parameters"])
 router_details = APIRouter(prefix="/parameters-detail", tags=["Parameters"])
 
 
-@router_params.get("/search")
+@router_params.get("/search", summary="Buscar parámetros", description="Busca parámetros del sistema (estados, géneros, niveles de actividad, etc.).")
 def search_parameters(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -27,7 +27,7 @@ def search_parameters(
     )
 
 
-@router_details.get("/search")
+@router_details.get("/search", summary="Buscar detalles de parámetro", description="Retorna los valores de un parámetro específico (ej: todos los estados de cliente).")
 def search_details(
     parameter_id: Optional[int] = Query(None),
     search: Optional[str] = Query(None),

@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Dashboard</title>
+  <title>ALZUM.io — Dashboard</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{
-      --purple:#5B2D8E;
-      --purple-dark:#4A2475;
-      --purple-light:#7C3AED;
-      --purple-pale:#F3EEFF;
-      --gray-bg:#F3F4F6;
+      --indigo:#4F46E5;
+      --indigo-dark:#4338CA;
+      --indigo-light:#6366F1;
+      --indigo-pale:#EEF2FF;
+      --gray-bg:#F8FAFC;
       --sidebar-w:240px;
     }
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
@@ -19,170 +19,189 @@
     /* ── Sidebar ── */
     .sidebar{
       width:var(--sidebar-w);min-width:var(--sidebar-w);
-      background:var(--purple);
+      background:#fff;border-right:1px solid #E5E7EB;
       display:flex;flex-direction:column;
       height:100vh;overflow-y:auto;
     }
     .sidebar-logo{
       padding:24px 20px 20px;
-      border-bottom:1px solid rgba(255,255,255,.1);
+      border-bottom:1px solid #EBEBEB;
     }
     .sidebar-logo span{
-      font-size:20px;font-weight:900;color:#fff;
+      font-size:20px;font-weight:900;color:#111827;
       letter-spacing:1px;font-style:italic;text-transform:uppercase;
     }
-    .sidebar-logo span em{color:#C084FC;font-style:inherit;}
-    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
 
-    .sidebar-nav{flex:1;padding:16px 0;}
-    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
     .nav-item{
       display:flex;align-items:center;gap:10px;
-      padding:11px 20px;color:rgba(255,255,255,.75);
+      padding:10px 20px;color:#374151;
       cursor:pointer;font-size:14px;transition:all .15s;
       border-left:3px solid transparent;text-decoration:none;
     }
-    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#C084FC;}
-    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
 
     .sidebar-user{
-      padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);
+      padding:14px 20px;border-top:1px solid #F3F4F6;
       display:flex;align-items:center;gap:10px;
     }
     .avatar{
-      width:36px;height:36px;border-radius:50%;
-      background:#C084FC;display:flex;align-items:center;justify-content:center;
-      font-weight:700;color:#fff;font-size:14px;flex-shrink:0;
+      width:34px;height:34px;border-radius:50%;
+      background:var(--indigo);display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:#fff;font-size:13px;flex-shrink:0;
     }
     .user-info{flex:1;min-width:0;}
-    .user-name{color:#fff;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .user-role{color:rgba(255,255,255,.5);font-size:11px;}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
     .btn-logout{
-      background:none;border:none;color:rgba(255,255,255,.5);
+      background:none;border:none;color:#9CA3AF;
       cursor:pointer;padding:4px;border-radius:4px;transition:color .15s;
     }
-    .btn-logout:hover{color:#fff;}
+    .btn-logout:hover{color:#EF4444;}
 
     /* ── Main ── */
     .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 
-    /* Header */
     .topbar{
       background:#fff;padding:16px 28px;
       display:flex;align-items:center;justify-content:space-between;
       border-bottom:1px solid #E5E7EB;flex-shrink:0;
     }
-    .topbar h1{font-size:20px;font-weight:700;color:#111827;}
+    .topbar-left h1{font-size:20px;font-weight:700;color:#111827;}
+    .topbar-left p{font-size:13px;color:#6B7280;margin-top:2px;}
     .topbar-right{display:flex;align-items:center;gap:12px;}
-    .badge-dot{
-      width:8px;height:8px;background:#22C55E;border-radius:50%;
-      box-shadow:0 0 0 3px rgba(34,197,94,.2);
+    .badge-online{display:flex;align-items:center;gap:6px;font-size:13px;color:#6B7280;background:#F0FDF4;border:1px solid #BBF7D0;padding:6px 12px;border-radius:20px;}
+    .dot-green{width:7px;height:7px;background:#22C55E;border-radius:50%;}
+
+    .content{flex:1;overflow-y:auto;padding:24px 28px;}
+
+    /* ── KPI Cards ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+    .kpi-card{
+      background:#fff;border-radius:12px;padding:20px 20px 16px;
+      box-shadow:0 1px 4px rgba(0,0,0,.09);border:1px solid #E5E7EB;
+      display:flex;flex-direction:column;gap:12px;
     }
-    .topbar-right span{font-size:13px;color:#6B7280;}
+    .kpi-top{display:flex;align-items:center;justify-content:space-between;}
+    .kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .kpi-icon.indigo{background:#EEF2FF;}
+    .kpi-icon.green {background:#F0FDF4;}
+    .kpi-icon.amber {background:#FFFBEB;}
+    .kpi-icon.blue  {background:#EFF6FF;}
+    .kpi-trend{font-size:11px;font-weight:600;padding:3px 7px;border-radius:20px;}
+    .kpi-trend.up  {background:#DCFCE7;color:#16A34A;}
+    .kpi-trend.down{background:#FEE2E2;color:#DC2626;}
+    .kpi-trend.neu {background:#F3F4F6;color:#6B7280;}
+    .kpi-val{font-size:30px;font-weight:800;color:#111827;line-height:1;}
+    .kpi-label{font-size:13px;color:#6B7280;}
 
-    /* Content */
-    .content{flex:1;overflow-y:auto;padding:28px;}
-
-    /* ── Stat cards ── */
-    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
-    .stat-card{
-      background:#fff;border-radius:12px;padding:20px;
-      display:flex;align-items:center;gap:16px;
-      box-shadow:0 1px 3px rgba(0,0,0,.06);
+    /* ── Quick Access ── */
+    .quick-row{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
+    .quick-btn{
+      display:flex;align-items:center;gap:10px;
+      background:#fff;border:1px solid #E5E7EB;border-radius:12px;
+      padding:14px 20px;text-decoration:none;color:#374151;
+      font-size:14px;font-weight:600;cursor:pointer;
+      box-shadow:0 1px 4px rgba(0,0,0,.07);
+      transition:border-color .15s,box-shadow .15s,background .15s;
+      white-space:nowrap;
     }
-    .stat-icon{
-      width:48px;height:48px;border-radius:12px;
-      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    .quick-btn:hover{border-color:var(--indigo);box-shadow:0 2px 8px rgba(79,70,229,.15);background:#FAFBFF;color:var(--indigo);}
+    .quick-btn:hover svg{opacity:1;}
+    .quick-btn svg{opacity:.6;transition:opacity .15s;flex-shrink:0;}
+    .quick-btn .q-badge{
+      margin-left:4px;background:#EEF2FF;color:var(--indigo);
+      font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
     }
-    .stat-icon.purple{background:var(--purple-pale);}
-    .stat-icon.green {background:#F0FDF4;}
-    .stat-icon.blue  {background:#EFF6FF;}
-    .stat-icon.amber {background:#FFFBEB;}
-    .stat-label{font-size:12px;color:#6B7280;margin-bottom:4px;}
-    .stat-value{font-size:26px;font-weight:800;color:#111827;line-height:1;}
-    .stat-sub{font-size:11px;color:#9CA3AF;margin-top:4px;}
 
-    /* ── Sección dos columnas ── */
-    .two-col{display:grid;grid-template-columns:1fr 360px;gap:20px;}
+    /* ── Two-col ── */
+    .two-col{display:grid;grid-template-columns:1fr 340px;gap:20px;}
 
-    /* ── Kanban preview ── */
-    .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-    .card-title{font-size:15px;font-weight:700;color:#111827;}
-    .card-link{font-size:13px;color:var(--purple);cursor:pointer;font-weight:500;text-decoration:none;}
-    .card-link:hover{color:var(--purple-dark);}
+    /* ── Card base ── */
+    .card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;box-shadow:0 1px 4px rgba(0,0,0,.09);}
+    .card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #EBEBEB;}
+    .card-title{font-size:14px;font-weight:700;color:#111827;}
+    .card-action{font-size:13px;color:var(--indigo);text-decoration:none;font-weight:500;}
+    .card-action:hover{color:var(--indigo-dark);text-decoration:underline;}
+    .card-body{padding:0;}
 
-    .kanban-cols{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;}
-    .kanban-col{min-width:160px;flex-shrink:0;}
-    .col-header{
-      padding:7px 10px;border-radius:7px;margin-bottom:8px;
-      font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:space-between;
-    }
-    .col-badge{
-      background:rgba(0,0,0,.12);border-radius:20px;
-      padding:1px 7px;font-size:11px;font-weight:700;
-    }
-    .client-card{
-      background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;
-      padding:10px;margin-bottom:6px;cursor:pointer;transition:box-shadow .15s;
-    }
-    .client-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);}
-    .client-name{font-size:13px;font-weight:600;color:#111827;margin-bottom:2px;}
-    .client-email{font-size:11px;color:#9CA3AF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .client-days{font-size:11px;color:#6B7280;margin-top:5px;}
-
-    /* Colores de estado */
-    .s0 {background:#F3F4F6;color:#374151;}
-    .s48{background:#FEF3C7;color:#92400E;}
-    .s49{background:#DCFCE7;color:#166534;}
-    .s50{background:#DBEAFE;color:#1E40AF;}
-    .s51{background:#EDE9FE;color:#5B21B6;}
-    .s52{background:#FCE7F3;color:#9D174D;}
-    .s53{background:#E0F2FE;color:#075985;}
-    .s54{background:#D1FAE5;color:#065F46;}
-
-    /* ── Clientes recientes ── */
-    .recent-list{display:flex;flex-direction:column;gap:10px;}
-    .recent-item{
+    /* ── Clients-no-plan list ── */
+    .client-row{
       display:flex;align-items:center;gap:12px;
-      padding:10px;border-radius:8px;cursor:pointer;transition:background .15s;
+      padding:13px 20px;border-bottom:1px solid #EBEBEB;
+      transition:background .12s;
     }
-    .recent-item:hover{background:#F9FAFB;}
-    .recent-avatar{
-      width:38px;height:38px;border-radius:50%;
-      background:var(--purple-pale);color:var(--purple);
+    .client-row:last-child{border-bottom:none;}
+    .client-row:hover{background:#FAFAFA;}
+    .c-avatar{
+      width:36px;height:36px;border-radius:50%;
+      background:#EEF2FF;color:var(--indigo);
       display:flex;align-items:center;justify-content:center;
-      font-weight:700;font-size:14px;flex-shrink:0;
+      font-weight:700;font-size:13px;flex-shrink:0;
     }
-    .recent-info{flex:1;min-width:0;}
-    .recent-name{font-size:13px;font-weight:600;color:#111827;}
-    .recent-email{font-size:11px;color:#9CA3AF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .state-pill{
-      font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;flex-shrink:0;
+    .c-info{flex:1;min-width:0;}
+    .c-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .c-sub{font-size:11px;color:#6B7280;margin-top:1px;}
+    .c-tags{display:flex;gap:4px;margin-top:4px;}
+    .tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;}
+    .tag.missing{background:#FEF3C7;color:#92400E;}
+    .tag.ok{background:#DCFCE7;color:#166534;}
+    .btn-assign{
+      font-size:12px;font-weight:600;color:var(--indigo);
+      background:#EEF2FF;border:none;border-radius:7px;
+      padding:6px 12px;cursor:pointer;white-space:nowrap;transition:background .15s;
     }
+    .btn-assign:hover{background:#E0E7FF;}
 
-    /* ── Skeleton loader ── */
-    .skeleton{background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
+    /* ── Events list ── */
+    .event-row{
+      display:flex;align-items:flex-start;gap:12px;
+      padding:13px 20px;border-bottom:1px solid #EBEBEB;
+    }
+    .event-row:last-child{border-bottom:none;}
+    .event-date-box{
+      min-width:40px;text-align:center;
+      background:#F8FAFC;border:1px solid #E5E7EB;
+      border-radius:8px;padding:6px 4px;flex-shrink:0;
+    }
+    .event-day{font-size:18px;font-weight:800;color:#111827;line-height:1;}
+    .event-mon{font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
+    .event-info{flex:1;min-width:0;}
+    .event-title{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .event-who{font-size:11px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .event-type{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;flex-shrink:0;margin-top:2px;}
+    .event-type.cita   {background:#DBEAFE;color:#1E40AF;}
+    .event-type.tarea  {background:#FEF3C7;color:#92400E;}
+    .event-type.otro   {background:#F3F4F6;color:#374151;}
+    .event-type.check  {background:#DCFCE7;color:#166534;}
+
+    /* ── Empty state ── */
+    .empty{padding:32px 20px;text-align:center;color:#9CA3AF;}
+    .empty svg{opacity:.3;margin-bottom:8px;}
+    .empty p{font-size:13px;}
+
+    /* ── Skeleton ── */
+    .sk{background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
     /* ── Toast ── */
-    #toast{
-      position:fixed;bottom:24px;right:24px;
-      background:#111827;color:#fff;padding:12px 18px;
-      border-radius:8px;font-size:14px;opacity:0;
-      transition:opacity .3s;pointer-events:none;z-index:999;
-    }
+    #toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:12px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
     #toast.show{opacity:1;}
 
-    /* Responsive */
     @media(max-width:1100px){
-      .stats-grid{grid-template-columns:repeat(2,1fr);}
+      .kpi-grid{grid-template-columns:repeat(2,1fr);}
       .two-col{grid-template-columns:1fr;}
     }
     @media(max-width:720px){
       .sidebar{display:none;}
+      .content{padding:16px;}
     }
   </style>
 </head>
@@ -191,19 +210,18 @@
 <!-- Sidebar -->
 <div class="sidebar">
   <div class="sidebar-logo">
-    <span>Nutri<em>Entrena</em></span>
-    <small>Panel de administración</small>
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
   </div>
-
-    <nav class="sidebar-nav">
+  <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item active" href="dashboard.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
+      Inicio
     </a>
-    <a class="nav-item" href="kanban.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
-      Kanban
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Calendario
     </a>
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -212,14 +230,25 @@
     <a class="nav-item" href="checkins.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       Check-ins
+      <span class="nav-badge" id="checkinsBadge" style="display:none"></span>
     </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="programas.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Programas
+    </a>
+    <a class="nav-item" href="library.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Librería
+    </a>
+    <div class="nav-section">Comunicación</div>
     <a class="nav-item" href="forms.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Formularios
       <span class="nav-badge" id="formsBadge" style="display:none"></span>
     </a>
     <a class="nav-item" href="notes.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Notas
     </a>
     <a class="nav-item" href="chat.html">
@@ -230,40 +259,21 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Progreso
     </a>
-    <div class="nav-section">Nutrición</div>
-    <a class="nav-item" href="diets.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-      Dietas
-    </a>
-    <a class="nav-item" href="aliments.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      Alimentos
-    </a>
-    <a class="nav-item" href="recipes.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
-      Recetas
-    </a>
-    <a class="nav-item" href="nutrition-catalog.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      Catálogos
-    </a>
-    <div class="nav-section">Entrenamiento</div>
-    <a class="nav-item" href="routines.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Rutinas
-    </a>
-    <div class="nav-section">Análisis</div>
+    <div class="nav-section">Negocio</div>
     <a class="nav-item" href="analytics.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analíticas
     </a>
-    <div class="nav-section">Configuración</div>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Equipo
+    </a>
+    <div class="nav-section">Cuenta</div>
     <a class="nav-item" href="settings.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Ajustes
     </a>
   </nav>
-
   <div class="sidebar-user">
     <div class="avatar" id="userAvatar">A</div>
     <div class="user-info">
@@ -279,88 +289,113 @@
 <!-- Main -->
 <div class="main">
   <div class="topbar">
-    <h1 id="pageTitle">Dashboard</h1>
+    <div class="topbar-left">
+      <h1 id="greetMsg">Bienvenido</h1>
+      <p id="todayDate">—</p>
+    </div>
     <div class="topbar-right">
-      <div class="badge-dot"></div>
-      <span>Conectado a producción</span>
+      <div class="badge-online"><div class="dot-green"></div>Producción</div>
     </div>
   </div>
 
-  <div class="content" id="content">
+  <div class="content">
 
-    <!-- Stats -->
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card">
-        <div class="stat-icon purple">
-          <svg width="22" height="22" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <!-- KPI Cards -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon indigo"><svg width="20" height="20" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <span class="kpi-trend neu" id="trendActive">—</span>
         </div>
-        <div>
-          <div class="stat-label">Total clientes</div>
-          <div class="stat-value" id="statTotal"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
-          <div class="stat-sub">registrados</div>
-        </div>
+        <div class="kpi-val sk" id="valActive" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
+        <div class="kpi-label">Clientes activos</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon green">
-          <svg width="22" height="22" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon amber"><svg width="20" height="20" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <span class="kpi-trend neu" id="trendCheckins">—</span>
         </div>
-        <div>
-          <div class="stat-label">En seguimiento</div>
-          <div class="stat-value" id="statActive"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
-          <div class="stat-sub">activos</div>
-        </div>
+        <div class="kpi-val sk" id="valCheckins" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
+        <div class="kpi-label">Check-ins pendientes</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon blue">
-          <svg width="22" height="22" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon blue"><svg width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <span class="kpi-trend neu" id="trendEvents">—</span>
         </div>
-        <div>
-          <div class="stat-label">Nuevos este mes</div>
-          <div class="stat-value" id="statNew"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
-          <div class="stat-sub">registrados</div>
-        </div>
+        <div class="kpi-val sk" id="valEvents" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
+        <div class="kpi-label">Próximas citas</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon amber">
-          <svg width="22" height="22" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.92 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.99 5.99l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon green"><svg width="20" height="20" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <span class="kpi-trend up" id="trendNew">este mes</span>
         </div>
-        <div>
-          <div class="stat-label">Adherencia check-ins</div>
-          <div class="stat-value" id="statAdherence"><span class="skeleton" style="width:40px;height:28px;display:inline-block;">&nbsp;</span></div>
-          <div class="stat-sub">últimos 30 días</div>
-        </div>
+        <div class="kpi-val sk" id="valNew" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
+        <div class="kpi-label">Nuevos clientes</div>
       </div>
     </div>
 
-    <!-- Dos columnas -->
+    <!-- Quick access -->
+    <div class="quick-row">
+      <a class="quick-btn" href="coaches.html">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Coaches
+      </a>
+      <a class="quick-btn" href="clients.html">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Clientes
+      </a>
+      <a class="quick-btn" href="programas.html">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Programas
+      </a>
+      <a class="quick-btn" href="formularios.html">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Formularios
+      </a>
+      <a class="quick-btn" href="events.html">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendario
+      </a>
+      <a class="quick-btn" href="progress.html">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Progreso
+      </a>
+      <a class="quick-btn" href="kanban.html">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+        Kanban
+      </a>
+    </div>
+
+    <!-- Two columns -->
     <div class="two-col">
 
-      <!-- Kanban -->
+      <!-- Left: Clientes sin plan -->
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">📋 Estado de clientes</span>
-          <a class="card-link" href="kanban.html">Ver kanban completo →</a>
+        <div class="card-head">
+          <span class="card-title">Clientes sin plan asignado</span>
+          <a class="card-action" href="clients.html">Ver todos →</a>
         </div>
-        <div class="kanban-cols" id="kanbanCols">
-          <div style="color:#9CA3AF;font-size:13px;padding:20px 0;">Cargando...</div>
+        <div class="card-body" id="noPlanList">
+          <div class="empty">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <p>Cargando clientes...</p>
+          </div>
         </div>
       </div>
 
-      <!-- Panel derecho -->
-      <div style="display:flex;flex-direction:column;gap:20px;">
-        <!-- Distribución estados -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">📊 Distribución de estados</span>
-          </div>
-          <div id="statesPanel" style="font-size:13px;color:#9CA3AF;">Cargando...</div>
+      <!-- Right: Próximos 5 días -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Próximos 5 días</span>
+          <a class="card-action" href="events.html">Calendario →</a>
         </div>
-        <!-- Coaches -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">🏋️ Rendimiento coaches</span>
+        <div class="card-body" id="upcomingList">
+          <div class="empty">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <p>Cargando eventos...</p>
           </div>
-          <div id="coachesPanel" style="font-size:13px;color:#9CA3AF;">Cargando...</div>
         </div>
       </div>
 
@@ -368,159 +403,200 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
 <script>
 const API = 'https://nutrientrena-production.up.railway.app';
+const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
-function token(){ return localStorage.getItem('token'); }
+function tok(){ return localStorage.getItem('token'); }
 
 function toast(msg, dur=3000){
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), dur);
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),dur);
 }
 
-async function apiFetch(path, opts={}){
+async function api(path, opts={}){
   const res = await fetch(API+path, {
     ...opts,
-    headers:{ 'Authorization':'Bearer '+token(), 'Content-Type':'application/json', ...(opts.headers||{}) }
+    headers:{'Authorization':'Bearer '+tok(),'Content-Type':'application/json',...(opts.headers||{})}
   });
   if(res.status===401){ logout(); return null; }
   return res.json();
 }
 
 function logout(){
-  apiFetch('/api/auth/logout',{method:'POST'}).catch(()=>{});
-  localStorage.removeItem('token');
-  localStorage.removeItem('refresh_token');
+  api('/api/auth/logout',{method:'POST'}).catch(()=>{});
+  ['token','refresh_token','role_id'].forEach(k=>localStorage.removeItem(k));
   window.location.href='login.html';
 }
 
 function initials(name=''){
-  return name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
+  return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
 }
 
-const STATE_COLORS = {
-  null:'s0', 45:'s0', 46:'s0', 47:'s0',
-  48:'s48', 49:'s49', 50:'s50', 51:'s51',
-  52:'s52', 53:'s53', 54:'s54',
-};
-function stateClass(id){ return STATE_COLORS[id]||'s0'; }
+function setKpi(id, value, skeleton=false){
+  const el=document.getElementById(id);
+  if(!el) return;
+  if(skeleton){ el.classList.add('sk'); el.innerHTML='&nbsp;'; return; }
+  el.classList.remove('sk');
+  el.style.width=''; el.style.height=''; el.style.borderRadius='';
+  el.textContent=value;
+}
 
-// ── Cargar datos ──────────────────────────────────────────────────────────────
-async function loadDashboard(){
-  if(!token()){ window.location.href='login.html'; return; }
+function setTrend(id, text, type='neu'){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=text;
+  el.className='kpi-trend '+type;
+}
 
-  // Me
-  const me = await apiFetch('/api/auth/me');
+async function load(){
+  if(!tok()){ window.location.href='login.html'; return; }
+
+  // Greeting
+  const now=new Date();
+  const h=now.getHours();
+  const greeting=h<13?'Buenos días':h<19?'Buenas tardes':'Buenas noches';
+  document.getElementById('todayDate').textContent=
+    DAYS[now.getDay()]+', '+now.getDate()+' de '+['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][now.getMonth()]+' '+now.getFullYear();
+
+  // Profile
+  const me = await api('/api/auth/me');
   if(!me) return;
-  const u = me.data||{};
-  document.getElementById('userName').textContent   = u.name||'Usuario';
-  document.getElementById('userRole').textContent   = (u.roles&&u.roles[0]?.name)||'—';
-  document.getElementById('userAvatar').textContent = initials(u.name||'U');
+  const u=me.data||{};
+  const name=u.name||'Coach';
+  document.getElementById('greetMsg').textContent=greeting+', '+name.split(' ')[0];
+  document.getElementById('userName').textContent=name;
+  document.getElementById('userRole').textContent=(u.roles&&u.roles[0]?.name)||'—';
+  (function(){var _av=document.getElementById('userAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials(name);}})()
 
-  // Analytics overview
-  const [ov, ck, st, co, kb] = await Promise.all([
-    apiFetch('/api/analytics/overview'),
-    apiFetch('/api/analytics/checkins'),
-    apiFetch('/api/analytics/states'),
-    apiFetch('/api/analytics/coaches'),
-    apiFetch('/api/users/kanban'),
+  // Parallel fetch
+  const [ov, ck, ev, cl] = await Promise.all([
+    api('/api/analytics/overview'),
+    api('/api/analytics/checkins'),
+    api('/api/events?per_page=20&sort=date&order=asc'),
+    api('/api/users?role_id=3&per_page=50'),
   ]);
 
-  const ovd = ov?.data||{};
-  document.getElementById('statTotal').textContent    = ovd.total_clients ?? '—';
-  document.getElementById('statActive').textContent   = ovd.active_clients ?? '—';
-  document.getElementById('statNew').textContent      = ovd.new_this_month ?? '—';
-  const adh = ck?.data?.adherence_pct;
-  document.getElementById('statAdherence').textContent = adh != null ? adh+'%' : '—';
+  // KPI — Clientes activos
+  const active=ov?.data?.active_clients;
+  setKpi('valActive', active??'—');
+  setTrend('trendActive', (ov?.data?.total_clients??'—')+' total', 'neu');
 
-  // Kanban columnas
-  const cols = kb?.data?.columns||[];
-  const kbEl = document.getElementById('kanbanCols');
-  if(!cols.length){ kbEl.innerHTML='<span style="color:#9CA3AF;font-size:13px;">No hay clientes aún</span>'; }
-  else {
-    kbEl.innerHTML = cols.filter(c=>c.total>0).map(col=>{
-      const cls = stateClass(col.status_id);
-      const cards = (col.clients||[]).slice(0,3).map(c=>`
-        <div class="client-card">
-          <div class="client-name">${c.name||''} ${c.last_name||''}</div>
-          <div class="client-email">${c.email||''}</div>
-        </div>`).join('');
-      const more = col.total>3 ? `<div style="font-size:11px;color:#9CA3AF;text-align:center;padding:4px;">+${col.total-3} más</div>` : '';
-      return `
-        <div class="kanban-col">
-          <div class="col-header ${cls}">
-            <span>${col.status_name}</span>
-            <span class="col-badge">${col.total}</span>
-          </div>
-          ${cards}${more}
-        </div>`;
-    }).join('');
+  // KPI — Check-ins pendientes
+  const pending=ck?.data?.pending_reviews??ck?.data?.pending;
+  setKpi('valCheckins', pending??'—');
+  if(pending>0){ setTrend('trendCheckins','requieren revisión','down'); }
+  else { setTrend('trendCheckins','al día','up'); }
+  if(pending>0){
+    const badge=document.getElementById('checkinsBadge');
+    if(badge){ badge.textContent=pending>99?'99+':pending; badge.style.display='inline-block'; }
   }
 
-  // States distribution
-  const dist = st?.data?.distribution||[];
-  const sEl = document.getElementById('statesPanel');
-  if(!dist.length){ sEl.innerHTML='<span style="color:#9CA3AF;">Sin datos</span>'; }
-  else {
-    sEl.innerHTML = dist.map(s=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F3F4F6;">
-        <span style="flex:1;font-size:13px;color:#374151;">${s.status_name}</span>
-        <div style="width:80px;background:#F3F4F6;border-radius:4px;height:6px;overflow:hidden;">
-          <div style="width:${s.percentage}%;background:#5B2D8E;height:100%;border-radius:4px;"></div>
-        </div>
-        <span style="font-size:13px;font-weight:700;color:#111;min-width:24px;text-align:right;">${s.count}</span>
-        <span style="font-size:11px;color:#9CA3AF;min-width:36px;">${s.percentage}%</span>
-      </div>`).join('');
-  }
+  // KPI — Próximas citas (events in next 5 days)
+  const evItems=ev?.data?.items||ev?.data||[];
+  const in5=new Date(now); in5.setDate(in5.getDate()+5);
+  const upcoming=evItems.filter(e=>{
+    const d=new Date(e.date||e.scheduled_at||e.start_date);
+    return d>=now && d<=in5;
+  });
+  setKpi('valEvents', upcoming.length);
+  setTrend('trendEvents','próximos 5 días','neu');
 
-  // Coaches table
-  const coaches = co?.data?.coaches||[];
-  const cEl = document.getElementById('coachesPanel');
-  if(!coaches.length){ cEl.innerHTML='<span style="color:#9CA3AF;">Sin coaches</span>'; }
-  else {
-    cEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead><tr style="color:#9CA3AF;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
-        <th style="text-align:left;padding:6px 8px;">Coach</th>
-        <th style="text-align:center;padding:6px 8px;">Clientes</th>
-        <th style="text-align:center;padding:6px 8px;">Check-ins</th>
-      </tr></thead>
-      <tbody>${coaches.map(c=>`
-        <tr style="border-top:1px solid #F3F4F6;">
-          <td style="padding:8px;">${c.coach_name||'—'}</td>
-          <td style="padding:8px;text-align:center;font-weight:700;">${c.clients_assigned}</td>
-          <td style="padding:8px;text-align:center;color:#5B2D8E;font-weight:700;">${c.checkins_received}</td>
-        </tr>`).join('')}
-      </tbody></table>`;
-  }
+  // KPI — Nuevos este mes
+  const newM=ov?.data?.new_this_month;
+  setKpi('valNew', newM??'—');
+
+  // Panel: Clientes sin plan
+  const clients=cl?.data?.items||cl?.data||[];
+  const noPlan=clients.filter(c=>!c.diet_id&&!c.routine_id);
+  const toShow=noPlan.length>0?noPlan:clients.filter((_,i)=>i<8);
+  const isFiltered=noPlan.length>0;
+  renderNoPlan(toShow, isFiltered);
+
+  // Panel: Próximos 5 días
+  const next5=evItems.filter(e=>new Date(e.date||e.scheduled_at||e.start_date)>=now).slice(0,5);
+  renderUpcoming(next5);
+
+  // Forms badge
+  try{
+    const fr=await api('/api/form-assignments?status=pending&per_page=1');
+    const total=(fr?.data?.total)||(fr?.total)||0;
+    const fb=document.getElementById('formsBadge');
+    if(fb&&total>0){fb.textContent=total>99?'99+':total;fb.style.display='inline-block';}
+  }catch{}
 }
 
-function setPage(page){
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  event.currentTarget?.classList?.add('active');
-  if(page==='kanban'){
-    toast('Vista Kanban completa — próximamente');
+function renderNoPlan(clients, isFiltered){
+  const el=document.getElementById('noPlanList');
+  if(!clients.length){
+    el.innerHTML=`<div class="empty">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <p>${isFiltered?'Todos los clientes tienen plan asignado':'No hay clientes registrados aún'}</p>
+    </div>`;
+    return;
   }
+  el.innerHTML=clients.slice(0,8).map(c=>{
+    const fullName=(c.name||'')+' '+(c.last_name||'');
+    const hasDiet=!!c.diet_id; const hasRoutine=!!c.routine_id;
+    const tags=`
+      <span class="tag ${hasDiet?'ok':'missing'}">${hasDiet?'✓ Dieta':'Sin dieta'}</span>
+      <span class="tag ${hasRoutine?'ok':'missing'}">${hasRoutine?'✓ Rutina':'Sin rutina'}</span>`;
+    return `<div class="client-row">
+      <div class="c-avatar">${initials(fullName)}</div>
+      <div class="c-info">
+        <div class="c-name">${fullName.trim()||c.email||'—'}</div>
+        <div class="c-sub">${c.email||''}</div>
+        <div class="c-tags">${tags}</div>
+      </div>
+      <button class="btn-assign" onclick="window.location.href='client-profile.html?id=${c.id}'">Ver perfil</button>
+    </div>`;
+  }).join('');
 }
 
-// ── Badge: formularios pendientes ─────────────────────────────────────────────
-async function loadPendingBadge() {
-  try {
-    const r = await apiFetch('/form-assignments?status=pending&per_page=1');
-    const total = (r?.data?.total) || (r?.total) || 0;
-    const badge = document.getElementById('formsBadge');
-    if (badge && total > 0) {
-      badge.textContent = total > 99 ? '99+' : total;
-      badge.style.display = 'inline-block';
-    }
-  } catch {}
+function renderUpcoming(events){
+  const el=document.getElementById('upcomingList');
+  if(!events.length){
+    el.innerHTML=`<div class="empty">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <p>Sin eventos en los próximos 5 días</p>
+    </div>`;
+    return;
+  }
+  const typeMap={cita:'cita',appointment:'cita',check:'check',checkin:'check',tarea:'tarea',task:'tarea'};
+  el.innerHTML=events.map(e=>{
+    const d=new Date(e.date||e.scheduled_at||e.start_date);
+    const typeRaw=(e.type||e.event_type||'otro').toLowerCase();
+    const typeCls=typeMap[typeRaw]||'otro';
+    const typeLabel={cita:'Cita',check:'Check-in',tarea:'Tarea',otro:'Evento'}[typeCls];
+    return `<div class="event-row">
+      <div class="event-date-box">
+        <div class="event-day">${d.getDate()}</div>
+        <div class="event-mon">${MONTHS[d.getMonth()]}</div>
+      </div>
+      <div class="event-info">
+        <div class="event-title">${e.title||e.name||'Evento'}</div>
+        <div class="event-who">${e.client_name||e.description||''}</div>
+        <span class="event-type ${typeCls}">${typeLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-loadDashboard();
-loadPendingBadge();
+function adaptSidebar(){
+  const rid=parseInt(localStorage.getItem('role_id')||'0');
+  if(rid!==5) return;
+  ['coaches.html','settings.html','analytics.html'].forEach(href=>{
+    const el=document.querySelector('.nav-item[href="'+href+'"]');
+    if(el) el.style.display='none';
+  });
+}
+
+load();
+adaptSidebar();
 </script>
 </body>
 </html>

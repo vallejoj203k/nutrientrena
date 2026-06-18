@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NutriEntrena — Formulario de evaluación</title>
+  <title>ALZUM.io — Formulario de evaluación</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#5B2D8E;--purple-dark:#4A2475;--purple-pale:#F3EEFF;}
+    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F2F5;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px;}
 
     .header{width:100%;max-width:560px;text-align:center;margin-bottom:28px;}
     .logo{font-size:24px;font-weight:900;color:var(--purple);letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .logo em{color:#C084FC;font-style:inherit;}
-    .header-sub{font-size:13px;color:#9CA3AF;margin-top:4px;}
+    .logo em{color:#818CF8;font-style:inherit;}
+    .header-sub{font-size:13px;color:#6B7280;margin-top:4px;}
 
     .card{background:#fff;border-radius:16px;width:100%;max-width:560px;box-shadow:0 4px 20px rgba(91,45,142,.08);border:1px solid #EDE9FE;overflow:hidden;}
     .card-head{background:var(--purple);padding:28px 28px 24px;}
@@ -58,11 +58,33 @@
       .card-body{padding:18px 20px;}
     }
   </style>
+  <style>
+    /* ALZUM.io — theme overrides */
+    body { background: #F8FAFC !important; }
+    .sidebar {
+      background: #fff !important;
+      border-right: 1px solid #E5E7EB !important;
+    }
+    .sidebar-logo span { color: #111827 !important; }
+    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
+    .sidebar-logo small { color: #6B7280 !important; }
+    .nav-section { color: #9CA3AF !important; }
+    .nav-item { color: #374151 !important; }
+    .nav-item svg { color: inherit !important; opacity: 1 !important; }
+    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
+    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
+    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
+    .avatar, .user-avatar { background: #4F46E5 !important; }
+    .user-name { color: #111827 !important; }
+    .user-role { color: #6B7280 !important; }
+    .btn-logout { color: #6B7280 !important; }
+    .btn-logout:hover { color: #4F46E5 !important; }
+  </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">Nutri<em>Entrena</em></div>
+  <div class="logo">ALZUM<em>.io</em></div>
   <div class="header-sub">Formulario de evaluación inicial</div>
 </div>
 

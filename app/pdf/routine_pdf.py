@@ -2,15 +2,17 @@
 Generador de PDF para rutinas usando ReportLab.
 """
 import io
+import urllib.request
+import ssl
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib.colors import HexColor, white
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, KeepTogether,
+    HRFlowable, KeepTogether, Image,
 )
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 # ── Brand colors ──────────────────────────────────────────────────────────────
 PURPLE       = HexColor("#5B2D8E")
@@ -75,6 +77,50 @@ def _styles():
             alignment=TA_CENTER,
         ),
     }
+
+
+IMG_SIZE = 1.8 * cm  # thumbnail size in the PDF
+
+
+def _fetch_image(url: str):
+    """Download image and return a ReportLab Image flowable, or None."""
+    if not url:
+        return None
+
+    # Try boto3 directly from R2 (no public URL dependency)
+    try:
+        from app.config import settings
+        import boto3
+        base = (settings.R2_PUBLIC_URL or "").rstrip("/")
+        if settings.AWS_ACCESS_KEY_ID and settings.AWS_BUCKET and base and url.startswith(base):
+            key = url[len(base):].lstrip("/")
+            r2 = boto3.client(
+                "s3",
+                endpoint_url="https://77925e3b1a6f6513bce155f71f6aa790.r2.cloudflarestorage.com",
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name="auto",
+            )
+            obj = r2.get_object(Bucket=settings.AWS_BUCKET, Key=key)
+            data = obj["Body"].read()
+            img = Image(io.BytesIO(data), width=IMG_SIZE, height=IMG_SIZE)
+            img.hAlign = "CENTER"
+            return img
+    except Exception as e:
+        print(f"PDF image R2 error ({url}): {e}")
+
+    # Fallback: HTTP with SSL context
+    try:
+        ctx = ssl.create_default_context()
+        req = urllib.request.Request(url, headers={"User-Agent": "Nutrientrena/1.0"})
+        with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
+            data = resp.read()
+        img = Image(io.BytesIO(data), width=IMG_SIZE, height=IMG_SIZE)
+        img.hAlign = "CENTER"
+        return img
+    except Exception as e:
+        print(f"PDF image HTTP error ({url}): {e}")
+        return None
 
 
 def _info_table(routine, styles, doc_width):
@@ -153,8 +199,17 @@ def generate_routine_pdf(routine) -> bytes:
     # ── Días ──────────────────────────────────────────────────────────────────
     story.append(Paragraph("Programa de entrenamiento", styles["section"]))
 
-    col_w = [doc.width * 0.30, doc.width * 0.22, doc.width * 0.12,
-             doc.width * 0.18, doc.width * 0.18]
+    # col widths: img | nombre | músculo | series | reps | descanso
+    col_w = [
+        IMG_SIZE + 0.2 * cm,
+        doc.width * 0.28,
+        doc.width * 0.20,
+        doc.width * 0.10,
+        doc.width * 0.14,
+        doc.width * 0.14,
+    ]
+    # Adjust last cols so total == doc.width
+    col_w[1] = doc.width - sum(col_w) + col_w[1]
 
     for day in (routine.days_list or []):
         # Encabezado del día
@@ -170,25 +225,32 @@ def generate_routine_pdf(routine) -> bytes:
         ]))
 
         rows = [[
-            Paragraph("<b>Ejercicio</b>",       styles["body"]),
+            Paragraph("<b>Img</b>",              styles["body"]),
+            Paragraph("<b>Ejercicio</b>",        styles["body"]),
             Paragraph("<b>Músculo</b>",          styles["body"]),
             Paragraph("<b>Series</b>",           styles["body"]),
             Paragraph("<b>Repeticiones</b>",     styles["body"]),
-            Paragraph("<b>Descanso (seg)</b>",   styles["body"]),
+            Paragraph("<b>Descanso (s)</b>",     styles["body"]),
         ]]
 
-        for detail in (day.details or []):
-            exercise_name = (
-                detail.training.name if detail.training else "—"
-            )
+        all_details = list(day.details or [])
+        for block in (day.blocks or []):
+            all_details.extend(block.exercises or [])
+        all_details.sort(key=lambda d: d.order_index or 0)
+
+        for detail in all_details:
+            training = detail.training
+            exercise_name = training.name if training else "—"
             muscle_name = (
                 detail.muscle_group.name
                 if detail.muscle_group
-                else (detail.training.muscle_group.name
-                      if detail.training and detail.training.muscle_group
+                else (training.muscle_group.name
+                      if training and training.muscle_group
                       else "—")
             )
+            img_cell = _fetch_image(training.image if training else None) or Paragraph("—", styles["body"])
             rows.append([
+                img_cell,
                 Paragraph(exercise_name, styles["body"]),
                 Paragraph(muscle_name,   styles["body"]),
                 Paragraph(str(detail.series or "—"),      styles["body"]),
@@ -197,15 +259,15 @@ def generate_routine_pdf(routine) -> bytes:
             ])
 
         # Si el día solo tiene descripción libre (sin detalles estructurados)
-        if len(rows) == 1 and day.description:
+        if len(rows) == 1 and not all_details and day.description:
             rows.append([
-                Paragraph(day.description, styles["body"]),
+                "", Paragraph(day.description, styles["body"]),
                 "", "", "", "",
             ])
             exercise_tbl = Table(rows, colWidths=col_w)
             exercise_tbl.setStyle(TableStyle([
                 ("BACKGROUND",   (0, 0), (-1, 0), PURPLE_LIGHT),
-                ("SPAN",         (0, 1), (-1, 1)),
+                ("SPAN",         (1, 1), (-1, 1)),
                 ("FONTSIZE",     (0, 0), (-1, -1), 8),
                 ("GRID",         (0, 0), (-1, -1), 0.3, GRAY_BORDER),
                 ("TOPPADDING",   (0, 0), (-1, -1), 5),
@@ -214,14 +276,14 @@ def generate_routine_pdf(routine) -> bytes:
                 ("VALIGN",       (0, 0), (-1, -1), "MIDDLE"),
             ]))
         else:
-            exercise_tbl = Table(rows, colWidths=col_w)
+            exercise_tbl = Table(rows, colWidths=col_w, rowHeights=[None] + [IMG_SIZE + 0.4 * cm] * (len(rows) - 1))
             exercise_tbl.setStyle(TableStyle([
                 ("BACKGROUND",   (0, 0), (-1, 0), PURPLE_LIGHT),
                 ("FONTNAME",     (0, 0), (-1, 0), "Helvetica-Bold"),
                 ("FONTSIZE",     (0, 0), (-1, -1), 8),
                 ("GRID",         (0, 0), (-1, -1), 0.3, GRAY_BORDER),
-                ("TOPPADDING",   (0, 0), (-1, -1), 5),
-                ("BOTTOMPADDING",(0, 0), (-1, -1), 5),
+                ("TOPPADDING",   (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING",(0, 0), (-1, -1), 4),
                 ("LEFTPADDING",  (0, 0), (-1, -1), 6),
                 ("VALIGN",       (0, 0), (-1, -1), "MIDDLE"),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [white, GRAY_BG]),

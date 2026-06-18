@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Librería</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-light:#6366F1;
+      --indigo-pale:#EEF2FF;--gray-bg:#F8FAFC;--sidebar-w:240px;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;}
+    .logout-btn:hover{color:#EF4444;}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+    /* ── Topbar ── */
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:20px 28px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+    .topbar-title{font-size:24px;font-weight:800;color:#111827;margin-bottom:3px;}
+    .topbar-sub{font-size:14px;color:#6B7280;}
+
+    /* ── Content ── */
+    .content{flex:1;overflow-y:auto;padding:32px 28px;}
+    .content::-webkit-scrollbar{width:5px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Section grid ── */
+    .section-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:900px;}
+
+    /* ── Library card ── */
+    .lib-card{background:#fff;border:1.5px solid #E5E7EB;border-radius:16px;padding:28px;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;gap:16px;transition:all .2s;position:relative;overflow:hidden;}
+    .lib-card:hover{border-color:var(--indigo);box-shadow:0 8px 24px rgba(79,70,229,.1);transform:translateY(-2px);}
+    .lib-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent);opacity:0;transition:.2s;}
+    .lib-card:hover::before{opacity:1;}
+
+    .lib-card-icon{width:52px;height:52px;border-radius:14px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--card-color);flex-shrink:0;}
+    .lib-card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--card-color);margin-bottom:2px;}
+    .lib-card-title{font-size:20px;font-weight:800;color:#111827;}
+    .lib-card-desc{font-size:13px;color:#6B7280;line-height:1.6;}
+
+    .lib-card-features{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
+    .lib-card-feature{display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;}
+    .lib-card-feature svg{color:var(--card-color);flex-shrink:0;}
+
+    .lib-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:16px;border-top:1px solid #F3F4F6;}
+    .lib-card-cta{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--card-color);background:var(--card-bg);padding:8px 16px;border-radius:8px;transition:.15s;}
+    .lib-card:hover .lib-card-cta{filter:brightness(.95);}
+    .lib-card-arrow{color:#D1D5DB;transition:.2s;}
+    .lib-card:hover .lib-card-arrow{color:var(--card-color);transform:translateX(3px);}
+
+    /* Color themes per card */
+    .card-indigo{--card-accent:var(--indigo);--card-bg:#EEF2FF;--card-color:#4F46E5;}
+    .card-emerald{--card-accent:#059669;--card-bg:#ECFDF5;--card-color:#059669;}
+    .card-amber{--card-accent:#D97706;--card-bg:#FFFBEB;--card-color:#D97706;}
+    .card-slate{--card-accent:#475569;--card-bg:#F1F5F9;--card-color:#475569;}
+
+    /* Coming soon badge */
+    .coming-soon{position:absolute;top:16px;right:16px;background:#F3F4F6;color:#9CA3AF;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:100;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.success{background:#059669;}
+
+    @media(max-width:768px){.sidebar{display:none;}.section-grid{grid-template-columns:1fr;}}
+    @media(max-width:1100px){.section-grid{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
+  </div>
+    <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Inicio
+    </a>
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Calendario
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <a class="nav-item" href="checkins.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins
+    </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="programas.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Programas
+    </a>
+    <a class="nav-item active" href="library.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Librería
+    </a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item" href="forms.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Formularios
+    </a>
+    <a class="nav-item" href="notes.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Notas
+    </a>
+    <a class="nav-item" href="chat.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></svg>
+      Chat
+    </a>
+    <div class="nav-section">Negocio</div>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analíticas
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Equipo
+    </a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarAvatar">?</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Cargando…</div>
+      <div class="user-role" id="sidebarRole">—</div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Librería</div>
+      <div class="topbar-sub">Elige una sección para gestionar tu contenido reutilizable.</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="section-grid">
+
+      <!-- Entrenamiento -->
+      <a class="lib-card card-indigo" href="routines.html">
+        <div>
+          <div class="lib-card-icon">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div style="margin-top:14px;">
+            <div class="lib-card-label">Sección</div>
+            <div class="lib-card-title">Entrenamiento</div>
+          </div>
+          <div class="lib-card-desc" style="margin-top:8px;">
+            Gestiona rutinas de entrenamiento, el catálogo de ejercicios y los grupos musculares que asignas a tus clientes.
+          </div>
+        </div>
+        <div class="lib-card-features">
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Rutinas por días y bloques
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Catálogo de ejercicios con imágenes
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Grupos musculares personalizados
+          </div>
+        </div>
+        <div class="lib-card-footer">
+          <span class="lib-card-cta">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Abrir Entrenamiento
+          </span>
+          <svg class="lib-card-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+
+      <!-- Nutrición -->
+      <a class="lib-card card-emerald" href="nutricion.html">
+        <div>
+          <div class="lib-card-icon">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <div style="margin-top:14px;">
+            <div class="lib-card-label">Sección</div>
+            <div class="lib-card-title">Nutrición</div>
+          </div>
+          <div class="lib-card-desc" style="margin-top:8px;">
+            Crea y gestiona planes alimenticios, dietas personalizadas y el catálogo de alimentos y recetas.
+          </div>
+        </div>
+        <div class="lib-card-features">
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Planes de dieta por cliente
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Catálogo de alimentos con macros
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Recetas y combinaciones
+          </div>
+        </div>
+        <div class="lib-card-footer">
+          <span class="lib-card-cta">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            Abrir Nutrición
+          </span>
+          <svg class="lib-card-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+
+      <!-- Formularios -->
+      <a class="lib-card card-amber" href="formularios.html">
+        <div>
+          <div class="lib-card-icon">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <div style="margin-top:14px;">
+            <div class="lib-card-label">Sección</div>
+            <div class="lib-card-title">Formularios</div>
+          </div>
+          <div class="lib-card-desc" style="margin-top:8px;">
+            Cuestionarios de anamnesis, seguimiento y satisfacción que puedes enviar y reutilizar con diferentes clientes.
+          </div>
+        </div>
+        <div class="lib-card-features">
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Plantillas de formularios
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Envío a clientes y seguimiento
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Respuestas centralizadas
+          </div>
+        </div>
+        <div class="lib-card-footer">
+          <span class="lib-card-cta">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Abrir Formularios
+          </span>
+          <svg class="lib-card-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+
+      <!-- Documentos -->
+      <a class="lib-card card-slate" href="documentos.html">
+        <div>
+          <div class="lib-card-icon">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          </div>
+          <div style="margin-top:14px;">
+            <div class="lib-card-label">Sección</div>
+            <div class="lib-card-title">Documentos</div>
+          </div>
+          <div class="lib-card-desc" style="margin-top:8px;">
+            Adjunta y comparte archivos PDF, contratos, guías y recursos con tus clientes desde un único lugar.
+          </div>
+        </div>
+        <div class="lib-card-features">
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Subida de archivos PDF
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Compartir con clientes
+          </div>
+          <div class="lib-card-feature">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Contratos y consentimientos
+          </div>
+        </div>
+        <div class="lib-card-footer">
+          <span class="lib-card-cta">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            Abrir Documentos
+          </span>
+          <svg class="lib-card-arrow" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+let token = localStorage.getItem('token');
+if (!token) location.href = 'login.html';
+
+function initials(name=''){
+  return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
+}
+
+async function loadUser(){
+  try{
+    const r=await fetch(`${API}/auth/me`,{headers:{Authorization:`Bearer ${token}`}});
+    if(r.status===401){logout();return;}
+    const j=await r.json(); const u=j.data||j;
+    const name=u.name||u.full_name||'Usuario';
+    document.getElementById('sidebarName').textContent=name;
+    document.getElementById('sidebarRole').textContent=u.role?.name||u.role||'—';
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials(name);}})()
+  }catch{}
+}
+
+function logout(){
+  fetch(`${API}/auth/logout`,{method:'POST',headers:{Authorization:`Bearer ${token}`}}).catch(()=>{});
+  localStorage.clear(); location.href='login.html';
+}
+
+loadUser();
+</script>
+</body>
+</html>

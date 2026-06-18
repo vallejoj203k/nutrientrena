@@ -24,7 +24,7 @@ def _get_note_or_404(db: Session, obj_id: int):
     return db.query(NoteUser).filter(NoteUser.id == obj_id).first()
 
 
-@router_templates.post("")
+@router_templates.post("", summary="Crear plantilla de nota", description="Crea una nueva plantilla de nota para el instructor autenticado.")
 def create_template(data: TemplateNoteCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = TemplateNote(instructor_id=current_user.id, **data.model_dump())
     db.add(obj)
@@ -33,7 +33,7 @@ def create_template(data: TemplateNoteCreate, db: Session = Depends(get_db), cur
     return send_response(TemplateNoteOut.model_validate(obj).model_dump(), "Plantilla creada")
 
 
-@router_templates.post("/update/{id}")
+@router_templates.post("/update/{id}", summary="Actualizar plantilla de nota", description="Modifica una plantilla de nota existente.")
 def update_template(id: int, data: TemplateNoteUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_template_or_404(db, id)
     if not obj:
@@ -45,13 +45,13 @@ def update_template(id: int, data: TemplateNoteUpdate, db: Session = Depends(get
     return send_response(TemplateNoteOut.model_validate(obj).model_dump(), "Actualizada")
 
 
-@router_templates.get("/find-all")
+@router_templates.get("/find-all", summary="Listar plantillas de nota", description="Retorna todas las plantillas activas del instructor autenticado.")
 def find_all_templates(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(TemplateNote).filter(TemplateNote.instructor_id == current_user.id, TemplateNote.state == 1).all()
     return send_response([TemplateNoteOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router_templates.get("/search")
+@router_templates.get("/search", summary="Buscar plantillas de nota", description="Busca plantillas de nota por título.")
 def search_templates(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -63,7 +63,7 @@ def search_templates(
     return send_response([TemplateNoteOut.model_validate(i).model_dump() for i in q.all()], "OK")
 
 
-@router_templates.delete("/delete/{id}")
+@router_templates.delete("/delete/{id}", summary="Eliminar plantilla de nota", description="Elimina una plantilla de nota por su ID.")
 def delete_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_template_or_404(db, id)
     if not obj:
@@ -73,7 +73,7 @@ def delete_template(id: int, db: Session = Depends(get_db), _=Depends(require_ro
     return send_response(None, "Plantilla eliminada")
 
 
-@router_notes.post("")
+@router_notes.post("", summary="Crear nota de cliente", description="Crea una nota para un cliente, asociada al instructor autenticado.")
 def create_note(data: NoteUserCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = NoteUser(instructor_id=current_user.id, **data.model_dump())
     db.add(obj)
@@ -82,7 +82,7 @@ def create_note(data: NoteUserCreate, db: Session = Depends(get_db), current_use
     return send_response(NoteUserOut.model_validate(obj).model_dump(), "Nota creada")
 
 
-@router_notes.post("/update/{id}")
+@router_notes.post("/update/{id}", summary="Actualizar nota de cliente", description="Modifica el contenido de una nota existente.")
 def update_note(id: int, data: NoteUserUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_note_or_404(db, id)
     if not obj:
@@ -94,13 +94,13 @@ def update_note(id: int, data: NoteUserUpdate, db: Session = Depends(get_db), _=
     return send_response(NoteUserOut.model_validate(obj).model_dump(), "Nota actualizada")
 
 
-@router_notes.get("/find-all")
+@router_notes.get("/find-all", summary="Listar notas de clientes", description="Retorna todas las notas activas del instructor autenticado.")
 def find_all_notes(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     items = db.query(NoteUser).filter(NoteUser.instructor_id == current_user.id, NoteUser.state == 1).all()
     return send_response([NoteUserOut.model_validate(i).model_dump() for i in items], "OK")
 
 
-@router_notes.get("/search")
+@router_notes.get("/search", summary="Buscar notas de clientes", description="Busca notas del instructor filtrando por cliente o texto.")
 def search_notes(
     user_id: Optional[int] = Query(None),
     search: Optional[str] = Query(None),
@@ -115,7 +115,7 @@ def search_notes(
     return send_response([NoteUserOut.model_validate(i).model_dump() for i in q.all()], "OK")
 
 
-@router_notes.delete("/delete/{id}")
+@router_notes.delete("/delete/{id}", summary="Eliminar nota de cliente", description="Elimina una nota de cliente por su ID.")
 def delete_note(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     obj = _get_note_or_404(db, id)
     if not obj:

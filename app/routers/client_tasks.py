@@ -47,7 +47,7 @@ class TaskUpdate(BaseModel):
     week_date: Optional[date] = None
 
 
-@router.get("/client/{client_user_detail_id}")
+@router.get("/client/{client_user_detail_id}", summary="Tareas del cliente", description="Retorna las tareas asignadas a un cliente, opcionalmente filtradas por semana.")
 def list_for_client(
     client_user_detail_id: str,
     week: Optional[date] = Query(None),
@@ -62,7 +62,7 @@ def list_for_client(
     return send_response([_out(t) for t in tasks], "OK")
 
 
-@router.get("/week")
+@router.get("/week", summary="Tareas por semana", description="Retorna todas las tareas de la semana agrupadas por cliente.")
 def bulk_by_week(
     week: Optional[date] = Query(None),
     db: Session = Depends(get_db),
@@ -77,7 +77,7 @@ def bulk_by_week(
     return send_response(grouped, "OK")
 
 
-@router.post("")
+@router.post("", summary="Crear tarea", description="Crea una nueva tarea semanal para un cliente (rutina, cardio, nutrición, etc.).")
 def create_task(
     data: TaskCreate,
     db: Session = Depends(get_db),
@@ -100,7 +100,7 @@ def create_task(
     return send_response(_out(t), "Tarea creada")
 
 
-@router.put("/{id}")
+@router.put("/{id}", summary="Actualizar tarea", description="Modifica o marca como completada una tarea del cliente.")
 def update_task(
     id: int,
     data: TaskUpdate,
@@ -121,7 +121,7 @@ def update_task(
     return send_response(_out(t), "Tarea actualizada")
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", summary="Eliminar tarea", description="Elimina una tarea asignada a un cliente.")
 def delete_task(
     id: int,
     db: Session = Depends(get_db),

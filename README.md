@@ -146,9 +146,9 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 2. Ir a la pestaña **Comercial**
 3. Hacer clic en editar → introducir la **Fecha de renovación** → guardar
 4. Verificar que el badge de renovación aparece con color correcto:
-   - ![](https://img.shields.io/badge/●-vencida-red?style=flat-square) Rojo → renovación vencida
-   - ![](https://img.shields.io/badge/●-7_dias-yellow?style=flat-square) Amarillo → ≤ 7 días
-   - ![](https://img.shields.io/badge/●-30_dias-blueviolet?style=flat-square) Morado → ≤ 30 días
+   - ● Rojo → renovación vencida
+   - ● Amarillo → ≤ 7 días
+   - ● Morado → ≤ 30 días
 
 ---
 
@@ -310,12 +310,12 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 
 | Endpoint | Método | Auth | Descripción |
 |----------|--------|------|-------------|
-| `/api/auth/login` | POST | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Iniciar sesión, devuelve token JWT |
-| `/api/auth/me` | GET | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Perfil del usuario autenticado |
-| `/api/auth/refresh-token` | PUT | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Renovar token |
-| `/api/auth/logout` | POST | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Cerrar sesión |
-| `/api/auth/recover-password` | POST | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Email de recuperación |
-| `/api/auth/menus` | GET | ![](https://img.shields.io/badge/auth-requerido-green?style=flat-square) | Menús disponibles según rol |
+| `/api/auth/login` | POST | Libre | Iniciar sesión, devuelve token JWT |
+| `/api/auth/me` | GET | Requerido | Perfil del usuario autenticado |
+| `/api/auth/refresh-token` | PUT | Requerido | Renovar token |
+| `/api/auth/logout` | POST | Requerido | Cerrar sesión |
+| `/api/auth/recover-password` | POST | Libre | Email de recuperación |
+| `/api/auth/menus` | GET | Requerido | Menús disponibles según rol |
 
 ---
 
@@ -384,8 +384,8 @@ Sigue estos pasos en orden desde el navegador. Cada sección cubre un módulo co
 
 | Endpoint | Método | Auth | Descripción |
 |----------|--------|------|-------------|
-| `/api/public/form/{assignment_id}` | GET | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Obtener template + estado del formulario |
-| `/api/public/form/{assignment_id}/submit` | POST | ![](https://img.shields.io/badge/auth-libre-lightgrey?style=flat-square) | Cliente envía respuestas desde el email |
+| `/api/public/form/{assignment_id}` | GET | Libre | Obtener template + estado del formulario |
+| `/api/public/form/{assignment_id}/submit` | POST | Libre | Cliente envía respuestas desde el email |
 
 ---
 
@@ -689,59 +689,59 @@ Cada push ejecuta dos jobs en GitHub Actions:
 
 | Fase | Descripción | Estado |
 |------|-------------|--------|
-| **Fase 0** | Infraestructura, auth, roles, seeds, CI/CD, deploy en Railway | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 1** | Clientes, kanban, check-ins, planes, formularios, frontend base | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 2** | Analytics, imágenes R2, PDFs, frontend avanzado, roles, emails, CRM | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 4** | Eventos recurrentes, notas, progreso con fotos _(con fixes post-entrega)_ | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 5** | Seguridad, testing, documentación API, optimización de BD | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 6** | Formularios de página completa, corrección de bugs frontend | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 7** | Chat en tiempo real, base USDA de alimentos, PDFs en emails, correcciones | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
-| **Fase 8** | Librería de contenido, módulo de programas con fases y asignación de clientes | ![](https://img.shields.io/badge/Completa-brightgreen?style=flat-square) |
+| **Fase 0** | Infraestructura, auth, roles, seeds, CI/CD, deploy en Railway | Completa |
+| **Fase 1** | Clientes, kanban, check-ins, planes, formularios, frontend base | Completa |
+| **Fase 2** | Analytics, imágenes R2, PDFs, frontend avanzado, roles, emails, CRM | Completa |
+| **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | Completa |
+| **Fase 4** | Eventos recurrentes, notas, progreso con fotos _(con fixes post-entrega)_ | Completa |
+| **Fase 5** | Seguridad, testing, documentación API, optimización de BD | Completa |
+| **Fase 6** | Formularios de página completa, corrección de bugs frontend | Completa |
+| **Fase 7** | Chat en tiempo real, base USDA de alimentos, PDFs en emails, correcciones | Completa |
+| **Fase 8** | Librería de contenido, módulo de programas con fases y asignación de clientes | Completa |
 
 ### Fase 3 — Detalle
 
 | Ítem | Estado |
 |------|--------|
-| Catálogos de nutrición (Tipos + Grupos de alimentos) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Alimentos: CRUD + importación masiva CSV | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Recetas: CRUD con ingredientes y macros calculados | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Dietas: creación, PDF, clonar, asignar a cliente | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Ajustes del negocio (nombre, moneda, zona horaria, alertas) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Perfil cliente: pestaña Progreso + fecha de renovación con countdown | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Dashboard: métricas reales (nuevos este mes, adherencia check-ins) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Catálogos de nutrición (Tipos + Grupos de alimentos) | Completado |
+| Alimentos: CRUD + importación masiva CSV | Completado |
+| Recetas: CRUD con ingredientes y macros calculados | Completado |
+| Dietas: creación, PDF, clonar, asignar a cliente | Completado |
+| Ajustes del negocio (nombre, moneda, zona horaria, alertas) | Completado |
+| Perfil cliente: pestaña Progreso + fecha de renovación con countdown | Completado |
+| Dashboard: métricas reales (nuevos este mes, adherencia check-ins) | Completado |
 
 ### Fase 4 — Detalle
 
 | Ítem | Estado |
 |------|--------|
-| Backend: progreso con 3 fotos + upsert por fecha + rango fechas | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Backend: eventos recurrentes (diario / semanal / mensual) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `events.html`: calendario mensual con chips por tipo + navegación | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `events.html`: CRUD tipos de evento con selector de color | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `events.html`: popover editar/eliminar (uno solo o toda la serie) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `notes.html`: plantillas reutilizables CRUD | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `notes.html`: notas por cliente con aplicación de plantilla | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `progress.html`: medidas corporales + gráfica SVG de peso | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `progress.html`: subida de hasta 3 fotos a R2 + lightbox | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Sidebar unificado en las 16 páginas | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| **Fix:** campo "Repetir hasta" visible en modal de creación de eventos | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
-| **Fix:** preview de N eventos al configurar recurrencia | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
-| **Fix:** al editar un evento recurrente regenera toda la serie | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
-| **Fix:** subida de imágenes en ejercicios de rutina | ![](https://img.shields.io/badge/-Fix_post--entrega-orange?style=flat-square) |
+| Backend: progreso con 3 fotos + upsert por fecha + rango fechas | Completado |
+| Backend: eventos recurrentes (diario / semanal / mensual) | Completado |
+| `events.html`: calendario mensual con chips por tipo + navegación | Completado |
+| `events.html`: CRUD tipos de evento con selector de color | Completado |
+| `events.html`: popover editar/eliminar (uno solo o toda la serie) | Completado |
+| `notes.html`: plantillas reutilizables CRUD | Completado |
+| `notes.html`: notas por cliente con aplicación de plantilla | Completado |
+| `progress.html`: medidas corporales + gráfica SVG de peso | Completado |
+| `progress.html`: subida de hasta 3 fotos a R2 + lightbox | Completado |
+| Sidebar unificado en las 16 páginas | Completado |
+| **Fix:** campo "Repetir hasta" visible en modal de creación de eventos | Fix post-entrega |
+| **Fix:** preview de N eventos al configurar recurrencia | Fix post-entrega |
+| **Fix:** al editar un evento recurrente regenera toda la serie | Fix post-entrega |
+| **Fix:** subida de imágenes en ejercicios de rutina | Fix post-entrega |
 
 ### Fase 5 — Detalle
 
 | Ítem | Estado |
 |------|--------|
-| CORS hardening — sin wildcard en producción, fallback automático a `FRONTEND_URL` | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Rate limiting — 10/min en login, 5/min en recuperar contraseña | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Security headers en todas las respuestas (CSP, X-Frame, Referrer-Policy…) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Global exception handler — sin stack traces en producción | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Suite pytest — 47 tests, cobertura ≥ 40% | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| 10 índices de performance en tablas críticas (Alembic idempotente) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| CI actualizado con job de pytest + reporte de cobertura | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Swagger: `summary` + `description` en 111+ endpoints, 30 secciones con tags | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| CORS hardening — sin wildcard en producción, fallback automático a `FRONTEND_URL` | Completado |
+| Rate limiting — 10/min en login, 5/min en recuperar contraseña | Completado |
+| Security headers en todas las respuestas (CSP, X-Frame, Referrer-Policy…) | Completado |
+| Global exception handler — sin stack traces en producción | Completado |
+| Suite pytest — 47 tests, cobertura ≥ 40% | Completado |
+| 10 índices de performance en tablas críticas (Alembic idempotente) | Completado |
+| CI actualizado con job de pytest + reporte de cobertura | Completado |
+| Swagger: `summary` + `description` en 111+ endpoints, 30 secciones con tags | Completado |
 
 ### Fase 6 — Formularios de página completa y corrección de bugs frontend
 
@@ -751,9 +751,9 @@ Las páginas de creación de registros complejos dejaron de usar ventanas emerge
 
 | Ítem | Estado |
 |------|--------|
-| `clients.html`: formulario de página completa con 3 secciones (Acceso, Perfil físico, Asignación) + panel lateral con avatar y resumen en vivo | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `diets.html`: formulario con secciones Información, Macros y Comidas + panel lateral con preview de macros y lista de comidas en tiempo real | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `routines.html`: formulario en 2 pasos — Paso 1 (info + sidebar resumen) y Paso 2 (constructor de días y bloques a ancho completo, sin sidebar) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `clients.html`: formulario de página completa con 3 secciones (Acceso, Perfil físico, Asignación) + panel lateral con avatar y resumen en vivo | Completado |
+| `diets.html`: formulario con secciones Información, Macros y Comidas + panel lateral con preview de macros y lista de comidas en tiempo real | Completado |
+| `routines.html`: formulario en 2 pasos — Paso 1 (info + sidebar resumen) y Paso 2 (constructor de días y bloques a ancho completo, sin sidebar) | Completado |
 
 Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flotantes (son seleccionadores contextuales, no flujos de creación primarios).
 
@@ -761,12 +761,12 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 | Bug | Páginas afectadas | Estado |
 |-----|------------------|--------|
-| `loadPendingBadge` usaba endpoint inexistente `/form-assignments/pending` → corregido a `/form-assignments?status=pending&per_page=1` | `events.html`, `diets.html`, `routines.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| `sidebarRole` usaba `u.roles?.[0]?.name` (incorrecto, la API devuelve `role` como objeto) → corregido a `u.role?.name \|\| u.role` | `events.html`, `diets.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| Calendario de eventos: `grid-template-rows: repeat(6, 1fr)` hardcodeado generaba fila vacía en meses de 5 semanas → ahora se calcula dinámicamente con `weeksRendered` | `events.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| Overlays de confirmación de borrado (`delEventOverlay`, `delTypeOverlay`) no cerraban al hacer clic en el fondo → añadido `onclick="if(event.target===this)close*()"` | `events.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| HTML duplicado `<div class="sidebar-nav"><nav class="sidebar-nav">` causaba contenedor sin cerrar → eliminado el `<div>` redundante | `diets.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| Enlace **Eventos** ausente en la barra lateral de 12 páginas → añadido en todas | todas las páginas | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| `loadPendingBadge` usaba endpoint inexistente `/form-assignments/pending` → corregido a `/form-assignments?status=pending&per_page=1` | `events.html`, `diets.html`, `routines.html` | Fix |
+| `sidebarRole` usaba `u.roles?.[0]?.name` (incorrecto, la API devuelve `role` como objeto) → corregido a `u.role?.name \|\| u.role` | `events.html`, `diets.html` | Fix |
+| Calendario de eventos: `grid-template-rows: repeat(6, 1fr)` hardcodeado generaba fila vacía en meses de 5 semanas → ahora se calcula dinámicamente con `weeksRendered` | `events.html` | Fix |
+| Overlays de confirmación de borrado (`delEventOverlay`, `delTypeOverlay`) no cerraban al hacer clic en el fondo → añadido `onclick="if(event.target===this)close*()"` | `events.html` | Fix |
+| HTML duplicado `<div class="sidebar-nav"><nav class="sidebar-nav">` causaba contenedor sin cerrar → eliminado el `<div>` redundante | `diets.html` | Fix |
+| Enlace **Eventos** ausente en la barra lateral de 12 páginas → añadido en todas | todas las páginas | Fix |
 
 ---
 
@@ -778,30 +778,30 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 | Ítem | Estado |
 |------|--------|
-| Nuevas tablas: `chat_conversations`, `chat_participants`, `chat_messages` | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Migración Alembic `q5r6s7t8u9v0` | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `GET /api/chat/conversations` — lista conversaciones del usuario autenticado | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `POST /api/chat/conversations` — crea conversación individual o grupal (auto-poblado por rol) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `GET /api/chat/conversations/{id}/messages` — historial paginado | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `POST /api/chat/conversations/{id}/messages` — envío REST (fallback sin WebSocket) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `DELETE /api/chat/conversations/{id}` — solo el creador o admin | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `WS /api/chat/ws?token=<jwt>` — WebSocket autenticado con JWT | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Indicador de "escribiendo..." entre participantes via WebSocket | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Reconexión automática del WebSocket (cada 3 s si se pierde la conexión) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| Nuevas tablas: `chat_conversations`, `chat_participants`, `chat_messages` | Completado |
+| Migración Alembic `q5r6s7t8u9v0` | Completado |
+| `GET /api/chat/conversations` — lista conversaciones del usuario autenticado | Completado |
+| `POST /api/chat/conversations` — crea conversación individual o grupal (auto-poblado por rol) | Completado |
+| `GET /api/chat/conversations/{id}/messages` — historial paginado | Completado |
+| `POST /api/chat/conversations/{id}/messages` — envío REST (fallback sin WebSocket) | Completado |
+| `DELETE /api/chat/conversations/{id}` — solo el creador o admin | Completado |
+| `WS /api/chat/ws?token=<jwt>` — WebSocket autenticado con JWT | Completado |
+| Indicador de "escribiendo..." entre participantes via WebSocket | Completado |
+| Reconexión automática del WebSocket (cada 3 s si se pierde la conexión) | Completado |
 
 **Frontend**
 
 | Ítem | Estado |
 |------|--------|
-| `chat.html`: panel de conversaciones + hilo de mensajes + barra de envío | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Botones **Individual** / **Grupal** con panel inline (no modal) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Individual: buscador de personas (clientes + coaches) con selección múltiple | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Grupal: opciones auto-generadas según rol — coach ve "Mis clientes"; admin ve las 3 opciones | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Botón **Grupal** oculto para clientes (rol 6) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Mensajes propios a la derecha (morado), mensajes ajenos a la izquierda | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Separadores de fecha (Hoy / Ayer / fecha corta) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Enter para enviar, Shift+Enter para salto de línea | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Enlace **Chat** añadido al sidebar de todas las páginas | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| `chat.html`: panel de conversaciones + hilo de mensajes + barra de envío | Completado |
+| Botones **Individual** / **Grupal** con panel inline (no modal) | Completado |
+| Individual: buscador de personas (clientes + coaches) con selección múltiple | Completado |
+| Grupal: opciones auto-generadas según rol — coach ve "Mis clientes"; admin ve las 3 opciones | Completado |
+| Botón **Grupal** oculto para clientes (rol 6) | Completado |
+| Mensajes propios a la derecha (morado), mensajes ajenos a la izquierda | Completado |
+| Separadores de fecha (Hoy / Ayer / fecha corta) | Completado |
+| Enter para enviar, Shift+Enter para salto de línea | Completado |
+| Enlace **Chat** añadido al sidebar de todas las páginas | Completado |
 
 **Grupos auto-generados por rol:**
 
@@ -817,12 +817,12 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 | Ítem | Estado |
 |------|--------|
-| 8 192 alimentos importados desde USDA FoodData Central (Foundation + SR Legacy) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Nombres traducidos al español con DeepL API (lotes de 50, ~500 k caracteres) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| 30 grupos de alimentos en español (carnes, lácteos, verduras, legumbres, etc.) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| 27 campos de micronutrientes: vitaminas A, B1, B2, B3, B5, B6, B9, B12, C, D, E, K + minerales calcio, fósforo, potasio, sodio, hierro, zinc, magnesio, manganeso, cobre, selenio + fibra, colesterol, agua, alcohol, cafeína | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Script idempotente `scripts/import_usda.py` — no duplica si se ejecuta varias veces | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Exportación a Excel `scripts/aliments_usda.xlsx` para revisión con el cliente | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
+| 8 192 alimentos importados desde USDA FoodData Central (Foundation + SR Legacy) | Completado |
+| Nombres traducidos al español con DeepL API (lotes de 50, ~500 k caracteres) | Completado |
+| 30 grupos de alimentos en español (carnes, lácteos, verduras, legumbres, etc.) | Completado |
+| 27 campos de micronutrientes: vitaminas A, B1, B2, B3, B5, B6, B9, B12, C, D, E, K + minerales calcio, fósforo, potasio, sodio, hierro, zinc, magnesio, manganeso, cobre, selenio + fibra, colesterol, agua, alcohol, cafeína | Completado |
+| Script idempotente `scripts/import_usda.py` — no duplica si se ejecuta varias veces | Completado |
+| Exportación a Excel `scripts/aliments_usda.xlsx` para revisión con el cliente | Completado |
 
 ---
 
@@ -830,12 +830,12 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 | Ítem | Estado |
 |------|--------|
-| Email de entrega ahora incluye el PDF de **dieta** y el PDF de **rutina** como adjuntos | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| `send_plan_email` acepta `attachments: list[tuple[bytes, str]]` (bytes + nombre del archivo) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| Compatible con Resend (base64) y Gmail SMTP (`MIMEApplication`) | ![](https://img.shields.io/badge/-Completado-brightgreen?style=flat-square) |
-| **Fix:** imágenes de ejercicios en PDFs descargadas directamente desde R2 (boto3) con fallback HTTP | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| **Fix:** ejercicios dentro de **bloques** (agrupaciones) no aparecían en PDF ni en email → ahora se itera `day.details + day.blocks → block.exercises` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| **Fix:** `AttributeError: aliment.unit` en dietas → campo `unit` no existe en el modelo; eliminado de `_build_diet_payload` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| Email de entrega ahora incluye el PDF de **dieta** y el PDF de **rutina** como adjuntos | Completado |
+| `send_plan_email` acepta `attachments: list[tuple[bytes, str]]` (bytes + nombre del archivo) | Completado |
+| Compatible con Resend (base64) y Gmail SMTP (`MIMEApplication`) | Completado |
+| **Fix:** imágenes de ejercicios en PDFs descargadas directamente desde R2 (boto3) con fallback HTTP | Fix |
+| **Fix:** ejercicios dentro de **bloques** (agrupaciones) no aparecían en PDF ni en email → ahora se itera `day.details + day.blocks → block.exercises` | Fix |
+| **Fix:** `AttributeError: aliment.unit` en dietas → campo `unit` no existe en el modelo; eliminado de `_build_diet_payload` | Fix |
 
 ---
 
@@ -843,10 +843,10 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 | Bug | Archivo | Estado |
 |-----|---------|--------|
-| `notes.html`: buscador de clientes usaba `/users/search?role_id=6` (no existe) → corregido a `/users/client/search?per_page=200` con parseo `r.data.data` | `notes.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| `progress.html`: `loadClients()` usaba endpoint incorrecto, no aparecían clientes en el selector | `progress.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| `progress.html`: `selectClient()` usaba `c.id` en lugar de `c.user_id` (campo real de la respuesta) | `progress.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
-| `progress.html`: fotos subidas a carpeta genérica `progress/` → ahora se guardan en `progress/<nombre-cliente>` en R2 | `progress.html` | ![](https://img.shields.io/badge/-Fix-orange?style=flat-square) |
+| `notes.html`: buscador de clientes usaba `/users/search?role_id=6` (no existe) → corregido a `/users/client/search?per_page=200` con parseo `r.data.data` | `notes.html` | Fix |
+| `progress.html`: `loadClients()` usaba endpoint incorrecto, no aparecían clientes en el selector | `progress.html` | Fix |
+| `progress.html`: `selectClient()` usaba `c.id` en lugar de `c.user_id` (campo real de la respuesta) | `progress.html` | Fix |
+| `progress.html`: fotos subidas a carpeta genérica `progress/` → ahora se guardan en `progress/<nombre-cliente>` en R2 | `progress.html` | Fix |
 
 ---
 

@@ -695,9 +695,7 @@ Cada push ejecuta dos jobs en GitHub Actions:
 | **Fase 3** | Nutrición completa, ajustes, perfil extendido, recetas | Completa |
 | **Fase 4** | Eventos recurrentes, notas, progreso con fotos _(con fixes post-entrega)_ | Completa |
 | **Fase 5** | Seguridad, testing, documentación API, optimización de BD | Completa |
-| **Fase 6** | Formularios de página completa, corrección de bugs frontend | Completa |
-| **Fase 7** | Chat en tiempo real, base USDA de alimentos, PDFs en emails, correcciones | Completa |
-| **Fase 8** | Librería de contenido, módulo de programas con fases y asignación de clientes | Completa |
+| **Fase 6** | Formularios de página completa, corrección de bugs, chat, alimentos USDA, PDFs, librería y programas | Completa |
 
 ### Fase 3 — Detalle
 
@@ -743,9 +741,9 @@ Cada push ejecuta dos jobs en GitHub Actions:
 | CI actualizado con job de pytest + reporte de cobertura | Completado |
 | Swagger: `summary` + `description` en 111+ endpoints, 30 secciones con tags | Completado |
 
-### Fase 6 — Formularios de página completa y corrección de bugs frontend
+### Fase 6 — Formularios, correcciones, chat, alimentos USDA, PDFs, librería y programas
 
-#### Formularios de página completa (patrón list/form)
+#### 6.1 Formularios de página completa (patrón list/form)
 
 Las páginas de creación de registros complejos dejaron de usar ventanas emergentes (modales) y ahora usan un formulario de página completa con panel lateral de vista previa en vivo. El patrón consiste en un `#listView` (lista + barra de herramientas) y un `#formView` (formulario a pantalla completa), ambos dentro del mismo `.main`, que se alternan ocultando/mostrando según la acción.
 
@@ -757,7 +755,7 @@ Las páginas de creación de registros complejos dejaron de usar ventanas emerge
 
 Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flotantes (son seleccionadores contextuales, no flujos de creación primarios).
 
-#### Corrección de bugs frontend
+#### 6.2 Corrección de bugs frontend
 
 | Bug | Páginas afectadas | Estado |
 |-----|------------------|--------|
@@ -770,9 +768,7 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 ---
 
-### Fase 7 — Chat en tiempo real, base USDA de alimentos, PDFs en emails y correcciones
-
-#### 7.1 Chat en tiempo real (`/app/chat.html`)
+#### 6.3 Chat en tiempo real (`/app/chat.html`)
 
 **Backend**
 
@@ -813,7 +809,7 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 ---
 
-#### 7.2 Base de datos de alimentos USDA
+#### 6.4 Base de datos de alimentos USDA
 
 | Ítem | Estado |
 |------|--------|
@@ -826,7 +822,7 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 ---
 
-#### 7.3 PDFs adjuntos en emails de entrega de planes
+#### 6.5 PDFs adjuntos en emails de entrega de planes
 
 | Ítem | Estado |
 |------|--------|
@@ -839,7 +835,7 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 ---
 
-#### 7.4 Correcciones generales
+#### 6.6 Correcciones generales
 
 | Bug | Archivo | Estado |
 |-----|---------|--------|
@@ -850,9 +846,9 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 ---
 
-#### Guía de pruebas — Fase 7
+#### Guía de pruebas — Fase 6 (parcial)
 
-##### 7.A Chat individual
+##### 6.A Chat individual
 
 1. Ir a **Chat** en el menú lateral (`/app/chat.html`)
 2. Hacer clic en el botón **Individual** → aparece un panel inline debajo de los botones
@@ -863,7 +859,7 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 7. El indicador **"Escribiendo…"** debe aparecer cuando el otro usuario está tecleando
 8. Comprobar que los mensajes persisten al recargar la página
 
-##### 7.B Chat grupal (coach)
+##### 6.B Chat grupal (coach)
 
 1. Iniciar sesión como **coach**
 2. Ir a **Chat** → el botón **Grupal** es visible (no para clientes)
@@ -872,21 +868,21 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 5. Hacer clic en **Crear grupo** → se crea una conversación con todos los clientes asignados a ese coach
 6. Enviar un mensaje → todos los clientes del grupo deben recibirlo en tiempo real
 
-##### 7.C Chat grupal (admin)
+##### 6.C Chat grupal (admin)
 
 1. Iniciar sesión como **admin**
 2. Ir a **Chat** → hacer clic en **Grupal**
 3. Aparecen 3 opciones: **Mis clientes**, **Todos los coaches**, **Todos los clientes**
 4. Seleccionar **Todos los coaches** → crear grupo → verificar que se añaden todos los coaches como participantes
 
-##### 7.D Alimentos con micronutrientes
+##### 6.D Alimentos con micronutrientes
 
 1. Ir a **Alimentos** (`/app/aliments.html`)
 2. Buscar cualquier alimento (ej. "pollo") → deben aparecer resultados en español
 3. Abrir el detalle de un alimento → verificar que los campos de micronutrientes (vitaminas, minerales) están rellenos
 4. Verificar que hay al menos 8 000 alimentos disponibles en la biblioteca
 
-##### 7.E Entrega de plan con PDFs adjuntos
+##### 6.E Entrega de plan con PDFs adjuntos
 
 1. Ir al **perfil de un cliente** → pestaña **Entregas**
 2. Seleccionar una dieta y una rutina → hacer clic en **Entregar plan**
@@ -894,7 +890,7 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 4. Abrir el PDF de rutina → verificar que los ejercicios de todos los días aparecen, incluyendo los que están dentro de bloques/agrupaciones
 5. Verificar que las imágenes de los ejercicios aparecen dentro del PDF
 
-##### 7.F Progreso — selector de clientes
+##### 6.F Progreso — selector de clientes
 
 1. Ir a **Progreso** (`/app/progress.html`)
 2. Escribir el nombre de un cliente en el buscador de la barra superior → debe aparecer la lista desplegable
@@ -903,7 +899,7 @@ Los ejercicios y grupos musculares en `routines.html` siguen usando overlays flo
 
 ---
 
-#### Migración de base de datos requerida (Fase 7)
+#### Migración de base de datos requerida (Fase 6)
 
 ```bash
 alembic upgrade head
@@ -913,9 +909,7 @@ Aplica la revisión `q5r6s7t8u9v0` que crea las tablas de chat.
 
 ---
 
-### Fase 8 — Librería de contenido y módulo de Programas
-
-#### 8.1 Librería (`/app/library.html`)
+#### 6.7 Librería (`/app/library.html`)
 
 Página de acceso rápido que centraliza todos los módulos de contenido reutilizable del coach en tarjetas visuales. No tiene backend propio: es un hub de navegación.
 
@@ -930,7 +924,7 @@ La librería está disponible en el menú lateral para coaches, admins y superad
 
 ---
 
-#### 8.2 Programas (`/app/programas.html`)
+#### 6.8 Programas (`/app/programas.html`)
 
 Módulo completo para crear programas de entrenamiento estructurados con fases y asignación de clientes.
 
@@ -974,9 +968,9 @@ Módulo completo para crear programas de entrenamiento estructurados con fases y
 
 ---
 
-#### Guía de pruebas — Fase 8
+#### Guía de pruebas — Fase 6 (continuación)
 
-##### 8.A Librería
+##### 6.G Librería
 
 1. Ir a **Librería** en el menú lateral (`/app/library.html`)
 2. Deben verse 4 tarjetas: **Entrenamiento**, **Nutrición**, **Formularios**, **Documentos**
@@ -984,7 +978,7 @@ Módulo completo para crear programas de entrenamiento estructurados con fases y
 4. Volver y hacer clic en **Nutrición** → redirige a la página de nutrición
 5. Verificar que la tarjeta activa en el sidebar es **Librería**
 
-##### 8.B Crear programa
+##### 6.H Crear programa
 
 1. Ir a **Programas** en el menú lateral (`/app/programas.html`)
 2. Hacer clic en la tarjeta punteada **"+ Nuevo programa"**
@@ -997,13 +991,13 @@ Módulo completo para crear programas de entrenamiento estructurados con fases y
 6. Hacer clic en **Crear** → el programa aparece como tarjeta en el grid
 7. La tarjeta debe mostrar la categoría, el total de semanas y 0 clientes asignados
 
-##### 8.C Filtrar por categoría
+##### 6.I Filtrar por categoría
 
 1. En la barra de pestañas superior, hacer clic en **Pérdida de grasa**
 2. Solo deben verse los programas de esa categoría; el contador de la pestaña debe coincidir
 3. Hacer clic en **Todos** → vuelven a aparecer todos los programas
 
-##### 8.D Ver detalle y editar
+##### 6.J Ver detalle y editar
 
 1. Hacer clic sobre la tarjeta del programa recién creado → se abre el **drawer** lateral
 2. Pestaña **Info**: muestra nombre, categoría, descripción y semanas totales
@@ -1011,7 +1005,7 @@ Módulo completo para crear programas de entrenamiento estructurados con fases y
 4. Hacer clic en **Editar** → modificar el nombre o añadir una fase nueva → guardar
 5. Verificar que los cambios se reflejan en el drawer y en la tarjeta del grid
 
-##### 8.E Asignar y quitar clientes
+##### 6.K Asignar y quitar clientes
 
 1. En el drawer del programa, hacer clic en **Asignar clientes**
 2. Se abre un modal con buscador → escribir el nombre de un cliente → seleccionarlo
@@ -1019,7 +1013,7 @@ Módulo completo para crear programas de entrenamiento estructurados con fases y
 4. La tarjeta del grid debe actualizar el contador de clientes asignados
 5. En la pestaña Asignados, hacer clic en el botón **×** junto al cliente → confirmar → el cliente desaparece
 
-##### 8.F Duplicar y eliminar
+##### 6.L Duplicar y eliminar
 
 1. En la tarjeta de un programa, hacer clic en el menú (**⋮**) → seleccionar **Duplicar**
 2. Aparece una copia del programa con las mismas fases pero sin clientes asignados

@@ -6,91 +6,78 @@
   <title>ALZUM.io — Alimentos</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--gray-bg:#F8FAFC;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
-
-    /* ── Sidebar ── */
-    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
-    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
-    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
-    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
-    .sidebar-nav{flex:1;padding:16px 0;}
-    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
-    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
-    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
-    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--indigo);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.7;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
-    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
-    .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
-    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
-    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
-    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
-
-    /* ── Main ── */
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .topbar-left h1{font-size:18px;font-weight:700;color:#111;}
-    .topbar-left p{font-size:12px;color:#9CA3AF;margin-top:1px;}
-    .topbar-actions{display:flex;gap:10px;}
-
-    .toolbar{padding:12px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
-    .search-wrap{position:relative;flex:1;min-width:200px;max-width:340px;}
-    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;background:#FAFAFA;}
-    .search-wrap input:focus{border-color:var(--purple);background:#fff;}
-    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;}
-    .filter-select{padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#FAFAFA;cursor:pointer;min-width:160px;}
-    .filter-select:focus{border-color:var(--purple);}
-    .total-badge{margin-left:auto;font-size:13px;color:#6B7280;white-space:nowrap;}
-
-    .content{flex:1;overflow-y:auto;padding:0;}
-    .content::-webkit-scrollbar{width:6px;}
-    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
-
-    /* ── Table ── */
-    .table-wrap{background:#fff;border-bottom:1px solid #E5E7EB;}
-    table{width:100%;border-collapse:collapse;}
-    thead th{padding:10px 16px;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;background:#FAFAFA;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
-    tbody td{padding:13px 16px;font-size:13px;color:#111;border-bottom:1px solid #EBEBEB;vertical-align:middle;}
-    tbody tr:last-child td{border-bottom:none;}
-    tbody tr:hover td{background:#FAFAFA;}
-    .td-name{font-weight:600;}
-    .td-brand{font-size:12px;color:#6B7280;}
-    .td-group{display:inline-flex;align-items:center;padding:3px 9px;background:var(--purple-pale);color:var(--purple);border-radius:12px;font-size:11px;font-weight:600;}
-    .td-macro{font-size:12px;color:#374151;text-align:right;}
-    .td-macro span{display:block;font-size:10px;color:#9CA3AF;}
-    .actions-cell{display:flex;gap:4px;justify-content:flex-end;}
-    .empty-row td{text-align:center;padding:60px 20px;color:#9CA3AF;}
-
-    /* ── Pagination ── */
-    .pagination{padding:14px 24px;background:#fff;border-top:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .page-info{font-size:13px;color:#6B7280;}
-    .page-btns{display:flex;gap:6px;}
-    .page-btn{padding:7px 12px;border:1px solid #E5E7EB;border-radius:7px;background:#fff;font-size:13px;cursor:pointer;color:#374151;transition:.15s;}
-    .page-btn:hover:not(:disabled){border-color:var(--purple);color:var(--purple);}
-    .page-btn:disabled{opacity:.4;cursor:default;}
-    .page-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
-
-    /* ── Buttons ── */
-    .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
-    .btn-primary{background:var(--purple);color:#fff;}
-    .btn-primary:hover{background:var(--purple-dark);}
+    .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:68px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
+    .page-header-left{display:flex;align-items:center;gap:14px;}
+    .page-header-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;flex-shrink:0;}
+    .page-header-back:hover{background:#F3F4F6;color:#374151;border-color:#D1D5DB;}
+    .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
+    .page-header-title{font-size:17px;font-weight:800;color:#111827;}
+    .page-header-right{display:flex;align-items:center;gap:10px;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--indigo);color:#fff;}
+    .btn-primary:hover{background:var(--indigo-dark);}
     .btn-ghost{background:#F3F4F6;color:#374151;}
     .btn-ghost:hover{background:#E5E7EB;}
     .btn-danger{background:#FEE2E2;color:#DC2626;}
     .btn-danger:hover{background:#DC2626;color:#fff;}
-    .btn-outline{background:#fff;color:var(--purple);border:1.5px solid var(--purple);}
-    .btn-outline:hover{background:var(--purple-pale);}
     .btn-sm{padding:6px 12px;font-size:12px;}
     .btn-icon{padding:6px;border-radius:7px;background:none;border:none;cursor:pointer;display:inline-flex;color:#6B7280;transition:.15s;}
     .btn-icon:hover{background:#F3F4F6;color:#111;}
     .btn-icon.danger:hover{background:#FEE2E2;color:#DC2626;}
-
-    /* ── Modal ── */
+    .toolbar{padding:12px 28px;background:#fff;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+    .search-wrap{position:relative;flex:1;min-width:200px;max-width:320px;}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;}
+    .search-wrap input:focus{border-color:var(--indigo);}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .filter-select{padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#fff;cursor:pointer;min-width:160px;}
+    .filter-select:focus{border-color:var(--indigo);}
+    .total-label{font-size:13px;color:#6B7280;margin-left:auto;}
+    .table-wrap{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 16px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;text-align:left;white-space:nowrap;}
+    thead th:first-child{padding-left:20px;}
+    tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover td{background:#FAFBFF;}
+    tbody td{padding:14px 16px;font-size:13px;color:#374151;vertical-align:middle;}
+    tbody td:first-child{padding-left:20px;}
+    .td-name{font-weight:600;color:#111827;}
+    .td-brand{font-size:12px;color:#6B7280;}
+    .td-group{display:inline-flex;align-items:center;padding:3px 9px;background:var(--indigo-pale);color:var(--indigo);border-radius:12px;font-size:11px;font-weight:600;}
+    .td-macro{font-size:12px;color:#374151;text-align:right;}
+    .td-macro span{display:block;font-size:10px;color:#9CA3AF;}
+    .actions-cell{display:flex;gap:4px;justify-content:flex-end;}
+    .empty-row td{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .pagination{padding:14px 28px;background:#fff;border-top:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .page-info{font-size:13px;color:#6B7280;}
+    .page-btns{display:flex;gap:6px;}
+    .page-btn{padding:7px 12px;border:1px solid #E5E7EB;border-radius:7px;background:#fff;font-size:13px;cursor:pointer;color:#374151;transition:.15s;}
+    .page-btn:hover:not(:disabled){border-color:var(--indigo);color:var(--indigo);}
+    .page-btn:disabled{opacity:.4;cursor:default;}
+    .page-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
     .modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
@@ -104,20 +91,18 @@
     .form-group{margin-bottom:14px;}
     .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
     .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
-    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--indigo);}
     .form-group textarea{min-height:64px;resize:vertical;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
     .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 12px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
     .form-error{color:#DC2626;font-size:12px;margin-top:8px;}
-
-    /* ── Import modal ── */
     .import-modal{width:680px;}
     .dropzone{border:2px dashed #D1D5DB;border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:.2s;background:#FAFAFA;}
-    .dropzone:hover,.dropzone.drag{border-color:var(--purple);background:var(--purple-pale);}
+    .dropzone:hover,.dropzone.drag{border-color:var(--indigo);background:var(--indigo-pale);}
     .dropzone svg{color:#9CA3AF;margin-bottom:10px;}
     .dropzone p{font-size:13px;color:#6B7280;}
-    .dropzone strong{color:var(--purple);}
+    .dropzone strong{color:var(--indigo);}
     .preview-table-wrap{max-height:260px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;margin-top:16px;}
     .preview-table{width:100%;border-collapse:collapse;font-size:12px;}
     .preview-table th{padding:8px 12px;background:#FAFAFA;font-weight:700;color:#6B7280;border-bottom:1px solid #E5E7EB;text-transform:uppercase;font-size:10px;white-space:nowrap;}
@@ -125,59 +110,32 @@
     .preview-table tr:last-child td{border-bottom:none;}
     .import-stats{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;}
     .import-stat{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;}
-    .import-stat.total{background:#EEF2FF;color:var(--purple);}
+    .import-stat.total{background:#EEF2FF;color:var(--indigo);}
     .import-stat.ok{background:#ECFDF5;color:#059669;}
     .import-stat.err{background:#FEF2F2;color:#DC2626;}
-    .template-link{font-size:12px;color:var(--purple);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;}
-
-    /* ── Confirm ── */
-    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .template-link{font-size:12px;color:var(--indigo);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;}
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
-    .confirm-box{background:#fff;border-radius:14px;padding:28px;width:360px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .confirm-overlay.open .confirm-box{transform:translateY(0);}
     .confirm-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
-    .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:24px;line-height:1.5;}
+    .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.5;}
     .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
-
-    /* ── Toast ── */
-    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:300;max-width:360px;}
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:400;max-width:360px;}
     .toast.show{transform:translateY(0);opacity:1;}
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
-  </style>
-  <style>
-    /* ALZUM.io — theme overrides */
-    body { background: #F8FAFC !important; }
-    .sidebar {
-      background: #fff !important;
-      border-right: 1px solid #E5E7EB !important;
-    }
-    .sidebar-logo span { color: #111827 !important; }
-    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
-    .sidebar-logo small { color: #6B7280 !important; }
-    .nav-section { color: #9CA3AF !important; }
-    .nav-item { color: #374151 !important; }
-    .nav-item svg { color: inherit !important; opacity: 1 !important; }
-    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
-    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
-    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
-    .avatar, .user-avatar { background: #4F46E5 !important; }
-    .user-name { color: #111827 !important; }
-    .user-role { color: #6B7280 !important; }
-    .btn-logout { color: #6B7280 !important; }
-    .btn-logout:hover { color: #4F46E5 !important; }
+    @media(max-width:768px){body{flex-direction:column;}.sidebar{width:100%;min-width:unset;height:auto;}.sidebar-nav,.sidebar-user{display:none;}.form-row,.form-row-4{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
 
-<!-- ── Sidebar ── -->
-<nav class="sidebar">
+<aside class="sidebar">
   <div class="sidebar-logo">
     <span>ALZUM<em>.io</em></span>
     <small>Panel del Coach</small>
   </div>
-  <div class="sidebar-nav">
-    <nav class="sidebar-nav">
+  <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -214,12 +172,8 @@
       Notas
     </a>
     <a class="nav-item" href="chat.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></svg>
       Chat
-    </a>
-    <a class="nav-item" href="progress.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Progreso
     </a>
     <div class="nav-section">Negocio</div>
     <a class="nav-item" href="analytics.html">
@@ -237,35 +191,31 @@
     </a>
   </nav>
   <div class="sidebar-user">
-    <div class="user-row">
-      <div class="user-avatar" id="sidebarAvatar">U</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebarName">Cargando…</div>
-        <div class="user-role" id="sidebarRole"></div>
-      </div>
-      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
+    <div class="s-avatar" id="sidebarAvatar">U</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Cargando…</div>
+      <div class="user-role" id="sidebarRole"></div>
     </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
   </div>
-</nav>
+</aside>
 
-<!-- ── Main ── -->
 <div class="main">
-  <div class="topbar">
-    <div class="topbar-left">
-      <h1>Alimentos</h1>
-      <p>Base de datos de alimentos con macronutrientes</p>
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <a class="page-header-back" href="nutricion.html">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Nutrición
+      </a>
+      <div class="page-header-divider"></div>
+      <div class="page-header-title">Alimentos</div>
     </div>
-    <div class="topbar-actions">
-      <button class="btn btn-outline btn-sm" onclick="openImportModal()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-        Importar CSV
-      </button>
-      <button class="btn btn-primary btn-sm" onclick="openModal()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo alimento
-      </button>
+    <div class="page-header-right">
+      <button class="btn btn-ghost" onclick="openImportModal()">Importar CSV</button>
+      <button class="btn btn-primary" onclick="openModal()">+ Nuevo alimento</button>
     </div>
   </div>
 
@@ -277,10 +227,10 @@
     <select class="filter-select" id="groupFilter" onchange="onSearch()">
       <option value="">Todos los grupos</option>
     </select>
-    <span class="total-badge" id="totalBadge"></span>
+    <span class="total-label" id="totalBadge"></span>
   </div>
 
-  <div class="content">
+  <div style="flex:1;overflow-y:auto;padding:16px 28px 0;">
     <div class="table-wrap">
       <table>
         <thead>
@@ -299,15 +249,16 @@
         </tbody>
       </table>
     </div>
-
-    <div class="pagination" id="paginationBar">
-      <span class="page-info" id="pageInfo"></span>
-      <div class="page-btns" id="pageBtns"></div>
-    </div>
   </div>
+
+  <div class="pagination" id="paginationBar">
+    <span class="page-info" id="pageInfo"></span>
+    <div class="page-btns" id="pageBtns"></div>
+  </div>
+
 </div>
 
-<!-- ── Create / Edit modal ── -->
+<!-- Create / Edit modal -->
 <div class="modal-overlay" id="alimentOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-head">
@@ -370,7 +321,7 @@
   </div>
 </div>
 
-<!-- ── Import modal ── -->
+<!-- Import modal -->
 <div class="modal-overlay" id="importOverlay" onclick="if(event.target===this)closeImportModal()">
   <div class="modal import-modal">
     <div class="modal-head">
@@ -382,7 +333,6 @@
         <p style="font-size:13px;color:#6B7280;">Sube un archivo CSV con los alimentos a importar.</p>
         <button class="template-link" onclick="downloadTemplate()">⬇ Descargar plantilla</button>
       </div>
-
       <div class="dropzone" id="dropzone" onclick="document.getElementById('csvFile').click()"
            ondragover="event.preventDefault();this.classList.add('drag')"
            ondragleave="this.classList.remove('drag')"
@@ -392,12 +342,10 @@
         <p style="font-size:11px;margin-top:4px;">Columnas: nombre, marca, grupo_id, proteinas, carbohidratos, grasas, calorias, cantidad</p>
       </div>
       <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none" onchange="handleFileSelect(this)"/>
-
       <div id="importPreview" style="display:none;">
         <div class="import-stats" id="importStats"></div>
         <div class="preview-table-wrap" id="previewTableWrap"></div>
       </div>
-
       <div id="importResult" style="display:none;margin-top:16px;padding:14px;border-radius:8px;font-size:13px;"></div>
       <div class="form-error" id="importError"></div>
     </div>
@@ -410,14 +358,14 @@
   </div>
 </div>
 
-<!-- ── Confirm delete ── -->
-<div class="confirm-overlay" id="confirmOverlay" onclick="if(event.target===this)closeConfirm()">
+<!-- Confirm delete -->
+<div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
-    <h3>¿Eliminar alimento?</h3>
-    <p id="confirmMsg">Esta acción no se puede deshacer.</p>
+    <h3 id="confirmTitle">Eliminar alimento</h3>
+    <p id="confirmText">Esta acción no se puede deshacer.</p>
     <div class="confirm-actions">
-      <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
-      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="doDelete()">Eliminar</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="confirmDeleteBtn" onclick="confirmDeleteFn()">Eliminar</button>
     </div>
   </div>
 </div>
@@ -433,22 +381,19 @@ const fmt   = v => v != null ? Number(v).toFixed(1) : '—';
 
 if (!token) location.href = 'login.html';
 
-// ── State ─────────────────────────────────────────────────────────────────────
 let groups      = [];
 let currentPage = 1;
 let totalPages  = 1;
 let totalItems  = 0;
 let searchTimer = null;
-let deletingId  = null;
 let csvFile     = null;
 let csvRows     = [];
+let confirmDeleteFn = () => {};
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 loadUser();
 loadPendingBadge();
 loadGroups().then(() => loadAliments());
 
-// ── Load groups ───────────────────────────────────────────────────────────────
 async function loadGroups() {
   try {
     const r = await fetch(`${API}/groupFood/findAll`, { headers: h() });
@@ -463,19 +408,14 @@ async function loadGroups() {
   } catch {}
 }
 
-// ── Load aliments ─────────────────────────────────────────────────────────────
 async function loadAliments(page = 1) {
   currentPage = page;
   const search  = document.getElementById('searchInput').value.trim();
   const groupId = document.getElementById('groupFilter').value;
-
   const params = new URLSearchParams({ page, per_page: 20 });
   if (search)  params.set('search', search);
   if (groupId) params.set('group_food_id', groupId);
-
-  document.getElementById('tableBody').innerHTML =
-    `<tr class="empty-row"><td colspan="7">Cargando…</td></tr>`;
-
+  document.getElementById('tableBody').innerHTML = `<tr class="empty-row"><td colspan="7">Cargando…</td></tr>`;
   try {
     const r = await fetch(`${API}/aliments/search?${params}`, { headers: h() });
     if (r.status === 401) { logout(); return; }
@@ -484,15 +424,12 @@ async function loadAliments(page = 1) {
     const items = res.data || [];
     totalPages  = res.last_page || 1;
     totalItems  = res.total || 0;
-
     renderTable(items);
     renderPagination();
-    document.getElementById('totalBadge').textContent =
-      `${totalItems} alimento${totalItems !== 1 ? 's' : ''}`;
+    document.getElementById('totalBadge').textContent = `${totalItems} alimento${totalItems !== 1 ? 's' : ''}`;
   } catch { toast('Error al cargar alimentos', 'error'); }
 }
 
-// ── Render table ──────────────────────────────────────────────────────────────
 function groupName(id) {
   const g = groups.find(x => x.id === id);
   return g ? g.name : null;
@@ -531,16 +468,12 @@ function renderTable(items) {
   }).join('');
 }
 
-// ── Pagination ────────────────────────────────────────────────────────────────
 function renderPagination() {
   const from = Math.min((currentPage - 1) * 20 + 1, totalItems);
   const to   = Math.min(currentPage * 20, totalItems);
-  document.getElementById('pageInfo').textContent =
-    totalItems ? `Mostrando ${from}–${to} de ${totalItems}` : '';
-
+  document.getElementById('pageInfo').textContent = totalItems ? `Mostrando ${from}–${to} de ${totalItems}` : '';
   const btns = document.getElementById('pageBtns');
   btns.innerHTML = '';
-
   const addBtn = (label, page, disabled, active = false) => {
     const b = document.createElement('button');
     b.className = `page-btn${active ? ' active' : ''}`;
@@ -549,23 +482,18 @@ function renderPagination() {
     if (!disabled) b.onclick = () => loadAliments(page);
     btns.appendChild(b);
   };
-
   addBtn('←', currentPage - 1, currentPage === 1);
-
   const start = Math.max(1, currentPage - 2);
   const end   = Math.min(totalPages, currentPage + 2);
   for (let p = start; p <= end; p++) addBtn(p, p, false, p === currentPage);
-
   addBtn('→', currentPage + 1, currentPage === totalPages);
 }
 
-// ── Search debounce ───────────────────────────────────────────────────────────
 function onSearch() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => loadAliments(1), 350);
 }
 
-// ── Modal create / edit ───────────────────────────────────────────────────────
 function openModal(item = null) {
   document.getElementById('modalTitle').textContent = item ? 'Editar alimento' : 'Nuevo alimento';
   document.getElementById('editId').value       = item?.id ?? '';
@@ -603,12 +531,10 @@ async function saveAliment() {
     document.getElementById('modalError').textContent = 'El nombre es requerido.';
     document.getElementById('fName').focus(); return;
   }
-
   const btn = document.getElementById('saveBtn');
   const lbl = document.getElementById('saveBtnLabel');
   btn.disabled = true; lbl.textContent = 'Guardando…';
   document.getElementById('modalError').textContent = '';
-
   const toF = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
   const body = {
     name,
@@ -621,16 +547,10 @@ async function saveAliment() {
     calories:       toF(document.getElementById('fCalories').value),
     comments:       document.getElementById('fComments').value.trim() || null,
   };
-
   const url    = id ? `${API}/aliments/${id}/update` : `${API}/aliments`;
   const method = id ? 'PUT' : 'POST';
-
   try {
-    const r = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json', ...h() },
-      body: JSON.stringify(body),
-    });
+    const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', ...h() }, body: JSON.stringify(body) });
     const j = await r.json();
     if (!r.ok) { document.getElementById('modalError').textContent = j.message || 'Error al guardar.'; return; }
     closeModal();
@@ -640,20 +560,24 @@ async function saveAliment() {
   finally { btn.disabled = false; lbl.textContent = 'Guardar'; }
 }
 
-// ── Delete ────────────────────────────────────────────────────────────────────
 function openConfirm(id, name) {
-  deletingId = id;
-  document.getElementById('confirmMsg').textContent = `Se eliminará "${name}". Esta acción no se puede deshacer.`;
+  document.getElementById('confirmTitle').textContent = 'Eliminar alimento';
+  document.getElementById('confirmText').textContent = `Se eliminará "${name}". Esta acción no se puede deshacer.`;
+  confirmDeleteFn = () => doDelete(id);
   document.getElementById('confirmOverlay').classList.add('open');
 }
-function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); deletingId = null; }
 
-async function doDelete() {
-  if (!deletingId) return;
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  confirmDeleteFn = () => {};
+}
+
+async function doDelete(id) {
+  if (!id) return;
   const btn = document.getElementById('confirmDeleteBtn');
   btn.disabled = true; btn.textContent = 'Eliminando…';
   try {
-    const r = await fetch(`${API}/aliments/${deletingId}`, { method: 'DELETE', headers: h() });
+    const r = await fetch(`${API}/aliments/${id}`, { method: 'DELETE', headers: h() });
     const j = await r.json();
     if (r.ok) { closeConfirm(); toast('Alimento eliminado', 'success'); loadAliments(currentPage); }
     else toast(j.message || 'No se pudo eliminar', 'error');
@@ -661,7 +585,6 @@ async function doDelete() {
   finally { btn.disabled = false; btn.textContent = 'Eliminar'; }
 }
 
-// ── Import modal ──────────────────────────────────────────────────────────────
 function openImportModal() {
   csvFile = null; csvRows = [];
   document.getElementById('importPreview').style.display  = 'none';
@@ -716,13 +639,11 @@ function showPreview(rows) {
   document.getElementById('importError').textContent = '';
   const valid = rows.filter(r => r.nombre || r.name);
   const invalid = rows.length - valid.length;
-
   document.getElementById('importStats').innerHTML = `
     <span class="import-stat total">${rows.length} filas totales</span>
     <span class="import-stat ok">${valid.length} válidas</span>
     ${invalid ? `<span class="import-stat err">${invalid} sin nombre (se omitirán)</span>` : ''}
   `;
-
   const cols = Object.keys(rows[0]);
   const preview = rows.slice(0, 8);
   document.getElementById('previewTableWrap').innerHTML = `
@@ -732,7 +653,6 @@ function showPreview(rows) {
     </table>
     ${rows.length > 8 ? `<p style="padding:8px 12px;font-size:11px;color:#9CA3AF;">… y ${rows.length - 8} filas más</p>` : ''}
   `;
-
   document.getElementById('importPreview').style.display = 'block';
   document.getElementById('importBtnLabel').textContent  = `Importar ${valid.length} alimentos`;
   document.getElementById('importBtn').disabled          = valid.length === 0;
@@ -743,16 +663,13 @@ async function doImport() {
   const btn = document.getElementById('importBtn');
   const lbl = document.getElementById('importBtnLabel');
   btn.disabled = true; lbl.textContent = 'Importando…';
-
   const form = new FormData();
   form.append('file', csvFile);
-
   try {
     const r = await fetch(`${API}/aliments/import`, { method: 'POST', headers: h(), body: form });
     const j = await r.json();
     const res = j.data || {};
     const resultEl = document.getElementById('importResult');
-
     if (r.ok) {
       resultEl.style.cssText = 'display:block;background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;';
       resultEl.innerHTML = `<strong>✅ ${res.created} alimentos importados correctamente</strong>` +
@@ -789,14 +706,12 @@ function downloadTemplate() {
   URL.revokeObjectURL(a.href);
 }
 
-// ── Keyboard shortcuts ────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeConfirm(); closeImportModal(); }
   if (e.key === 'Enter' && document.getElementById('alimentOverlay').classList.contains('open'))
     if (document.activeElement?.tagName !== 'TEXTAREA') saveAliment();
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 function toast(msg, type) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.className = `toast show ${type || ''}`;
@@ -805,14 +720,12 @@ function toast(msg, type) {
 
 async function loadUser() {
   try {
-    const r = await fetch(`${API}/users/me`, { headers: h() });
+    const r = await fetch(`${API}/auth/me`, { headers: h() });
     if (r.status === 401) { logout(); return; }
-    const u  = (await r.json()).data || {};
-    const d  = u.detail || {};
-    const name = `${d.name || ''} ${d.last_name || ''}`.trim() || u.email || 'Usuario';
-    document.getElementById('sidebarName').textContent   = name;
-    document.getElementById('sidebarRole').textContent   = u.roles?.[0]?.name || '—';
-    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=name.charAt(0).toUpperCase();}})()
+    const d = await r.json(); const u = d.data || d;
+    document.getElementById('sidebarName').textContent = u.name || u.email || '—';
+    document.getElementById('sidebarRole').textContent = u.role?.name || u.roles?.[0]?.name || '';
+    (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name||u.email||'U')[0].toUpperCase();}})()
   } catch {}
 }
 
@@ -822,16 +735,15 @@ async function loadPendingBadge() {
     if (!r.ok) return;
     const count = (await r.json()).data?.count ?? 0;
     const badge = document.getElementById('formsBadge');
-    if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; }
+    if (badge && count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; }
   } catch {}
 }
 
 function logout() { localStorage.clear(); location.href = 'login.html'; }
 
-// ── Sidebar role adaptation ───────────────────────────────────────────────────
 function adaptSidebar() {
   const rid = parseInt(localStorage.getItem('role_id') || '0');
-  if (rid !== 5) return; // only restrict coaches
+  if (rid !== 5) return;
   ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
     const el = document.querySelector('.nav-item[href="' + href + '"]');
     if (el) el.style.display = 'none';

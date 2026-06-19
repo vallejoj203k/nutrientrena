@@ -7,7 +7,7 @@ import io
 from app.database import get_db
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
-from app.models.nutrition.aliment import Aliment
+from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
 
 router = APIRouter(prefix="/aliments", tags=["Nutrition - Aliments"])
@@ -29,6 +29,16 @@ def _to_int(v: str) -> Optional[int]:
         return int(v) if v and v.strip() else None
     except ValueError:
         return None
+
+
+def _upsert_description(db: Session, aliment_id: str, desc_data: dict):
+    """Create or update the AlimentDescription row for a given aliment."""
+    existing = db.query(AlimentDescription).filter(AlimentDescription.aliment_id == aliment_id).first()
+    if existing:
+        for field, value in desc_data.items():
+            setattr(existing, field, value)
+    else:
+        db.add(AlimentDescription(aliment_id=aliment_id, **desc_data))
 
 
 @router.get("/findAll", summary="Listar alimentos", description="Retorna todos los alimentos del catálogo (sin clones).")
@@ -65,7 +75,7 @@ def search(
     )
 
 
-@router.get("/{id}/edit", summary="Ver alimento", description="Retorna el detalle completo de un alimento con sus macros.")
+@router.get("/{id}/edit", summary="Ver alimento", description="Retorna el detalle completo de un alimento incluyendo micronutrientes.")
 def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
     obj = _get_or_404(db, id)
     if not obj:
@@ -73,20 +83,28 @@ def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(AlimentOut.model_validate(obj).model_dump(), "OK")
 
 
-@router.post("", summary="Crear alimento", description="Agrega un nuevo alimento al catálogo con sus valores nutricionales.")
+@router.post("", summary="Crear alimento", description="Agrega un nuevo alimento al catálogo con sus macros y micronutrientes.")
 def create(
     data: AlimentCreate,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
-    obj = Aliment(**data.model_dump(), created_user_id=current_user.id)
+    payload = data.model_dump(exclude={"description"})
+    obj = Aliment(**payload, created_user_id=current_user.id)
     db.add(obj)
+    db.flush()
+
+    if data.description:
+        desc_data = data.description.model_dump(exclude_none=True)
+        if desc_data:
+            _upsert_description(db, obj.id, desc_data)
+
     db.commit()
     db.refresh(obj)
     return send_response(AlimentOut.model_validate(obj).model_dump(), "Alimento creado")
 
 
-@router.put("/{id}/update", summary="Actualizar alimento", description="Modifica los datos nutricionales de un alimento existente.")
+@router.put("/{id}/update", summary="Actualizar alimento", description="Modifica los datos nutricionales y micronutrientes de un alimento existente.")
 def updated(
     id: str,
     data: AlimentUpdate,
@@ -96,9 +114,16 @@ def updated(
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Alimento no encontrado")
-    for f, v in data.model_dump(exclude_unset=True).items():
+
+    for f, v in data.model_dump(exclude_unset=True, exclude={"description"}).items():
         setattr(obj, f, v)
     obj.updated_user_id = current_user.id
+
+    if data.description is not None:
+        desc_data = data.description.model_dump(exclude_unset=True)
+        if desc_data:
+            _upsert_description(db, obj.id, desc_data)
+
     db.commit()
     db.refresh(obj)
     return send_response(AlimentOut.model_validate(obj).model_dump(), "Actualizado")
@@ -122,7 +147,7 @@ def delete_aliment(
     return send_response(None, "Alimento eliminado")
 
 
-@router.post("/import", summary="Importar alimentos desde CSV", description="Importa alimentos masivamente desde un archivo CSV con columnas: nombre, proteinas, carbohidratos, grasas, calorias.")
+@router.post("/import", summary="Importar alimentos desde CSV", description="Importa alimentos masivamente desde un archivo CSV.")
 async def import_aliments(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -144,6 +169,45 @@ async def import_aliments(
         "calorias": "calories",    "calories": "calories",
         "cantidad": "quantity",    "quantity": "quantity",
         "comentarios": "comments", "comments": "comments",
+        # micronutrients
+        "fibra": "fiber",           "fiber": "fiber",
+        "sodio": "sodium",          "sodium": "sodium",
+        "calcio": "calcium",        "calcium": "calcium",
+        "hierro": "iron",           "iron": "iron",
+        "potasio": "potassium",     "potassium": "potassium",
+        "magnesio": "magnesium",    "magnesium": "magnesium",
+        "fosforo": "phosphorus",    "phosphorus": "phosphorus",
+        "zinc": "zinc",
+        "selenio": "selenium",      "selenium": "selenium",
+        "cobre": "copper",          "copper": "copper",
+        "manganeso": "manganese",   "manganese": "manganese",
+        "colesterol": "cholesterol", "cholesterol": "cholesterol",
+        "grasas_saturadas": "saturated_fats",     "saturated_fats": "saturated_fats",
+        "grasas_monoinsaturadas": "mono_saturated_fats", "mono_saturated_fats": "mono_saturated_fats",
+        "grasas_poliinsaturadas": "poli_saturated_fats", "poli_saturated_fats": "poli_saturated_fats",
+        "agua": "water",            "water": "water",
+        "indice_glucemico": "glycemic_index", "glycemic_index": "glycemic_index",
+        "vita": "vita",   "vitamina_a": "vita",
+        "vitb1": "vitb1", "vitamina_b1": "vitb1",
+        "vitb2": "vitb2", "vitamina_b2": "vitb2",
+        "vitb3": "vitb3", "vitamina_b3": "vitb3",
+        "vitb5": "vitb5", "vitamina_b5": "vitb5",
+        "vitb6": "vitb6", "vitamina_b6": "vitb6",
+        "vitb9": "vitb9", "vitamina_b9": "vitb9",   "acido_folico": "vitb9",
+        "vitb12": "vitb12", "vitamina_b12": "vitb12",
+        "vitc": "vitc",   "vitamina_c": "vitc",
+        "vitd": "vitd",   "vitamina_d": "vitd",
+        "vite": "vite",   "vitamina_e": "vite",
+        "vitk": "vitk",   "vitamina_k": "vitk",
+    }
+
+    DESC_FIELDS = {
+        "vita", "vitb1", "vitb2", "vitb3", "vitb5", "vitb6", "vitb9", "vitb12",
+        "vitc", "vitd", "vite", "vitk",
+        "calina", "calcium", "copper", "iron", "magnesium", "manganese",
+        "phosphorus", "potassium", "selenium", "sodium", "zinc",
+        "water", "fiber", "cholesterol", "saturated_fats",
+        "mono_saturated_fats", "poli_saturated_fats", "glycemic_index",
     }
 
     reader = csv.DictReader(io.StringIO(text))
@@ -166,7 +230,7 @@ async def import_aliments(
             brand=norm.get("brand") or None,
             group_food_id=_to_int(norm.get("group_food_id", "")),
             proteins=_to_float(norm.get("proteins", "")),
-            carbohydrates=_to_float(norm.get("carbohidratos", "") or norm.get("carbohydrates", "")),
+            carbohydrates=_to_float(norm.get("carbohydrates", "")),
             fats=_to_float(norm.get("fats", "")),
             calories=_to_float(norm.get("calories", "")),
             quantity=_to_float(norm.get("quantity", "")),
@@ -174,6 +238,12 @@ async def import_aliments(
             created_user_id=current_user.id,
         )
         db.add(aliment)
+        db.flush()
+
+        desc_data = {f: _to_float(norm.get(f, "")) for f in DESC_FIELDS if norm.get(f)}
+        if desc_data:
+            db.add(AlimentDescription(aliment_id=aliment.id, **desc_data))
+
         created += 1
 
     db.commit()
@@ -182,4 +252,3 @@ async def import_aliments(
         {"created": created, "errors": errors},
         f"{created} alimentos importados{suffix}",
     )
-

@@ -66,7 +66,7 @@ class Aliment(Base):
 
     group_food = relationship("GroupFood", back_populates="aliments")
     quantity_type = relationship("ParameterDetail", foreign_keys=[quantity_type_id])
-    description = relationship("AlimentDescription", back_populates="aliment", uselist=False)
+    description = relationship("AlimentDescription", back_populates="aliment", uselist=False, cascade="all, delete-orphan")
     parent = relationship("Aliment", remote_side=[id], foreign_keys=[parent_id])
     diet_food_aliments = relationship("DietFoodAliment", back_populates="aliment")
     recipe_details = relationship("RecipeDetail", back_populates="aliment")

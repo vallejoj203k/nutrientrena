@@ -80,7 +80,7 @@
     .page-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
-    .modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
+    .modal{background:#fff;border-radius:16px;width:720px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .modal-overlay.open .modal{transform:translateY(0);}
     .modal-head{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EBEBEB;position:sticky;top:0;background:#fff;z-index:1;}
     .modal-head h2{font-size:16px;font-weight:700;color:#111;}
@@ -97,6 +97,25 @@
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
     .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 12px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
     .form-error{color:#DC2626;font-size:12px;margin-top:8px;}
+    .micro-toggle{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;cursor:pointer;padding:12px 0 10px;border-top:1px solid #EBEBEB;margin-top:6px;}
+    .micro-toggle svg{flex-shrink:0;color:var(--indigo);transition:transform .2s;}
+    .micro-toggle.open svg.chevron{transform:rotate(180deg);}
+    .micro-toggle-label{font-size:13px;font-weight:700;color:#374151;}
+    .micro-toggle-sub{font-size:12px;color:#9CA3AF;font-weight:400;margin-left:4px;}
+    .micro-body{display:none;margin-top:8px;}
+    .micro-body.open{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 24px;}
+    .micro-col-head{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
+    .micro-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;}
+    .micro-row label{font-size:13px;color:#374151;flex:1;min-width:0;}
+    .micro-row-input{display:flex;align-items:center;gap:4px;}
+    .micro-row-input input{width:72px;padding:6px 8px;border:1px solid #E5E7EB;border-radius:6px;font-size:13px;color:#111;outline:none;text-align:right;}
+    .micro-row-input input:focus{border-color:var(--indigo);}
+    .micro-row-input span{font-size:11px;color:#9CA3AF;width:24px;}
+    .micro-card{background:#F8FAFC;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+    .micro-card label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+    .micro-card input{width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:6px;font-size:15px;font-weight:600;color:#111;outline:none;background:#fff;}
+    .micro-card input:focus{border-color:var(--indigo);}
+    .micro-card .unit{font-size:11px;color:#9CA3AF;margin-top:3px;}
     .import-modal{width:680px;}
     .dropzone{border:2px dashed #D1D5DB;border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:.2s;background:#FAFAFA;}
     .dropzone:hover,.dropzone.drag{border-color:var(--indigo);background:var(--indigo-pale);}
@@ -306,7 +325,79 @@
           <input id="fCalories" type="number" step="1" min="0" placeholder="0"/>
         </div>
       </div>
-      <div class="form-group">
+      <!-- Micronutrients accordion -->
+      <button type="button" class="micro-toggle" id="microToggle" onclick="toggleMicro()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5c0 2.1-1.3 3.9-3.1 4.7C16.1 12.9 18 15.3 18 18v1H6v-1c0-2.7 1.9-5.1 4.1-6.3A5 5 0 0 1 12 2z"/></svg>
+        <span class="micro-toggle-label">Micronutrientes</span>
+        <span class="micro-toggle-sub">(opcional — útil para planes con patologías)</span>
+        <svg class="chevron" style="margin-left:auto;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="micro-body" id="microBody">
+        <!-- VITAMINAS -->
+        <div>
+          <div class="micro-col-head">Vitaminas</div>
+          <div class="micro-row"><label>Vitamina A</label><div class="micro-row-input"><input id="fVita" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina B1</label><div class="micro-row-input"><input id="fVitb1" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina B2</label><div class="micro-row-input"><input id="fVitb2" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina B3</label><div class="micro-row-input"><input id="fVitb3" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina B5</label><div class="micro-row-input"><input id="fVitb5" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina B6</label><div class="micro-row-input"><input id="fVitb6" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina B9</label><div class="micro-row-input"><input id="fVitb9" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina B12</label><div class="micro-row-input"><input id="fVitb12" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina C</label><div class="micro-row-input"><input id="fVitc" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina D</label><div class="micro-row-input"><input id="fVitd" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina E</label><div class="micro-row-input"><input id="fVite" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Vitamina K</label><div class="micro-row-input"><input id="fVitk" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+        </div>
+        <!-- MINERALES -->
+        <div>
+          <div class="micro-col-head">Minerales</div>
+          <div class="micro-row"><label>Calcio</label><div class="micro-row-input"><input id="fCalcium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Hierro</label><div class="micro-row-input"><input id="fIron" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Magnesio</label><div class="micro-row-input"><input id="fMagnesium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Fósforo</label><div class="micro-row-input"><input id="fPhosphorus" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Potasio</label><div class="micro-row-input"><input id="fPotassium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Sodio</label><div class="micro-row-input"><input id="fSodium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Zinc</label><div class="micro-row-input"><input id="fZinc" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Selenio</label><div class="micro-row-input"><input id="fSelenium" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Cobre</label><div class="micro-row-input"><input id="fCopper" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="micro-row"><label>Manganeso</label><div class="micro-row-input"><input id="fManganese" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+        </div>
+        <!-- OTROS -->
+        <div>
+          <div class="micro-col-head">Otros</div>
+          <div class="micro-card">
+            <label>Fibra (g)</label>
+            <input id="fFiber" type="number" step="0.1" min="0" placeholder="0"/>
+          </div>
+          <div class="micro-card">
+            <label>Colesterol (mg)</label>
+            <input id="fCholesterol" type="number" step="0.1" min="0" placeholder="0"/>
+          </div>
+          <div class="micro-card">
+            <label>Grasas saturadas (g)</label>
+            <input id="fSatFats" type="number" step="0.01" min="0" placeholder="0"/>
+          </div>
+          <div class="micro-card">
+            <label>G. monoinsaturadas (g)</label>
+            <input id="fMonoFats" type="number" step="0.01" min="0" placeholder="0"/>
+          </div>
+          <div class="micro-card">
+            <label>G. poliinsaturadas (g)</label>
+            <input id="fPoliFats" type="number" step="0.01" min="0" placeholder="0"/>
+          </div>
+          <div class="micro-card">
+            <label>Agua (g)</label>
+            <input id="fWater" type="number" step="0.1" min="0" placeholder="0"/>
+          </div>
+          <div class="micro-card">
+            <label>Índice glucémico</label>
+            <input id="fGlycemic" type="number" step="1" min="0" placeholder="0"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
         <label>Comentarios</label>
         <textarea id="fComments" placeholder="Notas adicionales…" maxlength="500"></textarea>
       </div>
@@ -494,6 +585,18 @@ function onSearch() {
   searchTimer = setTimeout(() => loadAliments(1), 350);
 }
 
+function toggleMicro() {
+  const btn  = document.getElementById('microToggle');
+  const body = document.getElementById('microBody');
+  btn.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+function _setMicro(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = (val != null && val !== '') ? val : '';
+}
+
 function openModal(item = null) {
   document.getElementById('modalTitle').textContent = item ? 'Editar alimento' : 'Nuevo alimento';
   document.getElementById('editId').value       = item?.id ?? '';
@@ -509,6 +612,45 @@ function openModal(item = null) {
   document.getElementById('modalError').textContent = '';
   document.getElementById('saveBtn').disabled   = false;
   document.getElementById('saveBtnLabel').textContent = 'Guardar';
+
+  const d = item?.description || {};
+  _setMicro('fVita',       d.vita);
+  _setMicro('fVitb1',      d.vitb1);
+  _setMicro('fVitb2',      d.vitb2);
+  _setMicro('fVitb3',      d.vitb3);
+  _setMicro('fVitb5',      d.vitb5);
+  _setMicro('fVitb6',      d.vitb6);
+  _setMicro('fVitb9',      d.vitb9);
+  _setMicro('fVitb12',     d.vitb12);
+  _setMicro('fVitc',       d.vitc);
+  _setMicro('fVitd',       d.vitd);
+  _setMicro('fVite',       d.vite);
+  _setMicro('fVitk',       d.vitk);
+  _setMicro('fCalcium',    d.calcium);
+  _setMicro('fIron',       d.iron);
+  _setMicro('fMagnesium',  d.magnesium);
+  _setMicro('fPhosphorus', d.phosphorus);
+  _setMicro('fPotassium',  d.potassium);
+  _setMicro('fSodium',     d.sodium);
+  _setMicro('fZinc',       d.zinc);
+  _setMicro('fSelenium',   d.selenium);
+  _setMicro('fCopper',     d.copper);
+  _setMicro('fManganese',  d.manganese);
+  _setMicro('fFiber',      d.fiber);
+  _setMicro('fCholesterol',d.cholesterol);
+  _setMicro('fSatFats',    d.saturated_fats);
+  _setMicro('fMonoFats',   d.mono_saturated_fats);
+  _setMicro('fPoliFats',   d.poli_saturated_fats);
+  _setMicro('fWater',      d.water);
+  _setMicro('fGlycemic',   d.glycemic_index);
+
+  // auto-expand if editing and has micronutrient data
+  const hasMicro = Object.values(d).some(v => v != null && v !== '');
+  const btn  = document.getElementById('microToggle');
+  const body = document.getElementById('microBody');
+  if (hasMicro) { btn.classList.add('open'); body.classList.add('open'); }
+  else          { btn.classList.remove('open'); body.classList.remove('open'); }
+
   document.getElementById('alimentOverlay').classList.add('open');
   setTimeout(() => document.getElementById('fName').focus(), 120);
 }
@@ -536,16 +678,49 @@ async function saveAliment() {
   btn.disabled = true; lbl.textContent = 'Guardando…';
   document.getElementById('modalError').textContent = '';
   const toF = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+  const gv  = id => document.getElementById(id)?.value;
+  const desc = {
+    vita:               toF(gv('fVita')),
+    vitb1:              toF(gv('fVitb1')),
+    vitb2:              toF(gv('fVitb2')),
+    vitb3:              toF(gv('fVitb3')),
+    vitb5:              toF(gv('fVitb5')),
+    vitb6:              toF(gv('fVitb6')),
+    vitb9:              toF(gv('fVitb9')),
+    vitb12:             toF(gv('fVitb12')),
+    vitc:               toF(gv('fVitc')),
+    vitd:               toF(gv('fVitd')),
+    vite:               toF(gv('fVite')),
+    vitk:               toF(gv('fVitk')),
+    calcium:            toF(gv('fCalcium')),
+    iron:               toF(gv('fIron')),
+    magnesium:          toF(gv('fMagnesium')),
+    phosphorus:         toF(gv('fPhosphorus')),
+    potassium:          toF(gv('fPotassium')),
+    sodium:             toF(gv('fSodium')),
+    zinc:               toF(gv('fZinc')),
+    selenium:           toF(gv('fSelenium')),
+    copper:             toF(gv('fCopper')),
+    manganese:          toF(gv('fManganese')),
+    fiber:              toF(gv('fFiber')),
+    cholesterol:        toF(gv('fCholesterol')),
+    saturated_fats:     toF(gv('fSatFats')),
+    mono_saturated_fats:toF(gv('fMonoFats')),
+    poli_saturated_fats:toF(gv('fPoliFats')),
+    water:              toF(gv('fWater')),
+    glycemic_index:     toF(gv('fGlycemic')),
+  };
   const body = {
     name,
     brand:          document.getElementById('fBrand').value.trim() || null,
     group_food_id:  parseInt(document.getElementById('fGroup').value) || null,
-    quantity:       toF(document.getElementById('fQuantity').value),
-    proteins:       toF(document.getElementById('fProteins').value),
-    carbohydrates:  toF(document.getElementById('fCarbs').value),
-    fats:           toF(document.getElementById('fFats').value),
-    calories:       toF(document.getElementById('fCalories').value),
+    quantity:       toF(gv('fQuantity')),
+    proteins:       toF(gv('fProteins')),
+    carbohydrates:  toF(gv('fCarbs')),
+    fats:           toF(gv('fFats')),
+    calories:       toF(gv('fCalories')),
     comments:       document.getElementById('fComments').value.trim() || null,
+    description:    desc,
   };
   const url    = id ? `${API}/aliments/${id}/update` : `${API}/aliments`;
   const method = id ? 'PUT' : 'POST';

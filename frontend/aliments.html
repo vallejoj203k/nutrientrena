@@ -234,6 +234,10 @@
     </div>
     <div class="page-header-right">
       <button class="btn btn-ghost" onclick="openImportModal()">Importar CSV</button>
+      <button class="btn btn-ghost" onclick="openUsdaSync()" id="usdaSyncBtn" title="Rellenar micronutrientes desde USDA FoodData Central">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:5px;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        Sincronizar USDA
+      </button>
       <button class="btn btn-primary" onclick="openModal()">+ Nuevo alimento</button>
     </div>
   </div>
@@ -462,6 +466,37 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- USDA Sync modal -->
+<div class="modal-overlay" id="usdaOverlay" onclick="if(event.target===this&&!_usdaSyncing)closeUsdaSync()">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head">
+      <h2>Sincronizar con USDA</h2>
+      <button class="modal-close" onclick="closeUsdaSync()">×</button>
+    </div>
+    <div class="modal-body" id="usdaBody">
+      <p style="font-size:13px;color:#374151;line-height:1.6;">
+        Esto buscará cada alimento en <strong>USDA FoodData Central</strong> por nombre y rellenará automáticamente sus valores de vitaminas, minerales y otros micronutrientes.
+      </p>
+      <div style="margin-top:14px;padding:12px 14px;background:#EEF2FF;border-radius:10px;font-size:12px;color:#4338CA;">
+        <strong>Solo se sincronizan alimentos sin micronutrientes aún.</strong><br>
+        Los valores existentes no se sobreescriben.
+      </div>
+      <div id="usdaProgress" style="display:none;margin-top:18px;">
+        <div style="display:flex;align-items:center;gap:10px;color:#6B7280;font-size:13px;">
+          <svg width="18" height="18" fill="none" stroke="var(--indigo)" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;flex-shrink:0;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          Consultando USDA… puede tomar unos segundos.
+        </div>
+      </div>
+      <div id="usdaResult" style="display:none;margin-top:18px;"></div>
+    </div>
+    <div class="modal-footer" id="usdaFooter">
+      <button class="btn btn-ghost" onclick="closeUsdaSync()">Cancelar</button>
+      <button class="btn btn-primary" id="usdaRunBtn" onclick="runUsdaSync()">Sincronizar ahora</button>
+    </div>
+  </div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
 
 <script>
 const API   = 'https://nutrientrena-production.up.railway.app/api';
@@ -915,6 +950,68 @@ async function loadPendingBadge() {
 }
 
 function logout() { localStorage.clear(); location.href = 'login.html'; }
+
+// ── USDA Sync ─────────────────────────────────────────────────────────────────
+let _usdaSyncing = false;
+
+function openUsdaSync() {
+  document.getElementById('usdaProgress').style.display = 'none';
+  document.getElementById('usdaResult').style.display   = 'none';
+  document.getElementById('usdaRunBtn').disabled        = false;
+  document.getElementById('usdaRunBtn').textContent     = 'Sincronizar ahora';
+  document.getElementById('usdaFooter').style.display   = '';
+  _usdaSyncing = false;
+  document.getElementById('usdaOverlay').classList.add('open');
+}
+
+function closeUsdaSync() {
+  if (_usdaSyncing) return;
+  document.getElementById('usdaOverlay').classList.remove('open');
+}
+
+async function runUsdaSync() {
+  _usdaSyncing = true;
+  document.getElementById('usdaRunBtn').disabled    = true;
+  document.getElementById('usdaRunBtn').textContent = 'Sincronizando…';
+  document.getElementById('usdaProgress').style.display = 'block';
+  document.getElementById('usdaResult').style.display   = 'none';
+  try {
+    const r = await fetch(`${API}/aliments/usda-sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ ids: null }),
+    });
+    const d = await r.json();
+    const res = d.data || {};
+    document.getElementById('usdaProgress').style.display = 'none';
+    const resultEl = document.getElementById('usdaResult');
+    resultEl.style.display = 'block';
+    if (r.ok) {
+      let html = `<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px;">
+        <div style="font-weight:700;color:#059669;font-size:14px;margin-bottom:6px;">✅ Sincronización completada</div>
+        <div style="font-size:13px;color:#374151;">
+          <b>${res.synced || 0}</b> alimentos sincronizados con micronutrientes.
+          ${res.not_found?.length ? `<br><span style="color:#9CA3AF;">${res.not_found.length} no encontrados en USDA.</span>` : ''}
+          ${res.errors?.length ? `<br><span style="color:#EF4444;">${res.errors.length} con error.</span>` : ''}
+        </div>
+      </div>`;
+      resultEl.innerHTML = html;
+      toast(`${res.synced || 0} alimentos sincronizados con USDA`, 'success');
+      loadAliments(currentPage);
+    } else {
+      resultEl.innerHTML = `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:14px;color:#DC2626;font-size:13px;">${d.message || 'Error al sincronizar'}</div>`;
+    }
+    document.getElementById('usdaFooter').innerHTML = '<button class="btn btn-ghost" onclick="closeUsdaSync()">Cerrar</button>';
+  } catch (e) {
+    document.getElementById('usdaProgress').style.display = 'none';
+    document.getElementById('usdaResult').style.display = 'block';
+    document.getElementById('usdaResult').innerHTML = `<div style="color:#DC2626;font-size:13px;">Error de conexión: ${e.message}</div>`;
+    document.getElementById('usdaRunBtn').disabled = false;
+    document.getElementById('usdaRunBtn').textContent = 'Reintentar';
+  } finally {
+    _usdaSyncing = false;
+  }
+}
 
 function adaptSidebar() {
   const rid = parseInt(localStorage.getItem('role_id') || '0');

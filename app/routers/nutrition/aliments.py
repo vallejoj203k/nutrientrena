@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, UploadFile, File
 from sqlalchemy.orm import Session
-from typing import Optional
+from pydantic import BaseModel
+from typing import Optional, List
 import csv
 import io
 
@@ -9,6 +10,8 @@ from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
 from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
+from app.config import settings
+from app.services import usda as usda_svc
 
 router = APIRouter(prefix="/aliments", tags=["Nutrition - Aliments"])
 
@@ -251,4 +254,68 @@ async def import_aliments(
     return send_response(
         {"created": created, "errors": errors},
         f"{created} alimentos importados{suffix}",
+    )
+
+
+class UsdaSyncRequest(BaseModel):
+    ids: Optional[List[str]] = None
+
+
+@router.post("/usda-sync", summary="Sincronizar micronutrientes con USDA", description="Busca cada alimento en USDA FoodData Central por nombre y rellena sus micronutrientes.")
+async def usda_sync(
+    body: UsdaSyncRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    api_key = settings.USDA_API_KEY
+    if not api_key:
+        return send_error("USDA_API_KEY no configurada en el servidor")
+
+    if body.ids:
+        aliments = db.query(Aliment).filter(Aliment.id.in_(body.ids)).all()
+    else:
+        # sync only those without a description row yet
+        synced_ids = db.query(AlimentDescription.aliment_id).subquery()
+        aliments = db.query(Aliment).filter(
+            Aliment.parent_id.is_(None),
+            ~Aliment.id.in_(synced_ids),
+        ).all()
+
+    synced: List[str] = []
+    not_found: List[str] = []
+    errors: List[str] = []
+
+    for aliment in aliments:
+        try:
+            food = await usda_svc.search_food(api_key, aliment.name)
+            if not food:
+                not_found.append(aliment.name)
+                continue
+
+            micros = usda_svc.extract_micros(food)
+            macros = usda_svc.extract_macros(food)
+
+            # fill missing macros only (don't overwrite existing values)
+            if aliment.proteins is None and macros.get("proteins") is not None:
+                aliment.proteins = macros["proteins"]
+            if aliment.carbohydrates is None and macros.get("carbohydrates") is not None:
+                aliment.carbohydrates = macros["carbohydrates"]
+            if aliment.fats is None and macros.get("fats") is not None:
+                aliment.fats = macros["fats"]
+            if aliment.calories is None and macros.get("calories") is not None:
+                aliment.calories = macros["calories"]
+
+            non_null_micros = {k: v for k, v in micros.items() if v is not None}
+            if non_null_micros:
+                _upsert_description(db, aliment.id, non_null_micros)
+
+            synced.append(aliment.name)
+
+        except Exception as e:
+            errors.append(f"{aliment.name}: {str(e)[:80]}")
+
+    db.commit()
+    return send_response(
+        {"synced": len(synced), "not_found": not_found, "errors": errors},
+        f"{len(synced)} alimentos sincronizados con USDA",
     )

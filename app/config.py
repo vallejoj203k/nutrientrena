@@ -68,6 +68,8 @@ class Settings(BaseSettings):
     MAIL_FROM: str = "onboarding@resend.dev"
     FRONTEND_URL: str = "http://localhost:3000"
 
+    USDA_API_KEY: Optional[str] = None
+
     @property
     def cors_origins(self) -> list[str]:
         """Return the effective CORS origin list.

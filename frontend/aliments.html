@@ -64,7 +64,8 @@
     tbody tr:hover td{background:#FAFBFF;}
     tbody td{padding:14px 16px;font-size:13px;color:#374151;vertical-align:middle;}
     tbody td:first-child{padding-left:20px;}
-    .td-name{font-weight:600;color:#111827;}
+    .td-name{font-weight:600;color:#111827;cursor:pointer;}
+    .td-name:hover{color:var(--indigo);text-decoration:underline;}
     .td-brand{font-size:12px;color:#6B7280;}
     .td-group{display:inline-flex;align-items:center;padding:3px 9px;background:var(--indigo-pale);color:var(--indigo);border-radius:12px;font-size:11px;font-weight:600;}
     .td-macro{font-size:12px;color:#374151;text-align:right;}
@@ -97,6 +98,26 @@
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
     .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 12px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
     .form-error{color:#DC2626;font-size:12px;margin-top:8px;}
+    /* Detail modal */
+    .detail-modal{width:680px;}
+    .detail-header{padding:22px 28px 0;}
+    .detail-name{font-size:20px;font-weight:800;color:#111827;margin-bottom:4px;}
+    .detail-meta{font-size:12px;color:#9CA3AF;display:flex;gap:12px;flex-wrap:wrap;}
+    .detail-meta span{display:flex;align-items:center;gap:4px;}
+    .detail-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:20px 28px 0;}
+    .macro-box{background:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;text-align:center;}
+    .macro-box .val{font-size:22px;font-weight:800;color:#111827;}
+    .macro-box.kcal-box .val{color:var(--indigo);}
+    .macro-box .lbl{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+    .detail-section{padding:18px 28px 0;}
+    .detail-section-title{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #F3F4F6;}
+    .micro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 20px;}
+    .micro-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #F9FAFB;}
+    .micro-item .m-lbl{font-size:12px;color:#6B7280;}
+    .micro-item .m-val{font-size:12px;font-weight:600;color:#111827;white-space:nowrap;}
+    .micro-item .m-val.empty{color:#D1D5DB;font-weight:400;}
+    .no-micro-msg{text-align:center;padding:24px;color:#9CA3AF;font-size:13px;}
+    .no-micro-msg button{margin-top:10px;color:var(--indigo);background:none;border:none;font-size:13px;cursor:pointer;font-weight:600;text-decoration:underline;}
     .micro-toggle{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;cursor:pointer;padding:12px 0 10px;border-top:1px solid #EBEBEB;margin-top:6px;}
     .micro-toggle svg{flex-shrink:0;color:var(--indigo);transition:transform .2s;}
     .micro-toggle.open svg.chevron{transform:rotate(180deg);}
@@ -467,6 +488,23 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Detail modal -->
+<div class="modal-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="modal detail-modal">
+    <div class="modal-head">
+      <h2 id="detailTitle">Detalle del alimento</h2>
+      <button class="modal-close" onclick="closeDetail()">×</button>
+    </div>
+    <div id="detailContent" style="padding-bottom:24px;">
+      <!-- filled by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeDetail()">Cerrar</button>
+      <button class="btn btn-primary" id="detailEditBtn" onclick="">Editar</button>
+    </div>
+  </div>
+</div>
+
 <!-- USDA Sync modal -->
 <div class="modal-overlay" id="usdaOverlay" onclick="if(event.target===this&&!_usdaSyncing)closeUsdaSync()">
   <div class="modal" style="width:480px;">
@@ -572,7 +610,7 @@ function renderTable(items) {
     return `
     <tr>
       <td>
-        <div class="td-name">${esc(a.name)}</div>
+        <div class="td-name" onclick="openDetail('${esc(a.id)}')">${esc(a.name)}</div>
         ${a.brand ? `<div class="td-brand">${esc(a.brand)}</div>` : ''}
       </td>
       <td>${gn ? `<span class="td-group">${esc(gn)}</span>` : '<span style="color:#D1D5DB;">—</span>'}</td>
@@ -689,6 +727,86 @@ function openModal(item = null) {
   document.getElementById('alimentOverlay').classList.add('open');
   setTimeout(() => document.getElementById('fName').focus(), 120);
 }
+
+// ── Detail view ───────────────────────────────────────────────────────────────
+const MICRO_LABELS = {
+  vita:'Vitamina A',vitb1:'Vitamina B1',vitb2:'Vitamina B2',vitb3:'Vitamina B3',
+  vitb5:'Vitamina B5',vitb6:'Vitamina B6',vitb9:'Vitamina B9 (Ácido fólico)',
+  vitb12:'Vitamina B12',vitc:'Vitamina C',vitd:'Vitamina D',vite:'Vitamina E',vitk:'Vitamina K',
+  calcium:'Calcio',iron:'Hierro',magnesium:'Magnesio',phosphorus:'Fósforo',
+  potassium:'Potasio',sodium:'Sodio',zinc:'Zinc',selenium:'Selenio',
+  copper:'Cobre',manganese:'Manganeso',
+  fiber:'Fibra',cholesterol:'Colesterol',saturated_fats:'Grasas saturadas',
+  mono_saturated_fats:'G. monoinsaturadas',poli_saturated_fats:'G. poliinsaturadas',
+  water:'Agua',glycemic_index:'Índice glucémico',
+};
+const MICRO_UNITS = {
+  vita:'mcg',vitb9:'mcg',vitb12:'mcg',vitd:'mcg',vitk:'mcg',selenium:'mcg',
+  fiber:'g',saturated_fats:'g',mono_saturated_fats:'g',poli_saturated_fats:'g',water:'g',
+};
+const VIT_KEYS  = ['vita','vitb1','vitb2','vitb3','vitb5','vitb6','vitb9','vitb12','vitc','vitd','vite','vitk'];
+const MIN_KEYS  = ['calcium','iron','magnesium','phosphorus','potassium','sodium','zinc','selenium','copper','manganese'];
+const OTH_KEYS  = ['fiber','cholesterol','saturated_fats','mono_saturated_fats','poli_saturated_fats','water','glycemic_index'];
+
+function _mVal(d, key) {
+  const v = d[key];
+  const u = MICRO_UNITS[key] || 'mg';
+  if (v == null) return `<span class="m-val empty">—</span>`;
+  return `<span class="m-val">${parseFloat(v).toLocaleString('es-ES',{maximumFractionDigits:3})} ${u}</span>`;
+}
+
+function _microSection(title, keys, d) {
+  return `
+    <div class="detail-section">
+      <div class="detail-section-title">${title}</div>
+      <div class="micro-grid">
+        ${keys.map(k => `<div class="micro-item"><span class="m-lbl">${MICRO_LABELS[k]}</span>${_mVal(d,k)}</div>`).join('')}
+      </div>
+    </div>`;
+}
+
+async function openDetail(id) {
+  document.getElementById('detailTitle').textContent = 'Cargando…';
+  document.getElementById('detailContent').innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;">Cargando…</div>';
+  document.getElementById('detailEditBtn').onclick = () => { closeDetail(); openEdit(id); };
+  document.getElementById('detailOverlay').classList.add('open');
+  try {
+    const r = await fetch(`${API}/aliments/${id}/edit`, { headers: h() });
+    const a = (await r.json()).data || {};
+    const d = a.description || {};
+    const gn = groupName(a.group_food_id) || '—';
+    const hasMicro = Object.values(d).some(v => v != null);
+    document.getElementById('detailTitle').textContent = a.name || 'Alimento';
+    document.getElementById('detailContent').innerHTML = `
+      <div class="detail-header">
+        <div class="detail-name">${esc(a.name)}</div>
+        <div class="detail-meta">
+          <span>${esc(gn)}</span>
+          ${a.brand ? `<span>· ${esc(a.brand)}</span>` : ''}
+          ${a.quantity ? `<span>· ${a.quantity} g/ml por porción</span>` : ''}
+        </div>
+      </div>
+      <div class="detail-macros">
+        <div class="macro-box kcal-box"><div class="val">${a.calories != null ? Math.round(a.calories) : '—'}</div><div class="lbl">Calorías</div></div>
+        <div class="macro-box"><div class="val">${a.proteins != null ? +parseFloat(a.proteins).toFixed(1) : '—'}</div><div class="lbl">Proteínas g</div></div>
+        <div class="macro-box"><div class="val">${a.carbohydrates != null ? +parseFloat(a.carbohydrates).toFixed(1) : '—'}</div><div class="lbl">Carbos g</div></div>
+        <div class="macro-box"><div class="val">${a.fats != null ? +parseFloat(a.fats).toFixed(1) : '—'}</div><div class="lbl">Grasas g</div></div>
+      </div>
+      ${hasMicro
+        ? _microSection('Vitaminas', VIT_KEYS, d) +
+          _microSection('Minerales', MIN_KEYS, d) +
+          _microSection('Otros', OTH_KEYS, d)
+        : `<div class="no-micro-msg">
+             Sin micronutrientes registrados.<br>
+             <button onclick="closeDetail();setTimeout(()=>openEdit('${id}'),150)">Agregar manualmente</button>
+             &nbsp;o&nbsp;
+             <button onclick="closeDetail();openUsdaSync()">Sincronizar con USDA</button>
+           </div>`
+      }`;
+  } catch { document.getElementById('detailContent').innerHTML = '<div style="padding:40px;text-align:center;color:#EF4444;">Error al cargar.</div>'; }
+}
+
+function closeDetail() { document.getElementById('detailOverlay').classList.remove('open'); }
 
 async function openEdit(id) {
   try {

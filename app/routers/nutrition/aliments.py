@@ -259,6 +259,7 @@ async def import_aliments(
 
 class UsdaSyncRequest(BaseModel):
     ids: Optional[List[str]] = None
+    batch: int = 30  # max aliments per request to avoid gateway timeout
 
 
 @router.post("/usda-sync", summary="Sincronizar micronutrientes con USDA", description="Busca cada alimento en USDA FoodData Central por nombre y rellena sus micronutrientes.")
@@ -275,11 +276,16 @@ async def usda_sync(
         aliments = db.query(Aliment).filter(Aliment.id.in_(body.ids)).all()
     else:
         # sync only those without a description row yet
-        synced_ids = db.query(AlimentDescription.aliment_id).subquery()
+        synced_ids = db.query(AlimentDescription.aliment_id).scalar_subquery()
         aliments = db.query(Aliment).filter(
             Aliment.parent_id.is_(None),
             ~Aliment.id.in_(synced_ids),
-        ).all()
+        ).limit(body.batch).all()
+
+    total_pending = db.query(Aliment).filter(
+        Aliment.parent_id.is_(None),
+        ~Aliment.id.in_(db.query(AlimentDescription.aliment_id).scalar_subquery()),
+    ).count() if not body.ids else 0
 
     synced: List[str] = []
     not_found: List[str] = []
@@ -295,7 +301,6 @@ async def usda_sync(
             micros = usda_svc.extract_micros(food)
             macros = usda_svc.extract_macros(food)
 
-            # fill missing macros only (don't overwrite existing values)
             if aliment.proteins is None and macros.get("proteins") is not None:
                 aliment.proteins = macros["proteins"]
             if aliment.carbohydrates is None and macros.get("carbohydrates") is not None:
@@ -315,7 +320,13 @@ async def usda_sync(
             errors.append(f"{aliment.name}: {str(e)[:80]}")
 
     db.commit()
+    remaining = max(0, total_pending - len(aliments)) if not body.ids else 0
     return send_response(
-        {"synced": len(synced), "not_found": not_found, "errors": errors},
+        {
+            "synced": len(synced),
+            "not_found": not_found,
+            "errors": errors,
+            "remaining": remaining,
+        },
         f"{len(synced)} alimentos sincronizados con USDA",
     )

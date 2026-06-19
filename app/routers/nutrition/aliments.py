@@ -35,6 +35,18 @@ def _to_int(v: str) -> Optional[int]:
         return None
 
 
+def _usda_query(name: str) -> str:
+    """Simplify a long translated food name into a short English-safe USDA query."""
+    # Take the first segment before a comma (the main food type)
+    short = name.split(",")[0].strip()
+    # Strip characters that break USDA URL parsing
+    for ch in ['«', '»', '"', "'", '/', '\\', '(', ')', '%']:
+        short = short.replace(ch, ' ')
+    # Collapse multiple spaces and truncate
+    short = ' '.join(short.split())[:80]
+    return short or name[:80]
+
+
 def _upsert_description(db: Session, aliment_id: str, desc_data: dict):
     """Create or update the AlimentDescription row for a given aliment."""
     existing = db.query(AlimentDescription).filter(AlimentDescription.aliment_id == aliment_id).first()
@@ -294,7 +306,8 @@ async def usda_sync(
 
     for aliment in aliments:
         try:
-            food = await usda_svc.search_food(api_key, aliment.name)
+            query = _usda_query(aliment.name)
+            food = await usda_svc.search_food(api_key, query)
             if not food:
                 not_found.append(aliment.name)
                 await asyncio.sleep(0.25)

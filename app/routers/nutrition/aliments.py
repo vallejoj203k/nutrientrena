@@ -201,7 +201,6 @@ async def import_aliments(
         "vitk": "vitk",   "vitamina_k": "vitk",
     }
 
-    MACRO_FIELDS = {"name", "brand", "group_food_id", "proteins", "carbohydrates", "fats", "calories", "quantity", "comments"}
     DESC_FIELDS = {
         "vita", "vitb1", "vitb2", "vitb3", "vitb5", "vitb6", "vitb9", "vitb12",
         "vitc", "vitd", "vite", "vitk",

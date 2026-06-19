@@ -1089,10 +1089,11 @@ function closeUsdaSync() {
 
 async function runUsdaSync() {
   _usdaSyncing = true;
-  document.getElementById('usdaRunBtn').disabled    = true;
-  document.getElementById('usdaRunBtn').textContent = 'Sincronizando…';
   document.getElementById('usdaProgress').style.display = 'block';
   document.getElementById('usdaResult').style.display   = 'none';
+  document.getElementById('usdaFooter').innerHTML =
+    '<button class="btn btn-ghost" onclick="if(!_usdaSyncing)closeUsdaSync()" disabled>Cancelar</button>' +
+    '<button class="btn btn-primary" id="usdaRunBtn" disabled>Sincronizando…</button>';
   try {
     const r = await fetch(`${API}/aliments/usda-sync`, {
       method: 'POST',
@@ -1132,8 +1133,9 @@ async function runUsdaSync() {
     document.getElementById('usdaProgress').style.display = 'none';
     document.getElementById('usdaResult').style.display = 'block';
     document.getElementById('usdaResult').innerHTML = `<div style="color:#DC2626;font-size:13px;">Error de conexión: ${e.message}</div>`;
-    document.getElementById('usdaRunBtn').disabled = false;
-    document.getElementById('usdaRunBtn').textContent = 'Reintentar';
+    document.getElementById('usdaFooter').innerHTML =
+      '<button class="btn btn-ghost" onclick="closeUsdaSync()">Cerrar</button>' +
+      '<button class="btn btn-primary" onclick="runUsdaSync()">Reintentar</button>';
   } finally {
     _usdaSyncing = false;
   }

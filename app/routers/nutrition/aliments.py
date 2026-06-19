@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
+import asyncio
 import csv
 import io
 
@@ -296,6 +297,7 @@ async def usda_sync(
             food = await usda_svc.search_food(api_key, aliment.name)
             if not food:
                 not_found.append(aliment.name)
+                await asyncio.sleep(0.25)
                 continue
 
             micros = usda_svc.extract_micros(food)
@@ -315,9 +317,10 @@ async def usda_sync(
                 _upsert_description(db, aliment.id, non_null_micros)
 
             synced.append(aliment.name)
+            await asyncio.sleep(0.25)
 
         except Exception as e:
-            errors.append(f"{aliment.name}: {str(e)[:80]}")
+            errors.append(f"{aliment.name}: {str(e)[:120]}")
 
     db.commit()
     remaining = max(0, total_pending - len(aliments)) if not body.ids else 0

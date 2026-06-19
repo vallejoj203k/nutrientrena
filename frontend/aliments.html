@@ -1097,7 +1097,7 @@ async function runUsdaSync() {
     const r = await fetch(`${API}/aliments/usda-sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...h() },
-      body: JSON.stringify({ ids: null }),
+      body: JSON.stringify({ ids: null, batch: 30 }),
     });
     const d = await r.json();
     const res = d.data || {};
@@ -1105,21 +1105,29 @@ async function runUsdaSync() {
     const resultEl = document.getElementById('usdaResult');
     resultEl.style.display = 'block';
     if (r.ok) {
-      let html = `<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px;">
-        <div style="font-weight:700;color:#059669;font-size:14px;margin-bottom:6px;">✅ Sincronización completada</div>
+      const remaining = res.remaining || 0;
+      resultEl.innerHTML = `<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px;">
+        <div style="font-weight:700;color:#059669;font-size:14px;margin-bottom:6px;">✅ Lote completado</div>
         <div style="font-size:13px;color:#374151;">
-          <b>${res.synced || 0}</b> alimentos sincronizados con micronutrientes.
+          <b>${res.synced || 0}</b> alimentos sincronizados.
           ${res.not_found?.length ? `<br><span style="color:#9CA3AF;">${res.not_found.length} no encontrados en USDA.</span>` : ''}
           ${res.errors?.length ? `<br><span style="color:#EF4444;">${res.errors.length} con error.</span>` : ''}
+          ${remaining > 0 ? `<br><span style="color:#6366F1;font-weight:600;">Quedan ${remaining} alimentos por sincronizar.</span>` : '<br><span style="color:#059669;">¡Todos sincronizados!</span>'}
         </div>
       </div>`;
-      resultEl.innerHTML = html;
-      toast(`${res.synced || 0} alimentos sincronizados con USDA`, 'success');
+      toast(`${res.synced || 0} alimentos sincronizados`, 'success');
       loadAliments(currentPage);
+      if (remaining > 0) {
+        document.getElementById('usdaFooter').innerHTML =
+          '<button class="btn btn-ghost" onclick="closeUsdaSync()">Cerrar</button>' +
+          '<button class="btn btn-primary" onclick="runUsdaSync()">Sincronizar siguiente lote</button>';
+      } else {
+        document.getElementById('usdaFooter').innerHTML = '<button class="btn btn-ghost" onclick="closeUsdaSync()">Cerrar</button>';
+      }
     } else {
       resultEl.innerHTML = `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:14px;color:#DC2626;font-size:13px;">${d.message || 'Error al sincronizar'}</div>`;
+      document.getElementById('usdaFooter').innerHTML = '<button class="btn btn-ghost" onclick="closeUsdaSync()">Cerrar</button>';
     }
-    document.getElementById('usdaFooter').innerHTML = '<button class="btn btn-ghost" onclick="closeUsdaSync()">Cerrar</button>';
   } catch (e) {
     document.getElementById('usdaProgress').style.display = 'none';
     document.getElementById('usdaResult').style.display = 'block';

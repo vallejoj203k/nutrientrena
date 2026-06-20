@@ -161,6 +161,14 @@
     .add-meal-btn:hover{border-color:var(--indigo);color:var(--indigo);background:#EEF2FF;}
     .dist-apply-btn{margin-top:10px;width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid var(--indigo);background:#EEF2FF;color:var(--indigo);font-size:12px;font-weight:700;cursor:pointer;transition:.15s;}
     .dist-apply-btn:hover{background:var(--indigo);color:#fff;}
+    .food-src-tabs{display:flex;gap:4px;margin-bottom:7px;}
+    .food-src-tab{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;line-height:1.6;}
+    .food-src-tab:hover{border-color:#9CA3AF;color:#374151;}
+    .food-src-tab.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+    .food-src-tab.personal.active{background:#059669;border-color:#059669;color:#fff;}
+    .ref-client-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:12px;font-size:12px;color:#92400E;}
+    .ref-client-bar select{flex:1;padding:5px 8px;border:1px solid #FDE68A;border-radius:6px;font-size:12px;outline:none;background:#fff;color:#111;}
+    .ref-client-bar label{white-space:nowrap;font-weight:600;}
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .overlay.open{opacity:1;pointer-events:all;}
     .modal-box{background:#fff;border-radius:16px;padding:26px;width:440px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(14px);transition:.2s;}
@@ -390,6 +398,12 @@
         <div class="sec-card">
           <div class="sec-card-head">Comidas del plan</div>
           <div class="sec-card-body">
+            <div class="ref-client-bar">
+              <label>👤 Cliente:</label>
+              <select id="refClientSel" onchange="onRefClientChange(this.value)">
+                <option value="">Sin cliente (solo plataforma)</option>
+              </select>
+            </div>
             <div id="mealsContainer"></div>
             <button class="add-meal-btn" onclick="addMeal()">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -458,7 +472,7 @@ if (!token) location.href = 'login.html';
 
 let allDiets = [], editingId = null, assigningId = null;
 let _meals = [], _mealSeq = 0, _rowSeq = 0, _acTimers = {}, _macroCache = {};
-let allClients = [];
+let allClients = [], _refClientId = null;
 let activeFilter = 'all';
 
 let confirmDeleteFn = function(){};
@@ -533,6 +547,44 @@ async function loadClients() {
     var j = await r.json();
     allClients = Array.isArray(j.data) ? j.data : [];
   } catch(e) {}
+}
+
+function populateRefClientSel() {
+  var sel = document.getElementById('refClientSel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Sin cliente (solo plataforma)</option>';
+  allClients.forEach(function(c) {
+    var name = ((c.name||'') + ' ' + (c.last_name||'')).trim() || c.email || '#' + c.id;
+    var opt = document.createElement('option');
+    opt.value = c.user_id || c.id; opt.textContent = name;
+    sel.appendChild(opt);
+  });
+  sel.value = _refClientId || '';
+}
+
+function onRefClientChange(val) {
+  _refClientId = val ? parseInt(val) : null;
+}
+
+function setFoodSource(mid, rid, src, btn) {
+  if (src === 'personal' && !_refClientId) {
+    toast('Selecciona un cliente de referencia primero', 'error');
+    return;
+  }
+  var meal = _meals.find(function(m){ return m.id == mid; });
+  if (!meal) return;
+  var row = meal.rows.find(function(r){ return r.id == rid; });
+  if (!row) return;
+  row._source = src;
+  var ptab = document.getElementById('fsrc-p-' + rid);
+  var ctab = document.getElementById('fsrc-c-' + rid);
+  if (ptab) ptab.classList.toggle('active', src === 'platform');
+  if (ctab) ctab.classList.toggle('active', src === 'personal');
+  var inp = document.getElementById('fiac-' + rid);
+  if (inp) { inp.value = ''; inp.focus(); }
+  row.aliment_id = null; row.aliment_name = '';
+  row.proteins = null; row.carbohydrates = null; row.fats = null; row.calories = null;
+  updateRowMacros(row); recalcMealMacros(mid);
 }
 
 function setFilter(f) {
@@ -610,7 +662,9 @@ async function openForm(id) {
   editingId = id;
   document.getElementById('formViewTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
   document.getElementById('formError').textContent = '';
+  _refClientId = null;
   clearForm();
+  populateRefClientSel();
 
   if (id) {
     try {
@@ -651,7 +705,7 @@ function clearForm() {
   document.getElementById('f_type').value  = '';
   document.getElementById('f_style').value = '';
   document.getElementById('mealsContainer').innerHTML = '';
-  _meals = []; _mealSeq = 0; _rowSeq = 0;
+  _meals = []; _mealSeq = 0; _rowSeq = 0; _refClientId = null;
   updateDistPanel();
 }
 
@@ -752,14 +806,18 @@ function addFoodRow(mid, detail) {
   if (!meal) return;
   detail = detail || null;
   var rid = ++_rowSeq;
-  var row = { id: rid, mid: mid, db_id: null, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null };
+  var row = { id: rid, mid: mid, db_id: null, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null, _source: 'platform' };
   meal.rows.push(row);
   var container = document.getElementById('mrows-' + mid);
   if (!container) return;
   var card = document.createElement('div');
   card.className = 'food-card'; card.id = 'frow-' + rid;
   card.innerHTML =
-    '<div class="food-card-top">'
+    '<div class="food-src-tabs">'
+    + '<button class="food-src-tab active" id="fsrc-p-' + rid + '" onclick="setFoodSource(' + mid + ',' + rid + ',\'platform\',this)">🌐 Plataforma</button>'
+    + '<button class="food-src-tab personal" id="fsrc-c-' + rid + '" onclick="setFoodSource(' + mid + ',' + rid + ',\'personal\',this)">👤 Personal</button>'
+    + '</div>'
+    + '<div class="food-card-top">'
     + '<div class="ac-wrap"><input type="text" id="fiac-' + rid + '" placeholder="Buscar alimento..." autocomplete="off"'
     + ' oninput="acSearch(' + rid + ',this.value)" onfocus="acSearch(' + rid + ',this.value)" onblur="setTimeout(function(){closeAc(' + rid + ')},180)"/>'
     + '<div class="ac-dropdown" id="facdrop-' + rid + '"></div></div>'
@@ -854,12 +912,26 @@ function recalcTotalMacros() {
 function acSearch(rid, val) {
   clearTimeout(_acTimers[rid]);
   if (!val || val.length < 2) { closeAc(rid); return; }
+  // find which row this is to check _source
+  var row = null;
+  for (var i = 0; i < _meals.length; i++) {
+    var r2 = _meals[i].rows.find(function(r){ return r.id == rid; });
+    if (r2) { row = r2; break; }
+  }
+  var src = (row && row._source) || 'platform';
   _acTimers[rid] = setTimeout(async function(){
     try {
-      var p = new URLSearchParams({ search: val, per_page: 8, page: 1 });
-      var r = await fetch(API + '/aliments/search?' + p, { headers: { Authorization: 'Bearer ' + token } });
+      var params, url, items;
+      if (src === 'personal' && _refClientId) {
+        params = new URLSearchParams({ client_id: _refClientId, search: val, per_page: 8, page: 1 });
+        url = API + '/client-aliments/search?' + params;
+      } else {
+        params = new URLSearchParams({ search: val, per_page: 8, page: 1 });
+        url = API + '/aliments/search?' + params;
+      }
+      var r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
       var d = await r.json();
-      var items = ((d.data && d.data.data) || []).map(function(a){ return Object.assign({}, a, {_source:'platform'}); });
+      items = ((d.data && d.data.data) || []).map(function(a){ return Object.assign({}, a, {_source: src}); });
       showAcDrop(rid, items);
     } catch(e) {}
   }, 250);

@@ -67,6 +67,13 @@
     .td-name{font-weight:600;color:#111827;cursor:pointer;}
     .td-name:hover{color:var(--indigo);text-decoration:underline;}
     .td-brand{font-size:12px;color:#6B7280;}
+    .source-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;letter-spacing:.3px;}
+    .source-badge.platform{background:#EEF2FF;color:#4F46E5;}
+    .source-badge.personal{background:#ECFDF5;color:#059669;}
+    .source-tabs{display:flex;gap:6px;margin-left:8px;}
+    .source-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:all .15s;}
+    .source-tab.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+    .source-tab:hover:not(.active){border-color:var(--indigo);color:var(--indigo);}
     .td-group{display:inline-flex;align-items:center;padding:3px 9px;background:var(--indigo-pale);color:var(--indigo);border-radius:12px;font-size:11px;font-weight:600;}
     .td-macro{font-size:12px;color:#374151;text-align:right;}
     .td-macro span{display:block;font-size:10px;color:#9CA3AF;}
@@ -297,6 +304,10 @@
     <div class="search-wrap">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="searchInput" placeholder="Buscar alimento…" oninput="onSearch()"/>
+    </div>
+    <div class="source-tabs">
+      <button class="source-tab active" onclick="setSource('platform',this)">🌐 Plataforma</button>
+      <button class="source-tab" onclick="setSource('personal',this)">👤 Personal</button>
     </div>
     <select class="filter-select" id="groupFilter" onchange="onSearch()">
       <option value="">Todos los grupos</option>
@@ -580,6 +591,14 @@ let currentPage = 1;
 let totalPages  = 1;
 let totalItems  = 0;
 let searchTimer = null;
+let _currentSource = 'platform';
+
+function setSource(src, btn) {
+  _currentSource = src;
+  document.querySelectorAll('.source-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAliments(1);
+}
 let csvFile     = null;
 let csvRows     = [];
 let confirmDeleteFn = () => {};
@@ -611,11 +630,12 @@ async function loadAliments(page = 1) {
   if (groupId) params.set('group_food_id', groupId);
   document.getElementById('tableBody').innerHTML = `<tr class="empty-row"><td colspan="7">Cargando…</td></tr>`;
   try {
-    const r = await fetch(`${API}/aliments/search?${params}`, { headers: h() });
+    const endpoint = _currentSource === 'personal' ? `${API}/client-aliments/search` : `${API}/aliments/search`;
+    const r = await fetch(`${endpoint}?${params}`, { headers: h() });
     if (r.status === 401) { logout(); return; }
     const j   = await r.json();
     const res = j.data || {};
-    const items = res.data || [];
+    const items = (res.data || []).map(a => ({ ...a, _source: _currentSource }));
     totalPages  = res.last_page || 1;
     totalItems  = res.total || 0;
     renderTable(items);
@@ -640,7 +660,7 @@ function renderTable(items) {
     return `
     <tr>
       <td>
-        <div class="td-name" onclick="openDetail('${esc(a.id)}')">${esc(a.name)}</div>
+        <div class="td-name" onclick="openDetail('${esc(a.id)}')">${esc(a.name)}<span class="source-badge ${a._source==='personal'?'personal':'platform'}">${a._source==='personal'?'👤 Personal':'🌐 Plataforma'}</span></div>
         ${a.brand ? `<div class="td-brand">${esc(a.brand)}</div>` : ''}
       </td>
       <td>${gn ? `<span class="td-group">${esc(gn)}</span>` : '<span style="color:#D1D5DB;">—</span>'}</td>

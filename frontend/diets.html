@@ -729,10 +729,11 @@ function acSearch(rid, val) {
   if (!val || val.length < 2) { closeAc(rid); return; }
   _acTimers[rid] = setTimeout(async function(){
     try {
-      var p = new URLSearchParams({ search: val, per_page: 10, page: 1 });
+      var p = new URLSearchParams({ search: val, per_page: 8, page: 1 });
       var r = await fetch(API + '/aliments/search?' + p, { headers: { Authorization: 'Bearer ' + token } });
       var d = await r.json();
-      showAcDrop(rid, (d.data && d.data.data) || []);
+      var platform = ((d.data && d.data.data) || []).map(function(a){ return Object.assign({}, a, {_source:'platform'}); });
+      showAcDrop(rid, platform);
     } catch(e) {}
   }, 250);
 }
@@ -743,8 +744,11 @@ function showAcDrop(rid, items) {
   if (!items.length) { drop.classList.remove('open'); return; }
   items.forEach(function(a){ _macroCache[a.id] = { proteins: a.proteins!=null?a.proteins:null, carbohydrates: a.carbohydrates!=null?a.carbohydrates:null, fats: a.fats!=null?a.fats:null, calories: a.calories!=null?a.calories:null }; });
   drop.innerHTML = items.map(function(a){
-    return '<div class="ac-item" onmousedown="selectAliment(' + rid + ',' + a.id + ',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">'
-      + '<div class="ac-name">' + esc(a.name) + '</div>'
+    var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
+      + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">' + '👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">' + '🌐 Plataforma')
+      + '</span>';
+    return '<div class="ac-item" onmousedown="selectAliment(' + rid + ',' + JSON.stringify(a.id) + ',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">'
+      + '<div class="ac-name">' + esc(a.name) + srcBadge + '</div>'
       + (a.brand ? '<div class="ac-brand">' + esc(a.brand) + '</div>' : '')
       + '</div>';
   }).join('');

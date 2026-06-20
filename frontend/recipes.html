@@ -136,6 +136,10 @@
     .ingr-macro-chip.prot{background:#EDE9FE;color:#4F46E5;}
     .ingr-macro-chip.carb{background:#FED7AA;color:#C2410C;}
     .ingr-macro-chip.fat{background:#FEE2E2;color:#DC2626;}
+    .ingr-source-tabs{display:flex;gap:4px;margin-bottom:6px;}
+    .ingr-source-tab{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:all .15s;}
+    .ingr-source-tab.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+    .ingr-source-tab:hover:not(.active){border-color:var(--indigo);color:var(--indigo);}
     .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;max-height:200px;overflow-y:auto;display:none;}
     .ac-dropdown.open{display:block;}
     .ac-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #EBEBEB;}
@@ -652,13 +656,17 @@ function setCircle(id, val, max, label) {
 function addIngredientRow(detail) {
   if (!detail) detail = null;
   const rowId = ++_rowSeq;
-  const row = { id: rowId, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null };
+  const row = { id: rowId, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null, _source: 'platform' };
   _ingrRows.push(row);
 
   const card = document.createElement('div');
   card.className = 'ingr-card';
   card.id = 'irow-' + rowId;
   card.innerHTML =
+    '<div class="ingr-source-tabs">' +
+      '<button class="ingr-source-tab active" onclick="setIngrSource(\'' + rowId + '\',\'platform\',this)">🌐 Plataforma</button>' +
+      '<button class="ingr-source-tab" onclick="setIngrSource(\'' + rowId + '\',\'personal\',this)">👤 Personal</button>' +
+    '</div>' +
     '<div class="ingr-card-top">' +
       '<div class="ac-wrap">' +
         '<input type="text" id="iac-' + rowId + '" placeholder="Buscar alimento..." autocomplete="off"' +
@@ -763,16 +771,29 @@ async function resolveAlimentName(rowId, alimentId) {
   } catch(e) {}
 }
 
+function setIngrSource(rowId, src, btn) {
+  const row = _ingrRows.find(function(r) { return r.id == rowId; });
+  if (row) row._source = src;
+  const card = document.getElementById('irow-' + rowId);
+  if (card) card.querySelectorAll('.ingr-source-tab').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  const inp = document.getElementById('iac-' + rowId);
+  if (inp && inp.value.length >= 2) acSearch(rowId, inp.value);
+}
+
 async function acSearch(rowId, val) {
   clearTimeout(_acTimers[rowId]);
   if (!val || val.length < 2) { closeAc(rowId); return; }
   _acTimers[rowId] = setTimeout(async function() {
     try {
+      const row = _ingrRows.find(function(r) { return r.id == rowId; });
+      const src = row ? row._source : 'platform';
+      const endpoint = src === 'personal' ? API + '/client-aliments/search' : API + '/aliments/search';
       const p = new URLSearchParams({ search: val, per_page: 8, page: 1 });
-      const r = await fetch(API + '/aliments/search?' + p, { headers: headers() });
+      const r = await fetch(endpoint + '?' + p, { headers: headers() });
       const d = await r.json();
-      const platform = ((d.data && d.data.data) || []).map(a => ({ ...a, _source: 'platform' }));
-      showAcDropdown(rowId, platform);
+      const items = ((d.data && d.data.data) || []).map(function(a) { return Object.assign({}, a, { _source: src }); });
+      showAcDropdown(rowId, items);
     } catch(e) {}
   }, 250);
 }

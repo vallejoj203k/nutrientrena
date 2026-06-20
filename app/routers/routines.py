@@ -395,3 +395,67 @@ def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SU
     db.delete(routine)
     db.commit()
     return send_response(None, "Rutina eliminada")
+
+
+class _CloneBody(RoutineAssignRequest):
+    name: str = ""
+
+
+@router.post("/{id}/clone-to-client", summary="Asignar rutina existente a cliente", description="Copia una rutina del catálogo del coach al cliente especificado.")
+def clone_to_client(
+    id: int,
+    body: _CloneBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    from app.models.user import UserDetail
+    source = _get_or_404(db, id)
+    if not source:
+        return send_error("Rutina no encontrada")
+    client_detail = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
+    if not client_detail:
+        return send_error("Cliente no encontrado")
+
+    new_routine = Routine(
+        name=source.name,
+        user_id=client_detail.user_id,
+        gender_id=source.gender_id,
+        training=source.training,
+        training_level_id=source.training_level_id,
+        time=source.time,
+        days=source.days,
+    )
+    db.add(new_routine)
+    db.flush()
+
+    for day in source.days_list:
+        new_day = RoutineDay(routine_id=new_routine.id, day_name=day.day_name, description=day.description)
+        db.add(new_day)
+        db.flush()
+
+        for blk in sorted(day.blocks, key=lambda b: b.order_index):
+            new_blk = RoutineBlock(
+                routine_id=new_routine.id, routine_day_id=new_day.id,
+                block_type=blk.block_type, order_index=blk.order_index,
+            )
+            db.add(new_blk)
+            db.flush()
+            for ex in blk.exercises:
+                db.add(RoutineDayDetail(
+                    routine_id=new_routine.id, routine_day_id=new_day.id, block_id=new_blk.id,
+                    training_id=ex.training_id, series=ex.series, repetitions=ex.repetitions,
+                    break_time=ex.break_time, intensity_type=ex.intensity_type,
+                    intensity_value=ex.intensity_value, notes=ex.notes,
+                    order_index=ex.order_index or 0,
+                ))
+
+        for det in [d for d in day.details if d.block_id is None]:
+            db.add(RoutineDayDetail(
+                routine_id=new_routine.id, routine_day_id=new_day.id,
+                training_id=det.training_id, series=det.series,
+                repetitions=det.repetitions, break_time=det.break_time,
+            ))
+
+    db.commit()
+    db.refresh(new_routine)
+    return send_response(_serialize(new_routine), "Rutina asignada al cliente")

@@ -273,6 +273,18 @@
     .foods-list{display:flex;flex-wrap:wrap;gap:6px;}
     .food-chip{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:20px;padding:4px 12px;font-size:12px;color:#374151;}
 
+    /* ── Assign modals ── */
+    .assign-list{max-height:280px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:10px;}
+    .assign-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:.12s;border-left:3px solid transparent;}
+    .assign-item:last-child{border-bottom:none;}
+    .assign-item:hover{background:#F9FAFB;}
+    .assign-item.selected{background:#EEF2FF;border-left-color:#4F46E5;}
+    .assign-item-name{font-size:13px;font-weight:600;color:#111827;}
+    .assign-item-sub{font-size:11px;color:#9CA3AF;margin-top:2px;}
+    .assign-preview{background:#EEF2FF;border-radius:10px;padding:12px 14px;margin-top:10px;}
+    .assign-preview-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+    .assign-chip{background:#fff;border:1px solid #C7D2FE;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#4F46E5;}
+
     /* ── Notas ── */
     .note-item{padding:14px 0;border-bottom:1px solid #EBEBEB;}
     .note-item:last-child{border-bottom:none;}
@@ -666,6 +678,66 @@
       <button class="btn btn-primary" id="deliverBtn" onclick="deliverPlan()">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         <span id="deliverBtnLabel">Entregar plan</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Assign Diet Modal ── -->
+<div class="modal-overlay" id="assignDietOverlay" onclick="if(event.target===this)closeAssignDietModal()">
+  <div class="modal" style="width:520px;">
+    <div class="modal-head">
+      <h2>Asignar dieta al cliente</h2>
+      <button class="modal-close" onclick="closeAssignDietModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px;">
+        <input type="text" id="assignDietSearch" placeholder="Buscar dieta..." style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;" oninput="filterAssignList('diet',this.value)"/>
+      </div>
+      <div class="assign-list" id="assignDietList">
+        <div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando dietas…</div>
+      </div>
+      <div id="assignDietPreview" class="assign-preview" style="display:none;">
+        <div id="assignDietPreviewName" style="font-size:13px;font-weight:700;color:#4F46E5;"></div>
+        <div class="assign-preview-chips" id="assignDietPreviewChips"></div>
+      </div>
+      <div id="assignDietError" style="color:#DC2626;font-size:12px;margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAssignDietModal()">Cancelar</button>
+      <button class="btn btn-primary" id="assignDietBtn" onclick="confirmAssignDiet()" disabled>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Asignar dieta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Assign Routine Modal ── -->
+<div class="modal-overlay" id="assignRoutineOverlay" onclick="if(event.target===this)closeAssignRoutineModal()">
+  <div class="modal" style="width:520px;">
+    <div class="modal-head">
+      <h2>Asignar rutina al cliente</h2>
+      <button class="modal-close" onclick="closeAssignRoutineModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px;">
+        <input type="text" id="assignRoutineSearch" placeholder="Buscar rutina..." style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;" oninput="filterAssignList('routine',this.value)"/>
+      </div>
+      <div class="assign-list" id="assignRoutineList">
+        <div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando rutinas…</div>
+      </div>
+      <div id="assignRoutinePreview" class="assign-preview" style="display:none;">
+        <div id="assignRoutinePreviewName" style="font-size:13px;font-weight:700;color:#4F46E5;"></div>
+        <div class="assign-preview-chips" id="assignRoutinePreviewChips"></div>
+      </div>
+      <div id="assignRoutineError" style="color:#DC2626;font-size:12px;margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAssignRoutineModal()">Cancelar</button>
+      <button class="btn btn-primary" id="assignRoutineBtn" onclick="confirmAssignRoutine()" disabled>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Asignar rutina
       </button>
     </div>
   </div>
@@ -1994,6 +2066,7 @@ function renderEntrenamientoTab() {
     <div class="card" style="margin-bottom:16px;">
       <div class="card-head">
         <span class="card-title">Rutina asignada</span>
+        <button class="btn btn-ghost btn-sm" onclick="openAssignRoutineModal()">+ Asignar rutina</button>
       </div>
       <div id="routineSummary" style="padding:0 16px 16px;"></div>
     </div>
@@ -2139,12 +2212,17 @@ function renderNutricionTab() {
   if (!clientDiets.length) {
     el.innerHTML = `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
       <div style="font-size:40px;margin-bottom:12px;">🥗</div>
-      <p>Sin dieta asignada. Crea y asigna una dieta al cliente desde la sección de Dietas.</p>
+      <p style="margin-bottom:16px;">Sin dieta asignada.</p>
+      <button class="btn btn-primary btn-sm" onclick="openAssignDietModal()">+ Asignar dieta</button>
     </div>`;
     return;
   }
+  const headerHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <span style="font-size:14px;font-weight:700;color:#111;">Dietas asignadas</span>
+    <button class="btn btn-ghost btn-sm" onclick="openAssignDietModal()">+ Asignar otra dieta</button>
+  </div>`;
 
-  el.innerHTML = clientDiets.map(diet => {
+  el.innerHTML = headerHtml + clientDiets.map(diet => {
     const detail = diet.detail || diet.diet_detail || {};
     const proteins = detail.proteins || 0;
     const carbs = detail.carbs || 0;
@@ -2162,7 +2240,7 @@ function renderNutricionTab() {
         <div class="macro-bar-item"><div class="macro-bar-label">Grasas</div><div class="macro-bar-val fat">${Math.round(fats)}g</div></div>
       </div>` : ''}
       ${foods.length ? `
-      <div style="font-size:11px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Alimentos</div>
+      <div style="font-size:11px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Comidas</div>
       <div class="foods-list">${foods.map(f => `<span class="food-chip">${esc(f.name || '')}</span>`).join('')}</div>` : ''}
     </div>`;
   }).join('');
@@ -2350,6 +2428,190 @@ function toggleLibrary(el){
     });
   }
 })();
+
+/* ══════════════════════════════════════════════
+   ASSIGN DIET / ROUTINE FROM CLIENT PANEL
+══════════════════════════════════════════════ */
+let _assignDiets = [], _selectedDietId = null;
+let _assignRoutines = [], _selectedRoutineId = null;
+
+async function openAssignDietModal() {
+  _selectedDietId = null;
+  document.getElementById('assignDietError').textContent = '';
+  document.getElementById('assignDietSearch').value = '';
+  document.getElementById('assignDietPreview').style.display = 'none';
+  document.getElementById('assignDietBtn').disabled = true;
+  document.getElementById('assignDietList').innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando…</div>';
+  document.getElementById('assignDietOverlay').classList.add('open');
+  try {
+    const r = await fetch(`${API}/diets/findAll`, { headers: h() });
+    const j = await r.json();
+    _assignDiets = Array.isArray(j.data) ? j.data : [];
+    renderAssignDietList(_assignDiets);
+  } catch {
+    document.getElementById('assignDietList').innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar las dietas.</div>';
+  }
+}
+
+function closeAssignDietModal() {
+  document.getElementById('assignDietOverlay').classList.remove('open');
+  _selectedDietId = null;
+}
+
+function renderAssignDietList(diets) {
+  const el = document.getElementById('assignDietList');
+  if (!diets.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">No hay dietas en tu biblioteca.</div>'; return; }
+  el.innerHTML = diets.map(d => {
+    const det = d.detail || {};
+    const parts = [
+      d.calories ? Math.round(d.calories) + ' kcal' : '',
+      d.diet_type || '',
+      det.proteins ? Math.round(det.proteins) + 'P · ' + Math.round(det.carbs||0) + 'C · ' + Math.round(det.fats||0) + 'G' : '',
+    ].filter(Boolean);
+    return `<div class="assign-item" id="aditem-${esc(d.id)}" onclick="selectAssignDiet('${esc(d.id)}',this)">
+      <div class="assign-item-name">${esc(d.title || d.name || 'Sin nombre')}</div>
+      ${parts.length ? `<div class="assign-item-sub">${parts.join(' · ')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function selectAssignDiet(id, el) {
+  _selectedDietId = id;
+  document.querySelectorAll('#assignDietList .assign-item').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('assignDietBtn').disabled = false;
+  const diet = _assignDiets.find(d => d.id === id);
+  if (diet) {
+    const det = diet.detail || {};
+    document.getElementById('assignDietPreviewName').textContent = diet.title || diet.name || '';
+    const chips = [
+      diet.calories ? `<span class="assign-chip">🔥 ${Math.round(diet.calories)} kcal</span>` : '',
+      det.proteins ? `<span class="assign-chip">💪 ${Math.round(det.proteins)}g prot</span>` : '',
+      det.carbs ? `<span class="assign-chip">🌾 ${Math.round(det.carbs)}g carbs</span>` : '',
+      det.fats ? `<span class="assign-chip">🫒 ${Math.round(det.fats)}g grasas</span>` : '',
+    ].filter(Boolean);
+    document.getElementById('assignDietPreviewChips').innerHTML = chips.join('');
+    document.getElementById('assignDietPreview').style.display = 'block';
+  }
+}
+
+async function confirmAssignDiet() {
+  if (!_selectedDietId) return;
+  const btn = document.getElementById('assignDietBtn');
+  btn.disabled = true; btn.querySelector('span') ? btn.querySelector('span').textContent = 'Asignando…' : (btn.lastChild.textContent = 'Asignando…');
+  document.getElementById('assignDietError').textContent = '';
+  try {
+    const r = await fetch(`${API}/diets/${_selectedDietId}/assign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ client_id: clientId }),
+    });
+    const j = await r.json();
+    if (!r.ok) { document.getElementById('assignDietError').textContent = j.detail || j.message || 'Error al asignar'; return; }
+    closeAssignDietModal();
+    showToast('Dieta asignada correctamente', 'success');
+    const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
+    if (rd.ok) {
+      const jd = await rd.json();
+      const arr = jd.data || [];
+      clientDiets = Array.isArray(arr) ? arr.flatMap(g => g.diets || [g]).filter(d => d && d.id) : [];
+      if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
+    }
+    renderNutricionTab();
+  } catch { document.getElementById('assignDietError').textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; }
+}
+
+async function openAssignRoutineModal() {
+  _selectedRoutineId = null;
+  document.getElementById('assignRoutineError').textContent = '';
+  document.getElementById('assignRoutineSearch').value = '';
+  document.getElementById('assignRoutinePreview').style.display = 'none';
+  document.getElementById('assignRoutineBtn').disabled = true;
+  document.getElementById('assignRoutineList').innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando…</div>';
+  document.getElementById('assignRoutineOverlay').classList.add('open');
+  try {
+    const r = await fetch(`${API}/routines/findAll`, { headers: h() });
+    const j = await r.json();
+    _assignRoutines = Array.isArray(j.data) ? j.data : [];
+    renderAssignRoutineList(_assignRoutines);
+  } catch {
+    document.getElementById('assignRoutineList').innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar las rutinas.</div>';
+  }
+}
+
+function closeAssignRoutineModal() {
+  document.getElementById('assignRoutineOverlay').classList.remove('open');
+  _selectedRoutineId = null;
+}
+
+function renderAssignRoutineList(routines) {
+  const el = document.getElementById('assignRoutineList');
+  if (!routines.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">No hay rutinas en tu biblioteca.</div>'; return; }
+  el.innerHTML = routines.map(r => {
+    const parts = [
+      r.days ? r.days + ' días/sem' : '',
+      r.time ? r.time + ' min/sesión' : '',
+      r.training || '',
+    ].filter(Boolean);
+    return `<div class="assign-item" id="aritem-${r.id}" onclick="selectAssignRoutine(${r.id},this)">
+      <div class="assign-item-name">${esc(r.name || 'Sin nombre')}</div>
+      ${parts.length ? `<div class="assign-item-sub">${parts.join(' · ')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function selectAssignRoutine(id, el) {
+  _selectedRoutineId = id;
+  document.querySelectorAll('#assignRoutineList .assign-item').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('assignRoutineBtn').disabled = false;
+  const r = _assignRoutines.find(x => x.id === id);
+  if (r) {
+    document.getElementById('assignRoutinePreviewName').textContent = r.name || '';
+    const days = r.days_list ? r.days_list.length : r.days || 0;
+    const chips = [
+      r.days ? `<span class="assign-chip">📅 ${r.days} días/sem</span>` : '',
+      r.time ? `<span class="assign-chip">⏱ ${r.time} min</span>` : '',
+      r.training ? `<span class="assign-chip">🏋️ ${esc(r.training)}</span>` : '',
+      days ? `<span class="assign-chip">${days} días en la rutina</span>` : '',
+    ].filter(Boolean);
+    document.getElementById('assignRoutinePreviewChips').innerHTML = chips.join('');
+    document.getElementById('assignRoutinePreview').style.display = 'block';
+  }
+}
+
+async function confirmAssignRoutine() {
+  if (!_selectedRoutineId) return;
+  const btn = document.getElementById('assignRoutineBtn');
+  btn.disabled = true;
+  document.getElementById('assignRoutineError').textContent = '';
+  try {
+    const r = await fetch(`${API}/routines/${_selectedRoutineId}/clone-to-client`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ client_id: clientId, name: '' }),
+    });
+    const j = await r.json();
+    if (!r.ok) { document.getElementById('assignRoutineError').textContent = j.detail || j.message || 'Error al asignar'; return; }
+    closeAssignRoutineModal();
+    showToast('Rutina asignada correctamente', 'success');
+    const rr = await fetch(`${API}/routines/client/${clientId}`, { headers: h() });
+    if (rr.ok) {
+      const jr = await rr.json();
+      clientRoutines = Array.isArray(jr.data) ? jr.data : [];
+      if (clientRoutines.length) { _clientRoutineId = clientRoutines[0].id; document.getElementById('pdfRoutineBtn').style.display = 'inline-flex'; }
+    }
+    renderEntrenamientoTab();
+  } catch { document.getElementById('assignRoutineError').textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; }
+}
+
+function filterAssignList(type, q) {
+  q = (q || '').toLowerCase();
+  if (type === 'diet') renderAssignDietList(_assignDiets.filter(d => (d.title || '').toLowerCase().includes(q)));
+  else renderAssignRoutineList(_assignRoutines.filter(r => (r.name || '').toLowerCase().includes(q)));
+}
 </script>
 
 <!-- Library flyout -->

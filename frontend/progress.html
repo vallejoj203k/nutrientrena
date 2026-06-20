@@ -999,5 +999,26 @@ function adaptSidebar() {
 }
 adaptSidebar();
 </script>
+<script>
+function toggleLibrary(el){
+  if(!el||typeof el==='string') el=document.getElementById('navLibrary');
+  if(!el) return;
+  el.classList.toggle('open');
+  var sub=document.getElementById('librarySub');
+  if(sub) sub.classList.toggle('open');
+}
+(function(){
+  if(window.location.pathname.includes('library')){
+    document.addEventListener('DOMContentLoaded',function(){
+      var el=document.getElementById('navLibrary');
+      if(el) toggleLibrary(el);
+      var cat=new URLSearchParams(window.location.search).get('cat');
+      if(cat) document.querySelectorAll('.nav-sub-item').forEach(function(a){
+        if(a.href.includes('cat='+cat)) a.classList.add('active');
+      });
+    });
+  }
+})();
+</script>
 </body>
 </html>

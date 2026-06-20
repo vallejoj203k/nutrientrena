@@ -273,6 +273,47 @@
     .foods-list{display:flex;flex-wrap:wrap;gap:6px;}
     .food-chip{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:20px;padding:4px 12px;font-size:12px;color:#374151;}
 
+    /* ── Active plan cards ── */
+    .active-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    .apc{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;}
+    .apc-header{display:flex;align-items:flex-start;gap:12px;}
+    .apc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .apc-icon.diet{background:#EEF2FF;}
+    .apc-icon.routine{background:#F0FDF4;}
+    .apc-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#9CA3AF;margin-bottom:3px;}
+    .apc-name{font-size:15px;font-weight:800;color:#111827;line-height:1.3;}
+    .apc-badge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;align-self:flex-start;}
+    .apc-badge.deficit{background:#DBEAFE;color:#1D4ED8;}
+    .apc-badge.superavit{background:#D1FAE5;color:#059669;}
+    .apc-badge.mant{background:#F3F4F6;color:#6B7280;}
+    .apc-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+    .apc-macro{background:#F9FAFB;border-radius:8px;padding:8px 6px;text-align:center;}
+    .apc-macro .v{font-size:14px;font-weight:800;color:#111;}
+    .apc-macro .l{font-size:9px;color:#9CA3AF;font-weight:600;margin-top:1px;text-transform:uppercase;}
+    .apc-macro.kcal .v{color:#4F46E5;}
+    .apc-macro.prot .v{color:#2563EB;}
+    .apc-macro.carb .v{color:#D97706;}
+    .apc-macro.fat .v{color:#6366F1;}
+    .apc-meals{display:flex;flex-direction:column;gap:4px;}
+    .apc-meal{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:#F9FAFB;border-radius:7px;font-size:12px;}
+    .apc-meal-name{font-weight:600;color:#374151;}
+    .apc-meal-cnt{color:#9CA3AF;}
+    .apc-tags{display:flex;flex-wrap:wrap;gap:6px;}
+    .apc-tag{background:#F0FDF4;color:#059669;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
+    .apc-days{display:flex;flex-direction:column;gap:4px;}
+    .apc-day{display:flex;align-items:center;gap:8px;padding:5px 8px;background:#F9FAFB;border-radius:7px;font-size:12px;}
+    .apc-day-name{font-weight:700;color:#374151;min-width:44px;}
+    .apc-day-ex{color:#6B7280;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .apc-more{font-size:11px;color:#9CA3AF;text-align:center;padding:2px 0;}
+    .apc-footer{display:flex;gap:8px;margin-top:auto;}
+    .apc-see-btn{flex:1;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#374151;transition:.15s;text-align:center;}
+    .apc-see-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-pale);}
+    .apc-assign-btn{flex:1;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:var(--purple);color:#fff;transition:.15s;}
+    .apc-assign-btn:hover{opacity:.88;}
+    .apc-empty{text-align:center;padding:20px 0;color:#9CA3AF;}
+    .apc-empty p{font-size:12px;margin-bottom:12px;}
+    @media(max-width:900px){.active-plan-grid{grid-template-columns:1fr;}}
+
     /* ── Assign modals ── */
     .assign-list{max-height:280px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:10px;}
     .assign-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:.12s;border-left:3px solid transparent;}
@@ -551,6 +592,8 @@
       <div class="tab-pane active" id="tab-resumen">
         <!-- Stats -->
         <div class="grid-3" style="margin-bottom:16px;" id="statsRow"></div>
+        <!-- Active plan -->
+        <div class="active-plan-grid" id="activePlanRow"></div>
         <!-- Info + Checkins -->
         <div class="grid-2">
           <div class="card" id="infoCard">
@@ -1029,6 +1072,7 @@ function renderAll() {
   loadTarget();
 
   // New tabs
+  renderActivePlan();
   renderCalendarioTab();
   renderEntrenamientoTab();
   renderNutricionTab();
@@ -1048,6 +1092,122 @@ function renderAll() {
   pa.style.flexDirection = 'column';
   pa.style.overflow = 'hidden';
   pa.style.flex = '1';
+}
+
+/* ── Active plan summary (Resumen tab) ── */
+function renderActivePlan() {
+  const el = document.getElementById('activePlanRow');
+  if (!el) return;
+
+  const diet = clientDiets[0] || null;
+  const routine = clientRoutines[0] || null;
+
+  // ── Diet card ──
+  let dietHtml;
+  if (!diet) {
+    dietHtml = `<div class="apc">
+      <div class="apc-header">
+        <div class="apc-icon diet">🥗</div>
+        <div><div class="apc-label">Dieta activa</div><div class="apc-name" style="color:#9CA3AF;">Sin dieta asignada</div></div>
+      </div>
+      <div class="apc-empty"><p>Aún no tiene una dieta asignada.</p></div>
+      <div class="apc-footer">
+        <button class="apc-assign-btn" onclick="openAssignDietModal()">+ Asignar dieta</button>
+      </div>
+    </div>`;
+  } else {
+    const detail = diet.detail || diet.diet_detail || {};
+    const kcal = diet.calories ? Math.round(diet.calories) : (detail.calories ? Math.round(detail.calories) : null);
+    const prot = detail.proteins ? Math.round(detail.proteins) : null;
+    const carb = detail.carbs ? Math.round(detail.carbs) : null;
+    const fat  = detail.fats  ? Math.round(detail.fats)  : null;
+    const foods = diet.foods || diet.diet_foods || [];
+    const MAX_MEALS = 4;
+
+    const deficitVal = detail.deficit;
+    const surplusVal = detail.surplus;
+    let badgeHtml = '';
+    if (deficitVal) badgeHtml = `<span class="apc-badge deficit">Déficit</span>`;
+    else if (surplusVal) badgeHtml = `<span class="apc-badge superavit">Superávit</span>`;
+    else if (kcal) badgeHtml = `<span class="apc-badge mant">Mantenimiento</span>`;
+
+    const macrosHtml = (kcal || prot || carb || fat) ? `<div class="apc-macros">
+      <div class="apc-macro kcal"><div class="v">${kcal ?? '—'}</div><div class="l">kcal</div></div>
+      <div class="apc-macro prot"><div class="v">${prot ?? '—'}g</div><div class="l">Prot</div></div>
+      <div class="apc-macro carb"><div class="v">${carb ?? '—'}g</div><div class="l">Carb</div></div>
+      <div class="apc-macro fat"><div class="v">${fat ?? '—'}g</div><div class="l">Grasa</div></div>
+    </div>` : '';
+
+    const mealsSlice = foods.slice(0, MAX_MEALS);
+    const mealsHtml = foods.length ? `<div class="apc-meals">
+      ${mealsSlice.map(f => {
+        const cnt = (f.detail || []).length;
+        return `<div class="apc-meal"><span class="apc-meal-name">${esc(f.name || 'Comida')}</span><span class="apc-meal-cnt">${cnt} alimento${cnt !== 1 ? 's' : ''}</span></div>`;
+      }).join('')}
+      ${foods.length > MAX_MEALS ? `<div class="apc-more">+${foods.length - MAX_MEALS} más</div>` : ''}
+    </div>` : '';
+
+    dietHtml = `<div class="apc">
+      <div class="apc-header">
+        <div class="apc-icon diet">🥗</div>
+        <div style="flex:1;min-width:0;"><div class="apc-label">Dieta activa</div><div class="apc-name">${esc(diet.title || diet.name || 'Dieta')}</div></div>
+        ${badgeHtml}
+      </div>
+      ${macrosHtml}
+      ${mealsHtml}
+      <div class="apc-footer">
+        <button class="apc-see-btn" onclick="showTab('nutricion')">Ver plan completo</button>
+        <button class="apc-assign-btn" onclick="openAssignDietModal()">+ Asignar otra</button>
+      </div>
+    </div>`;
+  }
+
+  // ── Routine card ──
+  let routineHtml;
+  if (!routine) {
+    routineHtml = `<div class="apc">
+      <div class="apc-header">
+        <div class="apc-icon routine">🏋️</div>
+        <div><div class="apc-label">Rutina activa</div><div class="apc-name" style="color:#9CA3AF;">Sin rutina asignada</div></div>
+      </div>
+      <div class="apc-empty"><p>Aún no tiene una rutina asignada.</p></div>
+      <div class="apc-footer">
+        <button class="apc-assign-btn" onclick="openAssignRoutineModal()">+ Asignar rutina</button>
+      </div>
+    </div>`;
+  } else {
+    const days = routine.days_list || [];
+    const MAX_DAYS = 4;
+    const tagsHtml = `<div class="apc-tags">
+      ${routine.days ? `<span class="apc-tag">📅 ${routine.days} días/sem</span>` : ''}
+      ${routine.time ? `<span class="apc-tag">⏱ ${routine.time} min</span>` : ''}
+      ${days.length ? `<span class="apc-tag">🗓 ${days.length} días</span>` : ''}
+    </div>`;
+
+    const daysSlice = days.slice(0, MAX_DAYS);
+    const daysHtml = days.length ? `<div class="apc-days">
+      ${daysSlice.map(d => {
+        const exCount = (d.blocks || []).reduce((s, b) => s + (b.exercises || []).length, 0) || (d.details || []).length;
+        return `<div class="apc-day"><span class="apc-day-name">${esc(d.day_name || 'Día')}</span><span class="apc-day-ex">${exCount} ejercicio${exCount !== 1 ? 's' : ''}</span></div>`;
+      }).join('')}
+      ${days.length > MAX_DAYS ? `<div class="apc-more">+${days.length - MAX_DAYS} días más</div>` : ''}
+    </div>` : '';
+
+    routineHtml = `<div class="apc">
+      <div class="apc-header">
+        <div class="apc-icon routine">🏋️</div>
+        <div style="flex:1;min-width:0;"><div class="apc-label">Rutina activa</div><div class="apc-name">${esc(routine.name || 'Rutina')}</div></div>
+      </div>
+      ${tagsHtml}
+      ${daysHtml}
+      <div class="apc-footer">
+        <button class="apc-see-btn" onclick="showTab('entrenamiento')">Ver rutina completa</button>
+        <button class="apc-assign-btn" onclick="openAssignRoutineModal()">+ Asignar otra</button>
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML = dietHtml + routineHtml;
 }
 
 /* ── Form tab ── */

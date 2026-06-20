@@ -13,7 +13,7 @@ from app.core.limiter import limiter
 from app.routers import (
     auth, users, roles, menus, parameters, countries,
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
-    analytics, public, session_logs, client_tasks, programs, weekly_menus,
+    analytics, public, session_logs, client_tasks, programs, weekly_menus, client_exercises,
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes, client_aliments
@@ -56,6 +56,7 @@ _tags_metadata = [
     {"name": "Nutrition - TypeFood", "description": "Tipos de alimento (proteína, carbohidrato, grasa, etc.)."},
     {"name": "Nutrition - GroupFood", "description": "Grupos de alimentos (carnes, verduras, lácteos, etc.)."},
     {"name": "Nutrition - Client Aliments", "description": "Alimentos personalizados por cliente creados por el coach."},
+    {"name": "Client Exercises", "description": "Ejercicios personalizados por cliente creados por el coach."},
 ]
 
 app = FastAPI(
@@ -123,6 +124,7 @@ app.include_router(aliments.router, prefix=API_PREFIX)
 app.include_router(diets.router, prefix=API_PREFIX)
 app.include_router(recipes.router, prefix=API_PREFIX)
 app.include_router(client_aliments.router, prefix=API_PREFIX)
+app.include_router(client_exercises.router, prefix=API_PREFIX)
 app.include_router(session_logs.router, prefix=API_PREFIX)
 app.include_router(client_tasks.router, prefix=API_PREFIX)
 app.include_router(programs.router, prefix=API_PREFIX)

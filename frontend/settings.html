@@ -83,6 +83,14 @@
     .nav-sub-item:hover{color:var(--indigo);background:#EEF2FF;padding-left:18px;}
     .nav-sub-item:hover svg{opacity:1;}
     .nav-sub-item.active{color:var(--indigo);font-weight:600;background:#EEF2FF;}
+
+    .nav-sub-item{cursor:pointer;}
+    .sub-arrow{margin-left:auto;opacity:.4;flex-shrink:0;}
+    .nav-sub-item:hover .sub-arrow{opacity:1;}
+    .flyout-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#374151;text-decoration:none;font-size:13.5px;transition:background .15s,color .15s;cursor:pointer;}
+    .flyout-item:hover{background:#F5F3FF;color:#4F46E5;}
+    .flyout-item svg{opacity:.6;flex-shrink:0;}
+    .flyout-item:hover svg{opacity:1;}
   </style>
   <style>
     /* ALZUM.io — theme overrides */
@@ -143,10 +151,10 @@
       <svg class="nav-chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
     <div class="nav-sub" id="librarySub">
-      <a class="nav-sub-item" href="library.html?cat=entrenamiento"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></svg>Entrenamiento</a>
-      <a class="nav-sub-item" href="library.html?cat=nutricion"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Nutrición</a>
-      <a class="nav-sub-item" href="library.html?cat=formulario"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Formulario</a>
-      <a class="nav-sub-item" href="library.html?cat=documento"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documento</a>
+      <div class="nav-sub-item" onclick="openFlyout(event,'entrenamiento')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></svg>Entrenamiento<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="nav-sub-item" onclick="openFlyout(event,'nutricion')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Nutrición<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="nav-sub-item" onclick="openFlyout(event,'formulario')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Formulario<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="nav-sub-item" onclick="openFlyout(event,'documento')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documento<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
     <div class="nav-section">Comunicación</div>
     <a class="nav-item" href="forms.html">
@@ -374,6 +382,59 @@ function adaptSidebar() {
 adaptSidebar();
 </script>
 <script>
+var _flyoutMenus={
+  entrenamiento:{title:'Entrenamiento',color:'#4F46E5',items:[
+    {label:'Rutinas',href:'rutinas.html',icon:'<path d="M3 12h18M3 6h18M3 18h18"/>'},
+    {label:'Ejercicios',href:'ejercicios.html',icon:'<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>'},
+    {label:'Grupos Musculares',href:'grupos-musculares.html',icon:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'},
+    {label:'Programas',href:'programas.html',icon:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'}
+  ]},
+  nutricion:{title:'Nutrición',color:'#059669',items:[
+    {label:'Dietas',href:'diets.html',icon:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+    {label:'Menús',href:'menus.html',icon:'<path d="M3 11l19-9-9 19-2-8-8-2z"/>'},
+    {label:'Alimentos',href:'aliments.html',icon:'<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>'},
+    {label:'Recetas',href:'recipes.html',icon:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'},
+    {label:'Catálogos',href:'nutrition-catalog.html',icon:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>'}
+  ]},
+  formulario:{title:'Formulario',color:'#D97706',items:[
+    {label:'Check-ins',href:'checkins.html',icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
+    {label:'Onboarding',href:'onboarding.html',icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+    {label:'Encuestas',href:'encuestas.html',icon:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'}
+  ]},
+  documento:{title:'Documentos',color:'#7C3AED',items:[
+    {label:'Contratos',href:'contratos.html',icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'},
+    {label:'Guías',href:'guias.html',icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
+    {label:'Plantillas',href:'plantillas.html',icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>'}
+  ]}
+};
+function openFlyout(e,cat){
+  e.stopPropagation();
+  var menu=_flyoutMenus[cat]; if(!menu) return;
+  var panel=document.getElementById('flyoutPanel');
+  var backdrop=document.getElementById('flyoutBackdrop');
+  var rect=e.currentTarget.getBoundingClientRect();
+  document.getElementById('flyoutTitle').textContent=menu.title;
+  document.getElementById('flyoutDot').style.background=menu.color;
+  var html='';
+  menu.items.forEach(function(item){
+    html+='<a class="flyout-item" href="'+item.href+'"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+item.icon+'</svg>'+item.label+'</a>';
+  });
+  document.getElementById('flyoutItems').innerHTML=html;
+  panel.style.top=Math.min(rect.top,window.innerHeight-(menu.items.length*44+60))+'px';
+  panel.style.display='block';
+  backdrop.style.display='block';
+  requestAnimationFrame(function(){
+    panel.style.transform='translateX(0)';
+    panel.style.opacity='1';
+  });
+}
+function closeFlyout(){
+  var panel=document.getElementById('flyoutPanel');
+  var backdrop=document.getElementById('flyoutBackdrop');
+  panel.style.transform='translateX(-8px)';
+  panel.style.opacity='0';
+  setTimeout(function(){panel.style.display='none';backdrop.style.display='none';},200);
+}
 function toggleLibrary(el){
   if(!el||typeof el==='string') el=document.getElementById('navLibrary');
   if(!el) return;
@@ -394,5 +455,15 @@ function toggleLibrary(el){
   }
 })();
 </script>
+
+<!-- Library flyout -->
+<div id="flyoutBackdrop" onclick="closeFlyout()" style="display:none;position:fixed;inset:0;z-index:998;"></div>
+<div id="flyoutPanel" style="display:none;position:fixed;left:244px;z-index:999;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);border:1px solid #E5E7EB;min-width:200px;overflow:hidden;transform:translateX(-8px);opacity:0;transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .2s ease;">
+  <div id="flyoutHeader" style="padding:12px 16px 10px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:8px;">
+    <div id="flyoutDot" style="width:8px;height:8px;border-radius:50%;"></div>
+    <span id="flyoutTitle" style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;"></span>
+  </div>
+  <div id="flyoutItems" style="padding:6px;"></div>
+</div>
 </body>
 </html>

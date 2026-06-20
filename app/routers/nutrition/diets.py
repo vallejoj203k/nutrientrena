@@ -7,7 +7,7 @@ from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment
 from app.models.nutrition.aliment import Aliment
-from app.schemas.nutrition.diet import DietCreate, DietUpdate, DietOut
+from app.schemas.nutrition.diet import DietCreate, DietUpdate, DietOut, DietFoodCreate, DietFoodAlimentCreate
 from app.pdf.diet_pdf import generate_diet_pdf
 
 router = APIRouter(prefix="/diets", tags=["Nutrition - Diets"])
@@ -263,3 +263,64 @@ def delete(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SU
     db.delete(diet)
     db.commit()
     return send_response(None, "Dieta eliminada")
+
+
+class _AssignBody(DietCreate):
+    client_id: str
+    title: str = ""
+
+
+@router.post("/{id}/assign", summary="Asignar dieta existente a cliente", description="Copia una dieta del catálogo del coach al cliente especificado.")
+def assign_to_client(
+    id: str,
+    body: _AssignBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    from app.models.user import UserDetail
+    source = _get_or_404(db, id)
+    if not source:
+        return send_error("Dieta no encontrada")
+    client_detail = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
+    if not client_detail:
+        return send_error("Cliente no encontrado")
+
+    new_diet = Diet(
+        title=source.title,
+        calories=source.calories,
+        quantity=source.quantity,
+        type_id=source.type_id,
+        user_id=client_detail.user_id,
+        created_user_id=current_user.id,
+    )
+    db.add(new_diet)
+    db.flush()
+
+    if source.detail:
+        d = source.detail
+        db.add(DietDetail(
+            diet_id=new_diet.id,
+            proteins=d.proteins, carbs=d.carbs, fats=d.fats,
+            deficit=d.deficit, surplus=d.surplus,
+            height=d.height, weight=d.weight, body_fat=d.body_fat,
+            level_activity_id=d.level_activity_id, objective_id=d.objective_id,
+        ))
+
+    foods_data = [
+        DietFoodCreate(
+            name=food.name,
+            detail=[
+                DietFoodAlimentCreate(
+                    aliment_id=dfa.aliment_id,
+                    quantity_calc=dfa.quantity,
+                    order=dfa.order,
+                )
+                for dfa in food.detail
+            ],
+        )
+        for food in source.foods
+    ]
+    _save_foods(db, new_diet.id, foods_data, current_user.id)
+    db.commit()
+    db.refresh(new_diet)
+    return send_response(_serialize(new_diet), "Dieta asignada al cliente")

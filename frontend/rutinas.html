@@ -926,7 +926,7 @@ async function openAssignModal(routineId, routineName){
   _updateAssignFooter();
   if(!_assignAllClients.length){
     try{
-      const r=await fetch(`${API}/users/client`,{headers:authHeaders()});
+      const r=await fetch(`${API}/users/client/findAll`,{headers:authHeaders()});
       const d=await r.json();
       _assignAllClients=(d.data||[]).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
     }catch{

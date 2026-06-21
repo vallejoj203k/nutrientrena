@@ -248,6 +248,72 @@
     .ex-name-col{flex:1;font-weight:500;color:#111;}
     .ex-meta{color:#9CA3AF;font-size:12px;white-space:nowrap;}
 
+    /* ── Calendario v2 — task-based ── */
+    .cal-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+    .cal-nav{display:flex;align-items:center;gap:8px;}
+    .cal-nav-btn{background:#F3F4F6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;transition:.15s;}
+    .cal-nav-btn:hover{background:#E5E7EB;}
+    .cal-period-label{font-size:15px;font-weight:800;color:#111;min-width:160px;text-align:center;}
+    .cal-view-btns{display:flex;gap:4px;background:#F3F4F6;border-radius:8px;padding:3px;}
+    .cal-view-btn{padding:5px 14px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#6B7280;background:transparent;transition:.15s;}
+    .cal-view-btn.active{background:#fff;color:#4F46E5;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+    /* week grid */
+    .cal-week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;}
+    .cal-wday-hdr{text-align:center;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;padding-bottom:4px;}
+    .cal-wcell{background:#fff;border:1.5px solid #E5E7EB;border-radius:10px;padding:8px 6px;min-height:90px;cursor:pointer;transition:.15s;position:relative;}
+    .cal-wcell:hover{border-color:#C4B5FD;}
+    .cal-wcell.today{border-color:#4F46E5;background:#F5F3FF;}
+    .cal-wcell.selected{border-color:#7C3AED;box-shadow:0 0 0 2px #DDD6FE;}
+    .cal-wcell-num{font-size:13px;font-weight:800;color:#374151;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;}
+    .cal-wcell-num.today-num{color:#4F46E5;}
+    .cal-wcell-tasks{display:flex;flex-direction:column;gap:2px;}
+    .cal-task-pill{font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:3px;}
+    .cal-task-pill.done{opacity:.5;text-decoration:line-through;}
+    .cal-more-pill{font-size:10px;color:#9CA3AF;padding:1px 0;}
+    .cal-checkin-dot{width:6px;height:6px;border-radius:50%;background:#F59E0B;display:inline-block;flex-shrink:0;}
+    /* month grid */
+    .cal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+    .cal-mcell{background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:6px;min-height:72px;cursor:pointer;transition:.15s;}
+    .cal-mcell:hover{border-color:#C4B5FD;}
+    .cal-mcell.today{border-color:#4F46E5;background:#F5F3FF;}
+    .cal-mcell.other-month{opacity:.4;}
+    .cal-mcell-num{font-size:11px;font-weight:700;color:#374151;margin-bottom:3px;}
+    .cal-mcell-num.today-num{color:#4F46E5;}
+    .cal-mcell-dots{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px;}
+    .cal-mcell-dot{width:7px;height:7px;border-radius:50%;}
+    /* day detail panel */
+    .cal-day-panel{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:20px;margin-top:12px;}
+    .cal-day-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .cal-day-panel-title{font-size:15px;font-weight:800;color:#111;}
+    .cal-task-card{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;}
+    .cal-task-card:last-child{border-bottom:none;}
+    .cal-task-color-bar{width:4px;border-radius:4px;flex-shrink:0;align-self:stretch;}
+    .cal-task-body{flex:1;min-width:0;}
+    .cal-task-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9CA3AF;margin-bottom:2px;}
+    .cal-task-title{font-size:13px;font-weight:600;color:#111;}
+    .cal-task-notes{font-size:11px;color:#9CA3AF;margin-top:2px;}
+    .cal-task-done-btn{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#374151;transition:.15s;white-space:nowrap;}
+    .cal-task-done-btn.done{background:#ECFDF5;border-color:#6EE7B7;color:#059669;}
+    .cal-task-done-btn:hover{border-color:#7C3AED;color:#7C3AED;}
+    .cal-checkin-card{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 12px;margin-top:4px;}
+    .cal-checkin-title{font-size:12px;font-weight:700;color:#D97706;margin-bottom:6px;}
+    .cal-checkin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+    .cal-checkin-item{text-align:center;background:#fff;border-radius:6px;padding:4px;}
+    .cal-checkin-item .v{font-size:13px;font-weight:800;color:#111;}
+    .cal-checkin-item .l{font-size:9px;color:#9CA3AF;text-transform:uppercase;}
+    /* task create modal */
+    .cal-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1100;display:flex;align-items:center;justify-content:center;}
+    .cal-modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+    .cal-modal-title{font-size:16px;font-weight:800;color:#111;margin-bottom:18px;}
+    .cal-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+    .cal-type-btn{padding:8px 4px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;cursor:pointer;font-size:11px;font-weight:600;text-align:center;transition:.15s;}
+    .cal-type-btn:hover,.cal-type-btn.sel{border-color:#7C3AED;background:#F5F3FF;color:#7C3AED;}
+    /* checkin form */
+    .cal-checkin-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+    .cal-fin{display:flex;flex-direction:column;gap:3px;}
+    .cal-fin label{font-size:11px;font-weight:600;color:#6B7280;}
+    .cal-fin input{border:1px solid #E5E7EB;border-radius:6px;padding:6px 8px;font-size:13px;width:100%;}
+
     /* ── Entrenamiento / sesiones ── */
     .session-card{background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:16px;display:flex;align-items:center;gap:16px;margin-bottom:8px;}
     .session-date-box{background:#EEF2FF;border-radius:8px;padding:8px 12px;text-align:center;min-width:52px;}
@@ -2124,94 +2190,499 @@ async function saveTarget() {
 
 <script>
 /* ══════════════════════════════════════════════
-   CALENDARIO TAB
+   CALENDARIO TAB  (v2 — calendar_tasks API)
 ══════════════════════════════════════════════ */
-const DAY_NAMES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-let calSelectedDay = null;
+const DAY_NAMES  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const TASK_TYPE_LABELS = {
+  rutina:'🏋️ Rutina', cardio:'🏃 Cardio', descanso:'😴 Descanso',
+  nutricion:'🥗 Nutrición', checkin:'📊 Check-in', foto:'📷 Foto',
+  mensaje:'💬 Mensaje', video:'🎬 Video', sesion:'⚡ Sesión', otro:'📌 Otro',
+};
+
+let _calView       = 'week';   // 'week' | 'month'
+let _calRefDate    = new Date();
+let _calData       = {};       // keyed by YYYY-MM-DD → {tasks, checkins}
+let _calLoading    = false;
+let _calSelDate    = null;     // currently selected date string
+let _calNewType    = 'rutina'; // selected type in create modal
+let _calCheckinTaskId = null;  // task id for checkin registration
+
+function _isoDate(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function _mondayOf(d) {
+  const r = new Date(d);
+  r.setDate(r.getDate() - ((r.getDay() + 6) % 7));
+  return r;
+}
 
 function renderCalendarioTab() {
   const el = document.getElementById('calendarioContent');
   if (!el) return;
+  _renderCalToolbar();
+  _loadCalData();
+}
 
-  if (!clientRoutines.length) {
-    el.innerHTML = `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
-      <div style="font-size:40px;margin-bottom:12px;">📅</div>
-      <p>Sin rutina asignada. Asigna una rutina al cliente para ver su calendario.</p>
-    </div>`;
-    return;
+function _renderCalToolbar() {
+  const el = document.getElementById('calendarioContent');
+  if (!el) return;
+
+  let periodLabel = '';
+  if (_calView === 'week') {
+    const mon = _mondayOf(_calRefDate);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    const mL = MONTH_NAMES[mon.getMonth()].slice(0,3);
+    const sL = MONTH_NAMES[sun.getMonth()].slice(0,3);
+    periodLabel = mon.getMonth() === sun.getMonth()
+      ? `${mL} ${mon.getDate()}–${sun.getDate()}, ${mon.getFullYear()}`
+      : `${mL} ${mon.getDate()} – ${sL} ${sun.getDate()}, ${mon.getFullYear()}`;
+  } else {
+    periodLabel = `${MONTH_NAMES[_calRefDate.getMonth()]} ${_calRefDate.getFullYear()}`;
   }
-
-  const routine = clientRoutines[0];
-  const days = routine.days_list || [];
-  const today = new Date();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-
-  let gridHtml = DAY_NAMES.map((name, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const dayNum = d.getDate();
-    const routineDay = days[i]; // map Mon→Day1, Tue→Day2, etc.
-    const isToday = d.toDateString() === today.toDateString();
-    const hasWorkout = !!routineDay;
-    const totalExercises = routineDay ? (routineDay.blocks || []).reduce((sum, b) => sum + (b.exercises || []).length, 0) : 0;
-    return `<div class="cal-day ${hasWorkout ? 'has-workout' : 'rest-day'}" onclick="calSelectDay(${i})"
-      style="${isToday ? 'box-shadow:0 0 0 2px #4F46E5;' : ''}">
-      <div class="cal-day-name">${name}</div>
-      <div class="cal-day-num" style="${isToday ? 'color:#4F46E5;' : ''}">${dayNum}</div>
-      ${hasWorkout
-        ? `<div class="cal-day-label">${esc(routineDay.day_name || `Día ${i+1}`)}</div>
-           <div class="cal-day-blocks">${totalExercises} ejercicio${totalExercises !== 1 ? 's' : ''}</div>`
-        : `<div class="cal-day-label" style="color:#9CA3AF;">Descanso</div>`}
-    </div>`;
-  }).join('');
-
-  let detailHtml = `<div id="calDayDetail" style="display:none;" class="cal-detail"></div>`;
 
   el.innerHTML = `
     <div class="card" style="padding:20px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <h3 style="font-size:15px;font-weight:700;color:#111;">Semana actual — ${esc(routine.name)}</h3>
-        <span style="font-size:12px;color:#9CA3AF;">${days.length} día${days.length !== 1 ? 's' : ''} programados</span>
+      <div class="cal-toolbar">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="_calPrev()">‹</button>
+          <span class="cal-period-label">${periodLabel}</span>
+          <button class="cal-nav-btn" onclick="_calNext()">›</button>
+          <button class="cal-nav-btn" onclick="_calToday()" style="margin-left:4px;">Hoy</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-primary btn-sm" onclick="openCalTaskModal()">+ Tarea</button>
+          <div class="cal-view-btns">
+            <button class="cal-view-btn ${_calView==='week'?'active':''}" onclick="_setCalView('week')">Semana</button>
+            <button class="cal-view-btn ${_calView==='month'?'active':''}" onclick="_setCalView('month')">Mes</button>
+          </div>
+        </div>
       </div>
-      <div class="cal-grid">${gridHtml}</div>
-      ${detailHtml}
+      <div id="calGridArea"><div style="text-align:center;padding:40px;color:#9CA3AF;">Cargando…</div></div>
+      <div id="calDayPanel" style="display:none;" class="cal-day-panel"></div>
     </div>`;
 }
 
-function calSelectDay(idx) {
-  const routine = clientRoutines[0];
-  const days = routine?.days_list || [];
-  const routineDay = days[idx];
-  const box = document.getElementById('calDayDetail');
-  if (!box) return;
-  if (calSelectedDay === idx) { box.style.display = 'none'; calSelectedDay = null; return; }
-  calSelectedDay = idx;
-  if (!routineDay) { box.style.display = 'none'; return; }
+async function _loadCalData() {
+  if (_calLoading) return;
+  _calLoading = true;
+  try {
+    let url;
+    if (_calView === 'week') {
+      const mon = _mondayOf(_calRefDate);
+      url = `${API}/calendar-tasks/week/${clientId}?week=${_isoDate(mon)}`;
+    } else {
+      url = `${API}/calendar-tasks/month/${clientId}?year=${_calRefDate.getFullYear()}&month=${_calRefDate.getMonth()+1}`;
+    }
+    const r = await fetch(url, { headers: h() });
+    const j = await r.json();
+    if (!j.success) { _renderCalGrid({}); return; }
 
-  const BLOCK_LABELS = { warmup:'🔥 Calentamiento', normal:'📋 Normal', superset:'🔄 Superserie', circuit:'⭕ Circuito' };
-  const blocks = routineDay.blocks || [];
-  let html = `<h4>${esc(routineDay.day_name || `Día ${idx+1}`)}</h4>`;
-  if (!blocks.length) { html += '<p style="color:#9CA3AF;font-size:13px;">Sin ejercicios cargados.</p>'; }
-  blocks.forEach(blk => {
-    html += `<div style="margin-bottom:12px;">
-      <span class="block-badge-sm ${blk.block_type || 'normal'}">${BLOCK_LABELS[blk.block_type] || blk.block_type}</span>`;
-    (blk.exercises || []).forEach(ex => {
-      const parts = [];
-      if (ex.series) parts.push(`${ex.series} series`);
-      if (ex.repetitions) parts.push(`× ${ex.repetitions} reps`);
-      if (ex.break_time) parts.push(`${ex.break_time}s descanso`);
-      if (ex.intensity_type && ex.intensity_value != null) parts.push(`${ex.intensity_type.toUpperCase()} ${ex.intensity_value}`);
-      html += `<div class="ex-row">
-        <div class="ex-name-col">${esc(ex.training_name || 'Ejercicio')}
-          ${ex.muscle_group_name ? `<span style="font-size:11px;color:#9CA3AF;"> · ${esc(ex.muscle_group_name)}</span>` : ''}</div>
-        <div class="ex-meta">${parts.join(' · ')}</div>
-      </div>`;
-    });
-    html += '</div>';
+    if (_calView === 'week') {
+      // convert days array → by_date dict
+      _calData = {};
+      (j.data.days || []).forEach(d => {
+        _calData[d.date] = { tasks: d.tasks || [], checkins: d.checkins || [] };
+      });
+    } else {
+      _calData = j.data.by_day || {};
+    }
+    _renderCalGrid(_calData);
+  } catch(e) {
+    _renderCalGrid({});
+  } finally {
+    _calLoading = false;
+  }
+}
+
+function _renderCalGrid(data) {
+  const area = document.getElementById('calGridArea');
+  if (!area) return;
+  if (_calView === 'week') {
+    _renderWeekGrid(area, data);
+  } else {
+    _renderMonthGrid(area, data);
+  }
+  // Re-select same date if still in range
+  if (_calSelDate && data[_calSelDate]) {
+    _renderDayPanel(_calSelDate);
+  } else {
+    _calSelDate = null;
+    const panel = document.getElementById('calDayPanel');
+    if (panel) panel.style.display = 'none';
+  }
+}
+
+function _renderWeekGrid(area, data) {
+  const today = _isoDate(new Date());
+  const mon   = _mondayOf(_calRefDate);
+
+  const headers = DAY_NAMES.map(n =>
+    `<div class="cal-wday-hdr">${n}</div>`
+  ).join('');
+
+  const cells = DAY_NAMES.map((_, i) => {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    const key = _isoDate(d);
+    const entry = data[key] || { tasks: [], checkins: [] };
+    const isToday = key === today;
+    const isSel   = key === _calSelDate;
+    const MAX_SHOW = 3;
+    const pills = entry.tasks.slice(0, MAX_SHOW).map(t =>
+      `<div class="cal-task-pill ${t.done?'done':''}"
+           style="background:${t.color}22;color:${t.color};">
+         ${t.done ? '✓ ' : ''}${esc(t.title || TASK_TYPE_LABELS[t.task_type] || t.task_type)}
+       </div>`
+    ).join('');
+    const more = entry.tasks.length > MAX_SHOW
+      ? `<div class="cal-more-pill">+${entry.tasks.length - MAX_SHOW} más</div>` : '';
+    const checkinDot = entry.checkins.length
+      ? `<span class="cal-checkin-dot" title="Check-in registrado"></span>` : '';
+
+    return `<div class="cal-wcell ${isToday?'today':''} ${isSel?'selected':''}"
+                 onclick="calSelectDate('${key}')">
+      <div class="cal-wcell-num ${isToday?'today-num':''}">
+        <span>${d.getDate()}</span>${checkinDot}
+      </div>
+      <div class="cal-wcell-tasks">${pills}${more}</div>
+    </div>`;
+  }).join('');
+
+  area.innerHTML = `
+    <div class="cal-week-grid">${headers}</div>
+    <div class="cal-week-grid">${cells}</div>`;
+}
+
+function _renderMonthGrid(area, data) {
+  const today = _isoDate(new Date());
+  const y = _calRefDate.getFullYear();
+  const m = _calRefDate.getMonth();
+  const firstDay = new Date(y, m, 1);
+  const lastDay  = new Date(y, m + 1, 0);
+  // pad to Monday-aligned grid
+  const startPad = (firstDay.getDay() + 6) % 7;
+  const totalCells = Math.ceil((startPad + lastDay.getDate()) / 7) * 7;
+
+  const headers = DAY_NAMES.map(n =>
+    `<div class="cal-wday-hdr" style="margin-bottom:4px;">${n}</div>`
+  ).join('');
+
+  let cells = '';
+  for (let i = 0; i < totalCells; i++) {
+    const cellDate = new Date(firstDay);
+    cellDate.setDate(1 - startPad + i);
+    const key = _isoDate(cellDate);
+    const otherMonth = cellDate.getMonth() !== m;
+    const isToday = key === today;
+    const entry = data[key] || { tasks: [], checkins: [] };
+    const dots = [...entry.tasks.slice(0, 4).map(t =>
+      `<div class="cal-mcell-dot" style="background:${t.color};"></div>`
+    ), ...(entry.checkins.length ? [`<div class="cal-mcell-dot" style="background:#F59E0B;"></div>`] : [])].join('');
+
+    cells += `<div class="cal-mcell ${isToday?'today':''} ${otherMonth?'other-month':''}"
+                   onclick="calSelectDate('${key}')">
+      <div class="cal-mcell-num ${isToday?'today-num':''}">${cellDate.getDate()}</div>
+      <div class="cal-mcell-dots">${dots}</div>
+    </div>`;
+  }
+
+  area.innerHTML = `
+    <div class="cal-month-grid">${headers}</div>
+    <div class="cal-month-grid">${cells}</div>`;
+}
+
+function calSelectDate(dateStr) {
+  if (_calSelDate === dateStr) {
+    _calSelDate = null;
+    const panel = document.getElementById('calDayPanel');
+    if (panel) panel.style.display = 'none';
+    _renderCalGrid(_calData);
+    return;
+  }
+  _calSelDate = dateStr;
+  _renderCalGrid(_calData);
+  _renderDayPanel(dateStr);
+}
+
+function _renderDayPanel(dateStr) {
+  const panel = document.getElementById('calDayPanel');
+  if (!panel) return;
+  const entry = _calData[dateStr] || { tasks: [], checkins: [] };
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const label = `${d} de ${MONTH_NAMES[m-1]} ${y}`;
+
+  let html = `<div class="cal-day-panel-head">
+    <span class="cal-day-panel-title">📅 ${label}</span>
+    <button class="btn btn-primary btn-sm" onclick="openCalTaskModal('${dateStr}')">+ Tarea</button>
+  </div>`;
+
+  if (!entry.tasks.length && !entry.checkins.length) {
+    html += `<p style="color:#9CA3AF;font-size:13px;">Sin tareas ni check-ins para este día.</p>`;
+  }
+
+  entry.tasks.forEach(t => {
+    const doneClass = t.done ? 'done' : '';
+    html += `<div class="cal-task-card">
+      <div class="cal-task-color-bar" style="background:${t.color};min-height:44px;"></div>
+      <div class="cal-task-body">
+        <div class="cal-task-type">${TASK_TYPE_LABELS[t.task_type] || t.task_type}</div>
+        <div class="cal-task-title ${doneClass}" style="${t.done?'opacity:.55;text-decoration:line-through;':''}">${esc(t.title || '—')}</div>
+        ${t.notes ? `<div class="cal-task-notes">${esc(t.notes)}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+        ${t.task_type === 'checkin' && !t.done
+          ? `<button class="cal-task-done-btn" onclick="openCheckinForm(${t.id},'${dateStr}')">📊 Registrar</button>`
+          : `<button class="cal-task-done-btn ${t.done?'done':''}" onclick="calToggleDone(${t.id},${!t.done},'${dateStr}')">${t.done?'✓ Hecho':'Marcar hecho'}</button>`}
+        <button onclick="calDeleteTask(${t.id},'${dateStr}')" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:18px;line-height:1;" title="Eliminar">×</button>
+      </div>
+    </div>`;
   });
-  box.innerHTML = html;
-  box.style.display = 'block';
+
+  entry.checkins.forEach(c => {
+    const fields = [
+      c.weight   ? {l:'Peso',    v: c.weight+'kg'}  : null,
+      c.body_fat ? {l:'% Grasa', v: c.body_fat+'%'} : null,
+      c.waist    ? {l:'Cintura', v: c.waist+'cm'}   : null,
+      c.chest    ? {l:'Pecho',   v: c.chest+'cm'}   : null,
+      c.arms     ? {l:'Brazos',  v: c.arms+'cm'}    : null,
+      c.legs     ? {l:'Piernas', v: c.legs+'cm'}    : null,
+    ].filter(Boolean);
+    const gridHtml = fields.map(f =>
+      `<div class="cal-checkin-item"><div class="v">${f.v}</div><div class="l">${f.l}</div></div>`
+    ).join('');
+    html += `<div class="cal-checkin-card">
+      <div class="cal-checkin-title">📊 Check-in registrado</div>
+      ${gridHtml ? `<div class="cal-checkin-grid">${gridHtml}</div>` : ''}
+      ${c.notes ? `<div style="font-size:11px;color:#9CA3AF;margin-top:6px;">${esc(c.notes)}</div>` : ''}
+    </div>`;
+  });
+
+  panel.innerHTML = html;
+  panel.style.display = 'block';
+}
+
+function _calPrev() {
+  if (_calView === 'week') { _calRefDate.setDate(_calRefDate.getDate() - 7); }
+  else { _calRefDate.setMonth(_calRefDate.getMonth() - 1); }
+  _calSelDate = null;
+  _renderCalToolbar();
+  _loadCalData();
+}
+
+function _calNext() {
+  if (_calView === 'week') { _calRefDate.setDate(_calRefDate.getDate() + 7); }
+  else { _calRefDate.setMonth(_calRefDate.getMonth() + 1); }
+  _calSelDate = null;
+  _renderCalToolbar();
+  _loadCalData();
+}
+
+function _calToday() {
+  _calRefDate = new Date();
+  _calSelDate = null;
+  _renderCalToolbar();
+  _loadCalData();
+}
+
+function _setCalView(v) {
+  _calView = v;
+  _calSelDate = null;
+  _renderCalToolbar();
+  _loadCalData();
+}
+
+async function calToggleDone(taskId, done, dateStr) {
+  try {
+    const r = await fetch(`${API}/calendar-tasks/${taskId}/done`, {
+      method: 'PATCH',
+      headers: { ...h(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ done }),
+    });
+    const j = await r.json();
+    if (!j.success) { showToast('Error al actualizar', 'error'); return; }
+    // update local cache
+    const entry = _calData[dateStr];
+    if (entry) {
+      const t = entry.tasks.find(t => t.id === taskId);
+      if (t) { t.done = done; t.done_at = done ? new Date().toISOString() : null; }
+    }
+    _renderCalGrid(_calData);
+    _renderDayPanel(dateStr);
+  } catch { showToast('Error de conexión', 'error'); }
+}
+
+async function calDeleteTask(taskId, dateStr) {
+  if (!confirm('¿Eliminar esta tarea?')) return;
+  try {
+    const r = await fetch(`${API}/calendar-tasks/${taskId}`, { method: 'DELETE', headers: h() });
+    const j = await r.json();
+    if (!j.success) { showToast('Error al eliminar', 'error'); return; }
+    const entry = _calData[dateStr];
+    if (entry) entry.tasks = entry.tasks.filter(t => t.id !== taskId);
+    showToast('Tarea eliminada');
+    _renderCalGrid(_calData);
+    _renderDayPanel(dateStr);
+  } catch { showToast('Error de conexión', 'error'); }
+}
+
+/* ── Create task modal ── */
+function openCalTaskModal(prefillDate) {
+  const today = prefillDate || _isoDate(new Date());
+  _calNewType = 'rutina';
+  const typeButtons = Object.entries(TASK_TYPE_LABELS).map(([k, v]) =>
+    `<button class="cal-type-btn ${k===_calNewType?'sel':''}" id="ctb-${k}" onclick="_selCalType('${k}')">${v}</button>`
+  ).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'cal-modal-overlay';
+  overlay.id = 'calTaskOverlay';
+  overlay.innerHTML = `<div class="cal-modal">
+    <div class="cal-modal-title">Nueva tarea</div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Fecha</label>
+      <input type="date" id="calTaskDate" value="${today}" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:8px;">Tipo</label>
+      <div class="cal-type-grid">${typeButtons}</div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Título (opcional)</label>
+      <input type="text" id="calTaskTitle" placeholder="Ej: Pecho y tríceps" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
+    </div>
+    <div style="margin-bottom:18px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Notas (opcional)</label>
+      <textarea id="calTaskNotes" rows="2" placeholder="Instrucciones, detalles…" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;resize:none;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Repetir</label>
+      <select id="calTaskRec" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
+        <option value="none">Sin repetición</option>
+        <option value="daily">Diario</option>
+        <option value="weekly">Semanal</option>
+        <option value="monthly">Mensual</option>
+      </select>
+    </div>
+    <div id="calRecEndRow" style="display:none;margin-bottom:18px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Hasta</label>
+      <input type="date" id="calTaskRecEnd" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="closeCalTaskModal()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveCalTask()">Guardar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('calTaskRec').addEventListener('change', function() {
+    document.getElementById('calRecEndRow').style.display = this.value === 'none' ? 'none' : 'block';
+  });
+}
+
+function _selCalType(type) {
+  _calNewType = type;
+  document.querySelectorAll('.cal-type-btn').forEach(b => b.classList.remove('sel'));
+  const btn = document.getElementById(`ctb-${type}`);
+  if (btn) btn.classList.add('sel');
+}
+
+function closeCalTaskModal() {
+  const o = document.getElementById('calTaskOverlay');
+  if (o) o.remove();
+}
+
+async function saveCalTask() {
+  const dateVal = document.getElementById('calTaskDate')?.value;
+  const title   = document.getElementById('calTaskTitle')?.value.trim();
+  const notes   = document.getElementById('calTaskNotes')?.value.trim();
+  const rec     = document.getElementById('calTaskRec')?.value || 'none';
+  const recEnd  = document.getElementById('calTaskRecEnd')?.value;
+
+  if (!dateVal) { showToast('Selecciona una fecha', 'error'); return; }
+
+  const payload = {
+    client_user_detail_id: clientId,
+    task_date: dateVal,
+    task_type: _calNewType,
+    title: title || null,
+    notes: notes || null,
+    recurrence: rec,
+    recurrence_end_date: (rec !== 'none' && recEnd) ? recEnd : null,
+  };
+
+  try {
+    const r = await fetch(`${API}/calendar-tasks`, {
+      method: 'POST',
+      headers: { ...h(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const j = await r.json();
+    if (!j.success) { showToast('Error al guardar', 'error'); return; }
+    closeCalTaskModal();
+    const count = j.data?.count;
+    showToast(count ? `${count} tareas creadas` : 'Tarea creada');
+    _loadCalData();
+  } catch { showToast('Error de conexión', 'error'); }
+}
+
+/* ── Checkin registration ── */
+function openCheckinForm(taskId, dateStr) {
+  _calCheckinTaskId = taskId;
+  const overlay = document.createElement('div');
+  overlay.className = 'cal-modal-overlay';
+  overlay.id = 'calCheckinOverlay';
+  overlay.innerHTML = `<div class="cal-modal">
+    <div class="cal-modal-title">📊 Registrar Check-in</div>
+    <div class="cal-checkin-form">
+      <div class="cal-fin"><label>Peso (kg)</label><input type="number" step="0.1" id="ci_weight" placeholder="78.5"></div>
+      <div class="cal-fin"><label>% Grasa</label><input type="number" step="0.1" id="ci_fat" placeholder="18.0"></div>
+      <div class="cal-fin"><label>Cintura (cm)</label><input type="number" step="0.1" id="ci_waist" placeholder="82"></div>
+      <div class="cal-fin"><label>Pecho (cm)</label><input type="number" step="0.1" id="ci_chest" placeholder="95"></div>
+      <div class="cal-fin"><label>Brazos (cm)</label><input type="number" step="0.1" id="ci_arms" placeholder="35"></div>
+      <div class="cal-fin"><label>Piernas (cm)</label><input type="number" step="0.1" id="ci_legs" placeholder="55"></div>
+    </div>
+    <div style="margin-top:12px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Notas del cliente</label>
+      <textarea id="ci_notes" rows="2" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;resize:none;" placeholder="Cómo fue la semana…"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="closeCheckinForm()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveCheckin('${dateStr}')">Guardar check-in</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closeCheckinForm() {
+  const o = document.getElementById('calCheckinOverlay');
+  if (o) o.remove();
+  _calCheckinTaskId = null;
+}
+
+async function saveCheckin(dateStr) {
+  if (!_calCheckinTaskId) return;
+  const v = id => { const el = document.getElementById(id); return el?.value ? parseFloat(el.value) : null; };
+  const payload = {
+    weight:   v('ci_weight'),
+    body_fat: v('ci_fat'),
+    waist:    v('ci_waist'),
+    chest:    v('ci_chest'),
+    arms:     v('ci_arms'),
+    legs:     v('ci_legs'),
+    notes:    document.getElementById('ci_notes')?.value.trim() || null,
+  };
+  try {
+    const r = await fetch(`${API}/calendar-tasks/${_calCheckinTaskId}/checkin`, {
+      method: 'POST',
+      headers: { ...h(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const j = await r.json();
+    if (!j.success) { showToast('Error al guardar check-in', 'error'); return; }
+    closeCheckinForm();
+    showToast('Check-in registrado');
+    _loadCalData();
+  } catch { showToast('Error de conexión', 'error'); }
 }
 
 /* ══════════════════════════════════════════════

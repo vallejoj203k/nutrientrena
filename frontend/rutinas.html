@@ -222,6 +222,34 @@
     .flyout-item:hover{background:#F5F3FF;color:#4F46E5;}
     .flyout-item svg{opacity:.6;flex-shrink:0;}
     .flyout-item:hover svg{opacity:1;}
+    /* Assign modal */
+    .assign-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;}
+    .assign-overlay.open{display:flex;}
+    .assign-modal{background:#fff;border-radius:16px;width:440px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+    .assign-modal-head{padding:20px 20px 14px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .assign-modal-head h3{font-size:15px;font-weight:700;color:#111827;margin:0;}
+    .assign-modal-head button{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:4px;}
+    .assign-search{padding:12px 16px;border-bottom:1px solid #F3F4F6;}
+    .assign-search input{width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;}
+    .assign-search input:focus{border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+    .assign-list{overflow-y:auto;flex:1;padding:8px;}
+    .assign-client-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:.12s;}
+    .assign-client-row:hover{background:#F9FAFB;}
+    .assign-client-row.selected{background:#EEF2FF;}
+    .assign-avatar{width:34px;height:34px;border-radius:50%;background:#EEF2FF;color:#6366F1;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+    .assign-avatar img{width:100%;height:100%;object-fit:cover;}
+    .assign-client-name{font-size:13px;font-weight:600;color:#111827;}
+    .assign-client-email{font-size:11px;color:#9CA3AF;}
+    .assign-check{margin-left:auto;width:18px;height:18px;border-radius:5px;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .assign-client-row.selected .assign-check{background:#6366F1;border-color:#6366F1;}
+    .assign-empty{text-align:center;padding:32px 16px;color:#9CA3AF;font-size:13px;}
+    .assign-footer{padding:14px 16px;border-top:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .assign-count{font-size:12px;color:#6B7280;}
+    .assign-footer-btns{display:flex;gap:8px;}
+    .assign-btn-cancel{padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;}
+    .assign-btn-save{padding:8px 18px;border:none;border-radius:8px;background:#6366F1;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .assign-btn-save:hover{background:#4F46E5;}
+    .assign-btn-save:disabled{opacity:.5;cursor:not-allowed;}
   </style>
 </head>
 <body>
@@ -490,6 +518,27 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Assign routine modal -->
+<div class="assign-overlay" id="assignOverlay" onclick="if(event.target===this)closeAssignModal()">
+  <div class="assign-modal">
+    <div class="assign-modal-head">
+      <h3 id="assignModalTitle">Asignar rutina</h3>
+      <button onclick="closeAssignModal()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="assign-search">
+      <input type="text" id="assignSearch" placeholder="Buscar cliente…" oninput="_filterAssignClients()">
+    </div>
+    <div class="assign-list" id="assignList"></div>
+    <div class="assign-footer">
+      <span class="assign-count" id="assignCount">0 seleccionados</span>
+      <div class="assign-footer-btns">
+        <button class="assign-btn-cancel" onclick="closeAssignModal()">Cancelar</button>
+        <button class="assign-btn-save" id="assignSaveBtn" onclick="saveAssignment()" disabled>Asignar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const API='https://nutrientrena-production.up.railway.app/api';
 let token=localStorage.getItem('token')||'';
@@ -588,7 +637,7 @@ function routineRow(r){
     <td style="font-size:13px;color:#374151;">${r.clients_count!=null?`<span style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${r.clients_count}</span>`:'—'}</td>
     <td style="font-size:12px;color:#9CA3AF;">${timeAgo(r.updated_at)}</td>
     <td onclick="event.stopPropagation()"><div class="row-actions">
-      <button class="btn-assign" onclick="showToast('Asignación próximamente','')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>
+      <button class="btn-assign" onclick="openAssignModal(${r.id},'${esc(r.name)}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>
       <button class="btn-row-icon" onclick="openForm(${r.id})" title="Editar"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       <button class="btn-row-icon" onclick="showRowMenu(event,${r.id},'${esc(r.name)}')" title="Más opciones"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
     </div></td>
@@ -860,6 +909,90 @@ function selectExercise(trainingId,name,muscleName){
 async function loadMuscleGroupsForFilters(){
   if(allMuscleGroups.length){renderPickerPills();return;}
   try{const r=await fetch(`${API}/muscle-groups/findAll`,{headers:authHeaders()});const d=await r.json();allMuscleGroups=d.data||[];renderPickerPills();}catch{}
+}
+
+// ── Assign modal ──────────────────────────────────────────────────────────────
+let _assignRoutineId=null;
+let _assignAllClients=[];
+let _assignSelected=new Set();
+
+async function openAssignModal(routineId, routineName){
+  _assignRoutineId=routineId;
+  _assignSelected=new Set();
+  document.getElementById('assignModalTitle').textContent='Asignar: '+routineName;
+  document.getElementById('assignSearch').value='';
+  document.getElementById('assignList').innerHTML='<div class="assign-empty">Cargando clientes…</div>';
+  document.getElementById('assignOverlay').classList.add('open');
+  _updateAssignFooter();
+  if(!_assignAllClients.length){
+    try{
+      const r=await fetch(`${API}/users/client`,{headers:authHeaders()});
+      const d=await r.json();
+      _assignAllClients=(d.data||[]).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    }catch{
+      document.getElementById('assignList').innerHTML='<div class="assign-empty">Error al cargar clientes.</div>';
+      return;
+    }
+  }
+  _renderAssignList(_assignAllClients);
+}
+
+function closeAssignModal(){
+  document.getElementById('assignOverlay').classList.remove('open');
+}
+
+function _filterAssignClients(){
+  const q=document.getElementById('assignSearch').value.toLowerCase();
+  const filtered=q?_assignAllClients.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.last_name||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q)):_assignAllClients;
+  _renderAssignList(filtered);
+}
+
+function _renderAssignList(clients){
+  const el=document.getElementById('assignList');
+  if(!clients.length){el.innerHTML='<div class="assign-empty">Sin resultados.</div>';return;}
+  el.innerHTML=clients.map(c=>{
+    const sel=_assignSelected.has(c.id);
+    const initials=((c.name||'')[0]||(c.email||'U')[0]).toUpperCase();
+    const avatar=c.photo?`<img src="${esc(c.photo)}" alt="">`:`${initials}`;
+    const fullName=esc((c.name||'')+' '+(c.last_name||'')).trim()||esc(c.email||'—');
+    return`<div class="assign-client-row${sel?' selected':''}" onclick="toggleAssignClient('${c.id}')">
+      <div class="assign-avatar">${avatar}</div>
+      <div><div class="assign-client-name">${fullName}</div><div class="assign-client-email">${esc(c.email||'')}</div></div>
+      <div class="assign-check">${sel?'<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAssignClient(userDetailId){
+  if(_assignSelected.has(userDetailId))_assignSelected.delete(userDetailId);
+  else _assignSelected.add(userDetailId);
+  _updateAssignFooter();
+  _filterAssignClients();
+}
+
+function _updateAssignFooter(){
+  const n=_assignSelected.size;
+  document.getElementById('assignCount').textContent=n===0?'0 seleccionados':n===1?'1 cliente':n+' clientes';
+  document.getElementById('assignSaveBtn').disabled=n===0;
+}
+
+async function saveAssignment(){
+  if(!_assignRoutineId||!_assignSelected.size)return;
+  const btn=document.getElementById('assignSaveBtn');
+  btn.disabled=true;btn.textContent='Asignando…';
+  const ids=[..._assignSelected];
+  let ok=0,fail=0;
+  for(const clientId of ids){
+    try{
+      const r=await fetch(`${API}/routines/${_assignRoutineId}/clone-to-client`,{method:'POST',headers:authHeaders(),body:JSON.stringify({client_id:clientId,name:''})});
+      if(r.ok)ok++;else fail++;
+    }catch{fail++;}
+  }
+  btn.textContent='Asignar';
+  closeAssignModal();
+  if(ok&&!fail)showToast(`Rutina asignada a ${ok} cliente${ok!==1?'s':''}`, 'success');
+  else if(ok&&fail)showToast(`${ok} asignados, ${fail} fallaron`, 'error');
+  else showToast('Error al asignar la rutina', 'error');
 }
 
 initUser();loadParamSelects();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();adaptSidebar();

@@ -156,6 +156,63 @@
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid #E5E7EB;}
 
+    /* ── Page tabs ── */
+    .page-tabs{display:flex;gap:0;background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;flex-shrink:0;}
+    .page-tab{padding:14px 20px;font-size:13px;font-weight:600;color:#9CA3AF;cursor:pointer;border-bottom:2.5px solid transparent;transition:.15s;background:none;border-top:none;border-left:none;border-right:none;}
+    .page-tab.active{color:#4F46E5;border-bottom-color:#4F46E5;}
+    .page-tab:hover:not(.active){color:#374151;}
+    /* ── Compliance panel ── */
+    .cp-toolbar{background:#fff;border-radius:12px;padding:14px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .cp-nav-btn{background:#F3F4F6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;}
+    .cp-nav-btn:hover{background:#E5E7EB;}
+    .cp-period{font-size:14px;font-weight:700;color:#111;min-width:180px;text-align:center;}
+    .cp-search{border:1px solid #E5E7EB;border-radius:8px;padding:7px 12px;font-size:13px;outline:none;flex:1;min-width:160px;max-width:240px;}
+    .cp-search:focus{border-color:#4F46E5;}
+    .cp-stats{display:flex;gap:8px;margin-left:auto;}
+    .cp-stat{background:#F9FAFB;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#374151;}
+    .cp-stat span{color:#4F46E5;}
+    /* compliance table */
+    .cp-table-wrap{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;}
+    .cp-table{width:100%;border-collapse:collapse;}
+    .cp-table th{padding:10px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #F3F4F6;background:#FAFAFA;white-space:nowrap;text-align:center;}
+    .cp-table th.left{text-align:left;}
+    .cp-table td{padding:10px 12px;border-bottom:1px solid #F9FAFB;vertical-align:middle;text-align:center;}
+    .cp-table tr:last-child td{border-bottom:none;}
+    .cp-table tr:hover td{background:#FAFAFA;}
+    .cp-client-cell{display:flex;align-items:center;gap:10px;text-align:left;}
+    .cp-avatar{width:32px;height:32px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#4F46E5;flex-shrink:0;overflow:hidden;}
+    .cp-client-name{font-size:13px;font-weight:600;color:#111;cursor:pointer;text-decoration:none;}
+    .cp-client-name:hover{color:#4F46E5;}
+    .cp-client-sub{font-size:11px;color:#9CA3AF;}
+    /* day cell indicators */
+    .cp-day-cell{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:13px;cursor:default;}
+    .cp-day-cell.done-all{background:#ECFDF5;color:#059669;}
+    .cp-day-cell.done-part{background:#FEF3C7;color:#D97706;}
+    .cp-day-cell.missing{background:#FEE2E2;color:#DC2626;}
+    .cp-day-cell.no-task{background:#F3F4F6;color:#D1D5DB;}
+    .cp-day-cell.future{background:transparent;color:#E5E7EB;}
+    .cp-day-cell.checkin-only{background:#FFFBEB;color:#F59E0B;}
+    .cp-day-cell.today-col{box-shadow:0 0 0 2px #4F46E5;}
+    /* rate badge */
+    .cp-rate{font-size:12px;font-weight:700;padding:3px 8px;border-radius:20px;}
+    .cp-rate.high{background:#ECFDF5;color:#059669;}
+    .cp-rate.mid{background:#FEF3C7;color:#D97706;}
+    .cp-rate.low{background:#FEE2E2;color:#DC2626;}
+    .cp-rate.none{background:#F3F4F6;color:#9CA3AF;}
+    /* last checkin */
+    .cp-last{font-size:12px;font-weight:600;color:#374151;}
+    .cp-last.old{color:#DC2626;}
+    .cp-last.mid{color:#D97706;}
+    .cp-last.ok{color:#059669;}
+    /* loading skeleton */
+    .cp-skel{height:44px;background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px;margin:4px 12px;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    /* empty state */
+    .cp-empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .cp-legend{display:flex;gap:14px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid #F3F4F6;background:#FAFAFA;}
+    .cp-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#6B7280;}
+    .cp-legend-dot{width:12px;height:12px;border-radius:3px;}
+
     /* ── Toast ── */
     #toast{
       position:fixed;bottom:24px;right:24px;z-index:999;
@@ -326,8 +383,42 @@
     </div>
   </div>
 
-  <!-- Content -->
-  <div class="content">
+  <!-- Page tabs -->
+  <div class="page-tabs">
+    <button class="page-tab active" id="ptab-panel" onclick="switchPageTab('panel')">📊 Panel de cumplimiento</button>
+    <button class="page-tab" id="ptab-historial" onclick="switchPageTab('historial')">📋 Historial por cliente</button>
+  </div>
+
+  <!-- ── PANEL DE CUMPLIMIENTO ── -->
+  <div class="content" id="pane-panel">
+    <div class="cp-toolbar">
+      <button class="cp-nav-btn" onclick="cpPrev()">‹</button>
+      <span class="cp-period" id="cpPeriodLabel">Cargando…</span>
+      <button class="cp-nav-btn" onclick="cpNext()">›</button>
+      <button class="cp-nav-btn" onclick="cpToday()">Hoy</button>
+      <input class="cp-search" type="search" id="cpSearch" placeholder="Buscar cliente…" oninput="cpFilterClients()" />
+      <div class="cp-stats">
+        <div class="cp-stat">Clientes: <span id="cpTotalClients">—</span></div>
+        <div class="cp-stat">Activos hoy: <span id="cpActiveToday">—</span></div>
+        <div class="cp-stat">Tasa media: <span id="cpAvgRate">—</span></div>
+      </div>
+    </div>
+    <div class="cp-table-wrap">
+      <div id="cpTableContainer">
+        <div class="cp-empty">Cargando clientes…</div>
+      </div>
+      <div class="cp-legend">
+        <div class="cp-legend-item"><div class="cp-legend-dot" style="background:#ECFDF5;border:1px solid #6EE7B7;"></div> Todas las tareas completadas</div>
+        <div class="cp-legend-item"><div class="cp-legend-dot" style="background:#FEF3C7;border:1px solid #FCD34D;"></div> Parcialmente completado</div>
+        <div class="cp-legend-item"><div class="cp-legend-dot" style="background:#FEE2E2;border:1px solid #FCA5A5;"></div> Tareas sin completar</div>
+        <div class="cp-legend-item"><div class="cp-legend-dot" style="background:#FFFBEB;border:1px solid #FDE68A;"></div> Solo check-in</div>
+        <div class="cp-legend-item"><div class="cp-legend-dot" style="background:#F3F4F6;border:1px solid #E5E7EB;"></div> Sin tareas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HISTORIAL POR CLIENTE ── -->
+  <div class="content" id="pane-historial" style="display:none;">
 
     <!-- Client selector -->
     <div class="selector-bar">
@@ -432,7 +523,7 @@
       </div>
     </div>
 
-  </div><!-- /content -->
+  </div><!-- /pane-historial -->
 </div><!-- /main -->
 
 <!-- ══════════════════ MODAL: Nuevo check-in ══════════════════ -->
@@ -693,6 +784,8 @@ async function loadClients() {
     clients = (data?.data || data || []);
     populateClientSelects();
     document.getElementById('clientLoadingHint').style.display = 'none';
+    // Auto-load compliance panel (default tab)
+    cpLoad();
   } catch(e) {
     document.getElementById('clientLoadingHint').textContent = 'Error al cargar clientes';
     toast('Error al cargar clientes: ' + e.message, 'error');
@@ -1193,6 +1286,253 @@ function openPhoto(url) {
   overlay.innerHTML = `<img src="${url}" style="max-width:90vw;max-height:90vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);"/>`;
   overlay.onclick = () => overlay.remove();
   document.body.appendChild(overlay);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE TAB SWITCHER
+═══════════════════════════════════════════════════════════ */
+function switchPageTab(tab) {
+  ['panel','historial'].forEach(t => {
+    document.getElementById('pane-' + t).style.display = t === tab ? 'flex' : 'none';
+    document.getElementById('ptab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'panel' && !_cpLoaded) cpLoad();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PANEL DE CUMPLIMIENTO SEMANAL
+═══════════════════════════════════════════════════════════ */
+const CP_DAY_NAMES  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const CP_MONTH_ABR  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+let _cpWeek     = _cpMondayOf(new Date());   // Date — Monday of displayed week
+let _cpLoaded   = false;
+let _cpData     = {};    // clientId → { days:[{date,tasks,checkins,total,done}], lastCheckin }
+let _cpFiltered = [];    // client list after search filter
+
+function _cpMondayOf(d) {
+  const r = new Date(d);
+  r.setDate(r.getDate() - ((r.getDay() + 6) % 7));
+  r.setHours(0,0,0,0);
+  return r;
+}
+
+function _cpIso(d) { return d.toISOString().slice(0,10); }
+
+function _cpPeriodLabel(mon) {
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const mL = CP_MONTH_ABR[mon.getMonth()];
+  const sL = CP_MONTH_ABR[sun.getMonth()];
+  return mon.getMonth() === sun.getMonth()
+    ? `${mL} ${mon.getDate()}–${sun.getDate()}, ${mon.getFullYear()}`
+    : `${mL} ${mon.getDate()} – ${sL} ${sun.getDate()}, ${mon.getFullYear()}`;
+}
+
+function cpPrev()  { _cpWeek.setDate(_cpWeek.getDate() - 7); cpLoad(); }
+function cpNext()  { _cpWeek.setDate(_cpWeek.getDate() + 7); cpLoad(); }
+function cpToday() { _cpWeek = _cpMondayOf(new Date()); cpLoad(); }
+
+function cpFilterClients() {
+  const q = (document.getElementById('cpSearch')?.value || '').toLowerCase();
+  _cpFiltered = clients.filter(c => {
+    const name = ((c.name || '') + ' ' + (c.last_name || '')).toLowerCase();
+    return !q || name.includes(q);
+  });
+  _cpRenderTable();
+}
+
+async function cpLoad() {
+  _cpLoaded = true;
+  document.getElementById('cpPeriodLabel').textContent = _cpPeriodLabel(_cpWeek);
+  _cpFiltered = [...clients];
+  _cpRenderSkeleton();
+
+  // Fetch week data per client (batches of 6 to avoid flooding)
+  const weekStr = _cpIso(_cpWeek);
+  const BATCH = 6;
+  for (let i = 0; i < clients.length; i += BATCH) {
+    const batch = clients.slice(i, i + BATCH);
+    await Promise.all(batch.map(c => _cpFetchClient(c, weekStr)));
+    _cpRenderTable(); // progressive update after each batch
+  }
+  _cpUpdateStats();
+}
+
+async function _cpFetchClient(client, weekStr) {
+  try {
+    const r = await apiFetch(`/calendar-tasks/week/${client.id}?week=${weekStr}`);
+    const days = (r?.data?.days) || [];
+    _cpData[client.id] = { days, lastCheckin: _cpGetLastCheckin(days) };
+  } catch {
+    _cpData[client.id] = { days: [], lastCheckin: null };
+  }
+}
+
+function _cpGetLastCheckin(days) {
+  // Scan days newest-first for a checkin
+  for (let i = days.length - 1; i >= 0; i--) {
+    if (days[i].checkins && days[i].checkins.length) return days[i].date;
+  }
+  return null;
+}
+
+function _cpRenderSkeleton() {
+  const skels = Array.from({length: 5}, () =>
+    `<div class="cp-skel"></div>`
+  ).join('');
+  document.getElementById('cpTableContainer').innerHTML =
+    `<div style="padding:12px;">${skels}</div>`;
+}
+
+function _cpRenderTable() {
+  const today = _cpIso(new Date());
+  const monDates = Array.from({length:7}, (_, i) => {
+    const d = new Date(_cpWeek); d.setDate(_cpWeek.getDate() + i);
+    return _cpIso(d);
+  });
+
+  // Table header
+  const thDays = monDates.map((iso, i) => {
+    const [,, day] = iso.split('-');
+    const isToday = iso === today;
+    return `<th style="${isToday?'color:#4F46E5;':''}">${CP_DAY_NAMES[i]}<br><span style="font-size:11px;font-weight:600;">${parseInt(day)}</span></th>`;
+  }).join('');
+
+  // Rows
+  const rows = _cpFiltered.map(c => {
+    const uid = c.id;
+    const cdata = _cpData[c.id];
+    const name = ((c.name || '') + ' ' + (c.last_name || '')).trim() || 'Cliente';
+    const initials = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const avatarContent = c.photo
+      ? `<img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+      : initials;
+
+    // Day cells
+    let totalTasks = 0, doneTasks = 0;
+    const dayCells = monDates.map(iso => {
+      const isToday = iso === today;
+      const isFuture = iso > today;
+
+      if (!cdata) {
+        return `<td><div class="cp-day-cell future ${isToday?'today-col':''}">─</div></td>`;
+      }
+
+      const dayEntry = cdata.days.find(d => d.date === iso);
+      const tasks = dayEntry?.tasks || [];
+      const checkins = dayEntry?.checkins || [];
+      const total = tasks.length;
+      const done  = tasks.filter(t => t.done).length;
+
+      if (total > 0) { totalTasks += total; doneTasks += done; }
+
+      let cls, icon, title;
+      if (isFuture && total === 0 && checkins.length === 0) {
+        cls = 'future'; icon = '─'; title = 'Fecha futura';
+      } else if (total === 0 && checkins.length > 0) {
+        cls = 'checkin-only'; icon = '📊'; title = 'Check-in registrado';
+      } else if (total === 0) {
+        cls = 'no-task'; icon = '·'; title = 'Sin tareas';
+      } else if (done === total) {
+        cls = 'done-all'; icon = '✓'; title = `${done}/${total} completadas`;
+      } else if (done > 0) {
+        cls = 'done-part'; icon = `${done}/${total}`; title = `${done} de ${total} tareas`;
+      } else {
+        cls = 'missing'; icon = '✗'; title = `${total} tarea${total>1?'s':''} pendiente${total>1?'s':''}`;
+      }
+
+      return `<td><div class="cp-day-cell ${cls} ${isToday?'today-col':''}" title="${title}">${icon}</div></td>`;
+    }).join('');
+
+    // Completion rate
+    const rate = totalTasks > 0 ? Math.round(doneTasks / totalTasks * 100) : null;
+    const rateCls = rate === null ? 'none' : rate >= 80 ? 'high' : rate >= 40 ? 'mid' : 'low';
+    const rateHtml = rate !== null
+      ? `<span class="cp-rate ${rateCls}">${rate}%</span>`
+      : `<span class="cp-rate none">—</span>`;
+
+    // Last check-in
+    let lastHtml = '<span class="cp-last">—</span>';
+    if (cdata?.lastCheckin) {
+      const d = new Date(cdata.lastCheckin + 'T00:00:00');
+      const diffDays = Math.floor((new Date() - d) / 86400000);
+      const lbl = diffDays === 0 ? 'Hoy' : diffDays === 1 ? 'Ayer' : diffDays < 7 ? `hace ${diffDays}d` : diffDays < 30 ? `hace ${Math.round(diffDays/7)}sem` : `hace ${Math.round(diffDays/30)}m`;
+      const lcls = diffDays <= 2 ? 'ok' : diffDays <= 10 ? 'mid' : 'old';
+      lastHtml = `<span class="cp-last ${lcls}">${lbl}</span>`;
+    }
+
+    return `<tr>
+      <td>
+        <div class="cp-client-cell">
+          <div class="cp-avatar">${avatarContent}</div>
+          <div>
+            <a class="cp-client-name" href="client-profile.html?id=${uid}">${name}</a>
+            <div class="cp-client-sub">${c.email || ''}</div>
+          </div>
+        </div>
+      </td>
+      ${dayCells}
+      <td>${rateHtml}</td>
+      <td>${lastHtml}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openNewCheckinModalFor('${uid}','${c.id}')" title="Registrar check-in">+ Check-in</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const emptyRow = !_cpFiltered.length
+    ? `<tr><td colspan="11" class="cp-empty">No se encontraron clientes.</td></tr>`
+    : '';
+
+  document.getElementById('cpTableContainer').innerHTML = `
+    <div style="overflow-x:auto;">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th class="left" style="min-width:200px;">Cliente</th>
+            ${thDays}
+            <th>Tasa</th>
+            <th>Último check-in</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows || emptyRow}</tbody>
+      </table>
+    </div>`;
+}
+
+function _cpUpdateStats() {
+  const today = _cpIso(new Date());
+  let activeToday = 0;
+  let totalRate = 0, rateCount = 0;
+
+  clients.forEach(c => {
+    const cdata = _cpData[c.id];
+    if (!cdata) return;
+    const todayEntry = cdata.days.find(d => d.date === today);
+    if (todayEntry && (todayEntry.tasks.length || todayEntry.checkins.length)) activeToday++;
+
+    const weekTasks  = cdata.days.reduce((s,d) => s + d.tasks.length, 0);
+    const weekDone   = cdata.days.reduce((s,d) => s + d.tasks.filter(t=>t.done).length, 0);
+    if (weekTasks > 0) { totalRate += weekDone / weekTasks * 100; rateCount++; }
+  });
+
+  document.getElementById('cpTotalClients').textContent = clients.length;
+  document.getElementById('cpActiveToday').textContent  = activeToday;
+  document.getElementById('cpAvgRate').textContent = rateCount > 0 ? Math.round(totalRate / rateCount) + '%' : '—';
+}
+
+// Quick register check-in from panel
+function openNewCheckinModalFor(userDetailId, clientInternalId) {
+  // Pre-fill client in the existing new-checkin modal
+  switchPageTab('historial');
+  setTimeout(() => {
+    const sel = document.getElementById('ncClient');
+    if (sel) {
+      sel.value = userDetailId;
+      openNewCheckinModal();
+    }
+  }, 100);
 }
 
 /* ─────────────────────────────────────────────

@@ -10,16 +10,16 @@ from app.models.country import Country
 router = APIRouter(prefix="/countries", tags=["Countries"])
 
 
-@router.get("/search", summary="Buscar países", description="Busca países por nombre, retorna máximo 50 resultados.")
+@router.get("/search", summary="Buscar países", description="Busca países por nombre.")
 def search(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
-    q = db.query(Country)
+    q = db.query(Country).order_by(Country.country)
     if search:
         q = q.filter(Country.country.ilike(f"%{search}%"))
-    items = q.limit(50).all()
+    items = q.all()
     return send_response(
         [{"id": c.id, "code": c.code, "country": c.country} for c in items],
         "OK",

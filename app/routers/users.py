@@ -44,6 +44,13 @@ def create(
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, COACH)),
 ):
+    from app.core.dependencies import _user_role_ids
+    creator_roles = _user_role_ids(current_user.id, db)
+    creator_is_coach_only = COACH in creator_roles and ADMIN not in creator_roles and SUPERADMIN not in creator_roles
+    if creator_is_coach_only and data.role_id not in (6,):  # coaches can only create clients (role 6)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Los coaches solo pueden crear clientes")
+
     if db.query(User).filter(User.email == data.email).first():
         return send_error("El email ya está registrado", code=400)
 

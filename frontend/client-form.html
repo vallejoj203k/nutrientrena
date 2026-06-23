@@ -776,7 +776,7 @@ async function saveClient(){
       const v=document.getElementById(elId).value;
       if(!v) return;
       if(['height','weight'].includes(key)) body[key]=parseFloat(v);
-      else if(['gender_id','activity_id','objective_id','status_id','instructor'].includes(key)) body[key]=parseInt(v);
+      else if(['gender_id','activity_id','objective_id','status_id'].includes(key)) body[key]=parseInt(v);
       else body[key]=v;
     });
 
@@ -786,12 +786,14 @@ async function saveClient(){
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
       body:JSON.stringify(body),
     });
-    const j=await r.json();
+    let j={};
+    try{ j=await r.json(); }catch{ j={}; }
 
     if(!r.ok){
       let msg=isEdit?'Error al actualizar cliente':'Error al crear cliente';
       if(j.detail) msg=Array.isArray(j.detail)?j.detail.map(e=>e.msg||String(e)).join(', '):String(j.detail);
       else if(j.message) msg=j.message;
+      else msg+=` (${r.status})`;
       showError(msg);
       return;
     }
@@ -808,8 +810,8 @@ async function saveClient(){
 
     toast(isEdit?'Cliente actualizado correctamente':'Cliente creado correctamente','success');
     setTimeout(()=>location.href='clients.html',1200);
-  }catch{
-    showError('Error de conexión. Verifica tu conexión a internet.');
+  }catch(e){
+    showError(e?.message || 'Error de conexión. Verifica tu conexión a internet.');
   }finally{
     btn.disabled=false;
     btn.innerHTML=`<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>${isEdit?'Guardar cambios':'Crear cliente'}`;

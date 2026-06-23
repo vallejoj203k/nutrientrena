@@ -531,6 +531,9 @@ function toast(msg,type){
   clearTimeout(el._t); el._t=setTimeout(()=>{el.className='toast';},3500);
 }
 
+let _currentUserRoles = [];
+let _currentUserDetailId = null;
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 async function loadUser(){
   try{
@@ -538,10 +541,20 @@ async function loadUser(){
     if(r.status===401){logout();return;}
     const j=await r.json(); const u=j.data||j;
     const name=u.name||u.full_name||'Usuario';
+    _currentUserRoles = u.roles || (u.role ? [u.role] : []);
+    _currentUserDetailId = u.id || null; // UserDetail UUID
     document.getElementById('sidebarName').textContent=name;
     document.getElementById('sidebarRole').textContent=u.role?.name||u.role||'—';
     (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials(name);}})()
   }catch{}
+}
+
+function _isCoachOnly(){
+  // True if the user has coach role but NOT admin/superadmin
+  const roleNames = _currentUserRoles.map(r => (r.name||r||'').toLowerCase());
+  const hasAdmin = roleNames.some(n => n.includes('admin') || n.includes('superadmin'));
+  const hasCoach = roleNames.some(n => n.includes('coach'));
+  return hasCoach && !hasAdmin;
 }
 
 function logout(){
@@ -551,6 +564,12 @@ function logout(){
 
 // ── Loaders ───────────────────────────────────────────────────────────────────
 async function loadCoaches(){
+  const coachRow = document.getElementById('fCoach').closest('.form-group');
+  if(_isCoachOnly()){
+    // Coach only sees themselves; hide the select and auto-assign
+    coachRow.style.display = 'none';
+    return;
+  }
   try{
     const r=await fetch(`${API}/users/coach/findAll`,{headers:{Authorization:`Bearer ${token}`}});
     if(!r.ok) return;
@@ -564,14 +583,25 @@ async function loadCoaches(){
   }catch{}
 }
 
-async function loadParamSelect(paramName,selectId){
+async function loadParamSelect(paramName, selectId){
   try{
-    const r=await fetch(`${API}/parameters/search?q=${encodeURIComponent(paramName)}`,{headers:{Authorization:`Bearer ${token}`}});
-    if(!r.ok) return;
-    const j=await r.json();
-    const items=(j.data||j)?.details||[];
-    const sel=document.getElementById(selectId);
-    (Array.isArray(items)?items:[]).forEach(s=>{sel.appendChild(new Option(s.description||s.name,s.id));});
+    // Step 1: find the parameter by name
+    const r1 = await fetch(`${API}/parameters/search?search=${encodeURIComponent(paramName)}`,{headers:{Authorization:`Bearer ${token}`}});
+    if(!r1.ok) return;
+    const j1 = await r1.json();
+    const params = j1.data || j1;
+    const param = Array.isArray(params) ? params.find(p => p.description?.toLowerCase() === paramName.toLowerCase()) : null;
+    if(!param) return;
+
+    // Step 2: fetch details for that parameter
+    const r2 = await fetch(`${API}/parameters-detail/search?parameter_id=${param.id}`,{headers:{Authorization:`Bearer ${token}`}});
+    if(!r2.ok) return;
+    const j2 = await r2.json();
+    const items = j2.data || j2;
+    const sel = document.getElementById(selectId);
+    (Array.isArray(items) ? items : []).forEach(s => {
+      sel.appendChild(new Option(s.description || s.name, s.id));
+    });
   }catch{}
 }
 
@@ -734,7 +764,8 @@ async function saveClient(){
       fPhone:'phone',fOccupation:'occupation',fHeight:'height',fWeight:'weight',
       fGender:'gender_id',fActivity:'activity_id',fObjective:'objective_id',
       fCountry:'country_code',fDeficit:'defecit',fExcedente:'excedente',
-      fStatus:'status_id',fCoach:'instructor'
+      fStatus:'status_id',
+      ...(_isCoachOnly() ? {} : {fCoach:'instructor'}),
     };
     Object.entries(fields).forEach(([elId,key])=>{
       const v=document.getElementById(elId).value;
@@ -802,14 +833,14 @@ document.head.appendChild(style);
     document.getElementById('pwRequired').style.display='none';
   }
 
-  loadUser();
+  await loadUser();
   await Promise.all([
     loadCoaches(),
     loadCountries(),
-    loadParamSelect('Género','fGender'),
-    loadParamSelect('Nivel de Actividad','fActivity'),
-    loadParamSelect('Objetivo','fObjective'),
-    loadParamSelect('Estado del Cliente','fStatus'),
+    loadParamSelect('Genero', 'fGender'),
+    loadParamSelect('Nivel de actividad', 'fActivity'),
+    loadParamSelect('Objetivo Usuario', 'fObjective'),
+    loadParamSelect('Estado del Cliente', 'fStatus'),
   ]);
 
   await loadClient();

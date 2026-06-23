@@ -42,7 +42,7 @@ def _serialize(detail: UserDetail, db: Session) -> dict:
 def create(
     data: UserCreateRequest,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, COACH)),
 ):
     if db.query(User).filter(User.email == data.email).first():
         return send_error("El email ya está registrado", code=400)
@@ -76,13 +76,21 @@ def create(
     db.add(detail)
     db.flush()
 
-    if data.instructor:
+    # If the creator is a coach, auto-assign themselves; otherwise use the supplied instructor
+    from app.core.dependencies import _user_role_ids
+    creator_roles = _user_role_ids(current_user.id, db)
+    if COACH in creator_roles and ADMIN not in creator_roles and SUPERADMIN not in creator_roles:
+        instructor_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+    elif data.instructor:
         instructor_detail = db.query(UserDetail).filter(UserDetail.id == data.instructor).first()
-        if instructor_detail:
-            db.add(UserParent(
-                user_detail_id=detail.id,
-                parent_user_detail_id=instructor_detail.id,
-            ))
+    else:
+        instructor_detail = None
+
+    if instructor_detail:
+        db.add(UserParent(
+            user_detail_id=detail.id,
+            parent_user_detail_id=instructor_detail.id,
+        ))
 
     db.commit()
     db.refresh(detail)

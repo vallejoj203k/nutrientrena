@@ -40,13 +40,13 @@ class TestAuthorizationRBAC:
         r = client.get("/api/auth/me", headers=admin_headers)
         assert r.status_code == 200
 
-    def test_coach_cannot_access_admin_only_endpoint(self, client, coach_headers):
-        # Creating users requires admin role (SUPERADMIN/ADMIN)
+    def test_coach_cannot_create_admin_users(self, client, coach_headers):
+        # Coaches cannot create users with admin role (role_id=2)
         r = client.post("/api/users", json={
             "name": "Hacker", "email": "hacker@x.com", "password": "Pass123!",
-            "role_id": 6,
+            "role_id": 2,
         }, headers=coach_headers)
-        assert r.status_code in (403, 422)
+        assert r.status_code == 403
 
 
 class TestInputValidation:

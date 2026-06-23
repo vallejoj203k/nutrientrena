@@ -42,8 +42,15 @@ def _serialize(detail: UserDetail, db: Session) -> dict:
 def create(
     data: UserCreateRequest,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, COACH)),
 ):
+    from app.core.dependencies import _user_role_ids
+    creator_roles = _user_role_ids(current_user.id, db)
+    creator_is_coach_only = COACH in creator_roles and ADMIN not in creator_roles and SUPERADMIN not in creator_roles
+    if creator_is_coach_only and data.role_id not in (6,):  # coaches can only create clients (role 6)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Los coaches solo pueden crear clientes")
+
     if db.query(User).filter(User.email == data.email).first():
         return send_error("El email ya está registrado", code=400)
 
@@ -76,13 +83,21 @@ def create(
     db.add(detail)
     db.flush()
 
-    if data.instructor:
+    # If the creator is a coach, auto-assign themselves; otherwise use the supplied instructor
+    from app.core.dependencies import _user_role_ids
+    creator_roles = _user_role_ids(current_user.id, db)
+    if COACH in creator_roles and ADMIN not in creator_roles and SUPERADMIN not in creator_roles:
+        instructor_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+    elif data.instructor:
         instructor_detail = db.query(UserDetail).filter(UserDetail.id == data.instructor).first()
-        if instructor_detail:
-            db.add(UserParent(
-                user_detail_id=detail.id,
-                parent_user_detail_id=instructor_detail.id,
-            ))
+    else:
+        instructor_detail = None
+
+    if instructor_detail:
+        db.add(UserParent(
+            user_detail_id=detail.id,
+            parent_user_detail_id=instructor_detail.id,
+        ))
 
     db.commit()
     db.refresh(detail)

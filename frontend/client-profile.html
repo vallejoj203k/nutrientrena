@@ -343,7 +343,7 @@
     .active-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
     .apc{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;}
     .apc-header{display:flex;align-items:flex-start;gap:12px;}
-    .apc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .apc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .apc-icon.diet{background:#EEF2FF;}
     .apc-icon.routine{background:#F0FDF4;}
     .apc-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#9CA3AF;margin-bottom:3px;}
@@ -746,7 +746,7 @@
         <div class="card" id="deliveriesCard">
           <div class="card-head">
             <span class="card-title">Historial de entregas</span>
-            <button class="btn btn-ghost btn-sm" onclick="openEmailDiag()" title="Diagnosticar envío de email">🔍 Diagnóstico email</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEmailDiag()" title="Diagnosticar envío de email">Diagnóstico email</button>
           </div>
           <div id="deliveriesBody"></div>
           <!-- email diag result -->
@@ -759,7 +759,8 @@
         <div class="card">
           <div class="card-head">
             <span class="card-title">Información comercial</span>
-            <button class="btn btn-ghost btn-sm" onclick="openBizModal()">✏️ Editar</button>
+            <button class="btn btn-ghost btn-sm" onclick="openBizModal()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:middle;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
           </div>
           <div class="info-grid cols-3" id="bizGrid"></div>
         </div>
@@ -832,7 +833,7 @@
         <textarea id="deliverMsg" placeholder="Escribe un mensaje personalizado…"></textarea>
       </div>
       <div class="form-group">
-        <label>🎬 Enlace Loom (opcional)</label>
+        <label>Enlace Loom (opcional)</label>
         <input id="deliverLoom" type="url" placeholder="https://www.loom.com/share/…"/>
       </div>
       <div style="display:flex;align-items:center;gap:10px;background:#F9FAFB;border-radius:8px;padding:12px 14px;margin-bottom:4px;">
@@ -934,8 +935,8 @@
           <select id="biz_estado_pago">
             <option value="">— Sin definir —</option>
             <option value="pendiente">⏳ Pendiente</option>
-            <option value="parcial">🔶 Parcial</option>
-            <option value="pagado">✅ Pagado</option>
+            <option value="parcial">Parcial</option>
+            <option value="pagado">Pagado</option>
           </select>
         </div>
         <div class="form-group">
@@ -1115,7 +1116,7 @@ function renderAll() {
   if (c.coach_name && c.coach_name !== '—') badges.push(`<span class="badge badge-coach">Coach: ${esc(c.coach_name)}</span>`);
   if (c.estado_pago) {
     const payMap = {pendiente:'badge-pay-pendiente',parcial:'badge-pay-parcial',pagado:'badge-pay-pagado'};
-    const payLabel = {pendiente:'⏳ Pendiente',parcial:'🔶 Parcial',pagado:'✅ Pagado'};
+    const payLabel = {pendiente:'Pendiente',parcial:'Parcial',pagado:'Pagado'};
     badges.push(`<span class="badge ${payMap[c.estado_pago]||'badge-pay-default'}">${payLabel[c.estado_pago]||c.estado_pago}</span>`);
   }
   document.getElementById('profileBadges').innerHTML = badges.join('');
@@ -1184,27 +1185,37 @@ function _renderResStats() {
 
   el.innerHTML = `
     <div class="res-stat">
-      <div class="res-stat-icon" style="background:#EDE9FE;color:#7C3AED;">⚖️</div>
+      <div class="res-stat-icon" style="background:#EDE9FE;color:#7C3AED;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M12 8v13M8 12H4m16 0h-4"/></svg>
+      </div>
       <div class="res-stat-val">${peso != null ? peso + ' kg' : '—'}</div>
       <div class="res-stat-lbl">Peso actual</div>
     </div>
     <div class="res-stat">
-      <div class="res-stat-icon" style="background:#DCFCE7;color:#16A34A;">📊</div>
+      <div class="res-stat-icon" style="background:#DCFCE7;color:#16A34A;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
       <div class="res-stat-val" id="resAdherenceVal">—</div>
       <div class="res-stat-lbl">Adherencia 30D</div>
     </div>
     <div class="res-stat">
-      <div class="res-stat-icon" style="background:#FEF3C7;color:#D97706;">📅</div>
+      <div class="res-stat-icon" style="background:#FEF3C7;color:#D97706;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
       <div class="res-stat-val">${lastCiStr}</div>
       <div class="res-stat-lbl">Último check-in</div>
     </div>
     <div class="res-stat">
-      <div class="res-stat-icon" style="background:#DBEAFE;color:#2563EB;">🏃</div>
+      <div class="res-stat-icon" style="background:#DBEAFE;color:#2563EB;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
       <div class="res-stat-val" id="resNextSession">—</div>
       <div class="res-stat-lbl">Próxima sesión</div>
     </div>
     <div class="res-stat">
-      <div class="res-stat-icon" style="background:#FEE2E2;color:#DC2626;">🔔</div>
+      <div class="res-stat-icon" style="background:#FEE2E2;color:#DC2626;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
       <div class="res-stat-val" id="resAlerts">—</div>
       <div class="res-stat-lbl">Alertas</div>
     </div>`;
@@ -1464,7 +1475,7 @@ function renderActivePlan() {
   if (!diet) {
     dietHtml = `<div class="apc">
       <div class="apc-header">
-        <div class="apc-icon diet">🥗</div>
+        <div class="apc-icon diet" style="color:#4F46E5;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div>
         <div><div class="apc-label">Dieta activa</div><div class="apc-name" style="color:#9CA3AF;">Sin dieta asignada</div></div>
       </div>
       <div class="apc-empty"><p>Aún no tiene una dieta asignada.</p></div>
@@ -1506,7 +1517,7 @@ function renderActivePlan() {
 
     dietHtml = `<div class="apc">
       <div class="apc-header">
-        <div class="apc-icon diet">🥗</div>
+        <div class="apc-icon diet" style="color:#4F46E5;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div>
         <div style="flex:1;min-width:0;"><div class="apc-label">Dieta activa</div><div class="apc-name">${esc(diet.title || diet.name || 'Dieta')}</div></div>
         ${badgeHtml}
       </div>
@@ -1524,7 +1535,7 @@ function renderActivePlan() {
   if (!routine) {
     routineHtml = `<div class="apc">
       <div class="apc-header">
-        <div class="apc-icon routine">🏋️</div>
+        <div class="apc-icon routine" style="color:#059669;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/><rect x="5.5" y="5" width="1" height="14" rx=".5"/><rect x="17.5" y="5" width="1" height="14" rx=".5"/></svg></div>
         <div><div class="apc-label">Rutina activa</div><div class="apc-name" style="color:#9CA3AF;">Sin rutina asignada</div></div>
       </div>
       <div class="apc-empty"><p>Aún no tiene una rutina asignada.</p></div>
@@ -1536,9 +1547,9 @@ function renderActivePlan() {
     const days = routine.days_list || [];
     const MAX_DAYS = 4;
     const tagsHtml = `<div class="apc-tags">
-      ${routine.days ? `<span class="apc-tag">📅 ${routine.days} días/sem</span>` : ''}
-      ${routine.time ? `<span class="apc-tag">⏱ ${routine.time} min</span>` : ''}
-      ${days.length ? `<span class="apc-tag">🗓 ${days.length} días</span>` : ''}
+      ${routine.days ? `<span class="apc-tag">${routine.days} días/sem</span>` : ''}
+      ${routine.time ? `<span class="apc-tag">${routine.time} min</span>` : ''}
+      ${days.length ? `<span class="apc-tag">${days.length} días</span>` : ''}
     </div>`;
 
     const daysSlice = days.slice(0, MAX_DAYS);
@@ -1552,7 +1563,7 @@ function renderActivePlan() {
 
     routineHtml = `<div class="apc">
       <div class="apc-header">
-        <div class="apc-icon routine">🏋️</div>
+        <div class="apc-icon routine" style="color:#059669;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/><rect x="5.5" y="5" width="1" height="14" rx=".5"/><rect x="17.5" y="5" width="1" height="14" rx=".5"/></svg></div>
         <div style="flex:1;min-width:0;"><div class="apc-label">Rutina activa</div><div class="apc-name">${esc(routine.name || 'Rutina')}</div></div>
       </div>
       ${tagsHtml}
@@ -1612,7 +1623,7 @@ function renderFormTab() {
     const submittedDate = formAssignment.submitted_at ? fmtDate(formAssignment.submitted_at) : '—';
     statusCard = `
       <div class="form-status-card submitted">
-        <div class="form-status-title">✅ Formulario completado</div>
+        <div class="form-status-title">Formulario completado</div>
         <div class="form-status-sub" style="margin-bottom:0;">Enviado el ${submittedDate}</div>
       </div>`;
   }
@@ -1670,10 +1681,10 @@ function renderDeliveriesTab() {
       <div style="flex:1;min-width:0;">
         <div class="delivery-date">${fmtDateTime(d.delivered_at)}</div>
         <div class="delivery-chips">
-          ${d.diet_id    ? `<span class="chip chip-diet">🥗 ${esc(d.diet_title || 'Dieta')}</span>` : ''}
-          ${d.routine_id ? `<span class="chip chip-routine">🏋️ ${esc(d.routine_name || 'Rutina')}</span>` : ''}
-          ${d.email_sent ? `<span class="chip chip-email">✉️ Email enviado</span>` : `<span class="chip chip-noemail">Sin email</span>`}
-          ${d.loom_link  ? `<a class="chip chip-loom" href="${esc(d.loom_link)}" target="_blank">🎬 Loom</a>` : ''}
+          ${d.diet_id    ? `<span class="chip chip-diet"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg> ${esc(d.diet_title || 'Dieta')}</span>` : ''}
+          ${d.routine_id ? `<span class="chip chip-routine"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/><rect x="5.5" y="5" width="1" height="14" rx=".5"/><rect x="17.5" y="5" width="1" height="14" rx=".5"/></svg> ${esc(d.routine_name || 'Rutina')}</span>` : ''}
+          ${d.email_sent ? `<span class="chip chip-email"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email enviado</span>` : `<span class="chip chip-noemail">Sin email</span>`}
+          ${d.loom_link  ? `<a class="chip chip-loom" href="${esc(d.loom_link)}" target="_blank"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> Loom</a>` : ''}
         </div>
         ${d.message ? `<div class="delivery-msg">"${esc(d.message)}"</div>` : ''}
       </div>
@@ -1693,7 +1704,7 @@ function renewalCountdown(dateStr) {
   const label = d.toLocaleDateString('es-ES');
   if (diff < 0) return `<span style="color:#DC2626;font-weight:700;">${label} (vencida hace ${-diff}d)</span>`;
   if (diff === 0) return `<span style="color:#F59E0B;font-weight:700;">${label} (hoy)</span>`;
-  if (diff <= 7) return `<span style="color:#F59E0B;font-weight:700;">${label} (en ${diff}d ⚠️)</span>`;
+  if (diff <= 7) return `<span style="color:#F59E0B;font-weight:700;">${label} (en ${diff}d)</span>`;
   if (diff <= 30) return `<span style="color:#4F46E5;font-weight:600;">${label} (en ${diff}d)</span>`;
   return `${label} (en ${diff}d)`;
 }
@@ -1703,7 +1714,7 @@ function renderBizTab() {
   document.getElementById('bizGrid').innerHTML = `
     <div class="info-item"><label>Plan comprado</label><span>${esc(c.plan_comprado||'—')}</span></div>
     <div class="info-item"><label>Precio</label><span>${c.precio!=null?'€'+Number(c.precio).toFixed(2):'—'}</span></div>
-    <div class="info-item"><label>Estado de pago</label><span>${{pendiente:'⏳ Pendiente',parcial:'🔶 Parcial',pagado:'✅ Pagado'}[c.estado_pago]||'—'}</span></div>
+    <div class="info-item"><label>Estado de pago</label><span>${{pendiente:'Pendiente',parcial:'Parcial',pagado:'Pagado'}[c.estado_pago]||'—'}</span></div>
     <div class="info-item"><label>Importe pagado</label><span>${c.importe_pagado!=null?'€'+Number(c.importe_pagado).toFixed(2):'—'}</span></div>
     <div class="info-item"><label>Importe pendiente</label><span>${c.importe_pendiente!=null?'€'+Number(c.importe_pendiente).toFixed(2):'—'}</span></div>
     <div class="info-item"><label>Método de pago</label><span>${esc(c.metodo_pago||'—')}</span></div>
@@ -1713,7 +1724,7 @@ function renderBizTab() {
     <div class="info-item"><label>Responsable venta</label><span>${esc(c.responsable_venta||'—')}</span></div>
     <div class="info-item"><label>Origen CRM</label><span>${esc(c.crm_origen||'—')}</span></div>
     <div class="info-item"><label>WhatsApp</label><span>${c.whatsapp_link?`<a href="${esc(c.whatsapp_link)}" target="_blank" style="color:var(--purple);">Abrir chat →</a>`:'—'}</span></div>
-    <div class="info-item"><label>Consentimiento evolución</label><span>${c.consentimiento_evolucion?'✅ Sí':'❌ No'}</span></div>`;
+    <div class="info-item"><label>Consentimiento evolución</label><span>${c.consentimiento_evolucion?'Sí':'No'}</span></div>`;
 }
 
 /* ── Update profile header badges only (called after biz save) ── */
@@ -1724,7 +1735,7 @@ function renderProfileHeader() {
   if (c.coach_name && c.coach_name !== '—') badges.push(`<span class="badge badge-coach">Coach: ${esc(c.coach_name)}</span>`);
   if (c.estado_pago) {
     const payMap = {pendiente:'badge-pay-pendiente',parcial:'badge-pay-parcial',pagado:'badge-pay-pagado'};
-    const payLabel = {pendiente:'⏳ Pendiente',parcial:'🔶 Parcial',pagado:'✅ Pagado'};
+    const payLabel = {pendiente:'Pendiente',parcial:'Parcial',pagado:'Pagado'};
     badges.push(`<span class="badge ${payMap[c.estado_pago]||'badge-pay-default'}">${payLabel[c.estado_pago]||c.estado_pago}</span>`);
   }
   document.getElementById('profileBadges').innerHTML = badges.join('');
@@ -1991,21 +2002,21 @@ async function openEmailDiag() {
     if (d.sent) {
       box.style.background = '#DCFCE7';
       box.style.borderColor = '#86EFAC';
-      box.innerHTML = `✅ <strong>Email enviado correctamente</strong> a <code>${clientEmail}</code>.<br>Revisa la bandeja de entrada (y spam).`;
+      box.innerHTML = `<strong>Email enviado correctamente</strong> a <code>${clientEmail}</code>.<br>Revisa la bandeja de entrada (y spam).`;
     } else {
       box.style.background = '#FEE2E2';
       box.style.borderColor = '#FCA5A5';
       const provider = d.provider === 'gmail' ? `Gmail (${d.gmail_user})` : `Resend (${d.mail_from})`;
-      box.innerHTML = `❌ <strong>Fallo al enviar email</strong><br>
+      box.innerHTML = `<strong>Fallo al enviar email</strong><br>
         <b>Destino:</b> ${clientEmail}<br>
         <b>Proveedor activo:</b> ${provider}<br>
-        ${d.provider !== 'gmail' ? `<b>API Key configurada:</b> ${d.resend_api_key_set ? 'Sí ✓' : 'NO — falta RESEND_API_KEY en Railway'}<br>` : ''}
+        ${d.provider !== 'gmail' ? `<b>API Key configurada:</b> ${d.resend_api_key_set ? 'Sí' : 'NO — falta RESEND_API_KEY en Railway'}<br>` : ''}
         <b>Error:</b> <code>${d.error || 'desconocido'}</code>`;
     }
   } catch (e) {
     box.style.background = '#FEE2E2';
     box.style.borderColor = '#FCA5A5';
-    box.innerHTML = `❌ Error de conexión: ${e.message}`;
+    box.innerHTML = `Error de conexión: ${e.message}`;
   }
 }
 
@@ -2486,9 +2497,9 @@ async function saveTarget() {
 const DAY_NAMES  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const TASK_TYPE_LABELS = {
-  rutina:'🏋️ Rutina', cardio:'🏃 Cardio', descanso:'😴 Descanso',
-  nutricion:'🥗 Nutrición', checkin:'📊 Check-in', foto:'📷 Foto',
-  mensaje:'💬 Mensaje', video:'🎬 Video', sesion:'⚡ Sesión', otro:'📌 Otro',
+  rutina:'Rutina', cardio:'Cardio', descanso:'Descanso',
+  nutricion:'Nutrición', checkin:'Check-in', foto:'Foto',
+  mensaje:'Mensaje', video:'Video', sesion:'Sesión', otro:'Otro',
 };
 
 let _calView       = 'week';   // 'week' | 'month'
@@ -2704,7 +2715,7 @@ function _renderDayPanel(dateStr) {
   const label = `${d} de ${MONTH_NAMES[m-1]} ${y}`;
 
   let html = `<div class="cal-day-panel-head">
-    <span class="cal-day-panel-title">📅 ${label}</span>
+    <span class="cal-day-panel-title">${label}</span>
     <button class="btn btn-primary btn-sm" onclick="openCalTaskModal('${dateStr}')">+ Tarea</button>
   </div>`;
 
@@ -2723,7 +2734,7 @@ function _renderDayPanel(dateStr) {
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
         ${t.task_type === 'checkin' && !t.done
-          ? `<button class="cal-task-done-btn" onclick="openCheckinForm(${t.id},'${dateStr}')">📊 Registrar</button>`
+          ? `<button class="cal-task-done-btn" onclick="openCheckinForm(${t.id},'${dateStr}')">Registrar</button>`
           : `<button class="cal-task-done-btn ${t.done?'done':''}" onclick="calToggleDone(${t.id},${!t.done},'${dateStr}')">${t.done?'✓ Hecho':'Marcar hecho'}</button>`}
         <button onclick="calDeleteTask(${t.id},'${dateStr}')" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:18px;line-height:1;" title="Eliminar">×</button>
       </div>
@@ -2743,7 +2754,7 @@ function _renderDayPanel(dateStr) {
       `<div class="cal-checkin-item"><div class="v">${f.v}</div><div class="l">${f.l}</div></div>`
     ).join('');
     html += `<div class="cal-checkin-card">
-      <div class="cal-checkin-title">📊 Check-in registrado</div>
+      <div class="cal-checkin-title">Check-in registrado</div>
       ${gridHtml ? `<div class="cal-checkin-grid">${gridHtml}</div>` : ''}
       ${c.notes ? `<div style="font-size:11px;color:#9CA3AF;margin-top:6px;">${esc(c.notes)}</div>` : ''}
     </div>`;
@@ -2923,7 +2934,7 @@ function openCheckinForm(taskId, dateStr) {
   overlay.className = 'cal-modal-overlay';
   overlay.id = 'calCheckinOverlay';
   overlay.innerHTML = `<div class="cal-modal">
-    <div class="cal-modal-title">📊 Registrar Check-in</div>
+    <div class="cal-modal-title">Registrar Check-in</div>
     <div class="cal-checkin-form">
       <div class="cal-fin"><label>Peso (kg)</label><input type="number" step="0.1" id="ci_weight" placeholder="78.5"></div>
       <div class="cal-fin"><label>% Grasa</label><input type="number" step="0.1" id="ci_fat" placeholder="18.0"></div>
@@ -3011,9 +3022,9 @@ function renderEntrenamientoTab() {
     rsum.innerHTML = `<div style="padding-top:8px;">
       <p style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">${esc(r.name)}</p>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
-        ${r.days ? `<span style="font-size:13px;color:#6B7280;">📅 ${r.days} días/semana</span>` : ''}
-        ${r.time ? `<span style="font-size:13px;color:#6B7280;">⏱ ${r.time} min/sesión</span>` : ''}
-        <span style="font-size:13px;color:#6B7280;">🏋️ ${totalEx} ejercicios · ${days.length} días</span>
+        ${r.days ? `<span style="font-size:13px;color:#6B7280;display:inline-flex;align-items:center;gap:4px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${r.days} días/semana</span>` : ''}
+        ${r.time ? `<span style="font-size:13px;color:#6B7280;display:inline-flex;align-items:center;gap:4px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${r.time} min/sesión</span>` : ''}
+        <span style="font-size:13px;color:#6B7280;display:inline-flex;align-items:center;gap:4px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/></svg> ${totalEx} ejercicios · ${days.length} días</span>
       </div>
     </div>`;
   }
@@ -3037,9 +3048,9 @@ async function loadSessions() {
     el.innerHTML = sessions.map(s => {
       const d = new Date(s.session_date + 'T00:00:00');
       const chips = [];
-      if (s.duration_min) chips.push(`⏱ ${s.duration_min} min`);
+      if (s.duration_min) chips.push(`${s.duration_min} min`);
       if (s.rpe) chips.push(`RPE ${s.rpe}`);
-      if (s.routine_name) chips.push(`📋 ${esc(s.routine_name)}`);
+      if (s.routine_name) chips.push(esc(s.routine_name));
       return `<div class="session-card">
         <div class="session-date-box">
           <div class="s-day">${d.getDate()}</div>
@@ -3133,7 +3144,7 @@ function renderNutricionTab() {
 
   if (!clientDiets.length) {
     el.innerHTML = `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
-      <div style="font-size:40px;margin-bottom:12px;">🥗</div>
+      <div style="margin-bottom:12px;color:#D1D5DB;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div>
       <p style="margin-bottom:16px;">Sin dieta asignada.</p>
       <button class="btn btn-primary btn-sm" onclick="openAssignDietModal()">+ Asignar dieta</button>
     </div>`;
@@ -3407,10 +3418,10 @@ function selectAssignDiet(id, el) {
     const det = diet.detail || {};
     document.getElementById('assignDietPreviewName').textContent = diet.title || diet.name || '';
     const chips = [
-      diet.calories ? `<span class="assign-chip">🔥 ${Math.round(diet.calories)} kcal</span>` : '',
-      det.proteins ? `<span class="assign-chip">💪 ${Math.round(det.proteins)}g prot</span>` : '',
-      det.carbs ? `<span class="assign-chip">🌾 ${Math.round(det.carbs)}g carbs</span>` : '',
-      det.fats ? `<span class="assign-chip">🫒 ${Math.round(det.fats)}g grasas</span>` : '',
+      diet.calories ? `<span class="assign-chip">${Math.round(diet.calories)} kcal</span>` : '',
+      det.proteins ? `<span class="assign-chip">${Math.round(det.proteins)}g prot</span>` : '',
+      det.carbs ? `<span class="assign-chip">${Math.round(det.carbs)}g carbs</span>` : '',
+      det.fats ? `<span class="assign-chip">${Math.round(det.fats)}g grasas</span>` : '',
     ].filter(Boolean);
     document.getElementById('assignDietPreviewChips').innerHTML = chips.join('');
     document.getElementById('assignDietPreview').style.display = 'block';
@@ -3493,9 +3504,9 @@ function selectAssignRoutine(id, el) {
     document.getElementById('assignRoutinePreviewName').textContent = r.name || '';
     const days = r.days_list ? r.days_list.length : r.days || 0;
     const chips = [
-      r.days ? `<span class="assign-chip">📅 ${r.days} días/sem</span>` : '',
-      r.time ? `<span class="assign-chip">⏱ ${r.time} min</span>` : '',
-      r.training ? `<span class="assign-chip">🏋️ ${esc(r.training)}</span>` : '',
+      r.days ? `<span class="assign-chip">${r.days} días/sem</span>` : '',
+      r.time ? `<span class="assign-chip">${r.time} min</span>` : '',
+      r.training ? `<span class="assign-chip">${esc(r.training)}</span>` : '',
       days ? `<span class="assign-chip">${days} días en la rutina</span>` : '',
     ].filter(Boolean);
     document.getElementById('assignRoutinePreviewChips').innerHTML = chips.join('');

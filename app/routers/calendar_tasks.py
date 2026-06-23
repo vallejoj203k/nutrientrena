@@ -29,7 +29,8 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH, CLIENT
+from app.core.dependencies import _user_role_ids
 from app.core.responses import send_error, send_response
 from app.database import get_db
 from app.models.calendar_task import CalendarTask, VALID_TASK_TYPES, COLOR_MAP
@@ -39,6 +40,16 @@ from app.models.user import UserDetail
 router = APIRouter(prefix="/calendar-tasks", tags=["Calendar Tasks"])
 
 _WEEKDAYS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+
+
+def _assert_client_access(current_user, client_id: str, db: Session) -> None:
+    """If the caller is a pure client (role 6), verify they only access their own data."""
+    roles = _user_role_ids(current_user.id, db)
+    if CLIENT in roles and not roles.intersection({SUPERADMIN, ADMIN, COACH}):
+        own = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+        if not own or own.id != client_id:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=403, detail="Sin acceso")
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -201,8 +212,9 @@ def list_for_client(
     end: Optional[date] = Query(None),
     task_type: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
 ):
+    _assert_client_access(current_user, client_id, db)
     q = db.query(CalendarTask).filter(CalendarTask.client_user_detail_id == client_id)
     if start:
         q = q.filter(CalendarTask.task_date >= start)
@@ -229,8 +241,9 @@ def week_view(
     client_id: str,
     week: date = Query(..., description="Cualquier fecha de la semana deseada"),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
 ):
+    _assert_client_access(current_user, client_id, db)
     mon = _monday(week)
     sun = mon + timedelta(days=6)
 
@@ -299,8 +312,9 @@ def month_view(
     year: int = Query(...),
     month: int = Query(..., ge=1, le=12),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
 ):
+    _assert_client_access(current_user, client_id, db)
     first = date(year, month, 1)
     last_day = _cal.monthrange(year, month)[1]
     last = date(year, month, last_day)
@@ -664,11 +678,12 @@ def toggle_done(
     id: int,
     data: DoneToggle,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
 ):
     t = db.query(CalendarTask).filter(CalendarTask.id == id).first()
     if not t:
         return send_error("Tarea no encontrada")
+    _assert_client_access(current_user, t.client_user_detail_id, db)
     t.done = data.done
     t.done_at = datetime.utcnow() if data.done else None
     if data.checkin_id is not None:

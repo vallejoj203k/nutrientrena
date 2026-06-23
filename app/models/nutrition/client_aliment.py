@@ -13,6 +13,7 @@ class ClientAliment(Base):
     brand = Column(String(255), nullable=True)
     name = Column(String(255), nullable=False)
     quantity = Column(Float, nullable=True)
+    quantity_unit = Column(String(20), nullable=True, default='g')
     proteins = Column(Float, nullable=True)
     carbohydrates = Column(Float, nullable=True)
     fats = Column(Float, nullable=True)

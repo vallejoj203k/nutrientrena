@@ -8,6 +8,7 @@ class ClientAlimentCreate(BaseModel):
     brand: Optional[str] = None
     name: str
     quantity: Optional[float] = None
+    quantity_unit: Optional[str] = None
     proteins: Optional[float] = None
     carbohydrates: Optional[float] = None
     fats: Optional[float] = None
@@ -20,6 +21,7 @@ class ClientAlimentUpdate(BaseModel):
     brand: Optional[str] = None
     name: Optional[str] = None
     quantity: Optional[float] = None
+    quantity_unit: Optional[str] = None
     proteins: Optional[float] = None
     carbohydrates: Optional[float] = None
     fats: Optional[float] = None
@@ -34,6 +36,7 @@ class ClientAlimentOut(BaseModel):
     brand: Optional[str] = None
     name: str
     quantity: Optional[float] = None
+    quantity_unit: Optional[str] = None
     proteins: Optional[float] = None
     carbohydrates: Optional[float] = None
     fats: Optional[float] = None

@@ -52,6 +52,7 @@ class Aliment(Base):
     brand = Column(String(255), nullable=True)
     name = Column(String(255), nullable=False)
     quantity = Column(Float, nullable=True)
+    quantity_unit = Column(String(20), nullable=True, default='g')
     quantity_type_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     proteins = Column(Float, nullable=True)
     carbohydrates = Column(Float, nullable=True)

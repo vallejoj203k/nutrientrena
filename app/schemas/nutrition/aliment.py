@@ -45,6 +45,7 @@ class AlimentCreate(BaseModel):
     brand: Optional[str] = None
     name: str
     quantity: Optional[float] = None
+    quantity_unit: Optional[str] = None
     quantity_type_id: Optional[int] = None
     proteins: Optional[float] = None
     carbohydrates: Optional[float] = None
@@ -59,6 +60,7 @@ class AlimentUpdate(BaseModel):
     brand: Optional[str] = None
     name: Optional[str] = None
     quantity: Optional[float] = None
+    quantity_unit: Optional[str] = None
     quantity_type_id: Optional[int] = None
     proteins: Optional[float] = None
     carbohydrates: Optional[float] = None
@@ -81,6 +83,7 @@ class AlimentOut(BaseModel):
     brand: Optional[str] = None
     name: str
     quantity: Optional[float] = None
+    quantity_unit: Optional[str] = None
     quantity_type_id: Optional[int] = None
     quantity_type: Optional[QuantityTypeOut] = None
     proteins: Optional[float] = None

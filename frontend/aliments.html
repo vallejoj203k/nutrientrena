@@ -368,8 +368,20 @@
           <select id="fGroup"><option value="">— Sin grupo —</option></select>
         </div>
         <div class="form-group">
-          <label>Cantidad (g / ml)</label>
-          <input id="fQuantity" type="number" step="0.1" min="0" placeholder="100"/>
+          <label id="fQuantityLabel">Cantidad</label>
+          <div style="display:flex;gap:6px;">
+            <input id="fQuantity" type="number" step="0.1" min="0" placeholder="100" style="flex:1;min-width:0;"/>
+            <select id="fQuantityUnit" style="width:96px;padding:8px 6px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;color:#374151;background:#fff;" onchange="_updateQuantityLabel()">
+              <option value="g">g (gramos)</option>
+              <option value="ml">ml</option>
+              <option value="oz">oz</option>
+              <option value="unidad">Unidad</option>
+              <option value="taza">Taza</option>
+              <option value="cda">Cucharada</option>
+              <option value="cdta">Cucharadita</option>
+              <option value="porcion">Porción</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="section-title">Macronutrientes (por porción)</div>
@@ -630,7 +642,14 @@ async function loadAliments(page = 1) {
   if (groupId) params.set('group_food_id', groupId);
   document.getElementById('tableBody').innerHTML = `<tr class="empty-row"><td colspan="7">Cargando…</td></tr>`;
   try {
-    const endpoint = _currentSource === 'personal' ? `${API}/client-aliments/search` : `${API}/aliments/search`;
+    let endpoint;
+    if (_currentSource === 'personal') {
+      if (!_myUserId) { toast('Usuario no cargado, recarga la página', 'error'); return; }
+      params.set('client_id', _myUserId);
+      endpoint = `${API}/client-aliments/search`;
+    } else {
+      endpoint = `${API}/aliments/search`;
+    }
     const r = await fetch(`${endpoint}?${params}`, { headers: h() });
     if (r.status === 401) { logout(); return; }
     const j   = await r.json();
@@ -670,10 +689,10 @@ function renderTable(items) {
       <td class="td-macro" style="font-weight:700;color:#4F46E5;">${a.calories != null ? Math.round(a.calories) : '—'}<span>kcal</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn-icon" onclick="openEdit('${esc(a.id)}')" title="Editar">
+          <button class="btn-icon" onclick="openEdit('${esc(a.id)}','${a._source}')" title="Editar">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="btn-icon danger" onclick="openConfirm('${esc(a.id)}','${esc(a.name)}')" title="Eliminar">
+          <button class="btn-icon danger" onclick="openConfirm('${esc(a.id)}','${esc(a.name)}','${a._source}')" title="Eliminar">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
@@ -720,13 +739,22 @@ function _setMicro(id, val) {
   if (el) el.value = (val != null && val !== '') ? val : '';
 }
 
-function openModal(item = null) {
+let _editSource = null;
+function _updateQuantityLabel() {
+  const unit = document.getElementById('fQuantityUnit').value;
+  const labels = {g:'Cantidad (g)',ml:'Cantidad (ml)',oz:'Cantidad (oz)',unidad:'Cantidad (und)',taza:'Cantidad (tazas)',cda:'Cantidad (cdas)',cdta:'Cantidad (cdtas)',porcion:'Cantidad (porciones)'};
+  document.getElementById('fQuantityLabel').textContent = labels[unit] || 'Cantidad';
+}
+function openModal(item = null, source = null) {
+  _editSource = source || _currentSource;
   document.getElementById('modalTitle').textContent = item ? 'Editar alimento' : 'Nuevo alimento';
   document.getElementById('editId').value       = item?.id ?? '';
   document.getElementById('fName').value        = item?.name ?? '';
   document.getElementById('fBrand').value       = item?.brand ?? '';
   document.getElementById('fGroup').value       = item?.group_food_id ?? '';
   document.getElementById('fQuantity').value    = item?.quantity ?? '';
+  document.getElementById('fQuantityUnit').value = item?.quantity_unit || 'g';
+  _updateQuantityLabel();
   document.getElementById('fProteins').value    = item?.proteins ?? '';
   document.getElementById('fCarbs').value       = item?.carbohydrates ?? '';
   document.getElementById('fFats').value        = item?.fats ?? '';
@@ -858,12 +886,13 @@ async function openDetail(id) {
 
 function closeDetail() { document.getElementById('detailOverlay').classList.remove('open'); }
 
-async function openEdit(id) {
+async function openEdit(id, source) {
   try {
-    const r = await fetch(`${API}/aliments/${id}/edit`, { headers: h() });
+    const ep = source === 'personal' ? `${API}/client-aliments/${id}/edit` : `${API}/aliments/${id}/edit`;
+    const r = await fetch(ep, { headers: h() });
     if (!r.ok) { toast('Error al cargar alimento', 'error'); return; }
     const item = (await r.json()).data;
-    openModal(item);
+    openModal(item, source || _currentSource);
   } catch { toast('Error de conexión', 'error'); }
 }
 
@@ -913,19 +942,25 @@ async function saveAliment() {
     water:              toF(gv('fWater')),
     glycemic_index:     toF(gv('fGlycemic')),
   };
+  const quantityUnit = document.getElementById('fQuantityUnit').value || 'g';
+  const isPersonal = _editSource === 'personal';
   const body = {
     name,
     brand:          document.getElementById('fBrand').value.trim() || null,
     group_food_id:  parseInt(document.getElementById('fGroup').value) || null,
     quantity:       toF(gv('fQuantity')),
+    quantity_unit:  quantityUnit,
     proteins:       toF(gv('fProteins')),
     carbohydrates:  toF(gv('fCarbs')),
     fats:           toF(gv('fFats')),
     calories:       toF(gv('fCalories')),
     comments:       document.getElementById('fComments').value.trim() || null,
-    description:    desc,
   };
-  const url    = id ? `${API}/aliments/${id}/update` : `${API}/aliments`;
+  if (!isPersonal) body.description = desc;
+  if (isPersonal && !id) body.client_id = _myUserId;
+  const url    = isPersonal
+    ? (id ? `${API}/client-aliments/${id}/update` : `${API}/client-aliments`)
+    : (id ? `${API}/aliments/${id}/update`         : `${API}/aliments`);
   const method = id ? 'PUT' : 'POST';
   try {
     const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', ...h() }, body: JSON.stringify(body) });
@@ -938,10 +973,10 @@ async function saveAliment() {
   finally { btn.disabled = false; lbl.textContent = 'Guardar'; }
 }
 
-function openConfirm(id, name) {
+function openConfirm(id, name, source) {
   document.getElementById('confirmTitle').textContent = 'Eliminar alimento';
   document.getElementById('confirmText').textContent = `Se eliminará "${name}". Esta acción no se puede deshacer.`;
-  confirmDeleteFn = () => doDelete(id);
+  confirmDeleteFn = () => doDelete(id, source || _currentSource);
   document.getElementById('confirmOverlay').classList.add('open');
 }
 
@@ -950,12 +985,13 @@ function closeConfirm() {
   confirmDeleteFn = () => {};
 }
 
-async function doDelete(id) {
+async function doDelete(id, source) {
   if (!id) return;
   const btn = document.getElementById('confirmDeleteBtn');
   btn.disabled = true; btn.textContent = 'Eliminando…';
   try {
-    const r = await fetch(`${API}/aliments/${id}`, { method: 'DELETE', headers: h() });
+    const ep = source === 'personal' ? `${API}/client-aliments/${id}` : `${API}/aliments/${id}`;
+    const r = await fetch(ep, { method: 'DELETE', headers: h() });
     const j = await r.json();
     if (r.ok) { closeConfirm(); toast('Alimento eliminado', 'success'); loadAliments(currentPage); }
     else toast(j.message || 'No se pudo eliminar', 'error');
@@ -1096,11 +1132,13 @@ function toast(msg, type) {
   clearTimeout(el._t); el._t = setTimeout(() => { el.className = 'toast'; }, 3500);
 }
 
+let _myUserId = null;
 async function loadUser() {
   try {
     const r = await fetch(`${API}/auth/me`, { headers: h() });
     if (r.status === 401) { logout(); return; }
     const d = await r.json(); const u = d.data || d;
+    _myUserId = u.user_id || null;
     document.getElementById('sidebarName').textContent = u.name || u.email || '—';
     document.getElementById('sidebarRole').textContent = u.role?.name || u.roles?.[0]?.name || '';
     (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name||u.email||'U')[0].toUpperCase();}})()

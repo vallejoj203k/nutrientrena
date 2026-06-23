@@ -607,11 +607,11 @@ async function loadParamSelect(paramName, selectId){
 
 async function loadCountries(){
   try{
-    const r=await fetch(`${API}/countries`,{headers:{Authorization:`Bearer ${token}`}});
+    const r=await fetch(`${API}/countries/search`,{headers:{Authorization:`Bearer ${token}`}});
     if(!r.ok) return;
     const j=await r.json();
     const sel=document.getElementById('fCountry');
-    (j.data||j||[]).forEach(c=>{sel.appendChild(new Option(c.name,c.code||c.id));});
+    (j.data||j||[]).forEach(c=>{sel.appendChild(new Option(c.country||c.name,c.code||c.id));});
   }catch{}
 }
 

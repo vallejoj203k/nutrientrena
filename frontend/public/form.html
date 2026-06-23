@@ -97,21 +97,21 @@
 
   <!-- Error state -->
   <div class="state" id="stateError">
-    <div class="state-icon error">❌</div>
+    <div class="state-icon error"><svg width="32" height="32" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
     <h2>Formulario no encontrado</h2>
     <p>El enlace no es válido o ha caducado. Contacta con tu coach para recibir un nuevo enlace.</p>
   </div>
 
   <!-- Already submitted state -->
   <div class="state" id="stateSubmitted">
-    <div class="state-icon info">✅</div>
+    <div class="state-icon info"><svg width="32" height="32" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
     <h2>Formulario ya enviado</h2>
     <p>Ya completaste este formulario anteriormente. Tu coach revisará la información y se pondrá en contacto contigo pronto.</p>
   </div>
 
   <!-- Success state -->
   <div class="state" id="stateSuccess">
-    <div class="state-icon success">🎉</div>
+    <div class="state-icon success"><svg width="32" height="32" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
     <h2>¡Formulario enviado!</h2>
     <p>Hemos recibido tus respuestas correctamente. Tu coach las revisará y se pondrá en contacto contigo en breve para comenzar tu plan personalizado.</p>
   </div>
@@ -139,22 +139,26 @@
   const params = new URLSearchParams(location.search);
   const assignmentId = params.get('id');
   let formFields = [];
+  let _paramOptions = {};  // { gender_id: [{id, label}], ... }
 
   /* ── Init ── */
   async function init() {
     if (!assignmentId) { showState('stateError'); return; }
 
     try {
-      const r = await fetch(`${API}/public/form/${assignmentId}`);
-      const d = await r.json();
-      if (!r.ok || !d.data) { showState('stateError'); return; }
+      const [formRes, optsRes] = await Promise.all([
+        fetch(`${API}/public/form/${assignmentId}`),
+        fetch(`${API}/public/form-options`),
+      ]);
+      const d = await formRes.json();
+      if (!formRes.ok || !d.data) { showState('stateError'); return; }
+      if (optsRes.ok) {
+        const od = await optsRes.json();
+        _paramOptions = od.data || {};
+      }
 
       const assignment = d.data;
-
-      if (assignment.status === 'submitted') {
-        showState('stateSubmitted');
-        return;
-      }
+      if (assignment.status === 'submitted') { showState('stateSubmitted'); return; }
 
       const template = assignment.template;
       if (!template) { showState('stateError'); return; }
@@ -215,6 +219,16 @@
     updateProgress();
   }
 
+  // Keys that must always render as a select from _paramOptions
+  const PARAM_SELECT_KEYS = ['gender_id', 'activity_id', 'objective_id'];
+
+  // Nice labels for the blank option per field
+  const PARAM_PLACEHOLDERS = {
+    gender_id:    'Selecciona tu género',
+    activity_id:  'Selecciona tu nivel de actividad',
+    objective_id: 'Selecciona tu objetivo principal',
+  };
+
   function buildField(field, idx) {
     const wrap = document.createElement('div');
     wrap.className = 'form-group';
@@ -225,8 +239,11 @@
     wrap.appendChild(label);
 
     let input;
+    const isParamSelect = PARAM_SELECT_KEYS.includes(field.field_key) && _paramOptions[field.field_key]?.length;
 
-    if (field.field_type === 'textarea') {
+    if (isParamSelect) {
+      input = buildParamSelect(field.field_key);
+    } else if (field.field_type === 'textarea') {
       input = document.createElement('textarea');
       input.rows = 3;
       if (field.placeholder) input.placeholder = field.placeholder;
@@ -259,10 +276,26 @@
     input.id = `field_${field.field_key}`;
     input.name = field.field_key;
     if (field.required) input.required = true;
+    input.addEventListener('change', updateProgress);
     input.addEventListener('input', updateProgress);
 
     wrap.appendChild(input);
     return wrap;
+  }
+
+  function buildParamSelect(fieldKey) {
+    const sel = document.createElement('select');
+    const blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = PARAM_PLACEHOLDERS[fieldKey] || 'Selecciona una opción';
+    sel.appendChild(blank);
+    (_paramOptions[fieldKey] || []).forEach(opt => {
+      const o = document.createElement('option');
+      o.value = opt.id;
+      o.textContent = opt.label;
+      sel.appendChild(o);
+    });
+    return sel;
   }
 
   /* ── Progress ── */

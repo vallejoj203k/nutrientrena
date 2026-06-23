@@ -6,12 +6,37 @@ from app.database import get_db
 from app.core.responses import send_response, send_error
 from app.models.form import FormAssignment, FormResponse, PROFILE_FIELD_MAP
 from app.models.user import UserDetail, UserParent, User
-from app.models.parameter import ParameterDetail
+from app.models.parameter import Parameter, ParameterDetail
 from app.schemas.form import FormAssignmentOut, FormSubmitRequest
 
 router = APIRouter(prefix="/public", tags=["Public"])
 
 _CLIENT_STATE_CACHE: dict = {}
+
+# Parameter names that map to form field keys (no auth needed for these)
+_FORM_PARAM_NAMES = {
+    "gender_id":    "Genero",
+    "activity_id":  "Nivel de actividad",
+    "objective_id": "Objetivo Usuario",
+}
+
+
+@router.get("/form-options", summary="Opciones de formulario público")
+def get_form_options(db: Session = Depends(get_db)):
+    result = {}
+    for field_key, param_name in _FORM_PARAM_NAMES.items():
+        param = db.query(Parameter).filter(Parameter.description == param_name).first()
+        if param:
+            result[field_key] = [
+                {"id": d.id, "label": d.description}
+                for d in db.query(ParameterDetail)
+                    .filter(ParameterDetail.parameter_id == param.id)
+                    .order_by(ParameterDetail.id)
+                    .all()
+            ]
+        else:
+            result[field_key] = []
+    return send_response(result, "OK")
 
 
 def _get_client_state_id(db: Session, description: str) -> int | None:

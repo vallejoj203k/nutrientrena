@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Mi Agenda</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --purple:#4F46E5;--purple-dark:#4338CA;--purple-light:#6366F1;
+      --purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* sidebar */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
+    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
+    .nav-item svg{opacity:.8;flex-shrink:0;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
+    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+    /* main */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:64px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+    .topbar h1{font-size:18px;font-weight:700;color:#111;flex:1;}
+    .content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;gap:20px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* calendar panel */
+    .cal-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px;}
+
+    /* toolbar */
+    .ag-toolbar{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .ag-nav{display:flex;align-items:center;gap:6px;}
+    .ag-nav-btn{background:#F3F4F6;border:none;border-radius:8px;padding:7px 10px;cursor:pointer;color:#374151;font-size:13px;display:flex;align-items:center;gap:4px;font-weight:600;transition:.12s;}
+    .ag-nav-btn:hover{background:#E5E7EB;}
+    .ag-period{font-size:14px;font-weight:700;color:#111;min-width:160px;text-align:center;}
+    .ag-view-btns{margin-left:auto;display:flex;gap:4px;}
+    .ag-view-btn{padding:6px 14px;border-radius:7px;border:1px solid #E5E7EB;background:#fff;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;transition:.12s;}
+    .ag-view-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+
+    /* week grid */
+    .ag-week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
+    .ag-wcell{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);min-height:100px;cursor:pointer;transition:.15s;border:2px solid transparent;}
+    .ag-wcell:hover{border-color:#C7D2FE;}
+    .ag-wcell.today{border-color:var(--purple);}
+    .ag-wcell.selected{background:#EEF2FF;border-color:var(--purple);}
+    .ag-wday{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+    .ag-wdate{font-size:18px;font-weight:800;color:#111;margin-bottom:8px;}
+    .ag-wcell.today .ag-wdate{color:var(--purple);}
+    .ag-task-pill{font-size:10px;font-weight:600;padding:3px 7px;border-radius:20px;color:#fff;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;}
+    .ag-task-pill.done{opacity:.5;text-decoration:line-through;}
+    .ag-more{font-size:10px;color:#9CA3AF;margin-top:2px;}
+
+    /* month grid */
+    .ag-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+    .ag-month-hdr{text-align:center;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;padding:4px 0;}
+    .ag-mcell{background:#fff;border-radius:10px;padding:8px;min-height:70px;cursor:pointer;border:2px solid transparent;transition:.12s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .ag-mcell:hover{border-color:#C7D2FE;}
+    .ag-mcell.today{border-color:var(--purple);}
+    .ag-mcell.selected{background:#EEF2FF;border-color:var(--purple);}
+    .ag-mcell.other-month{opacity:.35;}
+    .ag-mdate{font-size:13px;font-weight:700;color:#374151;margin-bottom:5px;}
+    .ag-mcell.today .ag-mdate{color:var(--purple);}
+    .ag-dots{display:flex;flex-wrap:wrap;gap:3px;}
+    .ag-dot{width:7px;height:7px;border-radius:50%;}
+
+    /* day panel */
+    .ag-day-panel{width:300px;flex-shrink:0;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 120px);}
+    .ag-day-panel-head{padding:16px 18px 12px;border-bottom:1px solid #F3F4F6;}
+    .ag-day-panel-head h3{font-size:14px;font-weight:700;color:#111;}
+    .ag-day-panel-head p{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .ag-day-panel-body{flex:1;overflow-y:auto;padding:12px;}
+    .ag-day-panel-body::-webkit-scrollbar{width:4px;}
+    .ag-day-panel-body::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px;}
+    .ag-task-card{border-radius:10px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #6366F1;background:#F9FAFB;position:relative;}
+    .ag-task-card.done-card{opacity:.6;}
+    .ag-task-card-type{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+    .ag-task-card-title{font-size:13px;font-weight:700;color:#111;margin-bottom:4px;}
+    .ag-task-card-notes{font-size:12px;color:#6B7280;line-height:1.5;}
+    .ag-task-done-btn{margin-top:10px;width:100%;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s;}
+    .ag-task-done-btn.mark-done{background:#ECFDF5;color:#059669;}
+    .ag-task-done-btn.mark-done:hover{background:#059669;color:#fff;}
+    .ag-task-done-btn.mark-undone{background:#F3F4F6;color:#6B7280;}
+    .ag-task-done-btn.mark-undone:hover{background:#E5E7EB;}
+    .ag-checkin-card{background:#FFFBEB;border-radius:10px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #F59E0B;}
+    .ag-checkin-card-label{font-size:10px;font-weight:700;color:#D97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+    .ag-checkin-card-weight{font-size:20px;font-weight:800;color:#111;}
+    .ag-checkin-card-notes{font-size:12px;color:#6B7280;margin-top:4px;}
+    .ag-empty{text-align:center;padding:32px 12px;color:#D1D5DB;}
+    .ag-empty svg{display:block;margin:0 auto 10px;opacity:.4;}
+
+    /* toast */
+    .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;background:#374151;z-index:999;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    .toast.success{background:#059669;}
+    .toast.error{background:#DC2626;}
+
+    @media(max-width:900px){
+      .sidebar{display:none;}
+      .ag-week-grid{grid-template-columns:repeat(4,1fr);}
+      .ag-day-panel{width:100%;max-height:none;}
+      .content{flex-direction:column;padding:16px;}
+    }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><span>ALZUM<em>.io</em></span><small>Mi Panel</small></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Mi espacio</div>
+    <a class="nav-item active" href="mi-agenda.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Agenda
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">—</div>
+        <div class="user-role" id="sidebarRole">Cliente</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <h1>Mi Agenda</h1>
+  </div>
+  <div class="content" id="content">
+    <div id="calendarArea" style="display:none;flex:1;display:flex;flex-direction:column;gap:16px;flex:1;">
+      <div class="ag-toolbar">
+        <div class="ag-nav">
+          <button class="ag-nav-btn" onclick="agNav(-1)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="ag-period" id="agPeriod">—</span>
+          <button class="ag-nav-btn" onclick="agNav(1)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="ag-nav-btn" onclick="agGoToday()" style="margin-left:4px;">Hoy</button>
+        </div>
+        <div class="ag-view-btns">
+          <button class="ag-view-btn active" id="btnWeek" onclick="agSetView('week')">Semana</button>
+          <button class="ag-view-btn" id="btnMonth" onclick="agSetView('month')">Mes</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;flex:1;min-height:0;">
+        <div class="cal-panel">
+          <div id="agGrid"></div>
+        </div>
+        <div class="ag-day-panel" id="agDayPanel" style="display:none;">
+          <div class="ag-day-panel-head">
+            <h3 id="agDayTitle">—</h3>
+            <p id="agDaySubtitle"></p>
+          </div>
+          <div class="ag-day-panel-body" id="agDayBody"></div>
+        </div>
+      </div>
+    </div>
+    <div id="loadingMsg" style="flex:1;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:14px;">Cargando agenda…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+let _token = localStorage.getItem('token') || '';
+function h() { return { 'Content-Type': 'application/json', Authorization: `Bearer ${_token}` }; }
+function esc(s) { return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+let _toastT;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast show ${type}`;
+  clearTimeout(_toastT); _toastT = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let _myDetailId = null;
+let _agView = 'week';
+let _agRef = new Date();
+let _agData = null;
+let _agSelDate = null;
+
+const TASK_LABELS = {
+  rutina:'Rutina', cardio:'Cardio', descanso:'Descanso', nutricion:'Nutrición',
+  checkin:'Check-in', foto:'Foto', mensaje:'Mensaje', video:'Video',
+  sesion:'Sesión', otro:'Otro'
+};
+const COLOR_MAP = {
+  rutina:'#4F46E5', cardio:'#EF4444', descanso:'#6B7280', nutricion:'#10B981',
+  checkin:'#F59E0B', foto:'#8B5CF6', mensaje:'#3B82F6', video:'#EC4899',
+  sesion:'#0EA5E9', otro:'#9CA3AF'
+};
+const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DAY_NAMES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  if (!_token) { location.href = 'login.html'; return; }
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: h() });
+    if (!r.ok) { location.href = 'login.html'; return; }
+    const d = await r.json(); const u = d.data || d;
+    _myDetailId = u.id; // UserDetail UUID
+    document.getElementById('sidebarName').textContent = u.name || u.email || '—';
+    document.getElementById('sidebarRole').textContent = u.roles?.[0]?.name || 'Cliente';
+    const av = document.getElementById('sidebarAvatar');
+    if (u.photo) { av.innerHTML = `<img src="${esc(u.photo)}" style="width:100%;height:100%;object-fit:cover;">`; av.style.background = 'transparent'; }
+    else av.textContent = (u.name || u.email || 'U')[0].toUpperCase();
+
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('calendarArea').style.display = 'flex';
+    agLoad();
+  } catch { toast('Error al cargar tu perfil', 'error'); }
+}
+
+function logout() { localStorage.clear(); location.href = 'login.html'; }
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function agNav(dir) {
+  if (_agView === 'week') _agRef = new Date(_agRef.getTime() + dir * 7 * 86400000);
+  else { _agRef.setMonth(_agRef.getMonth() + dir); _agRef = new Date(_agRef); }
+  _agSelDate = null;
+  document.getElementById('agDayPanel').style.display = 'none';
+  agLoad();
+}
+
+function agGoToday() { _agRef = new Date(); _agSelDate = null; document.getElementById('agDayPanel').style.display = 'none'; agLoad(); }
+
+function agSetView(v) {
+  _agView = v;
+  document.getElementById('btnWeek').classList.toggle('active', v === 'week');
+  document.getElementById('btnMonth').classList.toggle('active', v === 'month');
+  _agSelDate = null;
+  document.getElementById('agDayPanel').style.display = 'none';
+  agLoad();
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+async function agLoad() {
+  if (!_myDetailId) return;
+  const grid = document.getElementById('agGrid');
+  grid.innerHTML = '<div style="text-align:center;padding:40px;color:#9CA3AF;font-size:13px;">Cargando…</div>';
+
+  try {
+    if (_agView === 'week') {
+      const weekStr = _isoDate(_monday(_agRef));
+      const r = await fetch(`${API}/calendar-tasks/week/${_myDetailId}?week=${weekStr}`, { headers: h() });
+      if (!r.ok) throw new Error();
+      _agData = (await r.json()).data;
+      _renderWeek();
+    } else {
+      const y = _agRef.getFullYear(), m = _agRef.getMonth() + 1;
+      const r = await fetch(`${API}/calendar-tasks/month/${_myDetailId}?year=${y}&month=${m}`, { headers: h() });
+      if (!r.ok) throw new Error();
+      _agData = (await r.json()).data;
+      _renderMonth();
+    }
+  } catch { grid.innerHTML = '<div style="text-align:center;padding:40px;color:#EF4444;font-size:13px;">Error al cargar la agenda.</div>'; }
+}
+
+// ── Week render ───────────────────────────────────────────────────────────────
+function _monday(d) {
+  const r = new Date(d); const day = r.getDay() || 7;
+  r.setDate(r.getDate() - (day - 1)); return r;
+}
+function _isoDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function _todayStr() { return _isoDate(new Date()); }
+
+function _renderWeek() {
+  const mon = _monday(_agRef);
+  const days = _agData?.days || [];
+  const todayStr = _todayStr();
+  document.getElementById('agPeriod').textContent = (() => {
+    const sun = new Date(mon.getTime() + 6*86400000);
+    return `${mon.getDate()} ${MONTH_NAMES[mon.getMonth()].slice(0,3)} – ${sun.getDate()} ${MONTH_NAMES[sun.getMonth()].slice(0,3)} ${sun.getFullYear()}`;
+  })();
+
+  const grid = document.getElementById('agGrid');
+  grid.className = 'ag-week-grid';
+  grid.innerHTML = days.map((slot, i) => {
+    const d = new Date(mon.getTime() + i*86400000);
+    const dateStr = _isoDate(d);
+    const isToday = dateStr === todayStr;
+    const isSel = dateStr === _agSelDate;
+    const tasks = slot.tasks || [];
+    const pills = tasks.slice(0,3).map(t =>
+      `<div class="ag-task-pill${t.done?' done':''}" style="background:${COLOR_MAP[t.task_type]||'#9CA3AF'}">${esc(t.title||TASK_LABELS[t.task_type]||t.task_type)}</div>`
+    ).join('');
+    const more = tasks.length > 3 ? `<div class="ag-more">+${tasks.length-3} más</div>` : '';
+    return `<div class="ag-wcell${isToday?' today':''}${isSel?' selected':''}" onclick="agSelectDate('${dateStr}')">
+      <div class="ag-wday">${DAY_NAMES[i]}</div>
+      <div class="ag-wdate">${d.getDate()}</div>
+      ${pills}${more}
+    </div>`;
+  }).join('');
+}
+
+// ── Month render ──────────────────────────────────────────────────────────────
+function _renderMonth() {
+  const year = _agRef.getFullYear(), month = _agRef.getMonth();
+  const todayStr = _todayStr();
+  document.getElementById('agPeriod').textContent = `${MONTH_NAMES[month]} ${year}`;
+
+  const byDay = _agData?.by_day || {};
+  const firstDay = new Date(year, month, 1);
+  const startOffset = (firstDay.getDay() || 7) - 1;
+  const daysInMonth = _agData?.days_in_month || new Date(year, month+1, 0).getDate();
+
+  let html = DAY_NAMES.map(d => `<div class="ag-month-hdr">${d}</div>`).join('');
+
+  for (let i = 0; i < startOffset; i++) {
+    const d = new Date(year, month, -startOffset + i + 1);
+    html += `<div class="ag-mcell other-month"><div class="ag-mdate">${d.getDate()}</div></div>`;
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isToday = dateStr === todayStr;
+    const isSel = dateStr === _agSelDate;
+    const dayData = byDay[dateStr] || {};
+    const tasks = dayData.tasks || [];
+    const dots = tasks.slice(0,5).map(t =>
+      `<div class="ag-dot${t.done?' done':''}" style="background:${COLOR_MAP[t.task_type]||'#9CA3AF'};${t.done?'opacity:.4':''}"></div>`
+    ).join('');
+    html += `<div class="ag-mcell${isToday?' today':''}${isSel?' selected':''}" onclick="agSelectDate('${dateStr}')">
+      <div class="ag-mdate">${day}</div>
+      <div class="ag-dots">${dots}</div>
+    </div>`;
+  }
+  const remaining = (7 - (startOffset + daysInMonth) % 7) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="ag-mcell other-month"><div class="ag-mdate">${i}</div></div>`;
+  }
+
+  const grid = document.getElementById('agGrid');
+  grid.className = 'ag-month-grid';
+  grid.innerHTML = html;
+}
+
+// ── Day panel ─────────────────────────────────────────────────────────────────
+function agSelectDate(dateStr) {
+  _agSelDate = dateStr;
+  if (_agView === 'week') _renderWeek(); else _renderMonth();
+  _renderDayPanel(dateStr);
+}
+
+function _renderDayPanel(dateStr) {
+  const panel = document.getElementById('agDayPanel');
+  panel.style.display = 'flex';
+
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dayObj = new Date(y, m-1, d);
+  const dayName = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][dayObj.getDay()];
+  document.getElementById('agDayTitle').textContent = `${dayName} ${d}`;
+  document.getElementById('agDaySubtitle').textContent = `${MONTH_NAMES[m-1]} ${y}`;
+
+  let tasks = [], checkins = [];
+  if (_agView === 'week') {
+    const days = _agData?.days || [];
+    const mon = _monday(_agRef);
+    const dayIdx = Math.round((dayObj - mon) / 86400000);
+    if (dayIdx >= 0 && dayIdx < days.length) {
+      tasks = days[dayIdx].tasks || [];
+      checkins = days[dayIdx].checkins || [];
+    }
+  } else {
+    const dayData = (_agData?.by_day || {})[dateStr] || {};
+    tasks = dayData.tasks || [];
+    checkins = dayData.checkins || [];
+  }
+
+  const body = document.getElementById('agDayBody');
+  if (!tasks.length && !checkins.length) {
+    body.innerHTML = `<div class="ag-empty">
+      <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Sin actividad este día
+    </div>`;
+    return;
+  }
+
+  body.innerHTML =
+    tasks.map(t => `
+      <div class="ag-task-card${t.done?' done-card':''}" id="tc-${t.id}" style="border-left-color:${COLOR_MAP[t.task_type]||'#6366F1'}">
+        <div class="ag-task-card-type">${esc(TASK_LABELS[t.task_type]||t.task_type)}</div>
+        ${t.title ? `<div class="ag-task-card-title">${esc(t.title)}</div>` : ''}
+        ${t.notes ? `<div class="ag-task-card-notes">${esc(t.notes)}</div>` : ''}
+        ${t.task_type !== 'checkin' ? `
+          <button class="ag-task-done-btn ${t.done?'mark-undone':'mark-done'}" onclick="agToggleDone(${t.id},${!t.done},'${dateStr}')">
+            ${t.done ? '↩ Marcar pendiente' : '✓ Marcar completado'}
+          </button>` : ''}
+      </div>`).join('') +
+    checkins.map(c => `
+      <div class="ag-checkin-card">
+        <div class="ag-checkin-card-label">✓ Check-in registrado</div>
+        ${c.weight ? `<div class="ag-checkin-card-weight">${c.weight} kg</div>` : ''}
+        ${c.notes ? `<div class="ag-checkin-card-notes">${esc(c.notes)}</div>` : ''}
+      </div>`).join('');
+}
+
+// ── Done toggle ───────────────────────────────────────────────────────────────
+async function agToggleDone(taskId, done, dateStr) {
+  try {
+    const r = await fetch(`${API}/calendar-tasks/${taskId}/done`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ done })
+    });
+    if (!r.ok) { toast('Error al actualizar', 'error'); return; }
+    toast(done ? 'Tarea completada ✓' : 'Marcada como pendiente', done ? 'success' : '');
+    await agLoad();
+    if (_agSelDate) _renderDayPanel(dateStr);
+  } catch { toast('Error de conexión', 'error'); }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -423,6 +423,67 @@
     .flyout-item:hover{background:#F5F3FF;color:#4F46E5;}
     .flyout-item svg{opacity:.6;flex-shrink:0;}
     .flyout-item:hover svg{opacity:1;}
+
+    /* ── New Resumen layout ──────────────────────────────────── */
+    .res-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px;}
+    .res-stat{background:#fff;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:2px;}
+    .res-stat-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+    .res-stat-val{font-size:24px;font-weight:800;color:#111;line-height:1;}
+    .res-stat-lbl{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;}
+    .res-stat-sub{font-size:11px;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:3px;color:#6B7280;}
+    .res-sub-up{color:#059669;} .res-sub-down{color:#DC2626;} .res-sub-warn{color:#D97706;}
+    .res-mid{display:grid;grid-template-columns:1fr 280px;gap:16px;margin-bottom:18px;}
+    .res-chart-card{background:#fff;border-radius:14px;padding:22px 24px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .res-chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+    .res-chart-title{font-size:14px;font-weight:700;color:#111;}
+    .res-chart-sub{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .res-chart-link{font-size:12px;color:#4F46E5;font-weight:600;text-decoration:none;cursor:pointer;}
+    .res-chart-area{height:150px;}
+    .res-obj-card{background:#fff;border-radius:14px;padding:22px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:14px;}
+    .res-obj-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;}
+    .res-obj-big{font-size:32px;font-weight:900;color:#111;line-height:1;margin-bottom:2px;}
+    .res-obj-unit{font-size:14px;font-weight:500;color:#9CA3AF;}
+    .res-obj-hint{font-size:12px;color:#9CA3AF;}
+    .res-obj-bar{height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden;margin:4px 0;}
+    .res-obj-bar-fill{height:100%;border-radius:4px;transition:width .5s;}
+    .res-obj-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .res-obj-stat{background:#F9FAFB;border-radius:8px;padding:10px;}
+    .res-obj-stat-val{font-size:18px;font-weight:800;color:#4F46E5;}
+    .res-obj-stat-lbl{font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+    .res-bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px;}
+    .res-bc{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .res-bch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .res-bct{font-size:13px;font-weight:700;color:#111;display:flex;align-items:center;gap:7px;}
+    .res-bca{font-size:12px;color:#4F46E5;font-weight:600;cursor:pointer;background:none;border:none;padding:0;}
+    .res-week-row{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #F9FAFB;}
+    .res-week-row:last-child{border-bottom:none;}
+    .res-wd{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;width:26px;flex-shrink:0;}
+    .res-wd.today{color:#4F46E5;}
+    .res-wdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .res-wtask{font-size:12px;color:#374151;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .res-wtask.done{text-decoration:line-through;color:#D1D5DB;}
+    .res-wtask.empty{color:#D1D5DB;font-style:italic;}
+    .res-wbadge{font-size:9px;font-weight:700;background:#FFF3CD;color:#D97706;padding:2px 6px;border-radius:4px;flex-shrink:0;}
+    .res-see-btn{display:inline-flex;align-items:center;padding:4px 10px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:11px;font-weight:600;color:#6B7280;cursor:pointer;text-align:center;transition:.12s;text-decoration:none;}
+    .res-see-btn:hover{background:#F9FAFB;color:#374151;}
+    .res-ci-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F9FAFB;}
+    .res-ci-row:last-child{border-bottom:none;}
+    .res-ci-date{font-size:13px;font-weight:700;color:#374151;}
+    .res-ci-pills{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap;}
+    .res-ci-pill{font-size:10px;padding:2px 7px;border-radius:20px;background:#EEF2FF;color:#4F46E5;font-weight:600;}
+    .res-ci-right{text-align:right;}
+    .res-ci-weight{font-size:17px;font-weight:800;color:#111;}
+    .res-ci-delta{font-size:11px;font-weight:600;color:#9CA3AF;}
+    .res-ci-delta.dn{color:#059669;} .res-ci-delta.up{color:#DC2626;}
+    .res-pedir-btn{display:block;width:100%;margin-top:12px;padding:8px;border-radius:8px;background:#4F46E5;color:#fff;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.12s;text-align:center;}
+    .res-pedir-btn:hover{background:#4338CA;}
+    .res-note-item{padding:10px 12px;background:#FFFBEB;border-radius:8px;margin-bottom:8px;border-left:3px solid #F59E0B;}
+    .res-note-item:last-child{margin-bottom:0;}
+    .res-note-date{font-size:10px;font-weight:700;color:#D97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+    .res-note-title{font-size:12px;font-weight:700;color:#374151;margin-bottom:2px;}
+    .res-note-body{font-size:12px;color:#6B7280;line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+    @media(max-width:1100px){.res-stats{grid-template-columns:repeat(3,1fr);}.res-mid{grid-template-columns:1fr;}.res-bottom{grid-template-columns:1fr 1fr;}}
+    @media(max-width:700px){.res-stats{grid-template-columns:1fr 1fr;}.res-bottom{grid-template-columns:1fr;}}
   </style>
   <style>
     /* ALZUM.io — theme overrides */
@@ -656,24 +717,23 @@
 
       <!-- ── RESUMEN ── -->
       <div class="tab-pane active" id="tab-resumen">
-        <!-- Stats -->
-        <div class="grid-3" style="margin-bottom:16px;" id="statsRow"></div>
-        <!-- Active plan -->
-        <div class="active-plan-grid" id="activePlanRow"></div>
-        <!-- Info + Checkins -->
-        <div class="grid-2">
-          <div class="card" id="infoCard">
-            <div class="card-head"><span class="card-title">Información personal</span></div>
-            <div class="info-grid" id="infoGrid"></div>
-          </div>
-          <div class="card" id="checkinsCard">
-            <div class="card-head">
-              <span class="card-title">Últimos check-ins</span>
-              <a href="#" id="seeAllCheckins" style="font-size:12px;color:var(--purple);text-decoration:none;font-weight:600;">Ver todos →</a>
-            </div>
-            <div id="checkinsBody"></div>
-          </div>
+        <div class="res-stats" id="resStats"></div>
+        <div class="res-mid">
+          <div class="res-chart-card" id="resChartCard"></div>
+          <div class="res-obj-card" id="resObjCard"></div>
         </div>
+        <div class="res-bottom">
+          <div class="res-bc" id="resWeekCard"></div>
+          <div class="res-bc" id="resCiCard"></div>
+          <div class="res-bc" id="resNotesCard"></div>
+        </div>
+        <!-- Active plan (kept below for Nutricion/Entrenamiento quick view) -->
+        <div class="active-plan-grid" id="activePlanRow"></div>
+        <!-- Hidden legacy IDs used by old code paths -->
+        <div style="display:none;" id="statsRow"></div>
+        <div style="display:none;" id="infoGrid"></div>
+        <div style="display:none;" id="checkinsBody"></div>
+        <a style="display:none;" id="seeAllCheckins"></a>
       </div>
 
       <!-- ── FORMULARIO ── -->
@@ -1063,67 +1123,8 @@ function renderAll() {
   // WhatsApp btn
   if (c.whatsapp_link) { document.getElementById('waBtn').style.display = 'inline-flex'; }
 
-  // Stats
-  const totalCheckins = checkins.length;
-  const firstW = totalCheckins > 0 ? (checkins[checkins.length-1].weight) : null;
-  const lastW  = totalCheckins > 0 ? checkins[0].weight : null;
-  const wDelta = (firstW && lastW) ? (lastW - firstW) : null;
-  const formStatus = formAssignment ? (formAssignment.status === 'submitted' ? '✓' : 'Pendiente') : '—';
-  const formColor = formAssignment?.status === 'submitted' ? '#059669' : (formAssignment ? '#D97706' : '#9CA3AF');
-
-  document.getElementById('statsRow').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#EEF2FF;"><svg width="20" height="20" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-      <div><div class="stat-val">${totalCheckins}</div><div class="stat-lbl">Check-ins</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:${wDelta===null?'#F3F4F6':wDelta<=0?'#ECFDF5':'#FEF2F2'};">
-        <svg width="20" height="20" fill="none" stroke="${wDelta===null?'#9CA3AF':wDelta<=0?'#059669':'#DC2626'}" stroke-width="2" viewBox="0 0 24 24"><polyline points="${wDelta!==null&&wDelta<=0?'23 6 13.5 15.5 8.5 10.5 1 18':'1 6 10.5 15.5 15.5 10.5 23 18'}"/></svg>
-      </div>
-      <div>
-        <div class="stat-val" style="color:${wDelta===null?'#9CA3AF':wDelta<=0?'#059669':'#DC2626'};">${wDelta===null?'—':(wDelta>0?'+':'')+wDelta.toFixed(1)+' kg'}</div>
-        <div class="stat-lbl">Cambio de peso</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#FFF7ED;"><svg width="20" height="20" fill="none" stroke="#C2410C" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-      <div><div class="stat-val" style="color:${formColor};">${formStatus}</div><div class="stat-lbl">Formulario intake</div></div>
-    </div>`;
-
-  // Personal info
-  document.getElementById('infoGrid').innerHTML = `
-    <div class="info-item"><label>Nombre</label><span>${esc(name)}</span></div>
-    <div class="info-item"><label>Email</label><span>${esc(c.email || '—')}</span></div>
-    <div class="info-item"><label>Teléfono</label><span>${esc(c.phone || '—')}</span></div>
-    <div class="info-item"><label>Género</label><span>${esc(c.gender || '—')}</span></div>
-    <div class="info-item"><label>Peso actual</label><span>${c.weight ? c.weight+' kg' : '—'}</span></div>
-    <div class="info-item"><label>Altura</label><span>${c.height ? c.height+' cm' : '—'}</span></div>
-    <div class="info-item"><label>Objetivo</label><span>${esc(c.goal || c.objective || '—')}</span></div>
-    <div class="info-item"><label>Nivel actividad</label><span>${esc(c.activity_level || '—')}</span></div>
-    <div class="info-item"><label>Ocupación</label><span>${esc(c.occupation || '—')}</span></div>
-    <div class="info-item"><label>País</label><span>${esc(c.country_code || '—')}</span></div>`;
-
-  document.getElementById('seeAllCheckins').href = `checkins.html?client=${clientId}`;
-
-  // Checkins
-  const ckEl = document.getElementById('checkinsBody');
-  if (totalCheckins === 0) {
-    ckEl.innerHTML = `<div class="empty"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><h4>Sin check-ins</h4><p>No hay check-ins registrados aún.</p></div>`;
-  } else {
-    const weights = checkins.map(c=>c.weight).filter(Boolean).reverse();
-    ckEl.innerHTML = (weights.length >= 2 ? renderMiniChart(weights) : '') +
-      checkins.slice(0,6).map((ck,i) => {
-        const d = new Date(ck.checkin_date||ck.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short'});
-        const delta = ck.weight_progress;
-        return `<div class="checkin-row">
-          <div><div class="checkin-date">${d}</div>${ck.notes?`<div class="checkin-note">${esc(ck.notes)}</div>`:''}</div>
-          <div style="display:flex;align-items:center;gap:7px;">
-            ${delta!=null?`<span class="checkin-delta ${delta<0?'delta-down':delta>0?'delta-up':'delta-zero'}">${delta>0?'+':''}${Number(delta).toFixed(1)} kg</span>`:''}
-            <div class="checkin-weight">${ck.weight?ck.weight+' kg':'—'}</div>
-          </div>
-        </div>`;
-      }).join('');
-  }
+  // ── New Resumen tab ──
+  renderResumenTab();
 
   // Form tab
   renderFormTab();
@@ -1158,6 +1159,296 @@ function renderAll() {
   pa.style.flexDirection = 'column';
   pa.style.overflow = 'hidden';
   pa.style.flex = '1';
+}
+
+/* ── Resumen tab ── */
+function renderResumenTab() {
+  _renderResStats();
+  _renderResChart();
+  _renderResObj();
+  _renderResCi();
+  _loadResumenExtras();
+}
+
+function _renderResStats() {
+  const el = document.getElementById('resStats');
+  if (!el) return;
+  const latest = checkins[0] || null;
+  const peso = latest?.weight ?? clientData?.weight ?? null;
+  const lastCiDate = latest?.checkin_date ? new Date(latest.checkin_date) : null;
+  let lastCiStr = '—';
+  if (lastCiDate) {
+    const diffDays = Math.round((Date.now() - lastCiDate) / 86400000);
+    lastCiStr = diffDays === 0 ? 'Hoy' : diffDays === 1 ? 'Ayer' : `Hace ${diffDays}d`;
+  }
+
+  el.innerHTML = `
+    <div class="res-stat">
+      <div class="res-stat-icon" style="background:#EDE9FE;color:#7C3AED;">⚖️</div>
+      <div class="res-stat-val">${peso != null ? peso + ' kg' : '—'}</div>
+      <div class="res-stat-lbl">Peso actual</div>
+    </div>
+    <div class="res-stat">
+      <div class="res-stat-icon" style="background:#DCFCE7;color:#16A34A;">📊</div>
+      <div class="res-stat-val" id="resAdherenceVal">—</div>
+      <div class="res-stat-lbl">Adherencia 30D</div>
+    </div>
+    <div class="res-stat">
+      <div class="res-stat-icon" style="background:#FEF3C7;color:#D97706;">📅</div>
+      <div class="res-stat-val">${lastCiStr}</div>
+      <div class="res-stat-lbl">Último check-in</div>
+    </div>
+    <div class="res-stat">
+      <div class="res-stat-icon" style="background:#DBEAFE;color:#2563EB;">🏃</div>
+      <div class="res-stat-val" id="resNextSession">—</div>
+      <div class="res-stat-lbl">Próxima sesión</div>
+    </div>
+    <div class="res-stat">
+      <div class="res-stat-icon" style="background:#FEE2E2;color:#DC2626;">🔔</div>
+      <div class="res-stat-val" id="resAlerts">—</div>
+      <div class="res-stat-lbl">Alertas</div>
+    </div>`;
+}
+
+function _renderResChart() {
+  const el = document.getElementById('resChartCard');
+  if (!el) return;
+  const pts = checkins.slice().reverse().filter(c => c.weight).slice(-10);
+
+  el.innerHTML = `<div class="res-bch">
+    <span style="font-size:14px;font-weight:700;color:#111;">Evolución del peso</span>
+    <a href="#" onclick="showTab('progreso');renderProgresoTab();return false;" class="res-see-btn">Ver progreso completo →</a>
+  </div>`;
+
+  if (pts.length < 2) {
+    el.innerHTML += `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No hay suficientes datos de peso para mostrar la gráfica.</div>`;
+    return;
+  }
+
+  const W = 480, H = 180, PAD = 24;
+  const weights = pts.map(p => p.weight);
+  const minW = Math.min(...weights), maxW = Math.max(...weights);
+  const rng = maxW - minW || 1;
+  const xStep = (W - PAD * 2) / (pts.length - 1);
+  const toX = i => PAD + i * xStep;
+  const toY = w => PAD + (1 - (w - minW) / rng) * (H - PAD * 2);
+
+  const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p.weight).toFixed(1)}`).join(' ');
+  const areaPath = linePath + ` L${toX(pts.length-1).toFixed(1)},${H} L${toX(0).toFixed(1)},${H} Z`;
+
+  const targetW = _target?.target_weight;
+  let targetLine = '';
+  if (targetW && targetW >= minW - 5 && targetW <= maxW + 5) {
+    const ty = toY(targetW).toFixed(1);
+    targetLine = `<line x1="${PAD}" y1="${ty}" x2="${W - PAD}" y2="${ty}" stroke="#10B981" stroke-width="1.5" stroke-dasharray="6,4" opacity=".7"/>
+      <text x="${W - PAD + 4}" y="${ty}" fill="#10B981" font-size="10" dominant-baseline="middle">${targetW}kg</text>`;
+  }
+
+  const dots = pts.map((p, i) => `<circle cx="${toX(i).toFixed(1)}" cy="${toY(p.weight).toFixed(1)}" r="3" fill="#7C3AED"/>`).join('');
+  const labels = pts.filter((_, i) => i === 0 || i === pts.length - 1).map((p, idx) => {
+    const origIdx = idx === 0 ? 0 : pts.length - 1;
+    const d = new Date(p.checkin_date);
+    const lbl = `${d.getDate()}/${d.getMonth()+1}`;
+    return `<text x="${toX(origIdx).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="10" fill="#9CA3AF">${lbl}</text>`;
+  }).join('');
+
+  el.innerHTML += `<div style="padding:16px 20px 8px;">
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">
+      <defs>
+        <linearGradient id="wGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7C3AED" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaPath}" fill="url(#wGrad)"/>
+      <path d="${linePath}" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linejoin="round"/>
+      ${targetLine}
+      ${dots}
+      ${labels}
+    </svg>
+  </div>`;
+}
+
+function _renderResObj() {
+  const el = document.getElementById('resObjCard');
+  if (!el) return;
+  const tw = _target?.target_weight;
+  const cw = checkins[0]?.weight ?? clientData?.weight;
+
+  let progPct = 0, progLabel = 'Sin datos', weeksEst = '—';
+  if (tw && cw) {
+    const start = clientData?.weight || cw;
+    const total = Math.abs(tw - start);
+    const done = Math.abs(cw - start);
+    progPct = total > 0 ? Math.min(100, Math.round(done / total * 100)) : 100;
+    progLabel = `${cw} kg → ${tw} kg`;
+
+    const avgPerWeek = 0.25;
+    const remaining = Math.abs(tw - cw);
+    weeksEst = remaining < 0.1 ? '¡Meta alcanzada!' : `~${Math.ceil(remaining / avgPerWeek)} semanas`;
+  }
+
+  const goal = clientData?.goal || _target?.goal || '—';
+  const trPct = clientRoutines.length ? 100 : 0;
+  const nuPct = clientDiets.length ? 100 : 0;
+
+  el.innerHTML = `
+    <div class="res-bch"><span>Objetivo</span></div>
+    <div style="padding:16px 20px;">
+      <div style="font-size:13px;color:#6B7280;margin-bottom:12px;">${esc(goal)}</div>
+      ${tw ? `
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#6B7280;margin-bottom:4px;">
+        <span>${progLabel}</span><span>${progPct}%</span>
+      </div>
+      <div style="background:#F3F4F6;border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;">
+        <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,#7C3AED,#A78BFA);width:${progPct}%;transition:width .5s;"></div>
+      </div>
+      <div style="font-size:12px;color:#9CA3AF;margin-bottom:16px;">Estimado: ${weeksEst}</div>` : `
+      <div style="font-size:12px;color:#9CA3AF;margin-bottom:16px;">Sin peso objetivo definido</div>`}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#F9FAFB;border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:#7C3AED;">${trPct}%</div>
+          <div style="font-size:11px;color:#9CA3AF;">Entreno</div>
+        </div>
+        <div style="background:#F9FAFB;border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:#10B981;">${nuPct}%</div>
+          <div style="font-size:11px;color:#9CA3AF;">Nutrición</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function _renderResCi() {
+  const el = document.getElementById('resCiCard');
+  if (!el) return;
+  const recent = checkins.slice(0, 3);
+
+  let rows = recent.length ? recent.map((ci, idx) => {
+    const prev = checkins[idx + 1];
+    const delta = (prev && ci.weight && prev.weight) ? (ci.weight - prev.weight).toFixed(1) : null;
+    const deltaHtml = delta != null
+      ? `<span class="res-ci-delta" style="color:${+delta <= 0 ? '#16A34A' : '#DC2626'}">${+delta > 0 ? '+' : ''}${delta} kg</span>`
+      : '';
+    const d = ci.checkin_date ? new Date(ci.checkin_date) : null;
+    const dateStr = d ? `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}` : '—';
+    const moodPill = ci.mood ? `<span class="res-ci-pill">${ci.mood}</span>` : '';
+    return `<div class="res-ci-row">
+      <span class="res-ci-date">${dateStr}</span>
+      <div class="res-ci-pills">${moodPill}</div>
+      <div class="res-ci-right">
+        ${ci.weight ? `<span class="res-ci-weight">${ci.weight} kg</span>` : ''}
+        ${deltaHtml}
+      </div>
+    </div>`;
+  }).join('') : `<div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">Sin check-ins aún</div>`;
+
+  el.innerHTML = `
+    <div class="res-bch"><span style="font-size:14px;font-weight:700;color:#111;">Check-ins recientes</span><button class="res-see-btn" onclick="showTab('progreso')">Ver todos</button></div>
+    <div style="padding:8px 0;">${rows}</div>
+    <div style="padding:12px 0 0;"><button class="res-see-btn" onclick="showTab('progreso')">+ Pedir check-in</button></div>`;
+}
+
+async function _loadResumenExtras() {
+  const weekEl = document.getElementById('resWeekCard');
+  const notesEl = document.getElementById('resNotesCard');
+
+  // Load calendar week
+  if (weekEl && clientId) {
+    try {
+      const today = new Date();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+      const weekStr = monday.toISOString().slice(0, 10);
+      const r = await fetch(`${API}/calendar-tasks/week/${clientId}?week=${weekStr}`, { headers: authHeaders() });
+      const d = await r.json();
+      _renderResWeek(weekEl, d?.days || []);
+
+      // Update Próxima sesión stat
+      const todayStr = today.toISOString().slice(0, 10);
+      const upcoming = (d?.days || []).find(day => day.date >= todayStr && (day.tasks || []).length > 0);
+      const nsEl = document.getElementById('resNextSession');
+      if (nsEl) {
+        if (upcoming) {
+          const dd = new Date(upcoming.date + 'T00:00:00');
+          const diff = Math.round((dd - today) / 86400000);
+          nsEl.textContent = diff === 0 ? 'Hoy' : diff === 1 ? 'Mañana' : `En ${diff}d`;
+        } else {
+          nsEl.textContent = 'Sin sesión';
+        }
+      }
+
+      // Adherence: done tasks / total tasks this week
+      const total = (d?.days || []).reduce((s, day) => s + (day.tasks || []).length, 0);
+      const done = (d?.days || []).reduce((s, day) => s + (day.tasks || []).filter(t => t.done).length, 0);
+      const adhEl = document.getElementById('resAdherenceVal');
+      if (adhEl && total > 0) adhEl.textContent = Math.round(done / total * 100) + '%';
+
+      // Alerts
+      const alertsEl = document.getElementById('resAlerts');
+      let alerts = 0;
+      if (checkins.length === 0) alerts++;
+      const daysSinceLastCi = checkins[0]?.checkin_date
+        ? Math.round((Date.now() - new Date(checkins[0].checkin_date)) / 86400000) : 999;
+      if (daysSinceLastCi > 14) alerts++;
+      if (alertsEl) alertsEl.textContent = alerts > 0 ? alerts : '0';
+
+    } catch(e) {
+      if (weekEl) weekEl.innerHTML = `<div class="res-bch"><span>Esta semana</span></div><div style="padding:16px;color:#9CA3AF;font-size:13px;text-align:center;">Sin datos</div>`;
+    }
+  }
+
+  // Load notes
+  if (notesEl && clientData?.user_id) {
+    try {
+      const r = await fetch(`${API}/note-users/search?user_id=${clientData.user_id}`, { headers: authHeaders() });
+      const d = await r.json();
+      const notes = (d.data || d || []).slice(0, 3);
+      _renderResNotes(notesEl, notes);
+    } catch(e) {
+      _renderResNotes(notesEl, []);
+    }
+  }
+}
+
+function _renderResWeek(el, days) {
+  const today = new Date().toISOString().slice(0, 10);
+  const DAY_NAMES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+  const rows = days.map((day, i) => {
+    const isToday = day.date === today;
+    const tasks = day.tasks || [];
+    const hasDone = tasks.some(t => t.done);
+    const hasPending = tasks.some(t => !t.done);
+    const dotColor = tasks.length === 0 ? '#E5E7EB' : hasDone && !hasPending ? '#10B981' : '#F59E0B';
+    const firstTask = tasks[0];
+    return `<div class="res-week-row" style="${isToday ? 'background:#F5F3FF;border-radius:8px;' : ''}">
+      <div class="res-wd" style="${isToday ? 'color:#7C3AED;font-weight:700;' : ''}">${DAY_NAMES[i] || day.date?.slice(5)}</div>
+      <div class="res-wdot" style="background:${dotColor};"></div>
+      <div class="res-wtask">${firstTask ? esc(firstTask.title || firstTask.task_name || 'Tarea') : '<span style="color:#D1D5DB;">—</span>'}</div>
+      ${isToday ? '<span class="res-wbadge">Hoy</span>' : ''}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="res-bch"><span style="font-size:14px;font-weight:700;color:#111;">Esta semana</span><button class="res-see-btn" onclick="showTab('calendario')">Ver rutina completa</button></div>
+    <div>${rows || '<div style="color:#9CA3AF;font-size:13px;text-align:center;padding:8px 0;">Sin tareas esta semana</div>'}</div>`;
+}
+
+function _renderResNotes(el, notes) {
+  const rows = notes.length ? notes.map(n => {
+    const d = n.created_at ? new Date(n.created_at) : null;
+    const dateStr = d ? `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}` : '—';
+    const body = (n.content || n.note || n.body || '').slice(0, 100);
+    return `<div class="res-note-item">
+      <div class="res-note-date">${dateStr}</div>
+      <div class="res-note-title">${esc(n.title || 'Nota')}</div>
+      <div class="res-note-body">${esc(body)}${(n.content || n.note || n.body || '').length > 100 ? '…' : ''}</div>
+    </div>`;
+  }).join('') : `<div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">Sin notas aún</div>`;
+
+  el.innerHTML = `
+    <div class="res-bch"><span style="font-size:14px;font-weight:700;color:#111;">Notas del coach</span><button class="res-see-btn" onclick="showTab('notas')">+ Añadir</button></div>
+    <div style="padding:8px 0;">${rows}</div>`;
 }
 
 /* ── Active plan summary (Resumen tab) ── */

@@ -880,6 +880,17 @@
         </div>
       </div>
 
+      <!-- ── CHAT ── -->
+      <div class="tab-pane" id="tab-chat">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Chat con el cliente</span></div>
+          <div style="padding:40px;text-align:center;color:#9CA3AF;">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block;opacity:.3;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <p style="font-size:14px;">El chat estará disponible próximamente.</p>
+          </div>
+        </div>
+      </div>
+
       <!-- ── PROGRESO ── -->
       <div class="tab-pane" id="tab-progreso">
         <div id="progresoContent"></div>
@@ -1180,32 +1191,37 @@ function renderAll() {
   const name = `${c.first_name || c.name || ''} ${c.last_name || ''}`.trim() || 'Sin nombre';
   const initials = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
 
-  document.getElementById('pageTitle').textContent = name;
+  // Breadcrumb
+  const bcName = document.getElementById('bcClientName');
+  if (bcName) bcName.textContent = name;
 
   // Avatar
   const av = document.getElementById('profileAvatar');
   if (c.photo || c.photo_url) {
-    av.innerHTML = `<img src="${esc(c.photo || c.photo_url)}" alt="${esc(name)}"/><div class="avatar-overlay"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="upload-spinner" id="avatarSpinner"></div></div>`;
+    av.innerHTML = `<img src="${esc(c.photo || c.photo_url)}" alt="${esc(name)}"/><div class="ph2-avatar-overlay"><svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
   } else {
-    av.innerHTML = `${initials}<div class="avatar-overlay"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="upload-spinner" id="avatarSpinner"></div></div>`;
+    av.innerHTML = `${initials}<div class="ph2-avatar-overlay"><svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
   }
 
   document.getElementById('profileName').textContent = name;
-  document.getElementById('profileEmail').textContent = c.email || '—';
 
-  // Badges
-  const badges = [];
-  if (c.status_name || c.status?.description) badges.push(`<span class="badge badge-status">${esc(c.status_name || c.status?.description)}</span>`);
-  if (c.coach_name && c.coach_name !== '—') badges.push(`<span class="badge badge-coach">Coach: ${esc(c.coach_name)}</span>`);
-  if (c.estado_pago) {
-    const payMap = {pendiente:'badge-pay-pendiente',parcial:'badge-pay-parcial',pagado:'badge-pay-pagado'};
-    const payLabel = {pendiente:'Pendiente',parcial:'Parcial',pagado:'Pagado'};
-    badges.push(`<span class="badge ${payMap[c.estado_pago]||'badge-pay-default'}">${payLabel[c.estado_pago]||c.estado_pago}</span>`);
-  }
-  document.getElementById('profileBadges').innerHTML = badges.join('');
+  // ph2 status badge
+  const statusText = c.status_name || c.status?.description || '';
+  const statusCat = statusText.toLowerCase();
+  const badgeBg = statusCat.includes('activ') ? '#DCFCE7' : statusCat.includes('pendi') ? '#FEF3C7' : '#F3F4F6';
+  const badgeFg = statusCat.includes('activ') ? '#166534' : statusCat.includes('pendi') ? '#92400E' : '#374151';
+  const ph2Badge = document.getElementById('ph2StatusBadge');
+  if (ph2Badge && statusText) ph2Badge.innerHTML = `<span class="ph2-status-badge" style="background:${badgeBg};color:${badgeFg};">${esc(statusText)}</span>`;
 
-  // WhatsApp btn
-  if (c.whatsapp_link) { document.getElementById('waBtn').style.display = 'inline-flex'; }
+  // ph2 meta items
+  const ph2Email = document.getElementById('ph2Email');
+  if (ph2Email && c.email) { ph2Email.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> ${esc(c.email)}`; }
+  const ph2Phone = document.getElementById('ph2Phone');
+  if (ph2Phone && c.phone) { ph2Phone.style.display='flex'; ph2Phone.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.39 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 3.1 4.18 2 2 0 0 1 5.08 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L9.91 9a16 16 0 0 0 6 6l.41-.41a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> ${esc(c.phone)}`; }
+  const ph2Weight = document.getElementById('ph2Weight');
+  if (ph2Weight && (c.weight || checkins[0]?.weight)) { const w = c.weight || checkins[0]?.weight; ph2Weight.style.display='flex'; ph2Weight.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M12 8v13M8 12H4m16 0h-4"/></svg> ${w} kg`; }
+  const ph2Sessions = document.getElementById('ph2Sessions');
+  if (ph2Sessions && deliveries.length) { ph2Sessions.style.display='flex'; ph2Sessions.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ${deliveries.length} sesiones`; }
 
   // ── New Resumen tab ──
   renderResumenTab();
@@ -1233,7 +1249,8 @@ function renderAll() {
     document.getElementById('tab-formulario-btn').innerHTML += ' <span class="tab-badge">!</span>';
   }
   if (deliveries.length) {
-    document.getElementById('tab-entregas-btn').innerHTML += ` <span class="tab-badge" style="background:#4F46E5;">${deliveries.length}</span>`;
+    const entregasBtn = document.getElementById('tab-entregas-btn');
+    if (entregasBtn) entregasBtn.innerHTML += ` <span class="tab-badge" style="background:#4F46E5;">${deliveries.length}</span>`;
   }
 
   // Show content
@@ -1247,11 +1264,154 @@ function renderAll() {
 
 /* ── Resumen tab ── */
 function renderResumenTab() {
-  _renderResStats();
-  _renderResChart();
-  _renderResObj();
-  _renderResCi();
+  _renderResDatos();
+  _renderResStatsNew();
+  _renderResActionsNew();
+  _renderProgSection();
+  _renderWeightChart();
   _loadResumenExtras();
+}
+
+/* ── Program progress section ── */
+function _renderProgSection() {
+  const c = clientData;
+  const start = c.start_date || c.fecha_inicio;
+  const end   = c.end_date   || c.fecha_fin;
+  if (!start && !end) return;
+  const progSec = document.getElementById('progSection');
+  if (progSec) progSec.style.display = 'block';
+  const fmtShort = d => { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}); };
+  let weekStr='—', progPct=0, diasStr='—', vencido=false;
+  if (start) {
+    const startD=new Date(start), now=new Date();
+    const weeksDone=Math.floor((now-startD)/(7*86400000))+1;
+    if (end) {
+      const endD=new Date(end);
+      const totalWeeks=Math.round((endD-startD)/(7*86400000));
+      weekStr=`${weeksDone} / ${totalWeeks}`;
+      const daysDiff=Math.round((endD-now)/86400000);
+      if(daysDiff<0){diasStr='Vencido';vencido=true;progPct=100;}
+      else{diasStr=daysDiff+' días';progPct=Math.min(100,Math.round(((now-startD)/(endD-startD))*100));}
+    } else {
+      weekStr=String(weeksDone); diasStr='—';
+    }
+  }
+  const boxes=document.getElementById('progBoxes');
+  if(boxes) boxes.innerHTML=`
+    <div class="prog-box"><div class="prog-box-label"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Fecha inicio</div><div class="prog-box-val">${fmtShort(start)}</div></div>
+    <div class="prog-box"><div class="prog-box-label"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Fecha fin</div><div class="prog-box-val">${fmtShort(end)}</div></div>
+    <div class="prog-box"><div class="prog-box-label"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Semana</div><div class="prog-box-val">${weekStr}</div></div>
+    <div class="prog-box"><div class="prog-box-label"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Días restantes</div><div class="prog-box-val${vencido?' vencido':''}">${diasStr}</div></div>`;
+  const fill=document.getElementById('progBarFill'); const pct=document.getElementById('progBarPct');
+  if(fill) fill.style.width=progPct+'%';
+  if(pct)  pct.textContent=progPct+'%';
+}
+
+/* ── Weight chart (above tabs) ── */
+function _renderWeightChart() {
+  const el=document.getElementById('weightChartContainer');
+  if(!el) return;
+  const pts=checkins.slice().reverse().filter(c=>c.weight).slice(-12);
+  if(pts.length<2){
+    el.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9CA3AF;font-size:13px;">Sin suficientes datos de peso</div>`;
+    return;
+  }
+  const W=900,H=160,PX=30,PY=20;
+  const weights=pts.map(p=>p.weight);
+  const minW=Math.min(...weights),maxW=Math.max(...weights);
+  const rng=(maxW-minW)||1;
+  const xStep=(W-PX*2)/(pts.length-1);
+  const toX=i=>PX+i*xStep;
+  const toY=w=>PY+(1-(w-minW)/rng)*(H-PY*2);
+  const realPath=pts.map((p,i)=>`${i===0?'M':'L'}${toX(i).toFixed(1)},${toY(p.weight).toFixed(1)}`).join(' ');
+  const realDots=pts.map((p,i)=>`<circle cx="${toX(i).toFixed(1)}" cy="${toY(p.weight).toFixed(1)}" r="4" fill="#22C55E" stroke="#fff" stroke-width="1.5"/>`).join('');
+  const tw=typeof _target!=='undefined'?_target?.target_weight:null;
+  let projPath='';
+  if(tw){
+    const clampedTw=Math.max(minW-2,Math.min(maxW+2,tw));
+    projPath=`<path d="M${toX(pts.length-1).toFixed(1)},${toY(pts[pts.length-1].weight).toFixed(1)} L${(W-PX).toFixed(1)},${toY(clampedTw).toFixed(1)}" fill="none" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4"/>`;
+  }
+  const yLabels=[minW,(minW+maxW)/2,maxW].map(v=>`<text x="${PX-5}" y="${toY(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="10" fill="#9CA3AF">${v.toFixed(1)}</text>`).join('');
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%;display:block;">
+    <defs><linearGradient id="wcGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22C55E" stop-opacity=".12"/><stop offset="100%" stop-color="#22C55E" stop-opacity="0"/></linearGradient></defs>
+    ${yLabels}
+    <path d="${realPath} L${toX(pts.length-1).toFixed(1)},${H-PY} L${toX(0).toFixed(1)},${H-PY} Z" fill="url(#wcGrad)"/>
+    <path d="${realPath}" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linejoin="round"/>
+    ${projPath}
+    ${realDots}
+  </svg>`;
+}
+
+/* ── Resumen: datos del cliente ── */
+function _renderResDatos() {
+  const el=document.getElementById('resDatosCard');
+  if(!el) return;
+  const c=clientData;
+  const objName=c.objective_name||c.objective?.description||c.goal||'—';
+  const planName=c.plan_name||(clientDiets[0]?.title)||(clientDiets[0]?.name)||'—';
+  const start=c.start_date||c.fecha_inicio;
+  const end=c.end_date||c.fecha_fin;
+  const fmtD=d=>d?new Date(d).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}):'—';
+  const peso=(checkins[0]?.weight??c.weight)?`${checkins[0]?.weight??c.weight} kg`:'—';
+  const precio=c.precio?`€${Number(c.precio).toFixed(0)}`:'—';
+  const sesiones=deliveries.length||checkins.length;
+  el.innerHTML=`<div class="res-datos-card">
+    <div class="res-datos-head">Datos del cliente</div>
+    <div class="res-datos-row"><span class="res-datos-key">Objetivo</span><span class="res-datos-val">${esc(objName)}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Plan</span><span class="res-datos-val">${esc(planName)}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Inicio</span><span class="res-datos-val">${fmtD(start)}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Fin programa</span><span class="res-datos-val">${fmtD(end)}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Peso</span><span class="res-datos-val">${peso}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Sesiones</span><span class="res-datos-val">${sesiones}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Precio</span><span class="res-datos-val">${precio}</span></div>
+  </div>`;
+}
+
+/* ── Resumen: activity stats ── */
+function _renderResStatsNew() {
+  const el=document.getElementById('resStatsCard');
+  if(!el) return;
+  const latest=checkins[0];
+  let lastCiStr='—',lastCiGreen=false;
+  if(latest?.checkin_date){
+    const diff=Math.round((Date.now()-new Date(latest.checkin_date))/86400000);
+    lastCiStr=diff===0?'hoy':diff===1?'hace 1 día':`hace ${diff} días`;
+    lastCiGreen=diff<=3;
+  }
+  const tw=typeof _target!=='undefined'?_target?.target_weight:null;
+  const cw=checkins[0]?.weight??clientData?.weight;
+  let objPct='—';
+  if(tw&&cw){
+    const start=clientData?.weight||cw,total=Math.abs(tw-start),done=Math.abs(cw-start);
+    objPct=(total>0?Math.min(100,Math.round(done/total*100)):100)+'%';
+  }
+  el.innerHTML=`
+    <div style="font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Actividad reciente</div>
+    <div class="res-stat-row"><span class="res-stat-key">Último check-in</span><span class="res-stat-val2${lastCiGreen?' green':''}">${lastCiStr}</span></div>
+    <div class="res-stat-row"><span class="res-stat-key">Adherencia entreno</span><span class="res-stat-val2" id="resAdhTrain">—</span></div>
+    <div class="res-stat-row"><span class="res-stat-key">Adherencia nutrición</span><span class="res-stat-val2" id="resAdhNutr">—</span></div>
+    <div class="res-stat-row"><span class="res-stat-key">Progreso objetivo</span><span class="res-stat-val2">${objPct}</span></div>`;
+}
+
+/* ── Resumen: acciones rápidas ── */
+function _renderResActionsNew() {
+  const el=document.getElementById('resActionsCard');
+  if(!el) return;
+  el.innerHTML=`
+    <div class="res-actions-title">Acciones rápidas</div>
+    <div class="res-actions-row">
+      <button class="res-action-btn" onclick="openWhatsApp()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensaje</button>
+      <button class="res-action-btn" onclick="showTab('progreso');renderProgresoTab()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-in</button>
+      <button class="res-action-btn" onclick="openAssignRoutineModal()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>Ajustar rutina</button>
+      <button class="res-action-btn" onclick="openAssignDietModal()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>Ajustar dieta</button>
+      <button class="res-action-btn warn" onclick="darDeBaja()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Marcar en riesgo</button>
+    </div>`;
+}
+
+/* ── Dar de baja ── */
+function darDeBaja() {
+  if(!confirm('¿Confirmar dar de baja a este cliente?')) return;
+  showToast('Función disponible próximamente','error');
 }
 
 function _renderResStats() {
@@ -1476,6 +1636,8 @@ async function _loadResumenExtras() {
       const done = (d?.days || []).reduce((s, day) => s + (day.tasks || []).filter(t => t.done).length, 0);
       const adhEl = document.getElementById('resAdherenceVal');
       if (adhEl && total > 0) adhEl.textContent = Math.round(done / total * 100) + '%';
+      const adhTrainEl = document.getElementById('resAdhTrain');
+      if (adhTrainEl && total > 0) adhTrainEl.textContent = Math.round(done / total * 100) + '%';
 
       // Alerts
       const alertsEl = document.getElementById('resAlerts');

@@ -753,7 +753,7 @@ function renderTable(){
     const daysDiff=lastCk?Math.floor((new Date()-new Date(lastCk))/86400000):999;
     const ckCls=daysDiff<=3?'recent':daysDiff>7?'due':'';
 
-    const objName=c.objective_name||c.objective||'—';
+    const objName=c.objective_name||c.objective?.description||'—';
 
     return `<tr onclick="viewClient('${c.id}')">
       <td>

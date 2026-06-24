@@ -10,11 +10,13 @@ class TeamMember(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_detail_id = Column(String(36), ForeignKey("user_details.id"), nullable=False, unique=True)
-    role_label = Column(String(100), nullable=True)   # e.g. "Entrenador", "Nutricionista"
+    role_label = Column(String(100), nullable=True)
     hours_week = Column(Integer, nullable=True)
     salary_fijo = Column(Float, nullable=True)
-    commission = Column(Float, nullable=True)  # optional commission
+    commission = Column(Float, nullable=True)
+    variable_type = Column(String(50), nullable=True)
     notes = Column(Text, nullable=True)
+    permissions = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user_detail = relationship("UserDetail", foreign_keys=[user_detail_id])

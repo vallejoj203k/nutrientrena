@@ -91,6 +91,7 @@ class DietOut(BaseModel):
     quantity: Optional[float] = None
     type_id: Optional[int] = None
     user_id: Optional[int] = None
+    organization_id: Optional[str] = None
     created_at: Optional[datetime] = None
     detail: Optional[DietDetailOut] = None
     foods: List[DietFoodOut] = []

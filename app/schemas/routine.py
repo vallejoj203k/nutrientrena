@@ -126,6 +126,7 @@ class RoutineOut(BaseModel):
     training_level_id: Optional[int] = None
     time: Optional[int] = None
     days: Optional[int] = None
+    organization_id: Optional[str] = None
     created_at: Optional[datetime] = None
     days_list: List[RoutineDayOut] = []
 

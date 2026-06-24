@@ -6,8 +6,10 @@ import asyncio
 import csv
 import io
 
+from sqlalchemy import or_
+
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
+from app.core.dependencies import require_role_ids, get_org_context, OrgContext, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
 from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
@@ -58,8 +60,15 @@ def _upsert_description(db: Session, aliment_id: str, desc_data: dict):
 
 
 @router.get("/findAll", summary="Listar alimentos", description="Retorna todos los alimentos del catálogo (sin clones).")
-def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
-    items = db.query(Aliment).filter(Aliment.parent_id.is_(None)).all()
+def find_all(
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
+    q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
+    if org.org_id:
+        q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
+    items = q.all()
     return send_response([AlimentOut.model_validate(i).model_dump() for i in items], "OK")
 
 
@@ -71,12 +80,15 @@ def search(
     per_page: int = Query(15),
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
     if search:
         q = q.filter(Aliment.name.ilike(f"%{search}%"))
     if group_food_id:
         q = q.filter(Aliment.group_food_id == group_food_id)
+    if org.org_id:
+        q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
     total = q.count()
     items = q.order_by(Aliment.name).offset((page - 1) * per_page).limit(per_page).all()
     return send_response(
@@ -104,9 +116,10 @@ def create(
     data: AlimentCreate,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     payload = data.model_dump(exclude={"description"})
-    obj = Aliment(**payload, created_user_id=current_user.id)
+    obj = Aliment(**payload, created_user_id=current_user.id, organization_id=org.org_id)
     db.add(obj)
     db.flush()
 
@@ -126,10 +139,14 @@ def updated(
     data: AlimentUpdate,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Alimento no encontrado")
+    # Non-admin coaches cannot edit platform-level content (organization_id IS NULL)
+    if obj.organization_id is None and not org.is_owner:
+        return send_error("No puedes editar alimentos de la plataforma", code=403)
 
     for f, v in data.model_dump(exclude_unset=True, exclude={"description"}).items():
         setattr(obj, f, v)

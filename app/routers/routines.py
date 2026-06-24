@@ -3,7 +3,11 @@ from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
+from sqlalchemy import or_
+from app.core.dependencies import (
+    require_role_ids, get_org_context, OrgContext,
+    verify_client_access, SUPERADMIN, ADMIN, COACH,
+)
 from app.core.responses import send_response, send_error
 from app.models.routine import Routine, RoutineBlock, RoutineDay, RoutineDayDetail
 from app.pdf.routine_pdf import generate_routine_pdf
@@ -303,8 +307,13 @@ def bulk_create_client(
 
 
 @router.get("/client/{client_id}", summary="Rutinas del cliente", description="Retorna todas las rutinas asignadas a un cliente.")
-def client_routines(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def client_routines(
+    client_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
     from app.models.user import UserDetail
+    verify_client_access(client_id, current_user, db)
     client_detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
     if not client_detail:
         return send_error("Cliente no encontrado")

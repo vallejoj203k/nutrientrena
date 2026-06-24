@@ -60,6 +60,7 @@ class Aliment(Base):
     calories = Column(Float, nullable=True)
     comments = Column(Text, nullable=True)
     parent_id = Column(String(36), ForeignKey("aliments.id"), nullable=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     created_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     updated_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

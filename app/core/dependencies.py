@@ -127,6 +127,56 @@ def verify_client_access(client_detail_id: str, current_user, db: Session) -> No
                             detail="No tienes acceso a este cliente")
 
 
+class OrgContext:
+    """Resolved organization context for the current user."""
+    def __init__(self, org_id: str | None, is_owner: bool, permissions: dict):
+        self.org_id = org_id
+        self.is_owner = is_owner
+        self.permissions = permissions
+
+    def can(self, key: str) -> bool:
+        return bool(self.permissions.get(key, False))
+
+
+def get_org_context(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> OrgContext:
+    """
+    Resolves the current user's organization context.
+    - Platform SUPERADMIN/ADMIN → org_id=None, is_owner=True (bypass org restrictions)
+    - Org owner (Nivel 2)       → org_id=<org>, is_owner=True
+    - Org member (Nivel 3)      → org_id=<org>, is_owner=False, permissions=<delegated>
+    - Client / other            → org_id=None, is_owner=False
+    """
+    from app.models.organization import Organization, OrganizationMember
+    from app.models.user import UserDetail
+
+    roles = _user_role_ids(current_user.id, db)
+    if SUPERADMIN in roles or ADMIN in roles:
+        return OrgContext(org_id=None, is_owner=True, permissions={})
+
+    detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+    if not detail:
+        return OrgContext(org_id=None, is_owner=False, permissions={})
+
+    org = db.query(Organization).filter(Organization.owner_id == detail.id).first()
+    if org:
+        return OrgContext(org_id=org.id, is_owner=True, permissions={})
+
+    membership = db.query(OrganizationMember).filter(
+        OrganizationMember.user_detail_id == detail.id
+    ).first()
+    if membership:
+        return OrgContext(
+            org_id=membership.organization_id,
+            is_owner=False,
+            permissions=membership.permissions or {},
+        )
+
+    return OrgContext(org_id=None, is_owner=False, permissions={})
+
+
 def filter_clients_by_role(all_clients: list, current_user, db: Session) -> list:
     """
     If the current user is a coach, return only their assigned clients.

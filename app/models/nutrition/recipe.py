@@ -12,6 +12,7 @@ class Recipe(Base):
     description = Column(Text, nullable=True)
     instructions = Column(Text, nullable=True)
     instructor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     category_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     calories = Column(Float, nullable=True)
     proteins = Column(Float, nullable=True)

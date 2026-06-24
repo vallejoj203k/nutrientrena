@@ -10,6 +10,7 @@ class Routine(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     gender_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     training = Column(String(255), nullable=True)
     training_level_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)

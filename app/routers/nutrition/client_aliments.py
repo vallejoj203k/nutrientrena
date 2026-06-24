@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
+from app.core.dependencies import require_role_ids, verify_client_access, SUPERADMIN, ADMIN, COACH
 from app.core.responses import send_response, send_error
 from app.models.nutrition.client_aliment import ClientAliment
 from app.schemas.nutrition.client_aliment import ClientAlimentCreate, ClientAlimentUpdate, ClientAlimentOut
@@ -19,8 +19,13 @@ def _get_or_404(db: Session, obj_id: str):
 def find_all(
     client_id: int = Query(...),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
+    from app.models.user import UserDetail
+    # client_id here is the users.id; resolve to user_details.id for access check
+    detail = db.query(UserDetail).filter(UserDetail.user_id == client_id).first()
+    if detail:
+        verify_client_access(detail.id, current_user, db)
     items = db.query(ClientAliment).filter(ClientAliment.client_id == client_id).all()
     return send_response([ClientAlimentOut.model_validate(i).model_dump() for i in items], "OK")
 

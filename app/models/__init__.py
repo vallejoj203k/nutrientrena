@@ -1,5 +1,6 @@
 from app.models.role import Role
 from app.models.user import User, RoleUser, UserDetail, UserParent
+from app.models.organization import Organization, OrganizationMember
 from app.models.menu import Menu, MenuRole
 from app.models.country import Country
 from app.models.parameter import Parameter, ParameterDetail

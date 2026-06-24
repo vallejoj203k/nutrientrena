@@ -3,7 +3,11 @@ from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
+from sqlalchemy import or_
+from app.core.dependencies import (
+    require_role_ids, get_org_context, OrgContext,
+    verify_client_access, SUPERADMIN, ADMIN, COACH,
+)
 from app.core.responses import send_response, send_error
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment
 from app.models.nutrition.aliment import Aliment
@@ -106,13 +110,20 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
 
 
 @router.get("/findAll", summary="Listar dietas", description="Retorna todas las dietas del coach autenticado.")
-def find_all(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
-    items = db.query(Diet).filter(Diet.user_id == current_user.id).all()
-    return send_response([_serialize(i) for i in items], "OK")
+def find_all(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
+    q = db.query(Diet).filter(Diet.user_id == current_user.id)
+    if org.org_id:
+        q = q.filter(or_(Diet.organization_id.is_(None), Diet.organization_id == org.org_id))
+    return send_response([_serialize(i) for i in q.all()], "OK")
 
 
 @router.get("/client/{client_id}", summary="Dietas del cliente", description="Retorna las dietas de un cliente agrupadas por tipo de alimentación.")
-def client_diets(client_id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def client_diets(client_id: str, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+    verify_client_access(client_id, current_user, db)
     from app.models.user import UserDetail
     from app.models.nutrition.type_food import TypeFood
 
@@ -213,7 +224,12 @@ def _save_detail(db: Session, diet_id: str, data: DietCreate):
 
 
 @router.post("", summary="Crear dieta", description="Crea una nueva dieta con sus comidas, alimentos y distribución de macros.")
-def create(data: DietCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def create(
+    data: DietCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     diet = Diet(
         title=data.title,
         calories=data.calories,
@@ -221,6 +237,7 @@ def create(data: DietCreate, db: Session = Depends(get_db), current_user=Depends
         type_id=data.type_id,
         user_id=current_user.id,
         created_user_id=current_user.id,
+        organization_id=org.org_id,
     )
     db.add(diet)
     db.flush()

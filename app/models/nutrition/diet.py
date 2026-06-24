@@ -14,6 +14,7 @@ class Diet(Base):
     quantity = Column(Float, nullable=True)
     type_id = Column(Integer, ForeignKey("type_foods.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     created_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     updated_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

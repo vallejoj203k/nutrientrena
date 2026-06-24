@@ -13,6 +13,7 @@ class WeeklyMenu(Base):
     description = Column(Text, nullable=True)
     is_favorite = Column(Boolean, server_default="0", nullable=False)
     coach_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

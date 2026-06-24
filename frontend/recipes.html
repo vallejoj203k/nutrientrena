@@ -269,6 +269,10 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       Equipo
     </a>
+    <a class="nav-item" href="mi-organizacion.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+      Mi Organización
+    </a>
     <div class="nav-section">Cuenta</div>
     <a class="nav-item" href="settings.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -538,7 +542,11 @@ function renderCards(items) {
     grid.innerHTML = '<div style="grid-column:1/-1"><div class="empty-state"><svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><p>No hay recetas todavia</p><small>Crea tu primera receta con el boton "+ Nueva receta"</small></div></div>';
     return;
   }
+  var _rid = parseInt(localStorage.getItem('role_id') || '0');
+  var _isAdmin = _rid === 1 || _rid === 2;
   grid.innerHTML = items.map(function(r) {
+    var isPlatformAdmin = r.organization_id == null;
+    var canEdit = _isAdmin || !isPlatformAdmin;
     const prot = r.proteins  != null ? r.proteins.toFixed(1)  : '—';
     const carb = r.carbs     != null ? r.carbs.toFixed(1)     : '—';
     const fat  = r.fats      != null ? r.fats.toFixed(1)      : '—';
@@ -548,10 +556,13 @@ function renderCards(items) {
     if (r.servings)  meta.push('<span><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>' + r.servings + ' raciones</span>');
     if (r.prep_time) meta.push('<span><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + r.prep_time + ' min</span>');
     const mealTags = r.meal_type ? r.meal_type.split(',').map(function(t) { return '<span class="card-meal-tag">' + t.trim() + '</span>'; }).join('') : '';
+    var orgBadge = isPlatformAdmin
+      ? '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:#F3F4F6;color:#6B7280;margin-left:6px;">Plataforma</span>'
+      : '<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:#EEF2FF;color:#4F46E5;margin-left:6px;">Mi org</span>';
     return '<div class="recipe-card">' +
       (r.image ? '<img class="card-img" src="' + r.image + '" alt="' + esc(r.name) + '" loading="lazy"/>' : '') +
       '<div class="card-header">' +
-        '<div class="card-name">' + esc(r.name) + '</div>' +
+        '<div class="card-name">' + esc(r.name) + orgBadge + '</div>' +
         (r.description ? '<div class="card-desc">' + esc(r.description) + '</div>' : '') +
         (meta.length ? '<div class="card-meta">' + meta.join('') + '</div>' : '') +
         (mealTags ? '<div class="card-meta" style="margin-top:6px;">' + mealTags + '</div>' : '') +
@@ -565,8 +576,10 @@ function renderCards(items) {
       '<div class="card-footer">' +
         '<div class="ingr-count"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>' + ingrs + ' ingrediente' + (ingrs !== 1 ? 's' : '') + '</div>' +
         '<div class="card-actions">' +
-          '<button class="btn-icon" title="Editar" onclick="openEdit(' + r.id + ')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
-          '<button class="btn-icon danger" title="Eliminar" onclick="openDel(' + r.id + ',\'' + esc(r.name) + '\')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>' +
+          (canEdit
+            ? '<button class="btn-icon" title="Editar" onclick="openEdit(' + r.id + ')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+              + '<button class="btn-icon danger" title="Eliminar" onclick="openDel(' + r.id + ',\'' + esc(r.name) + '\')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'
+            : '<span style="color:#9CA3AF;font-size:11px;">Solo lectura</span>') +
         '</div>' +
       '</div>' +
     '</div>';

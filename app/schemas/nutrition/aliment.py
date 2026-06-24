@@ -92,6 +92,7 @@ class AlimentOut(BaseModel):
     calories: Optional[float] = None
     comments: Optional[str] = None
     parent_id: Optional[str] = None
+    organization_id: Optional[str] = None
     description: Optional[AlimentDescriptionOut] = None
 
     model_config = {"from_attributes": True}

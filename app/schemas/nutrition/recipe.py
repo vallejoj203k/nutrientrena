@@ -74,6 +74,7 @@ class RecipeOut(BaseModel):
     image: Optional[str] = None
     meal_type: Optional[str] = None
     state: int
+    organization_id: Optional[str] = None
     details: List[RecipeDetailOut] = []
 
     model_config = {"from_attributes": True}

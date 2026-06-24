@@ -123,7 +123,11 @@
     .form-hint{font-size:11px;color:#9CA3AF;margin-top:2px;}
     .form-group input[readonly]{background:#F9FAFB;color:#6B7280;cursor:default;}
 
-    /* ── Member info card (Tab 1) ───────────────────────────────────────── */
+    /* ── Datalist autocomplete style ────────────────────────────────────── */
+    .form-group input::-webkit-calendar-picker-indicator{display:none;}
+
+    /* ── Full-width next button ──────────────────────────────────────────── */
+    .btn-full{width:100%;justify-content:center;padding:12px;font-size:14px;border-radius:10px;}
     .member-info-card{display:flex;align-items:center;gap:12px;background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:10px;padding:12px 14px;}
     .member-info-avatar{width:44px;height:44px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px;flex-shrink:0;overflow:hidden;}
     .member-info-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
@@ -296,19 +300,7 @@
     <!-- ─── TAB 1: Información ─── -->
     <div class="tab-panel active" id="tab1">
 
-      <!-- ADD mode: pick from staff list -->
-      <div id="addModeFields">
-        <div class="form-group">
-          <label>Nombre completo</label>
-          <select id="mUser" onchange="onUserSelect()">
-            <option value="">Seleccionar miembro…</option>
-          </select>
-        </div>
-        <!-- email preview after selection -->
-        <div id="emailPreview" style="display:none;font-size:12px;color:#6B7280;margin-top:-8px;padding-left:2px;" id="emailPreview"></div>
-      </div>
-
-      <!-- EDIT mode: member info card -->
+      <!-- Info card shown only in edit mode -->
       <div id="editModeCard" style="display:none">
         <label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px;">Miembro</label>
         <div class="member-info-card">
@@ -318,6 +310,25 @@
             <div class="member-info-email" id="modalMemberEmail"></div>
           </div>
         </div>
+      </div>
+
+      <!-- Name + email inputs (add mode: editable with autocomplete; edit mode: hidden) -->
+      <div id="addModeFields">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" id="mNameInput" list="staffDatalist"
+                   placeholder="Escribe un nombre…" autocomplete="off"
+                   oninput="onNameInput(this.value)"/>
+            <datalist id="staffDatalist"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="mEmailInput" placeholder="email@ejemplo.com"
+                   oninput="onEmailInput(this.value)"/>
+          </div>
+        </div>
+        <div id="matchHint" style="font-size:11px;margin-top:-8px;display:none;"></div>
       </div>
 
       <div class="form-group">
@@ -400,21 +411,25 @@
     </div>
 
     <!-- Footer -->
-    <div class="modal-footer">
-      <div>
-        <button class="btn btn-ghost btn-sm" id="btnBack" style="display:none" onclick="goTab(-1)">
-          ← Volver
-        </button>
-      </div>
-      <div class="modal-footer-right">
-        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancelar</button>
-        <button class="btn btn-primary btn-sm" id="btnNext" onclick="goTab(1)">
+    <div class="modal-footer" id="modalFooter">
+      <!-- Tab 1: full-width next -->
+      <div id="footerTab1" style="width:100%">
+        <button class="btn btn-primary btn-full" onclick="goTab(1)" id="btnNext1">
           Siguiente → Compensación
         </button>
-        <button class="btn btn-green btn-sm" id="btnSave" style="display:none" onclick="saveMember()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Añadir al equipo
-        </button>
+      </div>
+      <!-- Tab 2 & 3: back on left, next/save on right -->
+      <div id="footerTab23" style="display:none;width:100%;justify-content:space-between;align-items:center;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="goTab(-1)">← Volver</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm" id="btnNext" onclick="goTab(1)">
+            Siguiente → Permisos
+          </button>
+          <button class="btn btn-green btn-sm" id="btnSave" style="display:none" onclick="saveMember()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Añadir al equipo
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -429,6 +444,7 @@ if(!token){ location.href='login.html'; }
 
 let _editingId = null;
 let _pendingUserDetailId = null;
+let _selectedUserId = null; // tracks matched staff in add mode
 let _staffList = [];
 let _teamData  = [];
 let _currentTab = 1;
@@ -668,20 +684,44 @@ function setVarType(type, btn){
   document.getElementById('commissionField').style.display = (type==='commission'||type==='bonus'||type==='hours') ? 'flex' : 'none';
 }
 
-/* ── User select auto-fill ───────────────────────────────────── */
-function onUserSelect(){
-  const uid=document.getElementById('mUser').value;
-  const u=_staffList.find(x=>x.id===uid);
-  const ep=document.getElementById('emailPreview');
-  if(u&&u.email){ ep.textContent=u.email; ep.style.display='block'; }
-  else{ ep.style.display='none'; }
+/* ── Name/email autocomplete (add mode) ──────────────────────── */
+function _getAvailable(){
+  const addedIds=new Set(_teamData.filter(m=>m.id!==null).map(m=>m.user_detail_id));
+  return _staffList.filter(u=>!addedIds.has(u.id));
+}
+
+function onNameInput(val){
+  const hint=document.getElementById('matchHint');
+  const match=_getAvailable().find(u=>`${u.name||''} ${u.last_name||''}`.trim().toLowerCase()===val.trim().toLowerCase());
+  if(match){
+    _selectedUserId=match.id;
+    document.getElementById('mEmailInput').value=match.email||'';
+    hint.style.cssText='font-size:11px;color:#059669;margin-top:-8px;display:block;';
+    hint.textContent='✓ Usuario encontrado en el sistema';
+  } else {
+    _selectedUserId=null;
+    hint.style.cssText='font-size:11px;color:#9CA3AF;margin-top:-8px;display:block;';
+    hint.textContent='Escribe el nombre exacto de un colaborador del sistema';
+  }
+}
+
+function onEmailInput(val){
+  // If user types an email that matches a staff member, auto-fill name
+  if(_selectedUserId) return; // already matched by name
+  const match=_getAvailable().find(u=>(u.email||'').toLowerCase()===val.trim().toLowerCase());
+  if(match){
+    _selectedUserId=match.id;
+    document.getElementById('mNameInput').value=`${match.name||''} ${match.last_name||''}`.trim();
+  } else {
+    _selectedUserId=null;
+  }
 }
 
 /* ── Tab navigation ──────────────────────────────────────────── */
 function goTab(dir){
   if(dir>0 && _currentTab===1 && !_editingId && !_pendingUserDetailId){
-    if(!document.getElementById('mUser').value){
-      showTabError(1,'Selecciona un colaborador para continuar.');
+    if(!_selectedUserId){
+      showTabError(1,'Escribe el nombre de un colaborador y selecciónalo de la lista.');
       return;
     }
   }
@@ -693,20 +733,28 @@ function goTab(dir){
 
 function setTab(n){
   _currentTab=n;
-  // Show/hide panels
   [1,2,3].forEach(i=>{
     document.getElementById(`tab${i}`).classList.toggle('active',i===n);
     const step=document.getElementById(`wstep${i}`);
     step.classList.toggle('active',i===n);
     step.classList.toggle('done',i<n);
   });
-  // Footer buttons
-  document.getElementById('btnBack').style.display = n>1?'inline-flex':'none';
-  document.getElementById('btnNext').style.display = n<3?'inline-flex':'none';
-  document.getElementById('btnSave').style.display = n===3?'inline-flex':'none';
-  // Update "Siguiente" label
-  if(n===2) document.getElementById('btnNext').textContent='Siguiente → Permisos';
-  if(n===1) document.getElementById('btnNext').textContent='Siguiente → Compensación';
+  // Footer layout
+  const f1=document.getElementById('footerTab1');
+  const f23=document.getElementById('footerTab23');
+  if(n===1){
+    f1.style.display='block';
+    f23.style.display='none';
+    // In edit mode tab 1, show a save-like next
+    const lbl=_editingId?'Siguiente → Compensación':'Siguiente → Compensación';
+    document.getElementById('btnNext1').textContent=lbl;
+  } else {
+    f1.style.display='none';
+    f23.style.display='flex';
+    document.getElementById('btnNext').style.display = n===2?'inline-flex':'none';
+    document.getElementById('btnSave').style.display = n===3?'inline-flex':'none';
+    document.getElementById('btnSave').textContent = _editingId?'Guardar cambios':'Añadir al equipo';
+  }
 }
 
 function showTabError(tab, msg){
@@ -719,23 +767,20 @@ function clearTabErrors(){
 
 /* ── Open / close modal ──────────────────────────────────────── */
 function _showAddMode(){
+  _selectedUserId=null;
   document.getElementById('addModeFields').style.display='block';
   document.getElementById('editModeCard').style.display='none';
-  document.getElementById('emailPreview').style.display='none';
-  const sel=document.getElementById('mUser');
-  sel.value='';
-  // Only show staff who don't already have a team entry
-  const addedIds=new Set(_teamData.filter(m=>m.id!==null).map(m=>m.user_detail_id));
-  const available=_staffList.filter(u=>!addedIds.has(u.id));
-  if(available.length===0){
-    sel.innerHTML='<option value="">— No hay más miembros disponibles —</option>';
-  } else {
-    sel.innerHTML='<option value="">Seleccionar miembro…</option>';
-    available.forEach(u=>{
-      const n=`${u.name||''} ${u.last_name||''}`.trim();
-      sel.appendChild(new Option(n, u.id));
-    });
-  }
+  document.getElementById('mNameInput').value='';
+  document.getElementById('mEmailInput').value='';
+  document.getElementById('matchHint').style.display='none';
+  // Populate datalist with available staff
+  const dl=document.getElementById('staffDatalist');
+  dl.innerHTML='';
+  _getAvailable().forEach(u=>{
+    const opt=document.createElement('option');
+    opt.value=`${u.name||''} ${u.last_name||''}`.trim();
+    dl.appendChild(opt);
+  });
 }
 
 function _showEditMode(name, email, photo){
@@ -744,8 +789,10 @@ function _showEditMode(name, email, photo){
   document.getElementById('modalMemberName').textContent=name||'';
   document.getElementById('modalMemberEmail').textContent=email||'';
   const av=document.getElementById('modalAvatar');
+  av.innerHTML='';
+  av.style.background='';
   if(photo){ av.innerHTML=`<img src="${photo}">`; av.style.background='transparent'; }
-  else{ av.textContent=initials(name); av.style.background=avatarColor(name); av.innerHTML=''; av.textContent=initials(name); }
+  else{ av.textContent=initials(name); av.style.background=avatarColor(name||''); }
 }
 
 function openModal(editData=null){
@@ -755,6 +802,7 @@ function openModal(editData=null){
   clearTabErrors();
 
   // Reset fields
+  _selectedUserId=null;
   ['mSalary','mHours','mCommission','mNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('mRoleLabel').value='';
   document.getElementById('mCurrency').value='EUR';
@@ -846,12 +894,11 @@ async function saveMember(){
   };
 
   if(!_editingId){
-    if(!_pendingUserDetailId){
-      const uid=document.getElementById('mUser').value;
-      if(!uid){ showTabError(1,'Selecciona un colaborador.'); setTab(1); return; }
-      body.user_detail_id=uid;
-    } else {
+    if(_pendingUserDetailId){
       body.user_detail_id=_pendingUserDetailId;
+    } else {
+      if(!_selectedUserId){ showTabError(1,'Escribe el nombre exacto de un colaborador del sistema.'); setTab(1); return; }
+      body.user_detail_id=_selectedUserId;
     }
   }
 

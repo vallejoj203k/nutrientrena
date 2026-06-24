@@ -15,6 +15,7 @@ class TeamMember(Base):
     salary_fijo = Column(Float, nullable=True)
     commission = Column(Float, nullable=True)
     variable_type = Column(String(50), nullable=True)
+    currency = Column(String(10), nullable=True, default='EUR')
     notes = Column(Text, nullable=True)
     permissions = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -604,36 +604,67 @@ function renderCards(members){
 
 async function loadTeam(){
   try{
-    const staffRes = await Promise.all(['coach','admin','setter','closer'].map(s=>
-      fetch(`${API}/users/${s}/findAll`,{headers:{Authorization:`Bearer ${token}`}})
+    // Load staff users and team entries in parallel
+    const [staffRes, teamRes] = await Promise.all([
+      Promise.all(['coach','admin','setter','closer'].map(s=>
+        fetch(`${API}/users/${s}/findAll`,{headers:{Authorization:`Bearer ${token}`}})
+          .then(r=>r.ok?r.json():null).then(j=>j?(j.data||j):[]).catch(()=>[])
+      )),
+      fetch(`${API}/team`,{headers:{Authorization:`Bearer ${token}`}})
         .then(r=>r.ok?r.json():null).then(j=>j?(j.data||j):[]).catch(()=>[])
-    ));
+    ]);
+
     const seen=new Set(); const allStaff=[];
     staffRes.flat().forEach(u=>{ if(!seen.has(u.id)){seen.add(u.id);allStaff.push(u);} });
 
-    let teamMap={};
-    try{
-      const tr=await fetch(`${API}/team`,{headers:{Authorization:`Bearer ${token}`}});
-      if(tr.ok){ const tj=await tr.json(); (tj.data||tj||[]).forEach(t=>{teamMap[t.user_detail_id]=t;}); }
-    }catch{}
+    // Build map: user_detail_id → team entry
+    const teamByUdId={};
+    const unlinkEntries=[]; // team entries with no linked user
+    teamRes.forEach(t=>{
+      if(t.user_detail_id) teamByUdId[t.user_detail_id]=t;
+      else unlinkEntries.push(t);
+    });
 
+    // Staff users (with or without team entry)
     const merged=allStaff.map(u=>({
-      id: teamMap[u.id]?.id||null,
+      id: teamByUdId[u.id]?.id||null,
       user_detail_id: u.id,
       name: u.name,
       last_name: u.last_name,
       email: u.email,
       photo: u.photo,
-      client_count: teamMap[u.id]?.client_count??0,
-      role_label: teamMap[u.id]?.role_label||null,
-      hours_week: teamMap[u.id]?.hours_week||null,
-      salary_fijo: teamMap[u.id]?.salary_fijo??null,
-      commission: teamMap[u.id]?.commission||null,
-      variable_type: teamMap[u.id]?.variable_type||null,
-      currency: teamMap[u.id]?.currency||'EUR',
-      notes: teamMap[u.id]?.notes||null,
-      permissions: teamMap[u.id]?.permissions||null,
+      client_count: teamByUdId[u.id]?.client_count??0,
+      role_label: teamByUdId[u.id]?.role_label||null,
+      hours_week: teamByUdId[u.id]?.hours_week||null,
+      salary_fijo: teamByUdId[u.id]?.salary_fijo??null,
+      commission: teamByUdId[u.id]?.commission||null,
+      variable_type: teamByUdId[u.id]?.variable_type||null,
+      currency: teamByUdId[u.id]?.currency||'EUR',
+      notes: teamByUdId[u.id]?.notes||null,
+      permissions: teamByUdId[u.id]?.permissions||null,
     }));
+
+    // Unlinked team entries (manually added, no system account)
+    unlinkEntries.forEach(t=>{
+      merged.push({
+        id: t.id,
+        user_detail_id: null,
+        name: t.name||t.member_name||'',
+        last_name: t.last_name||'',
+        email: t.email||t.member_email||'',
+        photo: null,
+        client_count: 0,
+        role_label: t.role_label||null,
+        hours_week: t.hours_week||null,
+        salary_fijo: t.salary_fijo??null,
+        commission: t.commission||null,
+        variable_type: t.variable_type||null,
+        currency: t.currency||'EUR',
+        notes: t.notes||null,
+        permissions: t.permissions||null,
+      });
+    });
+
     renderCards(merged);
   }catch{ renderCards([]); }
 }
@@ -697,11 +728,10 @@ function onNameInput(val){
     _selectedUserId=match.id;
     document.getElementById('mEmailInput').value=match.email||'';
     hint.style.cssText='font-size:11px;color:#059669;margin-top:-8px;display:block;';
-    hint.textContent='✓ Usuario encontrado en el sistema';
+    hint.textContent='✓ Colaborador vinculado automáticamente al sistema';
   } else {
     _selectedUserId=null;
-    hint.style.cssText='font-size:11px;color:#9CA3AF;margin-top:-8px;display:block;';
-    hint.textContent='Escribe el nombre exacto de un colaborador del sistema';
+    hint.style.display='none';
   }
 }
 
@@ -720,8 +750,8 @@ function onEmailInput(val){
 /* ── Tab navigation ──────────────────────────────────────────── */
 function goTab(dir){
   if(dir>0 && _currentTab===1 && !_editingId && !_pendingUserDetailId){
-    if(!_selectedUserId){
-      showTabError(1,'Escribe el nombre de un colaborador y selecciónalo de la lista.');
+    if(!document.getElementById('mNameInput').value.trim()){
+      showTabError(1,'Escribe el nombre del miembro.');
       return;
     }
   }
@@ -897,8 +927,11 @@ async function saveMember(){
     if(_pendingUserDetailId){
       body.user_detail_id=_pendingUserDetailId;
     } else {
-      if(!_selectedUserId){ showTabError(1,'Escribe el nombre exacto de un colaborador del sistema.'); setTab(1); return; }
-      body.user_detail_id=_selectedUserId;
+      const nameVal=document.getElementById('mNameInput').value.trim();
+      if(!nameVal){ showTabError(1,'Escribe el nombre del miembro.'); setTab(1); return; }
+      body.member_name=nameVal;
+      body.member_email=document.getElementById('mEmailInput').value.trim()||null;
+      if(_selectedUserId) body.user_detail_id=_selectedUserId;
     }
   }
 

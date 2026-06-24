@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ALZUM.io — Mi Organización</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--purple:#4F46E5;--purple-dark:#4338CA;--purple-pale:#EEF2FF;--gray-bg:#F0F2F5;--sidebar-w:240px;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--purple);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:16px 0;}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#374151;cursor:pointer;font-size:14px;transition:.15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F3F4F6;color:var(--purple);}
+    .nav-item.active{background:#EEF2FF;color:var(--purple);border-left-color:var(--purple);}
+    .sidebar-user{padding:16px 20px;border-top:1px solid #E5E7EB;}
+    .user-row{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:#6B7280;}
+    .logout-btn{background:none;border:none;color:#6B7280;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:var(--purple);background:#F3F4F6;}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar-left h1{font-size:20px;font-weight:700;color:#111;}
+    .topbar-left p{font-size:13px;color:#6B7280;margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:10px;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:var(--purple-dark);}
+    .btn-outline{background:#fff;color:var(--purple);border:1.5px solid var(--purple);}
+    .btn-outline:hover{background:var(--purple-pale);}
+    .btn-ghost{background:none;color:#6B7280;border:1.5px solid #E5E7EB;}
+    .btn-ghost:hover{background:#F3F4F6;}
+    .btn-danger{background:#FEE2E2;color:#DC2626;border:none;}
+    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+
+    /* ── Content ── */
+    .content{flex:1;overflow-y:auto;padding:28px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+
+    /* ── Org header card ── */
+    .org-header{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:24px;display:flex;align-items:center;gap:20px;margin-bottom:24px;}
+    .org-avatar-big{width:72px;height:72px;border-radius:16px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff;flex-shrink:0;}
+    .org-header-info{flex:1;min-width:0;}
+    .org-header-name{font-size:22px;font-weight:800;color:#111827;}
+    .org-header-meta{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;}
+    .org-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+    .org-badge.owner{background:#EEF2FF;color:#4F46E5;}
+    .org-badge.member{background:#F0FDF4;color:#16A34A;}
+    .org-badge.platform{background:#F9FAFB;color:#6B7280;}
+    .org-header-actions{display:flex;gap:8px;flex-shrink:0;}
+
+    /* ── Stats row ── */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+    .stat-box{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;}
+    .stat-box-val{font-size:28px;font-weight:800;color:#111827;}
+    .stat-box-lbl{font-size:12px;color:#9CA3AF;margin-top:4px;text-transform:uppercase;letter-spacing:.3px;}
+
+    /* ── Section title ── */
+    .section-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .section-title{font-size:15px;font-weight:700;color:#111827;}
+    .section-sub{font-size:12px;color:#9CA3AF;margin-top:2px;}
+
+    /* ── Members grid ── */
+    .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+    .member-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px;position:relative;transition:.15s;}
+    .member-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+    .card-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff;margin:0 auto 4px;}
+    .card-head{text-align:center;}
+    .card-name{font-size:15px;font-weight:700;color:#111;}
+    .card-email{font-size:12px;color:#9CA3AF;margin-top:3px;}
+    .card-perms{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;}
+    .perm-badge{padding:3px 8px;background:#F3F4F6;border-radius:20px;font-size:10px;font-weight:600;color:#374151;}
+    .perm-badge.on{background:#EEF2FF;color:#4F46E5;}
+    .card-actions{display:flex;gap:8px;}
+    .card-actions .btn{flex:1;justify-content:center;}
+    .card-menu{position:absolute;top:12px;right:12px;display:flex;gap:4px;}
+    .icon-btn{background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#9CA3AF;display:flex;}
+    .icon-btn:hover{background:#F3F4F6;color:#374151;}
+    .owner-card{border:1.5px solid #818CF8;}
+    .owner-tag{position:absolute;top:12px;left:12px;background:#EEF2FF;color:#4F46E5;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+
+    .add-card{background:#fff;border:2px dashed #D1D5DB;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;min-height:220px;transition:.2s;color:#9CA3AF;}
+    .add-card:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-pale);}
+    .add-card span{font-size:13px;font-weight:600;}
+
+    /* ── Empty state ── */
+    .empty-state{text-align:center;padding:60px 24px;color:#9CA3AF;}
+    .empty-state svg{margin:0 auto 16px;display:block;opacity:.35;}
+    .empty-state h3{font-size:15px;font-weight:700;margin-bottom:6px;color:#6B7280;}
+
+    /* ── Modals ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;transform:translateY(12px);transition:transform .2s;}
+    .modal-overlay.open .modal-box{transform:translateY(0);}
+    .modal-box::-webkit-scrollbar{width:4px;}
+    .modal-box::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px;}
+    .modal-head{padding:20px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-head p{font-size:13px;color:#9CA3AF;margin-top:3px;}
+    .modal-close{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#9CA3AF;display:flex;flex-shrink:0;}
+    .modal-close:hover{background:#F3F4F6;color:#374151;}
+
+    /* ── Wizard ── */
+    .wizard-steps{display:flex;border-bottom:2px solid #E5E7EB;margin:16px 0 0;}
+    .w-step{flex:1;padding:12px 0 10px;text-align:center;border-bottom:2.5px solid transparent;margin-bottom:-2px;}
+    .w-step-label{font-size:12px;font-weight:600;color:#9CA3AF;}
+    .w-step.active .w-step-label{color:var(--purple);}
+    .w-step.active{border-bottom-color:var(--purple);}
+    .w-step.done .w-step-label{color:#6B7280;}
+
+    /* ── Tab panels ── */
+    .tab-panel{display:none;padding:20px 24px;flex-direction:column;gap:14px;}
+    .tab-panel.active{display:flex;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:space-between;gap:10px;}
+    .modal-footer-right{display:flex;gap:8px;}
+
+    /* ── Form ── */
+    .form-group{display:flex;flex-direction:column;gap:5px;}
+    .form-group label{font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.4px;}
+    .form-group input,.form-group select{padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;font-family:inherit;color:#111;width:100%;transition:.15s;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(79,70,229,.08);}
+    .form-hint{font-size:11px;color:#9CA3AF;margin-top:3px;}
+    .search-results{border:1.5px solid #E5E7EB;border-radius:8px;max-height:160px;overflow-y:auto;margin-top:-8px;}
+    .search-result-item{padding:10px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .search-result-item:last-child{border-bottom:none;}
+    .search-result-item:hover{background:#F9FAFB;}
+    .search-result-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+    .search-result-name{font-weight:600;color:#111;}
+    .search-result-email{font-size:11px;color:#9CA3AF;}
+    .selected-user-card{background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+    .selected-user-info{flex:1;}
+    .selected-user-name{font-size:14px;font-weight:700;color:#111;}
+    .selected-user-email{font-size:12px;color:#9CA3AF;}
+
+    /* ── Permission toggles ── */
+    .perm-section-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:4px;}
+    .perm-list{display:flex;flex-direction:column;gap:0;}
+    .perm-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F3F4F6;}
+    .perm-item:last-child{border-bottom:none;}
+    .perm-item-info{flex:1;}
+    .perm-item-label{font-size:13px;font-weight:600;color:#111;}
+    .perm-item-desc{font-size:11px;color:#9CA3AF;margin-top:1px;}
+    .toggle-switch{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;}
+    .toggle-track{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:22px;transition:.2s;}
+    .toggle-track:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+    .toggle-switch input:checked + .toggle-track{background:var(--purple);}
+    .toggle-switch input:checked + .toggle-track:before{transform:translateX(18px);}
+
+    /* ── Info banner ── */
+    .info-banner{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#1D4ED8;line-height:1.5;}
+    .info-banner svg{flex-shrink:0;margin-top:1px;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:24px;right:24px;background:#111;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    .toast.success{background:#16A34A;}
+    .toast.error{background:#DC2626;}
+
+    /* ── Access denied ── */
+    .access-denied{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:#9CA3AF;gap:12px;padding:40px;}
+    .access-denied svg{opacity:.3;}
+    .access-denied h3{font-size:16px;font-weight:700;color:#6B7280;}
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>ALZUM<em>.io</em></span>
+    <small>Panel del Coach</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Inicio
+    </a>
+    <a class="nav-item" href="events.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Mi Calendario
+    </a>
+    <a class="nav-item" href="clients.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </a>
+    <div class="nav-section">Contenido</div>
+    <a class="nav-item" href="programas.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Programas
+    </a>
+    <a class="nav-item" href="library.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Librería
+    </a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item" href="chat.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chat
+    </a>
+    <a class="nav-item" href="notes.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Notas
+    </a>
+    <div class="nav-section">Negocio</div>
+    <a class="nav-item" href="analytics.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analíticas
+    </a>
+    <a class="nav-item" href="coaches.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Equipo
+    </a>
+    <a class="nav-item active" href="mi-organizacion.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Mi Organizacion
+    </a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="settings.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ajustes
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sidebarAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Cargando…</div>
+        <div class="user-role" id="sidebarRole">—</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Mi Organizacion</h1>
+      <p id="topbarSub">Gestiona tu equipo y sus permisos</p>
+    </div>
+    <div class="topbar-right" id="topbarActions"></div>
+  </div>
+
+  <div class="content" id="mainContent">
+    <div style="text-align:center;padding:60px;color:#9CA3AF;font-size:13px;">Cargando…</div>
+  </div>
+</div>
+
+<!-- ── Add/Edit member modal ── -->
+<div class="modal-overlay" id="memberModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h2 id="memberModalTitle">Añadir coach al equipo</h2>
+        <p id="memberModalSub">Busca un coach existente y configura sus permisos</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('memberModal')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="wizard-steps" id="wizardSteps">
+      <div class="w-step active" id="wstep1"><div class="w-step-label">1. Seleccionar coach</div></div>
+      <div class="w-step" id="wstep2"><div class="w-step-label">2. Permisos</div></div>
+    </div>
+
+    <!-- Tab 1: Search -->
+    <div class="tab-panel active" id="panel1">
+      <div class="form-group">
+        <label>Buscar por nombre o email</label>
+        <input type="text" id="coachSearch" placeholder="Escribe para buscar…" oninput="searchCoaches(this.value)" autocomplete="off"/>
+        <div class="form-hint">Solo aparecen coaches que no pertenecen a otra organización</div>
+      </div>
+      <div id="searchResults" style="display:none;" class="search-results"></div>
+      <div id="selectedUserCard" style="display:none;" class="selected-user-card">
+        <div class="search-result-avatar" id="selectedAvatar" style="background:#4F46E5;">?</div>
+        <div class="selected-user-info">
+          <div class="selected-user-name" id="selectedName">—</div>
+          <div class="selected-user-email" id="selectedEmail">—</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="clearSelectedUser()">Cambiar</button>
+      </div>
+    </div>
+
+    <!-- Tab 2: Permissions -->
+    <div class="tab-panel" id="panel2">
+      <div class="info-banner">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Los permisos marcados son los que este coach tendra en tu organizacion. Puedes modificarlos en cualquier momento.
+      </div>
+      <div id="permissionsContainer"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer" id="memberModalFooter">
+      <button class="btn btn-ghost" id="footerBack" onclick="goStep(1)" style="display:none;">Atras</button>
+      <div class="modal-footer-right">
+        <button class="btn btn-ghost" onclick="closeModal('memberModal')">Cancelar</button>
+        <button class="btn btn-primary" id="footerNext" onclick="goStep(2)">Siguiente</button>
+        <button class="btn btn-primary" id="footerSave" onclick="saveMember()" style="display:none;">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit org name modal ── -->
+<div class="modal-overlay" id="editOrgModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div><h2>Editar organizacion</h2></div>
+      <button class="modal-close" onclick="closeModal('editOrgModal')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group">
+        <label>Nombre de la organizacion</label>
+        <input type="text" id="editOrgName" placeholder="Nombre de tu empresa o marca"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div></div>
+      <div class="modal-footer-right">
+        <button class="btn btn-ghost" onclick="closeModal('editOrgModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveOrgName()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://nutrientrena-production.up.railway.app/api';
+  const token = localStorage.getItem('token');
+  if (!token) location.href = 'login.html';
+  const h = () => ({ 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' });
+
+  let _org = null;
+  let _isOwner = false;
+  let _editingMemberId = null;
+  let _selectedUser = null;
+  let _allCoaches = [];
+  let _currentPerms = {};
+
+  // ── Permission definitions ────────────────────────────────────────────────
+  const PERM_SECTIONS = [
+    {
+      title: 'Organizacion',
+      items: [
+        { key: 'manage_org',       label: 'Gestionar organizacion',    desc: 'Puede añadir y eliminar miembros del equipo' },
+        { key: 'view_all_clients', label: 'Ver todos los clientes',    desc: 'Accede a clientes de otros coaches de la org' },
+      ],
+    },
+    {
+      title: 'Creacion de contenido',
+      items: [
+        { key: 'create_aliments',  label: 'Crear alimentos',           desc: 'Añadir alimentos a la base de datos' },
+        { key: 'create_recipes',   label: 'Crear recetas',             desc: 'Crear y editar recetas' },
+        { key: 'create_routines',  label: 'Crear rutinas',             desc: 'Crear rutinas de entrenamiento' },
+        { key: 'create_diets',     label: 'Crear dietas',              desc: 'Crear planes de alimentacion' },
+        { key: 'manage_programs',  label: 'Gestionar programas',       desc: 'Crear y editar programas de cliente' },
+      ],
+    },
+    {
+      title: 'Gestion de clientes',
+      items: [
+        { key: 'assign_routines',  label: 'Asignar rutinas',           desc: 'Puede asignar rutinas a clientes' },
+        { key: 'assign_diets',     label: 'Asignar dietas',            desc: 'Puede asignar dietas a clientes' },
+        { key: 'access_chat',      label: 'Chat con clientes',         desc: 'Acceso al modulo de mensajeria' },
+        { key: 'view_reports',     label: 'Ver informes de clientes',  desc: 'Acceso a informes y analytics' },
+      ],
+    },
+    {
+      title: 'Negocio',
+      items: [
+        { key: 'access_negocio',   label: 'Modulo negocio',            desc: 'Acceso al panel financiero' },
+      ],
+    },
+  ];
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function initials(name) {
+    return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  function avatarColor(name) {
+    const colors = ['#4F46E5','#7C3AED','#DB2777','#EA580C','#16A34A','#0891B2','#9333EA'];
+    let h = 0;
+    for (const c of (name || '')) h = (h * 31 + c.charCodeAt(0)) % colors.length;
+    return colors[h];
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  // ── Load user ─────────────────────────────────────────────────────────────
+  async function loadUser() {
+    try {
+      const r = await fetch(`${API}/users/me`, { headers: h() });
+      if (r.status === 401) { logout(); return; }
+      const j = await r.json();
+      const u = j.data || j;
+      const name = `${u.name || ''} ${u.last_name || u.lastName || ''}`.trim();
+      document.getElementById('sidebarName').textContent = name || u.email;
+      document.getElementById('sidebarRole').textContent = u.role_name || 'Coach';
+      document.getElementById('sidebarAvatar').textContent = initials(name || u.email);
+    } catch {}
+  }
+
+  function logout() {
+    fetch(`${API}/auth/logout`, { method: 'POST', headers: h() }).catch(() => {});
+    localStorage.clear();
+    location.href = 'login.html';
+  }
+
+  // ── Load org ──────────────────────────────────────────────────────────────
+  async function loadOrg() {
+    const r = await fetch(`${API}/organizations/mine`, { headers: h() });
+    const j = await r.json();
+    if (!r.ok || !j.data) {
+      document.getElementById('mainContent').innerHTML = `
+        <div class="access-denied">
+          <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <h3>No perteneces a ninguna organizacion</h3>
+          <p style="font-size:13px;max-width:300px;">Tu cuenta aun no esta vinculada a una organizacion. Contacta con el administrador de la plataforma.</p>
+        </div>`;
+      return;
+    }
+    _org = j.data;
+    renderPage();
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function renderPage() {
+    const org = _org;
+    // Check if current user is the owner (we infer from the org data)
+    // Since the API returns org context, we check if the user's name matches owner
+    // For simplicity, we check via the /me endpoint vs org.owner.id
+    // We'll use a flag set from the org response
+    _isOwner = true; // Will be refined after cross-checking with current user
+
+    // Topbar actions
+    const actions = document.getElementById('topbarActions');
+    actions.innerHTML = _isOwner
+      ? `<button class="btn btn-outline btn-sm" onclick="openEditOrg()">
+           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+           Editar nombre
+         </button>
+         <button class="btn btn-primary btn-sm" onclick="openAddMember()">
+           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+           Añadir coach
+         </button>`
+      : '';
+
+    // Stats
+    const memberCount = (org.members || []).length;
+
+    // Main content
+    document.getElementById('mainContent').innerHTML = `
+      <div class="org-header">
+        <div class="org-avatar-big">${initials(org.name)}</div>
+        <div class="org-header-info">
+          <div class="org-header-name">${esc(org.name)}</div>
+          <div class="org-header-meta">
+            <span class="org-badge owner">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Propietario: ${esc(org.owner?.name || '—')}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-box-val">${memberCount}</div>
+          <div class="stat-box-lbl">Coaches en el equipo</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-val">${memberCount + 1}</div>
+          <div class="stat-box-lbl">Total personas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-val">${org.is_active ? 'Activa' : 'Inactiva'}</div>
+          <div class="stat-box-lbl">Estado organizacion</div>
+        </div>
+      </div>
+
+      <div class="section-title-row">
+        <div>
+          <div class="section-title">Coaches del equipo</div>
+          <div class="section-sub">${memberCount === 0 ? 'Aun no hay coaches en tu equipo' : `${memberCount} coach${memberCount !== 1 ? 'es' : ''} añadido${memberCount !== 1 ? 's' : ''}`}</div>
+        </div>
+      </div>
+
+      <div class="members-grid" id="membersGrid"></div>
+    `;
+
+    renderMembers();
+  }
+
+  function renderMembers() {
+    const grid = document.getElementById('membersGrid');
+    if (!grid) return;
+    const members = _org.members || [];
+
+    let html = '';
+    members.forEach(m => {
+      const color = avatarColor(m.name);
+      const perms = m.permissions || {};
+      const activePerm = PERM_SECTIONS.flatMap(s => s.items).filter(p => perms[p.key]);
+      const permBadges = activePerm.slice(0, 3).map(p => `<span class="perm-badge on">${esc(p.label)}</span>`).join('');
+      const extra = activePerm.length > 3 ? `<span class="perm-badge">+${activePerm.length - 3}</span>` : '';
+
+      html += `
+        <div class="member-card">
+          <div class="card-menu">
+            ${_isOwner ? `
+            <button class="icon-btn" onclick="openEditMember(${m.id},'${esc(m.name)}')" title="Editar permisos">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="icon-btn" onclick="removeMember(${m.id},'${esc(m.name)}')" title="Eliminar del equipo" style="color:#EF4444;">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>` : ''}
+          </div>
+          <div class="card-head">
+            <div class="card-avatar" style="background:${color};">${initials(m.name)}</div>
+            <div class="card-name">${esc(m.name)}</div>
+            <div class="card-email">Coach empleado</div>
+          </div>
+          <div class="card-perms">
+            ${activePerm.length ? permBadges + extra : '<span style="font-size:11px;color:#9CA3AF;">Sin permisos adicionales</span>'}
+          </div>
+          ${_isOwner ? `
+          <div class="card-actions">
+            <button class="btn btn-outline btn-sm" onclick="openEditMember(${m.id},'${esc(m.name)}')">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Permisos
+            </button>
+          </div>` : ''}
+        </div>`;
+    });
+
+    if (_isOwner) {
+      html += `
+        <div class="add-card" onclick="openAddMember()">
+          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          <span>Añadir coach</span>
+        </div>`;
+    }
+
+    if (!members.length && !_isOwner) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <h3>Sin coaches en el equipo todavia</h3>
+        <p style="font-size:13px;">El propietario de la organizacion aun no ha añadido coaches al equipo.</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = html;
+  }
+
+  // ── Add member modal ──────────────────────────────────────────────────────
+  async function openAddMember() {
+    _editingMemberId = null;
+    _selectedUser = null;
+    _currentPerms = {};
+    document.getElementById('memberModalTitle').textContent = 'Añadir coach al equipo';
+    document.getElementById('memberModalSub').textContent = 'Busca un coach y configura sus permisos';
+    document.getElementById('coachSearch').value = '';
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('selectedUserCard').style.display = 'none';
+    goStep(1, true);
+    openModal('memberModal');
+    await loadAvailableCoaches();
+  }
+
+  function openEditMember(memberId, memberName) {
+    _editingMemberId = memberId;
+    _selectedUser = null;
+    const member = (_org.members || []).find(m => m.id === memberId);
+    _currentPerms = { ...(member?.permissions || {}) };
+    document.getElementById('memberModalTitle').textContent = 'Editar permisos';
+    document.getElementById('memberModalSub').textContent = `Permisos de ${memberName}`;
+    buildPermissionsPanel(_currentPerms);
+    goStep(2, true);
+    openModal('memberModal');
+  }
+
+  async function loadAvailableCoaches() {
+    try {
+      const r = await fetch(`${API}/users/coach/findAll`, { headers: h() });
+      if (!r.ok) return;
+      const j = await r.json();
+      _allCoaches = (j.data || j || []).filter(u => {
+        // Exclude members already in the org
+        const existingIds = (_org.members || []).map(m => m.user_detail_id);
+        return !existingIds.includes(u.id);
+      });
+    } catch { _allCoaches = []; }
+  }
+
+  function searchCoaches(query) {
+    const res = document.getElementById('searchResults');
+    if (!query.trim()) { res.style.display = 'none'; return; }
+    const matches = _allCoaches.filter(u => {
+      const name = `${u.name || ''} ${u.last_name || ''}`.toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      return name.includes(query.toLowerCase()) || email.includes(query.toLowerCase());
+    }).slice(0, 6);
+
+    if (!matches.length) {
+      res.style.display = 'block';
+      res.innerHTML = '<div style="padding:14px;text-align:center;font-size:13px;color:#9CA3AF;">No se encontraron coaches</div>';
+      return;
+    }
+
+    res.style.display = 'block';
+    res.innerHTML = matches.map(u => {
+      const name = `${u.name || ''} ${u.last_name || ''}`.trim();
+      const color = avatarColor(name);
+      return `<div class="search-result-item" onclick="selectUser('${u.id}','${esc(name)}','${esc(u.email || '')}')">
+        <div class="search-result-avatar" style="background:${color};">${initials(name)}</div>
+        <div>
+          <div class="search-result-name">${esc(name)}</div>
+          <div class="search-result-email">${esc(u.email || '')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function selectUser(id, name, email) {
+    _selectedUser = { id, name, email };
+    document.getElementById('coachSearch').value = '';
+    document.getElementById('searchResults').style.display = 'none';
+    const color = avatarColor(name);
+    document.getElementById('selectedAvatar').style.background = color;
+    document.getElementById('selectedAvatar').textContent = initials(name);
+    document.getElementById('selectedName').textContent = name;
+    document.getElementById('selectedEmail').textContent = email;
+    document.getElementById('selectedUserCard').style.display = 'flex';
+  }
+
+  function clearSelectedUser() {
+    _selectedUser = null;
+    document.getElementById('selectedUserCard').style.display = 'none';
+    document.getElementById('coachSearch').value = '';
+  }
+
+  // ── Permissions panel ─────────────────────────────────────────────────────
+  function buildPermissionsPanel(currentPerms) {
+    const container = document.getElementById('permissionsContainer');
+    let html = '';
+    PERM_SECTIONS.forEach(section => {
+      html += `<div class="perm-section-title">${esc(section.title)}</div><div class="perm-list">`;
+      section.items.forEach(item => {
+        const checked = currentPerms[item.key] ? 'checked' : '';
+        html += `<div class="perm-item">
+          <div class="perm-item-info">
+            <div class="perm-item-label">${esc(item.label)}</div>
+            <div class="perm-item-desc">${esc(item.desc)}</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" data-key="${item.key}" ${checked} onchange="togglePerm(this)"/>
+            <span class="toggle-track"></span>
+          </label>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function togglePerm(el) {
+    _currentPerms[el.dataset.key] = el.checked;
+  }
+
+  // ── Step navigation ───────────────────────────────────────────────────────
+  function goStep(step, force = false) {
+    const isEdit = !!_editingMemberId;
+
+    if (step === 2 && !isEdit && !_selectedUser && !force) {
+      showToast('Selecciona un coach primero', 'error');
+      return;
+    }
+
+    // Build perms panel when entering step 2
+    if (step === 2) buildPermissionsPanel(_currentPerms);
+
+    // Update wizard
+    document.getElementById('wstep1').className = 'w-step' + (step === 1 ? ' active' : ' done');
+    document.getElementById('wstep2').className = 'w-step' + (step === 2 ? ' active' : '');
+    document.getElementById('wizardSteps').style.display = isEdit ? 'none' : 'flex';
+
+    // Show panels
+    document.getElementById('panel1').className = 'tab-panel' + (step === 1 ? ' active' : '');
+    document.getElementById('panel2').className = 'tab-panel' + (step === 2 ? ' active' : '');
+
+    // Footer
+    document.getElementById('footerBack').style.display  = (step === 2 && !isEdit) ? 'flex' : 'none';
+    document.getElementById('footerNext').style.display  = (step === 1) ? 'flex' : 'none';
+    document.getElementById('footerSave').style.display  = (step === 2) ? 'flex' : 'none';
+  }
+
+  // ── Save member ───────────────────────────────────────────────────────────
+  async function saveMember() {
+    const btn = document.getElementById('footerSave');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    try {
+      if (_editingMemberId) {
+        // Update permissions
+        const r = await fetch(`${API}/organizations/${_org.id}/members/${_editingMemberId}/permissions`, {
+          method: 'PATCH',
+          headers: h(),
+          body: JSON.stringify({ permissions: _currentPerms }),
+        });
+        if (!r.ok) { const j = await r.json(); throw new Error(j.message || 'Error'); }
+        showToast('Permisos actualizados');
+      } else {
+        // Add member
+        const r = await fetch(`${API}/organizations/${_org.id}/members`, {
+          method: 'POST',
+          headers: h(),
+          body: JSON.stringify({ user_detail_id: _selectedUser.id, permissions: _currentPerms }),
+        });
+        if (!r.ok) { const j = await r.json(); throw new Error(j.message || 'Error'); }
+        showToast('Coach añadido al equipo');
+      }
+      closeModal('memberModal');
+      await loadOrg();
+    } catch (e) {
+      showToast(e.message || 'Error al guardar', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar';
+    }
+  }
+
+  // ── Remove member ─────────────────────────────────────────────────────────
+  async function removeMember(memberId, name) {
+    if (!confirm(`¿Eliminar a ${name} del equipo? Perdera acceso a la organizacion.`)) return;
+    try {
+      const r = await fetch(`${API}/organizations/${_org.id}/members/${memberId}`, {
+        method: 'DELETE',
+        headers: h(),
+      });
+      if (!r.ok) { const j = await r.json(); throw new Error(j.message || 'Error'); }
+      showToast('Miembro eliminado');
+      await loadOrg();
+    } catch (e) {
+      showToast(e.message || 'Error al eliminar', 'error');
+    }
+  }
+
+  // ── Edit org name ─────────────────────────────────────────────────────────
+  function openEditOrg() {
+    document.getElementById('editOrgName').value = _org.name || '';
+    openModal('editOrgModal');
+  }
+
+  async function saveOrgName() {
+    const name = document.getElementById('editOrgName').value.trim();
+    if (!name) { showToast('Escribe un nombre', 'error'); return; }
+    try {
+      const r = await fetch(`${API}/organizations/${_org.id}`, {
+        method: 'PATCH',
+        headers: h(),
+        body: JSON.stringify({ name }),
+      });
+      if (!r.ok) { const j = await r.json(); throw new Error(j.message || 'Error'); }
+      showToast('Nombre actualizado');
+      closeModal('editOrgModal');
+      await loadOrg();
+    } catch (e) {
+      showToast(e.message || 'Error al guardar', 'error');
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  (async () => {
+    await Promise.all([loadUser(), loadOrg()]);
+  })();
+</script>
+</body>
+</html>

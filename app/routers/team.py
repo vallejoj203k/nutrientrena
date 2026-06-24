@@ -19,6 +19,7 @@ class TeamMemberCreateRequest(BaseModel):
     salary_fijo: Optional[float] = None
     commission: Optional[float] = None
     variable_type: Optional[str] = None
+    currency: Optional[str] = None
     notes: Optional[str] = None
     permissions: Optional[str] = None
 
@@ -29,6 +30,7 @@ class TeamMemberUpdateRequest(BaseModel):
     salary_fijo: Optional[float] = None
     commission: Optional[float] = None
     variable_type: Optional[str] = None
+    currency: Optional[str] = None
     notes: Optional[str] = None
     permissions: Optional[str] = None
 
@@ -45,8 +47,9 @@ def _serialize(member: TeamMember, db: Session) -> dict:
         "hours_week": member.hours_week,
         "salary_fijo": member.salary_fijo,
         "commission": member.commission,
-        "notes": member.notes,
         "variable_type": member.variable_type,
+        "currency": member.currency or "EUR",
+        "notes": member.notes,
         "permissions": member.permissions,
         "created_at": member.created_at.isoformat() if member.created_at else None,
         # from user_detail
@@ -97,6 +100,7 @@ def create_team_member(
         salary_fijo=data.salary_fijo,
         commission=data.commission,
         variable_type=data.variable_type,
+        currency=data.currency or 'EUR',
         notes=data.notes,
         permissions=data.permissions,
     )
@@ -132,6 +136,8 @@ def update_team_member(
         member.commission = data.commission
     if data.variable_type is not None:
         member.variable_type = data.variable_type
+    if data.currency is not None:
+        member.currency = data.currency
     if data.notes is not None:
         member.notes = data.notes
     if data.permissions is not None:

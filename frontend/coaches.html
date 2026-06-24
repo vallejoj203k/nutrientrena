@@ -655,14 +655,10 @@ function onUserSelect(){
 
 /* ── Tab navigation ──────────────────────────────────────────── */
 function goTab(dir){
-  // Validate current tab before advancing
-  if(dir>0){
-    if(_currentTab===1){
-      const isNew=!_editingId&&!_pendingUserDetailId;
-      if(isNew && !document.getElementById('mUser').value){
-        showTabError(1,'Selecciona un colaborador para continuar.');
-        return;
-      }
+  if(dir>0 && _currentTab===1 && !_editingId && !_pendingUserDetailId){
+    if(!document.getElementById('mUser').value){
+      showTabError(1,'Selecciona un colaborador para continuar.');
+      return;
     }
   }
   clearTabErrors();
@@ -734,14 +730,18 @@ function openModal(editData=null){
   document.querySelectorAll('.var-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector('.var-btn').classList.add('active');
 
+  // Always show wizard steps
+  document.getElementById('wizardSteps').style.display='flex';
+
   if(editData){
     _editingId=editData.id;
     document.getElementById('modalTitle').textContent='Editar miembro';
-    document.getElementById('wizardSteps').style.display='none';
+    // Tab 1: show readonly name input, hide select
     _showEditMode(`${editData.name||''} ${editData.last_name||''}`.trim(), editData.email);
     document.getElementById('mRoleLabel').value=editData.role_label||'';
-    document.getElementById('mHours').value=editData.hours_week||'';
+    // Tab 2 fields
     document.getElementById('mSalary').value=editData.salary_fijo||'';
+    document.getElementById('mHours').value=editData.hours_week||'';
     document.getElementById('mCommission').value=editData.commission||'';
     document.getElementById('mNotes').value=editData.notes||'';
     if(editData.variable_type){
@@ -752,22 +752,17 @@ function openModal(editData=null){
       });
       if(_varType!=='none') document.getElementById('commissionField').style.display='flex';
     }
-    // Flat view: all panels visible, no wizard nav
-    [1,2,3].forEach(i=>document.getElementById(`tab${i}`).classList.add('active'));
-    document.getElementById('btnBack').style.display='none';
-    document.getElementById('btnNext').style.display='none';
-    document.getElementById('btnSave').style.display='inline-flex';
-    document.getElementById('btnSave').textContent='Guardar cambios';
     buildPermissionsPanel(editData.permissions||null);
+    // Edit: save button visible on tab 3, label updated
+    document.getElementById('btnSave').textContent='Guardar cambios';
   } else {
     document.getElementById('modalTitle').textContent='Añadir miembro del equipo';
-    document.getElementById('wizardSteps').style.display='flex';
     _showAddMode();
-    document.getElementById('btnSave').textContent='Añadir al equipo';
-    setTab(1);
     buildPermissionsPanel(null);
+    document.getElementById('btnSave').textContent='Añadir al equipo';
   }
 
+  setTab(1);
   document.getElementById('modalOverlay').style.display='flex';
 }
 

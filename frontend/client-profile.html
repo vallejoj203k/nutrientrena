@@ -553,6 +553,47 @@
 .res-action-btn:hover{background:#4338CA;}
 .res-action-btn.warn{background:#EF4444;}
 .res-action-btn.warn:hover{background:#DC2626;}
+
+/* Progreso sub-tabs */
+.pg-subtabs-bar{display:flex;gap:2px;padding:12px 24px 0;background:#fff;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
+.pg-stab{padding:8px 16px;border:none;background:none;font-size:13px;font-weight:500;color:#6B7280;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:.15s;}
+.pg-stab:hover{color:#111;}
+.pg-stab.active{color:#4F46E5;font-weight:700;border-bottom-color:#4F46E5;}
+.pg-subpane{padding:0;}
+.pg-placeholder{padding:40px 24px;text-align:center;color:#9CA3AF;font-size:13px;}
+.pg-stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 24px 0;}
+.pg-stat-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;}
+.pg-stat-val{font-size:20px;font-weight:800;color:#111827;line-height:1.2;}
+.pg-stat-lbl{font-size:11px;color:#9CA3AF;margin-top:4px;text-transform:uppercase;letter-spacing:.3px;}
+.pg-chart-section{background:#fff;border:1px solid #E5E7EB;border-radius:12px;margin:16px 24px 0;padding:16px;}
+.pg-chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.pg-chart-title{font-size:14px;font-weight:700;color:#111827;}
+.pg-chart-legend{display:flex;gap:14px;font-size:11px;color:#6B7280;}
+.pg-leg-item{display:flex;align-items:center;gap:5px;}
+.pg-leg-dot-green{width:18px;height:2px;background:#22C55E;border-radius:1px;}
+.pg-leg-dot-purple{width:18px;height:0;border-top:2px dashed #7C3AED;}
+.pg-chart-grid{display:grid;grid-template-columns:1fr 160px;gap:16px;align-items:start;}
+.pg-obj-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px;}
+.pg-obj-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.pg-obj-weight{font-size:28px;font-weight:900;color:#4F46E5;margin-bottom:10px;line-height:1;}
+.pg-obj-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #E5E7EB;}
+.pg-obj-lbl{font-size:11px;color:#9CA3AF;}
+.pg-obj-val{font-size:13px;font-weight:700;color:#111827;}
+.pg-section{background:#fff;border:1px solid #E5E7EB;border-radius:12px;margin:16px 24px 0;padding:16px;}
+.pg-section:last-child{margin-bottom:16px;}
+.pg-section-title{font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;}
+.pg-exercises-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.pg-exercise-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px;}
+.pg-ex-name{font-size:12px;font-weight:700;color:#111827;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pg-ex-chart{margin-bottom:6px;}
+.pg-ex-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.pg-ex-val{font-size:13px;font-weight:700;color:#4F46E5;}
+.pg-ex-rep{font-size:11px;color:#9CA3AF;}
+.pg-scores-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;}
+.pg-score-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px;text-align:center;}
+.pg-score-val{font-size:22px;font-weight:800;color:#111827;}
+.pg-score-lbl{font-size:11px;color:#9CA3AF;margin-top:3px;}
+.pg-ci-quote{background:#F0F9FF;border-left:3px solid #0EA5E9;padding:10px 14px;border-radius:0 8px 8px 0;font-size:13px;color:#374151;font-style:italic;}
   </style>
   <style>
     /* ALZUM.io — theme overrides */
@@ -2017,135 +2058,280 @@ function showTab(name) {
 /* ── Progreso tab ── */
 function renderProgresoTab() {
   const el = document.getElementById('progresoContent');
+  el.innerHTML = `
+    <div class="pg-subtabs-bar">
+      <button class="pg-stab active" onclick="showProgresoSubtab('resumen',this)">Resumen</button>
+      <button class="pg-stab" onclick="showProgresoSubtab('fuerza',this)">Fuerza</button>
+      <button class="pg-stab" onclick="showProgresoSubtab('sesiones',this)">Sesiones</button>
+      <button class="pg-stab" onclick="showProgresoSubtab('checkins',this)">Check-ins</button>
+      <button class="pg-stab" onclick="showProgresoSubtab('fotos',this)">Fotos</button>
+      <button class="pg-stab" onclick="showProgresoSubtab('informe',this)">Informe</button>
+    </div>
+    <div id="pg-pane-resumen" class="pg-subpane"></div>
+    <div id="pg-pane-fuerza" class="pg-subpane" style="display:none;"><div class="pg-placeholder">Sin datos de fuerza registrados.</div></div>
+    <div id="pg-pane-sesiones" class="pg-subpane" style="display:none;"><div class="pg-placeholder">Sin sesiones registradas.</div></div>
+    <div id="pg-pane-checkins" class="pg-subpane" style="display:none;"></div>
+    <div id="pg-pane-fotos" class="pg-subpane" style="display:none;"><div class="pg-placeholder">Sin fotos de progreso.</div></div>
+    <div id="pg-pane-informe" class="pg-subpane" style="display:none;"><div class="pg-placeholder">Informe no disponible.</div></div>
+  `;
+  _renderPgResumen();
+  _renderPgCheckins();
+}
+
+function showProgresoSubtab(name, btn) {
+  document.querySelectorAll('.pg-stab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pg-subpane').forEach(p => p.style.display = 'none');
+  if (btn) btn.classList.add('active');
+  const pane = document.getElementById('pg-pane-' + name);
+  if (pane) pane.style.display = '';
+}
+
+function _renderPgResumen() {
+  const el = document.getElementById('pg-pane-resumen');
+  if (!el) return;
   const ckData = checkins || [];
-
-  // Stats summary
+  // checkins are newest-first from API
   const weights = ckData.map(c => c.weight).filter(Boolean);
-  const first = weights.length ? weights[weights.length - 1] : null;
-  const last  = weights.length ? weights[0] : null;
-  const change = (first != null && last != null) ? (last - first) : null;
-  const adherence = ckData.length;
+  const pesoInicio = weights.length ? parseFloat(weights[weights.length - 1]) : null;
+  const pesoActual = weights.length ? parseFloat(weights[0]) : null;
+  const perdido = (pesoInicio != null && pesoActual != null) ? (pesoInicio - pesoActual) : null;
 
-  // Body measurements from latest checkin
-  const latest = ckData[0] || {};
+  let semanas = null;
+  if (clientData && clientData.start_date) {
+    const start = new Date(clientData.start_date);
+    const today = new Date();
+    semanas = Math.max(0, Math.round((today - start) / (7 * 86400000)));
+  } else if (ckData.length >= 2) {
+    const oldest = new Date(ckData[ckData.length - 1].checkin_date || ckData[ckData.length - 1].created_at);
+    const newest = new Date(ckData[0].checkin_date || ckData[0].created_at);
+    semanas = Math.max(1, Math.round((newest - oldest) / (7 * 86400000)));
+  }
 
-  let html = `
-    <div class="grid-3" style="margin-bottom:16px;">
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#EEF2FF;"><svg width="20" height="20" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-        <div><div class="stat-val">${adherence}</div><div class="stat-lbl">Check-ins totales</div></div>
+  let ritmoReal = null;
+  if (perdido != null && semanas && semanas > 0) ritmoReal = perdido / semanas;
+
+  const targetW = (typeof _target !== 'undefined' && _target && _target.target_weight) ? parseFloat(_target.target_weight) : null;
+  const aPerder = (pesoActual != null && targetW != null) ? (pesoActual - targetW) : null;
+  let estimacion = null;
+  if (aPerder != null && ritmoReal && ritmoReal > 0) estimacion = Math.ceil(aPerder / ritmoReal);
+
+  const fmtKg = v => v != null ? v.toFixed(1) + ' kg' : '—';
+  const fmtSigned = v => v != null ? (v > 0 ? '+' : '') + v.toFixed(1) + ' kg' : '—';
+
+  const statsHTML = `<div class="pg-stats-row">
+    <div class="pg-stat-card"><div class="pg-stat-val">${fmtKg(pesoInicio)}</div><div class="pg-stat-lbl">Peso inicio</div></div>
+    <div class="pg-stat-card"><div class="pg-stat-val">${fmtKg(pesoActual)}</div><div class="pg-stat-lbl">Peso actual</div></div>
+    <div class="pg-stat-card"><div class="pg-stat-val" style="color:${perdido != null && perdido > 0 ? '#16A34A' : perdido != null && perdido < 0 ? '#DC2626' : '#111'};">${perdido != null ? (perdido >= 0 ? '-' : '+') + Math.abs(perdido).toFixed(1) + ' kg' : '—'}</div><div class="pg-stat-lbl">Perdido</div></div>
+    <div class="pg-stat-card"><div class="pg-stat-val">${semanas != null ? semanas : '—'}</div><div class="pg-stat-lbl">Semanas</div></div>
+    <div class="pg-stat-card"><div class="pg-stat-val">${ritmoReal != null ? Math.abs(ritmoReal).toFixed(2) + ' kg/sem' : '—'}</div><div class="pg-stat-lbl">Ritmo real</div></div>
+  </div>`;
+
+  const chartSVG = _buildWeightChartSVG(ckData, targetW);
+
+  const objetivoHTML = `<div class="pg-obj-card">
+    <div class="pg-obj-title">Objetivo</div>
+    <div class="pg-obj-weight">${targetW != null ? targetW.toFixed(1) + ' kg' : '—'}</div>
+    <div class="pg-obj-row"><span class="pg-obj-lbl">A perder</span><span class="pg-obj-val">${aPerder != null ? aPerder.toFixed(1) + ' kg' : '—'}</span></div>
+    <div class="pg-obj-row"><span class="pg-obj-lbl">Ritmo</span><span class="pg-obj-val">${ritmoReal != null ? Math.abs(ritmoReal).toFixed(2) + ' kg/sem' : '—'}</span></div>
+    <div class="pg-obj-row"><span class="pg-obj-lbl">Estimacion</span><span class="pg-obj-val">${estimacion != null ? estimacion + ' sem' : '—'}</span></div>
+  </div>`;
+
+  const chartSection = `<div class="pg-chart-section">
+    <div class="pg-chart-header">
+      <span class="pg-chart-title">Seguimiento de peso · Real vs Proyeccion</span>
+      <div class="pg-chart-legend">
+        <span class="pg-leg-item"><span class="pg-leg-dot-green"></span>Real</span>
+        <span class="pg-leg-item"><span class="pg-leg-dot-purple"></span>Objetivo</span>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#F0FDF4;"><svg width="20" height="20" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-        <div><div class="stat-val">${last != null ? last + ' kg' : '—'}</div><div class="stat-lbl">Peso actual</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background:${change != null && change < 0 ? '#F0FDF4' : '#FFFBEB'};"><svg width="20" height="20" fill="none" stroke="${change != null && change < 0 ? '#16A34A' : '#D97706'}" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
-        <div><div class="stat-val" style="color:${change != null && change < 0 ? '#16A34A' : change != null && change > 0 ? '#D97706' : '#111'};">${change != null ? (change > 0 ? '+' : '') + change.toFixed(1) + ' kg' : '—'}</div><div class="stat-lbl">Cambio de peso</div></div>
+    </div>
+    <div class="pg-chart-grid">
+      <div class="pg-chart-left">${chartSVG}</div>
+      <div class="pg-chart-right">${objetivoHTML}</div>
+    </div>
+  </div>`;
+
+  const fuerzaSection = _buildFuerzaSection();
+  const ciSection = _buildLatestCiSection();
+
+  el.innerHTML = statsHTML + chartSection + fuerzaSection + ciSection;
+}
+
+function _buildWeightChartSVG(ckData, targetW) {
+  const sorted = [...ckData].filter(c => c.weight).sort((a, b) =>
+    new Date(a.checkin_date || a.created_at) - new Date(b.checkin_date || b.created_at)
+  );
+  if (!sorted.length) {
+    return '<div style="display:flex;align-items:center;justify-content:center;height:180px;color:#9CA3AF;font-size:13px;">Sin datos de peso registrados.</div>';
+  }
+
+  const CW = 480, CH = 190, PL = 48, PR = 20, PT = 16, PB = 32;
+  const plotW = CW - PL - PR;
+  const plotH = CH - PT - PB;
+
+  const ws = sorted.map(c => parseFloat(c.weight));
+  const allW = targetW != null ? [...ws, targetW] : ws;
+  const minW = Math.floor(Math.min(...allW)) - 1;
+  const maxW = Math.ceil(Math.max(...allW)) + 1;
+  const wRange = maxW - minW || 1;
+
+  const ts = sorted.map(c => new Date(c.checkin_date || c.created_at).getTime());
+  const tMin = ts[0];
+  const tNow = Date.now();
+  // Extend to show projection if target exists
+  const tMax = targetW != null ? Math.max(ts[ts.length - 1], tNow) + 21 * 86400000 : ts[ts.length - 1];
+  const tRange = tMax - tMin || 1;
+
+  const toX = t => PL + ((t - tMin) / tRange) * plotW;
+  const toY = w => PT + (1 - (w - minW) / wRange) * plotH;
+
+  const pts = sorted.map((c, i) => ({ x: toX(ts[i]), y: toY(parseFloat(c.weight)), t: ts[i], w: parseFloat(c.weight), lbl: new Date(ts[i]).toLocaleDateString('es-ES', {day:'2-digit',month:'short'}) }));
+  const lastPt = pts[pts.length - 1];
+
+  const realD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+  const areaD = realD + ' L' + lastPt.x.toFixed(1) + ',' + (PT + plotH).toFixed(1) + ' L' + PL + ',' + (PT + plotH).toFixed(1) + ' Z';
+
+  let projSVG = '';
+  if (targetW != null) {
+    const pX = toX(tMax).toFixed(1);
+    const pY = toY(targetW).toFixed(1);
+    projSVG = `<line x1="${lastPt.x.toFixed(1)}" y1="${lastPt.y.toFixed(1)}" x2="${pX}" y2="${pY}" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round"/>
+    <circle cx="${pX}" cy="${pY}" r="3" fill="#7C3AED" opacity=".55"/>`;
+  }
+
+  let todaySVG = '';
+  if (tNow > tMin && tNow < tMax) {
+    const tx = toX(tNow).toFixed(1);
+    todaySVG = `<line x1="${tx}" y1="${PT}" x2="${tx}" y2="${(PT + plotH).toFixed(1)}" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="${tx}" y="${PT - 4}" font-size="9" fill="#9CA3AF" text-anchor="middle">hoy</text>`;
+  }
+
+  const yTicks = [];
+  const yStep = Math.max(1, Math.ceil(wRange / 4));
+  for (let w = Math.ceil(minW + 1); w <= maxW - 1; w += yStep) {
+    const y = toY(w).toFixed(1);
+    yTicks.push(`<line x1="${PL}" y1="${y}" x2="${(PL + plotW).toFixed(1)}" y2="${y}" stroke="#F3F4F6" stroke-width="1"/>
+    <text x="${PL - 6}" y="${(parseFloat(y) + 4).toFixed(1)}" font-size="10" fill="#9CA3AF" text-anchor="end">${w}</text>`);
+  }
+
+  const xTicks = [];
+  const step = Math.max(1, Math.floor(pts.length / 5));
+  const shown = new Set();
+  for (let i = 0; i < pts.length; i += step) {
+    const p = pts[i];
+    if (!shown.has(p.lbl)) { shown.add(p.lbl); xTicks.push(`<text x="${p.x.toFixed(1)}" y="${(PT + plotH + 16).toFixed(1)}" font-size="9" fill="#9CA3AF" text-anchor="middle">${p.lbl}</text>`); }
+  }
+  // Always show last real date
+  if (!shown.has(lastPt.lbl)) xTicks.push(`<text x="${lastPt.x.toFixed(1)}" y="${(PT + plotH + 16).toFixed(1)}" font-size="9" fill="#9CA3AF" text-anchor="middle">${lastPt.lbl}</text>`);
+
+  const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#22C55E" stroke="#fff" stroke-width="1.5"/>`).join('');
+
+  return `<svg viewBox="0 0 ${CW} ${CH}" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="pgAreaGrad2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#22C55E" stop-opacity=".16"/>
+      <stop offset="100%" stop-color="#22C55E" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${yTicks.join('')}
+    ${xTicks.join('')}
+    ${todaySVG}
+    <path d="${areaD}" fill="url(#pgAreaGrad2)"/>
+    <path d="${realD}" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${projSVG}
+    ${dots}
+  </svg>`;
+}
+
+function _buildFuerzaSection() {
+  const routines = clientRoutines || [];
+  const current = routines[0];
+  const exercises = current ? (current.exercises || (current.routine && current.routine.exercises) || []).slice(0, 4) : [];
+
+  if (!exercises.length) {
+    return `<div class="pg-section"><div class="pg-section-title">Fuerza · resumen 6 semanas</div><div class="pg-placeholder" style="padding:20px 0;">Sin rutina asignada o sin ejercicios registrados.</div></div>`;
+  }
+
+  const cards = exercises.map(ex => {
+    const name = esc(ex.name || (ex.exercise && ex.exercise.name) || ex.exercise_name || '—');
+    const load = ex.weight || ex.load || null;
+    const sets = ex.sets || '—';
+    const reps = ex.reps || '—';
+    // Placeholder ascending sparkline since no historical session data
+    const spark = `<svg viewBox="0 0 80 28" style="width:80px;height:28px;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="2,22 18,18 36,14 56,10 78,6" fill="none" stroke="#4F46E5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+    return `<div class="pg-exercise-card">
+      <div class="pg-ex-name">${name}</div>
+      <div class="pg-ex-chart">${spark}</div>
+      <div class="pg-ex-meta">
+        ${load != null ? `<span class="pg-ex-val">${load} kg</span>` : ''}
+        <span class="pg-ex-rep">${sets}x${reps}</span>
       </div>
     </div>`;
+  }).join('');
 
-  // Weight chart
-  if (weights.length >= 2) {
-    const reversed = [...weights].reverse();
-    const dates = ckData.map(c => {
-      const d = new Date(c.checkin_date || c.created_at);
-      return d.toLocaleDateString('es-ES', {day:'2-digit', month:'short'});
-    }).reverse();
-    const min = Math.min(...reversed), max = Math.max(...reversed);
-    const range = max - min || 1;
-    const W = 100, H = 60;
-    const pts = reversed.map((v, i) => {
-      const x = (i / (reversed.length - 1)) * W;
-      const y = H - ((v - min) / range) * (H - 10) - 5;
-      return `${x},${y}`;
-    }).join(' ');
-    const lastPt = pts.split(' ').pop();
-    html += `
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-head"><span class="card-title">Evolución del peso</span></div>
-        <div style="padding:0 0 8px;">
-          <svg viewBox="0 0 100 60" preserveAspectRatio="none" style="width:100%;height:120px;display:block;">
-            <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4F46E5" stop-opacity=".15"/><stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/></linearGradient></defs>
-            <polygon points="${pts} ${lastPt.split(',')[0]},${H} 0,${H}" fill="url(#pg)"/>
-            <polyline points="${pts}" fill="none" stroke="#4F46E5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <div style="display:flex;justify-content:space-between;padding:0 0 4px;font-size:10px;color:#9CA3AF;">
-            <span>${dates[0]||''}</span>
-            <span>${reversed[Math.floor(reversed.length/2)]?.toFixed(1)||''} kg</span>
-            <span>${dates[dates.length-1]||''}</span>
-          </div>
-        </div>
-      </div>`;
-  }
+  return `<div class="pg-section"><div class="pg-section-title">Fuerza · resumen 6 semanas</div><div class="pg-exercises-row">${cards}</div></div>`;
+}
 
-  // Measurements table
-  const measFields = [
-    ['Cintura', latest.waist, 'cm'],
-    ['Cadera', latest.hips, 'cm'],
-    ['Pecho', latest.chest, 'cm'],
-    ['Brazo', latest.arm, 'cm'],
-    ['Muslo', latest.thigh, 'cm'],
-    ['Cuello', latest.neck, 'cm'],
-    ['% Grasa corporal', latest.body_fat, '%'],
-  ].filter(([, v]) => v != null);
+function _buildLatestCiSection() {
+  const ckData = checkins || [];
+  if (!ckData.length) return '';
+  const latest = ckData[0];
+  const dateStr = latest.checkin_date || latest.created_at;
+  const dateLabel = dateStr ? new Date(dateStr).toLocaleDateString('es-ES', {day:'numeric', month:'short', year:'2-digit'}) : '—';
 
-  if (measFields.length) {
-    html += `
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-head"><span class="card-title">Medidas corporales (último check-in)</span></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:0 0 4px;">
-          ${measFields.map(([label, val, unit]) => `
-            <div style="background:#F9FAFB;border-radius:8px;padding:12px;text-align:center;">
-              <div style="font-size:18px;font-weight:800;color:#4F46E5;">${val}${unit}</div>
-              <div style="font-size:11px;color:#9CA3AF;margin-top:3px;">${label}</div>
-            </div>`).join('')}
-        </div>
-      </div>`;
-  }
+  const energy = latest.energy != null ? latest.energy : (latest.energy_score != null ? latest.energy_score : null);
+  const effort = latest.effort != null ? latest.effort : (latest.effort_score != null ? latest.effort_score : null);
+  const hunger = latest.hunger != null ? latest.hunger : (latest.hunger_score != null ? latest.hunger_score : null);
+  const sleep  = latest.sleep  != null ? latest.sleep  : (latest.sleep_score  != null ? latest.sleep_score  : null);
 
-  // Check-ins history list
-  if (ckData.length) {
-    html += `
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">Historial de check-ins</span>
-          <a href="checkins.html?client=${clientId}" style="font-size:12px;color:var(--purple);text-decoration:none;">Ver todos →</a>
-        </div>
-        <div style="overflow-x:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead><tr style="color:#9CA3AF;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #EBEBEB;">
-              <th style="text-align:left;padding:8px;">Fecha</th>
-              <th style="text-align:center;padding:8px;">Peso</th>
-              <th style="text-align:center;padding:8px;">Cambio</th>
-              <th style="text-align:center;padding:8px;">Grasa</th>
-              <th style="text-align:left;padding:8px;">Notas</th>
-            </tr></thead>
-            <tbody>${ckData.slice(0,10).map(ck => {
-              const d = new Date(ck.checkin_date||ck.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
-              const delta = ck.weight_progress;
-              return `<tr style="border-bottom:1px solid #EBEBEB;">
-                <td style="padding:9px 8px;">${d}</td>
-                <td style="padding:9px 8px;text-align:center;font-weight:700;">${ck.weight ? ck.weight + ' kg' : '—'}</td>
-                <td style="padding:9px 8px;text-align:center;">
-                  ${delta != null ? `<span style="font-weight:600;color:${delta < 0 ? '#16A34A' : delta > 0 ? '#D97706' : '#6B7280'};">${delta > 0 ? '+' : ''}${Number(delta).toFixed(1)} kg</span>` : '—'}
-                </td>
-                <td style="padding:9px 8px;text-align:center;">${ck.body_fat != null ? ck.body_fat + '%' : '—'}</td>
-                <td style="padding:9px 8px;color:#6B7280;font-size:12px;">${esc(ck.notes||'')}</td>
-              </tr>`;
-            }).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>`;
-  } else {
-    html += `<div class="card"><div style="text-align:center;padding:40px;color:#9CA3AF;">
-      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block;opacity:.3;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <p>Sin check-ins registrados todavía.</p>
-    </div></div>`;
-  }
+  const anyScore = energy != null || effort != null || hunger != null || sleep != null;
+  if (!anyScore && !latest.notes) return '';
 
-  el.innerHTML = html;
+  const scoreCard = (label, val) => `<div class="pg-score-card">
+    <div class="pg-score-val">${val != null ? val + '/10' : '—'}</div>
+    <div class="pg-score-lbl">${label}</div>
+  </div>`;
+
+  const quote = latest.notes ? `<div class="pg-ci-quote">"${esc(latest.notes)}"</div>` : '';
+
+  return `<div class="pg-section" style="margin-bottom:16px;">
+    <div class="pg-section-title">Check-in · ${dateLabel}</div>
+    <div class="pg-scores-row">
+      ${scoreCard('Energia', energy)}
+      ${scoreCard('Esfuerzo', effort)}
+      ${scoreCard('Hambre', hunger)}
+      ${scoreCard('Sueno', sleep)}
+    </div>
+    ${quote}
+  </div>`;
+}
+
+function _renderPgCheckins() {
+  const el = document.getElementById('pg-pane-checkins');
+  if (!el) return;
+  const ckData = checkins || [];
+  if (!ckData.length) { el.innerHTML = '<div class="pg-placeholder">Sin check-ins registrados.</div>'; return; }
+  el.innerHTML = `<div style="overflow-x:auto;padding:16px 24px;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="color:#9CA3AF;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB;">
+        <th style="text-align:left;padding:8px;">Fecha</th>
+        <th style="text-align:center;padding:8px;">Peso</th>
+        <th style="text-align:center;padding:8px;">Cambio</th>
+        <th style="text-align:center;padding:8px;">Grasa</th>
+        <th style="text-align:left;padding:8px;">Notas</th>
+      </tr></thead>
+      <tbody>${ckData.map(ck => {
+        const d = new Date(ck.checkin_date||ck.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+        const delta = ck.weight_progress;
+        return `<tr style="border-bottom:1px solid #F3F4F6;">
+          <td style="padding:9px 8px;">${d}</td>
+          <td style="padding:9px 8px;text-align:center;font-weight:700;">${ck.weight ? ck.weight + ' kg' : '—'}</td>
+          <td style="padding:9px 8px;text-align:center;">${delta != null ? `<span style="font-weight:600;color:${delta < 0 ? '#16A34A' : delta > 0 ? '#D97706' : '#6B7280'};">${delta > 0 ? '+' : ''}${Number(delta).toFixed(1)} kg</span>` : '—'}</td>
+          <td style="padding:9px 8px;text-align:center;">${ck.body_fat != null ? ck.body_fat + '%' : '—'}</td>
+          <td style="padding:9px 8px;color:#6B7280;font-size:12px;">${esc(ck.notes||'')}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+  </div>`;
 }
 
 /* ── Assign form ── */

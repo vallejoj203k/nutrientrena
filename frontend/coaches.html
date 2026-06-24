@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ALZUM.io — Coaches</title>
+  <title>ALZUM.io — Equipo</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{
@@ -12,7 +12,7 @@
     }
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
-    /* Sidebar */
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
@@ -24,7 +24,6 @@
     .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
     .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
-    .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
     .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
@@ -34,171 +33,85 @@
     .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
     .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
 
-    /* Main */
+    /* ── Main ──────────────────────────────────────────────────────────────── */
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-
-    /* LIST VIEW */
-    #listView{flex:1;display:flex;flex-direction:column;overflow:hidden;}
     .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .topbar h1{font-size:18px;font-weight:700;color:#111;}
-    .topbar-right{display:flex;gap:10px;}
+    .topbar-left h1{font-size:20px;font-weight:700;color:#111;}
+    .topbar-left p{font-size:13px;color:#6B7280;margin-top:1px;}
+    .topbar-right{display:flex;align-items:center;gap:10px;}
+    .cost-chip{background:#F3F4F6;border:1px solid #E5E7EB;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;color:#374151;}
+    .cost-chip span{color:#EF4444;}
     .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:flex;align-items:center;gap:6px;}
     .btn-primary{background:var(--purple);color:#fff;}
     .btn-primary:hover{background:var(--purple-dark);}
-    .btn-ghost{background:#F3F4F6;color:#374151;}
-    .btn-ghost:hover{background:#E5E7EB;}
-    .btn-sm{padding:6px 12px;font-size:12px;}
-    .btn-danger{background:#FEE2E2;color:#DC2626;}
-    .btn-danger:hover{background:#DC2626;color:#fff;}
+    .btn-outline{background:#fff;color:var(--purple);border:1.5px solid var(--purple);}
+    .btn-outline:hover{background:var(--purple-pale);}
+    .btn-sm{padding:6px 14px;font-size:12px;border-radius:7px;}
 
-    .toolbar{padding:14px 24px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0;}
-    .search-wrap{position:relative;flex:1;min-width:200px;max-width:320px;}
-    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;}
-    .search-wrap input:focus{border-color:var(--purple);}
-    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
-    .filter-select{padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;color:#374151;background:#fff;cursor:pointer;}
-    .filter-select:focus{border-color:var(--purple);}
-    .toolbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-    .total-label{font-size:13px;color:#6B7280;}
-    .btn-csv{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #E5E7EB;background:#fff;color:#374151;display:flex;align-items:center;gap:6px;transition:.15s;}
-    .btn-csv:hover{border-color:var(--purple);color:var(--purple);}
+    /* ── Cards grid ─────────────────────────────────────────────────────────── */
+    .content{flex:1;overflow-y:auto;padding:28px;}
+    .content::-webkit-scrollbar{width:6px;}
+    .content::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
 
-    .table-wrap{flex:1;overflow-y:auto;padding:20px 24px;}
-    .table-wrap::-webkit-scrollbar{width:6px;}
-    .table-wrap::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-    thead th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
-    thead th:first-child{padding-left:20px;}
-    tbody tr{border-bottom:1px solid #EBEBEB;transition:background .1s;}
-    tbody tr:last-child{border-bottom:none;}
-    tbody tr:hover{background:#FAFAFA;}
-    tbody td{padding:14px 16px;font-size:13px;color:#374151;vertical-align:middle;}
-    tbody td:first-child{padding-left:20px;}
+    .member-card{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:24px;display:flex;flex-direction:column;gap:14px;position:relative;}
+    .member-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);}
 
-    .cell-coach{display:flex;align-items:center;gap:12px;}
-    .c-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;}
-    .c-name{font-weight:600;color:#111;font-size:14px;}
-    .c-email{font-size:11px;color:#6B7280;margin-top:1px;}
-    .status-pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
-    .cell-actions{display:flex;gap:6px;opacity:0;transition:.15s;}
-    tbody tr:hover .cell-actions{opacity:1;}
-    .icon-btn{background:none;border:1px solid #E5E7EB;border-radius:6px;padding:5px 8px;cursor:pointer;color:#6B7280;font-size:12px;transition:.15s;display:flex;align-items:center;gap:4px;}
-    .icon-btn:hover{background:var(--purple-pale);color:var(--purple);border-color:var(--purple);}
-    .icon-btn.del:hover{background:#FEE2E2;color:#DC2626;border-color:#DC2626;}
+    .card-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:#fff;margin:0 auto 4px;}
+    .card-head{text-align:center;}
+    .card-name{font-size:16px;font-weight:700;color:#111;}
+    .card-role-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin:4px 0;}
+    .card-email{font-size:12px;color:#6B7280;}
+    .card-stats{font-size:12px;color:#6B7280;margin-top:2px;}
 
-    .skeleton{background:linear-gradient(90deg,#E5E7EB 25%,#F3F4F6 50%,#E5E7EB 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    .empty-state{text-align:center;padding:60px 20px;color:#9CA3AF;}
-    .empty-state svg{margin-bottom:12px;opacity:.3;}
-    .empty-state p{font-size:14px;}
+    .salary-box{background:#F9FAFB;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;}
+    .salary-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+    .salary-label{color:#6B7280;}
+    .salary-val{font-weight:600;color:#111;}
+    .salary-val.total{color:#EF4444;}
+    .salary-val.commission{color:#F59E0B;}
 
-    /* FORM VIEW */
-    #formView{flex:1;display:none;flex-direction:column;overflow:hidden;}
-    #formView.active{display:flex;}
+    .card-notes{background:#EFF6FF;border-left:3px solid #93C5FD;border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;color:#374151;font-style:italic;line-height:1.5;}
 
-    .fv-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:60px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
-    .fv-back{display:flex;align-items:center;gap:6px;color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;padding:6px 10px;border-radius:8px;border:none;background:none;transition:.15s;}
-    .fv-back:hover{background:var(--purple-pale);}
-    .fv-title{font-size:17px;font-weight:700;color:#111;}
+    .card-actions{display:flex;gap:8px;margin-top:2px;}
+    .card-actions .btn{flex:1;justify-content:center;}
 
-    .fv-body{flex:1;display:flex;overflow:hidden;}
-    .fv-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;}
-    .fv-main::-webkit-scrollbar{width:6px;}
-    .fv-main::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
-    .fv-sidebar{width:272px;min-width:272px;overflow-y:auto;padding:24px 24px 24px 0;display:flex;flex-direction:column;gap:14px;}
+    .card-menu{position:absolute;top:14px;right:14px;display:flex;gap:4px;}
+    .icon-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#9CA3AF;display:flex;}
+    .icon-btn:hover{background:#F3F4F6;color:#374151;}
 
-    .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
-    .sec-card-head{padding:14px 18px 12px;border-bottom:1px solid #EBEBEB;font-size:13px;font-weight:700;color:#374151;letter-spacing:.3px;}
-    .sec-card-body{padding:18px;}
+    /* Add card */
+    .add-card{background:#fff;border:2px dashed #D1D5DB;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;min-height:280px;transition:.2s;color:#9CA3AF;}
+    .add-card:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-pale);}
+    .add-card svg{opacity:.6;}
+    .add-card span{font-size:13px;font-weight:600;}
 
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-    .form-row.full{grid-template-columns:1fr;}
-    .form-row:last-child{margin-bottom:0;}
-    .form-group label{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
-    .form-group input,.form-group select{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;background:#fff;}
-    .form-group input:focus,.form-group select:focus{border-color:var(--purple);}
-    .form-error{font-size:11px;color:#DC2626;margin-top:4px;}
+    /* ── Modal ──────────────────────────────────────────────────────────────── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+    .modal-box{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;}
+    .modal-box::-webkit-scrollbar{width:4px;}
+    .modal-box::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px;}
+    .modal-head{padding:20px 24px 16px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .modal-head h2{font-size:16px;font-weight:700;color:#111;}
+    .modal-close{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#9CA3AF;display:flex;}
+    .modal-close:hover{background:#F3F4F6;color:#374151;}
+    .modal-body{padding:20px 24px;flex:1;display:flex;flex-direction:column;gap:14px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;}
 
-    .sb-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:16px;}
-    .sb-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+    .form-group{display:flex;flex-direction:column;gap:5px;}
+    .form-group label{font-size:12px;font-weight:600;color:#374151;}
+    .form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;font-family:inherit;transition:.15s;width:100%;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
+    .form-group textarea{resize:vertical;min-height:70px;}
+    .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .form-hint{font-size:11px;color:#9CA3AF;margin-top:2px;}
 
-    .preview-avatar{width:56px;height:56px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;margin:0 auto 0;cursor:pointer;position:relative;overflow:hidden;flex-shrink:0;}
-    .preview-avatar:hover .av-overlay{opacity:1;}
-    .av-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;border-radius:50%;}
-    .av-overlay svg{color:#fff;}
-    .drop-zone{border:2px dashed #D1D5DB;border-radius:12px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:.2s;margin-bottom:12px;background:#FAFAFA;}
-    .drop-zone:hover,.drop-zone.drag-over{border-color:#4F46E5;background:#EEF2FF;}
-    .drop-zone-text{text-align:center;}
-    .drop-zone-text strong{display:block;font-size:12px;font-weight:600;color:#374151;}
-    .drop-zone-text span{font-size:11px;color:#9CA3AF;}
-    .preview-name{font-size:15px;font-weight:700;color:#111;text-align:center;min-height:22px;}
-    .preview-email{font-size:12px;color:#9CA3AF;text-align:center;margin-top:3px;min-height:16px;word-break:break-all;}
-    .preview-rows{margin-top:14px;display:flex;flex-direction:column;gap:6px;}
-    .preview-row{display:flex;justify-content:space-between;font-size:12px;}
-    .preview-row .lbl{color:#9CA3AF;}
-    .preview-row .val{color:#374151;font-weight:600;text-align:right;max-width:60%;}
-
-    .save-btn{width:100%;padding:13px;background:#22C55E;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.5px;transition:.15s;}
-    .save-btn:hover{background:#16A34A;}
-    .save-btn:disabled{opacity:.6;cursor:default;}
-    .err-general{color:#DC2626;font-size:12px;margin-top:8px;text-align:center;min-height:16px;}
-
-    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:200;}
-    .toast.show{transform:translateY(0);opacity:1;}
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;animation:fadeIn .2s;display:none;}
+    .toast.show{display:block;}
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
-
-    @media(max-width:768px){
-      body{flex-direction:column;}
-      .sidebar{width:100%;min-width:unset;height:auto;}
-      .sidebar-nav,.sidebar-user{display:none;}
-      .fv-sidebar{display:none;}
-    }
-
-    .nav-dropdown{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:background .2s,color .2s,border-color .2s;border-left:3px solid transparent;user-select:none;}
-    .nav-dropdown:hover{background:#F8FAFC;color:var(--indigo);}
-    .nav-dropdown.open{background:linear-gradient(90deg,#EEF2FF 0%,#F5F3FF 100%);color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
-    .nav-dropdown svg:first-child{opacity:.65;flex-shrink:0;transition:opacity .2s;}
-    .nav-dropdown:hover svg:first-child,.nav-dropdown.open svg:first-child{opacity:1;}
-    .nav-chevron{margin-left:auto !important;flex-shrink:0;transition:transform .35s cubic-bezier(.4,0,.2,1);opacity:.5;}
-    .nav-dropdown.open .nav-chevron{transform:rotate(180deg);opacity:1;}
-    .nav-sub{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease;opacity:0;margin:0 10px;border-radius:8px;}
-    .nav-sub.open{max-height:200px;opacity:1;}
-    .nav-sub-item{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 14px;color:#6B7280;font-size:12.5px;text-decoration:none;transition:color .15s,background .15s,padding-left .2s;border-radius:6px;margin:2px 0;}
-    .nav-sub-item svg{opacity:.6;flex-shrink:0;transition:opacity .15s;}
-    .nav-sub-item:hover{color:var(--indigo);background:#EEF2FF;padding-left:18px;}
-    .nav-sub-item:hover svg{opacity:1;}
-    .nav-sub-item.active{color:var(--indigo);font-weight:600;background:#EEF2FF;}
-
-    .nav-sub-item{cursor:pointer;}
-    .sub-arrow{margin-left:auto;opacity:.4;flex-shrink:0;}
-    .nav-sub-item:hover .sub-arrow{opacity:1;}
-    .flyout-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#374151;text-decoration:none;font-size:13.5px;transition:background .15s,color .15s;cursor:pointer;}
-    .flyout-item:hover{background:#F5F3FF;color:#4F46E5;}
-    .flyout-item svg{opacity:.6;flex-shrink:0;}
-    .flyout-item:hover svg{opacity:1;}
-  </style>
-  <style>
-    /* ALZUM.io — theme overrides */
-    body { background: #F8FAFC !important; }
-    .sidebar {
-      background: #fff !important;
-      border-right: 1px solid #E5E7EB !important;
-    }
-    .sidebar-logo span { color: #111827 !important; }
-    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
-    .sidebar-logo small { color: #6B7280 !important; }
-    .nav-section { color: #9CA3AF !important; }
-    .nav-item { color: #374151 !important; }
-    .nav-item svg { color: inherit !important; opacity: 1 !important; }
-    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
-    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
-    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
-    .avatar, .user-avatar { background: #4F46E5 !important; }
-    .user-name { color: #111827 !important; }
-    .user-role { color: #6B7280 !important; }
-    .btn-logout { color: #6B7280 !important; }
-    .btn-logout:hover { color: #4F46E5 !important; }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
@@ -209,7 +122,7 @@
     <span>ALZUM<em>.io</em></span>
     <small>Panel del Coach</small>
   </div>
-    <nav class="sidebar-nav">
+  <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -223,26 +136,15 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
     </a>
-    <a class="nav-item" href="checkins.html">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      Check-ins
-    </a>
     <div class="nav-section">Contenido</div>
     <a class="nav-item" href="programas.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       Programas
     </a>
-    <div class="nav-item nav-dropdown" onclick="toggleLibrary(this)" id="navLibrary">
+    <a class="nav-item" href="library.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       Librería
-      <svg class="nav-chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-    </div>
-    <div class="nav-sub" id="librarySub">
-      <div class="nav-sub-item" onclick="openFlyout(event,'entrenamiento')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></svg>Entrenamiento<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="nav-sub-item" onclick="openFlyout(event,'nutricion')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Nutrición<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="nav-sub-item" onclick="openFlyout(event,'formulario')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Formulario<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="nav-sub-item" onclick="openFlyout(event,'documento')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documento<svg class="sub-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-    </div>
+    </a>
     <div class="nav-section">Comunicación</div>
     <a class="nav-item" href="forms.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -261,7 +163,7 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analíticas
     </a>
-    <a class="nav-item" href="equipo.html">
+    <a class="nav-item active" href="coaches.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       Equipo
     </a>
@@ -270,6 +172,13 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Ajustes
     </a>
+    <div id="adminSection" style="display:none">
+      <div class="nav-section">Admin Global</div>
+      <a class="nav-item" href="analytics.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Superadmin
+      </a>
+    </div>
   </nav>
   <div class="sidebar-user">
     <div class="user-row">
@@ -287,626 +196,291 @@
 
 <!-- Main -->
 <div class="main">
-
-  <!-- LIST VIEW -->
-  <div id="listView">
-    <div class="topbar">
-      <h1>Coaches</h1>
-      <div class="topbar-right">
-        <button class="btn btn-primary" onclick="openForm()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nuevo coach
-        </button>
-      </div>
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Equipo</h1>
+      <p>Coaches, nutricionistas y colaboradores</p>
     </div>
-
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="Buscar por nombre o email…" oninput="onSearch()"/>
-      </div>
-      <div class="toolbar-right">
-        <span class="total-label" id="totalLabel">— coaches</span>
-        <button class="btn-csv" onclick="exportCSV()" title="Exportar a CSV">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Exportar CSV
-        </button>
-      </div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Coach</th>
-            <th>Teléfono</th>
-            <th>Clientes</th>
-            <th>Registro</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- FORM VIEW -->
-  <div id="formView">
-    <div class="fv-bar">
-      <button class="fv-back" onclick="closeForm()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        Coaches
+    <div class="topbar-right">
+      <div class="cost-chip">Coste equipo/mes: <span id="totalCost">0€</span></div>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Añadir miembro
       </button>
-      <span class="fv-title" id="formTitle">Nuevo coach</span>
-    </div>
-
-    <div class="fv-body">
-      <div class="fv-main">
-
-        <!-- Información personal -->
-        <div class="sec-card">
-          <div class="sec-card-head">Información personal</div>
-          <div class="sec-card-body">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nombre *</label>
-                <input type="text" id="fFirstName" placeholder="Juan" oninput="updatePreview()"/>
-                <div class="form-error" id="errFirstName"></div>
-              </div>
-              <div class="form-group">
-                <label>Apellido *</label>
-                <input type="text" id="fLastName" placeholder="García" oninput="updatePreview()"/>
-                <div class="form-error" id="errLastName"></div>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Email *</label>
-                <input type="email" id="fEmail" placeholder="coach@email.com" oninput="updatePreview()"/>
-                <div class="form-error" id="errEmail"></div>
-              </div>
-              <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="fPassword" placeholder="Mín. 8 caracteres"/>
-                <div class="form-error" id="errPassword"></div>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Teléfono</label>
-                <input type="tel" id="fPhone" placeholder="+34 600 000 000" oninput="updatePreview()"/>
-              </div>
-              <div class="form-group">
-                <label>País</label>
-                <select id="fCountry" onchange="updatePreview()">
-                  <option value="">Sin especificar</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row full">
-              <div class="form-group">
-                <label>Especialidad / Ocupación</label>
-                <input type="text" id="fOccupation" placeholder="Ej. Entrenador personal, Nutricionista…" oninput="updatePreview()"/>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /fv-main -->
-
-      <div class="fv-sidebar">
-        <!-- Preview -->
-        <div class="sb-card">
-          <div class="sb-title">Vista previa</div>
-          <div class="drop-zone" id="dropZone" onclick="document.getElementById('photoInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
-            <div class="preview-avatar" id="previewAvatar">
-              ?
-              <div class="av-overlay"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-            </div>
-            <div class="drop-zone-text">
-              <strong>Foto de perfil</strong>
-              <span>Haz clic o arrastra una imagen</span>
-            </div>
-          </div>
-          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)"/>
-          <div class="preview-name" id="previewName">Nombre del coach</div>
-          <div class="preview-email" id="previewEmail">email@ejemplo.com</div>
-          <div class="preview-rows">
-            <div class="preview-row">
-              <span class="lbl">Teléfono</span>
-              <span class="val" id="previewPhone">—</span>
-            </div>
-            <div class="preview-row">
-              <span class="lbl">País</span>
-              <span class="val" id="previewCountry">—</span>
-            </div>
-            <div class="preview-row">
-              <span class="lbl">Especialidad</span>
-              <span class="val" id="previewOccupation">—</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Save -->
-        <div class="sb-card">
-          <button class="save-btn" id="saveBtn" onclick="saveCoach()">Crear coach</button>
-          <div class="err-general" id="errGeneral"></div>
-        </div>
-      </div>
     </div>
   </div>
 
-</div><!-- /main -->
+  <div class="content">
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+</div>
+
+<!-- Modal: Añadir / Editar miembro -->
+<div class="modal-overlay" id="modalOverlay" style="display:none" onclick="closeModalIfBg(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="modalTitle">Añadir miembro</h2>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" id="userSelectGroup">
+        <label>Miembro del equipo *</label>
+        <select id="mUser"><option value="">Cargando colaboradores…</option></select>
+        <span class="form-hint">Selecciona un usuario del sistema</span>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Etiqueta de rol</label>
+          <input type="text" id="mRoleLabel" placeholder="Ej: Entrenador, Nutricionista…"/>
+        </div>
+        <div class="form-group">
+          <label>Horas / semana</label>
+          <input type="number" id="mHours" placeholder="20" min="1" max="168"/>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Salario fijo (€/mes)</label>
+          <input type="number" id="mSalary" placeholder="800" min="0"/>
+        </div>
+        <div class="form-group">
+          <label>Comisión estimada (€/mes)</label>
+          <input type="number" id="mCommission" placeholder="0 si no aplica" min="0"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas internas</label>
+        <textarea id="mNotes" placeholder="Ej: Tiempo parcial. Bonus trimestral si supera 15 clientes."></textarea>
+      </div>
+      <div id="modalError" style="color:#DC2626;font-size:12px;display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="modalSaveBtn" onclick="saveMember()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
-let token = localStorage.getItem('token');
-if (!token) location.href = 'login.html';
+const token = localStorage.getItem('token');
+if(!token){ location.href='login.html'; }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
-function toast(msg, type = '') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast' + (type ? ' ' + type : '');
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3200);
+let _editingId = null;
+let _staffList = [];
+let _teamData  = [];
+
+const AVATAR_COLORS = ['#0EA5E9','#10B981','#8B5CF6','#F59E0B','#EF4444','#06B6D4','#6366F1','#EC4899'];
+
+function initials(name){
+  if(!name) return '?';
+  const p=name.trim().split(' ');
+  return (p[0][0]||'').toUpperCase()+(p[1]?p[1][0].toUpperCase():'');
+}
+function avatarColor(name){
+  let h=0; for(let i=0;i<(name||'').length;i++) h=(h*31+name.charCodeAt(i))&0xffffffff;
+  return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length];
+}
+function fmt(n){ return n!=null?`${Number(n).toLocaleString('es-ES')}€/mes`:'—'; }
+function fmtPlus(n){ return n!=null&&n>0?`+${Number(n).toLocaleString('es-ES')}€`:null; }
+
+function toast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`toast show ${type}`;
+  setTimeout(()=>el.className='toast',2800);
 }
 
-// ── Escape HTML ───────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+async function loadUser(){
+  try{
+    const r=await fetch(`${API}/auth/me`,{headers:{Authorization:`Bearer ${token}`}});
+    if(r.status===401){logout();return;}
+    const j=await r.json(); const u=j.data||j;
+    const name=u.name||'Usuario';
+    document.getElementById('sidebarName').textContent=name;
+    document.getElementById('sidebarRole').textContent=u.roles?.[0]?.name||'—';
+    const av=document.getElementById('sidebarAvatar');
+    if(u.photo){av.innerHTML=`<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;av.style.background='transparent';}
+    else{av.textContent=initials(name);}
+    const roleIds=(u.roles||[]).map(r=>r.id);
+    if(roleIds.includes(1)||roleIds.includes(2)) document.getElementById('adminSection').style.display='block';
+  }catch{}
+}
+function logout(){
+  fetch(`${API}/auth/logout`,{method:'POST',headers:{Authorization:`Bearer ${token}`}}).catch(()=>{});
+  localStorage.clear(); location.href='login.html';
 }
 
-// ── Avatar color ──────────────────────────────────────────────────────────────
-const COLORS = ['#4F46E5','#6366F1','#2563EB','#059669','#D97706','#DC2626','#0891B2'];
-function avatarColor(name) {
-  let h = 0; for (const c of String(name)) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff;
-  return COLORS[Math.abs(h) % COLORS.length];
-}
-function initials(name, last) {
-  return ((name?.[0] || '') + (last?.[0] || '')).toUpperCase() || '?';
-}
-
-// ── Sidebar user ──────────────────────────────────────────────────────────────
-async function loadMe() {
-  try {
-    const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
-    if (!r.ok) { logout(); return; }
-    const j = await r.json();
-    const d = j.data || j;
-    const name = [d.name, d.last_name].filter(Boolean).join(' ') || d.email || '?';
-    document.getElementById('sidebarName').textContent = name;
-    document.getElementById('sidebarRole').textContent = (d.roles?.[0]?.name) || 'Staff';
-    const av = document.getElementById('sidebarAvatar');
-    if (d.photo) { av.innerHTML = `<img src="${d.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; av.style.background = 'transparent'; }
-    else { av.textContent = initials(d.name, d.last_name); av.style.background = avatarColor(name); }
-  } catch {}
+async function loadStaff(){
+  try{
+    const res=await Promise.all(['coach','admin','setter','closer'].map(s=>
+      fetch(`${API}/users/${s}/findAll`,{headers:{Authorization:`Bearer ${token}`}})
+        .then(r=>r.ok?r.json():null).then(j=>j?(j.data||j):[]).catch(()=>[])
+    ));
+    const seen=new Set(); _staffList=[];
+    res.flat().forEach(u=>{ if(!seen.has(u.id)){seen.add(u.id);_staffList.push(u);} });
+  }catch{}
 }
 
-function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role_id');
-  location.href = 'login.html';
-}
+function renderCards(members){
+  _teamData=members;
+  const grid=document.getElementById('cardsGrid');
+  grid.innerHTML='';
+  let total=0;
 
-// ── Forms badge ───────────────────────────────────────────────────────────────
-async function loadFormsBadge() {
-  try {
-    const r = await fetch(`${API}/form-assignments?status=pending&per_page=1`, { headers: { Authorization: `Bearer ${token}` } });
-    const j = await r.json();
-    const n = j.data?.total ?? 0;
-    const badge = document.getElementById('formsBadge');
-    if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.style.display = ''; }
-  } catch {}
-}
+  members.forEach(m=>{
+    const name=`${m.name||''} ${m.last_name||''}`.trim();
+    const sum=(m.salary_fijo||0)+(m.commission||0);
+    total+=sum;
+    const color=avatarColor(name);
+    const avatarHtml=m.photo
+      ?`<img src="${m.photo}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block;">`
+      :`<div class="card-avatar" style="background:${color}">${initials(name)}</div>`;
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let allCoaches = [];
-let filtered   = [];
-let countries  = [];
-let editingCoachId = null;
+    const lbl=(m.role_label||'').toLowerCase();
+    let bg='#E0F2FE',fg='#0369A1';
+    if(lbl.includes('nutri')){bg='#DCFCE7';fg='#166534';}
+    else if(lbl.includes('coach')||lbl.includes('entrena')){bg='#CFFAFE';fg='#155E75';}
+    else if(lbl.includes('admin')){bg='#EDE9FE';fg='#5B21B6';}
 
-// ── Load coaches ──────────────────────────────────────────────────────────────
-async function load() {
-  renderSkeleton();
-  try {
-    const r = await fetch(`${API}/users/coach/findAll`, { headers: { Authorization: `Bearer ${token}` } });
-    const j = await r.json();
-    allCoaches = Array.isArray(j.data) ? j.data : (Array.isArray(j) ? j : []);
-    filtered   = [...allCoaches];
-    render();
-    onSearch();
-  } catch {
-    document.getElementById('tableBody').innerHTML =
-      `<tr><td colspan="5" class="empty-state"><p>Error al cargar coaches</p></td></tr>`;
-  }
-}
-
-// ── Load countries ────────────────────────────────────────────────────────────
-async function loadCountries() {
-  try {
-    const r = await fetch(`${API}/countries`, { headers: { Authorization: `Bearer ${token}` } });
-    const j = await r.json();
-    countries = Array.isArray(j.data) ? j.data : (Array.isArray(j) ? j : []);
-    const sel = document.getElementById('fCountry');
-    countries.forEach(c => {
-      const o = document.createElement('option');
-      o.value = c.code || c.id;
-      o.textContent = c.name;
-      sel.appendChild(o);
-    });
-  } catch {}
-}
-
-// ── Search ────────────────────────────────────────────────────────────────────
-let _searchTimer;
-function onSearch() {
-  clearTimeout(_searchTimer);
-  _searchTimer = setTimeout(applyFilters, 200);
-}
-
-function applyFilters() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  filtered = allCoaches.filter(c => {
-    const name = [c.name, c.last_name].join(' ').toLowerCase();
-    const email = (c.email || '').toLowerCase();
-    return !q || name.includes(q) || email.includes(q);
-  });
-  render();
-}
-
-// ── Render table ──────────────────────────────────────────────────────────────
-function render() {
-  const tbody = document.getElementById('tableBody');
-  document.getElementById('totalLabel').textContent = `${filtered.length} coach${filtered.length !== 1 ? 'es' : ''}`;
-
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="5">
-      <div class="empty-state">
-        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <p>No se encontraron coaches</p>
+    const safeName=name.replace(/'/g,"\\'");
+    const card=document.createElement('div');
+    card.className='member-card';
+    card.innerHTML=`
+      <div class="card-menu">
+        <button class="icon-btn" onclick="editMember(${m.id})" title="Editar">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn" onclick="deleteMember(${m.id},'${safeName}')" title="Eliminar">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
       </div>
-    </td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(c => {
-    const name  = [c.name, c.last_name].filter(Boolean).join(' ') || '—';
-    const color = avatarColor(name);
-    const init  = initials(c.name, c.last_name);
-    const date  = c.created_at ? new Date(c.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }) : '—';
-    const clientCount = c.client_count ?? '—';
-    return `<tr>
-      <td>
-        <div class="cell-coach">
-          <div class="c-avatar" style="background:${color};overflow:hidden;">${c.photo ? `<img src="${esc(c.photo)}" style="width:100%;height:100%;object-fit:cover;">` : init}</div>
-          <div>
-            <div class="c-name">${esc(name)}</div>
-            <div class="c-email">${esc(c.email || '')}</div>
-          </div>
-        </div>
-      </td>
-      <td style="color:#6B7280;">${esc(c.phone || '—')}</td>
-      <td style="color:#6B7280;">${clientCount}</td>
-      <td style="color:#6B7280;">${date}</td>
-      <td>
-        <div class="cell-actions">
-          <button class="icon-btn" onclick="openForm('${c.id}')">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Editar
-          </button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function renderSkeleton() {
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = Array(6).fill(0).map(() => `<tr>
-    <td><div class="cell-coach">
-      <div class="skeleton" style="width:36px;height:36px;border-radius:50%"></div>
-      <div><div class="skeleton" style="width:120px;height:13px;margin-bottom:5px"></div><div class="skeleton" style="width:90px;height:11px"></div></div>
-    </div></td>
-    <td><div class="skeleton" style="width:100px;height:13px"></div></td>
-    <td><div class="skeleton" style="width:30px;height:13px"></div></td>
-    <td><div class="skeleton" style="width:80px;height:13px"></div></td>
-    <td></td>
-  </tr>`).join('');
-}
-
-// ── Form view toggle ──────────────────────────────────────────────────────────
-async function openForm(id = null) {
-  editingCoachId = id || null;
-  const isEdit = !!editingCoachId;
-
-  // Reset fields
-  ['fFirstName','fLastName','fEmail','fPassword','fPhone','fOccupation','fCountry'].forEach(fid => {
-    const el = document.getElementById(fid);
-    if (el) el.value = '';
-  });
-  ['errFirstName','errLastName','errEmail','errPassword','errGeneral'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = '';
+      ${avatarHtml}
+      <div class="card-head">
+        <div class="card-name">${name}</div>
+        ${m.role_label?`<div class="card-role-badge" style="background:${bg};color:${fg}">${m.role_label}</div>`:''}
+        <div class="card-email">${m.email||''}</div>
+        <div class="card-stats">${m.client_count??0} clientes${m.hours_week?` · ${m.hours_week}h/sem`:''}</div>
+      </div>
+      <div class="salary-box">
+        ${m.salary_fijo!=null?`<div class="salary-row"><span class="salary-label">Salario fijo</span><span class="salary-val">${fmt(m.salary_fijo)}</span></div>`:''}
+        ${m.commission?`<div class="salary-row"><span class="salary-label">Comisión (est.)</span><span class="salary-val commission">${fmtPlus(m.commission)}</span></div>`:''}
+        ${sum?`<div class="salary-row"><span class="salary-label">Total estimado</span><span class="salary-val total">${fmt(sum)}</span></div>`:''}
+      </div>
+      ${m.notes?`<div class="card-notes">${m.notes}</div>`:''}
+      <div class="card-actions">
+        <button class="btn btn-primary btn-sm" onclick="location.href='clients.html?coach=${m.user_detail_id}'">Clientes</button>
+      </div>
+    `;
+    grid.appendChild(card);
   });
 
-  document.getElementById('formTitle').textContent = isEdit ? 'Editar coach' : 'Nuevo coach';
-  document.getElementById('saveBtn').textContent   = isEdit ? 'Guardar cambios' : 'Crear coach';
-  const pwdEl = document.getElementById('fPassword');
-  if (pwdEl) pwdEl.placeholder = isEdit ? 'Dejar vacío para no cambiar' : 'Mín. 8 caracteres';
+  const addCard=document.createElement('div');
+  addCard.className='add-card'; addCard.onclick=openModal;
+  addCard.innerHTML=`
+    <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span>Añadir miembro</span>`;
+  grid.appendChild(addCard);
 
-  if (isEdit) {
-    try {
-      const r = await fetch(`${API}/users/${editingCoachId}/edit`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const j = await r.json();
-      const c = j.data || j;
-      const d = c.detail || c;
-      document.getElementById('fFirstName').value  = d.name       || '';
-      document.getElementById('fLastName').value   = d.last_name  || '';
-      document.getElementById('fEmail').value      = c.email || d.email || '';
-      document.getElementById('fPhone').value      = d.phone      || '';
-      document.getElementById('fOccupation').value = d.occupation || '';
-      document.getElementById('fCountry').value    = d.country_code || '';
-    } catch {
-      toast('Error al cargar datos del coach', 'error');
-    }
+  document.getElementById('totalCost').textContent=`${Number(total).toLocaleString('es-ES')}€`;
+}
+
+async function loadTeam(){
+  try{
+    const r=await fetch(`${API}/team`,{headers:{Authorization:`Bearer ${token}`}});
+    if(!r.ok){renderCards([]);return;}
+    const j=await r.json(); renderCards(j.data||j||[]);
+  }catch{ renderCards([]); }
+}
+
+function openModal(editData=null){
+  _editingId=null;
+  document.getElementById('modalTitle').textContent='Añadir miembro';
+  ['mRoleLabel','mHours','mSalary','mCommission','mNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modalError').style.display='none';
+  document.getElementById('userSelectGroup').style.display='flex';
+
+  const sel=document.getElementById('mUser');
+  sel.innerHTML='<option value="">— Seleccionar colaborador —</option>';
+  _staffList.forEach(u=>{
+    const n=`${u.name||''} ${u.last_name||''}`.trim();
+    sel.appendChild(new Option(`${n} (${u.email||u.id})`,u.id));
+  });
+
+  if(editData){
+    _editingId=editData.id;
+    document.getElementById('modalTitle').textContent='Editar miembro';
+    document.getElementById('userSelectGroup').style.display='none';
+    document.getElementById('mRoleLabel').value=editData.role_label||'';
+    document.getElementById('mHours').value=editData.hours_week||'';
+    document.getElementById('mSalary').value=editData.salary_fijo||'';
+    document.getElementById('mCommission').value=editData.commission||'';
+    document.getElementById('mNotes').value=editData.notes||'';
+  }
+  document.getElementById('modalOverlay').style.display='flex';
+}
+function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
+function closeModalIfBg(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+function editMember(id){
+  const m=_teamData.find(x=>x.id===id);
+  if(m) openModal(m);
+}
+
+async function deleteMember(id,name){
+  if(!confirm(`¿Eliminar a ${name} del equipo?`)) return;
+  try{
+    const r=await fetch(`${API}/team/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});
+    if(r.ok){ toast('Miembro eliminado'); loadTeam(); }
+    else toast('Error al eliminar','error');
+  }catch{ toast('Error de conexión','error'); }
+}
+
+async function saveMember(){
+  const btn=document.getElementById('modalSaveBtn');
+  const errEl=document.getElementById('modalError');
+  errEl.style.display='none';
+
+  const body={
+    role_label: document.getElementById('mRoleLabel').value.trim()||null,
+    hours_week: document.getElementById('mHours').value?parseInt(document.getElementById('mHours').value):null,
+    salary_fijo: document.getElementById('mSalary').value?parseFloat(document.getElementById('mSalary').value):null,
+    commission: document.getElementById('mCommission').value?parseFloat(document.getElementById('mCommission').value):null,
+    notes: document.getElementById('mNotes').value.trim()||null,
+  };
+
+  if(!_editingId){
+    const uid=document.getElementById('mUser').value;
+    if(!uid){ errEl.textContent='Selecciona un colaborador.'; errEl.style.display='block'; return; }
+    body.user_detail_id=uid;
   }
 
-  updatePreview();
-  document.getElementById('listView').style.display = 'none';
-  document.getElementById('formView').classList.add('active');
-}
-
-function closeForm() {
-  document.getElementById('formView').classList.remove('active');
-  document.getElementById('listView').style.display = '';
-  editingCoachId = null;
-}
-
-// ── Live preview ──────────────────────────────────────────────────────────────
-function updatePreview() {
-  const first  = document.getElementById('fFirstName').value.trim();
-  const last   = document.getElementById('fLastName').value.trim();
-  const email  = document.getElementById('fEmail').value.trim();
-  const phone  = document.getElementById('fPhone').value.trim();
-  const occ    = document.getElementById('fOccupation').value.trim();
-  const cSel   = document.getElementById('fCountry');
-  const country = cSel.options[cSel.selectedIndex]?.text || '—';
-
-  const name = [first, last].filter(Boolean).join(' ') || 'Nombre del coach';
-  document.getElementById('previewName').textContent  = name;
-  document.getElementById('previewEmail').textContent = email || 'email@ejemplo.com';
-  document.getElementById('previewPhone').textContent = phone || '—';
-  document.getElementById('previewCountry').textContent = (cSel.value ? country : '—');
-  document.getElementById('previewOccupation').textContent = occ || '—';
-
-  const av = document.getElementById('previewAvatar');
-  av.textContent = initials(first, last);
-  av.style.background = (first || last) ? avatarColor(name) : 'var(--purple)';
-}
-
-// ── Save coach ────────────────────────────────────────────────────────────────
-// ── Photo upload ──────────────────────────────────────────────────────────────
-let _photoUrl = null;
-
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('dropZone').classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) handlePhotoSelect({ files: [file] });
-}
-
-async function handlePhotoSelect(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const av = document.getElementById('previewAvatar');
-  av.innerHTML = '<div style="font-size:10px;color:#9CA3AF;">Subiendo…</div>';
-  try {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('folder', 'profiles');
-    const r = await fetch(`${API}/files/upload`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
-    const j = await r.json();
-    if (!r.ok) { toast(j.message || 'Error al subir foto', 'error'); return; }
-    _photoUrl = (j.data || j).url;
-    av.innerHTML = `<img src="${_photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"><div class="av-overlay"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
-    av.style.background = 'transparent';
-  } catch { toast('Error de conexión al subir foto', 'error'); }
-  finally { input.value = ''; }
-}
-
-async function saveCoach() {
-  const firstName  = document.getElementById('fFirstName').value.trim();
-  const lastName   = document.getElementById('fLastName').value.trim();
-  const email      = document.getElementById('fEmail').value.trim();
-  const password   = document.getElementById('fPassword').value;
-  const phone      = document.getElementById('fPhone').value.trim();
-  const occupation = document.getElementById('fOccupation').value.trim();
-  const countryCode= document.getElementById('fCountry').value;
-  const isEdit     = !!editingCoachId;
-
-  let ok = true;
-  const setErr = (id, msg) => { document.getElementById(id).textContent = msg; if (msg) ok = false; };
-  setErr('errFirstName', firstName ? '' : 'Campo requerido');
-  setErr('errLastName',  lastName  ? '' : 'Campo requerido');
-  setErr('errEmail',     email     ? '' : 'Campo requerido');
-  setErr('errPassword',  (!isEdit && password.length < 8) ? 'Mínimo 8 caracteres' : '');
-  document.getElementById('errGeneral').textContent = '';
-  if (!ok) return;
-
-  const btn = document.getElementById('saveBtn');
-  btn.textContent = isEdit ? 'Guardando…' : 'Creando…';
-  btn.disabled = true;
-
-  try {
-    const body = { name: firstName, last_name: lastName, email };
-    if (!isEdit) { body.password = password; body.role_id = 5; }
-    else if (password) { body.password = password; }
-    if (phone)        body.phone        = phone;
-    if (occupation)   body.occupation   = occupation;
-    if (countryCode)  body.country_code = countryCode;
-
-    const url    = isEdit ? `${API}/users/${editingCoachId}/update` : `${API}/users`;
-    const method = isEdit ? 'PUT' : 'POST';
-    const r = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify(body),
+  btn.disabled=true;
+  try{
+    const url=_editingId?`${API}/team/${_editingId}`:`${API}/team`;
+    const r=await fetch(url,{
+      method:_editingId?'PUT':'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
+      body:JSON.stringify(body),
     });
-    const j = await r.json();
-    if (!r.ok) {
-      let msg = isEdit ? 'Error al actualizar el coach' : 'Error al crear el coach';
-      if (j.detail) {
-        msg = Array.isArray(j.detail)
-          ? j.detail.map(e => e.msg || e.message || JSON.stringify(e)).join(', ')
-          : String(j.detail);
-      } else if (j.message) {
-        msg = j.message;
-      }
-      document.getElementById('errGeneral').textContent = msg;
-      return;
-    }
-    const savedId = (j.data || j).id || editingCoachId;
-    if (_photoUrl && savedId) {
-      await fetch(`${API}/users/${savedId}/photo`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ photo: _photoUrl }),
-      });
-    }
-    _photoUrl = null;
-    closeForm();
-    toast(isEdit ? 'Coach actualizado correctamente' : 'Coach creado correctamente', 'success');
-    await load();
-  } catch {
-    document.getElementById('errGeneral').textContent = 'Error de conexión';
-  } finally {
-    btn.textContent = isEdit ? 'Guardar cambios' : 'Crear coach';
-    btn.disabled = false;
-  }
+    let j={}; try{ j=await r.json(); }catch{}
+    if(!r.ok){ errEl.textContent=j.message||j.detail||'Error al guardar'; errEl.style.display='block'; return; }
+    toast(_editingId?'Miembro actualizado':'Miembro añadido');
+    closeModal(); loadTeam();
+  }catch(e){ errEl.textContent=e?.message||'Error de conexión'; errEl.style.display='block'; }
+  finally{ btn.disabled=false; }
 }
 
-// ── CSV Export ────────────────────────────────────────────────────────────────
-function exportCSV() {
-  if (!filtered.length) { toast('No hay coaches para exportar', 'error'); return; }
-  const headers = ['Nombre','Apellido','Email','Teléfono','Especialidad','Registro'];
-  const rows = filtered.map(c => [
-    c.name || '', c.last_name || '', c.email || '', c.phone || '',
-    c.occupation || '',
-    c.created_at ? new Date(c.created_at).toLocaleDateString('es-ES') : '',
-  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
-  const csv  = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = `coaches_${new Date().toISOString().slice(0,10)}.csv`; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-loadMe();
-loadFormsBadge();
-loadCountries();
-load();
-
-// ── Sidebar role adaptation ───────────────────────────────────────────────────
-function adaptSidebar() {
-  const rid = parseInt(localStorage.getItem('role_id') || '0');
-  if (rid !== 5) return; // only restrict coaches
-  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
-    const el = document.querySelector('.nav-item[href="' + href + '"]');
-    if (el) el.style.display = 'none';
-  });
-}
-adaptSidebar();
-</script>
-<script>
-var _flyoutMenus={
-  entrenamiento:{title:'Entrenamiento',color:'#4F46E5',items:[
-    {label:'Rutinas',href:'rutinas.html',icon:'<path d="M3 12h18M3 6h18M3 18h18"/>'},
-    {label:'Ejercicios',href:'ejercicios.html',icon:'<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>'},
-    {label:'Grupos Musculares',href:'grupos-musculares.html',icon:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'},
-    {label:'Programas',href:'programas.html',icon:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'}
-  ]},
-  nutricion:{title:'Nutrición',color:'#059669',items:[
-    {label:'Dietas',href:'diets.html',icon:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
-    {label:'Menús',href:'menus.html',icon:'<path d="M3 11l19-9-9 19-2-8-8-2z"/>'},
-    {label:'Alimentos',href:'aliments.html',icon:'<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>'},
-    {label:'Recetas',href:'recipes.html',icon:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'},
-    {label:'Catálogos',href:'nutrition-catalog.html',icon:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>'}
-  ]},
-  formulario:{title:'Formulario',color:'#D97706',items:[
-    {label:'Check-ins',href:'checkins.html',icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
-    {label:'Onboarding',href:'onboarding.html',icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
-    {label:'Encuestas',href:'encuestas.html',icon:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'}
-  ]},
-  documento:{title:'Documentos',color:'#7C3AED',items:[
-    {label:'Contratos',href:'contratos.html',icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'},
-    {label:'Guías',href:'guias.html',icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
-    {label:'Plantillas',href:'plantillas.html',icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>'}
-  ]}
-};
-function openFlyout(e,cat){
-  e.stopPropagation();
-  var menu=_flyoutMenus[cat]; if(!menu) return;
-  var panel=document.getElementById('flyoutPanel');
-  var backdrop=document.getElementById('flyoutBackdrop');
-  var rect=e.currentTarget.getBoundingClientRect();
-  document.getElementById('flyoutTitle').textContent=menu.title;
-  document.getElementById('flyoutDot').style.background=menu.color;
-  var html='';
-  menu.items.forEach(function(item){
-    html+='<a class="flyout-item" href="'+item.href+'"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+item.icon+'</svg>'+item.label+'</a>';
-  });
-  document.getElementById('flyoutItems').innerHTML=html;
-  panel.style.top=Math.min(rect.top,window.innerHeight-(menu.items.length*44+60))+'px';
-  panel.style.display='block';
-  backdrop.style.display='block';
-  requestAnimationFrame(function(){
-    panel.style.transform='translateX(0)';
-    panel.style.opacity='1';
-  });
-}
-function closeFlyout(){
-  var panel=document.getElementById('flyoutPanel');
-  var backdrop=document.getElementById('flyoutBackdrop');
-  panel.style.transform='translateX(-8px)';
-  panel.style.opacity='0';
-  setTimeout(function(){panel.style.display='none';backdrop.style.display='none';},200);
-}
-function toggleLibrary(el){
-  if(!el||typeof el==='string') el=document.getElementById('navLibrary');
-  if(!el) return;
-  el.classList.toggle('open');
-  var sub=document.getElementById('librarySub');
-  if(sub) sub.classList.toggle('open');
-}
-(function(){
-  if(window.location.pathname.includes('library')){
-    document.addEventListener('DOMContentLoaded',function(){
-      var el=document.getElementById('navLibrary');
-      if(el) toggleLibrary(el);
-      var cat=new URLSearchParams(window.location.search).get('cat');
-      if(cat) document.querySelectorAll('.nav-sub-item').forEach(function(a){
-        if(a.href.includes('cat='+cat)) a.classList.add('active');
-      });
-    });
-  }
+(async()=>{
+  await loadUser();
+  await Promise.all([loadTeam(), loadStaff()]);
 })();
 </script>
-
-<!-- Library flyout -->
-<div id="flyoutBackdrop" onclick="closeFlyout()" style="display:none;position:fixed;inset:0;z-index:998;"></div>
-<div id="flyoutPanel" style="display:none;position:fixed;left:244px;z-index:999;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);border:1px solid #E5E7EB;min-width:200px;overflow:hidden;transform:translateX(-8px);opacity:0;transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .2s ease;">
-  <div id="flyoutHeader" style="padding:12px 16px 10px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:8px;">
-    <div id="flyoutDot" style="width:8px;height:8px;border-radius:50%;"></div>
-    <span id="flyoutTitle" style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;"></span>
-  </div>
-  <div id="flyoutItems" style="padding:6px;"></div>
-</div>
 </body>
 </html>

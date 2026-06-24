@@ -287,22 +287,17 @@
 
     <!-- ─── TAB 1: Información ─── -->
     <div class="tab-panel active" id="tab1">
-      <div class="form-group" id="userSelectGroup">
-        <label>Miembro del equipo *</label>
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <!-- add mode: select; edit mode: readonly input (toggled by JS) -->
         <select id="mUser" onchange="onUserSelect()">
-          <option value="">— Seleccionar colaborador —</option>
+          <option value="">Seleccionar miembro…</option>
         </select>
-        <span class="form-hint">Selecciona un usuario del sistema</span>
+        <input type="text" id="mName" placeholder="Nombre completo" readonly style="display:none"/>
       </div>
-      <div class="form-row-2">
-        <div class="form-group">
-          <label>Nombre completo</label>
-          <input type="text" id="mName" placeholder="Nombre del miembro" readonly/>
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="mEmail" placeholder="email@ejemplo.com" readonly/>
-        </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="mEmail" placeholder="email@ejemplo.com" readonly/>
       </div>
       <div class="form-group">
         <label>Rol</label>
@@ -655,13 +650,7 @@ function setVarType(type, btn){
 function onUserSelect(){
   const uid=document.getElementById('mUser').value;
   const u=_staffList.find(x=>x.id===uid);
-  if(u){
-    document.getElementById('mName').value=`${u.name||''} ${u.last_name||''}`.trim();
-    document.getElementById('mEmail').value=u.email||'';
-  } else {
-    document.getElementById('mName').value='';
-    document.getElementById('mEmail').value='';
-  }
+  document.getElementById('mEmail').value=u?u.email||'':'';
 }
 
 /* ── Tab navigation ──────────────────────────────────────────── */
@@ -709,46 +698,52 @@ function clearTabErrors(){
 }
 
 /* ── Open / close modal ──────────────────────────────────────── */
+function _showAddMode(){
+  // Tab 1: show select dropdown, hide text input
+  document.getElementById('mUser').style.display='block';
+  document.getElementById('mName').style.display='none';
+  const sel=document.getElementById('mUser');
+  sel.innerHTML='<option value="">Seleccionar miembro…</option>';
+  _staffList.forEach(u=>{
+    const n=`${u.name||''} ${u.last_name||''}`.trim();
+    sel.appendChild(new Option(n, u.id));
+  });
+}
+
+function _showEditMode(name, email){
+  // Tab 1: hide select, show readonly text input
+  document.getElementById('mUser').style.display='none';
+  const inp=document.getElementById('mName');
+  inp.style.display='block';
+  inp.value=name||'';
+  document.getElementById('mEmail').value=email||'';
+}
+
 function openModal(editData=null){
   _editingId=null;
   _pendingUserDetailId=null;
   _varType='none';
   clearTabErrors();
 
-  // Reset all fields
+  // Reset fields
   ['mSalary','mHours','mCommission','mNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('mRoleLabel').value='';
-  document.getElementById('mName').value='';
   document.getElementById('mEmail').value='';
   document.getElementById('mCurrency').value='EUR';
   document.getElementById('commissionField').style.display='none';
   document.querySelectorAll('.var-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.var-btn').classList.add('active'); // first = Sin variable
-
-  const isWizard=!editData;
-  document.getElementById('wizardSteps').style.display=isWizard?'flex':'none';
-  document.getElementById('userSelectGroup').style.display='flex';
-
-  const sel=document.getElementById('mUser');
-  sel.innerHTML='<option value="">— Seleccionar colaborador —</option>';
-  _staffList.forEach(u=>{
-    const n=`${u.name||''} ${u.last_name||''}`.trim();
-    sel.appendChild(new Option(`${n} (${u.email||u.id})`,u.id));
-  });
+  document.querySelector('.var-btn').classList.add('active');
 
   if(editData){
     _editingId=editData.id;
-    document.getElementById('modalTitle').textContent='Editar miembro del equipo';
-    document.getElementById('userSelectGroup').style.display='none';
-    // Pre-fill
-    document.getElementById('mName').value=`${editData.name||''} ${editData.last_name||''}`.trim();
-    document.getElementById('mEmail').value=editData.email||'';
+    document.getElementById('modalTitle').textContent='Editar miembro';
+    document.getElementById('wizardSteps').style.display='none';
+    _showEditMode(`${editData.name||''} ${editData.last_name||''}`.trim(), editData.email);
     document.getElementById('mRoleLabel').value=editData.role_label||'';
     document.getElementById('mHours').value=editData.hours_week||'';
     document.getElementById('mSalary').value=editData.salary_fijo||'';
     document.getElementById('mCommission').value=editData.commission||'';
     document.getElementById('mNotes').value=editData.notes||'';
-    // Variable type
     if(editData.variable_type){
       _varType=editData.variable_type;
       document.querySelectorAll('.var-btn').forEach(b=>{
@@ -757,17 +752,17 @@ function openModal(editData=null){
       });
       if(_varType!=='none') document.getElementById('commissionField').style.display='flex';
     }
-    // Edit mode: show all tabs but start at tab1, show Save directly
-    document.getElementById('btnNext').style.display='none';
+    // Flat view: all panels visible, no wizard nav
+    [1,2,3].forEach(i=>document.getElementById(`tab${i}`).classList.add('active'));
     document.getElementById('btnBack').style.display='none';
+    document.getElementById('btnNext').style.display='none';
     document.getElementById('btnSave').style.display='inline-flex';
     document.getElementById('btnSave').textContent='Guardar cambios';
-    // Show all 3 tabs in a flat form (hide steps)
-    [1,2,3].forEach(i=>document.getElementById(`tab${i}`).classList.add('active'));
-    document.getElementById('modalTitle').textContent='Editar miembro';
     buildPermissionsPanel(editData.permissions||null);
   } else {
     document.getElementById('modalTitle').textContent='Añadir miembro del equipo';
+    document.getElementById('wizardSteps').style.display='flex';
+    _showAddMode();
     document.getElementById('btnSave').textContent='Añadir al equipo';
     setTab(1);
     buildPermissionsPanel(null);
@@ -784,14 +779,13 @@ function editMember(id, userDetailId){
   if(m){
     openModal(m);
   } else {
+    // Staff user with no team entry yet
     _pendingUserDetailId=userDetailId;
-    // Find staff info for display
     const u=_staffList.find(x=>x.id===userDetailId)||{};
     openModal();
+    // Override nombre field for this specific person
+    _showEditMode(`${u.name||''} ${u.last_name||''}`.trim(), u.email);
     document.getElementById('modalTitle').textContent='Añadir datos del miembro';
-    document.getElementById('userSelectGroup').style.display='none';
-    document.getElementById('mName').value=`${u.name||''} ${u.last_name||''}`.trim();
-    document.getElementById('mEmail').value=u.email||'';
   }
 }
 

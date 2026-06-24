@@ -13,25 +13,25 @@
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
 
     /* ── Sidebar ─────────────────────────────────────────────────────────── */
-    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--purple);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
-    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
-    .sidebar-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
-    .sidebar-logo span em{color:#818CF8;font-style:inherit;}
-    .sidebar-logo small{display:block;color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
+    .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
+    .sidebar-logo span em{color:var(--purple);font-style:inherit;}
+    .sidebar-logo small{display:block;color:#6B7280;font-size:11px;margin-top:2px;}
     .sidebar-nav{flex:1;padding:16px 0;}
-    .nav-section{padding:8px 20px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;}
-    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.75);cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
-    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
-    .nav-item svg{opacity:.8;flex-shrink:0;}
-    .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
+    .nav-section{padding:8px 20px 4px;font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F3F4F6;color:var(--purple);}
+    .nav-item.active{background:#EEF2FF;color:var(--purple);border-left-color:var(--purple);}
+    .nav-item svg{opacity:1;flex-shrink:0;}
+    .sidebar-user{padding:16px 20px;border-top:1px solid #E5E7EB;}
     .user-row{display:flex;align-items:center;gap:10px;}
-    .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+    .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
     .user-info{flex:1;min-width:0;}
-    .user-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .user-role{font-size:11px;color:rgba(255,255,255,.5);}
-    .logout-btn{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;}
-    .logout-btn:hover{color:#fff;background:rgba(255,255,255,.1);}
+    .user-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:11px;color:#6B7280;}
+    .logout-btn{background:none;border:none;color:#6B7280;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:var(--purple);background:#F3F4F6;}
 
     /* ── Main ──────────────────────────────────────────────────────────────── */
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
@@ -274,6 +274,7 @@ const token = localStorage.getItem('token');
 if(!token){ location.href='login.html'; }
 
 let _editingId = null;
+let _pendingUserDetailId = null;
 let _staffList = [];
 let _teamData  = [];
 
@@ -354,7 +355,7 @@ function renderCards(members){
     card.className='member-card';
     card.innerHTML=`
       <div class="card-menu">
-        <button class="icon-btn" onclick="editMember(${m.id})" title="Editar">
+        <button class="icon-btn" onclick="editMember(${m.id},'${m.user_detail_id}')" title="Editar">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
         <button class="icon-btn" onclick="deleteMember(${m.id},'${safeName}')" title="Eliminar">
@@ -393,14 +394,42 @@ function renderCards(members){
 
 async function loadTeam(){
   try{
-    const r=await fetch(`${API}/team`,{headers:{Authorization:`Bearer ${token}`}});
-    if(!r.ok){renderCards([]);return;}
-    const j=await r.json(); renderCards(j.data||j||[]);
+    // Load all staff users (coaches, admins, setters, closers)
+    const staffRes = await Promise.all(['coach','admin','setter','closer'].map(s=>
+      fetch(`${API}/users/${s}/findAll`,{headers:{Authorization:`Bearer ${token}`}})
+        .then(r=>r.ok?r.json():null).then(j=>j?(j.data||j):[]).catch(()=>[])
+    ));
+    const seen=new Set(); const allStaff=[];
+    staffRes.flat().forEach(u=>{ if(!seen.has(u.id)){seen.add(u.id);allStaff.push(u);} });
+
+    // Load salary/team data and merge
+    let teamMap={};
+    try{
+      const tr=await fetch(`${API}/team`,{headers:{Authorization:`Bearer ${token}`}});
+      if(tr.ok){ const tj=await tr.json(); (tj.data||tj||[]).forEach(t=>{teamMap[t.user_detail_id]=t;}); }
+    }catch{}
+
+    const merged=allStaff.map(u=>({
+      id: teamMap[u.id]?.id||null,
+      user_detail_id: u.id,
+      name: u.name,
+      last_name: u.last_name,
+      email: u.email,
+      photo: u.photo,
+      client_count: teamMap[u.id]?.client_count??0,
+      role_label: teamMap[u.id]?.role_label||null,
+      hours_week: teamMap[u.id]?.hours_week||null,
+      salary_fijo: teamMap[u.id]?.salary_fijo??null,
+      commission: teamMap[u.id]?.commission||null,
+      notes: teamMap[u.id]?.notes||null,
+    }));
+    renderCards(merged);
   }catch{ renderCards([]); }
 }
 
 function openModal(editData=null){
   _editingId=null;
+  _pendingUserDetailId=null;
   document.getElementById('modalTitle').textContent='Añadir miembro';
   ['mRoleLabel','mHours','mSalary','mCommission','mNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('modalError').style.display='none';
@@ -428,9 +457,17 @@ function openModal(editData=null){
 function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
 function closeModalIfBg(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
 
-function editMember(id){
+function editMember(id, userDetailId){
   const m=_teamData.find(x=>x.id===id);
-  if(m) openModal(m);
+  if(m){
+    openModal(m);
+  } else {
+    // Staff user without team entry yet — open modal to add salary data
+    _pendingUserDetailId=userDetailId;
+    openModal();
+    document.getElementById('modalTitle').textContent='Añadir datos salariales';
+    document.getElementById('userSelectGroup').style.display='none';
+  }
 }
 
 async function deleteMember(id,name){
@@ -456,9 +493,13 @@ async function saveMember(){
   };
 
   if(!_editingId){
-    const uid=document.getElementById('mUser').value;
-    if(!uid){ errEl.textContent='Selecciona un colaborador.'; errEl.style.display='block'; return; }
-    body.user_detail_id=uid;
+    if(!_pendingUserDetailId){
+      const uid=document.getElementById('mUser').value;
+      if(!uid){ errEl.textContent='Selecciona un colaborador.'; errEl.style.display='block'; return; }
+      body.user_detail_id=uid;
+    } else {
+      body.user_detail_id=_pendingUserDetailId;
+    }
   }
 
   btn.disabled=true;

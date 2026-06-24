@@ -44,8 +44,12 @@
     .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:flex;align-items:center;gap:6px;}
     .btn-primary{background:var(--purple);color:#fff;}
     .btn-primary:hover{background:var(--purple-dark);}
+    .btn-green{background:#059669;color:#fff;}
+    .btn-green:hover{background:#047857;}
     .btn-outline{background:#fff;color:var(--purple);border:1.5px solid var(--purple);}
     .btn-outline:hover{background:var(--purple-pale);}
+    .btn-ghost{background:none;color:#6B7280;border:1.5px solid #E5E7EB;}
+    .btn-ghost:hover{background:#F3F4F6;color:#374151;}
     .btn-sm{padding:6px 14px;font-size:12px;border-radius:7px;}
 
     /* ── Cards grid ─────────────────────────────────────────────────────────── */
@@ -80,7 +84,6 @@
     .icon-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#9CA3AF;display:flex;}
     .icon-btn:hover{background:#F3F4F6;color:#374151;}
 
-    /* Add card */
     .add-card{background:#fff;border:2px dashed #D1D5DB;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;min-height:280px;transition:.2s;color:#9CA3AF;}
     .add-card:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-pale);}
     .add-card svg{opacity:.6;}
@@ -88,23 +91,69 @@
 
     /* ── Modal ──────────────────────────────────────────────────────────────── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
-    .modal-box{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;}
+    .modal-box{background:#fff;border-radius:16px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;}
     .modal-box::-webkit-scrollbar{width:4px;}
     .modal-box::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px;}
     .modal-head{padding:20px 24px 16px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
     .modal-head h2{font-size:16px;font-weight:700;color:#111;}
     .modal-close{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#9CA3AF;display:flex;}
     .modal-close:hover{background:#F3F4F6;color:#374151;}
-    .modal-body{padding:20px 24px;flex:1;display:flex;flex-direction:column;gap:14px;}
-    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;}
 
+    /* ── Wizard tabs ──────────────────────────────────────────────────────── */
+    .wizard-steps{display:flex;align-items:center;padding:20px 24px 0;gap:0;}
+    .w-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative;}
+    .w-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:#E5E7EB;z-index:0;}
+    .w-step.done:not(:last-child)::after{background:var(--purple);}
+    .w-step-circle{width:28px;height:28px;border-radius:50%;background:#E5E7EB;color:#9CA3AF;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:.2s;}
+    .w-step.active .w-step-circle{background:var(--purple);color:#fff;}
+    .w-step.done .w-step-circle{background:var(--purple);color:#fff;}
+    .w-step-label{font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+    .w-step.active .w-step-label{color:var(--purple);}
+    .w-step.done .w-step-label{color:var(--purple);}
+
+    /* ── Tab panels ───────────────────────────────────────────────────────── */
+    .tab-panel{display:none;padding:20px 24px;flex-direction:column;gap:16px;}
+    .tab-panel.active{display:flex;}
+    .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:space-between;gap:10px;}
+    .modal-footer-right{display:flex;gap:8px;}
+
+    /* ── Form fields ──────────────────────────────────────────────────────── */
     .form-group{display:flex;flex-direction:column;gap:5px;}
-    .form-group label{font-size:12px;font-weight:600;color:#374151;}
-    .form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;font-family:inherit;transition:.15s;width:100%;}
-    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);}
-    .form-group textarea{resize:vertical;min-height:70px;}
+    .form-group label{font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.4px;}
+    .form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;font-family:inherit;transition:.15s;width:100%;color:#111;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(79,70,229,.08);}
+    .form-group textarea{resize:vertical;min-height:72px;}
     .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .form-hint{font-size:11px;color:#9CA3AF;margin-top:2px;}
+    .form-group input[readonly]{background:#F9FAFB;color:#6B7280;cursor:default;}
+
+    /* ── Info note ──────────────────────────────────────────────────────── */
+    .info-note{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;padding:10px 14px;font-size:12px;color:#0369A1;display:flex;gap:8px;align-items:flex-start;}
+    .info-note svg{flex-shrink:0;margin-top:1px;}
+
+    /* ── Variable type toggles ────────────────────────────────────────────── */
+    .var-type-group{display:flex;flex-direction:column;gap:6px;}
+    .var-type-group label{font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.4px;}
+    .var-type-btns{display:flex;flex-wrap:wrap;gap:6px;}
+    .var-btn{padding:7px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
+    .var-btn:hover{border-color:var(--purple);color:var(--purple);}
+    .var-btn.active{border-color:var(--purple);background:var(--purple-pale);color:var(--purple);}
+
+    /* ── Permission toggles ───────────────────────────────────────────────── */
+    .perm-section-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;padding:4px 0 2px;border-bottom:1px solid #F3F4F6;margin-top:4px;}
+    .perm-list{display:flex;flex-direction:column;gap:0;}
+    .perm-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F9FAFB;}
+    .perm-item:last-child{border-bottom:none;}
+    .perm-item-label{font-size:13px;color:#374151;}
+    .toggle-switch{position:relative;width:38px;height:22px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;position:absolute;}
+    .toggle-track{position:absolute;inset:0;border-radius:11px;background:#E5E7EB;cursor:pointer;transition:.2s;}
+    .toggle-track::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+    .toggle-switch input:checked + .toggle-track{background:#059669;}
+    .toggle-switch input:checked + .toggle-track::after{transform:translateX(16px);}
+
+    /* ── Error ──────────────────────────────────────────────────────────── */
+    .modal-error{color:#DC2626;font-size:12px;display:none;padding:4px 0;}
 
     /* Toast */
     .toast{position:fixed;bottom:24px;right:24px;background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;animation:fadeIn .2s;display:none;}
@@ -215,68 +264,147 @@
   </div>
 </div>
 
-<!-- Modal: Añadir / Editar miembro -->
+<!-- ══════════════════════ MODAL WIZARD ══════════════════════ -->
 <div class="modal-overlay" id="modalOverlay" style="display:none" onclick="closeModalIfBg(event)">
   <div class="modal-box">
+
+    <!-- Header -->
     <div class="modal-head">
-      <h2 id="modalTitle">Añadir miembro</h2>
+      <h2 id="modalTitle">Añadir miembro del equipo</h2>
       <button class="modal-close" onclick="closeModal()">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="modal-body">
+
+    <!-- Step progress (hidden when editing existing) -->
+    <div class="wizard-steps" id="wizardSteps">
+      <div class="w-step active" id="wstep1">
+        <div class="w-step-circle">1</div>
+        <div class="w-step-label">Información</div>
+      </div>
+      <div class="w-step" id="wstep2">
+        <div class="w-step-circle">2</div>
+        <div class="w-step-label">Compensación</div>
+      </div>
+      <div class="w-step" id="wstep3">
+        <div class="w-step-circle">3</div>
+        <div class="w-step-label">Permisos</div>
+      </div>
+    </div>
+
+    <!-- ─── TAB 1: Información ─── -->
+    <div class="tab-panel active" id="tab1">
       <div class="form-group" id="userSelectGroup">
         <label>Miembro del equipo *</label>
-        <select id="mUser"><option value="">Cargando colaboradores…</option></select>
+        <select id="mUser" onchange="onUserSelect()">
+          <option value="">— Seleccionar colaborador —</option>
+        </select>
         <span class="form-hint">Selecciona un usuario del sistema</span>
       </div>
-      <div class="form-row-2">
-        <div class="form-group">
-          <label>Rol</label>
-          <select id="mRoleLabel">
-            <option value="">Seleccionar…</option>
-            <option>Entrenador personal</option>
-            <option>Nutricionista</option>
-            <option>Coach integral</option>
-            <option>Fisioterapeuta</option>
-            <option>Médico</option>
-            <option>Psicólogo</option>
-            <option>Preparador físico</option>
-            <option>Dietista</option>
-            <option>Enfermero/a</option>
-            <option>Setter</option>
-            <option>Closer</option>
-            <option>Administrativo</option>
-            <option>Otro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Horas / semana</label>
-          <input type="number" id="mHours" placeholder="20" min="1" max="168"/>
-        </div>
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="mName" placeholder="Nombre del miembro" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="mEmail" placeholder="email@ejemplo.com" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Rol</label>
+        <select id="mRoleLabel">
+          <option value="">Seleccionar rol…</option>
+          <option>Entrenador personal</option>
+          <option>Nutricionista</option>
+          <option>Coach integral</option>
+          <option>Fisioterapeuta</option>
+          <option>Médico</option>
+          <option>Psicólogo</option>
+          <option>Preparador físico</option>
+          <option>Dietista</option>
+          <option>Enfermero/a</option>
+          <option>Setter</option>
+          <option>Closer</option>
+          <option>Administrativo</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="modal-error" id="errTab1"></div>
+    </div>
+
+    <!-- ─── TAB 2: Compensación ─── -->
+    <div class="tab-panel" id="tab2">
+      <div class="info-note">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
+        Esta información es privada y solo visible para administradores.
       </div>
       <div class="form-row-2">
         <div class="form-group">
-          <label>Salario fijo (€/mes)</label>
-          <input type="number" id="mSalary" placeholder="800" min="0"/>
+          <label>Salario fijo / mes</label>
+          <input type="number" id="mSalary" placeholder="0" min="0" step="0.01"/>
         </div>
         <div class="form-group">
-          <label>Comisión estimada (€/mes)</label>
-          <input type="number" id="mCommission" placeholder="0 si no aplica" min="0"/>
+          <label>Moneda</label>
+          <select id="mCurrency">
+            <option value="EUR">EUR €</option>
+            <option value="USD">USD $</option>
+            <option value="GBP">GBP £</option>
+            <option value="MXN">MXN $</option>
+            <option value="COP">COP $</option>
+            <option value="ARS">ARS $</option>
+          </select>
         </div>
+      </div>
+      <div class="var-type-group">
+        <label>Variable / Comisiones</label>
+        <div class="var-type-btns">
+          <button type="button" class="var-btn active" onclick="setVarType('none',this)">Sin variable</button>
+          <button type="button" class="var-btn" onclick="setVarType('commission',this)">Por comisión</button>
+          <button type="button" class="var-btn" onclick="setVarType('bonus',this)">Bonus / extra</button>
+          <button type="button" class="var-btn" onclick="setVarType('hours',this)">Por horas extra</button>
+        </div>
+      </div>
+      <div class="form-group" id="commissionField" style="display:none">
+        <label>Comisión estimada (€/mes)</label>
+        <input type="number" id="mCommission" placeholder="0" min="0" step="0.01"/>
+      </div>
+      <div class="form-group">
+        <label>Horas de trabajo / semana</label>
+        <input type="number" id="mHours" placeholder="40" min="1" max="168"/>
       </div>
       <div class="form-group">
         <label>Notas internas</label>
         <textarea id="mNotes" placeholder="Ej: Tiempo parcial. Bonus trimestral si supera 15 clientes."></textarea>
       </div>
-      <div id="modalError" style="color:#DC2626;font-size:12px;display:none;"></div>
+      <div class="modal-error" id="errTab2"></div>
     </div>
+
+    <!-- ─── TAB 3: Permisos ─── -->
+    <div class="tab-panel" id="tab3">
+      <div class="info-note">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Define qué puede hacer este miembro dentro de la plataforma.
+      </div>
+      <div id="permsList"></div>
+      <div class="modal-error" id="errTab3"></div>
+    </div>
+
+    <!-- Footer -->
     <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" id="modalSaveBtn" onclick="saveMember()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Guardar
-      </button>
+      <div>
+        <button class="btn btn-ghost btn-sm" id="btnBack" style="display:none" onclick="goTab(-1)">
+          ← Volver
+        </button>
+      </div>
+      <div class="modal-footer-right">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary btn-sm" id="btnNext" onclick="goTab(1)">
+          Siguiente → Compensación
+        </button>
+        <button class="btn btn-green btn-sm" id="btnSave" style="display:none" onclick="saveMember()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Añadir al equipo
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -292,8 +420,48 @@ let _editingId = null;
 let _pendingUserDetailId = null;
 let _staffList = [];
 let _teamData  = [];
+let _currentTab = 1;
+let _varType = 'none';
 
 const AVATAR_COLORS = ['#0EA5E9','#10B981','#8B5CF6','#F59E0B','#EF4444','#06B6D4','#6366F1','#EC4899'];
+
+const PERMISSIONS = [
+  { section: 'Clientes', perms: [
+    { key:'ver_clientes', label:'Ver todos los clientes' },
+    { key:'editar_clientes', label:'Editar clientes' },
+    { key:'asignar_clientes', label:'Asignar/mover clientes' },
+    { key:'baja_clientes', label:'Dar de baja clientes' },
+  ]},
+  { section: 'Contenido', perms: [
+    { key:'rutinas', label:'Crear y editar rutinas' },
+    { key:'dietas', label:'Crear y editar dietas' },
+    { key:'libreria', label:'Gestionar librería' },
+    { key:'ver_programas', label:'Ver programas' },
+    { key:'programas', label:'Crear y editar programas' },
+    { key:'asignar_programas', label:'Asignar programas a clientes' },
+  ]},
+  { section: 'Finanzas e informes', perms: [
+    { key:'finanzas', label:'Ver finanzas' },
+    { key:'precios', label:'Editar precios y facturas' },
+    { key:'informes', label:'Ver informes de negocio' },
+  ]},
+  { section: 'Equipo', perms: [
+    { key:'ver_equipo', label:'Ver equipo' },
+    { key:'añadir_equipo', label:'Añadir miembros al equipo' },
+    { key:'editar_equipo', label:'Editar miembros del equipo' },
+    { key:'permisos_equipo', label:'Gestionar permisos del equipo' },
+  ]},
+  { section: 'Comunicación', perms: [
+    { key:'chat', label:'Chat con clientes' },
+    { key:'mensajes_masivos', label:'Enviar mensajes masivos' },
+    { key:'ver_formularios', label:'Ver formularios' },
+    { key:'formularios', label:'Crear formularios' },
+  ]},
+  { section: 'Configuración', perms: [
+    { key:'ajustes', label:'Ajustes del negocio' },
+    { key:'integraciones', label:'Integraciones' },
+  ]},
+];
 
 function initials(name){
   if(!name) return '?';
@@ -409,7 +577,6 @@ function renderCards(members){
 
 async function loadTeam(){
   try{
-    // Load all staff users (coaches, admins, setters, closers)
     const staffRes = await Promise.all(['coach','admin','setter','closer'].map(s=>
       fetch(`${API}/users/${s}/findAll`,{headers:{Authorization:`Bearer ${token}`}})
         .then(r=>r.ok?r.json():null).then(j=>j?(j.data||j):[]).catch(()=>[])
@@ -417,7 +584,6 @@ async function loadTeam(){
     const seen=new Set(); const allStaff=[];
     staffRes.flat().forEach(u=>{ if(!seen.has(u.id)){seen.add(u.id);allStaff.push(u);} });
 
-    // Load salary/team data and merge
     let teamMap={};
     try{
       const tr=await fetch(`${API}/team`,{headers:{Authorization:`Bearer ${token}`}});
@@ -436,18 +602,136 @@ async function loadTeam(){
       hours_week: teamMap[u.id]?.hours_week||null,
       salary_fijo: teamMap[u.id]?.salary_fijo??null,
       commission: teamMap[u.id]?.commission||null,
+      variable_type: teamMap[u.id]?.variable_type||null,
       notes: teamMap[u.id]?.notes||null,
+      permissions: teamMap[u.id]?.permissions||null,
     }));
     renderCards(merged);
   }catch{ renderCards([]); }
 }
 
+/* ── Permissions panel ───────────────────────────────────────── */
+function buildPermissionsPanel(savedPerms){
+  let saved={};
+  if(savedPerms){ try{ saved=JSON.parse(savedPerms); }catch{} }
+  const container=document.getElementById('permsList');
+  container.innerHTML='';
+  PERMISSIONS.forEach(section=>{
+    const title=document.createElement('div');
+    title.className='perm-section-title';
+    title.textContent=section.section;
+    container.appendChild(title);
+    const list=document.createElement('div');
+    list.className='perm-list';
+    section.perms.forEach(p=>{
+      const checked = savedPerms ? (saved[p.key]!==false) : true;
+      const row=document.createElement('div');
+      row.className='perm-item';
+      row.innerHTML=`
+        <span class="perm-item-label">${p.label}</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="perm_${p.key}" ${checked?'checked':''}>
+          <span class="toggle-track"></span>
+        </label>`;
+      list.appendChild(row);
+    });
+    container.appendChild(list);
+  });
+}
+
+function getPermissionsJson(){
+  const obj={};
+  PERMISSIONS.forEach(s=>s.perms.forEach(p=>{
+    const el=document.getElementById(`perm_${p.key}`);
+    if(el) obj[p.key]=el.checked;
+  }));
+  return JSON.stringify(obj);
+}
+
+/* ── Variable type buttons ───────────────────────────────────── */
+function setVarType(type, btn){
+  _varType=type;
+  document.querySelectorAll('.var-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('commissionField').style.display = (type==='commission'||type==='bonus'||type==='hours') ? 'flex' : 'none';
+}
+
+/* ── User select auto-fill ───────────────────────────────────── */
+function onUserSelect(){
+  const uid=document.getElementById('mUser').value;
+  const u=_staffList.find(x=>x.id===uid);
+  if(u){
+    document.getElementById('mName').value=`${u.name||''} ${u.last_name||''}`.trim();
+    document.getElementById('mEmail').value=u.email||'';
+  } else {
+    document.getElementById('mName').value='';
+    document.getElementById('mEmail').value='';
+  }
+}
+
+/* ── Tab navigation ──────────────────────────────────────────── */
+function goTab(dir){
+  // Validate current tab before advancing
+  if(dir>0){
+    if(_currentTab===1){
+      const isNew=!_editingId&&!_pendingUserDetailId;
+      if(isNew && !document.getElementById('mUser').value){
+        showTabError(1,'Selecciona un colaborador para continuar.');
+        return;
+      }
+    }
+  }
+  clearTabErrors();
+  const newTab=_currentTab+dir;
+  if(newTab<1||newTab>3) return;
+  setTab(newTab);
+}
+
+function setTab(n){
+  _currentTab=n;
+  // Show/hide panels
+  [1,2,3].forEach(i=>{
+    document.getElementById(`tab${i}`).classList.toggle('active',i===n);
+    const step=document.getElementById(`wstep${i}`);
+    step.classList.toggle('active',i===n);
+    step.classList.toggle('done',i<n);
+  });
+  // Footer buttons
+  document.getElementById('btnBack').style.display = n>1?'inline-flex':'none';
+  document.getElementById('btnNext').style.display = n<3?'inline-flex':'none';
+  document.getElementById('btnSave').style.display = n===3?'inline-flex':'none';
+  // Update "Siguiente" label
+  if(n===2) document.getElementById('btnNext').textContent='Siguiente → Permisos';
+  if(n===1) document.getElementById('btnNext').textContent='Siguiente → Compensación';
+}
+
+function showTabError(tab, msg){
+  const el=document.getElementById(`errTab${tab}`);
+  el.textContent=msg; el.style.display='block';
+}
+function clearTabErrors(){
+  [1,2,3].forEach(i=>{ const el=document.getElementById(`errTab${i}`); if(el){el.textContent='';el.style.display='none';} });
+}
+
+/* ── Open / close modal ──────────────────────────────────────── */
 function openModal(editData=null){
   _editingId=null;
   _pendingUserDetailId=null;
-  document.getElementById('modalTitle').textContent='Añadir miembro';
-  ['mRoleLabel','mHours','mSalary','mCommission','mNotes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('modalError').style.display='none';
+  _varType='none';
+  clearTabErrors();
+
+  // Reset all fields
+  ['mSalary','mHours','mCommission','mNotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('mRoleLabel').value='';
+  document.getElementById('mName').value='';
+  document.getElementById('mEmail').value='';
+  document.getElementById('mCurrency').value='EUR';
+  document.getElementById('commissionField').style.display='none';
+  document.querySelectorAll('.var-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.var-btn').classList.add('active'); // first = Sin variable
+
+  const isWizard=!editData;
+  document.getElementById('wizardSteps').style.display=isWizard?'flex':'none';
   document.getElementById('userSelectGroup').style.display='flex';
 
   const sel=document.getElementById('mUser');
@@ -459,16 +743,44 @@ function openModal(editData=null){
 
   if(editData){
     _editingId=editData.id;
-    document.getElementById('modalTitle').textContent='Editar miembro';
+    document.getElementById('modalTitle').textContent='Editar miembro del equipo';
     document.getElementById('userSelectGroup').style.display='none';
+    // Pre-fill
+    document.getElementById('mName').value=`${editData.name||''} ${editData.last_name||''}`.trim();
+    document.getElementById('mEmail').value=editData.email||'';
     document.getElementById('mRoleLabel').value=editData.role_label||'';
     document.getElementById('mHours').value=editData.hours_week||'';
     document.getElementById('mSalary').value=editData.salary_fijo||'';
     document.getElementById('mCommission').value=editData.commission||'';
     document.getElementById('mNotes').value=editData.notes||'';
+    // Variable type
+    if(editData.variable_type){
+      _varType=editData.variable_type;
+      document.querySelectorAll('.var-btn').forEach(b=>{
+        const t=b.getAttribute('onclick').match(/setVarType\('([^']+)'/)?.[1];
+        b.classList.toggle('active',t===_varType);
+      });
+      if(_varType!=='none') document.getElementById('commissionField').style.display='flex';
+    }
+    // Edit mode: show all tabs but start at tab1, show Save directly
+    document.getElementById('btnNext').style.display='none';
+    document.getElementById('btnBack').style.display='none';
+    document.getElementById('btnSave').style.display='inline-flex';
+    document.getElementById('btnSave').textContent='Guardar cambios';
+    // Show all 3 tabs in a flat form (hide steps)
+    [1,2,3].forEach(i=>document.getElementById(`tab${i}`).classList.add('active'));
+    document.getElementById('modalTitle').textContent='Editar miembro';
+    buildPermissionsPanel(editData.permissions||null);
+  } else {
+    document.getElementById('modalTitle').textContent='Añadir miembro del equipo';
+    document.getElementById('btnSave').textContent='Añadir al equipo';
+    setTab(1);
+    buildPermissionsPanel(null);
   }
+
   document.getElementById('modalOverlay').style.display='flex';
 }
+
 function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
 function closeModalIfBg(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
 
@@ -477,11 +789,14 @@ function editMember(id, userDetailId){
   if(m){
     openModal(m);
   } else {
-    // Staff user without team entry yet — open modal to add salary data
     _pendingUserDetailId=userDetailId;
+    // Find staff info for display
+    const u=_staffList.find(x=>x.id===userDetailId)||{};
     openModal();
-    document.getElementById('modalTitle').textContent='Añadir datos salariales';
+    document.getElementById('modalTitle').textContent='Añadir datos del miembro';
     document.getElementById('userSelectGroup').style.display='none';
+    document.getElementById('mName').value=`${u.name||''} ${u.last_name||''}`.trim();
+    document.getElementById('mEmail').value=u.email||'';
   }
 }
 
@@ -495,22 +810,23 @@ async function deleteMember(id,name){
 }
 
 async function saveMember(){
-  const btn=document.getElementById('modalSaveBtn');
-  const errEl=document.getElementById('modalError');
-  errEl.style.display='none';
+  const btn=document.getElementById('btnSave');
+  clearTabErrors();
 
   const body={
     role_label: document.getElementById('mRoleLabel').value.trim()||null,
     hours_week: document.getElementById('mHours').value?parseInt(document.getElementById('mHours').value):null,
     salary_fijo: document.getElementById('mSalary').value?parseFloat(document.getElementById('mSalary').value):null,
     commission: document.getElementById('mCommission').value?parseFloat(document.getElementById('mCommission').value):null,
+    variable_type: _varType!=='none'?_varType:null,
     notes: document.getElementById('mNotes').value.trim()||null,
+    permissions: getPermissionsJson(),
   };
 
   if(!_editingId){
     if(!_pendingUserDetailId){
       const uid=document.getElementById('mUser').value;
-      if(!uid){ errEl.textContent='Selecciona un colaborador.'; errEl.style.display='block'; return; }
+      if(!uid){ showTabError(1,'Selecciona un colaborador.'); setTab(1); return; }
       body.user_detail_id=uid;
     } else {
       body.user_detail_id=_pendingUserDetailId;
@@ -526,10 +842,10 @@ async function saveMember(){
       body:JSON.stringify(body),
     });
     let j={}; try{ j=await r.json(); }catch{}
-    if(!r.ok){ errEl.textContent=j.message||j.detail||'Error al guardar'; errEl.style.display='block'; return; }
-    toast(_editingId?'Miembro actualizado':'Miembro añadido');
+    if(!r.ok){ showTabError(_currentTab,j.message||j.detail||'Error al guardar'); return; }
+    toast(_editingId?'Miembro actualizado':'Miembro añadido al equipo');
     closeModal(); loadTeam();
-  }catch(e){ errEl.textContent=e?.message||'Error de conexión'; errEl.style.display='block'; }
+  }catch(e){ showTabError(_currentTab,e?.message||'Error de conexión'); }
   finally{ btn.disabled=false; }
 }
 

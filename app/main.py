@@ -14,7 +14,7 @@ from app.routers import (
     auth, users, roles, menus, parameters, countries,
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
     analytics, public, session_logs, client_tasks, programs, weekly_menus, client_exercises,
-    calendar_tasks,
+    calendar_tasks, team,
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes, client_aliments
@@ -136,6 +136,7 @@ app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(settings_router.router, prefix=API_PREFIX)
 app.include_router(chat_router, prefix=API_PREFIX)
 app.include_router(chat_ws_router)
+app.include_router(team.router, prefix=API_PREFIX)
 
 
 # ── Global exception handler (no stack traces in production) ──────────────────

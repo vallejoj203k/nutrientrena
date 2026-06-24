@@ -13,7 +13,9 @@ router = APIRouter(prefix="/team", tags=["Team"])
 
 
 class TeamMemberCreateRequest(BaseModel):
-    user_detail_id: str
+    user_detail_id: Optional[str] = None
+    member_name: Optional[str] = None
+    member_email: Optional[str] = None
     role_label: Optional[str] = None
     hours_week: Optional[int] = None
     salary_fijo: Optional[float] = None
@@ -25,6 +27,8 @@ class TeamMemberCreateRequest(BaseModel):
 
 
 class TeamMemberUpdateRequest(BaseModel):
+    member_name: Optional[str] = None
+    member_email: Optional[str] = None
     role_label: Optional[str] = None
     hours_week: Optional[int] = None
     salary_fijo: Optional[float] = None
@@ -37,12 +41,22 @@ class TeamMemberUpdateRequest(BaseModel):
 
 def _serialize(member: TeamMember, db: Session) -> dict:
     ud: UserDetail = member.user_detail
-    client_count = db.query(UserParent).filter(
-        UserParent.parent_user_detail_id == member.user_detail_id
-    ).count()
+    client_count = 0
+    if ud:
+        client_count = db.query(UserParent).filter(
+            UserParent.parent_user_detail_id == member.user_detail_id
+        ).count()
+
+    name = (ud.name if ud else None) or member.member_name or ""
+    last_name = (ud.last_name if ud else None) or ""
+    email = (ud.user.email if ud and ud.user else None) or member.member_email or ""
+    photo = ud.photo if ud else None
+
     return {
         "id": member.id,
         "user_detail_id": member.user_detail_id,
+        "member_name": member.member_name,
+        "member_email": member.member_email,
         "role_label": member.role_label,
         "hours_week": member.hours_week,
         "salary_fijo": member.salary_fijo,
@@ -52,11 +66,10 @@ def _serialize(member: TeamMember, db: Session) -> dict:
         "notes": member.notes,
         "permissions": member.permissions,
         "created_at": member.created_at.isoformat() if member.created_at else None,
-        # from user_detail
-        "name": ud.name if ud else None,
-        "last_name": ud.last_name if ud else None,
-        "email": ud.user.email if ud and ud.user else None,
-        "photo": ud.photo if ud else None,
+        "name": name,
+        "last_name": last_name,
+        "email": email,
+        "photo": photo,
         "client_count": client_count,
     }
 
@@ -81,20 +94,35 @@ def create_team_member(
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
 ):
-    # Verify user_detail exists
-    ud = db.query(UserDetail).filter(UserDetail.id == data.user_detail_id).first()
-    if not ud:
-        return send_error("Usuario no encontrado", code=404)
+    if not data.user_detail_id and not data.member_name:
+        return send_error("Se requiere user_detail_id o member_name", code=400)
 
-    # Prevent duplicates
-    existing = db.query(TeamMember).filter(
-        TeamMember.user_detail_id == data.user_detail_id
-    ).first()
-    if existing:
-        return send_error("Este usuario ya es miembro del equipo", code=400)
+    # If user_detail_id provided, verify it exists
+    if data.user_detail_id:
+        ud = db.query(UserDetail).filter(UserDetail.id == data.user_detail_id).first()
+        if not ud:
+            return send_error("Usuario no encontrado", code=404)
+        # Try to find by email if not already set
+        existing = db.query(TeamMember).filter(
+            TeamMember.user_detail_id == data.user_detail_id
+        ).first()
+        if existing:
+            return send_error("Este usuario ya es miembro del equipo", code=400)
+    else:
+        # Try to auto-link by email
+        linked_id = None
+        if data.member_email:
+            from app.models.user import User
+            user = db.query(User).filter(User.email == data.member_email).first()
+            if user and user.user_detail:
+                linked_id = user.user_detail.id
+        data_dict = data.dict()
+        data_dict['user_detail_id'] = linked_id
 
     member = TeamMember(
         user_detail_id=data.user_detail_id,
+        member_name=data.member_name,
+        member_email=data.member_email,
         role_label=data.role_label,
         hours_week=data.hours_week,
         salary_fijo=data.salary_fijo,
@@ -126,6 +154,10 @@ def update_team_member(
     if not member:
         return send_error("Miembro del equipo no encontrado", code=404)
 
+    if data.member_name is not None:
+        member.member_name = data.member_name
+    if data.member_email is not None:
+        member.member_email = data.member_email
     if data.role_label is not None:
         member.role_label = data.role_label
     if data.hours_week is not None:

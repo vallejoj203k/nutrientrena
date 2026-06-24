@@ -9,7 +9,9 @@ class TeamMember(Base):
     __tablename__ = "team_members"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_detail_id = Column(String(36), ForeignKey("user_details.id"), nullable=False, unique=True)
+    user_detail_id = Column(String(36), ForeignKey("user_details.id"), nullable=True)
+    member_name = Column(String(200), nullable=True)
+    member_email = Column(String(200), nullable=True)
     role_label = Column(String(100), nullable=True)
     hours_week = Column(Integer, nullable=True)
     salary_fijo = Column(Float, nullable=True)

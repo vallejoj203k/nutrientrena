@@ -1,6 +1,6 @@
 """Add organizations, organization_members, and organization_id to content tables
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: aa1bb2cc3dd4
 Revises: z3a4b5c6d7e8
 Create Date: 2026-06-24
 
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import text
 
-revision = 'a1b2c3d4e5f6'
+revision = 'aa1bb2cc3dd4'
 down_revision = 'z3a4b5c6d7e8'
 branch_labels = None
 depends_on = None
@@ -59,10 +59,8 @@ def upgrade() -> None:
         op.create_index(f'ix_{table}_organization_id', table, ['organization_id'])
 
     # ── 4. Data migration: create one org per existing coach/admin ─────────
-    # We use raw SQL here to avoid model import issues during migration
     conn = op.get_bind()
 
-    # Get all COACH (role_id=5) and ADMIN (role_id=2) users that have a user_detail
     coaches = conn.execute(text("""
         SELECT DISTINCT ud.id, ud.name, u.id as user_id
         FROM user_details ud
@@ -78,7 +76,6 @@ def upgrade() -> None:
 
     for coach in coaches:
         org_id = str(uuid.uuid4())
-        # Generate a unique slug from the coach's name
         base_slug = (coach.name or 'org').lower().replace(' ', '-')[:50]
         slug = f"{base_slug}-{org_id[:8]}"
 

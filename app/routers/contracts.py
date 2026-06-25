@@ -395,7 +395,7 @@ def send_contract(
         client_name = f"{c.client.name or ''} {c.client.last_name or ''}".strip() or "Cliente"
 
         resend.Emails.send({
-            "from": f"Alzum.io <noreply@alzum.io>",
+            "from": "Alzum.io <noreply@alzum.io>",
             "to": [client_email],
             "subject": f"{c.title} — {coach_name}",
             "html": f"""

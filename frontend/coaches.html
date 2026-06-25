@@ -1305,18 +1305,18 @@ function renderCmList(list){
   if(!list.length){el.innerHTML='<div class="cm-empty">Sin clientes asignados.</div>';return;}
   el.innerHTML=list.map(c=>{
     const name=((c.name||'')+' '+(c.last_name||'')).trim()||c.email||'—';
-    const col=_statusColor(c.kanban_status||c.status);
+    const statusKey=c.kanban_status||_param(c.status)||'';
+    const col=_statusColor(statusKey);
     const avHtml=c.photo
       ?`<img src="${_esc(c.photo)}" alt=""/>`
       :`${_initials2(name)}`;
-    const statusKey=c.kanban_status||c.status||'';
     return`<div class="cm-client-row${String(_cmSelectedId)===String(c.id)?' selected':''}" onclick="selectCmClient('${c.id}')">
       <div class="cm-cav" style="${c.photo?'':'background:'+_avColor(name)}">${avHtml}</div>
       <div class="cm-cinfo">
         <div class="cm-cname">${_esc(name)}</div>
         <div class="cm-cemail">${_esc(c.email||'—')}</div>
       </div>
-      ${statusKey?`<span class="cm-cstatus" style="background:${col.bg};color:${col.fg};">${statusKey}</span>`:''}
+      ${statusKey?`<span class="cm-cstatus" style="background:${col.bg};color:${col.fg};">${_esc(statusKey)}</span>`:''}
     </div>`;
   }).join('');
 }
@@ -1365,10 +1365,16 @@ async function selectCmClient(clientId){
   }
 }
 
+function _param(v){
+  if(!v) return null;
+  if(typeof v==='string'||typeof v==='number') return String(v);
+  return v.description||v.name||v.label||null;
+}
+
 function renderCmDetail(u){
   const name=((u.name||'')+' '+(u.last_name||'')).trim()||u.email||'—';
-  const status=u.kanban_status||u.status||'—';
-  const col=_statusColor(status);
+  const rawStatus=_param(u.status)||u.kanban_status||null;
+  const col=_statusColor(rawStatus||'');
   const avHtml=u.photo
     ?`<img src="${_esc(u.photo)}" alt=""/>`
     :`${_initials2(name)}`;
@@ -1377,13 +1383,13 @@ function renderCmDetail(u){
   // Quick stats
   const fields=[
     {label:'Teléfono', val:u.phone},
-    {label:'Género', val:u.gender?.name||u.gender},
+    {label:'Género', val:_param(u.gender)},
     {label:'Peso', val:u.weight?`${u.weight} kg`:null},
     {label:'Altura', val:u.height?`${u.height} cm`:null},
-    {label:'Nivel actividad', val:u.activity?.name||u.activity},
-    {label:'Objetivo', val:u.objective?.name||u.objective},
+    {label:'Nivel actividad', val:_param(u.activity)},
+    {label:'Objetivo', val:_param(u.objective)},
     {label:'Ocupación', val:u.occupation},
-    {label:'País', val:u.country?.name||u.country_code},
+    {label:'País', val:_param(u.country)||u.country_code},
     {label:'Inicio', val:u.start_date?new Date(u.start_date).toLocaleDateString('es-ES'):null},
     {label:'Fin plan', val:u.end_date?new Date(u.end_date).toLocaleDateString('es-ES'):null},
   ];
@@ -1402,7 +1408,7 @@ function renderCmDetail(u){
       <div class="cd-pinfo">
         <div class="cd-name">${_esc(name)}</div>
         <div class="cd-email">${_esc(u.email||'—')}</div>
-        ${status!=='—'?`<span class="cd-status-chip" style="background:${col.bg};color:${col.fg};">${status}</span>`:''}
+        ${rawStatus?`<span class="cd-status-chip" style="background:${col.bg};color:${col.fg};">${_esc(rawStatus)}</span>`:''}
       </div>
     </div>
     <div class="cd-section">Información personal</div>

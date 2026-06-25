@@ -712,12 +712,12 @@ function renderCards(members){
       </div>
       ${m.notes?`<div class="card-notes">${m.notes}</div>`:''}
       ${m.user_detail_id ? `
-      <div class="card-clients" id="clients_${m.user_detail_id}" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">
+      <div class="card-clients" id="clients_${m.user_detail_id}" onclick="openClientsDrawer('${safeName}','${m.user_detail_id}')">
         <div class="cc-label">Clientes <span id="cc_count_${m.user_detail_id}"></span></div>
         <div class="cc-loading" id="cc_body_${m.user_detail_id}">Cargando…</div>
       </div>` : ''}
       <div class="card-actions">
-        ${m.user_detail_id ? `<button class="btn btn-primary btn-sm" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">Ver clientes</button>` : `<span style="font-size:12px;color:#9CA3AF;">Sin cuenta vinculada</span>`}
+        ${m.user_detail_id ? `<button class="btn btn-primary btn-sm" onclick="openClientsDrawer('${safeName}','${m.user_detail_id}')">Ver clientes</button>` : `<span style="font-size:12px;color:#9CA3AF;">Sin cuenta vinculada</span>`}
       </div>
     `;
     grid.appendChild(card);

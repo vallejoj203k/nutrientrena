@@ -97,10 +97,13 @@
     .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--indigo);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .img-upload-zone{border:2px dashed #E5E7EB;border-radius:10px;padding:20px 12px;text-align:center;cursor:pointer;transition:.15s;background:#FAFAFA;color:#9CA3AF;font-size:12px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
-    .img-upload-zone:hover{border-color:var(--indigo);background:#F5F3FF;color:var(--indigo);}
+    .img-upload-zone:hover,.img-upload-zone.drag-over{border-color:var(--indigo);background:#F5F3FF;color:var(--indigo);}
+    .img-upload-zone.drag-over{border-style:solid;}
     .img-preview-wrap{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1/1;}
     .img-preview-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
     .img-preview-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:26px;height:26px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;}
+    .video-preview-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;}
+    .video-preview-label{flex:1;font-size:11px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .ms-wrap{position:relative;}
     .ms-btn{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;text-align:left;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:#6B7280;transition:.15s;font-family:inherit;}
     .ms-btn:hover,.ms-btn.open{border-color:var(--indigo);}
@@ -349,8 +352,22 @@
           </div>
         </div>
         <div class="form-group" style="flex:1">
-          <label>URL video</label>
-          <input id="ex_video" placeholder="https://…"/>
+          <label>Video</label>
+          <input type="file" id="ex_videoFile" accept="video/*" style="display:none" onchange="uploadExVideo(this)"/>
+          <div id="ex_videoZone" class="img-upload-zone" style="aspect-ratio:16/9;"
+               onclick="document.getElementById('ex_videoFile').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="onExVideoDrop(event)">
+            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polygon points="10 12 15 15 10 18 10 12" fill="currentColor" stroke="none" stroke-width="0"/></svg>
+            <span>Arrastra un video o haz clic</span>
+          </div>
+          <div id="ex_videoPreview" class="video-preview-bar" style="display:none">
+            <button class="play-btn" id="ex_videoPlayBtn" type="button" title="Vista previa"><svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+            <span id="ex_videoLabel" class="video-preview-label"></span>
+            <button type="button" style="flex-shrink:0;background:rgba(0,0,0,.45);border:none;border-radius:50%;width:22px;height:22px;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1;" onclick="removeExVideo()" title="Quitar">×</button>
+          </div>
+          <input id="ex_video" placeholder="O pega una URL de YouTube, Vimeo…" style="margin-top:6px" oninput="onExVideoUrlInput(this.value)"/>
         </div>
       </div>
       <div class="form-group">
@@ -550,6 +567,57 @@ function setExImagePreview(url){
   else{zone.style.display='';wrap.style.display='none';}
 }
 function removeExImage(){setExImagePreview(null);document.getElementById('ex_imageFile').value='';}
+
+function _setExVideoPreview(url){
+  const zone=document.getElementById('ex_videoZone');
+  const preview=document.getElementById('ex_videoPreview');
+  const label=document.getElementById('ex_videoLabel');
+  const input=document.getElementById('ex_video');
+  if(url){
+    zone.style.display='none';preview.style.display='';
+    label.textContent=url;input.value=url;
+    document.getElementById('ex_videoPlayBtn').onclick=()=>playVideo(url);
+  }else{
+    zone.style.display='';preview.style.display='none';input.value='';
+  }
+}
+function onExVideoUrlInput(val){
+  if(val.trim()){
+    document.getElementById('ex_videoZone').style.display='none';
+    const preview=document.getElementById('ex_videoPreview');
+    preview.style.display='';
+    document.getElementById('ex_videoLabel').textContent=val.trim();
+    document.getElementById('ex_videoPlayBtn').onclick=()=>playVideo(val.trim());
+  }else{
+    document.getElementById('ex_videoZone').style.display='';
+    document.getElementById('ex_videoPreview').style.display='none';
+  }
+}
+function removeExVideo(){
+  _setExVideoPreview(null);
+  document.getElementById('ex_videoFile').value='';
+}
+async function uploadExVideo(input){
+  const file=input.files[0];if(!file)return;
+  const fd=new FormData();fd.append('file',file);
+  try{
+    const r=await fetch(`${API}/files/upload`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd});
+    const d=await r.json();
+    if(d.data?.url)_setExVideoPreview(d.data.url);
+    else showToast('Error al subir video','error');
+  }catch{showToast('Error al subir video','error');}
+}
+function onExVideoDrop(e){
+  e.preventDefault();
+  document.getElementById('ex_videoZone').classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith('video/')){
+    const dt=new DataTransfer();dt.items.add(file);
+    const inp=document.getElementById('ex_videoFile');inp.files=dt.files;
+    uploadExVideo(inp);
+  }
+}
+
 async function uploadExImage(input){
   const file=input.files[0];if(!file)return;
   const fd=new FormData();fd.append('file',file);
@@ -590,7 +658,8 @@ document.addEventListener('click',e=>{
 async function openExerciseModal(id=null){
   editingExerciseId=id;
   document.getElementById('exerciseModalTitle').textContent=id?'Editar ejercicio':'Nuevo ejercicio';
-  ['ex_name','ex_desc','ex_video'].forEach(f=>document.getElementById(f).value='');
+  ['ex_name','ex_desc'].forEach(f=>document.getElementById(f).value='');
+  _setExVideoPreview(null);
   document.getElementById('ex_type').value='';
   document.getElementById('ex_location').value='';
   document.getElementById('ex_state').value='1';
@@ -612,7 +681,7 @@ async function openExerciseModal(id=null){
       document.getElementById('ex_type').value=ex.exercise_type||'';
       document.getElementById('ex_location').value=ex.location||'';
       setExImagePreview(ex.image||null);
-      document.getElementById('ex_video').value=ex.video_url||'';
+      _setExVideoPreview(ex.video_url||null);
       document.getElementById('ex_state').value=ex.state??1;
     }catch{showToast('Error al cargar ejercicio','error');return;}
   }

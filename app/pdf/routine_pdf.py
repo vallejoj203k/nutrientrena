@@ -4,6 +4,7 @@ Generador de PDF para rutinas usando ReportLab.
 import io
 import urllib.request
 import ssl
+import html as _html
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib.colors import HexColor, white
@@ -296,9 +297,15 @@ def generate_routine_pdf(routine) -> bytes:
                       else "—")
             )
             img_cell = _fetch_image(training.image if training else None) or Paragraph("—", styles["body"])
+            video_url = training.video_url if training else None
+            if video_url:
+                vesc = _html.escape(video_url)
+                name_text = f'{_html.escape(exercise_name)}<br/><link href="{vesc}"><font color="#6366F1" size="7">&#9654; ver video</font></link>'
+            else:
+                name_text = _html.escape(exercise_name)
             rows.append([
                 img_cell,
-                Paragraph(exercise_name,               styles["body"]),
+                Paragraph(name_text,                   styles["body"]),
                 Paragraph(muscle_name,                 styles["body"]),
                 Paragraph(str(detail.series or "—"),   styles["body"]),
                 Paragraph(str(detail.repetitions or "—"), styles["body"]),

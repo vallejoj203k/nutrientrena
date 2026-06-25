@@ -48,7 +48,7 @@ async def upload_file(
     is_video = file.content_type in VIDEO_TYPES
     if file.content_type not in ALLOWED_TYPES and not is_video:
         return send_error(
-            f"Tipo de archivo no permitido. Imágenes: JPG, PNG, WEBP, GIF. Videos: MP4, WEBM, MOV.", code=400
+            "Tipo de archivo no permitido. Imágenes: JPG, PNG, WEBP, GIF. Videos: MP4, WEBM, MOV.", code=400
         )
 
     content = await file.read()

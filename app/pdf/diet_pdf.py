@@ -10,54 +10,78 @@ from reportlab.platypus import (
     HRFlowable, KeepTogether,
 )
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
-# ── Brand colors ──────────────────────────────────────────────────────────────
-PURPLE      = HexColor("#5B2D8E")
-PURPLE_LIGHT = HexColor("#EDE7F6")
-PURPLE_MID  = HexColor("#7E57C2")
-GRAY_BG     = HexColor("#F8F6FC")
-GRAY_TEXT   = HexColor("#555555")
-GRAY_BORDER = HexColor("#DDDDDD")
+# ── Brand colors (Alzum.io) ───────────────────────────────────────────────────
+INDIGO       = HexColor("#4F46E5")
+INDIGO_DARK  = HexColor("#4338CA")
+INDIGO_PALE  = HexColor("#EEF2FF")
+INDIGO_MID   = HexColor("#6366F1")
+INDIGO_LIGHT = HexColor("#818CF8")
+GRAY_BG      = HexColor("#F9FAFB")
+GRAY_BORDER  = HexColor("#E5E7EB")
+GRAY_TEXT    = HexColor("#6B7280")
+TEXT_DARK    = HexColor("#111827")
+TEXT_MID     = HexColor("#374151")
+WHITE        = white
 
 
 def _styles():
     return {
-        "title": ParagraphStyle(
-            "Title",
+        "brand": ParagraphStyle(
+            "Brand",
             fontName="Helvetica-Bold",
-            fontSize=22,
-            textColor=white,
-            alignment=TA_CENTER,
-            spaceAfter=4,
+            fontSize=20,
+            textColor=WHITE,
+            alignment=TA_LEFT,
+        ),
+        "brand_dot": ParagraphStyle(
+            "BrandDot",
+            fontName="Helvetica",
+            fontSize=20,
+            textColor=INDIGO_LIGHT,
+            alignment=TA_LEFT,
+        ),
+        "doc_type": ParagraphStyle(
+            "DocType",
+            fontName="Helvetica",
+            fontSize=10,
+            textColor=HexColor("#C7D2FE"),
+            alignment=TA_RIGHT,
         ),
         "subtitle": ParagraphStyle(
             "Subtitle",
-            fontName="Helvetica",
-            fontSize=11,
-            textColor=HexColor("#E0D0FF"),
-            alignment=TA_CENTER,
+            fontName="Helvetica-Bold",
+            fontSize=13,
+            textColor=WHITE,
+            alignment=TA_RIGHT,
         ),
         "section": ParagraphStyle(
             "Section",
             fontName="Helvetica-Bold",
-            fontSize=13,
-            textColor=PURPLE,
-            spaceBefore=14,
+            fontSize=11,
+            textColor=INDIGO,
+            spaceBefore=16,
             spaceAfter=6,
         ),
         "meal_name": ParagraphStyle(
             "MealName",
             fontName="Helvetica-Bold",
-            fontSize=11,
-            textColor=white,
+            fontSize=10,
+            textColor=WHITE,
         ),
         "body": ParagraphStyle(
             "Body",
             fontName="Helvetica",
             fontSize=9,
-            textColor=GRAY_TEXT,
+            textColor=TEXT_MID,
             spaceAfter=2,
+        ),
+        "body_bold": ParagraphStyle(
+            "BodyBold",
+            fontName="Helvetica-Bold",
+            fontSize=9,
+            textColor=TEXT_DARK,
         ),
         "macro_label": ParagraphStyle(
             "MacroLabel",
@@ -69,145 +93,195 @@ def _styles():
         "macro_value": ParagraphStyle(
             "MacroValue",
             fontName="Helvetica-Bold",
-            fontSize=14,
-            textColor=PURPLE,
+            fontSize=15,
+            textColor=INDIGO,
             alignment=TA_CENTER,
+        ),
+        "client_label": ParagraphStyle(
+            "ClientLabel",
+            fontName="Helvetica-Bold",
+            fontSize=8,
+            textColor=INDIGO,
+        ),
+        "client_value": ParagraphStyle(
+            "ClientValue",
+            fontName="Helvetica",
+            fontSize=8,
+            textColor=TEXT_MID,
         ),
         "footer": ParagraphStyle(
             "Footer",
             fontName="Helvetica",
             fontSize=8,
-            textColor=HexColor("#AAAAAA"),
+            textColor=GRAY_TEXT,
             alignment=TA_CENTER,
+        ),
+        "total_row": ParagraphStyle(
+            "TotalRow",
+            fontName="Helvetica-Bold",
+            fontSize=8,
+            textColor=INDIGO,
         ),
     }
 
 
-def _macro_table(kcal, proteins, carbs, fats, styles):
-    """Tarjeta de macros en la parte superior del documento."""
-    def cell(value, label):
+def _header_table(title, doc_width, styles):
+    """Banner superior con branding Alzum.io y título del plan."""
+    brand_cell = Paragraph("<b>Alzum</b><font color='#818CF8'>.io</font>", ParagraphStyle(
+        "BrandInline",
+        fontName="Helvetica-Bold",
+        fontSize=22,
+        textColor=WHITE,
+    ))
+    type_cell = Paragraph("Plan de Alimentación", styles["doc_type"])
+    title_cell = Paragraph(title or "Dieta", styles["subtitle"])
+
+    tbl = Table(
+        [[brand_cell, title_cell], ["", type_cell]],
+        colWidths=[doc_width * 0.45, doc_width * 0.55],
+    )
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND",    (0, 0), (-1, -1), INDIGO),
+        ("TOPPADDING",    (0, 0), (-1, -1), 16),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 16),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 18),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 18),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("SPAN",          (0, 0), (0, 1)),
+    ]))
+    return tbl
+
+
+def _macro_table(kcal, proteins, carbs, fats, styles, doc_width):
+    """Tarjeta de macros con 4 celdas."""
+    def cell(value, label, color=INDIGO):
         return [
-            Paragraph(str(value) if value is not None else "—", styles["macro_value"]),
+            Paragraph(str(value) if value is not None else "—",
+                      ParagraphStyle("MV", fontName="Helvetica-Bold",
+                                     fontSize=16, textColor=color, alignment=TA_CENTER)),
             Paragraph(label, styles["macro_label"]),
         ]
 
     data = [[
-        cell(f"{round(kcal)} kcal" if kcal else "—", "Calorías"),
-        cell(f"{round(proteins)} g" if proteins else "—", "Proteínas"),
-        cell(f"{round(carbs)} g" if carbs else "—", "Carbohidratos"),
-        cell(f"{round(fats)} g" if fats else "—", "Grasas"),
+        cell(f"{round(kcal)} kcal" if kcal else "—",    "Calorías",      INDIGO),
+        cell(f"{round(proteins)} g" if proteins else "—", "Proteínas",    INDIGO_MID),
+        cell(f"{round(carbs)} g" if carbs else "—",       "Carbohidratos", INDIGO_MID),
+        cell(f"{round(fats)} g" if fats else "—",         "Grasas",        INDIGO_LIGHT),
     ]]
 
-    tbl = Table(data, colWidths=[4.3 * cm] * 4)
+    col = doc_width / 4
+    tbl = Table(data, colWidths=[col] * 4)
     tbl.setStyle(TableStyle([
-        ("BACKGROUND",   (0, 0), (-1, -1), GRAY_BG),
-        ("GRID",         (0, 0), (-1, -1), 0.5, GRAY_BORDER),
-        ("ALIGN",        (0, 0), (-1, -1), "CENTER"),
-        ("VALIGN",       (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING",   (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING",(0, 0), (-1, -1), 10),
-        ("ROUNDEDCORNERS", [6]),
+        ("BACKGROUND",    (0, 0), (0, -1), INDIGO_PALE),
+        ("BACKGROUND",    (1, 0), (2, -1), HexColor("#F0F0FF")),
+        ("BACKGROUND",    (3, 0), (3, -1), GRAY_BG),
+        ("LINEAFTER",     (0, 0), (2, -1), 0.5, GRAY_BORDER),
+        ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING",    (0, 0), (-1, -1), 12),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+        ("BOX",           (0, 0), (-1, -1), 0.5, GRAY_BORDER),
+    ]))
+    return tbl
+
+
+def _section_header(text, styles):
+    """Título de sección con barra izquierda de color."""
+    tbl = Table(
+        [[Paragraph(text, styles["section"])]],
+        colWidths=None,
+    )
+    tbl.setStyle(TableStyle([
+        ("LEFTPADDING",   (0, 0), (-1, -1), 10),
+        ("TOPPADDING",    (0, 0), (-1, -1), 2),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+        ("LINEBEFORE",    (0, 0), (-1, -1), 3, INDIGO),
     ]))
     return tbl
 
 
 def generate_diet_pdf(diet) -> bytes:
-    """
-    Recibe un objeto Diet (con relaciones cargadas) y devuelve bytes PDF.
-    """
+    """Recibe un objeto Diet (con relaciones cargadas) y devuelve bytes PDF."""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
         leftMargin=1.8 * cm,
         rightMargin=1.8 * cm,
-        topMargin=2 * cm,
+        topMargin=1.8 * cm,
         bottomMargin=2 * cm,
     )
 
     styles = _styles()
     story = []
 
-    # ── Header banner ─────────────────────────────────────────────────────────
-    header_data = [[
-        Paragraph("NUTRIENTRENA", styles["title"]),
-    ], [
-        Paragraph(diet.title or "Plan de Alimentación", styles["subtitle"]),
-    ]]
-    header_tbl = Table(header_data, colWidths=[doc.width])
-    header_tbl.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, -1), PURPLE),
-        ("TOPPADDING",    (0, 0), (-1, -1), 14),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 14),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 10),
-        ("RIGHTPADDING",  (0, 0), (-1, -1), 10),
-    ]))
-    story.append(header_tbl)
-    story.append(Spacer(1, 0.5 * cm))
+    # ── Header ───────────────────────────────────────────────────────────────
+    story.append(_header_table(diet.title, doc.width, styles))
+    story.append(Spacer(1, 0.6 * cm))
 
-    # ── Macros ────────────────────────────────────────────────────────────────
-    detail = diet.detail
-    kcal = diet.calories
+    # ── Macros ───────────────────────────────────────────────────────────────
+    detail   = diet.detail
+    kcal     = diet.calories
     proteins = detail.proteins if detail else None
     carbs    = detail.carbs    if detail else None
     fats     = detail.fats     if detail else None
 
-    story.append(_macro_table(kcal, proteins, carbs, fats, styles))
+    story.append(_macro_table(kcal, proteins, carbs, fats, styles, doc.width))
     story.append(Spacer(1, 0.6 * cm))
 
-    # ── Detalle del cliente (si existe) ───────────────────────────────────────
+    # ── Datos del cliente ─────────────────────────────────────────────────────
     if detail and any([detail.weight, detail.height, detail.age]):
-        story.append(Paragraph("Datos del cliente", styles["section"]))
-        info_rows = []
-        if detail.weight:
-            info_rows.append(["Peso", f"{detail.weight} kg"])
-        if detail.height:
-            info_rows.append(["Altura", f"{detail.height} cm"])
-        if detail.age:
-            info_rows.append(["Edad", f"{detail.age} años"])
-        if detail.body_fat:
-            info_rows.append(["Grasa corporal", f"{detail.body_fat}%"])
+        story.append(_section_header("Datos del cliente", styles))
+        story.append(Spacer(1, 0.2 * cm))
 
-        info_tbl = Table(info_rows, colWidths=[4 * cm, 6 * cm])
+        client_rows = []
+        if detail.weight:    client_rows.append([Paragraph("Peso",           styles["client_label"]), Paragraph(f"{detail.weight} kg",   styles["client_value"])])
+        if detail.height:    client_rows.append([Paragraph("Altura",         styles["client_label"]), Paragraph(f"{detail.height} cm",   styles["client_value"])])
+        if detail.age:       client_rows.append([Paragraph("Edad",           styles["client_label"]), Paragraph(f"{detail.age} años",    styles["client_value"])])
+        if detail.body_fat:  client_rows.append([Paragraph("Grasa corporal", styles["client_label"]), Paragraph(f"{detail.body_fat}%",   styles["client_value"])])
+
+        info_tbl = Table(client_rows, colWidths=[4 * cm, doc.width - 4 * cm])
         info_tbl.setStyle(TableStyle([
-            ("FONTNAME",     (0, 0), (0, -1), "Helvetica-Bold"),
-            ("FONTNAME",     (1, 0), (1, -1), "Helvetica"),
-            ("FONTSIZE",     (0, 0), (-1, -1), 9),
-            ("TEXTCOLOR",    (0, 0), (0, -1), PURPLE),
-            ("TEXTCOLOR",    (1, 0), (1, -1), GRAY_TEXT),
-            ("TOPPADDING",   (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 4),
-            ("LINEBELOW",    (0, 0), (-1, -2), 0.3, GRAY_BORDER),
+            ("BACKGROUND",    (0, 0), (-1, -1), GRAY_BG),
+            ("TOPPADDING",    (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 10),
+            ("LINEBELOW",     (0, 0), (-1, -2), 0.3, GRAY_BORDER),
+            ("BOX",           (0, 0), (-1, -1), 0.5, GRAY_BORDER),
         ]))
         story.append(info_tbl)
         story.append(Spacer(1, 0.4 * cm))
 
-    # ── Comidas ───────────────────────────────────────────────────────────────
-    story.append(Paragraph("Plan de comidas", styles["section"]))
+    # ── Plan de comidas ───────────────────────────────────────────────────────
+    story.append(_section_header("Plan de comidas", styles))
+    story.append(Spacer(1, 0.2 * cm))
 
-    col_w = [doc.width * 0.42, doc.width * 0.15,
-             doc.width * 0.14, doc.width * 0.14, doc.width * 0.15]
+    col_w = [
+        doc.width * 0.38,
+        doc.width * 0.14,
+        doc.width * 0.14,
+        doc.width * 0.14,
+        doc.width * 0.20,
+    ]
 
     for food in (diet.foods or []):
-        # Encabezado de la comida
         meal_header = Table(
             [[Paragraph(food.name or "Comida", styles["meal_name"])]],
             colWidths=[doc.width],
         )
         meal_header.setStyle(TableStyle([
-            ("BACKGROUND",    (0, 0), (-1, -1), PURPLE_MID),
+            ("BACKGROUND",    (0, 0), (-1, -1), INDIGO),
             ("TOPPADDING",    (0, 0), (-1, -1), 7),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-            ("LEFTPADDING",   (0, 0), (-1, -1), 10),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 12),
         ]))
 
-        # Tabla de alimentos
         rows = [[
-            Paragraph("<b>Alimento</b>", styles["body"]),
-            Paragraph("<b>Cantidad</b>", styles["body"]),
-            Paragraph("<b>Prot.</b>",    styles["body"]),
-            Paragraph("<b>Carbs.</b>",   styles["body"]),
-            Paragraph("<b>Grasas</b>",   styles["body"]),
+            Paragraph("<b>Alimento</b>",   styles["body"]),
+            Paragraph("<b>Cantidad</b>",   styles["body"]),
+            Paragraph("<b>Prot.</b>",      styles["body"]),
+            Paragraph("<b>Carbs.</b>",     styles["body"]),
+            Paragraph("<b>Grasas</b>",     styles["body"]),
         ]]
 
         total_kcal = 0
@@ -215,8 +289,8 @@ def generate_diet_pdf(diet) -> bytes:
             aliment = dfa.aliment
             if not aliment:
                 continue
-            qty = dfa.quantity or aliment.quantity or 0
-            name = aliment.name or "—"
+            qty        = dfa.quantity or aliment.quantity or 0
+            name       = aliment.name or "—"
             proteins_a = round(aliment.proteins or 0, 1)
             carbs_a    = round(aliment.carbohydrates or 0, 1)
             fats_a     = round(aliment.fats or 0, 1)
@@ -224,43 +298,47 @@ def generate_diet_pdf(diet) -> bytes:
             total_kcal += kcal_a
 
             rows.append([
-                Paragraph(name, styles["body"]),
-                Paragraph(f"{qty} g", styles["body"]),
+                Paragraph(name,             styles["body"]),
+                Paragraph(f"{qty} g",       styles["body"]),
                 Paragraph(f"{proteins_a} g", styles["body"]),
-                Paragraph(f"{carbs_a} g", styles["body"]),
-                Paragraph(f"{fats_a} g", styles["body"]),
+                Paragraph(f"{carbs_a} g",   styles["body"]),
+                Paragraph(f"{fats_a} g",    styles["body"]),
             ])
 
         if total_kcal:
             rows.append([
-                Paragraph(f"<b>Total: {round(total_kcal)} kcal</b>", styles["body"]),
+                Paragraph(f"Total: {round(total_kcal)} kcal", styles["total_row"]),
                 "", "", "", "",
             ])
 
-        aliment_tbl = Table(rows, colWidths=col_w)
-        aliment_tbl.setStyle(TableStyle([
-            ("BACKGROUND",   (0, 0), (-1, 0), PURPLE_LIGHT),
-            ("FONTNAME",     (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE",     (0, 0), (-1, -1), 8),
-            ("GRID",         (0, 0), (-1, -1), 0.3, GRAY_BORDER),
-            ("TOPPADDING",   (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 4),
-            ("LEFTPADDING",  (0, 0), (-1, -1), 6),
-            ("VALIGN",       (0, 0), (-1, -1), "MIDDLE"),
-            ("BACKGROUND",   (0, -1), (-1, -1), GRAY_BG),
-            ("SPAN",         (0, -1), (-1, -1)),
-        ]))
+        n = len(rows)
+        row_bgs = []
+        for i in range(1, n - (1 if total_kcal else 0)):
+            row_bgs.append(("BACKGROUND", (0, i), (-1, i), WHITE if i % 2 else GRAY_BG))
 
-        story.append(KeepTogether([meal_header, aliment_tbl, Spacer(1, 0.3 * cm)]))
+        aliment_tbl = Table(rows, colWidths=col_w)
+        style_cmds = [
+            ("BACKGROUND",    (0, 0), (-1, 0), INDIGO_PALE),
+            ("TEXTCOLOR",     (0, 0), (-1, 0), INDIGO),
+            ("FONTSIZE",      (0, 0), (-1, -1), 8),
+            ("GRID",          (0, 0), (-1, -1), 0.3, GRAY_BORDER),
+            ("TOPPADDING",    (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 7),
+            ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+            ("BACKGROUND",    (0, n - 1), (-1, n - 1), INDIGO_PALE),
+            ("SPAN",          (0, n - 1), (-1, n - 1)),
+            ("TEXTCOLOR",     (0, n - 1), (-1, n - 1), INDIGO),
+        ] + row_bgs
+
+        aliment_tbl.setStyle(TableStyle(style_cmds))
+        story.append(KeepTogether([meal_header, aliment_tbl, Spacer(1, 0.35 * cm)]))
 
     # ── Footer ────────────────────────────────────────────────────────────────
-    story.append(Spacer(1, 0.5 * cm))
+    story.append(Spacer(1, 0.4 * cm))
     story.append(HRFlowable(width="100%", thickness=0.5, color=GRAY_BORDER))
     story.append(Spacer(1, 0.2 * cm))
-    story.append(Paragraph(
-        "Generado por Nutrientrena · nutrientrena.up.railway.app",
-        styles["footer"],
-    ))
+    story.append(Paragraph("Generado por Alzum.io", styles["footer"]))
 
     doc.build(story)
     return buffer.getvalue()

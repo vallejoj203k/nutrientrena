@@ -336,6 +336,12 @@ def updated(
         setattr(detail, field, value)
 
     if data.role_id is not None:
+        from app.core.dependencies import _user_role_ids
+        updater_roles = _user_role_ids(current_user.id, db)
+        updater_is_coach_only = COACH in updater_roles and ADMIN not in updater_roles and SUPERADMIN not in updater_roles
+        if updater_is_coach_only and data.role_id != 6:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=403, detail="Los coaches solo pueden asignar el rol de cliente")
         role_user = db.query(RoleUser).filter(RoleUser.user_id == detail.user_id).first()
         if role_user:
             role_user.role_id = data.role_id

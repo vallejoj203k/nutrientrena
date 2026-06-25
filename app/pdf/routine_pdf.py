@@ -4,6 +4,8 @@ Generador de PDF para rutinas usando ReportLab.
 import io
 import urllib.request
 import ssl
+import re
+import json as _json
 import html as _html
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
@@ -100,7 +102,9 @@ def _styles():
     }
 
 
-IMG_SIZE = 1.8 * cm
+IMG_SIZE  = 1.8 * cm
+THUMB_W   = 3.0 * cm
+THUMB_H   = 1.7 * cm  # ~16:9
 
 
 def _fetch_image(url: str):
@@ -139,6 +143,42 @@ def _fetch_image(url: str):
         return img
     except Exception as e:
         print(f"PDF image HTTP error ({url}): {e}")
+        return None
+
+
+def _fetch_video_thumbnail(url: str):
+    """Return a small (16:9) Image flowable for YouTube/Vimeo thumbnails, or None."""
+    thumb_url = None
+
+    m = re.search(r'(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([^&\s?]+)', url)
+    if m:
+        thumb_url = f"https://img.youtube.com/vi/{m.group(1)}/mqdefault.jpg"
+    else:
+        m = re.search(r'vimeo\.com/(?:video/)?(\d+)', url)
+        if m:
+            try:
+                req = urllib.request.Request(
+                    f"https://vimeo.com/api/oembed.json?url=https://vimeo.com/{m.group(1)}",
+                    headers={"User-Agent": "Alzum.io/1.0"},
+                )
+                ctx = ssl.create_default_context()
+                with urllib.request.urlopen(req, timeout=8, context=ctx) as resp:
+                    thumb_url = _json.loads(resp.read()).get("thumbnail_url")
+            except Exception:
+                pass
+
+    if not thumb_url:
+        return None
+    try:
+        req = urllib.request.Request(thumb_url, headers={"User-Agent": "Alzum.io/1.0"})
+        ctx = ssl.create_default_context()
+        with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
+            data = resp.read()
+        img = Image(io.BytesIO(data), width=THUMB_W, height=THUMB_H)
+        img.hAlign = "LEFT"
+        return img
+    except Exception as e:
+        print(f"PDF video thumbnail error ({url}): {e}")
         return None
 
 
@@ -296,16 +336,23 @@ def generate_routine_pdf(routine) -> bytes:
                       if training and training.muscle_group
                       else "—")
             )
-            img_cell = _fetch_image(training.image if training else None) or Paragraph("—", styles["body"])
+            img_cell  = _fetch_image(training.image if training else None) or Paragraph("—", styles["body"])
             video_url = training.video_url if training else None
+            name_cell = [Paragraph(_html.escape(exercise_name), styles["body"])]
             if video_url:
-                vesc = _html.escape(video_url)
-                name_text = f'{_html.escape(exercise_name)}<br/><a href="{vesc}" color="#6366F1"><font size="7">&#9654; ver video</font></a>'
-            else:
-                name_text = _html.escape(exercise_name)
+                vesc  = _html.escape(video_url)
+                thumb = _fetch_video_thumbnail(video_url)
+                if thumb:
+                    name_cell.append(Spacer(1, 3))
+                    name_cell.append(thumb)
+                name_cell.append(Spacer(1, 2))
+                name_cell.append(Paragraph(
+                    f'<a href="{vesc}" color="#6366F1"><font size="7">&#9654; ver video</font></a>',
+                    styles["body"],
+                ))
             rows.append([
                 img_cell,
-                Paragraph(name_text,                   styles["body"]),
+                name_cell,
                 Paragraph(muscle_name,                 styles["body"]),
                 Paragraph(str(detail.series or "—"),   styles["body"]),
                 Paragraph(str(detail.repetitions or "—"), styles["body"]),
@@ -340,7 +387,6 @@ def generate_routine_pdf(routine) -> bytes:
             exercise_tbl = Table(
                 rows,
                 colWidths=col_w,
-                rowHeights=[None] + [IMG_SIZE + 0.4 * cm] * (n - 1),
             )
             exercise_tbl.setStyle(TableStyle([
                 ("BACKGROUND",    (0, 0), (-1, 0), INDIGO_PALE),

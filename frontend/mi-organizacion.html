@@ -272,45 +272,21 @@
     <div class="modal-head">
       <div>
         <h2 id="memberModalTitle">Añadir coach al equipo</h2>
-        <p id="memberModalSub">Añade un coach existente o crea uno nuevo</p>
+        <p id="memberModalSub">Crea una cuenta nueva para tu coach</p>
       </div>
       <button class="modal-close" onclick="closeModal('memberModal')">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <!-- Mode toggle (only in add mode) -->
-    <div id="modeToggle" style="display:flex;gap:0;border-bottom:2px solid #E5E7EB;margin:0 0 0;">
-      <button id="modeExisting" onclick="setMode('existing')" style="flex:1;padding:11px 0;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;color:#4F46E5;border-bottom:2.5px solid #4F46E5;margin-bottom:-2px;">Buscar existente</button>
-      <button id="modeNew" onclick="setMode('new')" style="flex:1;padding:11px 0;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;color:#9CA3AF;border-bottom:2.5px solid transparent;margin-bottom:-2px;">Crear nuevo coach</button>
-    </div>
-
-    <!-- Wizard steps (only in existing mode) -->
+    <!-- Wizard steps -->
     <div class="wizard-steps" id="wizardSteps">
-      <div class="w-step active" id="wstep1"><div class="w-step-label">1. Seleccionar coach</div></div>
+      <div class="w-step active" id="wstep1"><div class="w-step-label">1. Datos del coach</div></div>
       <div class="w-step" id="wstep2"><div class="w-step-label">2. Permisos</div></div>
     </div>
 
-    <!-- Panel: Search existing -->
+    <!-- Panel 1: Create new coach -->
     <div class="tab-panel active" id="panel1">
-      <div class="form-group">
-        <label>Buscar por nombre o email</label>
-        <input type="text" id="coachSearch" placeholder="Escribe para buscar…" oninput="searchCoaches(this.value)" autocomplete="off"/>
-        <div class="form-hint">Solo aparecen coaches que no pertenecen a esta organización</div>
-      </div>
-      <div id="searchResults" style="display:none;" class="search-results"></div>
-      <div id="selectedUserCard" style="display:none;" class="selected-user-card">
-        <div class="search-result-avatar" id="selectedAvatar" style="background:#4F46E5;">?</div>
-        <div class="selected-user-info">
-          <div class="selected-user-name" id="selectedName">—</div>
-          <div class="selected-user-email" id="selectedEmail">—</div>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="clearSelectedUser()">Cambiar</button>
-      </div>
-    </div>
-
-    <!-- Panel: Create new coach -->
-    <div class="tab-panel" id="panelNew">
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group" style="margin:0;">
@@ -334,7 +310,7 @@
       </div>
     </div>
 
-    <!-- Panel: Permissions (step 2 for both modes) -->
+    <!-- Panel 2: Permissions -->
     <div class="tab-panel" id="panel2">
       <div class="info-banner">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -392,9 +368,6 @@
   let _org = null;
   let _isOwner = false;
   let _editingMemberId = null;
-  let _addMode = 'existing'; // 'existing' | 'new'
-  let _selectedUser = null;
-  let _allCoaches = [];
   let _currentPerms = {};
 
   // ── Permission definitions ────────────────────────────────────────────────
@@ -624,118 +597,30 @@
     grid.innerHTML = html;
   }
 
-  // ── Mode toggle (existing / new) ──────────────────────────────────────────
-  function setMode(mode) {
-    _addMode = mode;
-    const isExisting = mode === 'existing';
-    document.getElementById('modeExisting').style.cssText += ';color:' + (isExisting ? '#4F46E5' : '#9CA3AF') + ';border-bottom:2.5px solid ' + (isExisting ? '#4F46E5' : 'transparent');
-    document.getElementById('modeNew').style.cssText += ';color:' + (!isExisting ? '#4F46E5' : '#9CA3AF') + ';border-bottom:2.5px solid ' + (!isExisting ? '#4F46E5' : 'transparent');
-    document.getElementById('wizardSteps').style.display = isExisting ? 'flex' : 'none';
-    document.getElementById('panel1').className = 'tab-panel' + (isExisting ? ' active' : '');
-    document.getElementById('panelNew').className = 'tab-panel' + (!isExisting ? ' active' : '');
-    document.getElementById('panel2').className = 'tab-panel';
-    document.getElementById('footerNext').style.display = 'flex';
-    document.getElementById('footerSave').style.display = 'none';
-    document.getElementById('footerBack').style.display = 'none';
-    if (isExisting) {
-      document.getElementById('wstep1').className = 'w-step active';
-      document.getElementById('wstep2').className = 'w-step';
-    }
-  }
-
   // ── Add member modal ──────────────────────────────────────────────────────
-  async function openAddMember() {
+  function openAddMember() {
     _editingMemberId = null;
-    _selectedUser = null;
     _currentPerms = {};
-    _addMode = 'existing';
     document.getElementById('memberModalTitle').textContent = 'Añadir coach al equipo';
-    document.getElementById('memberModalSub').textContent = 'Añade un coach existente o crea uno nuevo';
-    document.getElementById('modeToggle').style.display = 'flex';
-    document.getElementById('coachSearch').value = '';
-    document.getElementById('searchResults').style.display = 'none';
-    document.getElementById('selectedUserCard').style.display = 'none';
+    document.getElementById('memberModalSub').textContent = 'Crea una cuenta nueva para tu coach';
     document.getElementById('newCoachName').value = '';
     document.getElementById('newCoachLastName').value = '';
     document.getElementById('newCoachEmail').value = '';
     document.getElementById('newCoachPassword').value = '';
     document.getElementById('newCoachError').style.display = 'none';
-    setMode('existing');
+    goStep(1, true);
     openModal('memberModal');
-    await loadAvailableCoaches();
   }
 
   function openEditMember(memberId, memberName) {
     _editingMemberId = memberId;
-    _selectedUser = null;
     const member = (_org.members || []).find(m => m.id === memberId);
     _currentPerms = { ...(member?.permissions || {}) };
     document.getElementById('memberModalTitle').textContent = 'Editar permisos';
     document.getElementById('memberModalSub').textContent = `Permisos de ${memberName}`;
-    document.getElementById('modeToggle').style.display = 'none';
     buildPermissionsPanel(_currentPerms);
     goStep(2, true);
     openModal('memberModal');
-  }
-
-  async function loadAvailableCoaches() {
-    try {
-      const r = await fetch(`${API}/users/coach/findAll`, { headers: h() });
-      if (!r.ok) return;
-      const j = await r.json();
-      _allCoaches = (j.data || j || []).filter(u => {
-        // Exclude members already in the org
-        const existingIds = (_org.members || []).map(m => m.user_detail_id);
-        return !existingIds.includes(u.id);
-      });
-    } catch { _allCoaches = []; }
-  }
-
-  function searchCoaches(query) {
-    const res = document.getElementById('searchResults');
-    if (!query.trim()) { res.style.display = 'none'; return; }
-    const matches = _allCoaches.filter(u => {
-      const name = `${u.name || ''} ${u.last_name || ''}`.toLowerCase();
-      const email = (u.email || '').toLowerCase();
-      return name.includes(query.toLowerCase()) || email.includes(query.toLowerCase());
-    }).slice(0, 6);
-
-    if (!matches.length) {
-      res.style.display = 'block';
-      res.innerHTML = '<div style="padding:14px;text-align:center;font-size:13px;color:#9CA3AF;">No se encontraron coaches</div>';
-      return;
-    }
-
-    res.style.display = 'block';
-    res.innerHTML = matches.map(u => {
-      const name = `${u.name || ''} ${u.last_name || ''}`.trim();
-      const color = avatarColor(name);
-      return `<div class="search-result-item" onclick="selectUser('${u.id}','${esc(name)}','${esc(u.email || '')}')">
-        <div class="search-result-avatar" style="background:${color};">${initials(name)}</div>
-        <div>
-          <div class="search-result-name">${esc(name)}</div>
-          <div class="search-result-email">${esc(u.email || '')}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  function selectUser(id, name, email) {
-    _selectedUser = { id, name, email };
-    document.getElementById('coachSearch').value = '';
-    document.getElementById('searchResults').style.display = 'none';
-    const color = avatarColor(name);
-    document.getElementById('selectedAvatar').style.background = color;
-    document.getElementById('selectedAvatar').textContent = initials(name);
-    document.getElementById('selectedName').textContent = name;
-    document.getElementById('selectedEmail').textContent = email;
-    document.getElementById('selectedUserCard').style.display = 'flex';
-  }
-
-  function clearSelectedUser() {
-    _selectedUser = null;
-    document.getElementById('selectedUserCard').style.display = 'none';
-    document.getElementById('coachSearch').value = '';
   }
 
   // ── Permissions panel ─────────────────────────────────────────────────────
@@ -769,15 +654,8 @@
   // ── Step navigation ───────────────────────────────────────────────────────
   function goStep(step, force = false) {
     const isEdit = !!_editingMemberId;
-    const isNew = _addMode === 'new';
 
-    if (step === 2 && !isEdit && !isNew && !_selectedUser && !force) {
-      showToast('Selecciona un coach primero', 'error');
-      return;
-    }
-
-    if (step === 2 && isNew && !force) {
-      // Validate new coach form fields
+    if (step === 2 && !isEdit && !force) {
       const name = document.getElementById('newCoachName').value.trim();
       const email = document.getElementById('newCoachEmail').value.trim();
       const pwd = document.getElementById('newCoachPassword').value;
@@ -788,24 +666,16 @@
       errEl.style.display = 'none';
     }
 
-    // Build perms panel when entering step 2
     if (step === 2) buildPermissionsPanel(_currentPerms);
 
-    // Update wizard
     document.getElementById('wstep1').className = 'w-step' + (step === 1 ? ' active' : ' done');
     document.getElementById('wstep2').className = 'w-step' + (step === 2 ? ' active' : '');
-    document.getElementById('wizardSteps').style.display = (isEdit || isNew) ? 'none' : 'flex';
-
-    // Show panels
-    document.getElementById('panel1').className = 'tab-panel' + (!isNew && step === 1 ? ' active' : '');
-    document.getElementById('panelNew').className = 'tab-panel' + (isNew && step === 1 ? ' active' : '');
+    document.getElementById('wizardSteps').style.display = isEdit ? 'none' : 'flex';
+    document.getElementById('panel1').className = 'tab-panel' + (step === 1 ? ' active' : '');
     document.getElementById('panel2').className = 'tab-panel' + (step === 2 ? ' active' : '');
-    document.getElementById('modeToggle').style.display = (step === 1 && !isEdit) ? 'flex' : 'none';
-
-    // Footer
-    document.getElementById('footerBack').style.display  = (step === 2 && !isEdit) ? 'flex' : 'none';
-    document.getElementById('footerNext').style.display  = (step === 1) ? 'flex' : 'none';
-    document.getElementById('footerSave').style.display  = (step === 2) ? 'flex' : 'none';
+    document.getElementById('footerBack').style.display = (step === 2 && !isEdit) ? 'flex' : 'none';
+    document.getElementById('footerNext').style.display = (step === 1) ? 'flex' : 'none';
+    document.getElementById('footerSave').style.display = (step === 2) ? 'flex' : 'none';
   }
 
   // ── Save member ───────────────────────────────────────────────────────────
@@ -816,7 +686,6 @@
 
     try {
       if (_editingMemberId) {
-        // Update permissions only
         const r = await fetch(`${API}/organizations/${_org.id}/members/${_editingMemberId}/permissions`, {
           method: 'PATCH',
           headers: h(),
@@ -824,8 +693,7 @@
         });
         if (!r.ok) { const j = await r.json(); throw new Error(j.message || j.detail || 'Error'); }
         showToast('Permisos actualizados');
-      } else if (_addMode === 'new') {
-        // Create new coach account and add to org
+      } else {
         const name = document.getElementById('newCoachName').value.trim();
         const last_name = document.getElementById('newCoachLastName').value.trim() || null;
         const email = document.getElementById('newCoachEmail').value.trim();
@@ -838,15 +706,6 @@
         const j = await r.json();
         if (!r.ok) { throw new Error(j.message || j.detail || 'Error al crear el coach'); }
         showToast(`Coach ${name} creado y añadido al equipo`);
-      } else {
-        // Add existing coach
-        const r = await fetch(`${API}/organizations/${_org.id}/members`, {
-          method: 'POST',
-          headers: h(),
-          body: JSON.stringify({ user_detail_id: _selectedUser.id, permissions: _currentPerms }),
-        });
-        if (!r.ok) { const j = await r.json(); throw new Error(j.message || j.detail || 'Error'); }
-        showToast('Coach añadido al equipo');
       }
       closeModal('memberModal');
       await loadOrg();

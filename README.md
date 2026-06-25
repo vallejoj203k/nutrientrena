@@ -1022,4 +1022,96 @@ Módulo completo para crear programas de entrenamiento estructurados con fases y
 
 ---
 
-*Nutrientrena v2.0 — Junio 2026*
+### Sprint A — Alzum.io
+
+#### Cambios incluidos
+
+| Área | Funcionalidad |
+|------|--------------|
+| Branding | PDFs renombrados de "Nutrientrena" a **Alzum.io** con nueva paleta índigo |
+| PDF entrega | Asignar dieta o rutina desde perfil de cliente genera el PDF y lo envía automáticamente por email |
+| PDF diseño | Header con logo Alzum.io, tarjeta de macros, secciones con borde lateral, filas alternas |
+| Coaches | Foto de perfil en el modal de miembro de equipo (subida por archivo o URL) |
+| Ejercicios | Campo de video con zona de arrastre (drag & drop) o URL; vista previa y botón de reproducción en la tabla |
+| PDF rutina | Miniatura del video (YouTube/Vimeo) embebida en el PDF + enlace "▶ ver video" |
+| Subida de archivos | Endpoint `/files/upload` acepta ahora video (mp4, webm, mov, avi, mkv) hasta 200 MB |
+| Badge de rol | Topbar de `chat.html` y `client-profile.html` muestra el rol del usuario |
+
+---
+
+#### Guía de pruebas — Sprint A
+
+##### A.1 Badge de rol en topbar
+
+1. Iniciar sesión con un usuario COACH
+2. Navegar a **Chat** (`/app/chat.html`) → debe aparecer un badge "Coach" junto al encabezado "Mensajes"
+3. Navegar al perfil de cualquier cliente → debe aparecer el badge de rol en la barra de acciones (junto a "Editar")
+4. Cerrar sesión e iniciar como ADMIN → verificar que el badge cambia a "Admin"
+
+##### A.2 Foto de miembro de equipo
+
+1. Ir a **Equipo** (`/app/coaches.html`)
+2. Hacer clic en **+ Añadir miembro**
+3. En el modal, hacer clic en el círculo de avatar → se abre el selector de archivo → subir una foto
+4. Verificar que el círculo muestra la foto subida
+5. Alternativa: pegar una URL de imagen en el campo "O pega una URL…" → la foto se actualiza
+6. Rellenar nombre y rol → guardar → la tarjeta del miembro debe mostrar la foto
+7. Hacer clic en **Editar** sobre ese miembro → verificar que la foto previa se carga en el modal
+
+##### A.3 Video en ejercicios — subida y reproducción
+
+1. Ir a **Ejercicios** (`/app/ejercicios.html`)
+2. Hacer clic en **+ Nuevo ejercicio**
+3. En la zona **Video**, arrastrar un archivo `.mp4` desde el explorador de archivos → debe subirse y mostrar la barra de previsualización con el nombre del archivo
+4. Alternativa: pegar una URL de YouTube o Vimeo en el campo "O pega una URL…"
+5. Hacer clic en el botón **▶** en la barra de previsualización → se abre el modal del reproductor y el video comienza
+6. Guardar el ejercicio
+7. En la tabla de ejercicios, verificar que aparece el botón **▶** en la columna Acciones para ese ejercicio
+8. Hacer clic en **▶** → el modal del reproductor se abre con el video
+9. Hacer clic fuera del modal o en la **×** → el video se detiene y el modal se cierra
+
+##### A.4 Video en ejercicios — URL de YouTube/Vimeo
+
+1. Crear o editar un ejercicio y pegar `https://www.youtube.com/watch?v=dQw4w9WgXcQ` en el campo de video
+2. El reproductor embed de YouTube debe abrirse dentro del modal (sin redirigir a otra pestaña)
+3. Probar con una URL de Vimeo → mismo comportamiento con el reproductor de Vimeo
+4. Probar con una URL directa de video (`.mp4`) → debe mostrar el mensaje "Este video no se puede reproducir directamente" con el botón **Abrir video**
+
+##### A.5 PDF de rutina con miniatura de video
+
+1. Crear una rutina con al menos un ejercicio que tenga una URL de YouTube
+2. Desde el perfil de un cliente asignado, hacer clic en **Asignar rutina** → seleccionar esa rutina → confirmar
+3. El sistema debe mostrar el toast **"Rutina asignada y PDF enviado por email"**
+4. Descargar el PDF de la rutina (o revisar el email recibido)
+5. En el PDF, el ejercicio con video debe mostrar:
+   - La miniatura del video de YouTube (imagen 16:9) dentro de la celda del ejercicio
+   - El enlace clicable **"▶ ver video"** en índigo debajo de la miniatura
+6. Hacer clic en el enlace dentro del PDF → debe abrir el video en el navegador
+
+##### A.6 Auto-envío de PDF al asignar dieta/rutina
+
+1. Ir al perfil de un cliente que tenga email registrado
+2. En la sección **Dietas**, hacer clic en **Asignar dieta** → seleccionar una dieta → confirmar
+3. El toast debe decir **"Dieta asignada y PDF enviado por email"** (verde) si el email se envió correctamente
+4. Si el cliente no tiene email o hay error, el toast debe decir **"Dieta asignada (no se pudo enviar el email)"** (amarillo) — la asignación sí se guarda
+5. Repetir con **Asignar rutina** → verificar el mismo comportamiento
+
+##### A.7 Diseño del PDF Alzum.io
+
+1. Descargar el PDF de cualquier dieta o rutina asignada
+2. Verificar en la **dieta**:
+   - Header índigo con logo "Alzum**.io**" a la izquierda y título del plan a la derecha
+   - Tarjeta de 4 macros (Calorías, Proteínas, Carbohidratos, Grasas) con colores en degradado índigo
+   - Secciones con barra índigo vertical izquierda
+   - Encabezados de comida con fondo índigo oscuro
+   - Filas alternas blanco/gris; fila de total en índigo pálido
+   - Pie de página: "Generado por Alzum.io"
+3. Verificar en la **rutina**:
+   - Mismo header y footer
+   - Tabla de info general (tipo de entrenamiento, días, duración, nivel, género)
+   - Encabezados de día con fondo índigo
+   - Columna de imagen de ejercicio a la izquierda; nombre, músculo, series, reps, descanso
+
+---
+
+*Alzum.io — Junio 2026*

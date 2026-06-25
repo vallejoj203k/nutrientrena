@@ -29,7 +29,25 @@
     .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#818CF8;}
     .nav-item svg{opacity:.8;flex-shrink:0;}
     .nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center;}
-    @media(max-width:768px){.sidebar{display:none;}.main{height:100vh;}}
+    /* ── Mobile hamburger ── */
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;flex-shrink:0;}
+    .menu-btn:hover{background:#F3F4F6;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
+    .sidebar-overlay.open{display:block;}
+    @media(max-width:768px){
+      body{display:block;height:auto;overflow-y:auto;}
+      .sidebar{position:fixed;top:0;left:0;width:260px;height:100%;transform:translateX(-100%);transition:transform .25s;z-index:200;overflow-y:auto;}
+      .sidebar.open{transform:translateX(0);}
+      .main{display:block;height:auto;overflow:visible;}
+      .menu-btn{display:flex;align-items:center;justify-content:center;}
+      .topbar{padding:0 12px;height:56px;flex-wrap:wrap;}
+      .board-wrap{overflow-x:auto;padding:12px;gap:12px;}
+      .column{flex:0 0 260px;max-height:none;}
+      .filter-bar{padding:10px 12px;gap:8px;}
+      .search-wrap{min-width:140px;max-width:100%;}
+      .task-filter-bar{padding:8px 12px;overflow-x:auto;}
+      .week-nav{flex-shrink:0;}
+    }
     .sidebar-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);}
     .user-row{display:flex;align-items:center;gap:10px;}
     .user-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
@@ -211,8 +229,11 @@
 </head>
 <body>
 
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <!-- Sidebar -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <span>ALZUM<em>.io</em></span>
     <small>Panel del Coach</small>
@@ -306,6 +327,9 @@
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <h1>Kanban Clientes</h1>
       <span class="client-count" id="totalCount">— clientes</span>
     </div>
@@ -582,6 +606,8 @@ function logout() {
   localStorage.clear();
   location.href = 'login.html';
 }
+function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');s.classList.toggle('open');o.classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
 // ── Load Board ────────────────────────────────────────────────────────────────
 async function loadBoard() {

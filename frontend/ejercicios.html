@@ -599,7 +599,7 @@ function removeExVideo(){
 }
 async function uploadExVideo(input){
   const file=input.files[0];if(!file)return;
-  const fd=new FormData();fd.append('file',file);
+  const fd=new FormData();fd.append('file',file);fd.append('folder','videos');
   try{
     const r=await fetch(`${API}/files/upload`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd});
     const d=await r.json();

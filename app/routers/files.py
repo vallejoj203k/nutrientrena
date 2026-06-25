@@ -10,7 +10,9 @@ from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, C
 router = APIRouter(prefix="/files", tags=["Files"])
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+VIDEO_TYPES = {"video/mp4", "video/webm", "video/ogg", "video/quicktime", "video/x-msvideo", "video/x-matroska"}
 MAX_SIZE_MB = 10
+MAX_VIDEO_SIZE_MB = 200
 
 
 def _get_r2_client():
@@ -43,14 +45,16 @@ async def upload_file(
     if not settings.AWS_BUCKET:
         return send_error("Almacenamiento no configurado", code=500)
 
-    if file.content_type not in ALLOWED_TYPES:
+    is_video = file.content_type in VIDEO_TYPES
+    if file.content_type not in ALLOWED_TYPES and not is_video:
         return send_error(
-            f"Tipo de archivo no permitido. Usa: {', '.join(ALLOWED_TYPES)}", code=400
+            "Tipo de archivo no permitido. Imágenes: JPG, PNG, WEBP, GIF. Videos: MP4, WEBM, MOV.", code=400
         )
 
     content = await file.read()
-    if len(content) > MAX_SIZE_MB * 1024 * 1024:
-        return send_error(f"El archivo supera el límite de {MAX_SIZE_MB} MB", code=400)
+    limit_mb = MAX_VIDEO_SIZE_MB if is_video else MAX_SIZE_MB
+    if len(content) > limit_mb * 1024 * 1024:
+        return send_error(f"El archivo supera el límite de {limit_mb} MB", code=400)
 
     ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "jpg"
     key = f"{folder}/{uuid.uuid4()}.{ext}"

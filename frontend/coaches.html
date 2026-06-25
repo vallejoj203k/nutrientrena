@@ -711,12 +711,13 @@ function renderCards(members){
         ${sum?`<div class="salary-row"><span class="salary-label">Total estimado</span><span class="salary-val total">${fmt(sum)}</span></div>`:''}
       </div>
       ${m.notes?`<div class="card-notes">${m.notes}</div>`:''}
-      <div class="card-clients" id="clients_${m.user_detail_id||'none'}" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">
-        <div class="cc-label">Clientes <span id="cc_count_${m.user_detail_id||'none'}"></span></div>
-        <div class="cc-loading" id="cc_body_${m.user_detail_id||'none'}">Cargando…</div>
-      </div>
+      ${m.user_detail_id ? `
+      <div class="card-clients" id="clients_${m.user_detail_id}" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">
+        <div class="cc-label">Clientes <span id="cc_count_${m.user_detail_id}"></span></div>
+        <div class="cc-loading" id="cc_body_${m.user_detail_id}">Cargando…</div>
+      </div>` : ''}
       <div class="card-actions">
-        <button class="btn btn-primary btn-sm" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">Ver clientes</button>
+        ${m.user_detail_id ? `<button class="btn btn-primary btn-sm" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">Ver clientes</button>` : `<span style="font-size:12px;color:#9CA3AF;">Sin cuenta vinculada</span>`}
       </div>
     `;
     grid.appendChild(card);
@@ -827,7 +828,7 @@ async function loadCoachClients(udId){
     const shown=clients.slice(0,MAX_AV);
     const extra=clients.length-MAX_AV;
     const avsHtml=shown.map(c=>{
-      const name=((c.name||'')+' '+(c.last_name||'')).trim();
+      const name=((c.name||'')+' '+(c.last_name||'')).trim()||c.email||'?';
       if(c.photo)return`<div class="cc-av"><img src="${c.photo}" title="${name}"/></div>`;
       return`<div class="cc-av" style="background:${_avColor(name)}" title="${name}">${_initials2(name)}</div>`;
     }).join('');

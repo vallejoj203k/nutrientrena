@@ -816,8 +816,7 @@ async function loadCoachClients(udId){
   try{
     const r=await fetch(`${API}/users/kanban?coach_id=${encodeURIComponent(udId)}`,{headers:{Authorization:`Bearer ${token}`}});
     const d=await r.json();
-    const groups=d.data||{};
-    const clients=Object.values(groups).flat();
+    const clients=(d.data?.columns||[]).flatMap(col=>col.clients||[]);
     // Update drawer cache
     _drawerClients_cache[udId]=clients;
 
@@ -1283,7 +1282,7 @@ async function openClientsDrawer(coachName,udId){
   try{
     const r=await fetch(`${API}/users/kanban?coach_id=${encodeURIComponent(udId)}`,{headers:{Authorization:`Bearer ${token}`}});
     const d=await r.json();
-    _cmClients=Object.values(d.data||{}).flat();
+    _cmClients=(d.data?.columns||[]).flatMap(col=>col.clients||[]);
     _drawerClients_cache[udId]=_cmClients;
     _updateCmCount();
     renderCmList(_cmClients);

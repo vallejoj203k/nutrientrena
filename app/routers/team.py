@@ -24,6 +24,7 @@ class TeamMemberCreateRequest(BaseModel):
     currency: Optional[str] = None
     notes: Optional[str] = None
     permissions: Optional[str] = None
+    photo: Optional[str] = None
 
 
 class TeamMemberUpdateRequest(BaseModel):
@@ -37,6 +38,7 @@ class TeamMemberUpdateRequest(BaseModel):
     currency: Optional[str] = None
     notes: Optional[str] = None
     permissions: Optional[str] = None
+    photo: Optional[str] = None
 
 
 def _serialize(member: TeamMember, db: Session) -> dict:
@@ -50,7 +52,7 @@ def _serialize(member: TeamMember, db: Session) -> dict:
     name = (ud.name if ud else None) or member.member_name or ""
     last_name = (ud.last_name if ud else None) or ""
     email = (ud.user.email if ud and ud.user else None) or member.member_email or ""
-    photo = ud.photo if ud else None
+    photo = (ud.photo if ud else None) or member.photo
 
     return {
         "id": member.id,
@@ -131,6 +133,7 @@ def create_team_member(
         currency=data.currency or 'EUR',
         notes=data.notes,
         permissions=data.permissions,
+        photo=data.photo,
     )
     db.add(member)
     db.commit()
@@ -174,6 +177,8 @@ def update_team_member(
         member.notes = data.notes
     if data.permissions is not None:
         member.permissions = data.permissions
+    if data.photo is not None:
+        member.photo = data.photo
 
     db.commit()
     db.refresh(member)

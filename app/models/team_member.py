@@ -20,6 +20,7 @@ class TeamMember(Base):
     currency = Column(String(10), nullable=True, default='EUR')
     notes = Column(Text, nullable=True)
     permissions = Column(Text, nullable=True)
+    photo = Column(String(2048), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user_detail = relationship("UserDetail", foreign_keys=[user_detail_id])

@@ -719,6 +719,7 @@
     <span class="bc-sep">/</span>
     <span class="bc-current" id="bcClientName">…</span>
     <div class="bc-actions">
+      <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
       <button class="btn-outline-purple" onclick="location.href='client-form.html?id='+clientId">Editar</button>
       <button class="btn-red" id="btnDarBaja" onclick="darDeBaja()">Dar de baja</button>
     </div>
@@ -3980,6 +3981,7 @@ function filterAssignList(type, q) {
   if (type === 'diet') renderAssignDietList(_assignDiets.filter(d => (d.title || '').toLowerCase().includes(q)));
   else renderAssignRoutineList(_assignRoutines.filter(r => (r.name || '').toLowerCase().includes(q)));
 }
+(function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 </script>
 
 <!-- Library flyout -->

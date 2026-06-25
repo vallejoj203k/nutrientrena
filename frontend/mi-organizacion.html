@@ -258,7 +258,9 @@
       <h1>Mi Organizacion</h1>
       <p id="topbarSub">Gestiona tu equipo y sus permisos</p>
     </div>
-    <div class="topbar-right" id="topbarActions"></div>
+    <div class="topbar-right" id="topbarActions">
+        <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+      </div>
   </div>
 
   <div class="content" id="mainContent">
@@ -761,6 +763,8 @@
   (async () => {
     await Promise.all([loadUser(), loadOrg()]);
   })();
+
+  (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 </script>
 </body>
 </html>

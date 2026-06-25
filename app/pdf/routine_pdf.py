@@ -300,7 +300,7 @@ def generate_routine_pdf(routine) -> bytes:
             video_url = training.video_url if training else None
             if video_url:
                 vesc = _html.escape(video_url)
-                name_text = f'{_html.escape(exercise_name)}<br/><link href="{vesc}"><font color="#6366F1" size="7">&#9654; ver video</font></link>'
+                name_text = f'{_html.escape(exercise_name)}<br/><a href="{vesc}" color="#6366F1"><font size="7">&#9654; ver video</font></a>'
             else:
                 name_text = _html.escape(exercise_name)
             rows.append([

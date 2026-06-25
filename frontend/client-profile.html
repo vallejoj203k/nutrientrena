@@ -182,6 +182,7 @@
     .toast.show{transform:translateY(0);opacity:1;}
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
+    .toast.warning{background:#D97706;}
 
     /* ── Metas tab ── */
     .target-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
@@ -3878,7 +3879,23 @@ async function confirmAssignDiet() {
     const j = await r.json();
     if (!r.ok) { document.getElementById('assignDietError').textContent = j.detail || j.message || 'Error al asignar'; return; }
     closeAssignDietModal();
-    showToast('Dieta asignada correctamente', 'success');
+
+    // Send PDF to client email automatically
+    const newDietId = j.data?.id;
+    let emailSent = false;
+    if (newDietId) {
+      try {
+        const ep = await fetch(`${API}/plans/deliver`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...h() },
+          body: JSON.stringify({ client_user_detail_id: clientId, diet_id: newDietId, send_email: true }),
+        });
+        const ej = await ep.json();
+        emailSent = ej.data?.email_sent === true;
+      } catch {}
+    }
+    showToast(emailSent ? 'Dieta asignada y PDF enviado por email' : 'Dieta asignada (no se pudo enviar el email)', emailSent ? 'success' : 'warning');
+
     const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
     if (rd.ok) {
       const jd = await rd.json();
@@ -3964,7 +3981,23 @@ async function confirmAssignRoutine() {
     const j = await r.json();
     if (!r.ok) { document.getElementById('assignRoutineError').textContent = j.detail || j.message || 'Error al asignar'; return; }
     closeAssignRoutineModal();
-    showToast('Rutina asignada correctamente', 'success');
+
+    // Send PDF to client email automatically
+    const newRoutineId = j.data?.id;
+    let emailSent = false;
+    if (newRoutineId) {
+      try {
+        const ep = await fetch(`${API}/plans/deliver`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...h() },
+          body: JSON.stringify({ client_user_detail_id: clientId, routine_id: newRoutineId, send_email: true }),
+        });
+        const ej = await ep.json();
+        emailSent = ej.data?.email_sent === true;
+      } catch {}
+    }
+    showToast(emailSent ? 'Rutina asignada y PDF enviado por email' : 'Rutina asignada (no se pudo enviar el email)', emailSent ? 'success' : 'warning');
+
     const rr = await fetch(`${API}/routines/client/${clientId}`, { headers: h() });
     if (rr.ok) {
       const jr = await rr.json();

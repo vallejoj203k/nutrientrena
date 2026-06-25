@@ -9,9 +9,9 @@
 
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      height: 100vh;
+      min-height: 100dvh;
       display: flex;
-      overflow: hidden;
+      overflow-y: auto;
     }
 
     /* ── Panel izquierdo ── */
@@ -164,30 +164,21 @@
     /* Responsive */
     @media (max-width: 720px) {
       .left { display: none; }
-      .right { width: 100%; }
+      .right {
+        width: 100%;
+        padding: 32px 24px;
+        min-height: 100dvh;
+        align-items: flex-start;
+        padding-top: 48px;
+      }
+      .form-box { max-width: 100%; }
     }
-  </style>
-  <style>
-    /* ALZUM.io — theme overrides */
-    body { background: #F8FAFC !important; }
-    .sidebar {
-      background: #fff !important;
-      border-right: 1px solid #E5E7EB !important;
+    @media (max-width: 400px) {
+      .right { padding: 32px 16px; padding-top: 40px; }
+      .logo-text { font-size: 26px; }
+      .input-group input { font-size: 16px; } /* prevent iOS zoom */
+      .btn-login { font-size: 15px; }
     }
-    .sidebar-logo span { color: #111827 !important; }
-    .sidebar-logo span em, .sidebar-logo span span { color: #4F46E5 !important; }
-    .sidebar-logo small { color: #6B7280 !important; }
-    .nav-section { color: #9CA3AF !important; }
-    .nav-item { color: #374151 !important; }
-    .nav-item svg { color: inherit !important; opacity: 1 !important; }
-    .nav-item:hover { background: #F3F4F6 !important; color: #4F46E5 !important; }
-    .nav-item.active { background: #EEF2FF !important; color: #4F46E5 !important; border-left-color: #4F46E5 !important; }
-    .sidebar-user { border-top: 1px solid #E5E7EB !important; }
-    .avatar, .user-avatar { background: #4F46E5 !important; }
-    .user-name { color: #111827 !important; }
-    .user-role { color: #6B7280 !important; }
-    .btn-logout { color: #6B7280 !important; }
-    .btn-logout:hover { color: #4F46E5 !important; }
   </style>
 </head>
 <body>

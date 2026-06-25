@@ -225,6 +225,76 @@ def add_member(
     return send_response({"id": member.id}, "Miembro añadido")
 
 
+class NewCoachCreate(BaseModel):
+    name: str
+    last_name: Optional[str] = None
+    email: str
+    password: str
+    permissions: Optional[Dict[str, Any]] = None
+
+
+@router.post("/{org_id}/members/create-coach", summary="Crear nuevo coach y añadirlo a la organización")
+def create_coach_member(
+    org_id: str,
+    data: NewCoachCreate,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Org owner or platform admin can create a new coach account and add them to the org."""
+    from app.models.user import User, RoleUser
+    from app.core.security import hash_password
+
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        return send_error("Organización no encontrada", code=404)
+
+    detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+    roles = _user_role_ids(current_user.id, db)
+    is_admin = SUPERADMIN in roles or ADMIN in roles
+    is_owner = detail and org.owner_id == detail.id
+
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Solo el dueño puede crear miembros")
+
+    if db.query(User).filter(User.email == data.email).first():
+        return send_error("El email ya está registrado", code=400)
+
+    if len(data.password) < 6:
+        return send_error("La contraseña debe tener al menos 6 caracteres", code=400)
+
+    user = User(
+        name=data.name,
+        email=data.email,
+        password=hash_password(data.password),
+    )
+    db.add(user)
+    db.flush()
+
+    db.add(RoleUser(role_id=5, user_id=user.id))  # COACH role
+
+    new_detail = UserDetail(
+        user_id=user.id,
+        name=data.name,
+        last_name=data.last_name,
+    )
+    db.add(new_detail)
+    db.flush()
+
+    member = OrganizationMember(
+        organization_id=org_id,
+        user_detail_id=new_detail.id,
+        permissions=data.permissions or {},
+        joined_at=datetime.utcnow(),
+    )
+    db.add(member)
+    db.commit()
+
+    return send_response(
+        {"user_detail_id": new_detail.id, "member_id": member.id, "email": data.email},
+        "Coach creado y añadido a la organización",
+    )
+
+
 @router.patch("/{org_id}/members/{member_id}/permissions", summary="Actualizar permisos de un miembro")
 def update_member_permissions(
     org_id: str,

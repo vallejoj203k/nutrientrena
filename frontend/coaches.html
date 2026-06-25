@@ -79,6 +79,18 @@
 
     .card-actions{display:flex;gap:8px;margin-top:2px;}
     .card-actions .btn{flex:1;justify-content:center;}
+    /* Client mini-panel inside card */
+    .card-clients{border-top:1px solid #F3F4F6;padding-top:10px;cursor:pointer;}
+    .card-clients:hover .cc-label{color:var(--purple);}
+    .cc-label{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+    .cc-label span{font-size:11px;color:var(--purple);font-weight:600;text-transform:none;letter-spacing:0;}
+    .cc-avatars{display:flex;gap:-4px;flex-wrap:wrap;gap:4px;align-items:center;}
+    .cc-av{width:26px;height:26px;border-radius:50%;border:2px solid #fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0;}
+    .cc-av img{width:100%;height:100%;object-fit:cover;}
+    .cc-more{background:#E5E7EB;color:#374151;font-size:10px;font-weight:700;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:2px solid #fff;}
+    .cc-names{font-size:11px;color:#6B7280;margin-top:4px;line-height:1.5;}
+    .cc-empty{font-size:11px;color:#D1D5DB;font-style:italic;}
+    .cc-loading{font-size:11px;color:#D1D5DB;}
 
     .card-menu{position:absolute;top:14px;right:14px;display:flex;gap:4px;}
     .icon-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#9CA3AF;display:flex;}
@@ -513,6 +525,7 @@ let _teamData  = [];
 let _currentTab = 1;
 let _varType = 'none';
 let _photoValue = null; // current photo URL or base64 for the modal
+const _drawerClients_cache = {};
 
 const AVATAR_COLORS = ['#0EA5E9','#10B981','#8B5CF6','#F59E0B','#EF4444','#06B6D4','#6366F1','#EC4899'];
 
@@ -655,8 +668,12 @@ function renderCards(members){
         ${sum?`<div class="salary-row"><span class="salary-label">Total estimado</span><span class="salary-val total">${fmt(sum)}</span></div>`:''}
       </div>
       ${m.notes?`<div class="card-notes">${m.notes}</div>`:''}
+      <div class="card-clients" id="clients_${m.user_detail_id||'none'}" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">
+        <div class="cc-label">Clientes <span id="cc_count_${m.user_detail_id||'none'}"></span></div>
+        <div class="cc-loading" id="cc_body_${m.user_detail_id||'none'}">Cargando…</div>
+      </div>
       <div class="card-actions">
-        <button class="btn btn-primary btn-sm" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">Clientes</button>
+        <button class="btn btn-primary btn-sm" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">Ver clientes</button>
       </div>
     `;
     grid.appendChild(card);
@@ -738,7 +755,49 @@ async function loadTeam(){
     });
 
     renderCards(merged);
+    // Load clients for each coach in parallel (only those with a user_detail_id)
+    const coachable=merged.filter(m=>m.user_detail_id);
+    await Promise.all(coachable.map(m=>loadCoachClients(m.user_detail_id)));
   }catch{ renderCards([]); }
+}
+
+const AV_COLORS=['#4F46E5','#0891B2','#059669','#D97706','#DC2626','#7C3AED','#DB2777'];
+function _avColor(name){let h=0;for(let i=0;i<(name||'').length;i++)h=(h*31+name.charCodeAt(i))>>>0;return AV_COLORS[h%AV_COLORS.length];}
+function _initials2(n){const p=(n||'').trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(p[0]?.[0]||'?').toUpperCase();}
+
+async function loadCoachClients(udId){
+  const bodyEl=document.getElementById(`cc_body_${udId}`);
+  const countEl=document.getElementById(`cc_count_${udId}`);
+  if(!bodyEl)return;
+  try{
+    const r=await fetch(`${API}/users/kanban?coach_id=${encodeURIComponent(udId)}`,{headers:{Authorization:`Bearer ${token}`}});
+    const d=await r.json();
+    const groups=d.data||{};
+    const clients=Object.values(groups).flat();
+    // Update drawer cache
+    _drawerClients_cache[udId]=clients;
+
+    if(countEl)countEl.textContent=`${clients.length} cliente${clients.length!==1?'s':''}`;
+    if(!clients.length){bodyEl.innerHTML='<span class="cc-empty">Sin clientes asignados</span>';return;}
+
+    const MAX_AV=5;
+    const shown=clients.slice(0,MAX_AV);
+    const extra=clients.length-MAX_AV;
+    const avsHtml=shown.map(c=>{
+      const name=((c.name||'')+' '+(c.last_name||'')).trim();
+      if(c.photo)return`<div class="cc-av"><img src="${c.photo}" title="${name}"/></div>`;
+      return`<div class="cc-av" style="background:${_avColor(name)}" title="${name}">${_initials2(name)}</div>`;
+    }).join('');
+    const moreHtml=extra>0?`<div class="cc-more">+${extra}</div>`:'';
+
+    // Names: first 3 clients
+    const names=clients.slice(0,3).map(c=>((c.name||'')+' '+(c.last_name||'')).trim()||c.email||'—');
+    const namesText=names.join(', ')+(clients.length>3?` y ${clients.length-3} más`:'');
+
+    bodyEl.innerHTML=`<div class="cc-avatars">${avsHtml}${moreHtml}</div><div class="cc-names">${namesText}</div>`;
+  }catch{
+    if(bodyEl)bodyEl.innerHTML='<span class="cc-empty">—</span>';
+  }
 }
 
 /* ── Permissions panel ───────────────────────────────────────── */

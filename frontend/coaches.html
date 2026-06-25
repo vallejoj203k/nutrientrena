@@ -184,6 +184,31 @@
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    /* Clients drawer */
+    .clients-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;opacity:0;pointer-events:none;transition:.2s;}
+    .clients-backdrop.open{opacity:1;pointer-events:all;}
+    .clients-drawer{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.12);z-index:501;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+    .clients-backdrop.open .clients-drawer{transform:translateX(0);}
+    .drawer-head{padding:20px 20px 16px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .drawer-head h3{font-size:15px;font-weight:800;color:#111827;flex:1;}
+    .drawer-close{background:none;border:none;font-size:20px;cursor:pointer;color:#9CA3AF;padding:2px 6px;border-radius:6px;line-height:1;}
+    .drawer-close:hover{background:#F3F4F6;color:#374151;}
+    .drawer-search{padding:12px 16px;border-bottom:1px solid #F3F4F6;flex-shrink:0;}
+    .drawer-search input{width:100%;padding:8px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;}
+    .drawer-search input:focus{border-color:var(--purple);}
+    .drawer-body{flex:1;overflow-y:auto;padding:8px 0;}
+    .client-row{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:.1s;text-decoration:none;}
+    .client-row:hover{background:#F8FAFC;}
+    .client-av{width:36px;height:36px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#4F46E5;flex-shrink:0;overflow:hidden;}
+    .client-av img{width:100%;height:100%;object-fit:cover;}
+    .client-info{flex:1;min-width:0;}
+    .client-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .client-email{font-size:11px;color:#9CA3AF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .client-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;}
+    .drawer-empty{padding:40px 20px;text-align:center;color:#9CA3AF;font-size:13px;}
+    .drawer-footer{padding:12px 16px;border-top:1px solid #F3F4F6;flex-shrink:0;}
+    .drawer-footer a{display:block;text-align:center;color:#4F46E5;font-size:13px;font-weight:600;text-decoration:none;padding:8px;border-radius:8px;border:1.5px solid #EEF2FF;background:#EEF2FF;transition:.15s;}
+    .drawer-footer a:hover{background:#E0E7FF;}
   </style>
 </head>
 <body>
@@ -631,7 +656,7 @@ function renderCards(members){
       </div>
       ${m.notes?`<div class="card-notes">${m.notes}</div>`:''}
       <div class="card-actions">
-        <button class="btn btn-primary btn-sm" onclick="location.href='clients.html?coach=${m.user_detail_id}'">Clientes</button>
+        <button class="btn btn-primary btn-sm" onclick="openClientsDrawer(${JSON.stringify(name)},${JSON.stringify(m.user_detail_id)})">Clientes</button>
       </div>
     `;
     grid.appendChild(card);
@@ -1065,6 +1090,95 @@ async function saveMember(){
 })();
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
+</script>
+<!-- Clients drawer -->
+<div class="clients-backdrop" id="clientsBackdrop" onclick="if(event.target===this)closeClientsDrawer()">
+  <div class="clients-drawer">
+    <div class="drawer-head">
+      <svg width="16" height="16" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <h3 id="drawerCoachName">Clientes</h3>
+      <button class="drawer-close" onclick="closeClientsDrawer()">×</button>
+    </div>
+    <div class="drawer-search">
+      <input id="drawerSearch" placeholder="Buscar cliente…" oninput="filterDrawerClients(this.value)"/>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+      <div class="drawer-empty">Cargando…</div>
+    </div>
+    <div class="drawer-footer">
+      <a id="drawerViewAll" href="#">Ver todos en Clientes</a>
+    </div>
+  </div>
+</div>
+
+<script>
+let _drawerClients=[];
+let _drawerCoachUdId=null;
+
+const STATUS_COLORS={
+  activo:{bg:'#D1FAE5',fg:'#065F46'},
+  inactivo:{bg:'#F3F4F6',fg:'#6B7280'},
+  potencial:{bg:'#DBEAFE',fg:'#1D4ED8'},
+  perdido:{bg:'#FEE2E2',fg:'#991B1B'},
+  en_proceso:{bg:'#FEF3C7',fg:'#92400E'},
+};
+
+function _statusColor(s){return STATUS_COLORS[s]||{bg:'#F1F5F9',fg:'#475569'};}
+
+async function openClientsDrawer(coachName,udId){
+  _drawerCoachUdId=udId;
+  document.getElementById('drawerCoachName').textContent=`Clientes de ${coachName}`;
+  document.getElementById('drawerSearch').value='';
+  document.getElementById('drawerViewAll').href=`clients.html?coach=${udId}`;
+  document.getElementById('drawerBody').innerHTML='<div class="drawer-empty">Cargando…</div>';
+  document.getElementById('clientsBackdrop').classList.add('open');
+  try{
+    const r=await fetch(`${API}/users/kanban?coach_id=${encodeURIComponent(udId)}`,{headers:{Authorization:`Bearer ${token}`}});
+    const d=await r.json();
+    const groups=d.data||{};
+    _drawerClients=Object.values(groups).flat();
+    renderDrawerClients(_drawerClients);
+  }catch{
+    document.getElementById('drawerBody').innerHTML='<div class="drawer-empty">Error al cargar clientes.</div>';
+  }
+}
+
+function closeClientsDrawer(){document.getElementById('clientsBackdrop').classList.remove('open');}
+
+function renderDrawerClients(list){
+  const body=document.getElementById('drawerBody');
+  if(!list.length){
+    body.innerHTML='<div class="drawer-empty">Este coach no tiene clientes asignados.</div>';
+    return;
+  }
+  body.innerHTML=list.map(c=>{
+    const name=((c.name||'')+(c.last_name?' '+c.last_name:'')).trim()||c.email||'—';
+    const initl=name[0]?.toUpperCase()||'?';
+    const col=_statusColor(c.kanban_status||c.status);
+    const avatar=c.photo
+      ?`<img src="${c.photo}" alt=""/>`
+      :`<span>${initl}</span>`;
+    return`<a class="client-row" href="client-profile.html?id=${c.id}">
+      <div class="client-av">${avatar}</div>
+      <div class="client-info">
+        <div class="client-name">${_esc(name)}</div>
+        <div class="client-email">${_esc(c.email||'')}</div>
+      </div>
+      ${c.kanban_status||c.status?`<span class="client-status" style="background:${col.bg};color:${col.fg};">${c.kanban_status||c.status}</span>`:''}
+    </a>`;
+  }).join('');
+}
+
+function filterDrawerClients(q){
+  if(!q.trim()){renderDrawerClients(_drawerClients);return;}
+  const lq=q.toLowerCase();
+  renderDrawerClients(_drawerClients.filter(c=>{
+    const name=((c.name||'')+' '+(c.last_name||'')+' '+(c.email||'')).toLowerCase();
+    return name.includes(lq);
+  }));
+}
+
+function _esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 </script>
 </body>
 </html>

@@ -264,7 +264,7 @@
     </div>
     <div class="topbar-right">
       <div class="cost-chip">Coste equipo/mes: <span id="totalCost">0€</span></div>
-      <button class="btn btn-primary" onclick="openModal()">
+      <button id="btnAddMember" class="btn btn-primary" onclick="openModal()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Añadir miembro
       </button>
@@ -512,6 +512,8 @@ function toast(msg,type='success'){
   setTimeout(()=>el.className='toast',2800);
 }
 
+let _isAdminUser = false;
+
 async function loadUser(){
   try{
     const r=await fetch(`${API}/auth/me`,{headers:{Authorization:`Bearer ${token}`}});
@@ -524,7 +526,12 @@ async function loadUser(){
     if(u.photo){av.innerHTML=`<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;av.style.background='transparent';}
     else{av.textContent=initials(name);}
     const roleIds=(u.roles||[]).map(r=>r.id);
-    if(roleIds.includes(1)||roleIds.includes(2)) document.getElementById('adminSection').style.display='block';
+    _isAdminUser = roleIds.includes(1)||roleIds.includes(2);
+    if(_isAdminUser) document.getElementById('adminSection').style.display='block';
+    // Hide management controls from coaches
+    if(!_isAdminUser){
+      document.getElementById('btnAddMember').style.display='none';
+    }
   }catch{}
 }
 function logout(){
@@ -568,14 +575,13 @@ function renderCards(members){
     const card=document.createElement('div');
     card.className='member-card';
     card.innerHTML=`
-      <div class="card-menu">
+      <div class="card-menu">${_isAdminUser?`
         <button class="icon-btn" onclick="editMember(${m.id===null?'null':m.id},'${m.user_detail_id}')" title="Editar">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
         <button class="icon-btn" onclick="deleteMember(${m.id===null?'null':m.id},'${safeName}')" title="Eliminar">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        </button>
-      </div>
+        </button>`:''}</div>
       ${avatarHtml}
       <div class="card-head">
         <div class="card-name">${name}</div>
@@ -596,12 +602,14 @@ function renderCards(members){
     grid.appendChild(card);
   });
 
-  const addCard=document.createElement('div');
-  addCard.className='add-card'; addCard.onclick=()=>openModal();
-  addCard.innerHTML=`
-    <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-    <span>Añadir miembro</span>`;
-  grid.appendChild(addCard);
+  if(_isAdminUser){
+    const addCard=document.createElement('div');
+    addCard.className='add-card'; addCard.onclick=()=>openModal();
+    addCard.innerHTML=`
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span>Añadir miembro</span>`;
+    grid.appendChild(addCard);
+  }
 
   document.getElementById('totalCost').textContent=`${Number(total).toLocaleString('es-ES')}€`;
 }

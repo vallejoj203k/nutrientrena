@@ -229,7 +229,10 @@
   <!-- Conversations panel -->
   <div class="conv-panel">
     <div class="conv-header">
-      <h2>Mensajes</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <h2 style="margin-bottom:0;">Mensajes</h2>
+        <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+      </div>
       <div class="new-chat-btns">
         <button class="new-chat-btn" id="btnInd" onclick="showNewPanel('individual')">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -753,6 +756,7 @@ function toggleLibrary(el){
     });
   }
 })();
+(function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 </script>
 
 <!-- Library flyout -->

@@ -211,7 +211,9 @@
     <div class="topbar-left">
       <h1>Ajustes</h1>
       <p>Configura los datos de tu negocio y preferencias</p>
-    </div>
+    
+    <span id="topbarRoleBadge" style="margin-left:auto;font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+  </div>
   </div>
   <div class="content">
     <div class="settings-card">
@@ -458,6 +460,8 @@ function toggleLibrary(el){
     });
   }
 })();
+
+  (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 </script>
 
 <!-- Library flyout -->

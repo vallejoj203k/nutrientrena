@@ -329,7 +329,9 @@
       <p id="greetRole" style="display:none;font-size:12px;font-weight:600;color:#4F46E5;margin-top:2px;letter-spacing:.3px;text-transform:uppercase;"></p>
     </div>
     <div class="topbar-right">
-      <div class="badge-online"><div class="dot-green"></div>Producción</div>
+      <div class="badge-online"><div class="dot-green">
+        <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+      </div>Producción</div>
     </div>
   </div>
 
@@ -708,6 +710,8 @@ function toggleLibrary(el){
     });
   }
 })();
+
+  (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 </script>
 
 <!-- Library flyout -->

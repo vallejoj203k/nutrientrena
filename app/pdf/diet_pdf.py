@@ -235,10 +235,14 @@ def generate_diet_pdf(diet) -> bytes:
         story.append(Spacer(1, 0.2 * cm))
 
         client_rows = []
-        if detail.weight:    client_rows.append([Paragraph("Peso",           styles["client_label"]), Paragraph(f"{detail.weight} kg",   styles["client_value"])])
-        if detail.height:    client_rows.append([Paragraph("Altura",         styles["client_label"]), Paragraph(f"{detail.height} cm",   styles["client_value"])])
-        if detail.age:       client_rows.append([Paragraph("Edad",           styles["client_label"]), Paragraph(f"{detail.age} años",    styles["client_value"])])
-        if detail.body_fat:  client_rows.append([Paragraph("Grasa corporal", styles["client_label"]), Paragraph(f"{detail.body_fat}%",   styles["client_value"])])
+        if detail.weight:
+            client_rows.append([Paragraph("Peso",           styles["client_label"]), Paragraph(f"{detail.weight} kg",  styles["client_value"])])
+        if detail.height:
+            client_rows.append([Paragraph("Altura",         styles["client_label"]), Paragraph(f"{detail.height} cm",  styles["client_value"])])
+        if detail.age:
+            client_rows.append([Paragraph("Edad",           styles["client_label"]), Paragraph(f"{detail.age} años",   styles["client_value"])])
+        if detail.body_fat:
+            client_rows.append([Paragraph("Grasa corporal", styles["client_label"]), Paragraph(f"{detail.body_fat}%",  styles["client_value"])])
 
         info_tbl = Table(client_rows, colWidths=[4 * cm, doc.width - 4 * cm])
         info_tbl.setStyle(TableStyle([

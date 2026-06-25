@@ -326,6 +326,7 @@
     <div class="topbar-left">
       <h1 id="greetMsg">Bienvenido</h1>
       <p id="todayDate">—</p>
+      <p id="greetRole" style="display:none;font-size:12px;font-weight:600;color:#4F46E5;margin-top:2px;letter-spacing:.3px;text-transform:uppercase;"></p>
     </div>
     <div class="topbar-right">
       <div class="badge-online"><div class="dot-green"></div>Producción</div>
@@ -504,7 +505,9 @@ async function load(){
   const name=u.name||'Coach';
   document.getElementById('greetMsg').textContent=greeting+', '+name.split(' ')[0];
   document.getElementById('userName').textContent=name;
-  document.getElementById('userRole').textContent=(u.roles&&u.roles[0]?.name)||'—';
+  const roleName=(u.roles&&u.roles[0]?.name)||'';
+  document.getElementById('userRole').textContent=roleName||'—';
+  if(roleName){const gr=document.getElementById('greetRole');gr.textContent=roleName;gr.style.display='block';}
   (function(){var _av=document.getElementById('userAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials(name);}})()
 
   // Parallel fetch

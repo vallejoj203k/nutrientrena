@@ -1035,13 +1035,10 @@ function updatePreview() {
 // --- Meal sidebar & selection ---
 
 function selectMeal(mid) {
-  // Return any rows from msContent back to their backing block
   if (_activeMealId !== null && _activeMealId !== mid) {
     var prevRows = document.getElementById('mrows-' + _activeMealId);
     var prevBlock = document.getElementById('meal-' + _activeMealId);
-    if (prevRows && prevBlock && !prevBlock.contains(prevRows)) {
-      prevBlock.appendChild(prevRows);
-    }
+    if (prevRows && prevBlock && !prevBlock.contains(prevRows)) prevBlock.appendChild(prevRows);
   }
   _activeMealId = mid;
   renderMealSidebar();
@@ -1061,17 +1058,16 @@ function renderMealSidebar() {
     meal.rows.forEach(function(row) {
       if (!row.aliment_id) return;
       var qty = parseFloat((document.getElementById('fqty-' + row.id) || {}).value) || 0;
-      totK += ((row.calories||0)/100)*qty;
+      totK += ((row.calories||0)/100) * qty;
     });
     var sub = totK > 0 ? Math.round(totK) + ' kcal' : 'Vacía · toca para añadir';
     return '<div class="ms-meal-item' + (isActive ? ' active' : '') + '" onclick="selectMeal(' + meal.id + ')">'
       + '<div class="ms-meal-item-name">' + esc(meal.name) + '</div>'
       + '<div class="ms-meal-item-sub">' + sub + '</div>'
       + '<div class="ms-meal-item-arrows">'
-      + '<button ' + (i === 0 ? 'disabled' : '') + ' onclick="event.stopPropagation();moveMeal(' + meal.id + ',-1)" title="Subir">↑</button>'
-      + '<button ' + (i === _meals.length-1 ? 'disabled' : '') + ' onclick="event.stopPropagation();moveMeal(' + meal.id + ',1)" title="Bajar">↓</button>'
-      + '</div>'
-      + '</div>';
+      + '<button ' + (i === 0 ? 'disabled' : '') + ' onclick="event.stopPropagation();moveMeal(' + meal.id + ',-1)">↑</button>'
+      + '<button ' + (i === _meals.length - 1 ? 'disabled' : '') + ' onclick="event.stopPropagation();moveMeal(' + meal.id + ',1)">↓</button>'
+      + '</div></div>';
   }).join('');
 }
 
@@ -1079,33 +1075,22 @@ function renderActiveMealContent(mid) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   var content = document.getElementById('msContent');
   if (!content) return;
-  // Move any orphaned rows back to their backing block first
   var orphaned = content.querySelectorAll('[id^="mrows-"]');
   orphaned.forEach(function(el) {
     var prevMid = el.id.replace('mrows-', '');
-    if (prevMid != mid) {
-      var block = document.getElementById('meal-' + prevMid);
-      if (block) block.appendChild(el);
-    }
+    if (prevMid != mid) { var b = document.getElementById('meal-' + prevMid); if (b) b.appendChild(el); }
   });
   if (!meal) {
-    content.innerHTML = '<div class="ms-empty-state" id="msEmptyState"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
+    content.innerHTML = '<div class="ms-empty-state"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
     return;
   }
-  // Build content
-  var topHtml = '<div class="ms-ref-bar"><label>👤 Cliente:</label><select id="refClientSel" onchange="onRefClientChange(this.value)"><option value="">Sin cliente (solo plataforma)</option></select></div>'
+  content.innerHTML = '<div class="ms-ref-bar"><label>👤 Cliente:</label><select id="refClientSel" onchange="onRefClientChange(this.value)"><option value="">Sin cliente</option></select></div>'
     + '<input class="ms-active-name-input" id="msNameInp-' + mid + '" value="' + esc(meal.name) + '" placeholder="Nombre de la comida" oninput="onActiveMealNameChange(' + mid + ',this.value)">'
-    + '<div id="mrows-placeholder-' + mid + '"></div>';
-  content.innerHTML = topHtml;
-  // Populate ref client select
+    + '<div id="mrows-ph-' + mid + '"></div>';
   populateRefClientSel();
-  // Move food rows div into content (after the placeholder)
-  var placeholder = document.getElementById('mrows-placeholder-' + mid);
+  var ph = document.getElementById('mrows-ph-' + mid);
   var mrows = document.getElementById('mrows-' + mid);
-  if (mrows && placeholder) {
-    placeholder.replaceWith(mrows);
-  }
-  // Add bottom buttons
+  if (mrows && ph) ph.replaceWith(mrows);
   var btnsDiv = document.createElement('div');
   btnsDiv.className = 'ms-add-btns';
   btnsDiv.innerHTML = '<button class="ms-add-food-btn" onclick="addFoodRow(' + mid + ')">'

@@ -1417,12 +1417,12 @@ function showAcDrop(rid, items) {
     drop.classList.add('open');
     return;
   }
-  items.forEach(function(a){ _macroCache[a.id] = { proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories }; });
+  items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories }; });
   drop.innerHTML = items.map(function(a){
     var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
       + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">🌐 Plataforma')
       + '</span>';
-    return '<div class="ac-item" onmousedown="selectAliment(' + rid + ',' + JSON.stringify(a.id) + ',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">'
+    return '<div class="ac-item" onmousedown="selectAliment(' + rid + ',' + JSON.stringify(a.id) + ')">'
       + '<div class="ac-name">' + esc(a.name) + srcBadge + '</div>'
       + (a.brand ? '<div class="ac-brand">' + esc(a.brand) + '</div>' : '')
       + '</div>';
@@ -1433,15 +1433,16 @@ function showAcDrop(rid, items) {
   drop.classList.add('open');
 }
 
-function selectAliment(rid, alimentId, alimentName) {
+function selectAliment(rid, alimentId) {
   var row = null, mid = null;
   for (var i = 0; i < _meals.length; i++) {
     var r = _meals[i].rows.find(function(r){ return r.id == rid; });
     if (r) { row = r; mid = _meals[i].id; break; }
   }
+  var m = _macroCache[alimentId] || {};
+  var alimentName = m.name || '';
   if (row) {
     row.aliment_id = alimentId; row.aliment_name = alimentName;
-    var m = _macroCache[alimentId] || {};
     row.proteins = m.proteins != null ? m.proteins : null;
     row.carbohydrates = m.carbohydrates != null ? m.carbohydrates : null;
     row.fats = m.fats != null ? m.fats : null;

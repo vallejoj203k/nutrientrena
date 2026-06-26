@@ -117,8 +117,11 @@
     .dp-save-header:hover{background:#4338CA;}
 
     /* Body */
-    .dp-body{flex:1;overflow-y:auto;display:none;}
-    .dp-body.active{display:block;}
+    #dpStepsWrap{flex:1;position:relative;overflow:hidden;}
+    .dp-body{position:absolute;inset:0;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);}
+    .dp-body.active{transform:translateX(0);}
+    .dp-body.slide-back{transform:translateX(-100%);}
+    .dp-step1-scroll{flex:1;overflow-y:auto;}
     .dp-form{max-width:720px;margin:0 auto;padding:32px 24px;}
     .dp-section-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:16px;margin-top:28px;}
     .dp-section-title:first-child{margin-top:0;}
@@ -240,6 +243,51 @@
     .btn-confirm{background:var(--indigo);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
     .btn-confirm:hover{background:var(--indigo-dark);}
     @media(max-width:1100px){.form-row-4{grid-template-columns:1fr 1fr;}}
+
+    /* ── Step 2 two-column layout ── */
+    .dp-step2-layout{flex:1;display:flex;overflow:hidden;}
+    .ms-sidebar{width:220px;min-width:180px;background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+    .ms-sidebar-label{padding:14px 16px 10px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid #F3F4F6;}
+    .ms-meal-list{flex:1;overflow-y:auto;}
+    .ms-meal-item{padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:.15s;position:relative;padding-right:52px;}
+    .ms-meal-item:hover{background:#F9FAFB;}
+    .ms-meal-item.active{background:#EEF2FF;border-left-color:#4F46E5;}
+    .ms-meal-item-name{font-size:13px;font-weight:700;color:#111827;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ms-meal-item.active .ms-meal-item-name{color:#4F46E5;}
+    .ms-meal-item-sub{font-size:11px;color:#9CA3AF;}
+    .ms-meal-item-arrows{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:none;gap:2px;flex-direction:column;}
+    .ms-meal-item:hover .ms-meal-item-arrows,.ms-meal-item.active .ms-meal-item-arrows{display:flex;}
+    .ms-meal-item-arrows button{width:20px;height:18px;border:1px solid #E5E7EB;border-radius:4px;background:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;line-height:1;color:#6B7280;transition:.15s;padding:0;}
+    .ms-meal-item-arrows button:hover:not(:disabled){background:#4F46E5;color:#fff;border-color:#4F46E5;}
+    .ms-meal-item-arrows button:disabled{opacity:.3;cursor:not-allowed;}
+    .ms-add-meal-btn{margin:8px 12px;padding:8px;border-radius:8px;border:1.5px dashed #D1D5DB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;width:calc(100% - 24px);text-align:center;}
+    .ms-add-meal-btn:hover{border-color:#4F46E5;color:#4F46E5;background:#EEF2FF;}
+    .ms-total{border-top:1px solid #F3F4F6;padding:12px 14px;background:#F9FAFB;flex-shrink:0;}
+    .ms-total-title{font-size:11px;font-weight:700;color:#374151;margin-bottom:8px;}
+    .ms-total-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280;margin-bottom:4px;}
+    .ms-val{font-weight:700;}
+    .ms-val.kcal{color:#4F46E5;}
+    .ms-val.prot{color:#2563EB;}
+    .ms-val.carb{color:#D97706;}
+    .ms-val.fat{color:#DC2626;}
+    .ms-content{flex:1;overflow-y:auto;padding:28px;display:flex;flex-direction:column;gap:0;background:#FAFBFC;}
+    .ms-active-name-input{width:100%;border:none;border-bottom:2px solid #4F46E5;outline:none;font-size:22px;font-weight:700;color:#111827;padding:0 0 8px 0;margin-bottom:20px;background:transparent;font-family:inherit;}
+    .ms-active-name-input::placeholder{color:#D1D5DB;}
+    .ms-add-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+    .ms-add-food-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px;background:#fff;color:#4F46E5;border:1.5px dashed #4F46E5;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .ms-add-food-btn:hover{background:#EEF2FF;}
+    .ms-add-recipe-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px;background:#fff;color:#6366F1;border:1.5px dashed #A5B4FC;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .ms-add-recipe-btn:hover{background:#EEF2FF;}
+    .ms-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:#D1D5DB;font-size:14px;gap:8px;min-height:200px;}
+    .ms-ref-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:14px;font-size:12px;color:#92400E;flex-shrink:0;}
+    .ms-ref-bar select{flex:1;padding:4px 8px;border:1px solid #FDE68A;border-radius:6px;font-size:12px;outline:none;background:#fff;color:#111;}
+    .ms-ref-bar label{white-space:nowrap;font-weight:600;}
+    @media(max-width:640px){
+      .ms-sidebar{width:160px;min-width:140px;}
+      .ms-content{padding:16px 14px;}
+      .ms-active-name-input{font-size:17px;}
+      .ms-add-btns{grid-template-columns:1fr;}
+    }
 
     /* ── Mobile hamburger ── */
     .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;flex-shrink:0;}
@@ -475,8 +523,11 @@
     </button>
   </div>
 
+  <div id="dpStepsWrap">
+
   <!-- ── Paso 1: Información ── -->
   <div class="dp-body active" id="dpStep1">
+    <div class="dp-step1-scroll">
     <div class="dp-form">
 
       <div class="dp-section-title">Información general</div>
@@ -555,6 +606,7 @@
       </div>
 
     </div>
+    </div><!-- /.dp-step1-scroll -->
 
     <div class="dp-footer">
       <button class="dp-next-btn" onclick="goToStep(2)">
@@ -566,45 +618,32 @@
 
   <!-- ── Paso 2: Plan de comidas ── -->
   <div class="dp-body" id="dpStep2">
-    <div class="dp-meals-wrap">
-
-      <div class="dp-meals-top">
-        <div class="dp-meals-title">Plan de comidas</div>
-        <div class="ref-client-bar" style="margin-bottom:0;flex:1;max-width:360px;">
-          <label>👤 Cliente:</label>
-          <select id="refClientSel" onchange="onRefClientChange(this.value)">
-            <option value="">Sin cliente (solo plataforma)</option>
-          </select>
+    <div class="dp-step2-layout">
+      <!-- Left sidebar: meal list -->
+      <div class="ms-sidebar">
+        <div class="ms-sidebar-label">Comidas del día</div>
+        <div class="ms-meal-list" id="msSidebarList"></div>
+        <button class="ms-add-meal-btn" onclick="addNewMeal()">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px;margin-right:4px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar comida
+        </button>
+        <div class="ms-total">
+          <div class="ms-total-title">Total del día</div>
+          <div class="ms-total-row"><span>Calorías</span><span class="ms-val kcal" id="tot_kcal">0 kcal</span></div>
+          <div class="ms-total-row"><span>Proteínas</span><span class="ms-val prot" id="tot_prot">0g</span></div>
+          <div class="ms-total-row"><span>Carbohidratos</span><span class="ms-val carb" id="tot_carb">0g</span></div>
+          <div class="ms-total-row"><span>Grasas</span><span class="ms-val fat" id="tot_fat">0g</span></div>
         </div>
       </div>
-
-      <!-- Distribución de macros colapsable -->
-      <div class="dp-dist-bar" id="dpDistBar" style="display:none;">
-        <div class="dp-dist-bar-title">Distribución de macros por comida</div>
-        <div id="macroDistPanel"><div style="color:#D1D5DB;font-size:12px;">Agrega comidas primero</div></div>
-        <div id="distPctError" style="font-size:11px;color:#DC2626;margin-top:6px;display:none;">Los porcentajes no suman 100%</div>
-        <button class="dist-apply-btn" onclick="applyDistribution()" style="margin-top:8px;">Aplicar distribución</button>
+      <!-- Right content: active meal -->
+      <div class="ms-content" id="msContent">
+        <div class="ms-empty-state" id="msEmptyState">
+          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          <span>Selecciona una comida</span>
+        </div>
       </div>
-
-      <div id="mealsContainer"></div>
-
-      <button class="add-meal-btn" onclick="addMeal()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Agregar comida
-      </button>
-
-      <div id="formError" style="color:#DC2626;font-size:13px;padding:8px 0;"></div>
-
-      <!-- Preview inline -->
-      <div id="dp-preview-wrap" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin-top:20px;display:none;">
-        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Vista previa</div>
-        <div id="previewTitle" style="font-size:15px;font-weight:700;color:#111;margin-bottom:10px;">Sin título</div>
-        <div class="preview-macros" id="previewMacros"></div>
-        <div id="previewFoods" style="font-size:12px;color:#9CA3AF;line-height:1.9;margin-top:8px;"></div>
-      </div>
-
     </div>
-
+    <div id="formError" style="color:#DC2626;font-size:13px;padding:4px 24px;display:none;"></div>
     <div class="dp-footer">
       <button class="dp-next-btn" id="saveBtn" onclick="saveDiet()">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-right:6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -613,7 +652,12 @@
     </div>
   </div>
 
+  </div><!-- /#dpStepsWrap -->
+
 </div><!-- /#dietPanel -->
+
+<!-- Hidden meal backing store -->
+<div id="mealsContainer" style="display:none;visibility:hidden;position:absolute;left:-9999px;"></div>
 
 <div class="overlay" id="assignOverlay">
   <div class="modal-box">
@@ -653,6 +697,7 @@ if (!token) location.href = 'login.html';
 let allDiets = [], editingId = null, assigningId = null;
 let _meals = [], _mealSeq = 0, _rowSeq = 0, _acTimers = {}, _macroCache = {};
 let allClients = [], _refClientId = null;
+let _activeMealId = null;
 let activeFilter = 'all';
 
 let confirmDeleteFn = function(){};
@@ -848,7 +893,7 @@ async function openForm(id) {
   id = id || null;
   editingId = id;
   document.getElementById('formViewTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
-  document.getElementById('formError').textContent = '';
+  var _fe = document.getElementById('formError'); if(_fe){_fe.textContent='';_fe.style.display='none';}
   _refClientId = null;
   clearForm();
   populateRefClientSel();
@@ -890,11 +935,31 @@ function closeForm() {
 }
 
 function goToStep(n) {
-  document.getElementById('dpStep1').classList.toggle('active', n === 1);
-  document.getElementById('dpStep2').classList.toggle('active', n === 2);
-  document.getElementById('step1Btn').classList.toggle('active', n === 1);
-  document.getElementById('step2Btn').classList.toggle('active', n === 2);
-  if (n === 2) { updateDistPanel(); updatePreview(); }
+  var s1 = document.getElementById('dpStep1');
+  var s2 = document.getElementById('dpStep2');
+  var b1 = document.getElementById('step1Btn');
+  var b2 = document.getElementById('step2Btn');
+  if (n === 2) {
+    s1.classList.remove('active'); s1.classList.add('slide-back');
+    s2.classList.remove('slide-back'); s2.classList.add('active');
+    b1.classList.remove('active'); b2.classList.add('active');
+    // Auto-create meals based on stepper
+    var targetCount = parseInt(document.getElementById('mealCountVal').textContent) || 3;
+    while (_meals.length < targetCount) addMeal();
+    // Select first meal if none active
+    if (_meals.length > 0) {
+      if (!_activeMealId || !_meals.find(function(m){ return m.id == _activeMealId; })) {
+        selectMeal(_meals[0].id);
+      } else {
+        renderMealSidebar();
+        renderActiveMealContent(_activeMealId);
+      }
+    } else { renderMealSidebar(); }
+  } else {
+    s1.classList.remove('slide-back'); s1.classList.add('active');
+    s2.classList.remove('active');
+    b1.classList.add('active'); b2.classList.remove('active');
+  }
 }
 
 function changeMealCount(delta) {
@@ -903,7 +968,6 @@ function changeMealCount(delta) {
   if (val < 1) val = 1;
   if (val > 10) val = 10;
   el.textContent = val;
-  var container = document.getElementById('mealsContainer');
   var current = _meals.length;
   if (val > current) {
     for (var i = current; i < val; i++) addMeal();
@@ -918,6 +982,7 @@ function changeMealCount(delta) {
     }
     updateDistPanel();
   }
+  renderMealSidebar();
 }
 
 function clearForm() {
@@ -927,21 +992,28 @@ function clearForm() {
   document.getElementById('f_type').value  = '';
   document.getElementById('f_style').value = '';
   document.getElementById('mealsContainer').innerHTML = '';
-  _meals = []; _mealSeq = 0; _rowSeq = 0; _refClientId = null;
+  _meals = []; _mealSeq = 0; _rowSeq = 0; _refClientId = null; _activeMealId = null;
   var mcv = document.getElementById('mealCountVal');
   if (mcv) mcv.textContent = '3';
+  var list = document.getElementById('msSidebarList');
+  if (list) list.innerHTML = '';
+  var content = document.getElementById('msContent');
+  if (content) content.innerHTML = '<div class="ms-empty-state" id="msEmptyState"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
   updateDistPanel();
 }
 
 function updatePreview() {
+  var ptEl = document.getElementById('previewTitle');
+  var pmEl = document.getElementById('previewMacros');
+  var pfEl = document.getElementById('previewFoods');
+  if (!ptEl) return; // preview panel not in DOM
   var title = document.getElementById('f_title').value.trim();
   var kcal  = parseFloat(document.getElementById('f_calories').value) || null;
   var prot  = parseFloat(document.getElementById('f_proteins').value) || null;
   var carb  = parseFloat(document.getElementById('f_carbs').value)    || null;
   var fat   = parseFloat(document.getElementById('f_fats').value)     || null;
-  document.getElementById('previewTitle').textContent = title || 'Sin titulo';
-  var m = document.getElementById('previewMacros');
-  m.innerHTML = (kcal || prot || carb || fat) ? [
+  ptEl.textContent = title || 'Sin titulo';
+  pmEl.innerHTML = (kcal || prot || carb || fat) ? [
     kcal ? '<div class="pm kcal"><span class="v">' + Math.round(kcal) + '</span><span class="l">kcal</span></div>' : '',
     prot ? '<div class="pm prot"><span class="v">' + Math.round(prot) + 'g</span><span class="l">Prot.</span></div>' : '',
     carb ? '<div class="pm carb"><span class="v">' + Math.round(carb) + 'g</span><span class="l">Carbs</span></div>' : '',
@@ -949,16 +1021,108 @@ function updatePreview() {
   ].join('') : '';
   var lines = [];
   _meals.forEach(function(meal) {
-    var mname = (document.getElementById('mname-' + meal.id) && document.getElementById('mname-' + meal.id).value) || meal.name;
-    var cnt = meal.rows.filter(function(r){ return r.aliment_id; }).length;
+    var mname = meal.name;
     if (mname) lines.push('<div style="font-weight:600;color:#374151;margin-top:6px;">' + esc(mname) + '</div>');
     meal.rows.forEach(function(r) {
       if (r.aliment_name) lines.push('<div style="padding-left:8px;">· ' + esc(r.aliment_name) + '</div>');
     });
   });
-  document.getElementById('previewFoods').innerHTML = lines.length
+  pfEl.innerHTML = lines.length
     ? lines.join('')
     : '<span style="color:#D1D5DB">Sin alimentos aun</span>';
+}
+
+// --- Meal sidebar & selection ---
+
+function selectMeal(mid) {
+  if (_activeMealId !== null && _activeMealId !== mid) {
+    var prevRows = document.getElementById('mrows-' + _activeMealId);
+    var prevBlock = document.getElementById('meal-' + _activeMealId);
+    if (prevRows && prevBlock && !prevBlock.contains(prevRows)) prevBlock.appendChild(prevRows);
+  }
+  _activeMealId = mid;
+  renderMealSidebar();
+  renderActiveMealContent(mid);
+}
+
+function renderMealSidebar() {
+  var list = document.getElementById('msSidebarList');
+  if (!list) return;
+  if (!_meals.length) {
+    list.innerHTML = '<div style="padding:16px;font-size:12px;color:#D1D5DB;text-align:center;">Sin comidas</div>';
+    return;
+  }
+  list.innerHTML = _meals.map(function(meal, i) {
+    var isActive = meal.id === _activeMealId;
+    var totK = 0;
+    meal.rows.forEach(function(row) {
+      if (!row.aliment_id) return;
+      var qty = parseFloat((document.getElementById('fqty-' + row.id) || {}).value) || 0;
+      totK += ((row.calories||0)/100) * qty;
+    });
+    var sub = totK > 0 ? Math.round(totK) + ' kcal' : 'Vacía · toca para añadir';
+    return '<div class="ms-meal-item' + (isActive ? ' active' : '') + '" onclick="selectMeal(' + meal.id + ')">'
+      + '<div class="ms-meal-item-name">' + esc(meal.name) + '</div>'
+      + '<div class="ms-meal-item-sub">' + sub + '</div>'
+      + '<div class="ms-meal-item-arrows">'
+      + '<button ' + (i === 0 ? 'disabled' : '') + ' onclick="event.stopPropagation();moveMeal(' + meal.id + ',-1)">↑</button>'
+      + '<button ' + (i === _meals.length - 1 ? 'disabled' : '') + ' onclick="event.stopPropagation();moveMeal(' + meal.id + ',1)">↓</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function renderActiveMealContent(mid) {
+  var meal = _meals.find(function(m){ return m.id == mid; });
+  var content = document.getElementById('msContent');
+  if (!content) return;
+  var orphaned = content.querySelectorAll('[id^="mrows-"]');
+  orphaned.forEach(function(el) {
+    var prevMid = el.id.replace('mrows-', '');
+    if (prevMid != mid) { var b = document.getElementById('meal-' + prevMid); if (b) b.appendChild(el); }
+  });
+  if (!meal) {
+    content.innerHTML = '<div class="ms-empty-state"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
+    return;
+  }
+  content.innerHTML = '<div class="ms-ref-bar"><label>👤 Cliente:</label><select id="refClientSel" onchange="onRefClientChange(this.value)"><option value="">Sin cliente</option></select></div>'
+    + '<input class="ms-active-name-input" id="msNameInp-' + mid + '" value="' + esc(meal.name) + '" placeholder="Nombre de la comida" oninput="onActiveMealNameChange(' + mid + ',this.value)">'
+    + '<div id="mrows-ph-' + mid + '"></div>';
+  populateRefClientSel();
+  var ph = document.getElementById('mrows-ph-' + mid);
+  var mrows = document.getElementById('mrows-' + mid);
+  if (mrows && ph) ph.replaceWith(mrows);
+  var btnsDiv = document.createElement('div');
+  btnsDiv.className = 'ms-add-btns';
+  btnsDiv.innerHTML = '<button class="ms-add-food-btn" onclick="addFoodRow(' + mid + ')">'
+    + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+    + ' Añadir alimento</button>'
+    + '<button class="ms-add-recipe-btn">'
+    + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+    + ' Añadir receta</button>';
+  content.appendChild(btnsDiv);
+}
+
+function onActiveMealNameChange(mid, val) {
+  var meal = _meals.find(function(m){ return m.id == mid; });
+  if (meal) meal.name = val;
+  var hidden = document.getElementById('mname-' + mid);
+  if (hidden) hidden.value = val;
+  renderMealSidebar();
+}
+
+function addNewMeal() {
+  var meal = addMeal();
+  renderMealSidebar();
+  selectMeal(meal.id);
+}
+
+function moveMeal(mid, dir) {
+  var idx = _meals.findIndex(function(m){ return m.id == mid; });
+  if (idx < 0) return;
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= _meals.length) return;
+  var tmp = _meals[idx]; _meals[idx] = _meals[newIdx]; _meals[newIdx] = tmp;
+  renderMealSidebar();
 }
 
 // --- Meal management ---
@@ -987,31 +1151,37 @@ function addMeal(prefill) {
   }
   updateDistPanel();
   updatePreview();
+  renderMealSidebar();
   return meal;
 }
 
 function _renderMealBlock(meal) {
   var container = document.getElementById('mealsContainer');
   var div = document.createElement('div');
-  div.className = 'meal-block'; div.id = 'meal-' + meal.id;
-  div.innerHTML =
-    '<div class="meal-header">'
-    + '<input class="meal-name-input" id="mname-' + meal.id + '" value="' + esc(meal.name) + '" placeholder="Ej: Desayuno" oninput="onMealNameChange(' + meal.id + ')">'
-    + '<span class="meal-macros-badge" id="msumm-' + meal.id + '">---</span>'
-    + '<span class="meal-dist-hint" id="mdist-' + meal.id + '"></span>'
-    + '<button class="del-row-btn" onclick="removeMeal(' + meal.id + ')" title="Eliminar comida"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
-    + '</div>'
-    + '<div class="meal-rows" id="mrows-' + meal.id + '"></div>'
-    + '<button class="add-meal-food-btn" onclick="addFoodRow(' + meal.id + ')">'
-    + '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
-    + ' Agregar alimento</button>';
+  div.id = 'meal-' + meal.id;
+  div.innerHTML = '<input type="hidden" id="mname-' + meal.id + '" value="' + esc(meal.name) + '"><div class="meal-rows" id="mrows-' + meal.id + '"></div>';
   container.appendChild(div);
 }
 
 function removeMeal(mid) {
+  // If we're removing the active meal, move its rows back to backing block
+  if (_activeMealId == mid) {
+    var mrows = document.getElementById('mrows-' + mid);
+    var block = document.getElementById('meal-' + mid);
+    if (mrows && block && !block.contains(mrows)) block.appendChild(mrows);
+    _activeMealId = null;
+  }
   _meals = _meals.filter(function(m){ return m.id != mid; });
   var el = document.getElementById('meal-' + mid); if (el) el.remove();
-  recalcTotalMacros(); updatePreview(); updateDistPanel();
+  recalcTotalMacros(); updatePreview();
+  renderMealSidebar();
+  // Select first remaining meal if any
+  if (_meals.length > 0 && !_activeMealId) selectMeal(_meals[0].id);
+  else if (!_activeMealId) {
+    var content = document.getElementById('msContent');
+    if (content) content.innerHTML = '<div class="ms-empty-state" id="msEmptyState"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
+  }
+  updateDistPanel();
 }
 
 function onMealNameChange(mid) {
@@ -1019,6 +1189,7 @@ function onMealNameChange(mid) {
   if (meal) {
     var inp = document.getElementById('mname-' + mid);
     if (inp) meal.name = inp.value;
+    renderMealSidebar();
     updateDistPanel();
   }
 }
@@ -1100,16 +1271,8 @@ function updateRowMacros(row) {
 function recalcMealMacros(mid) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   if (!meal) return;
-  var k=0, p=0, c=0, f=0;
-  meal.rows.forEach(function(row) {
-    if (!row.aliment_id) return;
-    var qty = parseFloat(document.getElementById('fqty-' + row.id) && document.getElementById('fqty-' + row.id).value) || 0;
-    k += ((row.calories||0)/100)*qty; p += ((row.proteins||0)/100)*qty;
-    c += ((row.carbohydrates||0)/100)*qty; f += ((row.fats||0)/100)*qty;
-  });
-  var el = document.getElementById('msumm-' + mid);
-  if (el) el.textContent = (k||p||c||f) ? Math.round(k) + ' kcal · ' + p.toFixed(1) + 'P · ' + c.toFixed(1) + 'C · ' + f.toFixed(1) + 'G' : '---';
   recalcTotalMacros();
+  renderMealSidebar();
 }
 
 function recalcTotalMacros() {
@@ -1117,11 +1280,12 @@ function recalcTotalMacros() {
   _meals.forEach(function(meal) {
     meal.rows.forEach(function(row) {
       if (!row.aliment_id) return;
-      var qty = parseFloat(document.getElementById('fqty-' + row.id) && document.getElementById('fqty-' + row.id).value) || 0;
+      var qty = parseFloat((document.getElementById('fqty-' + row.id)||{}).value) || 0;
       k += ((row.calories||0)/100)*qty; p += ((row.proteins||0)/100)*qty;
       c += ((row.carbohydrates||0)/100)*qty; f += ((row.fats||0)/100)*qty;
     });
   });
+  // Update step 1 form fields
   if (k||p||c||f) {
     document.getElementById('f_calories').value = Math.round(k)||'';
     document.getElementById('f_proteins').value = p.toFixed(1);
@@ -1129,6 +1293,15 @@ function recalcTotalMacros() {
     document.getElementById('f_fats').value     = f.toFixed(1);
     updatePreview();
   }
+  // Update sidebar totals
+  var tK = document.getElementById('tot_kcal');
+  var tP = document.getElementById('tot_prot');
+  var tC = document.getElementById('tot_carb');
+  var tF = document.getElementById('tot_fat');
+  if (tK) tK.textContent = Math.round(k) + ' kcal';
+  if (tP) tP.textContent = p.toFixed(1) + 'g';
+  if (tC) tC.textContent = c.toFixed(1) + 'g';
+  if (tF) tF.textContent = f.toFixed(1) + 'g';
 }
 
 // --- Autocomplete ---
@@ -1246,13 +1419,22 @@ function applyDistribution() {
 }
 
 async function saveDiet() {
+  // Sync active meal's visible name input back to hidden input and meal object
+  if (_activeMealId) {
+    var visInp = document.getElementById('msNameInp-' + _activeMealId);
+    var hidInp = document.getElementById('mname-' + _activeMealId);
+    var actMeal = _meals.find(function(m){ return m.id == _activeMealId; });
+    if (visInp && hidInp) hidInp.value = visInp.value;
+    if (visInp && actMeal) actMeal.name = visInp.value;
+  }
   var title = document.getElementById('f_title').value.trim();
-  if (!title) { document.getElementById('formError').textContent = 'El titulo es obligatorio'; return; }
+  var errEl = document.getElementById('formError');
+  if (!title) { if(errEl){errEl.textContent='El titulo es obligatorio';errEl.style.display='block';} return; }
   var btn = document.getElementById('saveBtn');
   btn.textContent = 'Guardando...'; btn.disabled = true;
-  document.getElementById('formError').textContent = '';
+  if(errEl){errEl.textContent='';errEl.style.display='none';}
   var foods = _meals.map(function(meal) {
-    var mealName = (document.getElementById('mname-' + meal.id) && document.getElementById('mname-' + meal.id).value) || meal.name || 'Comida';
+    var mealName = meal.name || (document.getElementById('mname-' + meal.id) && document.getElementById('mname-' + meal.id).value) || 'Comida';
     var detail = meal.rows
       .filter(function(r){ return r.aliment_id; })
       .map(function(r, i) {
@@ -1280,9 +1462,9 @@ async function saveDiet() {
     var method = editingId ? 'PUT' : 'POST';
     var r = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
     var j = await r.json();
-    if (!r.ok) { document.getElementById('formError').textContent = j.detail || j.message || 'Error al guardar'; return; }
+    if (!r.ok) { var fe=document.getElementById('formError');if(fe){fe.textContent=j.detail||j.message||'Error al guardar';fe.style.display='block';} return; }
     closeForm(); toast(editingId ? 'Dieta actualizada' : 'Dieta creada', 'success'); loadDiets();
-  } catch(e) { document.getElementById('formError').textContent = 'Error de conexion'; }
+  } catch(e) { var fe=document.getElementById('formError');if(fe){fe.textContent='Error de conexion';fe.style.display='block';} }
   finally { btn.textContent = 'Guardar dieta'; btn.disabled = false; }
 }
 

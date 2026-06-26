@@ -85,20 +85,67 @@
     .fv-back{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:#6B7280;font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;transition:.15s;}
     .fv-back:hover{background:#F3F4F6;color:#111;}
     .fv-title{font-size:18px;font-weight:700;color:#111;}
-    /* fv-body siempre apila verticalmente — sin cortes laterales */
-    .fv-body{display:block;overflow-y:auto;flex:1;}
-    .fv-main{padding:24px;display:flex;flex-direction:column;gap:16px;}
-    .fv-sidebar{background:#fff;border-top:2px solid #E5E7EB;padding:24px;display:grid;grid-template-columns:1fr 1fr auto;gap:16px;align-items:start;}
-    .fv-sidebar .sb-card:first-child{grid-column:1;}
-    .fv-sidebar .sb-card:nth-child(2){grid-column:2;}
-    .fv-sidebar .save-btn{grid-column:3;align-self:stretch;width:160px;white-space:nowrap;}
-    /* En pantallas grandes (≥1400px): layout lado a lado */
-    @media(min-width:1400px){
-      .fv-body{display:flex;overflow:hidden;}
-      .fv-main{flex:1;overflow-y:auto;}
-      .fv-sidebar{display:flex;flex-direction:column;width:280px;flex-shrink:0;border-top:none;border-left:1px solid #E5E7EB;padding:20px;overflow-y:auto;}
-      .fv-sidebar .save-btn{width:100%;align-self:unset;}
+    /* ── Diet panel (slide-up modal) ── */
+    .diet-panel{
+      position:fixed;inset:0;z-index:500;
+      background:#fff;
+      display:flex;flex-direction:column;
+      transform:translateY(100%);
+      transition:transform .4s cubic-bezier(.4,0,.2,1);
+      visibility:hidden;
     }
+    .diet-panel.open{transform:translateY(0);visibility:visible;}
+
+    /* Header */
+    .dp-header{
+      display:flex;align-items:center;gap:12px;
+      padding:0 24px;height:60px;
+      border-bottom:1px solid #E5E7EB;
+      background:#fff;flex-shrink:0;
+    }
+    .dp-close{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;color:#374151;font-size:15px;font-weight:700;padding:6px 10px;border-radius:8px;transition:.15s;flex-shrink:0;}
+    .dp-close:hover{background:#F3F4F6;}
+    .dp-close svg{color:#6B7280;}
+    .dp-title{font-size:16px;font-weight:800;color:#111;}
+    .dp-steps{display:flex;gap:4px;margin:0 auto;}
+    .dp-step{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;background:#F3F4F6;color:#6B7280;}
+    .dp-step:hover{background:#E5E7EB;}
+    .dp-step.active{background:#EEF2FF;color:#4F46E5;}
+    .dp-step-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:rgba(0,0,0,.08);flex-shrink:0;}
+    .dp-step.active .dp-step-num{background:#4F46E5;color:#fff;}
+    .dp-save-header{padding:8px 20px;border-radius:8px;background:#4F46E5;color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
+    .dp-save-header:hover{background:#4338CA;}
+
+    /* Body */
+    .dp-body{flex:1;overflow-y:auto;display:none;}
+    .dp-body.active{display:block;}
+    .dp-form{max-width:720px;margin:0 auto;padding:32px 24px;}
+    .dp-section-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:16px;margin-top:28px;}
+    .dp-section-title:first-child{margin-top:0;}
+
+    /* Macros row (4 cols) */
+    .dp-macros-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    @media(max-width:600px){.dp-macros-row{grid-template-columns:1fr 1fr;}}
+
+    /* Meals section (step 2) */
+    .dp-meals-wrap{max-width:900px;margin:0 auto;padding:24px;}
+    .dp-meals-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+    .dp-meals-title{font-size:15px;font-weight:700;color:#111;}
+    .dp-dist-bar{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+    .dp-dist-bar-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+
+    /* Footer next/save button */
+    .dp-footer{border-top:1px solid #F3F4F6;padding:16px 24px;background:#fff;flex-shrink:0;}
+    .dp-next-btn{display:block;width:100%;max-width:720px;margin:0 auto;padding:15px;background:#4F46E5;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;}
+    .dp-next-btn:hover{background:#4338CA;}
+    .dp-next-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+    /* Number stepper */
+    .dp-stepper{display:flex;align-items:center;gap:8px;}
+    .dp-stepper-btn{width:34px;height:34px;border:1.5px solid #E5E7EB;border-radius:8px;background:#fff;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;transition:.15s;line-height:1;flex-shrink:0;}
+    .dp-stepper-btn:hover{border-color:#4F46E5;color:#4F46E5;}
+    .dp-stepper-val{font-size:20px;font-weight:800;color:#111;min-width:28px;text-align:center;}
+    .dp-stepper-unit{font-size:13px;color:#9CA3AF;}
     .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
     .sec-card-head{padding:16px 20px;border-bottom:1px solid #EBEBEB;font-size:14px;font-weight:700;color:#111;}
     .sec-card-body{padding:20px;}
@@ -220,15 +267,15 @@
       #listView .table-wrap{overflow-x:auto;}
       #listView table{min-width:560px;}
 
-      /* ── Fix form view ── */
-      #formView,#formView.active{display:block !important;overflow:visible;height:auto;}
-      .fv-bar{padding:8px 12px;height:auto;min-height:52px;flex-wrap:wrap;gap:6px;}
-      .fv-title{font-size:16px;}
-      .fv-body{overflow-y:visible;height:auto;}
-      .fv-main{padding:12px;gap:12px;}
-      .fv-sidebar{grid-template-columns:1fr;padding:12px;gap:10px;}
-      .fv-sidebar .sb-card:first-child,.fv-sidebar .sb-card:nth-child(2){grid-column:1;}
-      .fv-sidebar .save-btn{grid-column:1;width:100%;}
+      /* ── Diet panel mobile ── */
+      .dp-header{padding:0 12px;height:52px;gap:8px;}
+      .dp-steps{gap:2px;}
+      .dp-step{padding:6px 10px;font-size:12px;}
+      .dp-form{padding:20px 16px;}
+      .dp-meals-wrap{padding:16px;}
+      .dp-footer{padding:12px 16px;}
+      .dp-save-header span{display:none;}
+      .dp-save-header{padding:8px 14px;}
 
       /* ── Form grids ── */
       .form-row{grid-template-columns:1fr 1fr;}   /* keep 2 cols — enough space */
@@ -257,6 +304,7 @@
 </head>
 <body>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <span>ALZUM<em>.io</em></span>
@@ -395,125 +443,177 @@
     </div>
   </div>
 
-  <div id="formView">
-    <div class="fv-bar">
-      <button class="fv-back" onclick="closeForm()">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        Volver a dietas
+  </div><!-- /#listView -->
+</div><!-- /.main -->
+
+<!-- ════════════════════════════════════════
+     PANEL NUEVA / EDITAR DIETA (slide-up)
+════════════════════════════════════════ -->
+<div id="dietPanel" class="diet-panel">
+
+  <!-- Header -->
+  <div class="dp-header">
+    <button class="dp-close" onclick="closeForm()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <span class="dp-title" id="formViewTitle">Nueva dieta</span>
+    </button>
+
+    <div class="dp-steps">
+      <button class="dp-step active" id="step1Btn" onclick="goToStep(1)">
+        <span class="dp-step-num">1</span>
+        Información
       </button>
-      <h2 class="fv-title" id="formViewTitle">Nueva dieta</h2>
+      <button class="dp-step" id="step2Btn" onclick="goToStep(2)">
+        <span class="dp-step-num">2</span>
+        Plan de comidas
+      </button>
     </div>
 
-    <div class="fv-body">
-      <div class="fv-main">
-        <div class="sec-card">
-          <div class="sec-card-head">Informacion general</div>
-          <div class="sec-card-body">
-            <div class="form-group">
-              <label>Titulo *</label>
-              <input id="f_title" placeholder="Ej: Definicion 1.800 kcal" oninput="updatePreview()"/>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Tipo</label>
-                <select id="f_type">
-                  <option value="">Sin especificar</option>
-                  <option value="Deficit">Deficit</option>
-                  <option value="Superavit">Superavit</option>
-                  <option value="Mantenimiento">Mantenimiento</option>
-                  <option value="Cetogenica">Cetogenica</option>
-                  <option value="Mediterranea">Mediterranea</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Estilo</label>
-                <select id="f_style">
-                  <option value="">Sin especificar</option>
-                  <option value="Omnivora">Omnivora</option>
-                  <option value="Vegetariana">Vegetariana</option>
-                  <option value="Vegana">Vegana</option>
-                  <option value="Saludable">Saludable</option>
-                  <option value="Low carb">Low carb</option>
-                  <option value="Alto carbo">Alto carbo</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
+    <button class="dp-save-header" onclick="saveDiet()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span>Guardar dieta</span>
+    </button>
+  </div>
 
-        <div class="sec-card">
-          <div class="sec-card-head">Macros y calorias</div>
-          <div class="sec-card-body">
-            <div class="form-row-4">
-              <div class="form-group">
-                <label>Calorias (kcal)</label>
-                <input id="f_calories" type="number" placeholder="1800" oninput="updatePreview()"/>
-              </div>
-              <div class="form-group">
-                <label>Proteinas (g)</label>
-                <input id="f_proteins" type="number" placeholder="150" oninput="updatePreview()"/>
-              </div>
-              <div class="form-group">
-                <label>Carbos (g)</label>
-                <input id="f_carbs" type="number" placeholder="180" oninput="updatePreview()"/>
-              </div>
-              <div class="form-group">
-                <label>Grasas (g)</label>
-                <input id="f_fats" type="number" placeholder="60" oninput="updatePreview()"/>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Deficit (kcal)</label>
-                <input id="f_deficit" type="number" placeholder="300"/>
-              </div>
-              <div class="form-group">
-                <label>Superavit (kcal)</label>
-                <input id="f_surplus" type="number" placeholder="0"/>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- ── Paso 1: Información ── -->
+  <div class="dp-body active" id="dpStep1">
+    <div class="dp-form">
 
-        <div class="sec-card">
-          <div class="sec-card-head">Comidas del plan</div>
-          <div class="sec-card-body">
-            <div class="ref-client-bar">
-              <label>👤 Cliente:</label>
-              <select id="refClientSel" onchange="onRefClientChange(this.value)">
-                <option value="">Sin cliente (solo plataforma)</option>
-              </select>
-            </div>
-            <div id="mealsContainer"></div>
-            <button class="add-meal-btn" onclick="addMeal()">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Agregar comida
-            </button>
-          </div>
-        </div>
+      <div class="dp-section-title">Información general</div>
 
-        <div id="formError" style="color:#DC2626;font-size:13px;padding:2px 0;"></div>
+      <div class="form-group">
+        <label>Nombre de la dieta *</label>
+        <input id="f_title" placeholder="Ej: Definición · Alta proteína · 1800 kcal" oninput="updatePreview()" style="font-size:16px;"/>
       </div>
 
-      <div class="fv-sidebar">
-        <div class="sb-card">
-          <div class="sb-card-title">Distribucion de macros</div>
-          <div id="macroDistPanel"><div style="color:#D1D5DB;font-size:12px;text-align:center;padding:8px 0;">Agrega comidas primero</div></div>
-          <div id="distPctError" style="font-size:11px;color:#DC2626;margin-top:6px;display:none;">Los porcentajes no suman 100%</div>
-          <button class="dist-apply-btn" onclick="applyDistribution()">Aplicar distribucion</button>
+      <div class="form-row" style="margin-bottom:0;">
+        <div class="form-group">
+          <label>Tipo de dieta</label>
+          <select id="f_type" style="font-size:16px;">
+            <option value="">Seleccionar...</option>
+            <option value="Deficit">Déficit</option>
+            <option value="Superavit">Superávit</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Cetogenica">Cetogénica</option>
+            <option value="Mediterranea">Mediterránea</option>
+          </select>
         </div>
-        <div class="sb-card">
-          <div class="sb-card-title">Vista previa</div>
-          <div id="previewTitle" style="font-size:15px;font-weight:700;color:#111;margin-bottom:10px;min-height:20px;">Sin titulo</div>
-          <div class="preview-macros" id="previewMacros"></div>
-          <div id="previewFoods" style="font-size:12px;color:#9CA3AF;line-height:1.9;"></div>
+        <div class="form-group">
+          <label>Estilo alimentario</label>
+          <select id="f_style" style="font-size:16px;">
+            <option value="">Seleccionar...</option>
+            <option value="Omnivora">Omnívora</option>
+            <option value="Vegetariana">Vegetariana</option>
+            <option value="Vegana">Vegana</option>
+            <option value="Saludable">Saludable</option>
+            <option value="Low carb">Low carb</option>
+            <option value="Alto carbo">Alto carbo</option>
+          </select>
         </div>
-        <button class="save-btn" id="saveBtn" onclick="saveDiet()">Guardar dieta</button>
       </div>
+
+      <div class="dp-section-title">Macros y calorías <span style="font-weight:400;color:#9CA3AF;">(opcional)</span></div>
+
+      <div class="dp-macros-row">
+        <div class="form-group">
+          <label>Calorías (kcal)</label>
+          <input id="f_calories" type="number" placeholder="1800" oninput="updatePreview()" style="font-size:16px;"/>
+        </div>
+        <div class="form-group">
+          <label>Proteínas (g)</label>
+          <input id="f_proteins" type="number" placeholder="150" oninput="updatePreview()" style="font-size:16px;"/>
+        </div>
+        <div class="form-group">
+          <label>Carbos (g)</label>
+          <input id="f_carbs" type="number" placeholder="180" oninput="updatePreview()" style="font-size:16px;"/>
+        </div>
+        <div class="form-group">
+          <label>Grasas (g)</label>
+          <input id="f_fats" type="number" placeholder="60" oninput="updatePreview()" style="font-size:16px;"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Déficit (kcal)</label>
+          <input id="f_deficit" type="number" placeholder="300" style="font-size:16px;"/>
+        </div>
+        <div class="form-group">
+          <label>Superávit (kcal)</label>
+          <input id="f_surplus" type="number" placeholder="0" style="font-size:16px;"/>
+        </div>
+      </div>
+
+      <div class="dp-section-title">Número de comidas</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+        <div class="dp-stepper">
+          <button class="dp-stepper-btn" onclick="changeMealCount(-1)">−</button>
+          <span class="dp-stepper-val" id="mealCountVal">3</span>
+          <button class="dp-stepper-btn" onclick="changeMealCount(1)">+</button>
+          <span class="dp-stepper-unit">comidas/día</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="dp-footer">
+      <button class="dp-next-btn" onclick="goToStep(2)">
+        Siguiente → Plan de comidas
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-left:6px;"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
   </div>
 
-</div>
+  <!-- ── Paso 2: Plan de comidas ── -->
+  <div class="dp-body" id="dpStep2">
+    <div class="dp-meals-wrap">
+
+      <div class="dp-meals-top">
+        <div class="dp-meals-title">Plan de comidas</div>
+        <div class="ref-client-bar" style="margin-bottom:0;flex:1;max-width:360px;">
+          <label>👤 Cliente:</label>
+          <select id="refClientSel" onchange="onRefClientChange(this.value)">
+            <option value="">Sin cliente (solo plataforma)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Distribución de macros colapsable -->
+      <div class="dp-dist-bar" id="dpDistBar" style="display:none;">
+        <div class="dp-dist-bar-title">Distribución de macros por comida</div>
+        <div id="macroDistPanel"><div style="color:#D1D5DB;font-size:12px;">Agrega comidas primero</div></div>
+        <div id="distPctError" style="font-size:11px;color:#DC2626;margin-top:6px;display:none;">Los porcentajes no suman 100%</div>
+        <button class="dist-apply-btn" onclick="applyDistribution()" style="margin-top:8px;">Aplicar distribución</button>
+      </div>
+
+      <div id="mealsContainer"></div>
+
+      <button class="add-meal-btn" onclick="addMeal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar comida
+      </button>
+
+      <div id="formError" style="color:#DC2626;font-size:13px;padding:8px 0;"></div>
+
+      <!-- Preview inline -->
+      <div id="dp-preview-wrap" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin-top:20px;display:none;">
+        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Vista previa</div>
+        <div id="previewTitle" style="font-size:15px;font-weight:700;color:#111;margin-bottom:10px;">Sin título</div>
+        <div class="preview-macros" id="previewMacros"></div>
+        <div id="previewFoods" style="font-size:12px;color:#9CA3AF;line-height:1.9;margin-top:8px;"></div>
+      </div>
+
+    </div>
+
+    <div class="dp-footer">
+      <button class="dp-next-btn" id="saveBtn" onclick="saveDiet()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-right:6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Guardar dieta
+      </button>
+    </div>
+  </div>
+
+</div><!-- /#dietPanel -->
 
 <div class="overlay" id="assignOverlay">
   <div class="modal-box">
@@ -775,16 +875,49 @@ async function openForm(id) {
   }
 
   updatePreview();
-  document.getElementById('listView').style.display = 'none';
-  document.getElementById('formView').classList.add('active');
+  goToStep(1);
+  var panel = document.getElementById('dietPanel');
+  panel.style.visibility = 'visible';
+  requestAnimationFrame(function(){ panel.classList.add('open'); });
   window.scrollTo(0, 0);
 }
 
 function closeForm() {
-  document.getElementById('formView').classList.remove('active');
-  document.getElementById('listView').style.display = '';
+  var panel = document.getElementById('dietPanel');
+  panel.classList.remove('open');
+  setTimeout(function(){ panel.style.visibility = 'hidden'; }, 420);
   editingId = null;
-  window.scrollTo(0, 0);
+}
+
+function goToStep(n) {
+  document.getElementById('dpStep1').classList.toggle('active', n === 1);
+  document.getElementById('dpStep2').classList.toggle('active', n === 2);
+  document.getElementById('step1Btn').classList.toggle('active', n === 1);
+  document.getElementById('step2Btn').classList.toggle('active', n === 2);
+  if (n === 2) { updateDistPanel(); updatePreview(); }
+}
+
+function changeMealCount(delta) {
+  var el = document.getElementById('mealCountVal');
+  var val = parseInt(el.textContent) + delta;
+  if (val < 1) val = 1;
+  if (val > 10) val = 10;
+  el.textContent = val;
+  var container = document.getElementById('mealsContainer');
+  var current = _meals.length;
+  if (val > current) {
+    for (var i = current; i < val; i++) addMeal();
+  } else if (val < current) {
+    for (var i = current; i > val; i--) {
+      var last = _meals[_meals.length - 1];
+      if (last) {
+        var block = document.getElementById('meal-' + last.id);
+        if (block) block.remove();
+        _meals.pop();
+      }
+    }
+    updateDistPanel();
+  }
 }
 
 function clearForm() {
@@ -795,6 +928,8 @@ function clearForm() {
   document.getElementById('f_style').value = '';
   document.getElementById('mealsContainer').innerHTML = '';
   _meals = []; _mealSeq = 0; _rowSeq = 0; _refClientId = null;
+  var mcv = document.getElementById('mealCountVal');
+  if (mcv) mcv.textContent = '3';
   updateDistPanel();
 }
 

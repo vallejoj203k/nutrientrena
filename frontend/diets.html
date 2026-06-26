@@ -85,14 +85,19 @@
     .fv-back{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:#6B7280;font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;transition:.15s;}
     .fv-back:hover{background:#F3F4F6;color:#111;}
     .fv-title{font-size:18px;font-weight:700;color:#111;}
-    .fv-body{display:flex;flex:1;overflow:hidden;}
-    .fv-main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0;}
-    .fv-sidebar{width:280px;min-width:260px;max-width:300px;background:#fff;border-left:1px solid #E5E7EB;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;flex-shrink:0;}
-    /* Stack sidebar below main when there isn't enough horizontal room */
-    @media(max-width:1100px){
-      .fv-body{flex-direction:column;overflow-y:auto;}
-      .fv-main{overflow-y:visible;flex:unset;}
-      .fv-sidebar{width:100%;min-width:unset;max-width:unset;border-left:none;border-top:2px solid #E5E7EB;overflow-y:visible;}
+    /* fv-body siempre apila verticalmente — sin cortes laterales */
+    .fv-body{display:block;overflow-y:auto;flex:1;}
+    .fv-main{padding:24px;display:flex;flex-direction:column;gap:16px;}
+    .fv-sidebar{background:#fff;border-top:2px solid #E5E7EB;padding:24px;display:grid;grid-template-columns:1fr 1fr auto;gap:16px;align-items:start;}
+    .fv-sidebar .sb-card:first-child{grid-column:1;}
+    .fv-sidebar .sb-card:nth-child(2){grid-column:2;}
+    .fv-sidebar .save-btn{grid-column:3;align-self:stretch;width:160px;white-space:nowrap;}
+    /* En pantallas grandes (≥1400px): layout lado a lado */
+    @media(min-width:1400px){
+      .fv-body{display:flex;overflow:hidden;}
+      .fv-main{flex:1;overflow-y:auto;}
+      .fv-sidebar{display:flex;flex-direction:column;width:280px;flex-shrink:0;border-top:none;border-left:1px solid #E5E7EB;padding:20px;overflow-y:auto;}
+      .fv-sidebar .save-btn{width:100%;align-self:unset;}
     }
     .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
     .sec-card-head{padding:16px 20px;border-bottom:1px solid #EBEBEB;font-size:14px;font-weight:700;color:#111;}
@@ -215,13 +220,15 @@
       #listView .table-wrap{overflow-x:auto;}
       #listView table{min-width:560px;}
 
-      /* ── Fix form view — the key: everything is a scrollable block ── */
+      /* ── Fix form view ── */
       #formView,#formView.active{display:block !important;overflow:visible;height:auto;}
       .fv-bar{padding:8px 12px;height:auto;min-height:52px;flex-wrap:wrap;gap:6px;}
       .fv-title{font-size:16px;}
-      .fv-body{display:block !important;overflow:visible;height:auto;}
-      .fv-main{overflow-y:visible !important;height:auto !important;padding:12px;gap:12px;}
-      .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:2px solid #E5E7EB;padding:12px;overflow-y:visible;height:auto;}
+      .fv-body{overflow-y:visible;height:auto;}
+      .fv-main{padding:12px;gap:12px;}
+      .fv-sidebar{grid-template-columns:1fr;padding:12px;gap:10px;}
+      .fv-sidebar .sb-card:first-child,.fv-sidebar .sb-card:nth-child(2){grid-column:1;}
+      .fv-sidebar .save-btn{grid-column:1;width:100%;}
 
       /* ── Form grids ── */
       .form-row{grid-template-columns:1fr 1fr;}   /* keep 2 cols — enough space */

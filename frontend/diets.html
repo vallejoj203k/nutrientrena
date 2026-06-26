@@ -1070,16 +1070,24 @@ function updatePreview() {
 
 // --- Meal sidebar & selection ---
 
+function saveMealDOMState(mid) {
+  var meal = _meals.find(function(m){ return m.id == mid; });
+  if (!meal) return;
+  var nEl = document.getElementById('msNameInp-' + mid);
+  if (nEl) meal.name = nEl.value;
+  meal.rows.forEach(function(row) {
+    var qEl = document.getElementById('fqty-' + row.id);
+    if (qEl) row.quantity = qEl.value;
+    var uEl = document.getElementById('funit-' + row.id);
+    if (uEl) row.unit = uEl.value;
+    var srcP = document.getElementById('fsrc-p-' + row.id);
+    if (srcP) row._source = srcP.classList.contains('active') ? 'platform' : 'personal';
+  });
+}
+
 function selectMeal(mid) {
-  if (_activeMealId === mid) {
-    renderMealSidebar();
-    return;
-  }
-  if (_activeMealId !== null) {
-    var prevRows = document.getElementById('mrows-' + _activeMealId);
-    var prevBlock = document.getElementById('meal-' + _activeMealId);
-    if (prevRows && prevBlock && !prevBlock.contains(prevRows)) prevBlock.appendChild(prevRows);
-  }
+  if (_activeMealId === mid) return;
+  if (_activeMealId !== null) saveMealDOMState(_activeMealId);
   _activeMealId = mid;
   renderMealSidebar();
   renderActiveMealContent(mid);
@@ -1097,9 +1105,9 @@ function renderMealSidebar() {
     var totK = 0;
     meal.rows.forEach(function(row) {
       if (!row.aliment_id) return;
-      var qtyRaw = parseFloat((document.getElementById('fqty-' + row.id) || {}).value) || 0;
-      var unit = row.unit || (document.getElementById('funit-' + row.id) ? document.getElementById('funit-' + row.id).value : 'gr');
-      totK += ((row.calories||0)/100) * qtyRaw * getUnitMult(unit);
+      var qEl = document.getElementById('fqty-' + row.id);
+      var qtyRaw = parseFloat(qEl ? qEl.value : (row.quantity || '')) || 0;
+      totK += ((row.calories||0)/100) * qtyRaw * getUnitMult(row.unit || 'gr');
     });
     var sub = totK > 0 ? Math.round(totK) + ' kcal' : 'Vacía · toca para añadir';
     return '<div class="ms-meal-item' + (isActive ? ' active' : '') + '" onclick="selectMeal(' + meal.id + ')">'
@@ -1116,30 +1124,16 @@ function renderActiveMealContent(mid) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   var content = document.getElementById('msContent');
   if (!content) return;
-  // Save ALL mrows to backing store before clearing innerHTML (including current meal's)
-  var allMrows = Array.from(content.querySelectorAll('[id^="mrows-"]'));
-  allMrows.forEach(function(el) {
-    var b = document.getElementById('meal-' + el.id.replace('mrows-', ''));
-    if (b) b.appendChild(el);
-  });
+  var EMPTY_SVG = '<svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>';
   if (!meal) {
-    content.innerHTML = '<div class="ms-empty-state"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
+    content.innerHTML = '<div class="ms-empty-state">' + EMPTY_SVG + '<span>Selecciona una comida</span></div>';
     return;
   }
   content.innerHTML = '<div class="ms-ref-bar"><label>👤 Cliente:</label><select id="refClientSel" onchange="onRefClientChange(this.value)"><option value="">Sin cliente</option></select></div>'
     + '<input class="ms-active-name-input" id="msNameInp-' + mid + '" value="' + esc(meal.name) + '" placeholder="Nombre de la comida" oninput="onActiveMealNameChange(' + mid + ',this.value)">'
-    + '<div id="mrows-ph-' + mid + '"></div>';
+    + '<div class="meal-rows" id="mrows-' + mid + '"></div>';
   populateRefClientSel();
-  var ph = document.getElementById('mrows-ph-' + mid);
-  var mrows = document.getElementById('mrows-' + mid);
-  if (!mrows) {
-    mrows = document.createElement('div');
-    mrows.className = 'meal-rows';
-    mrows.id = 'mrows-' + mid;
-    var block = document.getElementById('meal-' + mid);
-    if (block) block.appendChild(mrows);
-  }
-  if (ph && mrows) ph.replaceWith(mrows);
+  meal.rows.forEach(function(row) { _renderFoodCard(mid, row); });
   var btnsDiv = document.createElement('div');
   btnsDiv.className = 'ms-add-btns';
   btnsDiv.innerHTML = '<button class="ms-add-food-btn" onclick="addFoodRow(' + mid + ')">'
@@ -1147,7 +1141,7 @@ function renderActiveMealContent(mid) {
     + ' Buscar alimento</button>'
     + '<button class="ms-add-recipe-btn">'
     + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
-    + ' Añadir receta</button>';
+    + ' A\u00f1adir receta</button>';
   content.appendChild(btnsDiv);
   var createBtn = document.createElement('button');
   createBtn.style.cssText = 'margin-top:10px;width:100%;padding:10px;border:1.5px dashed #9CA3AF;border-radius:8px;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;';
@@ -1189,19 +1183,20 @@ function addMeal(prefill) {
   var defaultName = 'Comida ' + _meals.length;
   var meal = { id: mid, db_id: (prefill && prefill.id) || null, name: (prefill && prefill.name) || defaultName, rows: [] };
   _meals.push(meal);
-  _renderMealBlock(meal);
   if (prefill && prefill.detail) {
     (prefill.detail || []).forEach(function(dfa) {
       if (!dfa.aliment) return;
-      addFoodRow(mid, {
-        db_id: dfa.id,
-        aliment_id: dfa.aliment_id,
-        aliment_name: dfa.aliment.name || '',
-        quantity: dfa.quantity,
-        proteins: dfa.aliment.proteins,
-        carbohydrates: dfa.aliment.carbohydrates,
-        fats: dfa.aliment.fats,
-        calories: dfa.aliment.calories,
+      var rid = ++_rowSeq;
+      meal.rows.push({
+        id: rid, mid: mid, db_id: dfa.id || null,
+        aliment_id: dfa.aliment_id || null,
+        aliment_name: (dfa.aliment && dfa.aliment.name) || '',
+        proteins: (dfa.aliment && dfa.aliment.proteins != null) ? dfa.aliment.proteins : null,
+        carbohydrates: (dfa.aliment && dfa.aliment.carbohydrates != null) ? dfa.aliment.carbohydrates : null,
+        fats: (dfa.aliment && dfa.aliment.fats != null) ? dfa.aliment.fats : null,
+        calories: (dfa.aliment && dfa.aliment.calories != null) ? dfa.aliment.calories : null,
+        quantity: dfa.quantity != null ? String(dfa.quantity) : '',
+        unit: 'gr', _source: 'platform'
       });
     });
   }
@@ -1211,32 +1206,46 @@ function addMeal(prefill) {
   return meal;
 }
 
-function _renderMealBlock(meal) {
-  var container = document.getElementById('mealsContainer');
-  var div = document.createElement('div');
-  div.id = 'meal-' + meal.id;
-  div.innerHTML = '<input type="hidden" id="mname-' + meal.id + '" value="' + esc(meal.name) + '"><div class="meal-rows" id="mrows-' + meal.id + '"></div>';
-  container.appendChild(div);
+function _renderFoodCard(mid, row) {
+  var container = document.getElementById('mrows-' + mid);
+  if (!container) return;
+  if (document.getElementById('frow-' + row.id)) return;
+  var rid = row.id;
+  var card = document.createElement('div');
+  card.className = 'food-card'; card.id = 'frow-' + rid;
+  card.innerHTML =
+    '<div class="food-src-tabs">'
+    + '<button class="food-src-tab' + (row._source !== 'personal' ? ' active' : '') + '" id="fsrc-p-' + rid + '" onclick="setFoodSource(' + mid + ',' + rid + ',\'platform\',this)">🌐 Plataforma</button>'
+    + '<button class="food-src-tab personal' + (row._source === 'personal' ? ' active' : '') + '" id="fsrc-c-' + rid + '" onclick="setFoodSource(' + mid + ',' + rid + ',\'personal\',this)">👤 Personal</button>'
+    + '</div>'
+    + '<div class="food-card-top">'
+    + '<div class="ac-wrap"><input type="text" id="fiac-' + rid + '" placeholder="Buscar alimento..." autocomplete="off"'
+    + ' oninput="acSearch(' + rid + ',this.value)" onfocus="acSearch(' + rid + ',this.value)" onblur="setTimeout(function(){closeAc(' + rid + ')},180)"/>'
+    + '<div class="ac-dropdown" id="facdrop-' + rid + '"></div></div>'
+    + '<button class="del-row-btn" onclick="removeFoodRow(' + mid + ',' + rid + ')" title="Quitar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+    + '</div>'
+    + '<div class="food-card-bottom">'
+    + '<div class="food-qty-wrap"><input type="number" id="fqty-' + rid + '" min="0" step="0.1" placeholder="0" oninput="onQtyChange(' + mid + ',' + rid + ')"/>'
+    + '<select id="funit-' + rid + '" onchange="onUnitChange(' + mid + ',' + rid + ',this.value)"><option value="gr">gr</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option><option value="unidad">unidad</option><option value="cucharada">cucharada</option><option value="taza">taza</option></select></div>'
+    + '<div class="food-macros"><span class="fmc kcal" id="fkcal-' + rid + '">--- kcal</span><span class="fmc prot" id="fprot-' + rid + '">--- P</span><span class="fmc carb" id="fcarb-' + rid + '">--- C</span><span class="fmc fat" id="ffat-' + rid + '">--- G</span></div>'
+    + '</div>';
+  container.appendChild(card);
+  if (row.aliment_name) { var aEl = document.getElementById('fiac-' + rid); if (aEl) aEl.value = row.aliment_name; }
+  if (row.quantity) { var qEl = document.getElementById('fqty-' + rid); if (qEl) qEl.value = row.quantity; }
+  if (row.unit && row.unit !== 'gr') { var uEl = document.getElementById('funit-' + rid); if (uEl) uEl.value = row.unit; }
+  updateRowMacros(row);
 }
 
 function removeMeal(mid) {
-  // If we're removing the active meal, move its rows back to backing block
   if (_activeMealId == mid) {
-    var mrows = document.getElementById('mrows-' + mid);
-    var block = document.getElementById('meal-' + mid);
-    if (mrows && block && !block.contains(mrows)) block.appendChild(mrows);
     _activeMealId = null;
+    var cnt = document.getElementById('msContent');
+    if (cnt) cnt.innerHTML = '<div class="ms-empty-state"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
   }
   _meals = _meals.filter(function(m){ return m.id != mid; });
-  var el = document.getElementById('meal-' + mid); if (el) el.remove();
   recalcTotalMacros(); updatePreview();
   renderMealSidebar();
-  // Select first remaining meal if any
   if (_meals.length > 0 && !_activeMealId) selectMeal(_meals[0].id);
-  else if (!_activeMealId) {
-    var content = document.getElementById('msContent');
-    if (content) content.innerHTML = '<div class="ms-empty-state" id="msEmptyState"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Selecciona una comida</span></div>';
-  }
   updateDistPanel();
 }
 
@@ -1255,47 +1264,22 @@ function onMealNameChange(mid) {
 function addFoodRow(mid, detail) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   if (!meal) return;
-  detail = detail || null;
+  detail = detail || {};
   var rid = ++_rowSeq;
-  var row = { id: rid, mid: mid, db_id: null, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null, unit: 'gr', _source: 'platform' };
+  var row = {
+    id: rid, mid: mid, db_id: detail.db_id || null,
+    aliment_id: detail.aliment_id || null,
+    aliment_name: detail.aliment_name || '',
+    proteins: detail.proteins != null ? detail.proteins : null,
+    carbohydrates: detail.carbohydrates != null ? detail.carbohydrates : null,
+    fats: detail.fats != null ? detail.fats : null,
+    calories: detail.calories != null ? detail.calories : null,
+    quantity: detail.quantity != null ? String(detail.quantity) : '',
+    unit: 'gr', _source: 'platform'
+  };
   meal.rows.push(row);
-  var container = document.getElementById('mrows-' + mid);
-  if (!container) return;
-  var card = document.createElement('div');
-  card.className = 'food-card'; card.id = 'frow-' + rid;
-  card.innerHTML =
-    '<div class="food-src-tabs">'
-    + '<button class="food-src-tab active" id="fsrc-p-' + rid + '" onclick="setFoodSource(' + mid + ',' + rid + ',\'platform\',this)">🌐 Plataforma</button>'
-    + '<button class="food-src-tab personal" id="fsrc-c-' + rid + '" onclick="setFoodSource(' + mid + ',' + rid + ',\'personal\',this)">👤 Personal</button>'
-    + '</div>'
-    + '<div class="food-card-top">'
-    + '<div class="ac-wrap"><input type="text" id="fiac-' + rid + '" placeholder="Buscar alimento..." autocomplete="off"'
-    + ' oninput="acSearch(' + rid + ',this.value)" onfocus="acSearch(' + rid + ',this.value)" onblur="setTimeout(function(){closeAc(' + rid + ')},180)"/>'
-    + '<div class="ac-dropdown" id="facdrop-' + rid + '"></div></div>'
-    + '<button class="del-row-btn" onclick="removeFoodRow(' + mid + ',' + rid + ')" title="Quitar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
-    + '</div>'
-    + '<div class="food-card-bottom">'
-    + '<div class="food-qty-wrap"><input type="number" id="fqty-' + rid + '" min="0" step="0.1" placeholder="0" oninput="onQtyChange(' + mid + ',' + rid + ')"/>'
-    + '<select id="funit-' + rid + '" onchange="onUnitChange(' + mid + ',' + rid + ',this.value)"><option value="gr">gr</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option><option value="unidad">unidad</option><option value="cucharada">cucharada</option><option value="taza">taza</option></select></div>'
-    + '<div class="food-macros"><span class="fmc kcal" id="fkcal-' + rid + '">--- kcal</span><span class="fmc prot" id="fprot-' + rid + '">--- P</span><span class="fmc carb" id="fcarb-' + rid + '">--- C</span><span class="fmc fat" id="ffat-' + rid + '">--- G</span></div>'
-    + '</div>';
-  container.appendChild(card);
-  if (detail) {
-    if (detail.db_id) row.db_id = detail.db_id;
-    if (detail.quantity != null) { var qEl = document.getElementById('fqty-' + rid); if (qEl) qEl.value = detail.quantity; }
-    if (detail.aliment_id) {
-      row.aliment_id = detail.aliment_id;
-      row.aliment_name = detail.aliment_name || '';
-      row.proteins = detail.proteins != null ? detail.proteins : null;
-      row.carbohydrates = detail.carbohydrates != null ? detail.carbohydrates : null;
-      row.fats = detail.fats != null ? detail.fats : null;
-      row.calories = detail.calories != null ? detail.calories : null;
-      var inp = document.getElementById('fiac-' + rid);
-      if (inp) inp.value = row.aliment_name;
-      updateRowMacros(row);
-      recalcMealMacros(mid);
-    }
-  }
+  _renderFoodCard(mid, row);
+  if (row.aliment_id) { updateRowMacros(row); recalcMealMacros(mid); }
 }
 
 function removeFoodRow(mid, rid) {
@@ -1319,14 +1303,19 @@ function onQtyChange(mid, rid) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   if (!meal) return;
   var row = meal.rows.find(function(r){ return r.id == rid; });
-  if (row) { updateRowMacros(row); recalcMealMacros(mid); }
+  if (!row) return;
+  var qEl = document.getElementById('fqty-' + rid);
+  if (qEl) row.quantity = qEl.value;
+  updateRowMacros(row); recalcMealMacros(mid);
 }
 
 function onUnitChange(mid, rid, unit) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   if (!meal) return;
   var row = meal.rows.find(function(r){ return r.id == rid; });
-  if (row) { row.unit = unit; updateRowMacros(row); recalcMealMacros(mid); }
+  if (!row) return;
+  row.unit = unit;
+  updateRowMacros(row); recalcMealMacros(mid);
 }
 
 function updateRowMacros(row) {
@@ -1338,8 +1327,9 @@ function updateRowMacros(row) {
     if (ge('ffat-'  + row.id)) ge('ffat-'  + row.id).textContent = '--- G';
     return;
   }
-  var qtyRaw = parseFloat((ge('fqty-' + row.id) || {}).value) || 0;
-  var unit = row.unit || (ge('funit-' + row.id) ? ge('funit-' + row.id).value : 'gr');
+  var qEl = ge('fqty-' + row.id);
+  var qtyRaw = parseFloat(qEl ? qEl.value : (row.quantity || '')) || 0;
+  var unit = row.unit || 'gr';
   var qtyG = qtyRaw * getUnitMult(unit);
   var k = ((row.calories||0)/100)*qtyG, p = ((row.proteins||0)/100)*qtyG;
   var c = ((row.carbohydrates||0)/100)*qtyG, f = ((row.fats||0)/100)*qtyG;
@@ -1362,14 +1352,13 @@ function recalcTotalMacros() {
   _meals.forEach(function(meal) {
     meal.rows.forEach(function(row) {
       if (!row.aliment_id) return;
-      var qtyRaw = parseFloat((document.getElementById('fqty-' + row.id)||{}).value) || 0;
-      var unit = row.unit || (document.getElementById('funit-' + row.id) ? document.getElementById('funit-' + row.id).value : 'gr');
-      var qtyG = qtyRaw * getUnitMult(unit);
+      var qEl = document.getElementById('fqty-' + row.id);
+      var qtyRaw = parseFloat(qEl ? qEl.value : (row.quantity || '')) || 0;
+      var qtyG = qtyRaw * getUnitMult(row.unit || 'gr');
       k += ((row.calories||0)/100)*qtyG; p += ((row.proteins||0)/100)*qtyG;
       c += ((row.carbohydrates||0)/100)*qtyG; f += ((row.fats||0)/100)*qtyG;
     });
   });
-  // Update step 1 form fields
   if (k||p||c||f) {
     document.getElementById('f_calories').value = Math.round(k)||'';
     document.getElementById('f_proteins').value = p.toFixed(1);
@@ -1377,7 +1366,6 @@ function recalcTotalMacros() {
     document.getElementById('f_fats').value     = f.toFixed(1);
     updatePreview();
   }
-  // Update sidebar totals
   var tK = document.getElementById('tot_kcal');
   var tP = document.getElementById('tot_prot');
   var tC = document.getElementById('tot_carb');
@@ -1513,14 +1501,7 @@ function applyDistribution() {
 }
 
 async function saveDiet() {
-  // Sync active meal's visible name input back to hidden input and meal object
-  if (_activeMealId) {
-    var visInp = document.getElementById('msNameInp-' + _activeMealId);
-    var hidInp = document.getElementById('mname-' + _activeMealId);
-    var actMeal = _meals.find(function(m){ return m.id == _activeMealId; });
-    if (visInp && hidInp) hidInp.value = visInp.value;
-    if (visInp && actMeal) actMeal.name = visInp.value;
-  }
+  if (_activeMealId) saveMealDOMState(_activeMealId);
   var title = document.getElementById('f_title').value.trim();
   var errEl = document.getElementById('formError');
   if (!title) { if(errEl){errEl.textContent='El titulo es obligatorio';errEl.style.display='block';} return; }
@@ -1528,11 +1509,12 @@ async function saveDiet() {
   btn.textContent = 'Guardando...'; btn.disabled = true;
   if(errEl){errEl.textContent='';errEl.style.display='none';}
   var foods = _meals.map(function(meal) {
-    var mealName = meal.name || (document.getElementById('mname-' + meal.id) && document.getElementById('mname-' + meal.id).value) || 'Comida';
+    var mealName = meal.name || 'Comida';
     var detail = meal.rows
       .filter(function(r){ return r.aliment_id; })
       .map(function(r, i) {
-        var obj = { aliment_id: r.aliment_id, quantity_calc: parseFloat(document.getElementById('fqty-' + r.id) && document.getElementById('fqty-' + r.id).value) || null, order: i };
+        var qElS = document.getElementById('fqty-' + r.id);
+        var obj = { aliment_id: r.aliment_id, quantity_calc: parseFloat(qElS ? qElS.value : (r.quantity || '')) || null, order: i };
         if (r.db_id) obj.id = r.db_id;
         return obj;
       });

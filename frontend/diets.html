@@ -1097,8 +1097,9 @@ function renderMealSidebar() {
     var totK = 0;
     meal.rows.forEach(function(row) {
       if (!row.aliment_id) return;
-      var qty = parseFloat((document.getElementById('fqty-' + row.id) || {}).value) || 0;
-      totK += ((row.calories||0)/100) * qty;
+      var qtyRaw = parseFloat((document.getElementById('fqty-' + row.id) || {}).value) || 0;
+      var unit = row.unit || (document.getElementById('funit-' + row.id) ? document.getElementById('funit-' + row.id).value : 'gr');
+      totK += ((row.calories||0)/100) * qtyRaw * getUnitMult(unit);
     });
     var sub = totK > 0 ? Math.round(totK) + ' kcal' : 'Vacía · toca para añadir';
     return '<div class="ms-meal-item' + (isActive ? ' active' : '') + '" onclick="selectMeal(' + meal.id + ')">'
@@ -1256,7 +1257,7 @@ function addFoodRow(mid, detail) {
   if (!meal) return;
   detail = detail || null;
   var rid = ++_rowSeq;
-  var row = { id: rid, mid: mid, db_id: null, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null, _source: 'platform' };
+  var row = { id: rid, mid: mid, db_id: null, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null, unit: 'gr', _source: 'platform' };
   meal.rows.push(row);
   var container = document.getElementById('mrows-' + mid);
   if (!container) return;
@@ -1275,7 +1276,7 @@ function addFoodRow(mid, detail) {
     + '</div>'
     + '<div class="food-card-bottom">'
     + '<div class="food-qty-wrap"><input type="number" id="fqty-' + rid + '" min="0" step="0.1" placeholder="0" oninput="onQtyChange(' + mid + ',' + rid + ')"/>'
-    + '<select id="funit-' + rid + '"><option value="gr">gr</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option><option value="unidad">unidad</option><option value="cucharada">cucharada</option><option value="taza">taza</option></select></div>'
+    + '<select id="funit-' + rid + '" onchange="onUnitChange(' + mid + ',' + rid + ',this.value)"><option value="gr">gr</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option><option value="unidad">unidad</option><option value="cucharada">cucharada</option><option value="taza">taza</option></select></div>'
     + '<div class="food-macros"><span class="fmc kcal" id="fkcal-' + rid + '">--- kcal</span><span class="fmc prot" id="fprot-' + rid + '">--- P</span><span class="fmc carb" id="fcarb-' + rid + '">--- C</span><span class="fmc fat" id="ffat-' + rid + '">--- G</span></div>'
     + '</div>';
   container.appendChild(card);
@@ -1304,11 +1305,28 @@ function removeFoodRow(mid, rid) {
   recalcMealMacros(mid);
 }
 
+function getUnitMult(unit) {
+  switch (unit) {
+    case 'kg': return 1000;
+    case 'l':  return 1000;
+    case 'cucharada': return 15;
+    case 'taza': return 240;
+    default: return 1; // gr, ml, unidad
+  }
+}
+
 function onQtyChange(mid, rid) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   if (!meal) return;
   var row = meal.rows.find(function(r){ return r.id == rid; });
   if (row) { updateRowMacros(row); recalcMealMacros(mid); }
+}
+
+function onUnitChange(mid, rid, unit) {
+  var meal = _meals.find(function(m){ return m.id == mid; });
+  if (!meal) return;
+  var row = meal.rows.find(function(r){ return r.id == rid; });
+  if (row) { row.unit = unit; updateRowMacros(row); recalcMealMacros(mid); }
 }
 
 function updateRowMacros(row) {
@@ -1320,9 +1338,11 @@ function updateRowMacros(row) {
     if (ge('ffat-'  + row.id)) ge('ffat-'  + row.id).textContent = '--- G';
     return;
   }
-  var qty = parseFloat((ge('fqty-' + row.id) || {}).value) || 0;
-  var k = ((row.calories||0)/100)*qty, p = ((row.proteins||0)/100)*qty;
-  var c = ((row.carbohydrates||0)/100)*qty, f = ((row.fats||0)/100)*qty;
+  var qtyRaw = parseFloat((ge('fqty-' + row.id) || {}).value) || 0;
+  var unit = row.unit || (ge('funit-' + row.id) ? ge('funit-' + row.id).value : 'gr');
+  var qtyG = qtyRaw * getUnitMult(unit);
+  var k = ((row.calories||0)/100)*qtyG, p = ((row.proteins||0)/100)*qtyG;
+  var c = ((row.carbohydrates||0)/100)*qtyG, f = ((row.fats||0)/100)*qtyG;
   var fmt = function(v){ return v >= 10 ? v.toFixed(1) : v.toFixed(2); };
   if (ge('fkcal-' + row.id)) ge('fkcal-' + row.id).textContent = Math.round(k) + ' kcal';
   if (ge('fprot-' + row.id)) ge('fprot-' + row.id).textContent = fmt(p) + 'g P';
@@ -1342,9 +1362,11 @@ function recalcTotalMacros() {
   _meals.forEach(function(meal) {
     meal.rows.forEach(function(row) {
       if (!row.aliment_id) return;
-      var qty = parseFloat((document.getElementById('fqty-' + row.id)||{}).value) || 0;
-      k += ((row.calories||0)/100)*qty; p += ((row.proteins||0)/100)*qty;
-      c += ((row.carbohydrates||0)/100)*qty; f += ((row.fats||0)/100)*qty;
+      var qtyRaw = parseFloat((document.getElementById('fqty-' + row.id)||{}).value) || 0;
+      var unit = row.unit || (document.getElementById('funit-' + row.id) ? document.getElementById('funit-' + row.id).value : 'gr');
+      var qtyG = qtyRaw * getUnitMult(unit);
+      k += ((row.calories||0)/100)*qtyG; p += ((row.proteins||0)/100)*qtyG;
+      c += ((row.carbohydrates||0)/100)*qtyG; f += ((row.fats||0)/100)*qtyG;
     });
   });
   // Update step 1 form fields

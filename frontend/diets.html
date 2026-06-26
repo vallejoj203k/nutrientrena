@@ -289,6 +289,42 @@
       .ms-add-btns{grid-template-columns:1fr;}
     }
 
+
+    /* ── Create Aliment Modal ── */
+    .ca-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .ca-overlay.open{opacity:1;pointer-events:all;}
+    .ca-modal{background:#fff;border-radius:16px;width:680px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;}
+    .ca-overlay.open .ca-modal{transform:translateY(0);}
+    .ca-modal-header{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 0;}
+    .ca-modal-title{font-size:20px;font-weight:800;color:#111;}
+    .ca-modal-close{width:32px;height:32px;border:none;background:#F3F4F6;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
+    .ca-modal-close:hover{background:#E5E7EB;color:#111;}
+    .ca-form{padding:20px 28px 28px;}
+    .ca-row{display:grid;gap:14px;margin-bottom:14px;}
+    .ca-row-3{grid-template-columns:2fr 1.5fr 1.5fr;}
+    .ca-row-2{grid-template-columns:2fr 1fr;}
+    .ca-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;}
+    .ca-input{width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .ca-input:focus{border-color:#4F46E5;box-shadow:0 0 0 3px #EEF2FF;}
+    .ca-section-label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;}
+    .ca-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+    .ca-macro-grid-2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .ca-micro-toggle{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;color:#6B7280;font-size:12px;font-weight:600;border:none;background:none;user-select:none;}
+    .ca-micro-toggle:hover{color:#4F46E5;}
+    .ca-micro-body{display:none;}
+    .ca-micro-body.open{display:block;}
+    .ca-micro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .ca-actions{display:flex;gap:10px;margin-top:24px;}
+    .ca-btn-primary{flex:1;padding:14px;background:#4F46E5;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
+    .ca-btn-primary:hover{background:#4338CA;}
+    .ca-btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+    .ca-btn-cancel{padding:14px 22px;background:#F3F4F6;color:#374151;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+    .ca-btn-cancel:hover{background:#E5E7EB;}
+    .ca-error{color:#DC2626;font-size:12px;margin-top:8px;font-weight:600;}
+    .ca-create-link{display:block;width:100%;padding:9px 11px;text-align:left;font-size:12px;font-weight:600;color:#4F46E5;background:#EEF2FF;border:none;border-top:1px solid #E5E7EB;cursor:pointer;transition:.15s;}
+    .ca-create-link:hover{background:#E0E7FF;}
+    @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-macro-grid-2{grid-template-columns:1fr 1fr;}.ca-micro-grid{grid-template-columns:1fr 1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
+
     /* ── Mobile hamburger ── */
     .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;flex-shrink:0;}
     .menu-btn:hover{background:#F3F4F6;}
@@ -1095,11 +1131,18 @@ function renderActiveMealContent(mid) {
   btnsDiv.className = 'ms-add-btns';
   btnsDiv.innerHTML = '<button class="ms-add-food-btn" onclick="addFoodRow(' + mid + ')">'
     + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
-    + ' Añadir alimento</button>'
+    + ' Buscar alimento</button>'
     + '<button class="ms-add-recipe-btn">'
     + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
     + ' Añadir receta</button>';
   content.appendChild(btnsDiv);
+  var createBtn = document.createElement('button');
+  createBtn.style.cssText = 'margin-top:10px;width:100%;padding:10px;border:1.5px dashed #9CA3AF;border-radius:8px;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;';
+  createBtn.onmouseover = function(){ this.style.borderColor='#4F46E5';this.style.color='#4F46E5';this.style.background='#EEF2FF'; };
+  createBtn.onmouseout  = function(){ this.style.borderColor='#9CA3AF';this.style.color='#6B7280';this.style.background='#fff'; };
+  createBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Crear nuevo alimento';
+  createBtn.onclick = function(){ openCreateAlimentModal(null); };
+  content.appendChild(createBtn);
 }
 
 function onActiveMealNameChange(mid, val) {
@@ -1337,7 +1380,14 @@ function acSearch(rid, val) {
 function showAcDrop(rid, items) {
   var drop = document.getElementById('facdrop-' + rid);
   if (!drop) return;
-  if (!items.length) { drop.classList.remove('open'); return; }
+  if (!items.length) {
+    drop.innerHTML = '<div style="padding:8px 11px;font-size:12px;color:#9CA3AF;">Sin resultados</div>'
+      + '<button class="ca-create-link" onmousedown="event.preventDefault();openCreateAlimentModal(' + rid + ')">'
+      + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      + 'Crear nuevo alimento</button>';
+    drop.classList.add('open');
+    return;
+  }
   items.forEach(function(a){ _macroCache[a.id] = { proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories }; });
   drop.innerHTML = items.map(function(a){
     var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
@@ -1348,6 +1398,9 @@ function showAcDrop(rid, items) {
       + (a.brand ? '<div class="ac-brand">' + esc(a.brand) + '</div>' : '')
       + '</div>';
   }).join('');
+  drop.innerHTML += '<button class="ca-create-link" onmousedown="event.preventDefault();openCreateAlimentModal(' + rid + ')">'
+    + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-1px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+    + '¿No lo encuentras? Crea un nuevo alimento</button>';
   drop.classList.add('open');
 }
 
@@ -1518,8 +1571,184 @@ loadClients();
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 
+
+// --- Create Aliment Modal ---
+
+var _caTargetRid = null;
+var _alimentGroups = [];
+
+async function loadAlimentGroups() {
+  if (_alimentGroups.length) return;
+  try {
+    var r = await fetch(API + '/groupFood/findAll', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) return;
+    var j = await r.json();
+    _alimentGroups = j.data || [];
+  } catch(e) {}
+}
+
+function openCreateAlimentModal(rid) {
+  _caTargetRid = rid || null;
+  loadAlimentGroups().then(function() {
+    var sel = document.getElementById('ca_group');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Seleccionar...</option>';
+    _alimentGroups.forEach(function(g) { sel.innerHTML += '<option value="' + g.id + '">' + esc(g.name) + '</option>'; });
+  });
+  ['ca_name','ca_brand','ca_calories','ca_proteins','ca_carbs','ca_fats','ca_fiber','ca_sugars','ca_satfats','ca_sodium','ca_potassium','ca_calcium','ca_iron','ca_vit_c','ca_cholesterol'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var qty = document.getElementById('ca_quantity'); if (qty) qty.value = '100';
+  var unit = document.getElementById('ca_unit'); if (unit) unit.value = 'g';
+  var err = document.getElementById('ca_error'); if (err) err.textContent = '';
+  var micro = document.querySelector('.ca-micro-body'); if (micro) micro.classList.remove('open');
+  document.getElementById('createAlimentOverlay').classList.add('open');
+  setTimeout(function(){ var n = document.getElementById('ca_name'); if(n) n.focus(); }, 100);
+}
+
+function closeCreateAlimentModal() {
+  document.getElementById('createAlimentOverlay').classList.remove('open');
+  _caTargetRid = null;
+}
+
+async function submitCreateAliment() {
+  var name = (document.getElementById('ca_name').value || '').trim();
+  var errEl = document.getElementById('ca_error');
+  if (!name) { if(errEl) errEl.textContent = 'El nombre es obligatorio'; return; }
+  var btn = document.getElementById('ca_submit_btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  if(errEl) errEl.textContent = '';
+  var toF = function(id) { var v = parseFloat((document.getElementById(id)||{}).value); return isNaN(v) ? null : v; };
+  var body = {
+    name: name,
+    brand: (document.getElementById('ca_brand').value || '').trim() || null,
+    group_food_id: parseInt(document.getElementById('ca_group').value) || null,
+    quantity: toF('ca_quantity') || 100,
+    quantity_unit: document.getElementById('ca_unit').value || 'g',
+    calories: toF('ca_calories'),
+    proteins: toF('ca_proteins'),
+    carbohydrates: toF('ca_carbs'),
+    fats: toF('ca_fats'),
+    fiber: toF('ca_fiber'),
+    sugars: toF('ca_sugars'),
+    saturated_fats: toF('ca_satfats'),
+    sodium: toF('ca_sodium'),
+    potassium: toF('ca_potassium'),
+    calcium: toF('ca_calcium'),
+    iron: toF('ca_iron'),
+    vitamin_c: toF('ca_vit_c'),
+    cholesterol: toF('ca_cholesterol'),
+  };
+  try {
+    var r = await fetch(API + '/aliments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify(body)
+    });
+    var j = await r.json();
+    if (!r.ok) { if(errEl) errEl.textContent = j.message || j.detail || 'Error al guardar'; return; }
+    var newAl = j.data || j;
+    if (newAl.id) {
+      _macroCache[newAl.id] = { proteins: newAl.proteins, carbohydrates: newAl.carbohydrates, fats: newAl.fats, calories: newAl.calories };
+    }
+    closeCreateAlimentModal();
+    toast('Alimento "' + esc(name) + '" creado', 'success');
+    // Auto-fill target row if we have one
+    var rid = _caTargetRid;
+    if (rid && newAl.id) {
+      selectAliment(rid, newAl.id, newAl.name || name);
+    } else if (!rid && _activeMealId && newAl.id) {
+      // No target row — add a new row to the active meal and fill it
+      addFoodRow(_activeMealId);
+      var meal = _meals.find(function(m){ return m.id == _activeMealId; });
+      if (meal && meal.rows.length) {
+        var lastRow = meal.rows[meal.rows.length - 1];
+        selectAliment(lastRow.id, newAl.id, newAl.name || name);
+      }
+    }
+  } catch(e) { if(errEl) errEl.textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; btn.textContent = 'Añadir alimento'; }
+}
+
 function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');s.classList.toggle('open');o.classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 </script>
+
+<!-- ════ Create Aliment Modal ════ -->
+<div class="ca-overlay" id="createAlimentOverlay" onclick="if(event.target===this)closeCreateAlimentModal()">
+  <div class="ca-modal">
+    <div class="ca-modal-header">
+      <h2 class="ca-modal-title">Añadir alimento</h2>
+      <button class="ca-modal-close" onclick="closeCreateAlimentModal()">✕</button>
+    </div>
+    <div class="ca-form">
+      <div class="ca-row ca-row-3">
+        <div>
+          <label class="ca-label">Nombre del alimento *</label>
+          <input id="ca_name" class="ca-input" placeholder="Ej: Pechuga de pollo"/>
+        </div>
+        <div>
+          <label class="ca-label">Grupo</label>
+          <select id="ca_group" class="ca-input">
+            <option value="">Seleccionar...</option>
+          </select>
+        </div>
+        <div>
+          <label class="ca-label">Marca <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input id="ca_brand" class="ca-input" placeholder="Ej: Hacendado"/>
+        </div>
+      </div>
+      <div class="ca-row ca-row-2">
+        <div>
+          <label class="ca-label">Cantidad de referencia</label>
+          <input id="ca_quantity" class="ca-input" type="number" min="1" value="100" placeholder="100"/>
+        </div>
+        <div>
+          <label class="ca-label">Unidad</label>
+          <select id="ca_unit" class="ca-input">
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+            <option value="ml">ml</option>
+            <option value="l">l</option>
+            <option value="unidad">unidad</option>
+          </select>
+        </div>
+      </div>
+      <div class="ca-section-label">Macronutrientes por 100g</div>
+      <div class="ca-macro-grid">
+        <div><label class="ca-label">Calorías (kcal)</label><input id="ca_calories" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Proteínas (g)</label><input id="ca_proteins" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Carbohidratos (g)</label><input id="ca_carbs" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Grasas (g)</label><input id="ca_fats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+      </div>
+      <div class="ca-macro-grid-2">
+        <div><label class="ca-label">Fibra (g)</label><input id="ca_fiber" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Azúcares (g)</label><input id="ca_sugars" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Grasas saturadas (g)</label><input id="ca_satfats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+      </div>
+      <button class="ca-micro-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.ca-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Micronutrientes <span style="color:#9CA3AF;font-weight:400;">(opcional — útil para planes con patologías)</span>
+        <span class="ca-arr" style="margin-left:auto;">▼</span>
+      </button>
+      <div class="ca-micro-body">
+        <div class="ca-micro-grid">
+          <div><label class="ca-label">Sodio (mg)</label><input id="ca_sodium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Potasio (mg)</label><input id="ca_potassium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Calcio (mg)</label><input id="ca_calcium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Hierro (mg)</label><input id="ca_iron" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Vitamina C (mg)</label><input id="ca_vit_c" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Colesterol (mg)</label><input id="ca_cholesterol" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        </div>
+      </div>
+      <div class="ca-error" id="ca_error"></div>
+      <div class="ca-actions">
+        <button class="ca-btn-primary" id="ca_submit_btn" onclick="submitCreateAliment()">Añadir alimento</button>
+        <button class="ca-btn-cancel" onclick="closeCreateAlimentModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

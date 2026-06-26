@@ -249,7 +249,12 @@
       .tab-pane{padding:16px;}
       .grid-2,.grid-3,.info-grid{grid-template-columns:1fr;}
       .form-row{grid-template-columns:1fr;}
-    }.fv-body{padding:16px;}}
+      /* Fix form view scroll */
+      #listView{display:block;overflow:visible;height:auto;}
+      #formView,#formView.active{display:block;overflow:visible;height:auto;}
+      .content-area{display:block;overflow:visible;height:auto;}
+      .fv-body{display:block;overflow-y:visible;height:auto;padding:16px;}
+    }
 
     .nav-dropdown{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:background .2s,color .2s,border-color .2s;border-left:3px solid transparent;user-select:none;}
     .nav-dropdown:hover{background:#F8FAFC;color:var(--indigo);}

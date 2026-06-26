@@ -216,15 +216,58 @@
     .target-empty p{color:#9CA3AF;font-size:14px;margin-bottom:16px;}
     .no-target-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#FEF9C3;color:#92400E;border-radius:20px;font-size:11px;font-weight:600;}
 
+    /* ── Mobile hamburger button ── */
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;flex-shrink:0;}
+    .menu-btn:hover{background:#F3F4F6;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
+    .sidebar-overlay.open{display:block;}
+
     @media(max-width:768px){
-      body{flex-direction:column;}
-      .sidebar{width:100%;min-width:unset;height:auto;}
-      .sidebar-nav,.sidebar-user{display:none;}
+      body{display:block;height:auto;overflow-y:auto;}
+      .sidebar{
+        position:fixed;top:0;left:0;width:260px;height:100%;
+        transform:translateX(-100%);transition:transform .25s;
+        z-index:200;overflow-y:auto;
+      }
+      .sidebar.open{transform:translateX(0);}
+      .main{display:block;height:auto;overflow:visible;}
+      .content{overflow-y:visible;height:auto;}
+      #profileArea{display:block !important;overflow:visible;height:auto;}
+      .menu-btn{display:flex;align-items:center;justify-content:center;}
+      .breadcrumb-bar{padding:0 12px;gap:6px;flex-wrap:wrap;height:auto;min-height:48px;padding-top:6px;padding-bottom:6px;}
+      .bc-actions{gap:5px;flex-wrap:wrap;}
+      .btn-outline-purple,.btn-red{padding:5px 10px;font-size:12px;}
+      .ph2{padding:12px 16px;gap:12px;}
+      .ph2-name{font-size:16px;}
+      .ph2-meta{gap:8px;font-size:11px;}
+      .prog-section{padding:10px 16px;}
+      .prog-boxes{grid-template-columns:repeat(2,1fr);}
+      .weight-chart-section{padding:12px 16px;}
+      .tabs-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 8px;}
+      .tab-btn{padding:12px 12px;font-size:12px;white-space:nowrap;}
+      .tab-pane{padding:16px;}
       .grid-2,.grid-3,.info-grid{grid-template-columns:1fr;}
       .form-row{grid-template-columns:1fr;}
-      .tab-btn{padding:12px 14px;font-size:12px;}
       .cal-grid{grid-template-columns:repeat(4,1fr);}
       .macro-bar-row{flex-direction:column;gap:4px;}
+      .res-stats{grid-template-columns:1fr 1fr;}
+      .res-mid{grid-template-columns:1fr;}
+      .res-bottom{grid-template-columns:1fr;}
+      .active-plan-grid{grid-template-columns:1fr;}
+      .prog-boxes{grid-template-columns:1fr 1fr;}
+      .pg-stats-row{grid-template-columns:1fr 1fr;}
+      .pg-exercises-row{grid-template-columns:1fr 1fr;}
+      .pg-scores-row{grid-template-columns:1fr 1fr;}
+      .pg-chart-grid{grid-template-columns:1fr;}
+      .apc-macros{grid-template-columns:repeat(2,1fr);}
+      .cal-week-grid{grid-template-columns:repeat(4,1fr);}
+      .cal-month-grid{grid-template-columns:repeat(4,1fr);}
+    }
+    @media(max-width:480px){
+      .bc-current{font-size:12px;}
+      .ph2-name{font-size:14px;}
+      .ph2-avatar{width:42px;height:42px;font-size:15px;}
+      .res-stats{grid-template-columns:1fr;}
     }
 
     /* ── Calendario ── */
@@ -621,8 +664,11 @@
 </head>
 <body>
 
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <!-- Sidebar -->
-<nav class="sidebar">
+<nav class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <span>ALZUM<em>.io</em></span>
     <small>Panel del Coach</small>
@@ -716,6 +762,9 @@
 <div class="main">
   <!-- Breadcrumb bar -->
   <div class="breadcrumb-bar" id="breadcrumbBar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <a class="bc-link" href="clients.html">Clientes</a>
     <span class="bc-sep">/</span>
     <span class="bc-current" id="bcClientName">…</span>
@@ -1178,6 +1227,8 @@ async function initUser() {
 }
 
 function logout() { localStorage.clear(); location.href = 'login.html'; }
+function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');s.classList.toggle('open');o.classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
 /* ── Load all client data ── */
 async function loadClient() {

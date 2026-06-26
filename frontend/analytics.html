@@ -149,12 +149,35 @@
     .user-role { color: #6B7280 !important; }
     .btn-logout { color: #6B7280 !important; }
     .btn-logout:hover { color: #4F46E5 !important; }
+      /* ── Mobile hamburger ── */
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;flex-shrink:0;}
+    .menu-btn:hover{background:rgba(255,255,255,.1);}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
+    .sidebar-overlay.open{display:block;}
+    @media(max-width:768px){
+      body{display:block;height:auto;overflow-y:auto;}
+      .sidebar{position:fixed;top:0;left:0;width:260px;height:100%;transform:translateX(-100%);transition:transform .25s;z-index:200;overflow-y:auto;}
+      .sidebar.open{transform:translateX(0);}
+      .main{display:block;height:auto;overflow:visible;}
+      .content{overflow-y:visible;height:auto;}
+      .menu-btn{display:flex;align-items:center;justify-content:center;}
+      .topbar{padding:0 12px;height:auto;min-height:56px;flex-wrap:wrap;gap:8px;}
+      .topbar h1,.topbar-title{font-size:16px;}
+      .filter-bar,.task-filter-bar{padding:10px 12px;gap:8px;flex-wrap:wrap;}
+      .board-wrap{overflow-x:auto;padding:12px;gap:12px;}
+      .column{flex:0 0 260px;max-height:none;}
+      .tabs-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 8px;}
+      .tab-btn{white-space:nowrap;padding:12px 12px;font-size:12px;}
+      .tab-pane{padding:16px;}
+      .grid-2,.grid-3,.info-grid{grid-template-columns:1fr;}
+      .form-row{grid-template-columns:1fr;}
+    }
   </style>
 </head>
 <body>
 
 <!-- Sidebar -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <span>ALZUM<em>.io</em></span>
     <small>Panel del Coach</small>
@@ -692,6 +715,9 @@ function toggleLibrary(el){
 })();
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
+
+function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');s.classList.toggle('open');o.classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 </script>
 
 <!-- Library flyout -->

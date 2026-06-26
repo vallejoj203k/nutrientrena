@@ -198,7 +198,6 @@
     .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px;}
     .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
     .modal-close:hover{color:#374151;}
-    @media(max-width:768px){body{flex-direction:column;}.sidebar{width:100%;min-width:unset;height:auto;}.sidebar-nav,.sidebar-user{display:none;}.form-row,.form-row-3{grid-template-columns:1fr;}.builder-layout{flex-direction:column;}.days-panel{width:100%;min-width:unset;}.fv-body{flex-direction:column;}.fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;}.fv-wizard-steps{margin-left:0;}}
 
     .nav-dropdown{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:background .2s,color .2s,border-color .2s;border-left:3px solid transparent;user-select:none;}
     .nav-dropdown:hover{background:#F8FAFC;color:var(--indigo);}
@@ -272,6 +271,14 @@
       .tab-pane{padding:16px;}
       .grid-2,.grid-3,.info-grid{grid-template-columns:1fr;}
       .form-row{grid-template-columns:1fr;}
+      /* Fix form view scroll */
+      #listView{display:block;overflow:visible;height:auto;}
+      #formView,#formView.active{display:block;overflow:visible;height:auto;}
+      .fv-body{display:block;overflow:visible;height:auto;}
+      .fv-main{overflow-y:visible;height:auto;padding:16px;}
+      .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;overflow-y:visible;height:auto;}
+      .builder-layout{display:block;}
+      .days-panel{width:100%;min-width:unset;}
     }
   </style>
 </head>

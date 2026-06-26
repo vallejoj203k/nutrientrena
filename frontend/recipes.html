@@ -226,6 +226,12 @@
       .tab-pane{padding:16px;}
       .grid-2,.grid-3,.info-grid{grid-template-columns:1fr;}
       .form-row{grid-template-columns:1fr;}
+      /* Fix form view scroll */
+      #listView{display:block;overflow:visible;height:auto;}
+      #formView,#formView.active{display:block;overflow:visible;height:auto;}
+      .fv-body{display:block;overflow:visible;height:auto;}
+      .fv-main{overflow-y:visible;height:auto;padding:16px;}
+      .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;overflow-y:visible;height:auto;}
     }
   </style>
 </head>

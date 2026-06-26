@@ -1447,6 +1447,11 @@ function selectAliment(rid, alimentId) {
     row.carbohydrates = m.carbohydrates != null ? m.carbohydrates : null;
     row.fats = m.fats != null ? m.fats : null;
     row.calories = m.calories != null ? m.calories : null;
+    if (!row.quantity) {
+      row.quantity = '100';
+      var qEl = document.getElementById('fqty-' + rid);
+      if (qEl) qEl.value = '100';
+    }
     updateRowMacros(row);
     if (mid) recalcMealMacros(mid);
   }
@@ -1673,21 +1678,31 @@ async function submitCreateAliment() {
     if (!r.ok) { if(errEl) errEl.textContent = j.message || j.detail || 'Error al guardar'; return; }
     var newAl = j.data || j;
     if (newAl.id) {
-      _macroCache[newAl.id] = { proteins: newAl.proteins, carbohydrates: newAl.carbohydrates, fats: newAl.fats, calories: newAl.calories };
+      _macroCache[newAl.id] = { name: newAl.name || name, proteins: newAl.proteins, carbohydrates: newAl.carbohydrates, fats: newAl.fats, calories: newAl.calories };
     }
     closeCreateAlimentModal();
     toast('Alimento "' + esc(name) + '" creado', 'success');
     // Auto-fill target row if we have one
     var rid = _caTargetRid;
     if (rid && newAl.id) {
-      selectAliment(rid, newAl.id, newAl.name || name);
+      selectAliment(rid, newAl.id);
+      var targetRow = null;
+      for (var mi = 0; mi < _meals.length; mi++) {
+        var rr = _meals[mi].rows.find(function(r){ return r.id == rid; });
+        if (rr) { targetRow = rr; break; }
+      }
+      if (targetRow && !targetRow.quantity) {
+        targetRow.quantity = '100';
+        var qEl = document.getElementById('fqty-' + rid);
+        if (qEl) qEl.value = '100';
+        updateRowMacros(targetRow); recalcMealMacros(targetRow.mid);
+      }
     } else if (!rid && _activeMealId && newAl.id) {
-      // No target row — add a new row to the active meal and fill it
-      addFoodRow(_activeMealId);
+      addFoodRow(_activeMealId, { quantity: 100 });
       var meal = _meals.find(function(m){ return m.id == _activeMealId; });
       if (meal && meal.rows.length) {
         var lastRow = meal.rows[meal.rows.length - 1];
-        selectAliment(lastRow.id, newAl.id, newAl.name || name);
+        selectAliment(lastRow.id, newAl.id);
       }
     }
   } catch(e) { if(errEl) errEl.textContent = 'Error de conexión'; }

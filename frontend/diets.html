@@ -8,6 +8,7 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--gray-bg:#F8FAFC;--sidebar-w:240px;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+    html{-webkit-overflow-scrolling:touch;}
     .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #EBEBEB;}
     .sidebar-logo span{font-size:20px;font-weight:900;color:#111827;letter-spacing:1px;font-style:italic;text-transform:uppercase;}
@@ -197,28 +198,47 @@
       .menu-btn{display:flex;align-items:center;justify-content:center;}
 
       /* ── Topbar & toolbar ── */
-      .page-header{padding:0 12px;height:auto;min-height:56px;flex-wrap:wrap;gap:6px;padding-top:8px;padding-bottom:8px;}
+      .page-header{padding:8px 12px;height:auto;min-height:56px;flex-wrap:wrap;gap:6px;}
       .page-header-title{font-size:15px;}
       .page-header-right{flex-wrap:wrap;gap:6px;}
       .toolbar{padding:10px 12px;gap:8px;}
       .search-wrap{min-width:120px;}
 
-      /* ── Fix list view so it scrolls naturally ── */
+      /* ── Fix list view ── */
       #listView{display:block;overflow:visible;height:auto;}
       #listView .table-wrap{overflow-x:auto;}
       #listView table{min-width:560px;}
 
-      /* ── Fix form view so it scrolls naturally ── */
-      #formView,#formView.active{display:block;overflow:visible;height:auto;}
-      .fv-bar{padding:0 12px;height:auto;min-height:56px;flex-wrap:wrap;gap:6px;padding-top:8px;padding-bottom:8px;}
-      .fv-body{display:block;overflow:visible;height:auto;}
-      .fv-main{overflow-y:visible;height:auto;padding:16px;}
-      .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid #E5E7EB;padding:16px;overflow-y:visible;height:auto;}
+      /* ── Fix form view — the key: everything is a scrollable block ── */
+      #formView,#formView.active{display:block !important;overflow:visible;height:auto;}
+      .fv-bar{padding:8px 12px;height:auto;min-height:52px;flex-wrap:wrap;gap:6px;}
+      .fv-title{font-size:16px;}
+      .fv-body{display:block !important;overflow:visible;height:auto;}
+      .fv-main{overflow-y:visible !important;height:auto !important;padding:12px;gap:12px;}
+      .fv-sidebar{width:100%;min-width:unset;border-left:none;border-top:2px solid #E5E7EB;padding:12px;overflow-y:visible;height:auto;}
 
-      /* ── Forms ── */
-      .form-row,.form-row-4{grid-template-columns:1fr;}
-      .food-card-bottom{gap:6px;}
-      .food-macros{margin-left:0;}
+      /* ── Form grids ── */
+      .form-row{grid-template-columns:1fr 1fr;}   /* keep 2 cols — enough space */
+      .form-row-4{grid-template-columns:1fr 1fr;} /* 2x2 for kcal/prot/carbs/fat */
+      .form-row-4 .form-group,.form-row .form-group{margin-bottom:12px;}
+
+      /* ── Prevent iOS input zoom (font-size must be ≥16px) ── */
+      .form-group input,
+      .form-group select,
+      .form-group textarea,
+      .food-card-top .ac-wrap input,
+      .food-qty-wrap input,
+      .food-qty-wrap select,
+      .meal-name-input{font-size:16px !important;}
+
+      /* ── Food cards ── */
+      .food-card-bottom{flex-wrap:wrap;gap:6px;}
+      .food-macros{margin-left:0;flex-wrap:wrap;}
+      .sec-card-body{padding:14px;}
+
+      /* ── Sidebar cards ── */
+      .sb-card{padding:12px;}
+      .save-btn{padding:14px;font-size:15px;}
     }
   </style>
 </head>
@@ -744,12 +764,14 @@ async function openForm(id) {
   updatePreview();
   document.getElementById('listView').style.display = 'none';
   document.getElementById('formView').classList.add('active');
+  window.scrollTo(0, 0);
 }
 
 function closeForm() {
   document.getElementById('formView').classList.remove('active');
   document.getElementById('listView').style.display = '';
   editingId = null;
+  window.scrollTo(0, 0);
 }
 
 function clearForm() {

@@ -1422,7 +1422,7 @@ function showAcDrop(rid, items) {
     var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
       + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">🌐 Plataforma')
       + '</span>';
-    return '<div class="ac-item" onmousedown="selectAliment(' + rid + ',' + JSON.stringify(a.id) + ')">'
+    return '<div class="ac-item" onmousedown="selectAliment(' + rid + ',' + JSON.stringify(a.id).replace(/"/g, '&quot;') + ')">'
       + '<div class="ac-name">' + esc(a.name) + srcBadge + '</div>'
       + (a.brand ? '<div class="ac-brand">' + esc(a.brand) + '</div>' : '')
       + '</div>';

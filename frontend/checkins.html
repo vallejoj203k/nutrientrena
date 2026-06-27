@@ -497,9 +497,9 @@
 
   <!-- Page tabs -->
   <div class="page-tabs">
-    <button class="page-tab active" id="ptab-revision" onclick="switchPageTab('revision')">📥 Por revisar</button>
-    <button class="page-tab" id="ptab-panel" onclick="switchPageTab('panel')">📊 Panel de cumplimiento</button>
-    <button class="page-tab" id="ptab-historial" onclick="switchPageTab('historial')">📋 Historial por cliente</button>
+    <button class="page-tab active" id="ptab-revision" onclick="switchPageTab('revision')">Por revisar</button>
+    <button class="page-tab" id="ptab-panel" onclick="switchPageTab('panel')">Panel de cumplimiento</button>
+    <button class="page-tab" id="ptab-historial" onclick="switchPageTab('historial')">Historial por cliente</button>
   </div>
 
   <!-- ── POR REVISAR ── -->
@@ -518,7 +518,7 @@
         <!-- Left: Received / pending review -->
         <div>
           <div class="rev-col-header">
-            <span class="rev-col-title">📥 Recibidos</span>
+            <span class="rev-col-title">Recibidos</span>
             <span class="rev-badge rev-badge-red" id="revReceivedBadge">0</span>
             <span style="font-size:12px;color:#9CA3AF;">por revisar</span>
           </div>
@@ -529,7 +529,7 @@
         <!-- Right: Waiting to send -->
         <div>
           <div class="rev-col-header">
-            <span class="rev-col-title">⏳ Esperando</span>
+            <span class="rev-col-title">Esperando</span>
             <span class="rev-badge rev-badge-orange" id="revWaitingBadge">0</span>
             <span style="font-size:12px;color:#9CA3AF;">que envíen</span>
           </div>
@@ -541,7 +541,7 @@
       <!-- Revisados hoy (shown only after reviewing ≥1) -->
       <div class="rev-done-section" id="revDoneSection" style="display:none;">
         <div class="rev-done-header" onclick="toggleRevDone()">
-          <span class="rev-done-title">✅ Revisados hoy</span>
+          <span class="rev-done-title">Revisados hoy</span>
           <span class="rev-badge" style="background:#D1FAE5;color:#059669;" id="revDoneBadge">0</span>
           <svg class="rev-done-chevron open" id="revDoneChevron" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
@@ -860,20 +860,20 @@
     <!-- Body -->
     <div class="rm-body">
       <div class="rm-metrics" id="rmMetrics"></div>
-      <div class="rm-section-title">📈 Historial de peso</div>
+      <div class="rm-section-title">Historial de peso</div>
       <div class="rm-hist-tabs">
         <button class="rm-hist-tab active" onclick="setHistRange(4,this)">4 semanas</button>
         <button class="rm-hist-tab" onclick="setHistRange(8,this)">8 semanas</button>
         <button class="rm-hist-tab" onclick="setHistRange(12,this)">12 semanas</button>
       </div>
       <div class="rm-hist-chart" id="rmHistChart"></div>
-      <div class="rm-section-title">📝 Notas del cliente</div>
+      <div class="rm-section-title">Notas del cliente</div>
       <div class="rm-notes-box" id="rmClientNotes">—</div>
       <div id="rmPhotosSection" style="display:none;">
-        <div class="rm-section-title">📸 Fotos</div>
+        <div class="rm-section-title">Fotos</div>
         <div id="rmPhotos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;"></div>
       </div>
-      <div class="rm-section-title">🔒 Notas internas (solo tú)</div>
+      <div class="rm-section-title">Notas internas (solo tú)</div>
       <textarea class="rm-coach-notes" id="rmCoachNotes" placeholder="Notas privadas sobre este check-in..."></textarea>
     </div>
     <div class="rm-footer">
@@ -887,12 +887,14 @@
 <div class="modal-overlay" id="doneModal">
   <div class="modal" style="max-width:420px;">
     <div class="done-modal-content">
-      <div class="done-modal-icon">✅</div>
+      <div style="width:52px;height:52px;border-radius:50%;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+        <svg width="26" height="26" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
       <div class="done-modal-title">Check-in revisado</div>
       <div class="done-modal-sub">Has marcado el check-in como revisado.<br>¿Quieres abrir el chat con este cliente?</div>
       <div class="done-modal-btns">
         <button class="btn btn-ghost" onclick="closeModal('doneModal')">No por ahora</button>
-        <button class="btn btn-primary" onclick="openClientChat()">💬 Abrir chat</button>
+        <button class="btn btn-primary" onclick="openClientChat()">Abrir chat</button>
       </div>
     </div>
   </div>
@@ -917,7 +919,7 @@
     </div>
     <div class="remind-modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('remindModal')">Cancelar</button>
-      <button class="btn-send-remind" onclick="sendReminder()">💬 Enviar recordatorio</button>
+      <button class="btn-send-remind" onclick="sendReminder()">Enviar recordatorio</button>
     </div>
   </div>
 </div>
@@ -1024,8 +1026,8 @@ async function loadClients() {
     clients = (data?.data || data || []);
     populateClientSelects();
     document.getElementById('clientLoadingHint').style.display = 'none';
-    // Auto-load compliance panel (default tab)
-    cpLoad();
+    // Load revision tab (default) then lazy-load compliance panel when user switches
+    loadRevisionData();
   } catch(e) {
     document.getElementById('clientLoadingHint').textContent = 'Error al cargar clientes';
     toast('Error al cargar clientes: ' + e.message, 'error');
@@ -1542,36 +1544,17 @@ function switchPageTab(tab) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   REVISION TAB — Por revisar
+   REVISION TAB — Por revisar (real data)
 ═══════════════════════════════════════════════════════════ */
 var _REV_COLORS = ['#4F46E5','#7C3AED','#059669','#D97706','#DC2626','#2563EB','#0891B2','#DB2777','#6D28D9','#047857'];
 
-var _revReceived = [
-  { id:'r1', name:'Ana García', hoursAgo:1, energy:4, effort:5, sleep:7.5, hasPhotos:true, hasPeriod:false, weight:63.2, prevWeight:64.1, notes:'Esta semana me sentí con mucha energía, cumplí todos los entrenamientos. El descanso mejoró mucho.', coachNotes:'', history:[64.8,64.5,64.1,63.2] },
-  { id:'r2', name:'Carlos Méndez', hoursAgo:3, energy:3, effort:4, sleep:6, hasPhotos:false, hasPeriod:false, weight:82.5, prevWeight:83.0, notes:'Tuve algo de estrés en el trabajo pero intenté mantener la rutina. Llegué al 80% de las tareas.', coachNotes:'', history:[84.2,83.8,83.0,82.5] },
-  { id:'r3', name:'Lucía Torres', hoursAgo:5, energy:5, effort:5, sleep:8, hasPhotos:true, hasPeriod:true, weight:57.8, prevWeight:58.5, notes:'¡Todo muy bien! Mucha motivación esta semana, me noté con más fuerza en los entrenamientos.', coachNotes:'', history:[59.2,59.0,58.5,57.8] },
-  { id:'r4', name:'Roberto Silva', hoursAgo:7, energy:2, effort:3, sleep:5.5, hasPhotos:false, hasPeriod:false, weight:91.0, prevWeight:90.5, notes:'Tuve un viaje de trabajo y no pude hacer todos los entrenos. Comí bastante fuera de casa.', coachNotes:'', history:[92.5,91.8,90.5,91.0] },
-  { id:'r5', name:'María López', hoursAgo:10, energy:4, effort:4, sleep:7, hasPhotos:true, hasPeriod:false, weight:68.3, prevWeight:69.0, notes:'Me fue bien en general, aunque los fines de semana me cuesta más mantener la dieta.', coachNotes:'', history:[70.1,69.5,69.0,68.3] },
-  { id:'r6', name:'Diego Ruiz', hoursAgo:12, energy:5, effort:5, sleep:8.5, hasPhotos:false, hasPeriod:false, weight:75.6, prevWeight:76.8, notes:'Excelente semana, batí mis marcas en sentadilla y press banca. Muy contento con el progreso.', coachNotes:'', history:[78.0,77.2,76.8,75.6] },
-  { id:'r7', name:'Sofía Martínez', hoursAgo:14, energy:3, effort:3, sleep:6.5, hasPhotos:true, hasPeriod:true, weight:55.1, prevWeight:54.8, notes:'Me vino el periodo y tuve bajón de energía toda la semana. Intenté seguir la planificación.', coachNotes:'', history:[55.3,55.0,54.8,55.1] },
-  { id:'r8', name:'Pablo Hernández', hoursAgo:18, energy:4, effort:4, sleep:7.5, hasPhotos:false, hasPeriod:false, weight:88.2, prevWeight:89.0, notes:'Buena semana en general, cumplí el 90% de las tareas. El sueño está mejorando bastante.', coachNotes:'', history:[90.5,89.8,89.0,88.2] }
-];
-
-var _revWaiting = [
-  { id:'w1', name:'Elena Jiménez', daysWithout:5, lastCheckin:'hace 5 días' },
-  { id:'w2', name:'Fernando Castro', daysWithout:8, lastCheckin:'hace 8 días' },
-  { id:'w3', name:'Valentina Morales', daysWithout:3, lastCheckin:'hace 3 días' },
-  { id:'w4', name:'Andrés Flores', daysWithout:12, lastCheckin:'hace 12 días' },
-  { id:'w5', name:'Isabella Ramírez', daysWithout:7, lastCheckin:'hace 7 días' },
-  { id:'w6', name:'Sebastián Díaz', daysWithout:4, lastCheckin:'hace 4 días' },
-  { id:'w7', name:'Camila González', daysWithout:10, lastCheckin:'hace 10 días' },
-  { id:'w8', name:'Nicolás Vargas', daysWithout:6, lastCheckin:'hace 6 días' }
-];
-
-var _revReviewedIds = [];
-var _revRemindSent = {};
+/* State */
+var _revData = { received: [], waiting: [] };
+var _revLoading = false;
+var _revReviewedCheckinIds = [];   // check-in IDs reviewed this session
+var _revRemindSent = {};           // clientId → true
 var _revSearchQ = '';
-var _revActiveId = null;
+var _revActiveItem = null;         // { client, checkin, allCheckins }
 var _revHistRange = 4;
 var _revDoneOpen = true;
 var _remindClientId = null;
@@ -1579,246 +1562,359 @@ var _remindClientId = null;
 function _revInitials(name) {
   return (name || '').trim().split(/\s+/).slice(0,2).map(function(w){ return w[0] || ''; }).join('').toUpperCase() || '?';
 }
-
-function _revColor(idx) {
-  return _REV_COLORS[idx % _REV_COLORS.length];
-}
+function _revColor(idx) { return _REV_COLORS[idx % _REV_COLORS.length]; }
+function _revFullName(c) { return ((c.name || '') + ' ' + (c.last_name || '')).trim() || 'Cliente'; }
 
 function revFilter() {
   _revSearchQ = (document.getElementById('revSearch').value || '').toLowerCase();
   revRender();
 }
 
+async function loadRevisionData() {
+  if (_revLoading || clients.length === 0) return;
+  _revLoading = true;
+
+  document.getElementById('revReceivedCards').innerHTML =
+    '<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">Cargando clientes...</div>';
+  document.getElementById('revWaitingCards').innerHTML =
+    '<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">Cargando clientes...</div>';
+
+  var received = [];
+  var waiting  = [];
+  var todayMs = new Date().setHours(0,0,0,0);
+  var REVIEW_WINDOW_DAYS = 7;
+  var BATCH = 5;
+
+  for (var i = 0; i < clients.length; i += BATCH) {
+    var batch = clients.slice(i, i + BATCH);
+    await Promise.all(batch.map(async function(c) {
+      try {
+        var res = await apiFetch('/checkins/client/' + c.id);
+        var raw = (res && res.data) ? res.data : (res || {});
+        var cis = Array.isArray(raw) ? raw : (raw.checkins || []);
+        /* API returns desc by date → cis[0] is most recent */
+        if (cis.length === 0) {
+          waiting.push({ client: c, checkin: null, allCheckins: [], daysDiff: null });
+          return;
+        }
+        var latest = cis[0];
+        var dStr = (latest.checkin_date || latest.created_at || '').slice(0,10);
+        var dMs  = dStr ? new Date(dStr + 'T00:00:00').getTime() : 0;
+        var diff  = dMs ? Math.floor((todayMs - dMs) / 86400000) : 999;
+
+        var isUnreviewed = !latest.coach_notes && !latest.coach_user_detail_id;
+        if (diff <= REVIEW_WINDOW_DAYS && isUnreviewed) {
+          received.push({ client: c, checkin: latest, allCheckins: cis });
+        } else if (diff > REVIEW_WINDOW_DAYS || !latest.checkin_date) {
+          waiting.push({ client: c, checkin: latest, allCheckins: cis, daysDiff: diff < 999 ? diff : null });
+        }
+        /* else: reviewed or recently reviewed — not shown in either column */
+      } catch (_) { /* skip silently */ }
+    }));
+    /* Progressive render after each batch */
+    _revData = { received: received.slice(), waiting: waiting.slice() };
+    revRender();
+  }
+  _revLoading = false;
+}
+
 function revRender() {
   var q = _revSearchQ;
-  var received = _revReceived.filter(function(c){ return _revReviewedIds.indexOf(c.id) === -1 && (!q || c.name.toLowerCase().indexOf(q) !== -1); });
-  var waiting  = _revWaiting.filter(function(c){ return !q || c.name.toLowerCase().indexOf(q) !== -1; });
-  var reviewed = _revReceived.filter(function(c){ return _revReviewedIds.indexOf(c.id) !== -1 && (!q || c.name.toLowerCase().indexOf(q) !== -1); });
+  var received = _revData.received.filter(function(item) {
+    return _revReviewedCheckinIds.indexOf(item.checkin.id) === -1 &&
+           (!q || _revFullName(item.client).toLowerCase().indexOf(q) !== -1);
+  });
+  var waiting = _revData.waiting.filter(function(item) {
+    return !q || _revFullName(item.client).toLowerCase().indexOf(q) !== -1;
+  });
+  var reviewed = _revData.received.filter(function(item) {
+    return _revReviewedCheckinIds.indexOf(item.checkin.id) !== -1 &&
+           (!q || _revFullName(item.client).toLowerCase().indexOf(q) !== -1);
+  });
 
   document.getElementById('revReceivedBadge').textContent = received.length;
   document.getElementById('revWaitingBadge').textContent  = waiting.length;
-  document.getElementById('revSubtitle').textContent = received.length + ' por revisar · ' + waiting.length + ' esperando enviar';
+  document.getElementById('revSubtitle').textContent =
+    received.length + ' por revisar  ·  ' + waiting.length + ' esperando enviar';
 
   document.getElementById('revReceivedCards').innerHTML = received.length
-    ? received.map(function(c,i){ return _revReceivedCardHtml(c, _revReceived.indexOf(c)); }).join('')
-    : '<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">Sin check-ins pendientes 🎉</div>';
+    ? received.map(function(item, i) { return _revReceivedCardHtml(item, i); }).join('')
+    : '<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">Sin check-ins pendientes</div>';
 
   document.getElementById('revWaitingCards').innerHTML = waiting.length
-    ? waiting.map(function(c,i){ return _revWaitingCardHtml(c, _revWaiting.indexOf(c)); }).join('')
-    : '<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">Todos los clientes han enviado su check-in ✅</div>';
+    ? waiting.map(function(item, i) { return _revWaitingCardHtml(item, i); }).join('')
+    : '<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">Todos los clientes han enviado su check-in</div>';
 
   var doneSection = document.getElementById('revDoneSection');
   if (reviewed.length > 0) {
     doneSection.style.display = 'block';
     document.getElementById('revDoneBadge').textContent = reviewed.length;
-    document.getElementById('revDoneCards').innerHTML = reviewed.map(function(c){ return _revDoneCardHtml(c, _revReceived.indexOf(c)); }).join('');
-    document.getElementById('revDoneCards').style.display = _revDoneOpen ? 'flex' : 'none';
-    document.getElementById('revDoneCards').style.flexDirection = 'column';
-    document.getElementById('revDoneCards').style.gap = '8px';
+    var cardsEl = document.getElementById('revDoneCards');
+    cardsEl.innerHTML = reviewed.map(function(item) { return _revDoneCardHtml(item); }).join('');
+    cardsEl.style.cssText = 'display:' + (_revDoneOpen ? 'flex' : 'none') + ';flex-direction:column;gap:8px;';
   } else {
     doneSection.style.display = 'none';
   }
 }
 
 function _revAvatarHtml(name, idx) {
-  var color = _revColor(idx);
-  return '<div class="ci-avatar" style="background:' + color + ';">' + _revInitials(name) + '</div>';
+  return '<div class="ci-avatar" style="background:' + _revColor(idx) + ';">' + _revInitials(name) + '</div>';
 }
 
-function _revReceivedCardHtml(c, idx) {
-  var timeStr = c.hoursAgo < 24 ? 'hace ' + c.hoursAgo + 'h' : 'hace ' + Math.floor(c.hoursAgo/24) + 'd';
-  var pills = [
-    '<span class="ci-pill">⚡ ' + c.energy + '/5</span>',
-    '<span class="ci-pill">💪 ' + c.effort + '/5</span>',
-    '<span class="ci-pill">😴 ' + c.sleep + 'h</span>',
-    c.hasPhotos ? '<span class="ci-pill">📸 Fotos</span>' : '',
-    c.hasPeriod ? '<span class="ci-pill">🩸 Período</span>' : ''
-  ].filter(Boolean).join('');
+function _revTimeAgo(dateStr) {
+  if (!dateStr) return '—';
+  var d = new Date(dateStr.length === 10 ? dateStr + 'T00:00:00' : dateStr);
+  var diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if (diff === 0) return 'Hoy';
+  if (diff === 1) return 'Ayer';
+  if (diff < 7)  return 'Hace ' + diff + ' días';
+  return formatDate(dateStr);
+}
+
+function _revReceivedCardHtml(item, idx) {
+  var c   = item.client;
+  var ci  = item.checkin;
+  var name = _revFullName(c);
+  var timeStr = _revTimeAgo(ci.checkin_date || ci.created_at);
+  var weightStr = ci.weight != null ? parseFloat(ci.weight).toFixed(1) + ' kg' : '';
+  var notesSnippet = ci.notes ? escHtml(ci.notes.length > 90 ? ci.notes.slice(0,90) + '...' : ci.notes) : '';
   return '<div class="ci-card">' +
     '<div class="ci-card-top">' +
-      _revAvatarHtml(c.name, idx) +
+      _revAvatarHtml(name, idx) +
       '<div style="flex:1;min-width:0;">' +
-        '<div class="ci-name">' + c.name + '</div>' +
-        '<div class="ci-time">' + timeStr + '</div>' +
+        '<div class="ci-name">' + escHtml(name) + '</div>' +
+        '<div class="ci-time">' + timeStr + (weightStr ? '  ·  ' + weightStr : '') + '</div>' +
+        (notesSnippet ? '<div style="font-size:12px;color:#6B7280;margin-top:3px;line-height:1.4;">' + notesSnippet + '</div>' : '') +
       '</div>' +
-      '<button class="btn-ver" onclick="openReviewModal(\'' + c.id + '\')">Ver</button>' +
+      '<button class="btn-ver" onclick="openReviewModal(\'' + escHtml(ci.id) + '\')">Ver</button>' +
     '</div>' +
-    '<div class="ci-pills">' + pills + '</div>' +
   '</div>';
 }
 
-function _revWaitingCardHtml(c, idx) {
-  var sent = _revRemindSent[c.id];
-  var btn = sent
-    ? '<button class="btn-recordar sent" disabled>✓ Enviado</button>'
-    : '<button class="btn-recordar" onclick="openRemindModal(\'' + c.id + '\')">Recordar</button>';
+function _revWaitingCardHtml(item, idx) {
+  var c    = item.client;
+  var name = _revFullName(c);
+  var cid  = String(c.id);
+  var sent = _revRemindSent[cid];
+  var btn  = sent
+    ? '<button class="btn-recordar sent" disabled>Enviado</button>'
+    : '<button class="btn-recordar" onclick="openRemindModal(\'' + cid + '\')">Recordar</button>';
+  var overdueStr = item.daysDiff != null
+    ? 'Sin check-in desde hace ' + item.daysDiff + ' días'
+    : 'Nunca ha enviado un check-in';
+  var lastStr = item.checkin ? 'Último: ' + formatDate(item.checkin.checkin_date) : '';
   return '<div class="ci-card">' +
     '<div class="ci-card-top">' +
-      _revAvatarHtml(c.name, idx + 8) +
+      _revAvatarHtml(name, idx + 8) +
       '<div style="flex:1;min-width:0;">' +
-        '<div class="ci-name">' + c.name + '</div>' +
-        '<div class="ci-overdue-label">Lleva ' + c.daysWithout + ' días sin enviar</div>' +
-        '<div class="ci-last-checkin">Último: ' + c.lastCheckin + '</div>' +
+        '<div class="ci-name">' + escHtml(name) + '</div>' +
+        '<div class="ci-overdue-label">' + overdueStr + '</div>' +
+        (lastStr ? '<div class="ci-last-checkin">' + lastStr + '</div>' : '') +
       '</div>' +
       btn +
     '</div>' +
   '</div>';
 }
 
-function _revDoneCardHtml(c, idx) {
+function _revDoneCardHtml(item) {
+  var name = _revFullName(item.client);
+  var ciId = escHtml(item.checkin.id);
+  var idx  = _revData.received.indexOf(item);
   return '<div class="ci-card" style="opacity:.75;border-color:#D1FAE5;background:#F0FDF4;">' +
     '<div class="ci-card-top">' +
-      _revAvatarHtml(c.name, idx) +
+      _revAvatarHtml(name, idx) +
       '<div style="flex:1;min-width:0;">' +
-        '<div class="ci-name">' + c.name + '</div>' +
-        '<div class="ci-time" style="color:#059669;">✓ Revisado hoy</div>' +
+        '<div class="ci-name">' + escHtml(name) + '</div>' +
+        '<div class="ci-time" style="color:#059669;">Revisado hoy</div>' +
       '</div>' +
-      '<button class="btn btn-ghost btn-sm" onclick="openReviewModal(\'' + c.id + '\')">Ver de nuevo</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="openReviewModal(\'' + ciId + '\')">Ver de nuevo</button>' +
     '</div>' +
   '</div>';
 }
 
 function toggleRevDone() {
   _revDoneOpen = !_revDoneOpen;
-  var cards = document.getElementById('revDoneCards');
-  var chevron = document.getElementById('revDoneChevron');
-  cards.style.display = _revDoneOpen ? 'flex' : 'none';
-  chevron.classList.toggle('open', _revDoneOpen);
+  document.getElementById('revDoneCards').style.display = _revDoneOpen ? 'flex' : 'none';
+  document.getElementById('revDoneChevron').classList.toggle('open', _revDoneOpen);
 }
 
 /* ── Review modal ── */
-function openReviewModal(clientId) {
-  var c = null;
-  for (var i = 0; i < _revReceived.length; i++) { if (_revReceived[i].id === clientId) { c = _revReceived[i]; break; } }
-  if (!c) return;
-  _revActiveId = clientId;
-  _revHistRange = 4;
+function openReviewModal(checkinId) {
+  var found = null;
+  for (var i = 0; i < _revData.received.length; i++) {
+    if (_revData.received[i].checkin && _revData.received[i].checkin.id === checkinId) {
+      found = _revData.received[i]; break;
+    }
+  }
+  if (!found) return;
+  _revActiveItem = found;
+  _revHistRange  = 4;
 
-  document.getElementById('rmClientName').textContent = c.name;
-  var now = new Date();
-  var dayNames = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  var monthNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  document.getElementById('rmDate').textContent = 'Check-in · ' + dayNames[now.getDay()] + ', ' + now.getDate() + ' de ' + monthNames[now.getMonth()];
-  document.getElementById('rmWeight').textContent = c.weight.toFixed(1);
+  var c    = found.client;
+  var ci   = found.checkin;
+  var name = _revFullName(c);
 
-  var delta = parseFloat((c.weight - c.prevWeight).toFixed(1));
+  document.getElementById('rmClientName').textContent = name;
+  document.getElementById('rmDate').textContent = 'Check-in  ·  ' + formatDate(ci.checkin_date);
+
+  var weightStr = ci.weight != null ? parseFloat(ci.weight).toFixed(1) : '—';
+  document.getElementById('rmWeight').textContent = weightStr;
+
+  /* Delta vs previous check-in */
   var deltaEl = document.getElementById('rmDelta');
-  if (delta < 0) {
-    deltaEl.textContent = '▼ ' + Math.abs(delta).toFixed(1) + ' kg';
-    deltaEl.style.background = 'rgba(16,185,129,.25)';
-  } else if (delta > 0) {
-    deltaEl.textContent = '▲ ' + delta.toFixed(1) + ' kg';
-    deltaEl.style.background = 'rgba(239,68,68,.25)';
+  var allCI   = found.allCheckins;
+  if (allCI.length >= 2 && ci.weight != null && allCI[1].weight != null) {
+    var delta = parseFloat((ci.weight - allCI[1].weight).toFixed(1));
+    if (delta < 0) {
+      deltaEl.textContent = String.fromCharCode(9660) + ' ' + Math.abs(delta).toFixed(1) + ' kg';
+      deltaEl.style.background = 'rgba(16,185,129,.25)';
+    } else if (delta > 0) {
+      deltaEl.textContent = String.fromCharCode(9650) + ' ' + delta.toFixed(1) + ' kg';
+      deltaEl.style.background = 'rgba(239,68,68,.25)';
+    } else {
+      deltaEl.textContent = 'sin cambio';
+      deltaEl.style.background = 'rgba(255,255,255,.18)';
+    }
+    deltaEl.style.display = '';
   } else {
-    deltaEl.textContent = '= sin cambio';
-    deltaEl.style.background = 'rgba(255,255,255,.18)';
+    deltaEl.style.display = 'none';
   }
 
-  var metrics = [
-    { label:'⚡ Energía',  val:c.energy, max:5, pct:c.energy/5*100, color:'#F59E0B' },
-    { label:'💪 Esfuerzo', val:c.effort, max:5, pct:c.effort/5*100, color:'#4F46E5' },
-    { label:'😴 Sueño',    val:c.sleep,  max:9, pct:Math.min(c.sleep/9*100,100), color:'#7C3AED', suffix:'h' },
-    { label:c.hasPeriod ? '🩸 Período' : '📊 Estado', val:c.hasPeriod ? 'Activo' : 'Normal', pct:0, color:'#059669', noBar:true }
+  /* Body measurements */
+  var measDefs = [
+    { key:'body_fat', label:'Grasa corporal', suffix:'%',  max:40,  color:'#F59E0B' },
+    { key:'waist',    label:'Cintura',         suffix:' cm', max:120, color:'#4F46E5' },
+    { key:'chest',    label:'Pecho',           suffix:' cm', max:140, color:'#7C3AED' },
+    { key:'hips',     label:'Cadera',          suffix:' cm', max:130, color:'#059669' },
+    { key:'arms',     label:'Brazos',          suffix:' cm', max:50,  color:'#D97706' },
+    { key:'legs',     label:'Piernas',         suffix:' cm', max:80,  color:'#DC2626' }
   ];
-  document.getElementById('rmMetrics').innerHTML = metrics.map(function(m) {
-    var valStr = typeof m.val === 'number' ? m.val + (m.suffix || '') + '/' + m.max : m.val;
+  var measHtml = measDefs.filter(function(m){ return ci[m.key] != null; }).map(function(m) {
+    var v   = parseFloat(ci[m.key]);
+    var pct = Math.min(v / m.max * 100, 100);
     return '<div class="rm-metric-card">' +
       '<div class="rm-metric-label">' + m.label + '</div>' +
-      '<div class="rm-metric-val">' + valStr + '</div>' +
-      (!m.noBar ? '<div class="rm-metric-bar"><div class="rm-metric-fill" style="width:' + m.pct + '%;background:' + m.color + ';"></div></div>' : '') +
+      '<div class="rm-metric-val">' + v.toFixed(1) + m.suffix + '</div>' +
+      '<div class="rm-metric-bar"><div class="rm-metric-fill" style="width:' + pct + '%;background:' + m.color + ';"></div></div>' +
     '</div>';
   }).join('');
+  document.getElementById('rmMetrics').innerHTML = measHtml ||
+    '<div style="font-size:13px;color:#9CA3AF;padding:2px 0;grid-column:1/-1;">Sin medidas registradas en este check-in.</div>';
 
-  document.getElementById('rmClientNotes').textContent = c.notes || 'Sin notas.';
-  document.getElementById('rmCoachNotes').value = c.coachNotes || '';
+  /* Client notes */
+  document.getElementById('rmClientNotes').textContent = ci.notes || 'Sin notas.';
 
-  if (c.hasPhotos) {
+  /* Coach notes (pre-fill if already reviewed) */
+  document.getElementById('rmCoachNotes').value = ci.coach_notes || '';
+
+  /* Photo */
+  if (ci.photo_url) {
     document.getElementById('rmPhotosSection').style.display = 'block';
-    document.getElementById('rmPhotos').innerHTML = '<div style="background:#F3F4F6;border-radius:8px;padding:16px 20px;font-size:12px;color:#9CA3AF;">📸 Fotos adjuntas (disponibles en la app móvil)</div>';
+    document.getElementById('rmPhotos').innerHTML =
+      '<img src="' + escHtml(ci.photo_url) + '" style="max-width:100%;border-radius:8px;max-height:220px;object-fit:cover;cursor:pointer;" ' +
+      'onclick="openPhoto(\'' + escHtml(ci.photo_url) + '\')" />';
   } else {
     document.getElementById('rmPhotosSection').style.display = 'none';
   }
 
-  var isReviewed = _revReviewedIds.indexOf(clientId) !== -1;
-  document.getElementById('btnMarkDone').style.display = isReviewed ? 'none' : 'flex';
+  /* Mark-done button visibility */
+  var isReviewed = _revReviewedCheckinIds.indexOf(checkinId) !== -1;
+  document.getElementById('btnMarkDone').style.display = isReviewed ? 'none' : '';
 
+  /* History chart */
   document.querySelectorAll('.rm-hist-tab').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('.rm-hist-tab')[0].classList.add('active');
-  _revRenderHistChart(c, 4);
+  _revRenderHistChart(found.allCheckins, 4);
 
   document.getElementById('reviewModal').classList.add('open');
 }
 
 function closeReviewModal() {
   document.getElementById('reviewModal').classList.remove('open');
-  _revActiveId = null;
+  _revActiveItem = null;
 }
 
 function setHistRange(weeks, btn) {
   _revHistRange = weeks;
   document.querySelectorAll('.rm-hist-tab').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
-  var c = null;
-  for (var i = 0; i < _revReceived.length; i++) { if (_revReceived[i].id === _revActiveId) { c = _revReceived[i]; break; } }
-  if (c) _revRenderHistChart(c, weeks);
+  if (_revActiveItem) _revRenderHistChart(_revActiveItem.allCheckins, weeks);
 }
 
-function _revRenderHistChart(c, weeks) {
-  var base = c.history[0] + (c.history[0] - c.history[c.history.length-1]) * 0.6;
-  var hist = [];
-  for (var i = weeks; i >= 0; i--) {
-    if (i < c.history.length) {
-      hist.push(c.history[c.history.length - 1 - i] || c.weight);
-    } else {
-      base = parseFloat((base + (Math.random() - 0.45) * 0.7).toFixed(1));
-      hist.push(base);
-    }
+function _revRenderHistChart(allCheckins, weeks) {
+  var slice = allCheckins.slice(0, weeks)
+    .filter(function(ci){ return ci.weight != null; })
+    .reverse();
+  if (slice.length === 0) {
+    document.getElementById('rmHistChart').innerHTML =
+      '<div style="font-size:12px;color:#9CA3AF;text-align:center;padding:20px;">Sin historial de peso disponible.</div>';
+    return;
   }
-  var min = Math.min.apply(null, hist) - 0.3;
-  var max = Math.max.apply(null, hist) + 0.3;
-  var range = max - min || 1;
-  var bars = hist.map(function(v, i) {
-    var h = Math.round((v - min) / range * 56);
-    var isLast = i === hist.length - 1;
+  var weights = slice.map(function(ci){ return parseFloat(ci.weight); });
+  var wMin = Math.min.apply(null, weights) - 0.5;
+  var wMax = Math.max.apply(null, weights) + 0.5;
+  var range = wMax - wMin || 1;
+  var bars  = slice.map(function(ci, i) {
+    var v     = parseFloat(ci.weight);
+    var h     = Math.round((v - wMin) / range * 56);
+    var isLast = i === slice.length - 1;
+    var label = formatDate(ci.checkin_date).split(' ').slice(0,2).join(' ');
     return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;">' +
       '<div style="font-size:9px;color:#9CA3AF;white-space:nowrap;">' + v.toFixed(1) + '</div>' +
       '<div style="width:100%;background:' + (isLast ? '#4F46E5' : '#C7D2FE') + ';border-radius:3px 3px 0 0;height:' + Math.max(h,3) + 'px;"></div>' +
-      '<div style="font-size:9px;color:#9CA3AF;">S' + (hist.length - i) + '</div>' +
+      '<div style="font-size:9px;color:#9CA3AF;overflow:hidden;max-width:32px;white-space:nowrap;text-overflow:ellipsis;">' + label + '</div>' +
     '</div>';
   }).join('');
   document.getElementById('rmHistChart').innerHTML =
-    '<div style="display:flex;align-items:flex-end;gap:3px;height:80px;">' + bars + '</div>';
+    '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;">' + bars + '</div>';
 }
 
-function markAsReviewed() {
-  if (!_revActiveId) return;
-  var c = null;
-  for (var i = 0; i < _revReceived.length; i++) { if (_revReceived[i].id === _revActiveId) { c = _revReceived[i]; break; } }
-  if (!c) return;
-  c.coachNotes = document.getElementById('rmCoachNotes').value;
-  if (_revReviewedIds.indexOf(_revActiveId) === -1) _revReviewedIds.push(_revActiveId);
-  _revDoneOpen = true;
-  closeReviewModal();
-  revRender();
-  document.getElementById('doneModal').classList.add('open');
+async function markAsReviewed() {
+  if (!_revActiveItem) return;
+  var ci       = _revActiveItem.checkin;
+  var notes    = document.getElementById('rmCoachNotes').value.trim();
+  var btn      = document.getElementById('btnMarkDone');
+  var origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+  try {
+    await apiFetch('/checkins/' + ci.id + '/coach-notes', {
+      method: 'PUT',
+      body: JSON.stringify({ coach_notes: notes || null })
+    });
+    ci.coach_notes = notes;
+    if (_revReviewedCheckinIds.indexOf(ci.id) === -1) _revReviewedCheckinIds.push(ci.id);
+    _revDoneOpen = true;
+    closeReviewModal();
+    revRender();
+    document.getElementById('doneModal').classList.add('open');
+  } catch (e) {
+    toast('Error al guardar: ' + e.message, 'error');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = origText;
+  }
 }
 
 function openClientChat() {
   closeModal('doneModal');
-  toast('Abriendo chat...', 'success');
-  setTimeout(function(){ window.location.href = 'chat.html'; }, 500);
+  window.location.href = 'chat.html';
 }
 
 /* ── Reminder modal ── */
 function openRemindModal(clientId) {
-  var c = null;
-  for (var i = 0; i < _revWaiting.length; i++) { if (_revWaiting[i].id === clientId) { c = _revWaiting[i]; break; } }
-  if (!c) return;
-  _remindClientId = clientId;
-  document.getElementById('remindClientName').textContent = c.name;
-  var firstName = c.name.split(' ')[0];
+  var found = null;
+  for (var i = 0; i < _revData.waiting.length; i++) {
+    if (String(_revData.waiting[i].client.id) === String(clientId)) { found = _revData.waiting[i]; break; }
+  }
+  if (!found) return;
+  _remindClientId = String(clientId);
+  var c         = found.client;
+  var firstName = (c.name || '').split(' ')[0];
+  document.getElementById('remindClientName').textContent = _revFullName(c);
   document.getElementById('remindMsgTA').value =
-    '¡Hola ' + firstName + '! 👋\n\nRecordatorio amistoso: ¡Ya es hora de enviar tu check-in semanal!\n\nCuéntame cómo fue tu semana: energía, descanso, entrenamientos...\n\nUn abrazo,\nTu coach';
+    'Hola ' + firstName + ',\n\nRecordatorio: esta semana aun no has enviado tu check-in semanal.\n\n' +
+    'Cuentame como fue la semana: descanso, entrenamientos, alimentacion...\n\nAnimo!\nTu coach';
   openModal('remindModal');
 }
 
@@ -1827,18 +1923,17 @@ function sendReminder() {
   _revRemindSent[_remindClientId] = true;
   closeModal('remindModal');
   revRender();
-  toast('Recordatorio enviado ✓', 'success');
+  toast('Recordatorio enviado', 'success');
   _remindClientId = null;
 }
 
-// Close review modal on backdrop click
+/* Close review modal on backdrop click / Escape */
 document.getElementById('reviewModal').addEventListener('click', function(e) {
   if (e.target === this) closeReviewModal();
 });
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    if (document.getElementById('reviewModal').classList.contains('open')) closeReviewModal();
-  }
+  if (e.key === 'Escape' && document.getElementById('reviewModal').classList.contains('open'))
+    closeReviewModal();
 });
 
 /* ═══════════════════════════════════════════════════════════
@@ -1972,7 +2067,7 @@ function _cpRenderTable() {
       if (isFuture && total === 0 && checkins.length === 0) {
         cls = 'future'; icon = '─'; title = 'Fecha futura';
       } else if (total === 0 && checkins.length > 0) {
-        cls = 'checkin-only'; icon = '📊'; title = 'Check-in registrado';
+        cls = 'checkin-only'; icon = 'CI'; title = 'Check-in registrado';
       } else if (total === 0) {
         cls = 'no-task'; icon = '·'; title = 'Sin tareas';
       } else if (done === total) {
@@ -2081,7 +2176,6 @@ function openNewCheckinModalFor(userDetailId, clientInternalId) {
    Boot
 ───────────────────────────────────────────── */
 init();
-revRender();
 
 // ── Sidebar role adaptation ───────────────────────────────────────────────────
 function adaptSidebar() {

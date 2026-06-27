@@ -1131,25 +1131,14 @@ function renderActiveMealContent(mid) {
   }
   content.innerHTML = '<div class="ms-ref-bar"><label>👤 Cliente:</label><select id="refClientSel" onchange="onRefClientChange(this.value)"><option value="">Sin cliente</option></select></div>'
     + '<input class="ms-active-name-input" id="msNameInp-' + mid + '" value="' + esc(meal.name) + '" placeholder="Nombre de la comida" oninput="onActiveMealNameChange(' + mid + ',this.value)">'
+    + '<div class="ms-add-btns" style="margin-bottom:10px;">'
+    + '<button class="ms-add-food-btn" onclick="addFoodRow(' + mid + ')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Buscar alimento</button>'
+    + '<button class="ms-add-recipe-btn"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir receta</button>'
+    + '</div>'
+    + '<button onclick="openCreateAlimentModal(null)" style="margin-bottom:14px;width:100%;padding:9px;border:1.5px dashed #9CA3AF;border-radius:8px;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;" onmouseover="this.style.borderColor=\'#4F46E5\';this.style.color=\'#4F46E5\';this.style.background=\'#EEF2FF\';" onmouseout="this.style.borderColor=\'#9CA3AF\';this.style.color=\'#6B7280\';this.style.background=\'#fff\';"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Crear nuevo alimento</button>'
     + '<div class="meal-rows" id="mrows-' + mid + '"></div>';
   populateRefClientSel();
   meal.rows.forEach(function(row) { _renderFoodCard(mid, row); });
-  var btnsDiv = document.createElement('div');
-  btnsDiv.className = 'ms-add-btns';
-  btnsDiv.innerHTML = '<button class="ms-add-food-btn" onclick="addFoodRow(' + mid + ')">'
-    + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
-    + ' Buscar alimento</button>'
-    + '<button class="ms-add-recipe-btn">'
-    + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
-    + ' A\u00f1adir receta</button>';
-  content.appendChild(btnsDiv);
-  var createBtn = document.createElement('button');
-  createBtn.style.cssText = 'margin-top:10px;width:100%;padding:10px;border:1.5px dashed #9CA3AF;border-radius:8px;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;';
-  createBtn.onmouseover = function(){ this.style.borderColor='#4F46E5';this.style.color='#4F46E5';this.style.background='#EEF2FF'; };
-  createBtn.onmouseout  = function(){ this.style.borderColor='#9CA3AF';this.style.color='#6B7280';this.style.background='#fff'; };
-  createBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Crear nuevo alimento';
-  createBtn.onclick = function(){ openCreateAlimentModal(null); };
-  content.appendChild(createBtn);
 }
 
 function onActiveMealNameChange(mid, val) {

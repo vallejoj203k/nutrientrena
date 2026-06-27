@@ -968,6 +968,7 @@ let clients = [];
 let activeClientId = null;
 let allCheckins = [];   // full data from server for the selected client
 let checkins = [];      // currently displayed (after date filter)
+let _clientNotes = []; // notes/reminders for selected client from /note-users
 let pendingDeleteId = null;
 let pendingCoachNotesId = null;
 let meData = null;
@@ -1099,12 +1100,20 @@ async function onClientChange() {
 async function loadClientData(clientId) {
   showSkeletonRows(5);
   hideSummary();
+  _clientNotes = [];
+
+  const client = clients.find(c => String(c.id) === String(clientId));
+  const clientUserIdInt = client ? client.user_id : null;
 
   try {
-    const [checkinsRes, summaryRes] = await Promise.all([
+    const calls = [
       apiFetch(`/checkins/client/${clientId}`),
       apiFetch(`/checkins/summary/${clientId}`)
-    ]);
+    ];
+    if (clientUserIdInt) {
+      calls.push(apiFetch(`/note-users/search?user_id=${clientUserIdInt}`));
+    }
+    const [checkinsRes, summaryRes, notesRes] = await Promise.all(calls);
 
     const checkinsData = checkinsRes?.data || {};
     const rawList = Array.isArray(checkinsData) ? checkinsData : (checkinsData.checkins || []);
@@ -1117,12 +1126,15 @@ async function loadClientData(clientId) {
         : null;
       return { ...ci, weight_progress: delta };
     });
+
+    const notesData = notesRes?.data || notesRes || [];
+    _clientNotes = Array.isArray(notesData) ? notesData : [];
+
     const summary = summaryRes?.data || summaryRes || {};
 
     renderSummary(summary);
     applyFilters();
 
-    const client = clients.find(c => String(c.id) === String(clientId));
     const name = client ? [client.name, client.last_name].filter(Boolean).join(' ') : 'cliente';
     document.getElementById('tableSubtitle').textContent = `${checkins.length} check-in(s) registrado(s) para ${name}`;
     document.getElementById('clientBadge').innerHTML = `<span style="background:var(--purple-pale);color:var(--purple);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;">${name}</span>`;
@@ -1237,9 +1249,7 @@ function clearDateFilters() {
 function renderCheckins(list) {
   document.getElementById('skeletonState').style.display = 'none';
 
-  const reminders = activeClientId
-    ? JSON.parse(localStorage.getItem('remind_' + activeClientId) || '[]')
-    : [];
+  const reminders = _clientNotes;
 
   if (!list.length && !reminders.length) {
     showEmptyState('Este cliente no tiene check-ins registrados todavía.');
@@ -1316,13 +1326,14 @@ function renderCheckins(list) {
     }
   });
 
-  /* Append saved reminders to coach column */
+  /* Append coach notes/reminders from backend */
   if (reminders.length) {
-    coachHtml += '<div class="hist-remind-sep">Recordatorios enviados</div>';
+    coachHtml += '<div class="hist-remind-sep">Notas del coach</div>';
     reminders.forEach(function(r) {
+      const dateStr = r.created_at ? r.created_at.slice(0, 10) : '';
       coachHtml += '<div class="hist-remind-card">'
-        + '<div class="hist-remind-label">Recordatorio &mdash; ' + escHtml(r.date) + '</div>'
-        + '<div class="hist-remind-text">' + escHtml(r.message) + '</div>'
+        + '<div class="hist-remind-label">' + escHtml(r.title || 'Nota') + (dateStr ? ' &mdash; ' + escHtml(dateStr) : '') + '</div>'
+        + '<div class="hist-remind-text">' + escHtml(r.content || '') + '</div>'
         + '</div>';
     });
   }
@@ -1977,22 +1988,41 @@ function openRemindModal(clientId) {
   openModal('remindModal');
 }
 
-function sendReminder() {
+async function sendReminder() {
   if (!_remindClientId) return;
-  var msg  = (document.getElementById('remindMsgTA').value || '').trim();
-  var cid  = _remindClientId;
-  var today = new Date().toISOString().slice(0, 10);
+  var msg = (document.getElementById('remindMsgTA').value || '').trim();
+  var cid = _remindClientId;
 
-  var key   = 'remind_' + cid;
-  var saved = JSON.parse(localStorage.getItem(key) || '[]');
-  saved.unshift({ message: msg, date: today });
-  localStorage.setItem(key, JSON.stringify(saved));
+  var client = clients.find(function(c) { return String(c.id) === String(cid); });
+  var clientUserIdInt = client ? client.user_id : null;
 
-  _revRemindSent[cid] = true;
-  closeModal('remindModal');
-  revRender();
-  toast('Recordatorio guardado en el historial', 'success');
-  _remindClientId = null;
+  if (!clientUserIdInt) {
+    toast('No se pudo identificar el cliente', 'error');
+    return;
+  }
+
+  var sendBtn = document.querySelector('.btn-send-remind');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Guardando...'; }
+
+  try {
+    await apiFetch('/note-users', {
+      method: 'POST',
+      body: JSON.stringify({ user_id: clientUserIdInt, title: 'Recordatorio', content: msg })
+    });
+    _revRemindSent[cid] = true;
+    closeModal('remindModal');
+    revRender();
+    toast('Recordatorio guardado en el historial', 'success');
+    // Reload notes if this client's historial is currently visible
+    if (activeClientId && String(activeClientId) === String(cid)) {
+      loadClientData(cid);
+    }
+  } catch(e) {
+    toast('Error al guardar recordatorio: ' + e.message, 'error');
+  } finally {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar recordatorio'; }
+    _remindClientId = null;
+  }
 }
 
 /* Close review modal on backdrop click / Escape */

@@ -725,6 +725,24 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ── RECIPE PICKER MODAL ── -->
+<div class="overlay" id="recipeOverlay" style="z-index:320;">
+  <div class="modal-box" style="max-width:480px;width:100%;">
+    <div class="modal-title">Añadir receta</div>
+    <div class="modal-sub">Busca una receta y todos sus alimentos se añadirán a la comida.</div>
+    <input type="search" id="recipeSearch" placeholder="Buscar receta..." autocomplete="off"
+      style="width:100%;padding:9px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;margin-bottom:10px;font-family:inherit;"
+      oninput="searchRecipes(this.value)"
+      onfocus="this.style.borderColor='#4F46E5'" onblur="this.style.borderColor='#E5E7EB'"/>
+    <div id="recipeResults" style="max-height:320px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;background:#fff;min-height:60px;">
+      <div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Escribe para buscar recetas...</div>
+    </div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn-cancel" onclick="closeRecipeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
 const token = localStorage.getItem('token');
@@ -952,6 +970,7 @@ async function openForm(id) {
       _meals = []; _mealSeq = 0; _rowSeq = 0;
       document.getElementById('mealsContainer').innerHTML = '';
       (d.foods || []).forEach(function(food){ addMeal(food); });
+      _restoreDistribution();
     } catch(e) { toast('Error al cargar la dieta', 'error'); return; }
   }
 
@@ -1133,7 +1152,7 @@ function renderActiveMealContent(mid) {
     + '<input class="ms-active-name-input" id="msNameInp-' + mid + '" value="' + esc(meal.name) + '" placeholder="Nombre de la comida" oninput="onActiveMealNameChange(' + mid + ',this.value)">'
     + '<div class="ms-add-btns" style="margin-bottom:10px;">'
     + '<button class="ms-add-food-btn" onclick="addFoodRow(' + mid + ')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Buscar alimento</button>'
-    + '<button class="ms-add-recipe-btn"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir receta</button>'
+    + '<button class="ms-add-recipe-btn" onclick="openRecipeModal(' + mid + ')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Añadir receta</button>'
     + '</div>'
     + '<button onclick="openCreateAlimentModal(null)" style="margin-bottom:14px;width:100%;padding:9px;border:1.5px dashed #9CA3AF;border-radius:8px;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;" onmouseover="this.style.borderColor=\'#4F46E5\';this.style.color=\'#4F46E5\';this.style.background=\'#EEF2FF\';" onmouseout="this.style.borderColor=\'#9CA3AF\';this.style.color=\'#6B7280\';this.style.background=\'#fff\';"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Crear nuevo alimento</button>'
     + '<div class="meal-rows" id="mrows-' + mid + '"></div>';
@@ -1487,12 +1506,109 @@ function applyDistribution() {
   var total = 0;
   _meals.forEach(function(m){ total += parseFloat(document.getElementById('dpct-' + m.id) && document.getElementById('dpct-' + m.id).value) || 0; });
   if (Math.abs(total - 100) > 0.5) { toast('Los porcentajes deben sumar 100%', 'error'); return; }
+  var distMap = {};
   _meals.forEach(function(meal) {
     var pct = (parseFloat(document.getElementById('dpct-' + meal.id) && document.getElementById('dpct-' + meal.id).value) || 0) / 100;
+    var targets = { pct: Math.round(pct * 100), kcal: Math.round(kcal*pct), prot: Math.round(prot*pct), carb: Math.round(carb*pct), fat: Math.round(fat*pct) };
+    meal._dist = targets;
     var el = document.getElementById('mdist-' + meal.id);
-    if (el) el.textContent = 'Obj: ' + Math.round(kcal*pct) + ' kcal · ' + Math.round(prot*pct) + 'P · ' + Math.round(carb*pct) + 'C · ' + Math.round(fat*pct) + 'G';
+    if (el) el.textContent = 'Obj: ' + targets.kcal + ' kcal · ' + targets.prot + 'P · ' + targets.carb + 'C · ' + targets.fat + 'G';
+    var key = meal.db_id != null ? String(meal.db_id) : meal.name;
+    distMap[key] = targets;
   });
-  toast('Distribucion aplicada', 'success');
+  if (editingId) localStorage.setItem('diet_dist_' + editingId, JSON.stringify(distMap));
+  toast('Distribucion aplicada y guardada', 'success');
+}
+
+function _restoreDistribution() {
+  if (!editingId) return;
+  var raw = localStorage.getItem('diet_dist_' + editingId);
+  if (!raw) return;
+  try {
+    var distMap = JSON.parse(raw);
+    _meals.forEach(function(meal) {
+      var key = meal.db_id != null ? String(meal.db_id) : meal.name;
+      var t = distMap[key];
+      if (!t) return;
+      meal._dist = t;
+      var el = document.getElementById('mdist-' + meal.id);
+      if (el) el.textContent = 'Obj: ' + t.kcal + ' kcal · ' + t.prot + 'P · ' + t.carb + 'C · ' + t.fat + 'G';
+    });
+  } catch(e) {}
+}
+
+/* ── Recipe picker ── */
+var _recipeMealId = null;
+var _recipeTimer  = null;
+
+function openRecipeModal(mid) {
+  _recipeMealId = mid;
+  document.getElementById('recipeSearch').value = '';
+  document.getElementById('recipeResults').innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Escribe para buscar recetas...</div>';
+  document.getElementById('recipeOverlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('recipeSearch').focus(); }, 100);
+  searchRecipes('');
+}
+
+function closeRecipeModal() {
+  document.getElementById('recipeOverlay').classList.remove('open');
+  _recipeMealId = null;
+}
+
+function searchRecipes(q) {
+  clearTimeout(_recipeTimer);
+  _recipeTimer = setTimeout(async function() {
+    var container = document.getElementById('recipeResults');
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Buscando...</div>';
+    try {
+      var params = new URLSearchParams({ search: q || '', page: 1, per_page: 20 });
+      var r = await fetch(API + '/recipes/search?' + params, { headers: { Authorization: 'Bearer ' + token } });
+      var j = await r.json();
+      var items = (j.data && j.data.data) || j.data || [];
+      if (!items.length) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Sin resultados</div>';
+        return;
+      }
+      container.innerHTML = items.map(function(rec) {
+        return '<div onclick="addRecipeToMeal(' + rec.id + ')" style="padding:11px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;font-size:13px;transition:background .1s;" onmouseover="this.style.background=\'#F9FAFB\'" onmouseout="this.style.background=\'#fff\'">'
+          + '<div style="font-weight:600;color:#111;">' + esc(rec.name) + '</div>'
+          + (rec.description ? '<div style="font-size:11px;color:#9CA3AF;margin-top:2px;">' + esc(rec.description) + '</div>' : '')
+          + '</div>';
+      }).join('');
+    } catch(e) {
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar recetas</div>';
+    }
+  }, q ? 300 : 0);
+}
+
+async function addRecipeToMeal(recipeId) {
+  if (!_recipeMealId) return;
+  var mid = _recipeMealId;
+  closeRecipeModal();
+  try {
+    var r = await fetch(API + '/recipes/' + recipeId + '/edit', { headers: { Authorization: 'Bearer ' + token } });
+    var j = await r.json();
+    var rec = j.data || j;
+    var details = rec.details || rec.detail || [];
+    if (!details.length) { toast('La receta no tiene alimentos', 'error'); return; }
+    details.forEach(function(d) {
+      if (!d.aliment_id && !(d.aliment && d.aliment.id)) return;
+      var alId = d.aliment_id || d.aliment.id;
+      var al = d.aliment || {};
+      addFoodRow(mid, {
+        aliment_id: alId,
+        aliment_name: al.name || '',
+        proteins: al.proteins != null ? al.proteins : null,
+        carbohydrates: al.carbohydrates != null ? al.carbohydrates : null,
+        fats: al.fats != null ? al.fats : null,
+        calories: al.calories != null ? al.calories : null,
+        quantity: d.quantity_calc != null ? String(d.quantity_calc) : '100'
+      });
+    });
+    toast('Receta "' + esc(rec.name || '') + '" añadida (' + details.length + ' alimentos)', 'success');
+  } catch(e) {
+    toast('Error al cargar la receta', 'error');
+  }
 }
 
 async function saveDiet() {

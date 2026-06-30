@@ -254,7 +254,9 @@
       blank.textContent = field.placeholder || 'Selecciona una opción';
       input.appendChild(blank);
       try {
-        const opts = JSON.parse(field.options || '[]');
+        const raw = field.options || '';
+        let opts;
+        try { opts = JSON.parse(raw); } catch { opts = raw.split(',').map(s => s.trim()).filter(Boolean); }
         opts.forEach(opt => {
           const o = document.createElement('option');
           if (typeof opt === 'object') {

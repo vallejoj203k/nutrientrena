@@ -122,6 +122,15 @@
     .add-field-btn:hover{border-color:var(--purple);color:var(--purple);}
     .modal-footer{padding:16px 24px;border-top:1px solid #F3F4F6;display:flex;justify-content:flex-end;gap:10px;}
     .form-error{color:#DC2626;font-size:12px;margin-top:4px;}
+    .field-options-area{margin-top:8px;padding:10px 12px;background:#EEF2FF;border-radius:8px;border:1px solid #C7D2FE;}
+    .field-options-area label{font-size:11px;font-weight:700;color:#4F46E5;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:7px;}
+    .field-option-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+    .field-option-row input{flex:1;padding:6px 9px;border:1px solid #C7D2FE;border-radius:6px;font-size:12px;outline:none;background:#fff;}
+    .field-option-row input:focus{border-color:#4F46E5;}
+    .btn-remove-opt{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:2px 5px;border-radius:4px;line-height:1;}
+    .btn-remove-opt:hover{color:#DC2626;background:#FEE2E2;}
+    .btn-add-opt{margin-top:4px;padding:5px 10px;border:1.5px dashed #818CF8;border-radius:6px;background:none;cursor:pointer;color:#4F46E5;font-size:12px;font-weight:600;transition:.15s;}
+    .btn-add-opt:hover{background:#EEF2FF;}
 
     /* Assign modal */
     .client-option{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:.15s;}
@@ -669,21 +678,26 @@ function editTemplate(id) {
   document.getElementById('fieldsContainer').innerHTML = '';
   fieldCounter = 0;
   const fields = t.fields || [];
-  if (fields.length) fields.forEach(f => addField(f.label || f.name, f.field_type || f.type || 'text', f.required));
+  if (fields.length) fields.forEach(f => addField(f.label || f.name, f.field_type || f.type || 'text', f.required, f.options || ''));
   else addField();
   document.getElementById('templateModal').classList.add('open');
 }
 
 function closeTemplateModal() { document.getElementById('templateModal').classList.remove('open'); }
 
-function addField(label = '', type = 'text', required = false) {
+function addField(label = '', type = 'text', required = false, options = '') {
   const id = ++fieldCounter;
+  const wrap = document.createElement('div');
+  wrap.id = `fieldwrap-${id}`;
+  wrap.style.marginBottom = '10px';
+
   const div = document.createElement('div');
   div.className = 'field-row';
   div.id = `field-${id}`;
+  div.style.marginBottom = '0';
   div.innerHTML = `
     <input type="text" placeholder="Nombre del campo" value="${esc(label)}" id="fl-${id}"/>
-    <select id="ft-${id}">
+    <select id="ft-${id}" onchange="onFieldTypeChange(${id}, this.value)">
       ${FIELD_TYPES.map(t => `<option value="${t}" ${t === type ? 'selected' : ''}>${t}</option>`).join('')}
     </select>
     <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#6B7280;cursor:pointer;white-space:nowrap;">
@@ -692,11 +706,57 @@ function addField(label = '', type = 'text', required = false) {
     </label>
     <button class="remove-field" onclick="removeField(${id})">×</button>
   `;
-  document.getElementById('fieldsContainer').appendChild(div);
+
+  wrap.appendChild(div);
+
+  // Options area (only visible for 'select' type)
+  const optArea = document.createElement('div');
+  optArea.className = 'field-options-area';
+  optArea.id = `fopts-${id}`;
+  optArea.style.display = type === 'select' ? 'block' : 'none';
+  optArea.innerHTML = `<label>Opciones del desplegable</label><div id="foptrows-${id}"></div><button class="btn-add-opt" onclick="addSelectOption(${id})">+ Agregar opción</button>`;
+  wrap.appendChild(optArea);
+
+  document.getElementById('fieldsContainer').appendChild(wrap);
+
+  // Pre-fill options if editing
+  if (type === 'select') {
+    const opts = options ? options.split(',').map(o => o.trim()).filter(Boolean) : [''];
+    opts.forEach(o => addSelectOption(id, o));
+  }
+}
+
+let _optSeq = 0;
+function addSelectOption(fieldId, value = '') {
+  const oid = ++_optSeq;
+  const container = document.getElementById(`foptrows-${fieldId}`);
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'field-option-row';
+  row.id = `optrow-${oid}`;
+  row.innerHTML = `<input type="text" placeholder="Escribe una opción..." value="${esc(value)}" id="fopt-${oid}"/><button class="btn-remove-opt" onclick="removeSelectOption(${oid})" title="Eliminar">×</button>`;
+  container.appendChild(row);
+}
+
+function removeSelectOption(oid) {
+  const el = document.getElementById(`optrow-${oid}`);
+  if (el) el.remove();
+}
+
+function onFieldTypeChange(id, type) {
+  const area = document.getElementById(`fopts-${id}`);
+  if (!area) return;
+  if (type === 'select') {
+    area.style.display = 'block';
+    const container = document.getElementById(`foptrows-${id}`);
+    if (container && !container.children.length) addSelectOption(id);
+  } else {
+    area.style.display = 'none';
+  }
 }
 
 function removeField(id) {
-  const el = document.getElementById(`field-${id}`);
+  const el = document.getElementById(`fieldwrap-${id}`);
   if (el) el.remove();
 }
 
@@ -712,7 +772,16 @@ async function saveTemplate() {
     const label = document.getElementById(`fl-${id}`)?.value?.trim();
     const type  = document.getElementById(`ft-${id}`)?.value;
     const req   = document.getElementById(`fr-${id}`)?.checked;
-    if (label) fields.push({ label, field_type: type, required: req, order: fields.length + 1 });
+    if (!label) return;
+    let options = null;
+    if (type === 'select') {
+      const optInputs = document.querySelectorAll(`#foptrows-${id} input`);
+      const opts = Array.from(optInputs).map(i => i.value.trim()).filter(Boolean);
+      if (opts.length) options = opts.join(',');
+    }
+    const field = { label, field_type: type, required: req, order: fields.length + 1, field_key: label.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'') };
+    if (options) field.options = options;
+    fields.push(field);
   });
 
   if (!fields.length) {

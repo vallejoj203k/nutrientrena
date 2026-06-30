@@ -779,7 +779,8 @@ async function saveTemplate() {
       const opts = Array.from(optInputs).map(i => i.value.trim()).filter(Boolean);
       if (opts.length) options = opts.join(',');
     }
-    const field = { label, field_type: type, required: req, order: fields.length + 1 };
+    const field_key = label.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'') || 'campo_' + (fields.length + 1);
+    const field = { label, field_type: type, required: req, order: fields.length + 1, field_key };
     if (options) field.options = options;
     fields.push(field);
   });
@@ -799,7 +800,7 @@ async function saveTemplate() {
     const r = await fetch(url, {
       method,
       headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
-      body: JSON.stringify({ name, description, fields }),
+      body: JSON.stringify({ title: name, description, fields }),
     });
     const j = await r.json();
     if (!r.ok) {

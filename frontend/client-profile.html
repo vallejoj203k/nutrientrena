@@ -292,31 +292,29 @@
     .ex-name-col{flex:1;font-weight:500;color:#111;}
     .ex-meta{color:#9CA3AF;font-size:12px;white-space:nowrap;}
 
-    /* ── Calendario v2 — task-based ── */
-    .cal-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+    /* ── Calendario v3 — planificacion semanal ── */
     .cal-nav{display:flex;align-items:center;gap:8px;}
     .cal-nav-btn{background:#F3F4F6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;transition:.15s;}
     .cal-nav-btn:hover{background:#E5E7EB;}
-    .cal-period-label{font-size:15px;font-weight:800;color:#111;min-width:160px;text-align:center;}
-    .cal-view-btns{display:flex;gap:4px;background:#F3F4F6;border-radius:8px;padding:3px;}
-    .cal-view-btn{padding:5px 14px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#6B7280;background:transparent;transition:.15s;}
-    .cal-view-btn.active{background:#fff;color:#4F46E5;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-    /* week grid */
-    .cal-week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;}
-    .cal-wday-hdr{text-align:center;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;padding-bottom:4px;}
-    .cal-wcell{background:#fff;border:1.5px solid #E5E7EB;border-radius:10px;padding:8px 6px;min-height:90px;cursor:pointer;transition:.15s;position:relative;}
-    .cal-wcell:hover{border-color:#C4B5FD;}
-    .cal-wcell.today{border-color:#4F46E5;background:#F5F3FF;}
-    .cal-wcell.selected{border-color:#7C3AED;box-shadow:0 0 0 2px #DDD6FE;}
-    .cal-wcell-num{font-size:13px;font-weight:800;color:#374151;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;}
-    .cal-wcell-num.today-num{color:#4F46E5;}
-    .cal-wcell-tasks{display:flex;flex-direction:column;gap:2px;}
-    .cal-task-pill{font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:3px;}
-    .cal-task-pill.done{opacity:.5;text-decoration:line-through;}
-    .cal-more-pill{font-size:10px;color:#9CA3AF;padding:1px 0;}
-    .cal-checkin-dot{width:6px;height:6px;border-radius:50%;background:#F59E0B;display:inline-block;flex-shrink:0;}
+    .cal-period-label{font-size:14px;font-weight:700;color:#374151;min-width:180px;text-align:center;}
+    /* week grid v3 */
+    .cal-week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+    .cal-day-col{display:flex;flex-direction:column;gap:4px;min-height:180px;}
+    .cal-day-hdr{text-align:center;padding:6px 0 8px;border-bottom:1px solid #F3F4F6;margin-bottom:4px;}
+    .cal-day-name{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+    .cal-day-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:14px;font-weight:800;color:#374151;}
+    .cal-day-num.today{background:#4F46E5;color:#fff;}
+    .cal-chips{display:flex;flex-direction:column;gap:4px;flex:1;}
+    .cal-chip{display:flex;align-items:center;gap:5px;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+    .cal-chip-icon{font-size:12px;flex-shrink:0;}
+    .cal-chip-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .cal-chip-del{background:none;border:none;padding:0 2px;cursor:pointer;opacity:.5;font-size:14px;line-height:1;color:inherit;transition:.1s;flex-shrink:0;}
+    .cal-chip-del:hover{opacity:1;}
+    .cal-add-day-btn{background:none;border:1.5px dashed #D1D5DB;border-radius:7px;padding:5px;width:100%;cursor:pointer;color:#9CA3AF;font-size:16px;font-weight:300;transition:.15s;margin-top:2px;}
+    .cal-add-day-btn:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF;}
     /* month grid */
     .cal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+    .cal-wday-hdr{text-align:center;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;padding-bottom:4px;}
     .cal-mcell{background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:6px;min-height:72px;cursor:pointer;transition:.15s;}
     .cal-mcell:hover{border-color:#C4B5FD;}
     .cal-mcell.today{border-color:#4F46E5;background:#F5F3FF;}
@@ -325,34 +323,34 @@
     .cal-mcell-num.today-num{color:#4F46E5;}
     .cal-mcell-dots{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px;}
     .cal-mcell-dot{width:7px;height:7px;border-radius:50%;}
-    /* day detail panel */
-    .cal-day-panel{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:20px;margin-top:12px;}
-    .cal-day-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-    .cal-day-panel-title{font-size:15px;font-weight:800;color:#111;}
-    .cal-task-card{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;}
-    .cal-task-card:last-child{border-bottom:none;}
-    .cal-task-color-bar{width:4px;border-radius:4px;flex-shrink:0;align-self:stretch;}
-    .cal-task-body{flex:1;min-width:0;}
-    .cal-task-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9CA3AF;margin-bottom:2px;}
-    .cal-task-title{font-size:13px;font-weight:600;color:#111;}
-    .cal-task-notes{font-size:11px;color:#9CA3AF;margin-top:2px;}
-    .cal-task-done-btn{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#374151;transition:.15s;white-space:nowrap;}
-    .cal-task-done-btn.done{background:#ECFDF5;border-color:#6EE7B7;color:#059669;}
-    .cal-task-done-btn:hover{border-color:#7C3AED;color:#7C3AED;}
+    /* task create modal v3 */
+    .cal-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1100;display:flex;align-items:flex-end;justify-content:center;}
+    .cal-modal{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;box-shadow:0 -10px 40px rgba(0,0,0,.15);max-height:90vh;overflow-y:auto;}
+    .cal-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .cal-modal-title{font-size:15px;font-weight:800;color:#111;}
+    .cal-modal-close{background:none;border:none;font-size:22px;color:#9CA3AF;cursor:pointer;padding:0;line-height:1;}
+    .cal-modal-close:hover{color:#374151;}
+    .cal-type-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:1.5px solid #F3F4F6;margin-bottom:6px;cursor:pointer;transition:.15s;}
+    .cal-type-row:hover{border-color:#C4B5FD;background:#FAFAFA;}
+    .cal-type-row.sel{border-color:#7C3AED;background:#F5F3FF;}
+    .cal-type-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .cal-type-lbl{font-size:13px;font-weight:600;color:#374151;flex:1;}
+    .cal-type-arrow{font-size:11px;color:#9CA3AF;transition:.2s;}
+    .cal-type-row.sel .cal-type-arrow{transform:rotate(180deg);color:#7C3AED;}
+    .cal-repeat-row{display:flex;align-items:center;gap:12px;padding:14px 0 4px;border-top:1px solid #F3F4F6;margin-top:8px;}
+    .cal-repeat-lbl{font-size:13px;font-weight:700;color:#374151;}
+    .cal-repeat-opts{display:flex;gap:12px;}
+    .cal-repeat-opt{display:flex;align-items:center;gap:5px;font-size:13px;color:#374151;cursor:pointer;}
+    .cal-repeat-opt input{accent-color:#7C3AED;width:15px;height:15px;}
+    .cal-modal-save{width:100%;padding:13px;border:none;border-radius:10px;background:#7C3AED;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;transition:.15s;}
+    .cal-modal-save:hover{background:#6D28D9;}
+    /* checkin */
     .cal-checkin-card{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 12px;margin-top:4px;}
     .cal-checkin-title{font-size:12px;font-weight:700;color:#D97706;margin-bottom:6px;}
     .cal-checkin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
     .cal-checkin-item{text-align:center;background:#fff;border-radius:6px;padding:4px;}
     .cal-checkin-item .v{font-size:13px;font-weight:800;color:#111;}
     .cal-checkin-item .l{font-size:9px;color:#9CA3AF;text-transform:uppercase;}
-    /* task create modal */
-    .cal-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1100;display:flex;align-items:center;justify-content:center;}
-    .cal-modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
-    .cal-modal-title{font-size:16px;font-weight:800;color:#111;margin-bottom:18px;}
-    .cal-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-    .cal-type-btn{padding:8px 4px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;cursor:pointer;font-size:11px;font-weight:600;text-align:center;transition:.15s;}
-    .cal-type-btn:hover,.cal-type-btn.sel{border-color:#7C3AED;background:#F5F3FF;color:#7C3AED;}
-    /* checkin form */
     .cal-checkin-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
     .cal-fin{display:flex;flex-direction:column;gap:3px;}
     .cal-fin label{font-size:11px;font-weight:600;color:#6B7280;}
@@ -2989,6 +2987,18 @@ const TASK_TYPE_LABELS = {
   nutricion:'Nutrición', checkin:'Check-in', foto:'Foto',
   mensaje:'Mensaje', video:'Video', sesion:'Sesión', otro:'Otro',
 };
+const TASK_TC = {
+  rutina:    {color:'#4F46E5', icon:'🏋️', bg:'#EEF2FF'},
+  cardio:    {color:'#EF4444', icon:'🏃', bg:'#FEF2F2'},
+  descanso:  {color:'#10B981', icon:'🌙', bg:'#ECFDF5'},
+  nutricion: {color:'#F59E0B', icon:'🥗', bg:'#FFFBEB'},
+  checkin:   {color:'#8B5CF6', icon:'📊', bg:'#F5F3FF'},
+  foto:      {color:'#EC4899', icon:'📷', bg:'#FDF2F8'},
+  mensaje:   {color:'#06B6D4', icon:'💬', bg:'#ECFEFF'},
+  video:     {color:'#F97316', icon:'🎥', bg:'#FFF7ED'},
+  sesion:    {color:'#3B82F6', icon:'📅', bg:'#EFF6FF'},
+  otro:      {color:'#6B7280', icon:'📌', bg:'#F9FAFB'},
+};
 
 let _calView       = 'week';   // 'week' | 'month'
 let _calRefDate    = new Date();
@@ -3019,38 +3029,26 @@ function _renderCalToolbar() {
   const el = document.getElementById('calendarioContent');
   if (!el) return;
 
-  let periodLabel = '';
-  if (_calView === 'week') {
-    const mon = _mondayOf(_calRefDate);
-    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-    const mL = MONTH_NAMES[mon.getMonth()].slice(0,3);
-    const sL = MONTH_NAMES[sun.getMonth()].slice(0,3);
-    periodLabel = mon.getMonth() === sun.getMonth()
-      ? `${mL} ${mon.getDate()}–${sun.getDate()}, ${mon.getFullYear()}`
-      : `${mL} ${mon.getDate()} – ${sL} ${sun.getDate()}, ${mon.getFullYear()}`;
-  } else {
-    periodLabel = `${MONTH_NAMES[_calRefDate.getMonth()]} ${_calRefDate.getFullYear()}`;
-  }
+  const mon = _mondayOf(_calRefDate);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const mL = MONTH_NAMES[mon.getMonth()].slice(0,3);
+  const sL = MONTH_NAMES[sun.getMonth()].slice(0,3);
+  const periodLabel = mon.getMonth() === sun.getMonth()
+    ? `${mL} ${mon.getDate()} – ${sun.getDate()}, ${mon.getFullYear()}`
+    : `${mL} ${mon.getDate()} – ${sL} ${sun.getDate()}, ${mon.getFullYear()}`;
 
   el.innerHTML = `
     <div class="card" style="padding:20px;">
-      <div class="cal-toolbar">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <h3 style="font-size:16px;font-weight:800;color:#111;margin:0;">Planificación semanal</h3>
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="_calPrev()">‹</button>
           <span class="cal-period-label">${periodLabel}</span>
           <button class="cal-nav-btn" onclick="_calNext()">›</button>
-          <button class="cal-nav-btn" onclick="_calToday()" style="margin-left:4px;">Hoy</button>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-primary btn-sm" onclick="openCalTaskModal()">+ Tarea</button>
-          <div class="cal-view-btns">
-            <button class="cal-view-btn ${_calView==='week'?'active':''}" onclick="_setCalView('week')">Semana</button>
-            <button class="cal-view-btn ${_calView==='month'?'active':''}" onclick="_setCalView('month')">Mes</button>
-          </div>
+          <button class="cal-nav-btn" onclick="_calToday()" style="margin-left:4px;font-size:11px;">Hoy</button>
         </div>
       </div>
       <div id="calGridArea"><div style="text-align:center;padding:40px;color:#9CA3AF;">Cargando…</div></div>
-      <div id="calDayPanel" style="display:none;" class="cal-day-panel"></div>
     </div>`;
 }
 
@@ -3107,41 +3105,34 @@ function _renderCalGrid(data) {
 function _renderWeekGrid(area, data) {
   const today = _isoDate(new Date());
   const mon   = _mondayOf(_calRefDate);
+  const DAY_SHORT = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
 
-  const headers = DAY_NAMES.map(n =>
-    `<div class="cal-wday-hdr">${n}</div>`
-  ).join('');
-
-  const cells = DAY_NAMES.map((_, i) => {
+  const cols = DAY_SHORT.map((name, i) => {
     const d = new Date(mon); d.setDate(mon.getDate() + i);
     const key = _isoDate(d);
     const entry = data[key] || { tasks: [], checkins: [] };
     const isToday = key === today;
-    const isSel   = key === _calSelDate;
-    const MAX_SHOW = 3;
-    const pills = entry.tasks.slice(0, MAX_SHOW).map(t =>
-      `<div class="cal-task-pill ${t.done?'done':''}"
-           style="background:${t.color}22;color:${t.color};">
-         ${t.done ? '✓ ' : ''}${esc(t.title || TASK_TYPE_LABELS[t.task_type] || t.task_type)}
-       </div>`
-    ).join('');
-    const more = entry.tasks.length > MAX_SHOW
-      ? `<div class="cal-more-pill">+${entry.tasks.length - MAX_SHOW} más</div>` : '';
-    const checkinDot = entry.checkins.length
-      ? `<span class="cal-checkin-dot" title="Check-in registrado"></span>` : '';
 
-    return `<div class="cal-wcell ${isToday?'today':''} ${isSel?'selected':''}"
-                 onclick="calSelectDate('${key}')">
-      <div class="cal-wcell-num ${isToday?'today-num':''}">
-        <span>${d.getDate()}</span>${checkinDot}
+    const chips = entry.tasks.map(t => {
+      const tc = TASK_TC[t.task_type] || TASK_TC.otro;
+      return `<div class="cal-chip" style="background:${tc.bg};color:${tc.color};">
+        <span class="cal-chip-icon">${tc.icon}</span>
+        <span class="cal-chip-label">${(TASK_TYPE_LABELS[t.task_type]||t.task_type).toUpperCase()}</span>
+        <button class="cal-chip-del" onclick="calDeleteChipTask(${t.id},'${key}')" title="Eliminar">×</button>
+      </div>`;
+    }).join('');
+
+    return `<div class="cal-day-col">
+      <div class="cal-day-hdr">
+        <div class="cal-day-name">${name}</div>
+        <div class="cal-day-num${isToday?' today':''}">${d.getDate()}</div>
       </div>
-      <div class="cal-wcell-tasks">${pills}${more}</div>
+      <div class="cal-chips">${chips}</div>
+      <button class="cal-add-day-btn" onclick="openCalTaskModal('${key}')">+</button>
     </div>`;
   }).join('');
 
-  area.innerHTML = `
-    <div class="cal-week-grid">${headers}</div>
-    <div class="cal-week-grid">${cells}</div>`;
+  area.innerHTML = `<div class="cal-week-grid">${cols}</div>`;
 }
 
 function _renderMonthGrid(area, data) {
@@ -3316,64 +3307,76 @@ async function calDeleteTask(taskId, dateStr) {
   } catch { showToast('Error de conexión', 'error'); }
 }
 
-/* ── Create task modal ── */
+async function calDeleteChipTask(taskId, dateStr) {
+  try {
+    const r = await fetch(`${API}/calendar-tasks/${taskId}`, { method: 'DELETE', headers: h() });
+    const j = await r.json();
+    if (!j.success) { showToast('Error al eliminar', 'error'); return; }
+    const entry = _calData[dateStr];
+    if (entry) entry.tasks = entry.tasks.filter(t => t.id !== taskId);
+    _renderCalGrid(_calData);
+  } catch { showToast('Error de conexión', 'error'); }
+}
+
+/* ── Create task modal v3 ── */
 function openCalTaskModal(prefillDate) {
-  const today = prefillDate || _isoDate(new Date());
+  const dateStr = prefillDate || _isoDate(new Date());
   _calNewType = 'rutina';
-  const typeButtons = Object.entries(TASK_TYPE_LABELS).map(([k, v]) =>
-    `<button class="cal-type-btn ${k===_calNewType?'sel':''}" id="ctb-${k}" onclick="_selCalType('${k}')">${v}</button>`
-  ).join('');
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dateObj = new Date(y, m-1, d);
+  const dayName = DAY_NAMES[(dateObj.getDay()+6)%7];
+  const dayLabel = `${dayName}, ${d} ${MONTH_NAMES[m-1].slice(0,3)}`;
+
+  const TYPE_ORDER = ['rutina','cardio','descanso','nutricion','checkin','foto','mensaje','video'];
+  const typeRows = TYPE_ORDER.map(k => {
+    const tc = TASK_TC[k] || TASK_TC.otro;
+    return `<div class="cal-type-row${k===_calNewType?' sel':''}" id="ctr-${k}" onclick="_selCalType('${k}')">
+      <div class="cal-type-dot" style="background:${tc.color};"></div>
+      <span class="cal-type-lbl">${TASK_TYPE_LABELS[k]||k}</span>
+      <span class="cal-type-arrow">▼</span>
+    </div>`;
+  }).join('');
 
   const overlay = document.createElement('div');
   overlay.className = 'cal-modal-overlay';
   overlay.id = 'calTaskOverlay';
   overlay.innerHTML = `<div class="cal-modal">
-    <div class="cal-modal-title">Nueva tarea</div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Fecha</label>
-      <input type="date" id="calTaskDate" value="${today}" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
+    <div class="cal-modal-head">
+      <span class="cal-modal-title">Nueva tarea · ${dayLabel}</span>
+      <button class="cal-modal-close" onclick="closeCalTaskModal()">×</button>
     </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:8px;">Tipo</label>
-      <div class="cal-type-grid">${typeButtons}</div>
+    ${typeRows}
+    <div style="margin-top:12px;">
+      <input type="text" id="calTaskTitle" placeholder="Título (opcional)" style="border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;box-sizing:border-box;margin-bottom:8px;">
+      <textarea id="calTaskNotes" rows="2" placeholder="Notas (opcional)" style="border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;resize:none;box-sizing:border-box;"></textarea>
     </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Título (opcional)</label>
-      <input type="text" id="calTaskTitle" placeholder="Ej: Pecho y tríceps" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
+    <div class="cal-repeat-row">
+      <span class="cal-repeat-lbl">¿Repetir esta tarea?</span>
+      <div class="cal-repeat-opts">
+        <label class="cal-repeat-opt"><input type="radio" name="calRep" value="no" checked> No</label>
+        <label class="cal-repeat-opt"><input type="radio" name="calRep" value="weekly"> Sí</label>
+      </div>
     </div>
-    <div style="margin-bottom:18px;">
-      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Notas (opcional)</label>
-      <textarea id="calTaskNotes" rows="2" placeholder="Instrucciones, detalles…" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;resize:none;"></textarea>
+    <div id="calRepEndRow" style="display:none;margin-bottom:8px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Repetir hasta</label>
+      <input type="date" id="calTaskRecEnd" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;box-sizing:border-box;">
     </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Repetir</label>
-      <select id="calTaskRec" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
-        <option value="none">Sin repetición</option>
-        <option value="daily">Diario</option>
-        <option value="weekly">Semanal</option>
-        <option value="monthly">Mensual</option>
-      </select>
-    </div>
-    <div id="calRecEndRow" style="display:none;margin-bottom:18px;">
-      <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Hasta</label>
-      <input type="date" id="calTaskRecEnd" style="border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;">
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="closeCalTaskModal()">Cancelar</button>
-      <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveCalTask()">Guardar</button>
-    </div>
+    <input type="hidden" id="calTaskDate" value="${dateStr}">
+    <button class="cal-modal-save" onclick="saveCalTask()">+ Añadir tarea</button>
   </div>`;
   document.body.appendChild(overlay);
-  document.getElementById('calTaskRec').addEventListener('change', function() {
-    document.getElementById('calRecEndRow').style.display = this.value === 'none' ? 'none' : 'block';
+  overlay.querySelectorAll('input[name="calRep"]').forEach(r => {
+    r.addEventListener('change', function() {
+      document.getElementById('calRepEndRow').style.display = this.value === 'no' ? 'none' : 'block';
+    });
   });
 }
 
 function _selCalType(type) {
   _calNewType = type;
-  document.querySelectorAll('.cal-type-btn').forEach(b => b.classList.remove('sel'));
-  const btn = document.getElementById(`ctb-${type}`);
-  if (btn) btn.classList.add('sel');
+  document.querySelectorAll('.cal-type-row').forEach(r => r.classList.remove('sel'));
+  const row = document.getElementById(`ctr-${type}`);
+  if (row) row.classList.add('sel');
 }
 
 function closeCalTaskModal() {
@@ -3385,7 +3388,8 @@ async function saveCalTask() {
   const dateVal = document.getElementById('calTaskDate')?.value;
   const title   = document.getElementById('calTaskTitle')?.value.trim();
   const notes   = document.getElementById('calTaskNotes')?.value.trim();
-  const rec     = document.getElementById('calTaskRec')?.value || 'none';
+  const repVal  = document.querySelector('input[name="calRep"]:checked')?.value || 'no';
+  const rec     = repVal === 'weekly' ? 'weekly' : 'none';
   const recEnd  = document.getElementById('calTaskRecEnd')?.value;
 
   if (!dateVal) { showToast('Selecciona una fecha', 'error'); return; }

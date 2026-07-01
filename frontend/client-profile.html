@@ -1445,7 +1445,7 @@ async function loadClient() {
     const [dietR, routineR] = clientPlansRes;
     if (dietR.ok) {
       const arr = ((await dietR.json()).data || []);
-      clientDiets = Array.isArray(arr) ? arr.flatMap(g => g.diets || [g]).filter(d => d && d.id) : [];
+      clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
       if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
     }
     if (routineR.ok) {
@@ -4729,7 +4729,9 @@ async function renderNutricionTab() {
     try {
       const r = await fetch(`${API}/diets/${diet.id}/edit`, { headers: h() });
       const j = await r.json();
-      _nutDetail = j.data || j;
+      _nutDetail = _nutNormalize(j.data || j);
+      // Carry the diet_type name from the list response (lost in flatMap)
+      if (!_nutDetail.diet_type) _nutDetail.diet_type = diet.diet_type || null;
       _nutDetailLoaded = true;
     } catch {
       el.innerHTML = '<div style="padding:40px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar el plan nutricional.</div>';
@@ -4737,6 +4739,16 @@ async function renderNutricionTab() {
     }
   }
   _renderNutUI();
+}
+
+// Normalize API response: map item.quantity → item.quantity_calc (our internal name)
+function _nutNormalize(det) {
+  (det.foods || []).forEach(meal => {
+    (meal.detail || []).forEach(item => {
+      if (item.quantity_calc == null) item.quantity_calc = item.quantity ?? 0;
+    });
+  });
+  return det;
 }
 
 function _renderNutUI() {
@@ -4854,7 +4866,7 @@ function setNutMealsPerDay(n) {
 /* ── Diet editor ── */
 function openNutEditor() {
   if (!_nutDetail) return;
-  _nutWorking = JSON.parse(JSON.stringify(_nutDetail));
+  _nutWorking = _nutNormalize(JSON.parse(JSON.stringify(_nutDetail)));
   _nutEditorMealIdx = 0;
   document.getElementById('nutEditorName').value = _nutWorking.title || '';
   _renderNutEditorSidebar();
@@ -5391,7 +5403,7 @@ async function confirmAssignDiet() {
     if (rd.ok) {
       const jd = await rd.json();
       const arr = jd.data || [];
-      clientDiets = Array.isArray(arr) ? arr.flatMap(g => g.diets || [g]).filter(d => d && d.id) : [];
+      clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
       if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
     }
     renderNutricionTab();

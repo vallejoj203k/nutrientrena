@@ -615,6 +615,97 @@
     .bld-notes-wrap textarea:focus{border-color:#7C3AED;}
     .bld-dup-btn{background:none;border:1px solid #E5E7EB;border-radius:6px;cursor:pointer;color:#6B7280;padding:4px 6px;display:inline-flex;align-items:center;transition:.1s;}
     .bld-dup-btn:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF;}
+    /* ── Nutrition Tab ── */
+    .nut-banner{background:linear-gradient(135deg,#16A34A,#15803D);border-radius:14px;padding:20px 24px;color:#fff;display:flex;align-items:center;gap:20px;margin-bottom:16px;}
+    .nut-banner-left{flex:1;min-width:0;}
+    .nut-banner-badge{font-size:10px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.75);text-transform:uppercase;margin-bottom:4px;}
+    .nut-banner-title{font-size:22px;font-weight:800;line-height:1.2;}
+    .nut-banner-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;}
+    .nut-banner-stats{display:flex;gap:10px;flex-shrink:0;}
+    .nut-stat-chip{background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;text-align:center;min-width:68px;}
+    .nut-stat-chip-val{font-size:18px;font-weight:800;}
+    .nut-stat-chip-lbl{font-size:10px;color:rgba(255,255,255,.75);white-space:nowrap;}
+    .nut-layout{display:flex;background:#fff;border-radius:14px;border:1px solid #E5E7EB;overflow:hidden;min-height:280px;}
+    .nut-day-side{width:175px;flex-shrink:0;border-right:1px solid #E5E7EB;padding:6px 0;}
+    .nut-day-item{display:flex;flex-direction:column;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;gap:1px;}
+    .nut-day-item:hover{background:#F9FAFB;}
+    .nut-day-item.sel{background:#F0FDF4;border-left-color:#16A34A;}
+    .nut-day-abv{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;}
+    .nut-day-item.sel .nut-day-abv{color:#16A34A;}
+    .nut-day-name{font-size:13px;font-weight:600;color:#111827;}
+    .nut-day-meta{font-size:11px;color:#9CA3AF;}
+    .nut-meal-panel{flex:1;display:flex;flex-direction:column;min-width:0;}
+    .nut-meal-ph{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #F3F4F6;flex-shrink:0;}
+    .nut-meal-day-title{font-size:16px;font-weight:700;color:#111;}
+    .nut-meal-day-sub{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .nut-edit-btn{display:flex;align-items:center;gap:6px;border:1.5px solid #16A34A;color:#16A34A;background:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
+    .nut-edit-btn:hover{background:#F0FDF4;}
+    .nut-meals-area{padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+    .nut-meal-card{border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;}
+    .nut-meal-hdr{background:#F0FDF4;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;}
+    .nut-meal-hdr-left{display:flex;align-items:center;gap:8px;}
+    .nut-meal-dot{width:8px;height:8px;border-radius:50%;background:#16A34A;flex-shrink:0;}
+    .nut-meal-name{font-size:13px;font-weight:700;color:#166534;}
+    .nut-meal-time{font-size:11px;color:#4ADE80;margin-left:2px;}
+    .nut-meal-kcal{font-size:13px;font-weight:700;color:#16A34A;}
+    .nut-food-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid #F9FAFB;font-size:13px;}
+    .nut-food-row:last-child{border-bottom:none;}
+    .nut-food-name{color:#374151;flex:1;}
+    .nut-food-qty{font-weight:700;color:#6B7280;min-width:44px;text-align:right;}
+    .nut-libre-msg{color:#9CA3AF;font-size:13px;padding:40px 20px;text-align:center;}
+    /* bottom cards */
+    .nut-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;}
+    .nut-card{background:#16A34A;border-radius:14px;padding:20px;}
+    .nut-card-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+    .nut-card-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:12px;color:rgba(255,255,255,.85);}
+    .nut-card-row:last-child{border-bottom:none;}
+    .nut-card-val{font-weight:700;color:#fff;}
+    .nut-card-val.g{color:#86EFAC;}
+    .nut-card-val.warn{color:#FCA5A5;}
+    .nut-ajust-btn{background:rgba(255,255,255,.18);border:none;border-radius:6px;padding:4px 10px;font-size:11px;color:#fff;font-weight:600;cursor:pointer;}
+    .nut-seg-row{display:flex;gap:4px;margin-bottom:10px;}
+    .nut-seg-btn{background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;transition:.15s;}
+    .nut-seg-btn.sel{background:#fff;color:#16A34A;}
+    /* Diet editor overlay */
+    .nut-edit-ovl{position:fixed;inset:0;background:#fff;z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+    .nut-edit-ovl.open{transform:translateX(0);}
+    .nut-edit-bar{display:flex;align-items:center;gap:14px;padding:0 24px;height:64px;border-bottom:1px solid #E5E7EB;flex-shrink:0;background:#fff;}
+    .nut-edit-close{background:none;border:1px solid #E5E7EB;border-radius:8px;width:36px;height:36px;font-size:20px;cursor:pointer;color:#6B7280;display:flex;align-items:center;justify-content:center;line-height:1;}
+    .nut-edit-save{background:#16A34A;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+    .nut-edit-body{display:flex;flex:1;overflow:hidden;}
+    .nut-edit-side{width:220px;flex-shrink:0;border-right:1px solid #E5E7EB;overflow-y:auto;display:flex;flex-direction:column;}
+    .nut-edit-meal-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;border-left:3px solid transparent;font-size:13px;font-weight:600;color:#374151;}
+    .nut-edit-meal-row:hover{background:#F9FAFB;}
+    .nut-edit-meal-row.sel{background:#F0FDF4;border-left-color:#16A34A;color:#166534;}
+    .nut-edit-meal-cnt{font-size:11px;color:#9CA3AF;font-weight:400;}
+    .nut-edit-add-meal{width:100%;background:none;border:none;border-top:1px solid #E5E7EB;padding:12px 16px;text-align:left;font-size:13px;color:#16A34A;font-weight:600;cursor:pointer;margin-top:auto;}
+    .nut-edit-main{flex:1;overflow-y:auto;padding:20px 24px;}
+    .nut-edit-food-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #F3F4F6;}
+    .nut-edit-food-row:last-child{border-bottom:none;}
+    .nut-edit-food-name{flex:1;font-size:13px;color:#374151;font-weight:500;}
+    .nut-edit-food-macros{font-size:11px;color:#9CA3AF;white-space:nowrap;}
+    .nut-edit-qty{border:1px solid #E5E7EB;border-radius:7px;padding:5px 8px;font-size:13px;width:70px;text-align:center;outline:none;}
+    .nut-edit-qty:focus{border-color:#16A34A;}
+    .nut-edit-rm{background:none;border:1px solid #FECACA;border-radius:6px;color:#DC2626;padding:4px 8px;font-size:12px;cursor:pointer;flex-shrink:0;}
+    .nut-edit-add-food-btn{display:flex;align-items:center;gap:6px;border:1.5px dashed #D1D5DB;border-radius:8px;padding:10px 14px;font-size:13px;color:#16A34A;font-weight:600;background:none;cursor:pointer;margin-top:12px;width:100%;box-sizing:border-box;}
+    /* Food picker */
+    .nut-pk-ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;}
+    .nut-pk-ovl.open{display:flex;}
+    .nut-pk-box{background:#fff;border-radius:16px;width:480px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+    .nut-pk-hd{padding:16px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;}
+    .nut-pk-hd-title{font-size:15px;font-weight:700;color:#111;}
+    .nut-pk-close{background:none;border:none;font-size:20px;cursor:pointer;color:#6B7280;line-height:1;}
+    .nut-pk-search{border:1px solid #E5E7EB;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;margin:12px 20px;display:block;width:calc(100% - 40px);box-sizing:border-box;}
+    .nut-pk-pills{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 10px;}
+    .nut-pk-pill{border:1.5px solid #E5E7EB;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;background:none;color:#6B7280;}
+    .nut-pk-pill.sel{border-color:#16A34A;background:#F0FDF4;color:#166534;}
+    .nut-pk-list{flex:1;overflow-y:auto;padding:4px 20px 12px;}
+    .nut-pk-item{display:flex;align-items:center;justify-content:space-between;padding:10px 8px;border-radius:8px;cursor:pointer;gap:10px;}
+    .nut-pk-item:hover{background:#F0FDF4;}
+    .nut-pk-item-info{flex:1;min-width:0;}
+    .nut-pk-item-name{font-size:13px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .nut-pk-item-mac{font-size:11px;color:#9CA3AF;}
+    .nut-pk-item-add{background:#16A34A;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
   </style>
   <style>
 /* ── Screenshot redesign ── */
@@ -3065,6 +3156,38 @@ async function saveTarget() {
   </div>
 </div>
 
+<!-- ── Diet Editor Overlay ── -->
+<div class="nut-edit-ovl" id="nutEditorOverlay">
+  <div class="nut-edit-bar">
+    <button class="nut-edit-close" onclick="closeNutEditor()">×</button>
+    <div style="flex:1;min-width:0;">
+      <input id="nutEditorName" type="text" placeholder="Nombre de la dieta" style="font-size:16px;font-weight:700;border:none;outline:none;width:100%;background:transparent;color:#111;" oninput="_nutWorking&&(_nutWorking.title=this.value)">
+      <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Editor de dieta</div>
+    </div>
+    <button class="nut-edit-save" id="nutEditorSaveBtn" onclick="saveNutChanges()">Guardar cambios</button>
+  </div>
+  <div class="nut-edit-body">
+    <div class="nut-edit-side">
+      <div id="nutEditorMealList"></div>
+      <button class="nut-edit-add-meal" onclick="addNutMeal()">+ Añadir comida</button>
+    </div>
+    <div class="nut-edit-main" id="nutEditorContent"></div>
+  </div>
+</div>
+
+<!-- ── Food Picker Overlay ── -->
+<div class="nut-pk-ovl" id="nutFoodPkOverlay" onclick="if(event.target===this)closeNutFoodPk()">
+  <div class="nut-pk-box">
+    <div class="nut-pk-hd">
+      <span class="nut-pk-hd-title">Añadir alimento</span>
+      <button class="nut-pk-close" onclick="closeNutFoodPk()">×</button>
+    </div>
+    <input class="nut-pk-search" id="nutPkSearch" type="text" placeholder="Buscar alimento…" oninput="_searchNutFoodDebounced()">
+    <div class="nut-pk-pills" id="nutPkPills"></div>
+    <div class="nut-pk-list" id="nutPkList"><div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Escribe para buscar…</div></div>
+  </div>
+</div>
+
 <!-- ── Routine Builder Overlay ── -->
 <div class="ent-bld-overlay" id="entBuilderOverlay">
   <div class="ent-bld-bar">
@@ -4533,45 +4656,452 @@ async function deleteSession(id) {
 /* ══════════════════════════════════════════════
    NUTRICIÓN TAB
 ══════════════════════════════════════════════ */
-function renderNutricionTab() {
+let _nutDayIdx = 0;
+let _nutDetail = null;
+let _nutDetailLoaded = false;
+let _nutActiveDietIdx = 0;
+let _nutEditorMealIdx = 0;
+let _nutWorking = null;
+let _nutFoodGrpId = null;
+let _nutFoodPickerMealIdx = 0;
+let _nutFoodGroups = [];
+let _nutFoodGrpsLoaded = false;
+let _nutMealsPerDay = 4;
+
+const _NUT_DAY_ABV  = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+const _NUT_DAY_FULL = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const _NUT_MEAL_TIMES = {desayuno:'08:00',almuerzo:'14:00',comida:'14:00',merienda:'17:30',cena:'21:00',snack:'11:00',preentrenamiento:'17:00',postentrenamiento:'19:00'};
+
+function _nutMealTime(name) {
+  const k=(name||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s/g,'');
+  for(const[key,val]of Object.entries(_NUT_MEAL_TIMES))if(k.includes(key))return val;
+  return '';
+}
+function _nutMealKcal(meal) {
+  return(meal.detail||[]).reduce((s,item)=>{const a=item.aliment||{};return s+(a.calories||0)/100*(item.quantity_calc||0);},0);
+}
+function _nutTotalKcal(detail) {
+  return(detail.foods||[]).reduce((s,m)=>s+_nutMealKcal(m),0);
+}
+function _calcClientMacros(c) {
+  if(!c)return null;
+  const weight=parseFloat(c.weight)||0,height=parseFloat(c.height)||0,age=parseFloat(c.age)||0;
+  if(!weight||!height||!age)return null;
+  const gn=(c.gender?.name||'').toLowerCase();
+  const isMale=gn.includes('masc')||gn.includes('male')||c.gender_id===1;
+  const tmb=isMale?88.36+13.4*weight+4.8*height-5.7*age:447.6+9.2*weight+3.1*height-4.3*age;
+  const actMap={sedentario:1.2,ligero:1.375,moderado:1.55,activo:1.725,muyactivo:1.9};
+  const actKey=(c.activity?.name||c.level_activity?.name||'moderado').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s/g,'');
+  const factor=actMap[actKey]||1.55;
+  const tdee=tmb*factor;
+  const obj=(c.objective?.name||'').toLowerCase();
+  let kcal=tdee;
+  if(obj.includes('rdida')||obj.includes('grasa')||obj.includes('cut'))kcal=tdee-400;
+  else if(obj.includes('volumen')||obj.includes('masa')||obj.includes('ganar')||obj.includes('bulk'))kcal=tdee+300;
+  const bodyFat=parseFloat(c.body_fat)||20;
+  const lean=weight*(1-bodyFat/100);
+  const imc=weight/((height/100)**2);
+  const proteins=lean*2.2,fats=weight*0.9;
+  const carbs=Math.max(0,(kcal-proteins*4-fats*9)/4);
+  return{tmb:Math.round(tmb),tdee:Math.round(tdee),kcal:Math.round(kcal),
+    proteins:Math.round(proteins),carbs:Math.round(carbs),fats:Math.round(fats),
+    lean:Math.round(lean*10)/10,imc:Math.round(imc*10)/10,
+    deficit:kcal<tdee?Math.round((1-kcal/tdee)*100):0,
+    surplus:kcal>tdee?Math.round((kcal/tdee-1)*100):0};
+}
+
+async function renderNutricionTab() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
 
   if (!clientDiets.length) {
-    el.innerHTML = `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
+    el.innerHTML = `<div style="padding:40px;text-align:center;color:#9CA3AF;">
       <div style="margin-bottom:12px;color:#D1D5DB;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div>
       <p style="margin-bottom:16px;">Sin dieta asignada.</p>
       <button class="btn btn-primary btn-sm" onclick="openAssignDietModal()">+ Asignar dieta</button>
     </div>`;
     return;
   }
-  const headerHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <span style="font-size:14px;font-weight:700;color:#111;">Dietas asignadas</span>
-    <button class="btn btn-ghost btn-sm" onclick="openAssignDietModal()">+ Asignar otra dieta</button>
-  </div>`;
 
-  el.innerHTML = headerHtml + clientDiets.map(diet => {
-    const detail = diet.detail || diet.diet_detail || {};
-    const proteins = detail.proteins || 0;
-    const carbs = detail.carbs || 0;
-    const fats = detail.fats || 0;
-    const foods = diet.foods || diet.diet_foods || [];
-    return `<div class="diet-card">
-      <div class="diet-card-head">
-        <div class="diet-title">${esc(diet.title || diet.name || 'Dieta')}</div>
-        ${diet.calories ? `<span class="diet-kcal">${Math.round(diet.calories)} kcal/día</span>` : ''}
+  if (!_nutDetailLoaded) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando plan nutricional…</div>';
+    const diet = clientDiets[_nutActiveDietIdx] || clientDiets[0];
+    try {
+      const r = await fetch(`${API}/diets/${diet.id}/edit`, { headers: h() });
+      const j = await r.json();
+      _nutDetail = j.data || j;
+      _nutDetailLoaded = true;
+    } catch {
+      el.innerHTML = '<div style="padding:40px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar el plan nutricional.</div>';
+      return;
+    }
+  }
+  _renderNutUI();
+}
+
+function _renderNutUI() {
+  const el = document.getElementById('nutricionContent');
+  if (!el) return;
+  const det = _nutDetail || {};
+  const macros = _calcClientMacros(clientData);
+  const totalKcal = Math.round(_nutTotalKcal(det)) || Math.round(det.calories || 0);
+  const daysPerWeek = det.quantity || 7;
+  const isLibre = _nutDayIdx >= daysPerWeek;
+  const dayName = _NUT_DAY_FULL[_nutDayIdx];
+
+  const foods = det.foods || [];
+  const mealCount = foods.length;
+
+  el.innerHTML = `
+    <div class="nut-banner">
+      <div class="nut-banner-left">
+        <div class="nut-banner-badge">Plan Activo</div>
+        <div class="nut-banner-title">${esc(det.title || 'Plan nutricional')}</div>
+        <div class="nut-banner-sub">${daysPerWeek} días · ${esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
       </div>
-      ${(proteins || carbs || fats) ? `
-      <div class="macro-bars">
-        <div class="macro-bar-item"><div class="macro-bar-label">Proteínas</div><div class="macro-bar-val prot">${Math.round(proteins)}g</div></div>
-        <div class="macro-bar-item"><div class="macro-bar-label">Carbohidratos</div><div class="macro-bar-val carb">${Math.round(carbs)}g</div></div>
-        <div class="macro-bar-item"><div class="macro-bar-label">Grasas</div><div class="macro-bar-val fat">${Math.round(fats)}g</div></div>
-      </div>` : ''}
-      ${foods.length ? `
-      <div style="font-size:11px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Comidas</div>
-      <div class="foods-list">${foods.map(f => `<span class="food-chip">${esc(f.name || '')}</span>`).join('')}</div>` : ''}
-    </div>`;
-  }).join('');
+      <div class="nut-banner-stats">
+        <div class="nut-stat-chip"><div class="nut-stat-chip-val">${daysPerWeek}</div><div class="nut-stat-chip-lbl">días/sem</div></div>
+        <div class="nut-stat-chip"><div class="nut-stat-chip-val">${totalKcal}</div><div class="nut-stat-chip-lbl">kcal/día</div></div>
+        <div class="nut-stat-chip"><div class="nut-stat-chip-val">${checkins.length ? Math.min(100,Math.round(checkins.filter(c=>c.diet_id===det.id||true).length/Math.max(1,daysPerWeek)*100))+'%' : '—'}</div><div class="nut-stat-chip-lbl">adherencia</div></div>
+      </div>
+    </div>
+    <div class="nut-layout">
+      <div class="nut-day-side">${_NUT_DAY_ABV.map((abv,i)=>{
+        const libre=i>=daysPerWeek;
+        return`<div class="nut-day-item${_nutDayIdx===i?' sel':''}" onclick="selectNutDay(${i})">
+          <span class="nut-day-abv">${abv}</span>
+          <span class="nut-day-name">${_NUT_DAY_FULL[i]}</span>
+          <span class="nut-day-meta">${libre?'Libre':mealCount+' comida'+(mealCount!==1?'s':'')}</span>
+        </div>`;
+      }).join('')}</div>
+      <div class="nut-meal-panel">
+        <div class="nut-meal-ph">
+          <div>
+            <div class="nut-meal-day-title">${dayName}</div>
+            <div class="nut-meal-day-sub">${isLibre?'Día de descanso':mealCount+' comidas · '+totalKcal+' kcal'}</div>
+          </div>
+          ${!isLibre?`<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar este día</button>`:''}
+        </div>
+        <div class="nut-meals-area">${isLibre?`<div class="nut-libre-msg">Día de descanso — sin comidas planificadas</div>`:foods.map(meal=>{
+          const mKcal=Math.round(_nutMealKcal(meal));
+          const mTime=_nutMealTime(meal.name);
+          return`<div class="nut-meal-card">
+            <div class="nut-meal-hdr">
+              <div class="nut-meal-hdr-left">
+                <div class="nut-meal-dot"></div>
+                <span class="nut-meal-name">${esc(meal.name||'Comida')}</span>
+                ${mTime?`<span class="nut-meal-time">· ${mTime}</span>`:''}
+              </div>
+              <span class="nut-meal-kcal">${mKcal} kcal</span>
+            </div>
+            ${(meal.detail||[]).map(item=>{
+              const a=item.aliment||{};
+              const qty=Math.round(item.quantity_calc||0);
+              return`<div class="nut-food-row"><span class="nut-food-name">${esc(a.name||item.aliment_id||'Alimento')}</span><span class="nut-food-qty">${qty} g</span></div>`;
+            }).join('')}
+          </div>`;
+        }).join('')}</div>
+      </div>
+    </div>
+    ${macros?`
+    <div class="nut-cards">
+      <div class="nut-card">
+        <div class="nut-card-title">Datos personales</div>
+        <div class="nut-card-row"><span>Género</span><span class="nut-card-val">${esc(clientData?.gender?.name||'—')}</span></div>
+        <div class="nut-card-row"><span>Edad</span><span class="nut-card-val">${clientData?.age||'—'} años</span></div>
+        <div class="nut-card-row"><span>Altura</span><span class="nut-card-val">${clientData?.height||'—'} cm</span></div>
+        <div class="nut-card-row"><span>Peso</span><span class="nut-card-val">${clientData?.weight||'—'} kg</span></div>
+        <div class="nut-card-row"><span>Grasa corporal</span><span class="nut-card-val">${clientData?.body_fat?clientData.body_fat+'%':'—'}</span></div>
+        <div class="nut-card-row"><span>Nivel actividad</span><span class="nut-card-val">${esc(clientData?.activity?.name||clientData?.level_activity?.name||'—')}</span></div>
+        <div class="nut-card-row"><span>Objetivo</span><span class="nut-card-val">${esc(clientData?.objective?.name||'—')}</span></div>
+      </div>
+      <div class="nut-card">
+        <div class="nut-card-title">Tu meta diaria<button class="nut-ajust-btn" onclick="openNutAdjust()">Ajustar</button></div>
+        <div class="nut-card-row"><span>IMC</span><span class="nut-card-val">${macros.imc} kg/m²</span></div>
+        <div class="nut-card-row"><span>Masa corporal magra</span><span class="nut-card-val">${macros.lean} Kg</span></div>
+        <div class="nut-card-row"><span>TMB</span><span class="nut-card-val">${macros.tmb} kcal</span></div>
+        <div class="nut-card-row"><span>TDEE (gasto real)</span><span class="nut-card-val">${macros.tdee} kcal</span></div>
+        <div class="nut-card-row"><span>Proteínas</span><span class="nut-card-val g">2.2 g/kg · ${macros.proteins}g</span></div>
+        <div class="nut-card-row"><span>Carbohidratos</span><span class="nut-card-val g">${macros.carbs}g</span></div>
+        <div class="nut-card-row"><span>Grasas</span><span class="nut-card-val${macros.fats>80?' warn':' g'}">0.9 g/kg · ${macros.fats}g</span></div>
+        ${macros.deficit?`<div class="nut-card-row" style="margin-top:4px;background:rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;"><span style="font-size:11px;">Déficit ${macros.deficit}% · Obj: ${macros.kcal} kcal</span></div>`:''}
+        ${macros.surplus?`<div class="nut-card-row" style="margin-top:4px;background:rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;"><span style="font-size:11px;">Superávit ${macros.surplus}% · Obj: ${macros.kcal} kcal</span></div>`:''}
+      </div>
+      <div class="nut-card">
+        <div class="nut-card-title">Gramos por comida</div>
+        <div class="nut-seg-row">${[3,4,5,6].map(n=>`<button class="nut-seg-btn${_nutMealsPerDay===n?' sel':''}" onclick="setNutMealsPerDay(${n})">${n}</button>`).join('')}</div>
+        <div class="nut-card-row"><span>Proteínas</span><span class="nut-card-val g">${Math.round(macros.proteins/_nutMealsPerDay)}g</span></div>
+        <div class="nut-card-row"><span>Carbohidratos</span><span class="nut-card-val g">${Math.round(macros.carbs/_nutMealsPerDay)}g</span></div>
+        <div class="nut-card-row"><span>Grasas</span><span class="nut-card-val g">${Math.round(macros.fats/_nutMealsPerDay)}g</span></div>
+        <div class="nut-card-row"><span>TMB</span><span class="nut-card-val">${macros.tmb} kcal</span></div>
+        ${macros.deficit?`<div class="nut-card-row"><span>Déficit</span><span class="nut-card-val warn">${macros.deficit}%</span></div>`:''}
+        ${macros.surplus?`<div class="nut-card-row"><span>Excedente</span><span class="nut-card-val g">${macros.surplus}%</span></div>`:''}
+      </div>
+    </div>`:''}
+  `;
+}
+
+function selectNutDay(idx) {
+  _nutDayIdx = idx;
+  _renderNutUI();
+}
+
+function setNutMealsPerDay(n) {
+  _nutMealsPerDay = n;
+  _renderNutUI();
+}
+
+/* ── Diet editor ── */
+function openNutEditor() {
+  if (!_nutDetail) return;
+  _nutWorking = JSON.parse(JSON.stringify(_nutDetail));
+  _nutEditorMealIdx = 0;
+  document.getElementById('nutEditorName').value = _nutWorking.title || '';
+  _renderNutEditorSidebar();
+  _renderNutEditorContent();
+  document.getElementById('nutEditorOverlay').classList.add('open');
+}
+
+function closeNutEditor() {
+  document.getElementById('nutEditorOverlay').classList.remove('open');
+  _nutWorking = null;
+}
+
+function _renderNutEditorSidebar() {
+  const meals = _nutWorking?.foods || [];
+  document.getElementById('nutEditorMealList').innerHTML = meals.map((m, i) => `
+    <div class="nut-edit-meal-row${_nutEditorMealIdx===i?' sel':''}" onclick="selectNutEditorMeal(${i})">
+      <span>${esc(m.name||'Comida '+(i+1))}</span>
+      <span class="nut-edit-meal-cnt">${(m.detail||[]).length} alim.</span>
+    </div>
+  `).join('');
+}
+
+function _renderNutEditorContent() {
+  const meals = _nutWorking?.foods || [];
+  const meal = meals[_nutEditorMealIdx];
+  const el = document.getElementById('nutEditorContent');
+  if (!meal) { el.innerHTML = '<div style="color:#9CA3AF;font-size:13px;padding-top:20px;">Selecciona una comida del panel izquierdo.</div>'; return; }
+  const items = meal.detail || [];
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <input value="${esc(meal.name||'')}" style="font-size:16px;font-weight:700;border:none;outline:none;color:#111;background:transparent;" oninput="_nutWorking.foods[${_nutEditorMealIdx}].name=this.value;_renderNutEditorSidebar()">
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${Math.round(_nutMealKcal(meal))} kcal · ${items.length} alimentos</div>
+      </div>
+      <button onclick="removeNutMeal(${_nutEditorMealIdx})" style="background:none;border:1px solid #FECACA;color:#DC2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">Eliminar comida</button>
+    </div>
+    ${items.map((item, ii) => {
+      const a = item.aliment || {};
+      const kcal = Math.round((a.calories||0)/100*(item.quantity_calc||0));
+      const p = Math.round((a.proteins||0)/100*(item.quantity_calc||0));
+      const c = Math.round((a.carbohydrates||0)/100*(item.quantity_calc||0));
+      const f = Math.round((a.fats||0)/100*(item.quantity_calc||0));
+      return `<div class="nut-edit-food-row">
+        <div style="flex:1;min-width:0;">
+          <div class="nut-edit-food-name">${esc(a.name||item.aliment_id||'Alimento')}</div>
+          <div class="nut-edit-food-macros">${kcal} kcal · P:${p}g C:${c}g G:${f}g</div>
+        </div>
+        <input type="number" class="nut-edit-qty" value="${Math.round(item.quantity_calc||0)}" min="0" step="5" oninput="updateNutFoodQty(${_nutEditorMealIdx},${ii},this.value)">
+        <span class="nut-edit-qty-unit" style="font-size:11px;color:#9CA3AF;">g</span>
+        <button class="nut-edit-rm" onclick="removeNutFood(${_nutEditorMealIdx},${ii})">×</button>
+      </div>`;
+    }).join('')}
+    <button class="nut-edit-add-food-btn" onclick="openNutFoodPk(${_nutEditorMealIdx})">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Añadir alimento
+    </button>
+  `;
+}
+
+function selectNutEditorMeal(idx) {
+  _nutEditorMealIdx = idx;
+  _renderNutEditorSidebar();
+  _renderNutEditorContent();
+}
+
+function addNutMeal() {
+  if (!_nutWorking) return;
+  if (!_nutWorking.foods) _nutWorking.foods = [];
+  _nutWorking.foods.push({ name: 'Nueva comida', detail: [] });
+  _nutEditorMealIdx = _nutWorking.foods.length - 1;
+  _renderNutEditorSidebar();
+  _renderNutEditorContent();
+}
+
+function removeNutMeal(idx) {
+  if (!_nutWorking?.foods || _nutWorking.foods.length <= 1) { showToast('Debe haber al menos una comida', 'error'); return; }
+  // Mark for deletion if has server id, else splice
+  const meal = _nutWorking.foods[idx];
+  if (meal.id) meal.delete = true;
+  else _nutWorking.foods.splice(idx, 1);
+  _nutEditorMealIdx = Math.max(0, _nutEditorMealIdx - (idx <= _nutEditorMealIdx ? 1 : 0));
+  _renderNutEditorSidebar();
+  _renderNutEditorContent();
+}
+
+function updateNutFoodQty(mealIdx, itemIdx, val) {
+  if (!_nutWorking?.foods?.[mealIdx]?.detail?.[itemIdx]) return;
+  _nutWorking.foods[mealIdx].detail[itemIdx].quantity_calc = parseFloat(val) || 0;
+  // Update macros display inline
+  const rows = document.querySelectorAll('.nut-edit-food-row');
+  if (rows[itemIdx]) {
+    const item = _nutWorking.foods[mealIdx].detail[itemIdx];
+    const a = item.aliment || {};
+    const qty = item.quantity_calc;
+    const kcal = Math.round((a.calories||0)/100*qty);
+    const p = Math.round((a.proteins||0)/100*qty);
+    const c2 = Math.round((a.carbohydrates||0)/100*qty);
+    const f = Math.round((a.fats||0)/100*qty);
+    const macEl = rows[itemIdx].querySelector('.nut-edit-food-macros');
+    if (macEl) macEl.textContent = `${kcal} kcal · P:${p}g C:${c2}g G:${f}g`;
+  }
+}
+
+function removeNutFood(mealIdx, itemIdx) {
+  if (!_nutWorking?.foods?.[mealIdx]) return;
+  const items = _nutWorking.foods[mealIdx].detail;
+  if (!items) return;
+  const item = items[itemIdx];
+  if (item.id) item.delete = true;
+  else items.splice(itemIdx, 1);
+  _renderNutEditorContent();
+}
+
+async function saveNutChanges() {
+  if (!_nutWorking || !_nutDetail?.id) return;
+  const btn = document.getElementById('nutEditorSaveBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  _nutWorking.title = document.getElementById('nutEditorName').value.trim() || _nutWorking.title;
+  const payload = {
+    title: _nutWorking.title,
+    calories: _nutWorking.calories,
+    proteins: _nutWorking.proteins,
+    carbs: _nutWorking.carbs,
+    fats: _nutWorking.fats,
+    deficit: _nutWorking.deficit,
+    surplus: _nutWorking.surplus,
+    quantity: _nutWorking.quantity,
+    type_id: _nutWorking.type_id,
+    foods: (_nutWorking.foods || []).map((meal, mi) => ({
+      ...(meal.id ? { id: meal.id } : {}),
+      ...(meal.delete ? { delete: true } : {}),
+      name: meal.name,
+      detail: (meal.detail || []).map((item, ii) => ({
+        ...(item.id ? { id: item.id } : {}),
+        ...(item.delete ? { delete: true } : {}),
+        aliment_id: item.aliment_id,
+        quantity_calc: parseFloat(item.quantity_calc) || 0,
+        order: ii,
+      })),
+    })),
+  };
+  try {
+    const r = await fetch(`${API}/diets/${_nutDetail.id}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify(payload),
+    });
+    const j = await r.json();
+    if (!r.ok) { showToast(j.detail || j.message || 'Error al guardar', 'error'); return; }
+    showToast('Cambios guardados', 'success');
+    _nutDetailLoaded = false;
+    closeNutEditor();
+    await renderNutricionTab();
+  } catch { showToast('Error de conexión', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
+}
+
+function openNutAdjust() {
+  showToast('Función disponible próximamente', 'info');
+}
+
+/* ── Food picker ── */
+function openNutFoodPk(mealIdx) {
+  _nutFoodPickerMealIdx = mealIdx;
+  document.getElementById('nutPkSearch').value = '';
+  document.getElementById('nutPkList').innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Escribe para buscar…</div>';
+  document.getElementById('nutFoodPkOverlay').classList.add('open');
+  if (!_nutFoodGrpsLoaded) _loadNutFoodGroups();
+  else _renderNutPkPills();
+}
+
+function closeNutFoodPk() {
+  document.getElementById('nutFoodPkOverlay').classList.remove('open');
+}
+
+async function _loadNutFoodGroups() {
+  try {
+    const r = await fetch(`${API}/groupFood/findAll`, { headers: h() });
+    const j = await r.json();
+    _nutFoodGroups = Array.isArray(j.data) ? j.data : [];
+    _nutFoodGrpsLoaded = true;
+    _renderNutPkPills();
+  } catch {}
+}
+
+function _renderNutPkPills() {
+  const el = document.getElementById('nutPkPills');
+  if (!el) return;
+  el.innerHTML = `<button class="nut-pk-pill${!_nutFoodGrpId?' sel':''}" onclick="setNutFoodGrp(null)">Todos</button>`
+    + _nutFoodGroups.map(g=>`<button class="nut-pk-pill${_nutFoodGrpId===g.id?' sel':''}" onclick="setNutFoodGrp(${g.id})">${esc(g.name||'')}</button>`).join('');
+}
+
+function setNutFoodGrp(id) {
+  _nutFoodGrpId = id;
+  _renderNutPkPills();
+  const q = document.getElementById('nutPkSearch')?.value || '';
+  _fetchNutFoodResults(q);
+}
+
+let _nutPkTimer = null;
+function _searchNutFoodDebounced() {
+  clearTimeout(_nutPkTimer);
+  _nutPkTimer = setTimeout(() => {
+    const q = document.getElementById('nutPkSearch')?.value || '';
+    _fetchNutFoodResults(q);
+  }, 300);
+}
+
+async function _fetchNutFoodResults(search) {
+  const el = document.getElementById('nutPkList');
+  if (!el) return;
+  el.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Buscando…</div>';
+  try {
+    const params = new URLSearchParams({ search: search||'', per_page: 30, page: 1 });
+    if (_nutFoodGrpId) params.set('group_food_id', _nutFoodGrpId);
+    const r = await fetch(`${API}/aliments/search?${params}`, { headers: h() });
+    const j = await r.json();
+    const items = Array.isArray(j.data) ? j.data : (Array.isArray(j) ? j : []);
+    if (!items.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Sin resultados.</div>'; return; }
+    el.innerHTML = items.map(al => {
+      const p=Math.round(al.proteins||0),c=Math.round(al.carbohydrates||0),f=Math.round(al.fats||0),k=Math.round(al.calories||0);
+      return `<div class="nut-pk-item">
+        <div class="nut-pk-item-info">
+          <div class="nut-pk-item-name">${esc(al.name||'')}</div>
+          <div class="nut-pk-item-mac">${k} kcal · P:${p}g C:${c}g G:${f}g <span style="color:#D1D5DB;">/ 100g</span></div>
+        </div>
+        <button class="nut-pk-item-add" onclick="selectNutFood('${al.id}','${esc(al.name||'')}',${al.proteins||0},${al.carbohydrates||0},${al.fats||0},${al.calories||0})">+ Añadir</button>
+      </div>`;
+    }).join('');
+  } catch {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al buscar.</div>';
+  }
+}
+
+function selectNutFood(alimentId, name, proteins, carbs, fats, calories) {
+  if (!_nutWorking?.foods?.[_nutFoodPickerMealIdx]) return;
+  const newItem = {
+    aliment_id: String(alimentId),
+    quantity_calc: 100,
+    order: (_nutWorking.foods[_nutFoodPickerMealIdx].detail || []).length,
+    aliment: { name, proteins: parseFloat(proteins)||0, carbohydrates: parseFloat(carbs)||0, fats: parseFloat(fats)||0, calories: parseFloat(calories)||0 },
+  };
+  if (!_nutWorking.foods[_nutFoodPickerMealIdx].detail) _nutWorking.foods[_nutFoodPickerMealIdx].detail = [];
+  _nutWorking.foods[_nutFoodPickerMealIdx].detail.push(newItem);
+  closeNutFoodPk();
+  _renderNutEditorSidebar();
+  _renderNutEditorContent();
 }
 
 /* ══════════════════════════════════════════════
@@ -4836,6 +5366,9 @@ async function confirmAssignDiet() {
     });
     const j = await r.json();
     if (!r.ok) { document.getElementById('assignDietError').textContent = j.detail || j.message || 'Error al asignar'; return; }
+    _nutDetailLoaded = false;
+    _nutDetail = null;
+    _nutActiveDietIdx = 0;
     closeAssignDietModal();
 
     // Send PDF to client email automatically

@@ -1663,7 +1663,7 @@ function openAssign(id, title) {
   allClients.forEach(function(c){
     var name = ((c.name||'') + ' ' + (c.last_name||'')).trim() || c.email || '#' + c.id;
     var opt = document.createElement('option');
-    opt.value = c.user_id || c.id; opt.textContent = name;
+    opt.value = c.id; opt.textContent = name;
     sel.appendChild(opt);
   });
   document.getElementById('assignOverlay').classList.add('open');
@@ -1678,7 +1678,7 @@ async function confirmAssign() {
     var r = await fetch(API + '/diets/' + assigningId + '/assign', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({ client_id: parseInt(clientId) }),
+      body: JSON.stringify({ client_id: clientId }),
     });
     if (!r.ok) { var j = await r.json(); toast(j.message || 'Error al asignar', 'error'); return; }
     closeAssign(); toast('Dieta asignada', 'success'); loadDiets();

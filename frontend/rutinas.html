@@ -199,6 +199,32 @@
     .modal-close{background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:22px;line-height:1;padding:2px 6px;}
     .modal-close:hover{color:#374151;}
 
+    /* ── Slide-in rutina panel ── */
+    .rp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:100;opacity:0;pointer-events:none;transition:.25s;}
+    .rp-overlay.open{opacity:1;pointer-events:all;}
+    .rp-panel{position:fixed;top:0;right:0;height:100%;width:500px;max-width:100vw;background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.12);overflow:hidden;}
+    .rp-panel.open{transform:translateX(0);}
+    .rp-bar{display:flex;align-items:center;gap:10px;padding:0 16px;height:60px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
+    .rp-close{background:none;border:none;cursor:pointer;font-size:22px;color:#6B7280;padding:4px 8px;border-radius:6px;line-height:1;transition:.15s;}
+    .rp-close:hover{background:#F3F4F6;color:#111;}
+    .rp-title{font-size:15px;font-weight:700;color:#111;flex:1;}
+    .rp-tabs{display:flex;gap:0;border:1.5px solid #E5E7EB;border-radius:8px;overflow:hidden;}
+    .rp-tab{padding:6px 14px;font-size:12px;font-weight:600;background:#F9FAFB;color:#6B7280;border:none;cursor:pointer;transition:.15s;}
+    .rp-tab.active{background:var(--indigo);color:#fff;}
+    .rp-body{flex:1;overflow-y:auto;padding:24px;}
+    .rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+    .rp-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid #F3F4F6;margin-top:8px;}
+    .rp-toggle-label{font-size:14px;font-weight:600;color:#374151;}
+    .rp-toggle-sub{font-size:12px;color:#6B7280;margin-top:2px;}
+    .toggle-sw{position:relative;width:44px;height:24px;flex-shrink:0;}
+    .toggle-sw input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;inset:0;background:#D1D5DB;border-radius:34px;cursor:pointer;transition:.2s;}
+    .toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+    .toggle-sw input:checked+.toggle-slider{background:var(--indigo);}
+    .toggle-sw input:checked+.toggle-slider:before{transform:translateX(20px);}
+    .rp-next-btn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--indigo);color:#fff;margin-top:20px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .rp-next-btn:hover{background:var(--indigo-dark);}
+
     .nav-dropdown{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:background .2s,color .2s,border-color .2s;border-left:3px solid transparent;user-select:none;}
     .nav-dropdown:hover{background:#F8FAFC;color:var(--indigo);}
     .nav-dropdown.open{background:linear-gradient(90deg,#EEF2FF 0%,#F5F3FF 100%);color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
@@ -428,53 +454,14 @@
       Volver a rutinas
     </button>
     <h2 class="fv-title" id="formViewTitle">Nueva rutina</h2>
-    <div class="fv-wizard-steps">
-      <div class="fv-wstep active" id="wStep1">1. Información</div>
-      <div class="fv-wstep" id="wStep2">2. Ejercicios</div>
-    </div>
-  </div>
-
-  <div class="fv-body" id="fvInfoBody">
-    <div class="fv-main">
-      <div class="sec-card">
-        <div class="sec-card-head">Información de la rutina</div>
-        <div class="sec-card-body">
-          <div class="form-group">
-            <label>Nombre *</label>
-            <input id="f_name" placeholder="Ej: Rutina fuerza 4 días — Upper/Lower" oninput="updateRoutinePreview()"/>
-          </div>
-          <div class="form-row-3">
-            <div class="form-group">
-              <label>Días por semana</label>
-              <input id="f_days" type="number" min="1" max="7" placeholder="4" oninput="updateRoutinePreview()"/>
-            </div>
-            <div class="form-group">
-              <label>Duración (min)</label>
-              <input id="f_time" type="number" min="15" placeholder="60" oninput="updateRoutinePreview()"/>
-            </div>
-            <div class="form-group">
-              <label>Género</label>
-              <select id="f_gender" onchange="updateRoutinePreview()">
-                <option value="">Cualquiera</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom:0;">
-            <label>Notas</label>
-            <textarea id="f_notes" rows="3" placeholder="Observaciones generales de la rutina…"></textarea>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="fv-sidebar">
-      <div class="sb-card">
-        <div class="sb-card-title">Resumen</div>
-        <div id="previewName" style="font-size:15px;font-weight:700;color:#111;margin-bottom:10px;min-height:20px;">Sin nombre</div>
-        <div id="previewMeta" style="display:flex;flex-direction:column;gap:2px;"></div>
-      </div>
-      <button class="save-btn" onclick="wizardNext()">
-        Continuar — Ejercicios
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-left:4px"><polyline points="9 18 15 12 9 6"/></svg>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="openRutinaPanel()" style="display:flex;align-items:center;gap:5px;">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Información
+      </button>
+      <button class="btn btn-primary btn-sm" id="saveRoutineBtn" onclick="saveRoutine()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar rutina
       </button>
     </div>
   </div>
@@ -628,14 +615,18 @@ async function loadParamSelects(){
     const genderParam=params.find(p=>/g[eé]nero|gender/i.test(p.description));
     if(genderParam){
       const dr=await fetch(`${API}/parameters-detail/search?parameter_id=${genderParam.id}`,{headers:authHeaders()});
-      if(dr.ok){const dd=await dr.json();const sel=document.getElementById('f_gender');sel.innerHTML='<option value="">Cualquiera</option>';(dd.data||[]).forEach(item=>{sel.innerHTML+=`<option value="${item.id}">${item.description}</option>`;GENDERS[item.id]=item.description;});}
+      if(dr.ok){const dd=await dr.json();const sel=document.getElementById('f_gender');sel.innerHTML='<option value="">Mixto</option>';(dd.data||[]).forEach(item=>{sel.innerHTML+=`<option value="${item.id}">${item.description}</option>`;GENDERS[item.id]=item.description;});}
     }
     const levelParam=params.find(p=>/nivel|level/i.test(p.description));
     if(levelParam){
       const dr=await fetch(`${API}/parameters-detail/search?parameter_id=${levelParam.id}`,{headers:authHeaders()});
-      if(dr.ok){const dd=await dr.json();Object.keys(LEVELS).forEach(k=>delete LEVELS[k]);(dd.data||[]).forEach(item=>{LEVELS[item.id]=item.description;});}
+      if(dr.ok){const dd=await dr.json();Object.keys(LEVELS).forEach(k=>delete LEVELS[k]);const levelSel=document.getElementById('f_level');if(levelSel){levelSel.innerHTML='<option value="">Seleccionar</option>';(dd.data||[]).forEach(item=>{LEVELS[item.id]=item.description;levelSel.innerHTML+=`<option value="${item.id}">${item.description}</option>`;});}else{(dd.data||[]).forEach(item=>{LEVELS[item.id]=item.description;});}}
+    } else {
+      const levelSel=document.getElementById('f_level');if(levelSel){levelSel.innerHTML='<option value="">Seleccionar</option><option value="1">Principiante</option><option value="2">Intermedio</option><option value="3">Avanzado</option>';}
     }
-  }catch{}
+  }catch{
+    const levelSel=document.getElementById('f_level');if(levelSel){levelSel.innerHTML='<option value="">Seleccionar</option><option value="1">Principiante</option><option value="2">Intermedio</option><option value="3">Avanzado</option>';}
+  }
 }
 
 async function loadRoutines(){
@@ -810,14 +801,24 @@ function toggleLibrary(el){
 
 <script>
 let editingRoutineId=null;let currentWizardStep=1;
-const routineData={name:'',days:0,time:0,gender_id:null,notes:'',days_list:[]};
+const routineData={name:'',days:0,time:0,gender_id:null,training_level_id:null,training:'',notes:'',days_list:[]};
 let selectedDayIdx=0;let pickerTargetBlockIdx=null;
-function resetRoutineData(){routineData.name='';routineData.days=0;routineData.time=0;routineData.gender_id=null;routineData.notes='';routineData.days_list=[];selectedDayIdx=0;}
+function resetRoutineData(){routineData.name='';routineData.days=0;routineData.time=0;routineData.gender_id=null;routineData.training_level_id=null;routineData.training='';routineData.notes='';routineData.days_list=[];selectedDayIdx=0;}
+
+function openRutinaPanel(){
+  document.getElementById('rpOverlay').classList.add('open');
+  document.getElementById('rutinaPanel').classList.add('open');
+}
+function closeRutinaPanel(){
+  document.getElementById('rpOverlay').classList.remove('open');
+  document.getElementById('rutinaPanel').classList.remove('open');
+}
 
 async function openForm(id=null){
   editingRoutineId=id;resetRoutineData();
+  document.getElementById('rpTitle').textContent=id?'Editar rutina':'Nueva rutina';
   document.getElementById('formViewTitle').textContent=id?'Editar rutina':'Nueva rutina';
-  clearRoutineForm();wizardGo(1);
+  clearRoutineForm();
   if(id){
     try{
       const r=await fetch(`${API}/routines/${id}/edit`,{headers:authHeaders()});
@@ -826,37 +827,52 @@ async function openForm(id=null){
       document.getElementById('f_days').value=rt.days||'';
       document.getElementById('f_time').value=rt.time||'';
       document.getElementById('f_gender').value=rt.gender_id||'';
+      document.getElementById('f_level').value=rt.training_level_id||'';
+      document.getElementById('f_place').value=rt.training||'';
       document.getElementById('f_notes').value=rt.notes||'';
-      routineData.name=rt.name||'';routineData.days=rt.days||0;routineData.time=rt.time||0;routineData.gender_id=rt.gender_id||null;routineData.notes=rt.notes||'';
+      const activeEl=document.getElementById('f_active');if(activeEl)activeEl.checked=rt.is_active!==false;
+      routineData.name=rt.name||'';routineData.days=rt.days||0;routineData.time=rt.time||0;
+      routineData.gender_id=rt.gender_id||null;routineData.training_level_id=rt.training_level_id||null;
+      routineData.training=rt.training||'';routineData.notes=rt.notes||'';
       routineData.days_list=(rt.days_list||[]).map(day=>({day_name:day.day_name||'',description:day.description||'',blocks:(day.blocks||[]).map(blk=>({block_type:blk.block_type||'normal',order_index:blk.order_index||0,exercises:(blk.exercises||[]).map(ex=>({training_id:ex.training_id,training_name:ex.training_name||'',muscle_group_name:ex.muscle_group_name||'',series:ex.series||null,repetitions:ex.repetitions||'',break_time:ex.break_time||null,intensity_type:ex.intensity_type||'',intensity_value:ex.intensity_value||null,notes:ex.notes||'',order_index:ex.order_index||0}))}))})  );
     }catch{showToast('Error al cargar la rutina','error');return;}
   }
-  updateRoutinePreview();
-  document.getElementById('listView').style.display='none';
-  document.getElementById('formView').classList.add('active');
+  openRutinaPanel();
 }
-function closeForm(){document.getElementById('formView').classList.remove('active');document.getElementById('listView').style.display='';editingRoutineId=null;resetRoutineData();}
-function clearRoutineForm(){['f_name','f_days','f_time','f_notes'].forEach(id=>{document.getElementById(id).value='';});document.getElementById('f_gender').value='';document.getElementById('daysList').innerHTML='';document.getElementById('blocksList').innerHTML='';document.getElementById('selectedDayName').textContent='Selecciona un día';}
+function closeForm(){
+  document.getElementById('formView').classList.remove('active');
+  document.getElementById('listView').style.display='';
+  editingRoutineId=null;resetRoutineData();
+}
+function clearRoutineForm(){
+  ['f_name','f_time','f_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const sel=['f_days','f_gender','f_level','f_place'];sel.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const activeEl=document.getElementById('f_active');if(activeEl)activeEl.checked=true;
+  const sub=document.getElementById('rpToggleSub');if(sub)sub.textContent='Activa';
+  document.getElementById('daysList').innerHTML='';
+  document.getElementById('blocksList').innerHTML='';
+  document.getElementById('selectedDayName').textContent='Selecciona un día';
+}
 function wizardGo(step){
   currentWizardStep=step;
-  document.querySelectorAll('.fv-wstep').forEach((el,i)=>{el.classList.remove('active','done');if(i+1===step)el.classList.add('active');else if(i+1<step)el.classList.add('done');});
-  const infoBody=document.getElementById('fvInfoBody');const builderBody=document.getElementById('fvBuilderBody');
-  if(step===1){infoBody.style.display='';builderBody.classList.remove('active');}
-  else{infoBody.style.display='none';builderBody.classList.add('active');renderDaysList();renderBlocks();}
+  const builderBody=document.getElementById('fvBuilderBody');
+  if(step===2){builderBody.classList.add('active');renderDaysList();renderBlocks();}
+  else{builderBody.classList.remove('active');}
 }
-function updateRoutinePreview(){
-  const name=document.getElementById('f_name')?.value.trim()||'';
-  const days=document.getElementById('f_days')?.value||'';
-  const time=document.getElementById('f_time')?.value||'';
-  const genderSel=document.getElementById('f_gender');const genderText=genderSel?.options[genderSel.selectedIndex]?.text||'';
-  document.getElementById('previewName').textContent=name||'Sin nombre';
-  const meta=[];if(days)meta.push(['Días/semana',days]);if(time)meta.push(['Duración',`${time} min`]);if(genderSel?.value)meta.push(['Género',genderText]);
-  document.getElementById('previewMeta').innerHTML=meta.map(([k,v])=>`<div class="sb-row"><span>${k}</span><span>${esc(v)}</span></div>`).join('');
-}
+function updateRoutinePreview(){}
 function wizardNext(){
   const name=document.getElementById('f_name').value.trim();
   if(!name){showToast('El nombre es obligatorio','error');return;}
-  routineData.name=name;routineData.days=parseInt(document.getElementById('f_days').value)||0;routineData.time=parseInt(document.getElementById('f_time').value)||0;routineData.gender_id=parseInt(document.getElementById('f_gender').value)||null;routineData.notes=document.getElementById('f_notes').value.trim();
+  routineData.name=name;
+  routineData.days=parseInt(document.getElementById('f_days').value)||0;
+  routineData.time=parseInt(document.getElementById('f_time').value)||0;
+  routineData.gender_id=parseInt(document.getElementById('f_gender').value)||null;
+  routineData.training_level_id=parseInt(document.getElementById('f_level').value)||null;
+  routineData.training=document.getElementById('f_place').value||'';
+  routineData.notes=document.getElementById('f_notes').value.trim();
+  closeRutinaPanel();
+  document.getElementById('listView').style.display='none';
+  document.getElementById('formView').classList.add('active');
   wizardGo(2);
 }
 
@@ -909,9 +925,16 @@ function updateEx(bi,ei,field,value){const ex=routineData.days_list[selectedDayI
 function removeExercise(bi,ei){routineData.days_list[selectedDayIdx].blocks[bi].exercises.splice(ei,1);renderBlocks();}
 
 async function saveRoutine(){
-  routineData.name=document.getElementById('f_name').value.trim();routineData.days=parseInt(document.getElementById('f_days').value)||null;routineData.time=parseInt(document.getElementById('f_time').value)||null;routineData.gender_id=parseInt(document.getElementById('f_gender').value)||null;routineData.notes=document.getElementById('f_notes').value.trim();
   if(!routineData.name){showToast('El nombre es obligatorio','error');return;}
-  const payload={name:routineData.name,days:routineData.days,time:routineData.time,gender_id:routineData.gender_id,notes:routineData.notes||null,days_list:routineData.days_list.map((day,i)=>({day_name:day.day_name,description:day.description||null,blocks:day.blocks.map((blk,bi)=>({block_type:blk.block_type,order_index:bi,exercises:blk.exercises.map((ex,ei)=>({training_id:ex.training_id||null,series:parseInt(ex.series)||null,repetitions:ex.repetitions||null,break_time:parseInt(ex.break_time)||null,intensity_type:ex.intensity_type||null,intensity_value:parseFloat(ex.intensity_value)||null,notes:ex.notes||null,order_index:ei}))}))})  )};
+  const payload={
+    name:routineData.name,
+    days:routineData.days||null,
+    time:routineData.time||null,
+    gender_id:routineData.gender_id||null,
+    training_level_id:routineData.training_level_id||null,
+    training:routineData.training||null,
+    notes:routineData.notes||null,
+    days_list:routineData.days_list.map((day,i)=>({day_name:day.day_name,description:day.description||null,blocks:day.blocks.map((blk,bi)=>({block_type:blk.block_type,order_index:bi,exercises:blk.exercises.map((ex,ei)=>({training_id:ex.training_id||null,series:parseInt(ex.series)||null,repetitions:ex.repetitions||null,break_time:parseInt(ex.break_time)||null,intensity_type:ex.intensity_type||null,intensity_value:parseFloat(ex.intensity_value)||null,notes:ex.notes||null,order_index:ei}))}))})  )};
   const btn=document.getElementById('saveRoutineBtn');btn.disabled=true;btn.textContent='Guardando…';
   try{
     const url=editingRoutineId?`${API}/routines/${editingRoutineId}/update`:`${API}/routines`;const method=editingRoutineId?'PUT':'POST';
@@ -1045,6 +1068,85 @@ initUser();loadParamSelects();loadRoutines();loadPendingBadge();loadMuscleGroups
 function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');s.classList.toggle('open');o.classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 </script>
+
+<!-- Nueva rutina slide panel -->
+<div class="rp-overlay" id="rpOverlay" onclick="closeRutinaPanel()"></div>
+<div class="rp-panel" id="rutinaPanel">
+  <div class="rp-bar">
+    <button class="rp-close" onclick="closeRutinaPanel()">×</button>
+    <span class="rp-title" id="rpTitle">Nueva rutina</span>
+    <div class="rp-tabs">
+      <button class="rp-tab active">Información</button>
+      <button class="rp-tab" onclick="wizardNext()">Constructor</button>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="wizardNext()">Crear rutina</button>
+  </div>
+  <div class="rp-body">
+    <div class="form-group">
+      <label>Nombre de la rutina *</label>
+      <input id="f_name" placeholder="Ej: Rutina fuerza 4 días — Upper/Lower"/>
+    </div>
+    <div class="rp-grid">
+      <div class="form-group">
+        <label>Nivel</label>
+        <select id="f_level">
+          <option value="">Seleccionar</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Lugar</label>
+        <select id="f_place">
+          <option value="">Seleccionar</option>
+          <option value="Gimnasio">Gimnasio</option>
+          <option value="Casa">Casa</option>
+          <option value="Aire libre">Aire libre</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Dirigido a</label>
+        <select id="f_gender">
+          <option value="">Mixto</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Días por semana</label>
+        <select id="f_days">
+          <option value="">—</option>
+          <option value="1">1 día</option>
+          <option value="2">2 días</option>
+          <option value="3">3 días</option>
+          <option value="4">4 días</option>
+          <option value="5">5 días</option>
+          <option value="6">6 días</option>
+          <option value="7">7 días</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Duración estimada (min)</label>
+      <input id="f_time" type="number" min="1" placeholder="60"/>
+    </div>
+    <div class="form-group">
+      <label>Notas del entrenador</label>
+      <textarea id="f_notes" rows="3" placeholder="Observaciones generales de la rutina…"></textarea>
+    </div>
+    <div class="rp-toggle-row">
+      <div>
+        <div class="rp-toggle-label">Estado de la rutina</div>
+        <div class="rp-toggle-sub" id="rpToggleSub">Activa</div>
+      </div>
+      <label class="toggle-sw">
+        <input type="checkbox" id="f_active" checked onchange="document.getElementById('rpToggleSub').textContent=this.checked?'Activa':'Inactiva'">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <button class="rp-next-btn" onclick="wizardNext()">
+      Siguiente — Construir rutina
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
 
 <!-- Library flyout -->
 <div id="flyoutBackdrop" onclick="closeFlyout()" style="display:none;position:fixed;inset:0;z-index:998;"></div>

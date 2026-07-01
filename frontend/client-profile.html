@@ -3668,19 +3668,110 @@ async function saveCheckin(dateStr) {
    ENTRENAMIENTO TAB
 ══════════════════════════════════════════════ */
 let editingSessionId = null;
+let _entSelectedDay = 0;
+let _entDetailLoaded = false;
 
-function renderEntrenamientoTab() {
+async function renderEntrenamientoTab() {
   const el = document.getElementById('entrenamientoContent');
   if (!el) return;
-  el.innerHTML = `
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-head">
-        <span class="card-title">Rutina asignada</span>
-        <button class="btn btn-ghost btn-sm" onclick="openAssignRoutineModal()">+ Asignar rutina</button>
-      </div>
-      <div id="routineSummary" style="padding:0 16px 16px;"></div>
+
+  if (!clientRoutines.length) {
+    el.innerHTML = `<div class="card" style="padding:48px;text-align:center;">
+      <div style="margin-bottom:16px;color:#D1D5DB;"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/></svg></div>
+      <p style="font-size:15px;font-weight:700;color:#374151;margin:0 0 6px;">Sin plan de entrenamiento</p>
+      <p style="font-size:13px;color:#9CA3AF;margin:0 0 20px;">Asigna un plan de tu librería para comenzar</p>
+      <button class="btn btn-primary" onclick="openAssignRoutineModal()">+ Asignar plan de entrenamiento</button>
     </div>
-    <div class="card">
+    <div class="card" style="margin-top:16px;">
+      <div class="card-head">
+        <span class="card-title">Historial de sesiones</span>
+        <button class="btn btn-primary btn-sm" onclick="openSessionModal()">+ Registrar sesión</button>
+      </div>
+      <div id="sessionsList" style="padding:0 16px 16px;"></div>
+    </div>`;
+    loadSessions();
+    return;
+  }
+
+  const r = clientRoutines[0];
+  // Fetch full routine details if not yet loaded
+  if (!_entDetailLoaded || !(r.days_list && r.days_list.length && r.days_list[0].blocks)) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando plan…</div>';
+    try {
+      const res = await fetch(`${API}/routines/${r.id}/edit`, { headers: h() });
+      const j = await res.json();
+      const detail = j.data || j;
+      if (detail && detail.days_list) Object.assign(clientRoutines[0], detail);
+      _entDetailLoaded = true;
+    } catch {}
+  }
+
+  _renderEntTrainingUI();
+}
+
+function _renderEntTrainingUI() {
+  const el = document.getElementById('entrenamientoContent');
+  if (!el || !clientRoutines.length) return;
+
+  const r = clientRoutines[0];
+  const days = r.days_list || [];
+  const totalEx = days.reduce((s, d) => s + (d.blocks || []).reduce((bs, b) => bs + (b.exercises || []).length, 0), 0);
+  if (_entSelectedDay >= days.length) _entSelectedDay = 0;
+
+  const chips = [r.training, r.days ? `${r.days} días/sem` : '', r.time ? `${r.time} min/sesión` : ''].filter(Boolean).join(' · ');
+  const assignedDate = r.assigned_at || r.created_at;
+  let dateLabel = '';
+  if (assignedDate) {
+    const d = new Date(assignedDate);
+    const MONTHS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    dateLabel = `Asignado el ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <h3 style="font-size:16px;font-weight:800;color:#111;margin:0 0 2px;">Plan de entrenamiento</h3>
+        ${dateLabel ? `<p style="font-size:12px;color:#9CA3AF;margin:0;">${dateLabel} · vista de plan activo</p>` : ''}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-ghost btn-sm" onclick="_downloadEntPdf()" style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
+        <button class="btn btn-primary btn-sm" onclick="openAssignRoutineModal()">Cambiar plan</button>
+      </div>
+    </div>
+
+    <!-- PLAN ACTIVO BANNER -->
+    <div style="background:linear-gradient(135deg,#7C3AED 0%,#4F46E5 100%);border-radius:16px;padding:22px 28px;margin-bottom:16px;color:#fff;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;opacity:.65;margin-bottom:10px;">PLAN ACTIVO</div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+          <h2 style="font-size:26px;font-weight:900;margin:0 0 4px;line-height:1.1;">${esc(r.name)}</h2>
+          <p style="margin:0;opacity:.75;font-size:13px;">${chips}</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-shrink:0;">
+          ${r.days ? `<div style="text-align:center;background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;min-width:60px;">
+            <div style="font-size:22px;font-weight:900;line-height:1;">${r.days}</div>
+            <div style="font-size:10px;opacity:.65;margin-top:3px;white-space:nowrap;">días/sem</div>
+          </div>` : ''}
+          <div style="text-align:center;background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;min-width:60px;">
+            <div style="font-size:22px;font-weight:900;line-height:1;">${totalEx}</div>
+            <div style="font-size:10px;opacity:.65;margin-top:3px;white-space:nowrap;">ejercicios</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY VIEW -->
+    ${days.length ? `<div style="display:flex;gap:12px;align-items:flex-start;">
+      <div id="entSidebar" style="width:160px;flex-shrink:0;background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
+        ${_renderEntSidebar(days)}
+      </div>
+      <div id="entDayContent" style="flex:1;min-width:0;">
+        ${_renderEntDayContent(days[_entSelectedDay], _entSelectedDay)}
+      </div>
+    </div>` : '<p style="color:#9CA3AF;font-size:13px;">Esta rutina no tiene días configurados.</p>'}
+
+    <!-- SESSION HISTORY -->
+    <div class="card" style="margin-top:16px;">
       <div class="card-head">
         <span class="card-title">Historial de sesiones</span>
         <button class="btn btn-primary btn-sm" onclick="openSessionModal()">+ Registrar sesión</button>
@@ -3688,25 +3779,93 @@ function renderEntrenamientoTab() {
       <div id="sessionsList" style="padding:0 16px 16px;"></div>
     </div>`;
 
-  // Routine summary
-  const rsum = document.getElementById('routineSummary');
-  if (!clientRoutines.length) {
-    rsum.innerHTML = '<p style="color:#9CA3AF;font-size:13px;padding-top:8px;">Sin rutina asignada.</p>';
-  } else {
-    const r = clientRoutines[0];
-    const days = r.days_list || [];
-    const totalEx = days.reduce((s, d) => s + (d.blocks || []).reduce((bs, b) => bs + (b.exercises || []).length, 0), 0);
-    rsum.innerHTML = `<div style="padding-top:8px;">
-      <p style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">${esc(r.name)}</p>
-      <div style="display:flex;gap:16px;flex-wrap:wrap;">
-        ${r.days ? `<span style="font-size:13px;color:#6B7280;display:inline-flex;align-items:center;gap:4px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${r.days} días/semana</span>` : ''}
-        ${r.time ? `<span style="font-size:13px;color:#6B7280;display:inline-flex;align-items:center;gap:4px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${r.time} min/sesión</span>` : ''}
-        <span style="font-size:13px;color:#6B7280;display:inline-flex;align-items:center;gap:4px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/></svg> ${totalEx} ejercicios · ${days.length} días</span>
-      </div>
+  loadSessions();
+}
+
+function _renderEntSidebar(days) {
+  const DAY_ABR = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+  return `<div style="padding:8px 14px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #F3F4F6;">Días de entreno</div>` +
+    days.map((day, i) => {
+      const label = day.label || day.name || `Día ${i+1}`;
+      const exCount = (day.blocks || []).reduce((s, b) => s + (b.exercises || []).length, 0);
+      const isRest = exCount === 0;
+      const isSel = i === _entSelectedDay;
+      return `<div onclick="selectEntDay(${i})" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #F9FAFB;background:${isSel?'#F5F3FF':'#fff'};border-left:3px solid ${isSel?'#7C3AED':'transparent'};transition:.1s;">
+        <div style="font-size:9px;font-weight:700;color:${isSel?'#7C3AED':'#9CA3AF'};text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px;">${DAY_ABR[i]||''}</div>
+        <div style="font-size:13px;font-weight:700;color:${isSel?'#7C3AED':isRest?'#D1D5DB':'#374151'};">${esc(label)}</div>
+        ${!isRest?`<div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${exCount} ejercicio${exCount!==1?'s':''}</div>`:''}
+      </div>`;
+    }).join('');
+}
+
+function _renderEntDayContent(day, idx) {
+  const DAY_ABR = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+  if (!day) return '<p style="color:#9CA3AF;font-size:13px;">Selecciona un día.</p>';
+  const blocks = day.blocks || [];
+  const allEx = blocks.flatMap(b => b.exercises || []);
+  const label = day.label || day.name || `Día ${idx+1}`;
+  const dayAbr = DAY_ABR[idx] || '';
+
+  if (!allEx.length) {
+    return `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
+      <p style="font-size:14px;font-weight:600;color:#374151;margin:0 0 4px;">${dayAbr} · Descanso</p>
+      <p style="font-size:12px;margin:0;">Sin ejercicios programados</p>
     </div>`;
   }
 
-  loadSessions();
+  const rows = allEx.map(ex => {
+    const inten = ex.intensity_value
+      ? `<span style="background:#EEF2FF;color:#4F46E5;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;">${ex.intensity_value}${ex.intensity_type==='RPE'?' RPE':'%'}</span>`
+      : '<span style="color:#D1D5DB;">—</span>';
+    return `<tr style="border-top:1px solid #F3F4F6;">
+      <td style="padding:12px 20px;">
+        <div style="font-weight:600;color:#111;">${esc(ex.training_name||ex.name||'—')}</div>
+        ${ex.muscle_group_name?`<div style="font-size:11px;color:#9CA3AF;margin-top:1px;">${esc(ex.muscle_group_name)}</div>`:''}
+      </td>
+      <td style="text-align:center;padding:12px;font-weight:600;">${ex.series||'—'}</td>
+      <td style="text-align:center;padding:12px;font-weight:600;">${ex.repetitions||'—'}</td>
+      <td style="text-align:center;padding:12px;">${inten}</td>
+      <td style="text-align:center;padding:12px;color:#6B7280;">${ex.break_time?ex.break_time+'"':'—'}</td>
+      <td style="padding:12px;color:#6B7280;font-size:12px;max-width:160px;">${ex.notes?esc(ex.notes):'<span style="color:#D1D5DB;">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="card">
+    <div style="padding:16px 20px 12px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <h4 style="font-size:16px;font-weight:800;color:#111;margin:0 0 2px;">${dayAbr} · ${esc(label)}</h4>
+        <p style="font-size:12px;color:#9CA3AF;margin:0;">${allEx.length} ejercicio${allEx.length!==1?'s':''}</p>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#F9FAFB;">
+          <th style="text-align:left;padding:9px 20px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Ejercicio</th>
+          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Series</th>
+          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Reps</th>
+          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Intensidad</th>
+          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Descanso</th>
+          <th style="text-align:left;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Nota</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function selectEntDay(idx) {
+  _entSelectedDay = idx;
+  const days = (clientRoutines[0] && clientRoutines[0].days_list) || [];
+  const sidebar = document.getElementById('entSidebar');
+  if (sidebar) sidebar.innerHTML = _renderEntSidebar(days);
+  const content = document.getElementById('entDayContent');
+  if (content) content.innerHTML = _renderEntDayContent(days[idx], idx);
+}
+
+function _downloadEntPdf() {
+  const r = clientRoutines[0];
+  if (!r || !r.id) { showToast('Sin rutina asignada', 'error'); return; }
+  window.open(`${API}/routines/${r.id}/pdf`, '_blank');
 }
 
 async function loadSessions() {
@@ -4244,6 +4403,8 @@ async function confirmAssignRoutine() {
       clientRoutines = Array.isArray(jr.data) ? jr.data : [];
       if (clientRoutines.length) { _clientRoutineId = clientRoutines[0].id; document.getElementById('pdfRoutineBtn').style.display = 'inline-flex'; }
     }
+    _entDetailLoaded = false;
+    _entSelectedDay = 0;
     renderEntrenamientoTab();
   } catch { document.getElementById('assignRoutineError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; }

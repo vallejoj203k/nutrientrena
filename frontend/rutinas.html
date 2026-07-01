@@ -816,7 +816,7 @@ function toggleLibrary(el){
 <script>
 let editingRoutineId=null;let currentWizardStep=1;
 const routineData={name:'',days:0,time:0,gender_id:null,training_level_id:null,training:'',notes:'',days_list:[]};
-let selectedDayIdx=0;let pickerTargetBlockIdx=null;
+let selectedDayIdx=0;let pickerTargetBlockIdx=null;let pickerReplaceEi=null;
 function resetRoutineData(){routineData.name='';routineData.days=0;routineData.time=0;routineData.gender_id=null;routineData.training_level_id=null;routineData.training='';routineData.notes='';routineData.days_list=[];selectedDayIdx=0;}
 
 function openRutinaPanel(){
@@ -944,15 +944,18 @@ function removeExercise(bi,ei){routineData.days_list[selectedDayIdx].blocks[bi].
 function duplicateExercise(bi,ei){
   const blk=routineData.days_list[selectedDayIdx].blocks[bi];
   const src=blk.exercises[ei];
-  const copy=Object.assign({},src);
+  // Copy specs only — exercise identity is chosen via picker
+  const copy={
+    training_id:null,training_name:'',muscle_group_name:'',
+    series:src.series,repetitions:src.repetitions,break_time:src.break_time,
+    intensity_type:src.intensity_type,intensity_value:src.intensity_value,
+    notes:src.notes,order_index:ei+1
+  };
   blk.exercises.splice(ei+1,0,copy);
   blk.exercises.forEach((e,i)=>{e.order_index=i;});
   renderBlocks();
-  // highlight the duplicate
-  setTimeout(()=>{
-    const rows=document.querySelectorAll(`.ex-row[data-bi="${bi}"][data-ei="${ei+1}"]`);
-    rows.forEach(r=>{r.style.background='#EEF2FF';setTimeout(()=>{r.style.background='';},600);});
-  },50);
+  // Open picker in replace mode so the user picks which exercise goes in this slot
+  openPicker(bi,ei+1);
 }
 
 let _exDrag={srcBi:null,srcEi:null,active:false};
@@ -1041,7 +1044,7 @@ async function saveRoutine(){
 }
 
 let pickerMgFilter=null;let pickerSearchTimeout=null;let allMuscleGroups=[];
-function openPicker(blockIdx){pickerTargetBlockIdx=blockIdx;document.getElementById('pickerSearch').value='';pickerMgFilter=null;document.getElementById('pickerOverlay').classList.add('open');renderPickerPills();fetchPickerResults('');}
+function openPicker(blockIdx,replaceEi=null){pickerTargetBlockIdx=blockIdx;pickerReplaceEi=replaceEi;document.getElementById('pickerSearch').value='';pickerMgFilter=null;document.getElementById('pickerOverlay').classList.add('open');renderPickerPills();fetchPickerResults('');}
 function closePicker(){document.getElementById('pickerOverlay').classList.remove('open');}
 function renderPickerPills(){
   const container=document.getElementById('pickerPills');
@@ -1062,7 +1065,13 @@ function renderPickerResults(items){
 function selectExercise(trainingId,name,muscleName){
   if(pickerTargetBlockIdx===null)return;
   const day=routineData.days_list[selectedDayIdx];const blk=day.blocks[pickerTargetBlockIdx];
-  blk.exercises.push({training_id:trainingId,training_name:name,muscle_group_name:muscleName,series:null,repetitions:'',break_time:null,intensity_type:'',intensity_value:null,notes:'',order_index:blk.exercises.length});
+  if(pickerReplaceEi!==null){
+    const ex=blk.exercises[pickerReplaceEi];
+    ex.training_id=trainingId;ex.training_name=name;ex.muscle_group_name=muscleName;
+    pickerReplaceEi=null;
+  }else{
+    blk.exercises.push({training_id:trainingId,training_name:name,muscle_group_name:muscleName,series:null,repetitions:'',break_time:null,intensity_type:'',intensity_value:null,notes:'',order_index:blk.exercises.length});
+  }
   closePicker();renderBlocks();
 }
 

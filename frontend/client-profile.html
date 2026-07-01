@@ -337,6 +337,14 @@
     .cal-type-lbl{font-size:13px;font-weight:600;color:#374151;flex:1;}
     .cal-type-arrow{font-size:11px;color:#9CA3AF;transition:.2s;}
     .cal-type-row.sel .cal-type-arrow{transform:rotate(180deg);color:#7C3AED;}
+    .cal-type-row.sel{border-radius:10px 10px 0 0;border-bottom-color:#E5E7EB;}
+    .cal-type-extra{display:none;padding:12px 14px 14px;background:#F9FAFB;border:1.5px solid #E5E7EB;border-top:none;border-radius:0 0 10px 10px;margin-top:-6px;margin-bottom:6px;}
+    .cal-type-extra.open{display:block;}
+    .cal-extra-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:block;}
+    .cal-extra-input{border:1px solid #E5E7EB;border-radius:8px;padding:7px 10px;font-size:13px;width:100%;box-sizing:border-box;background:#fff;outline:none;font-family:inherit;}
+    .cal-extra-input:focus{border-color:#7C3AED;}
+    .cal-extra-row{display:flex;gap:8px;}
+    .cal-extra-group{flex:1;display:flex;flex-direction:column;gap:3px;}
     .cal-repeat-row{display:flex;align-items:center;gap:12px;padding:14px 0 4px;border-top:1px solid #F3F4F6;margin-top:8px;}
     .cal-repeat-lbl{font-size:13px;font-weight:700;color:#374151;}
     .cal-repeat-opts{display:flex;gap:12px;}
@@ -2983,21 +2991,23 @@ async function saveTarget() {
 const DAY_NAMES  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const TASK_TYPE_LABELS = {
-  rutina:'Rutina', cardio:'Cardio', descanso:'Descanso',
-  nutricion:'Nutrición', checkin:'Check-in', foto:'Foto',
-  mensaje:'Mensaje', video:'Video', sesion:'Sesión', otro:'Otro',
+  rutina:'Rutina', cardio:'Cardio', checkin:'Registrar evolución',
+  sesion:'Sesión', nutricion:'Nutrición', otro:'Documento',
+  mensaje:'Programar mensaje', formulario:'Formulario',
+  descanso:'Descanso', foto:'Fotos', video:'Video',
 };
 const TASK_TC = {
-  rutina:    {color:'#4F46E5', icon:'🏋️', bg:'#EEF2FF'},
-  cardio:    {color:'#EF4444', icon:'🏃', bg:'#FEF2F2'},
-  descanso:  {color:'#10B981', icon:'🌙', bg:'#ECFDF5'},
-  nutricion: {color:'#F59E0B', icon:'🥗', bg:'#FFFBEB'},
-  checkin:   {color:'#8B5CF6', icon:'📊', bg:'#F5F3FF'},
-  foto:      {color:'#EC4899', icon:'📷', bg:'#FDF2F8'},
-  mensaje:   {color:'#06B6D4', icon:'💬', bg:'#ECFEFF'},
-  video:     {color:'#F97316', icon:'🎥', bg:'#FFF7ED'},
-  sesion:    {color:'#3B82F6', icon:'📅', bg:'#EFF6FF'},
-  otro:      {color:'#6B7280', icon:'📌', bg:'#F9FAFB'},
+  rutina:     {color:'#F97316', icon:'🏋️', bg:'#FFF7ED'},
+  cardio:     {color:'#EF4444', icon:'🏃', bg:'#FEF2F2'},
+  checkin:    {color:'#EC4899', icon:'📸', bg:'#FDF2F8'},
+  sesion:     {color:'#8B5CF6', icon:'📹', bg:'#F5F3FF'},
+  nutricion:  {color:'#10B981', icon:'🥗', bg:'#ECFDF5'},
+  otro:       {color:'#3B82F6', icon:'📄', bg:'#EFF6FF'},
+  mensaje:    {color:'#7C3AED', icon:'💬', bg:'#F5F3FF'},
+  formulario: {color:'#06B6D4', icon:'📋', bg:'#ECFEFF'},
+  descanso:   {color:'#10B981', icon:'🌙', bg:'#ECFDF5'},
+  foto:       {color:'#EC4899', icon:'📷', bg:'#FDF2F8'},
+  video:      {color:'#F97316', icon:'🎥', bg:'#FFF7ED'},
 };
 
 let _calView       = 'week';   // 'week' | 'month'
@@ -3319,7 +3329,92 @@ async function calDeleteChipTask(taskId, dateStr) {
 }
 
 /* ── Create task modal v3 ── */
-function openCalTaskModal(prefillDate) {
+const _CAL_TYPES = [
+  { key:'rutina',     label:'Rutina',              dot:'#F97316' },
+  { key:'cardio',     label:'Cardio',              dot:'#EF4444' },
+  { key:'checkin',    label:'Registrar evolución', dot:'#EC4899' },
+  { key:'sesion',     label:'Sesión',              dot:'#8B5CF6' },
+  { key:'nutricion',  label:'Nutrición',           dot:'#10B981' },
+  { key:'otro',       label:'Documento',           dot:'#3B82F6' },
+  { key:'mensaje',    label:'Programar mensaje',   dot:'#7C3AED' },
+  { key:'formulario', label:'Formulario',          dot:'#06B6D4' },
+];
+
+function _calTypeExtraHtml(key) {
+  switch(key) {
+    case 'rutina':
+      return `<span class="cal-extra-label">RUTINA</span>
+        <select id="ex-rutina-id" class="cal-extra-input">
+          <option value="">Cargando...</option>
+        </select>`;
+    case 'cardio':
+      return `<span class="cal-extra-label">TIPO DE CARDIO</span>
+        <select id="ex-cardio-tipo" class="cal-extra-input">
+          <option value="Caminata">Caminata</option>
+          <option value="Trote">Trote</option>
+          <option value="Bicicleta">Bicicleta</option>
+          <option value="Elíptica">Elíptica</option>
+          <option value="Natación">Natación</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <div class="cal-extra-row" style="margin-top:8px;">
+          <div class="cal-extra-group">
+            <span class="cal-extra-label">DURACIÓN (MIN)</span>
+            <input type="number" id="ex-cardio-min" class="cal-extra-input" placeholder="30" min="1">
+          </div>
+          <div class="cal-extra-group">
+            <span class="cal-extra-label">DISTANCIA (KM)</span>
+            <input type="number" id="ex-cardio-km" class="cal-extra-input" step="0.1" placeholder="5.0" min="0">
+          </div>
+        </div>`;
+    case 'checkin':
+      return `<span class="cal-extra-label">REGISTRAR</span>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer;"><input type="checkbox" id="ex-ci-peso" style="accent-color:#7C3AED;width:16px;height:16px;"> Peso</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer;"><input type="checkbox" id="ex-ci-medidas" style="accent-color:#7C3AED;width:16px;height:16px;"> Medidas corporales</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;cursor:pointer;"><input type="checkbox" id="ex-ci-fotos" style="accent-color:#7C3AED;width:16px;height:16px;"> Fotos de progreso</label>
+        </div>`;
+    case 'sesion':
+      return `<span class="cal-extra-label">MODALIDAD</span>
+        <div style="display:flex;gap:16px;margin:6px 0 10px;">
+          <label class="cal-repeat-opt"><input type="radio" name="exSesionMode" value="presencial" checked> Presencial</label>
+          <label class="cal-repeat-opt"><input type="radio" name="exSesionMode" value="online"> Online</label>
+        </div>
+        <div class="cal-extra-row">
+          <div class="cal-extra-group">
+            <span class="cal-extra-label">HORA</span>
+            <input type="time" id="ex-sesion-hora" class="cal-extra-input" style="margin-top:2px;">
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <span class="cal-extra-label">NOTAS</span>
+          <textarea id="ex-sesion-notas" class="cal-extra-input" rows="2" placeholder="Detalles de la sesión..." style="resize:none;margin-top:2px;"></textarea>
+        </div>`;
+    case 'nutricion':
+      return `<span class="cal-extra-label">DIETA</span>
+        <select id="ex-nutricion-id" class="cal-extra-input">
+          <option value="">Cargando...</option>
+        </select>`;
+    case 'otro':
+      return `<p style="font-size:12px;color:#9CA3AF;margin:0;">Se registra el documento enviado al cliente.</p>`;
+    case 'mensaje':
+      return `<span class="cal-extra-label">MENSAJE</span>
+        <textarea id="ex-mensaje-texto" class="cal-extra-input" rows="3" placeholder="Escribe el mensaje..." style="resize:none;margin-top:2px;"></textarea>
+        <div style="margin-top:8px;">
+          <span class="cal-extra-label">HORA DE ENVÍO</span>
+          <input type="time" id="ex-mensaje-hora" class="cal-extra-input" style="margin-top:2px;">
+        </div>`;
+    case 'formulario':
+      return `<span class="cal-extra-label">FORMULARIO</span>
+        <select id="ex-form-id" class="cal-extra-input">
+          <option value="">Cargando...</option>
+        </select>`;
+    default:
+      return '';
+  }
+}
+
+async function openCalTaskModal(prefillDate) {
   const dateStr = prefillDate || _isoDate(new Date());
   _calNewType = 'rutina';
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -3327,15 +3422,16 @@ function openCalTaskModal(prefillDate) {
   const dayName = DAY_NAMES[(dateObj.getDay()+6)%7];
   const dayLabel = `${dayName}, ${d} ${MONTH_NAMES[m-1].slice(0,3)}`;
 
-  const TYPE_ORDER = ['rutina','cardio','descanso','nutricion','checkin','foto','mensaje','video'];
-  const typeRows = TYPE_ORDER.map(k => {
-    const tc = TASK_TC[k] || TASK_TC.otro;
-    return `<div class="cal-type-row${k===_calNewType?' sel':''}" id="ctr-${k}" onclick="_selCalType('${k}')">
-      <div class="cal-type-dot" style="background:${tc.color};"></div>
-      <span class="cal-type-lbl">${TASK_TYPE_LABELS[k]||k}</span>
+  const typeRows = _CAL_TYPES.map(t =>
+    `<div class="cal-type-row${t.key===_calNewType?' sel':''}" id="ctr-${t.key}" onclick="_selCalType('${t.key}')">
+      <div class="cal-type-dot" style="background:${t.dot};"></div>
+      <span class="cal-type-lbl">${t.label}</span>
       <span class="cal-type-arrow">▼</span>
-    </div>`;
-  }).join('');
+    </div>
+    <div class="cal-type-extra${t.key===_calNewType?' open':''}" id="ctex-${t.key}">
+      ${_calTypeExtraHtml(t.key)}
+    </div>`
+  ).join('');
 
   const overlay = document.createElement('div');
   overlay.className = 'cal-modal-overlay';
@@ -3345,11 +3441,7 @@ function openCalTaskModal(prefillDate) {
       <span class="cal-modal-title">Nueva tarea · ${dayLabel}</span>
       <button class="cal-modal-close" onclick="closeCalTaskModal()">×</button>
     </div>
-    ${typeRows}
-    <div style="margin-top:12px;">
-      <input type="text" id="calTaskTitle" placeholder="Título (opcional)" style="border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;box-sizing:border-box;margin-bottom:8px;">
-      <textarea id="calTaskNotes" rows="2" placeholder="Notas (opcional)" style="border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;font-size:13px;width:100%;resize:none;box-sizing:border-box;"></textarea>
-    </div>
+    <div id="calTypeList">${typeRows}</div>
     <div class="cal-repeat-row">
       <span class="cal-repeat-lbl">¿Repetir esta tarea?</span>
       <div class="cal-repeat-opts">
@@ -3370,13 +3462,47 @@ function openCalTaskModal(prefillDate) {
       document.getElementById('calRepEndRow').style.display = this.value === 'no' ? 'none' : 'block';
     });
   });
+
+  // Fetch data in parallel and populate selects
+  try {
+    const [rR, dR, fR] = await Promise.all([
+      fetch(`${API}/routines/findAll`, { headers: h() }),
+      fetch(`${API}/diets/findAll`, { headers: h() }),
+      fetch(`${API}/form-templates`, { headers: h() }),
+    ]);
+    const [rJ, dJ, fJ] = await Promise.all([rR.json(), dR.json(), fR.json()]);
+
+    const routineSel = document.getElementById('ex-rutina-id');
+    if (routineSel) {
+      const list = Array.isArray(rJ.data) ? rJ.data : (Array.isArray(rJ) ? rJ : []);
+      routineSel.innerHTML = '<option value="">Seleccionar...</option>' +
+        list.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
+    }
+
+    const dietSel = document.getElementById('ex-nutricion-id');
+    if (dietSel) {
+      const list = Array.isArray(dJ.data) ? dJ.data : (Array.isArray(dJ) ? dJ : []);
+      dietSel.innerHTML = '<option value="">Seleccionar...</option>' +
+        list.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
+    }
+
+    const formSel = document.getElementById('ex-form-id');
+    if (formSel) {
+      const list = Array.isArray(fJ.data) ? fJ.data : (Array.isArray(fJ) ? fJ : []);
+      formSel.innerHTML = '<option value="">Seleccionar...</option>' +
+        list.map(f => `<option value="${f.id}">${esc(f.name || f.title)}</option>`).join('');
+    }
+  } catch(e) { /* dropdowns remain with placeholder */ }
 }
 
 function _selCalType(type) {
   _calNewType = type;
   document.querySelectorAll('.cal-type-row').forEach(r => r.classList.remove('sel'));
+  document.querySelectorAll('.cal-type-extra').forEach(e => e.classList.remove('open'));
   const row = document.getElementById(`ctr-${type}`);
   if (row) row.classList.add('sel');
+  const extra = document.getElementById(`ctex-${type}`);
+  if (extra) extra.classList.add('open');
 }
 
 function closeCalTaskModal() {
@@ -3386,13 +3512,72 @@ function closeCalTaskModal() {
 
 async function saveCalTask() {
   const dateVal = document.getElementById('calTaskDate')?.value;
-  const title   = document.getElementById('calTaskTitle')?.value.trim();
-  const notes   = document.getElementById('calTaskNotes')?.value.trim();
-  const repVal  = document.querySelector('input[name="calRep"]:checked')?.value || 'no';
-  const rec     = repVal === 'weekly' ? 'weekly' : 'none';
-  const recEnd  = document.getElementById('calTaskRecEnd')?.value;
-
   if (!dateVal) { showToast('Selecciona una fecha', 'error'); return; }
+
+  let title = null, notes = null;
+  switch (_calNewType) {
+    case 'rutina': {
+      const sel = document.getElementById('ex-rutina-id');
+      const name = sel?.options[sel.selectedIndex]?.text;
+      if (!name || name === 'Seleccionar...') { showToast('Selecciona una rutina', 'error'); return; }
+      title = name;
+      break;
+    }
+    case 'cardio': {
+      const tipo = document.getElementById('ex-cardio-tipo')?.value || 'Cardio';
+      const min  = document.getElementById('ex-cardio-min')?.value;
+      const km   = document.getElementById('ex-cardio-km')?.value;
+      title = tipo;
+      notes = [min ? `${min} min` : '', km ? `${km} km` : ''].filter(Boolean).join(' · ') || null;
+      break;
+    }
+    case 'checkin': {
+      const parts = [];
+      if (document.getElementById('ex-ci-peso')?.checked)    parts.push('Peso');
+      if (document.getElementById('ex-ci-medidas')?.checked) parts.push('Medidas');
+      if (document.getElementById('ex-ci-fotos')?.checked)   parts.push('Fotos');
+      title = 'Registrar evolución';
+      notes = parts.length ? parts.join(', ') : null;
+      break;
+    }
+    case 'sesion': {
+      const mode = document.querySelector('input[name="exSesionMode"]:checked')?.value || 'presencial';
+      const hora = document.getElementById('ex-sesion-hora')?.value;
+      const nt   = document.getElementById('ex-sesion-notas')?.value.trim();
+      title = mode === 'presencial' ? 'Sesión presencial' : 'Sesión online';
+      notes = [hora ? `Hora: ${hora}` : '', nt].filter(Boolean).join(' · ') || null;
+      break;
+    }
+    case 'nutricion': {
+      const sel = document.getElementById('ex-nutricion-id');
+      const name = sel?.options[sel.selectedIndex]?.text;
+      if (!name || name === 'Seleccionar...') { showToast('Selecciona una dieta', 'error'); return; }
+      title = name;
+      break;
+    }
+    case 'otro':
+      title = 'Documento';
+      break;
+    case 'mensaje': {
+      const txt  = document.getElementById('ex-mensaje-texto')?.value.trim();
+      const hora = document.getElementById('ex-mensaje-hora')?.value;
+      if (!txt) { showToast('Escribe el mensaje', 'error'); return; }
+      title = hora ? `Mensaje a las ${hora}` : 'Mensaje programado';
+      notes = txt;
+      break;
+    }
+    case 'formulario': {
+      const sel = document.getElementById('ex-form-id');
+      const name = sel?.options[sel.selectedIndex]?.text;
+      if (!name || name === 'Seleccionar...') { showToast('Selecciona un formulario', 'error'); return; }
+      title = name;
+      break;
+    }
+  }
+
+  const repVal = document.querySelector('input[name="calRep"]:checked')?.value || 'no';
+  const rec    = repVal === 'weekly' ? 'weekly' : 'none';
+  const recEnd = document.getElementById('calTaskRecEnd')?.value;
 
   const payload = {
     client_user_detail_id: clientId,

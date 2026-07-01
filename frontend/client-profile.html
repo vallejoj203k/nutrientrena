@@ -3483,7 +3483,7 @@ async function openCalTaskModal(prefillDate) {
     if (dietSel) {
       const list = Array.isArray(dJ.data) ? dJ.data : (Array.isArray(dJ) ? dJ : []);
       dietSel.innerHTML = '<option value="">Seleccionar...</option>' +
-        list.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
+        list.map(d => `<option value="${d.id}">${esc(d.title || d.name)}</option>`).join('');
     }
 
     const formSel = document.getElementById('ex-form-id');

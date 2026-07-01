@@ -599,6 +599,22 @@
     .ent-pk-mu{font-size:10px;color:#9CA3AF;}
     .ent-pk-cancel{background:none;border:1.5px solid #E5E7EB;color:#6B7280;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;width:100%;transition:.1s;}
     .ent-pk-cancel:hover{border-color:#9CA3AF;}
+    /* drag-to-reorder */
+    .bld-drag-handle{width:24px;padding:0 4px;text-align:center;cursor:grab;color:#D1D5DB;vertical-align:middle;user-select:none;}
+    .bld-drag-handle:hover{color:#9CA3AF;}
+    .bld-drag-handle:active{cursor:grabbing;}
+    .bld-ex-row.bld-dragging{opacity:.3;background:#F3F4F6;}
+    .bld-ex-row.drop-above>td{border-top:2px solid #4F46E5 !important;background:#F5F3FF;}
+    .bld-ex-row.drop-below>td{border-bottom:2px solid #4F46E5 !important;background:#F5F3FF;}
+    @keyframes bldSlide{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+    .bld-ex-row.bld-ex-anim{animation:bldSlide .22s ease both;}
+    /* auto-growing notes */
+    .bld-notes-wrap{display:inline-grid;width:150px;vertical-align:top;}
+    .bld-notes-wrap::after{content:attr(data-value) "\00a0";visibility:hidden;white-space:pre-wrap;word-break:break-word;grid-area:1/1;font-size:12px;padding:5px 7px;border:1px solid transparent;pointer-events:none;font-family:inherit;line-height:1.4;}
+    .bld-notes-wrap textarea{grid-area:1/1;width:100%;resize:none;overflow:hidden;min-height:29px;font-family:inherit;font-size:12px;line-height:1.4;border:1px solid #E5E7EB;border-radius:6px;padding:5px 7px;outline:none;background:#fff;}
+    .bld-notes-wrap textarea:focus{border-color:#7C3AED;}
+    .bld-dup-btn{background:none;border:1px solid #E5E7EB;border-radius:6px;cursor:pointer;color:#6B7280;padding:4px 6px;display:inline-flex;align-items:center;transition:.1s;}
+    .bld-dup-btn:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF;}
   </style>
   <style>
 /* ── Screenshot redesign ── */
@@ -4031,6 +4047,10 @@ function closeEntBuilder() {
   document.getElementById('entBuilderOverlay').classList.remove('open');
 }
 
+const _GRIP_SVG = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="9" y1="5" x2="15" y2="5"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/><line x1="9" y1="21" x2="15" y2="21"/></svg>';
+const _COPY_SVG = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const _EDIT_SVG = '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+
 function _renderBuilderSidebar() {
   const days = _bld.days_list || [];
   const container = document.getElementById('entBldDays');
@@ -4042,9 +4062,9 @@ function _renderBuilderSidebar() {
     return `<div class="ent-bld-day${isSel?' sel':''}" onclick="selectBldDay(${i})">
       <div class="ent-bld-day-info">
         <div class="ent-bld-day-nm">${esc(nm)}</div>
-        <div class="ent-bld-day-meta">${exCount > 0 ? exCount + ' ejercicio' + (exCount !== 1 ? 's' : '') + ' · clic en ✏️ para renombrar' : '0 ejercicios · clic en ✏️ para renombrar'}</div>
+        <div class="ent-bld-day-meta">${exCount} ejercicio${exCount!==1?'s':''} · clic en ${_EDIT_SVG} para renombrar</div>
       </div>
-      <button class="ent-bld-day-edit" onclick="event.stopPropagation();renameBldDay(${i})" title="Renombrar">✏️</button>
+      <button class="ent-bld-day-edit" onclick="event.stopPropagation();renameBldDay(${i})" title="Renombrar">${_EDIT_SVG}</button>
       ${days.length > 1 ? `<button class="ent-bld-day-rm" onclick="event.stopPropagation();removeBldDay(${i})" title="Eliminar día">×</button>` : ''}
     </div>`;
   }).join('');
@@ -4064,20 +4084,21 @@ function _renderBuilderContent() {
   let exHtml;
   if (!exArr.length) {
     exHtml = `<div class="ent-bld-empty">
-      <div class="ent-bld-empty-ico">🏋️</div>
+      <div class="ent-bld-empty-ico"><svg width="36" height="36" fill="none" stroke="#D1D5DB" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/></svg></div>
       <p class="ent-bld-empty-txt">Sin ejercicios en ${esc(nm)}. Añade el primero.</p>
       <button class="ent-bld-add-ex" onclick="openEntPicker(${_bldDayIdx},null)">+ Añadir primer ejercicio</button>
     </div>`;
   } else {
-    const rows = exArr.map((ex, ei) => `<tr>
+    const rows = exArr.map((ex, ei) => `<tr class="bld-ex-row" draggable="true" data-di="${_bldDayIdx}" data-ei="${ei}">
+      <td class="bld-drag-handle" title="Arrastrar para reordenar">${_GRIP_SVG}</td>
       <td style="min-width:160px;">
-        <div style="font-weight:700;color:#111;font-size:13px;">${esc(ex.training_name || '')||'<em style="color:#9CA3AF">Sin nombre</em>'}</div>
-        <div style="font-size:10px;color:#9CA3AF;">${esc(ex.muscle_group_name || '')}</div>
-        <button onclick="openEntPicker(${_bldDayIdx},${ei})" style="background:none;border:none;cursor:pointer;color:#7C3AED;font-size:10px;padding:0;font-weight:600;">cambiar ↗</button>
+        <div style="font-weight:700;color:#111;font-size:13px;">${esc(ex.training_name||'')||'<em style="color:#9CA3AF">Sin nombre</em>'}</div>
+        <div style="font-size:10px;color:#9CA3AF;">${esc(ex.muscle_group_name||'')}</div>
+        <button onclick="openEntPicker(${_bldDayIdx},${ei})" style="background:none;border:none;cursor:pointer;color:#7C3AED;font-size:10px;padding:0;font-weight:600;">cambiar</button>
       </td>
-      <td style="width:60px;"><input type="number" min="1" max="20" value="${esc(ex.series)}" placeholder="—" oninput="updateBldEx(${_bldDayIdx},${ei},'series',this.value)"></td>
-      <td style="width:72px;"><input type="text" value="${esc(ex.repetitions)}" placeholder="8-12" oninput="updateBldEx(${_bldDayIdx},${ei},'repetitions',this.value)"></td>
-      <td style="width:70px;"><input type="number" value="${esc(ex.break_time)}" placeholder="seg" oninput="updateBldEx(${_bldDayIdx},${ei},'break_time',this.value)"></td>
+      <td style="width:58px;"><input type="number" min="1" max="20" value="${esc(ex.series)}" placeholder="—" onchange="updateBldEx(${_bldDayIdx},${ei},'series',this.value)"></td>
+      <td style="width:68px;"><input type="text" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateBldEx(${_bldDayIdx},${ei},'repetitions',this.value)"></td>
+      <td style="width:66px;"><input type="number" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateBldEx(${_bldDayIdx},${ei},'break_time',this.value)"></td>
       <td style="width:80px;"><select onchange="updateBldEx(${_bldDayIdx},${ei},'intensity_type',this.value)">
         <option value=""${!ex.intensity_type?' selected':''}>—</option>
         <option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option>
@@ -4085,17 +4106,25 @@ function _renderBuilderContent() {
         <option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option>
         <option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option>
       </select></td>
-      <td style="width:66px;"><input type="number" step="0.5" value="${esc(ex.intensity_value)}" placeholder="Val." oninput="updateBldEx(${_bldDayIdx},${ei},'intensity_value',this.value)"></td>
-      <td><input type="text" value="${esc(ex.notes)}" placeholder="Notas…" oninput="updateBldEx(${_bldDayIdx},${ei},'notes',this.value)"></td>
-      <td><button class="ent-ex-rm" onclick="removeBldEx(${_bldDayIdx},${ei})">×</button></td>
+      <td style="width:62px;"><input type="number" step="0.5" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateBldEx(${_bldDayIdx},${ei},'intensity_value',this.value)"></td>
+      <td style="vertical-align:top;">
+        <span class="bld-notes-wrap" data-value="${esc(ex.notes||'')}">
+          <textarea placeholder="Notas…" oninput="updateBldEx(${_bldDayIdx},${ei},'notes',this.value);this.parentNode.dataset.value=this.value">${esc(ex.notes||'')}</textarea>
+        </span>
+      </td>
+      <td style="white-space:nowrap;vertical-align:middle;">
+        <button class="bld-dup-btn" title="Duplicar" onclick="duplicateBldEx(${_bldDayIdx},${ei})">${_COPY_SVG}</button>
+        <button class="ent-ex-rm" onclick="removeBldEx(${_bldDayIdx},${ei})">×</button>
+      </td>
     </tr>`).join('');
 
     exHtml = `<div style="overflow-x:auto;margin-bottom:8px;">
       <table class="ent-ex-tbl">
         <thead><tr>
+          <th style="width:24px;"></th>
           <th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Intensidad</th><th>Valor</th><th>Notas</th><th></th>
         </tr></thead>
-        <tbody>${rows}</tbody>
+        <tbody id="entBldTbody">${rows}</tbody>
       </table>
     </div>
     <button class="ent-bld-add-ex-sm" onclick="openEntPicker(${_bldDayIdx},null)">
@@ -4118,6 +4147,8 @@ function _renderBuilderContent() {
       <label style="font-size:12px;font-weight:700;color:#6B7280;display:block;margin-bottom:6px;">Notas generales de la rutina</label>
       <textarea class="ent-notes-box" id="entBldNotes" placeholder="Ej: Semana 1 de fase de fuerza. Foco en técnica básica. Aumentar carga 2.5kg por semana." oninput="_bld.notes=this.value">${esc(_bld.notes || '')}</textarea>
     </div>`;
+
+  setupBldDrag();
 }
 
 function selectBldDay(idx) {
@@ -4160,7 +4191,7 @@ function updateBldEx(dayIdx, exIdx, field, value) {
   const dayItems = document.querySelectorAll('.ent-bld-day');
   if (dayItems[dayIdx]) {
     const meta = dayItems[dayIdx].querySelector('.ent-bld-day-meta');
-    if (meta) meta.textContent = exArr.length + ' ejercicio' + (exArr.length !== 1 ? 's' : '') + ' · clic en ✏️ para renombrar';
+    if (meta) meta.textContent = exArr.length + ' ejercicio' + (exArr.length !== 1 ? 's' : '');
   }
 }
 
@@ -4315,6 +4346,85 @@ async function saveBuilderChanges() {
     _renderEntTrainingUI();
   } catch { showToast('Error de conexión', 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
+}
+
+function setupBldDrag() {
+  const rows = document.querySelectorAll('.bld-ex-row');
+  let dragSrc = null;
+  rows.forEach(row => {
+    row.addEventListener('dragstart', e => {
+      if (!e.target.closest('.bld-drag-handle')) { e.preventDefault(); return; }
+      dragSrc = row;
+      setTimeout(() => row.classList.add('bld-dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('bld-dragging');
+      rows.forEach(r => r.classList.remove('drop-above', 'drop-below'));
+      dragSrc = null;
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!dragSrc || dragSrc === row) return;
+      e.dataTransfer.dropEffect = 'move';
+      rows.forEach(r => r.classList.remove('drop-above', 'drop-below'));
+      const rect = row.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      row.classList.add(e.clientY < mid ? 'drop-above' : 'drop-below');
+    });
+    row.addEventListener('dragleave', () => {
+      row.classList.remove('drop-above', 'drop-below');
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragSrc || dragSrc === row) return;
+      rows.forEach(r => r.classList.remove('drop-above', 'drop-below'));
+      const srcEi = parseInt(dragSrc.dataset.ei);
+      const tgtEi = parseInt(row.dataset.ei);
+      const rect = row.getBoundingClientRect();
+      const insertBefore = e.clientY < rect.top + rect.height / 2;
+      const dayIdx = parseInt(dragSrc.dataset.di);
+      const exArr = _bldExFromDay(dayIdx);
+      const [moved] = exArr.splice(srcEi, 1);
+      let insertIdx = tgtEi > srcEi ? tgtEi - 1 : tgtEi;
+      if (!insertBefore) insertIdx++;
+      exArr.splice(insertIdx, 0, moved);
+      exArr.forEach((ex, i) => { ex.order_index = i; });
+      _bldSetExInDay(dayIdx, exArr);
+      _renderBuilderContent();
+      _renderBuilderSidebar();
+      // Staggered animation
+      document.querySelectorAll('.bld-ex-row').forEach((r, i) => {
+        r.style.animationDelay = `${i * 30}ms`;
+        r.classList.add('bld-ex-anim');
+        r.addEventListener('animationend', () => r.classList.remove('bld-ex-anim'), { once: true });
+      });
+    });
+  });
+}
+
+function duplicateBldEx(dayIdx, exIdx) {
+  const exArr = _bldExFromDay(dayIdx);
+  const src = exArr[exIdx];
+  if (!src) return;
+  const copy = {
+    training_id: null,
+    training_name: '',
+    muscle_group_name: '',
+    series: src.series,
+    repetitions: src.repetitions,
+    break_time: src.break_time,
+    intensity_type: src.intensity_type,
+    intensity_value: src.intensity_value,
+    notes: src.notes,
+    order_index: exIdx + 1,
+  };
+  exArr.splice(exIdx + 1, 0, copy);
+  exArr.forEach((ex, i) => { ex.order_index = i; });
+  _bldSetExInDay(dayIdx, exArr);
+  _renderBuilderContent();
+  _renderBuilderSidebar();
+  openEntPicker(dayIdx, exIdx + 1);
 }
 
 async function loadSessions() {

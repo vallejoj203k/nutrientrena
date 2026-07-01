@@ -534,6 +534,71 @@
     .res-note-body{font-size:12px;color:#6B7280;line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
     @media(max-width:1100px){.res-stats{grid-template-columns:repeat(3,1fr);}.res-mid{grid-template-columns:1fr;}.res-bottom{grid-template-columns:1fr 1fr;}}
     @media(max-width:700px){.res-stats{grid-template-columns:1fr 1fr;}.res-bottom{grid-template-columns:1fr;}}
+
+    /* ── Routine Builder Overlay ── */
+    .ent-bld-overlay{position:fixed;inset:0;background:#fff;z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+    .ent-bld-overlay.open{transform:translateX(0);}
+    .ent-bld-bar{display:flex;align-items:center;gap:14px;padding:0 24px;height:64px;border-bottom:1px solid #E5E7EB;flex-shrink:0;background:#fff;}
+    .ent-bld-close{background:none;border:none;font-size:26px;color:#9CA3AF;cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
+    .ent-bld-close:hover{color:#111;}
+    .ent-bld-name{font-size:18px;font-weight:800;color:#111;background:none;border:none;border-bottom:2px solid #4F46E5;padding:2px 6px;width:280px;outline:none;font-family:inherit;}
+    .ent-bld-sub{font-size:12px;color:#9CA3AF;margin-left:2px;}
+    .ent-bld-body{display:flex;flex:1;overflow:hidden;}
+    .ent-bld-sidebar{width:230px;flex-shrink:0;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;background:#fff;}
+    .ent-bld-sb-hdr{padding:10px 16px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #F3F4F6;}
+    .ent-bld-days{flex:1;overflow-y:auto;}
+    .ent-bld-day{display:flex;align-items:center;padding:11px 14px;cursor:pointer;border-bottom:1px solid #F9FAFB;border-left:3px solid transparent;transition:.1s;}
+    .ent-bld-day.sel{background:#F5F3FF;border-left-color:#7C3AED;}
+    .ent-bld-day:hover:not(.sel){background:#FAFAFA;}
+    .ent-bld-day-info{flex:1;min-width:0;}
+    .ent-bld-day-nm{font-size:13px;font-weight:700;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ent-bld-day.sel .ent-bld-day-nm{color:#7C3AED;}
+    .ent-bld-day-meta{font-size:10px;color:#9CA3AF;margin-top:1px;}
+    .ent-bld-day-edit{background:none;border:none;cursor:pointer;color:#C4B5FD;font-size:13px;padding:3px 5px;opacity:0;transition:.1s;flex-shrink:0;}
+    .ent-bld-day-rm{background:none;border:none;cursor:pointer;color:#FCA5A5;font-size:17px;padding:3px 4px;opacity:0;transition:.1s;line-height:1;flex-shrink:0;}
+    .ent-bld-day:hover .ent-bld-day-edit,.ent-bld-day:hover .ent-bld-day-rm{opacity:1;}
+    .ent-bld-add-day{margin:10px 12px;border:1.5px dashed #D1D5DB;border-radius:8px;padding:8px;width:calc(100% - 24px);cursor:pointer;color:#9CA3AF;font-size:12px;font-weight:600;background:none;transition:.15s;text-align:center;}
+    .ent-bld-add-day:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF;}
+    .ent-bld-content{flex:1;overflow-y:auto;padding:24px 28px;}
+    .ent-bld-day-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .ent-bld-day-title{font-size:20px;font-weight:800;color:#111;display:flex;align-items:center;gap:10px;cursor:pointer;}
+    .ent-bld-day-hint{font-size:12px;color:#D1D5DB;font-weight:400;}
+    .ent-bld-ex-count{font-size:13px;color:#9CA3AF;}
+    .ent-bld-empty{background:#F9FAFB;border:1.5px dashed #E5E7EB;border-radius:12px;padding:48px 24px;text-align:center;margin-bottom:20px;}
+    .ent-bld-empty-ico{font-size:36px;margin-bottom:10px;}
+    .ent-bld-empty-txt{font-size:13px;color:#9CA3AF;margin:0 0 16px;}
+    .ent-bld-add-ex{background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
+    .ent-bld-add-ex:hover{background:#6D28D9;}
+    .ent-bld-add-ex-sm{background:none;border:1.5px solid #E5E7EB;color:#6B7280;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;margin-top:8px;}
+    .ent-bld-add-ex-sm:hover{border-color:#7C3AED;color:#7C3AED;}
+    /* exercise table */
+    .ent-ex-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4px;}
+    .ent-ex-tbl th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;}
+    .ent-ex-tbl td{padding:9px 10px;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
+    .ent-ex-tbl input,.ent-ex-tbl select{border:1px solid #E5E7EB;border-radius:6px;padding:5px 7px;font-size:12px;background:#fff;outline:none;font-family:inherit;width:100%;}
+    .ent-ex-tbl input:focus,.ent-ex-tbl select:focus{border-color:#7C3AED;}
+    .ent-ex-rm{background:none;border:none;cursor:pointer;color:#FCA5A5;font-size:17px;padding:4px;line-height:1;transition:.1s;}
+    .ent-ex-rm:hover{color:#EF4444;}
+    .ent-notes-box{border:1px solid #E5E7EB;border-radius:10px;padding:14px 16px;font-size:13px;width:100%;box-sizing:border-box;resize:vertical;min-height:80px;font-family:inherit;color:#374151;outline:none;}
+    .ent-notes-box:focus{border-color:#7C3AED;}
+    /* exercise picker */
+    .ent-pk-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;}
+    .ent-pk{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:540px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.22);}
+    .ent-pk-title{font-size:15px;font-weight:800;color:#111;margin-bottom:12px;}
+    .ent-pk-search{border:1.5px solid #E5E7EB;border-radius:10px;padding:9px 14px;font-size:14px;width:100%;box-sizing:border-box;outline:none;margin-bottom:10px;font-family:inherit;}
+    .ent-pk-search:focus{border-color:#7C3AED;}
+    .ent-pk-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+    .ent-pk-pill{padding:4px 11px;border-radius:20px;border:1.5px solid #E5E7EB;background:#fff;font-size:11px;font-weight:600;color:#6B7280;cursor:pointer;transition:.1s;}
+    .ent-pk-pill:hover,.ent-pk-pill.active{border-color:#7C3AED;background:#F5F3FF;color:#7C3AED;}
+    .ent-pk-results{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+    .ent-pk-item{border:1.5px solid #E5E7EB;border-radius:10px;padding:10px 8px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
+    .ent-pk-item:hover{border-color:#7C3AED;background:#F5F3FF;}
+    .ent-pk-img{width:44px;height:44px;border-radius:8px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#4F46E5;overflow:hidden;flex-shrink:0;}
+    .ent-pk-img img{width:100%;height:100%;object-fit:cover;border-radius:8px;}
+    .ent-pk-nm{font-size:11px;font-weight:700;color:#374151;line-height:1.3;}
+    .ent-pk-mu{font-size:10px;color:#9CA3AF;}
+    .ent-pk-cancel{background:none;border:1.5px solid #E5E7EB;color:#6B7280;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;width:100%;transition:.1s;}
+    .ent-pk-cancel:hover{border-color:#9CA3AF;}
   </style>
   <style>
 /* ── Screenshot redesign ── */
@@ -2984,6 +3049,45 @@ async function saveTarget() {
   </div>
 </div>
 
+<!-- ── Routine Builder Overlay ── -->
+<div class="ent-bld-overlay" id="entBuilderOverlay">
+  <div class="ent-bld-bar">
+    <button class="ent-bld-close" onclick="closeEntBuilder()">×</button>
+    <div style="flex:1;min-width:0;">
+      <input class="ent-bld-name" id="entBldName" type="text" placeholder="Nombre de la rutina">
+      <div class="ent-bld-sub" id="entBldSub">Constructor de rutina</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <select id="entBldPlace" style="border:1.5px solid #E5E7EB;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:#374151;background:#fff;outline:none;cursor:pointer;">
+        <option value="Gimnasio">Gimnasio</option>
+        <option value="Casa">Casa</option>
+        <option value="Casa con equipo">Casa con equipo</option>
+        <option value="Al aire libre">Al aire libre</option>
+      </select>
+      <button class="btn" style="background:#22C55E;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;" id="entBldSaveBtn" onclick="saveBuilderChanges()">Guardar cambios</button>
+    </div>
+  </div>
+  <div class="ent-bld-body">
+    <div class="ent-bld-sidebar">
+      <div class="ent-bld-sb-hdr">Días de entrenamiento</div>
+      <div class="ent-bld-days" id="entBldDays"></div>
+      <button class="ent-bld-add-day" onclick="addBuilderDay()">+ Añadir día</button>
+    </div>
+    <div class="ent-bld-content" id="entBldContent"></div>
+  </div>
+</div>
+
+<!-- ── Exercise Picker (builder) ── -->
+<div class="ent-pk-overlay" id="entPkOverlay" style="display:none;" onclick="if(event.target===this)closeEntPicker()">
+  <div class="ent-pk">
+    <div class="ent-pk-title">Seleccionar ejercicio</div>
+    <input class="ent-pk-search" id="entPkSearch" type="text" placeholder="Buscar ejercicio…" oninput="searchEntPicker()">
+    <div class="ent-pk-pills" id="entPkPills"></div>
+    <div class="ent-pk-results" id="entPkResults"></div>
+    <button class="ent-pk-cancel" onclick="closeEntPicker()">Cancelar</button>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════
    CALENDARIO TAB  (v2 — calendar_tasks API)
@@ -3836,6 +3940,10 @@ function _renderEntDayContent(day, idx) {
         <h4 style="font-size:16px;font-weight:800;color:#111;margin:0 0 2px;">${dayAbr} · ${esc(label)}</h4>
         <p style="font-size:12px;color:#9CA3AF;margin:0;">${allEx.length} ejercicio${allEx.length!==1?'s':''}</p>
       </div>
+      <button onclick="openEntBuilder(${idx})" style="display:flex;align-items:center;gap:6px;border:1.5px solid #7C3AED;color:#7C3AED;background:#fff;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;flex-shrink:0;">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar este día
+      </button>
     </div>
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
@@ -3866,6 +3974,347 @@ function _downloadEntPdf() {
   const r = clientRoutines[0];
   if (!r || !r.id) { showToast('Sin rutina asignada', 'error'); return; }
   window.open(`${API}/routines/${r.id}/pdf`, '_blank');
+}
+
+/* ══════════════════════════════════════════════
+   ROUTINE BUILDER (client-profile inline editor)
+══════════════════════════════════════════════ */
+let _bld = null;        // working copy of routine being edited
+let _bldDayIdx = 0;    // selected day in builder
+let _bldPkDayIdx = null; // day index for picker target
+let _bldPkExIdx = null;  // exercise index for replace (null = add new)
+let _bldMgs = [];       // muscle groups cache
+let _bldPkTimer = null;
+
+function _deepCopy(o) { return JSON.parse(JSON.stringify(o)); }
+
+function _bldExFromDay(dayIdx) {
+  const day = (_bld.days_list || [])[dayIdx];
+  if (!day) return [];
+  const block = (day.blocks || [])[0];
+  return (block && block.exercises) || [];
+}
+
+function _bldSetExInDay(dayIdx, exArr) {
+  const days = _bld.days_list || [];
+  if (!days[dayIdx]) return;
+  if (!days[dayIdx].blocks || !days[dayIdx].blocks.length) {
+    days[dayIdx].blocks = [{ block_type: 'normal', order_index: 0, exercises: [] }];
+  }
+  days[dayIdx].blocks[0].exercises = exArr;
+}
+
+function openEntBuilder(dayIdx) {
+  if (!clientRoutines.length) return;
+  _bld = _deepCopy(clientRoutines[0]);
+  // Normalize days_list fields
+  (_bld.days_list || []).forEach((d, i) => {
+    if (!d.day_name && (d.label || d.name)) d.day_name = d.label || d.name || `Día ${i+1}`;
+    if (!d.blocks) d.blocks = [{ block_type: 'normal', order_index: 0, exercises: [] }];
+    if (!d.blocks[0]) d.blocks.push({ block_type: 'normal', order_index: 0, exercises: [] });
+    (d.blocks[0].exercises || []).forEach((ex, ei) => { ex.order_index = ei; });
+  });
+  _bldDayIdx = dayIdx || 0;
+  const r = clientRoutines[0];
+  document.getElementById('entBldName').value = r.name || '';
+  document.getElementById('entBldSub').textContent = `Constructor de rutina · ${(clientData?.first_name || '') + ' ' + (clientData?.last_name || '')}`.trim() || 'Constructor de rutina';
+  const placeEl = document.getElementById('entBldPlace');
+  const place = r.training || 'Gimnasio';
+  for (let o of placeEl.options) o.selected = o.value === place;
+  document.getElementById('entBuilderOverlay').classList.add('open');
+  _renderBuilderSidebar();
+  _renderBuilderContent();
+  _loadBldMuscleGroups();
+}
+
+function closeEntBuilder() {
+  document.getElementById('entBuilderOverlay').classList.remove('open');
+}
+
+function _renderBuilderSidebar() {
+  const days = _bld.days_list || [];
+  const container = document.getElementById('entBldDays');
+  if (!container) return;
+  container.innerHTML = days.map((day, i) => {
+    const nm = day.day_name || `Día ${i+1}`;
+    const exCount = _bldExFromDay(i).length;
+    const isSel = i === _bldDayIdx;
+    return `<div class="ent-bld-day${isSel?' sel':''}" onclick="selectBldDay(${i})">
+      <div class="ent-bld-day-info">
+        <div class="ent-bld-day-nm">${esc(nm)}</div>
+        <div class="ent-bld-day-meta">${exCount > 0 ? exCount + ' ejercicio' + (exCount !== 1 ? 's' : '') + ' · clic en ✏️ para renombrar' : '0 ejercicios · clic en ✏️ para renombrar'}</div>
+      </div>
+      <button class="ent-bld-day-edit" onclick="event.stopPropagation();renameBldDay(${i})" title="Renombrar">✏️</button>
+      ${days.length > 1 ? `<button class="ent-bld-day-rm" onclick="event.stopPropagation();removeBldDay(${i})" title="Eliminar día">×</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function _renderBuilderContent() {
+  const container = document.getElementById('entBldContent');
+  if (!container) return;
+  const days = _bld.days_list || [];
+  const day = days[_bldDayIdx];
+  if (!day) { container.innerHTML = '<p style="color:#9CA3AF;">Sin días.</p>'; return; }
+  const nm = day.day_name || `Día ${_bldDayIdx + 1}`;
+  const exArr = _bldExFromDay(_bldDayIdx);
+  const DAY_ABR = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+  const abr = DAY_ABR[_bldDayIdx] || '';
+
+  let exHtml;
+  if (!exArr.length) {
+    exHtml = `<div class="ent-bld-empty">
+      <div class="ent-bld-empty-ico">🏋️</div>
+      <p class="ent-bld-empty-txt">Sin ejercicios en ${esc(nm)}. Añade el primero.</p>
+      <button class="ent-bld-add-ex" onclick="openEntPicker(${_bldDayIdx},null)">+ Añadir primer ejercicio</button>
+    </div>`;
+  } else {
+    const rows = exArr.map((ex, ei) => `<tr>
+      <td style="min-width:160px;">
+        <div style="font-weight:700;color:#111;font-size:13px;">${esc(ex.training_name || '')||'<em style="color:#9CA3AF">Sin nombre</em>'}</div>
+        <div style="font-size:10px;color:#9CA3AF;">${esc(ex.muscle_group_name || '')}</div>
+        <button onclick="openEntPicker(${_bldDayIdx},${ei})" style="background:none;border:none;cursor:pointer;color:#7C3AED;font-size:10px;padding:0;font-weight:600;">cambiar ↗</button>
+      </td>
+      <td style="width:60px;"><input type="number" min="1" max="20" value="${esc(ex.series)}" placeholder="—" oninput="updateBldEx(${_bldDayIdx},${ei},'series',this.value)"></td>
+      <td style="width:72px;"><input type="text" value="${esc(ex.repetitions)}" placeholder="8-12" oninput="updateBldEx(${_bldDayIdx},${ei},'repetitions',this.value)"></td>
+      <td style="width:70px;"><input type="number" value="${esc(ex.break_time)}" placeholder="seg" oninput="updateBldEx(${_bldDayIdx},${ei},'break_time',this.value)"></td>
+      <td style="width:80px;"><select onchange="updateBldEx(${_bldDayIdx},${ei},'intensity_type',this.value)">
+        <option value=""${!ex.intensity_type?' selected':''}>—</option>
+        <option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option>
+        <option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option>
+        <option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option>
+        <option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option>
+      </select></td>
+      <td style="width:66px;"><input type="number" step="0.5" value="${esc(ex.intensity_value)}" placeholder="Val." oninput="updateBldEx(${_bldDayIdx},${ei},'intensity_value',this.value)"></td>
+      <td><input type="text" value="${esc(ex.notes)}" placeholder="Notas…" oninput="updateBldEx(${_bldDayIdx},${ei},'notes',this.value)"></td>
+      <td><button class="ent-ex-rm" onclick="removeBldEx(${_bldDayIdx},${ei})">×</button></td>
+    </tr>`).join('');
+
+    exHtml = `<div style="overflow-x:auto;margin-bottom:8px;">
+      <table class="ent-ex-tbl">
+        <thead><tr>
+          <th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Intensidad</th><th>Valor</th><th>Notas</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <button class="ent-bld-add-ex-sm" onclick="openEntPicker(${_bldDayIdx},null)">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Agregar ejercicio
+    </button>`;
+  }
+
+  container.innerHTML = `
+    <div class="ent-bld-day-hdr">
+      <div class="ent-bld-day-title" ondblclick="renameBldDay(${_bldDayIdx})">
+        ${abr ? `<span style="font-size:13px;color:#9CA3AF;font-weight:700;">${abr}</span>` : ''}
+        ${esc(nm)}
+        <span class="ent-bld-day-hint">· doble clic para renombrar</span>
+      </div>
+      <span class="ent-bld-ex-count">${exArr.length} ejercicio${exArr.length !== 1 ? 's' : ''}</span>
+    </div>
+    ${exHtml}
+    <div style="margin-top:20px;">
+      <label style="font-size:12px;font-weight:700;color:#6B7280;display:block;margin-bottom:6px;">Notas generales de la rutina</label>
+      <textarea class="ent-notes-box" id="entBldNotes" placeholder="Ej: Semana 1 de fase de fuerza. Foco en técnica básica. Aumentar carga 2.5kg por semana." oninput="_bld.notes=this.value">${esc(_bld.notes || '')}</textarea>
+    </div>`;
+}
+
+function selectBldDay(idx) {
+  _bldDayIdx = idx;
+  _renderBuilderSidebar();
+  _renderBuilderContent();
+}
+
+function addBuilderDay() {
+  if (!_bld.days_list) _bld.days_list = [];
+  const n = _bld.days_list.length + 1;
+  _bld.days_list.push({ day_name: `Día ${n}`, description: '', blocks: [{ block_type: 'normal', order_index: 0, exercises: [] }] });
+  _bldDayIdx = _bld.days_list.length - 1;
+  _renderBuilderSidebar();
+  _renderBuilderContent();
+}
+
+function removeBldDay(idx) {
+  if ((_bld.days_list || []).length <= 1) { showToast('Debe haber al menos un día', 'error'); return; }
+  _bld.days_list.splice(idx, 1);
+  if (_bldDayIdx >= _bld.days_list.length) _bldDayIdx = _bld.days_list.length - 1;
+  _renderBuilderSidebar();
+  _renderBuilderContent();
+}
+
+function renameBldDay(idx) {
+  const day = (_bld.days_list || [])[idx];
+  if (!day) return;
+  const name = prompt('Nombre del día:', day.day_name || `Día ${idx + 1}`);
+  if (name === null) return;
+  day.day_name = name.trim() || day.day_name;
+  _renderBuilderSidebar();
+  if (idx === _bldDayIdx) _renderBuilderContent();
+}
+
+function updateBldEx(dayIdx, exIdx, field, value) {
+  const exArr = _bldExFromDay(dayIdx);
+  if (exArr[exIdx]) exArr[exIdx][field] = value;
+  // Sync count in sidebar without full re-render
+  const dayItems = document.querySelectorAll('.ent-bld-day');
+  if (dayItems[dayIdx]) {
+    const meta = dayItems[dayIdx].querySelector('.ent-bld-day-meta');
+    if (meta) meta.textContent = exArr.length + ' ejercicio' + (exArr.length !== 1 ? 's' : '') + ' · clic en ✏️ para renombrar';
+  }
+}
+
+function removeBldEx(dayIdx, exIdx) {
+  const exArr = _bldExFromDay(dayIdx);
+  exArr.splice(exIdx, 1);
+  exArr.forEach((ex, i) => { ex.order_index = i; });
+  _bldSetExInDay(dayIdx, exArr);
+  _renderBuilderContent();
+  _renderBuilderSidebar();
+}
+
+/* ── Exercise Picker ── */
+async function _loadBldMuscleGroups() {
+  if (_bldMgs.length) { _renderBldPkPills(); return; }
+  try {
+    const r = await fetch(`${API}/muscle-groups/findAll`, { headers: h() });
+    const j = await r.json();
+    _bldMgs = j.data || [];
+    _renderBldPkPills();
+  } catch {}
+}
+
+let _bldPkMgFilter = null;
+
+function openEntPicker(dayIdx, replaceExIdx) {
+  _bldPkDayIdx = dayIdx;
+  _bldPkExIdx = replaceExIdx; // null = add new, number = replace
+  _bldPkMgFilter = null;
+  document.getElementById('entPkSearch').value = '';
+  document.getElementById('entPkOverlay').style.display = 'flex';
+  _renderBldPkPills();
+  _fetchBldPkResults('');
+}
+
+function closeEntPicker() {
+  document.getElementById('entPkOverlay').style.display = 'none';
+}
+
+function _renderBldPkPills() {
+  const c = document.getElementById('entPkPills');
+  if (!c) return;
+  c.innerHTML = `<button class="ent-pk-pill${!_bldPkMgFilter?' active':''}" onclick="setBldPkMg(null)">Todos</button>` +
+    _bldMgs.map(mg => `<button class="ent-pk-pill${_bldPkMgFilter===mg.id?' active':''}" onclick="setBldPkMg(${mg.id})">${esc(mg.name)}</button>`).join('');
+}
+
+function setBldPkMg(id) {
+  _bldPkMgFilter = id;
+  _renderBldPkPills();
+  _fetchBldPkResults(document.getElementById('entPkSearch')?.value || '');
+}
+
+function searchEntPicker() {
+  clearTimeout(_bldPkTimer);
+  _bldPkTimer = setTimeout(() => _fetchBldPkResults(document.getElementById('entPkSearch')?.value || ''), 300);
+}
+
+async function _fetchBldPkResults(search) {
+  const params = new URLSearchParams({ per_page: 30 });
+  if (search) params.set('search', search);
+  if (_bldPkMgFilter) params.set('muscle_group_id', _bldPkMgFilter);
+  const c = document.getElementById('entPkResults');
+  if (!c) return;
+  c.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Buscando…</div>';
+  try {
+    const r = await fetch(`${API}/trainings/search?${params}`, { headers: h() });
+    const j = await r.json();
+    const items = j.data?.data || j.data || [];
+    if (!items.length) { c.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Sin resultados.</div>'; return; }
+    c.innerHTML = items.map(ex => `<div class="ent-pk-item" onclick="selectBldExercise(${ex.id},'${esc(ex.name)}','${esc(ex.muscle_group_name||'')}')">
+      <div class="ent-pk-img">${ex.image ? `<img src="${esc(ex.image)}" alt="">` : (ex.muscle_group_name ? esc(ex.muscle_group_name[0]) : '?')}</div>
+      <div class="ent-pk-nm">${esc(ex.name)}</div>
+      <div class="ent-pk-mu">${esc(ex.muscle_group_name || '—')}</div>
+    </div>`).join('');
+  } catch {
+    c.innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al buscar.</div>';
+  }
+}
+
+function selectBldExercise(id, name, muscleName) {
+  const dayIdx = _bldPkDayIdx;
+  const exArr = _bldExFromDay(dayIdx);
+  if (_bldPkExIdx !== null && exArr[_bldPkExIdx]) {
+    // Replace exercise identity, keep specs
+    exArr[_bldPkExIdx].training_id = id;
+    exArr[_bldPkExIdx].training_name = name;
+    exArr[_bldPkExIdx].muscle_group_name = muscleName;
+  } else {
+    exArr.push({ training_id: id, training_name: name, muscle_group_name: muscleName, series: null, repetitions: '', break_time: null, intensity_type: '', intensity_value: null, notes: '', order_index: exArr.length });
+  }
+  _bldSetExInDay(dayIdx, exArr);
+  closeEntPicker();
+  _renderBuilderContent();
+  _renderBuilderSidebar();
+}
+
+async function saveBuilderChanges() {
+  const btn = document.getElementById('entBldSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+  const routine = clientRoutines[0];
+  if (!routine) return;
+
+  // Collect values from inputs (some may not have triggered oninput)
+  _bld.name = document.getElementById('entBldName').value.trim() || _bld.name;
+  _bld.training = document.getElementById('entBldPlace').value;
+  _bld.notes = document.getElementById('entBldNotes')?.value ?? _bld.notes;
+
+  const payload = {
+    name: _bld.name,
+    training: _bld.training,
+    notes: _bld.notes,
+    days: _bld.days,
+    time: _bld.time,
+    gender_id: _bld.gender_id,
+    training_level_id: _bld.training_level_id,
+    days_list: (_bld.days_list || []).map((day, di) => ({
+      day_name: day.day_name || `Día ${di + 1}`,
+      description: day.description || '',
+      blocks: (day.blocks || []).map((blk, bi) => ({
+        block_type: blk.block_type || 'normal',
+        order_index: bi,
+        exercises: (blk.exercises || []).map((ex, ei) => ({
+          training_id: ex.training_id,
+          training_name: ex.training_name,
+          muscle_group_name: ex.muscle_group_name,
+          series: ex.series ? parseInt(ex.series) : null,
+          repetitions: ex.repetitions || '',
+          break_time: ex.break_time ? parseInt(ex.break_time) : null,
+          intensity_type: ex.intensity_type || '',
+          intensity_value: ex.intensity_value ? parseFloat(ex.intensity_value) : null,
+          notes: ex.notes || '',
+          order_index: ei,
+        })),
+      })),
+    })),
+  };
+
+  try {
+    const r = await fetch(`${API}/routines/${routine.id}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify(payload),
+    });
+    const j = await r.json();
+    if (!r.ok) { showToast(j.detail || j.message || 'Error al guardar', 'error'); return; }
+    // Merge updated data back into clientRoutines[0]
+    Object.assign(clientRoutines[0], _bld, { name: payload.name, training: payload.training });
+    _entDetailLoaded = true;
+    closeEntBuilder();
+    showToast('Cambios guardados', 'success');
+    _renderEntTrainingUI();
+  } catch { showToast('Error de conexión', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
 }
 
 async function loadSessions() {

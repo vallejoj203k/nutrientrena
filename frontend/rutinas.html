@@ -225,6 +225,20 @@
     .rp-next-btn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--indigo);color:#fff;margin-top:20px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
     .rp-next-btn:hover{background:var(--indigo-dark);}
 
+    /* ── Exercise drag & duplicate ── */
+    .ex-th-drag{width:26px;padding:0 6px !important;}
+    .ex-drag-handle{width:26px;padding:0 6px;text-align:center;cursor:grab;color:#D1D5DB;vertical-align:middle;user-select:none;}
+    .ex-drag-handle:hover{color:#9CA3AF;}
+    .ex-drag-handle:active{cursor:grabbing;}
+    .ex-row{transition:background .1s;}
+    .ex-row.ex-dragging{opacity:.3;background:#F3F4F6;}
+    .ex-row.drop-above>td{border-top:2px solid var(--indigo) !important;background:#F5F3FF;}
+    .ex-row.drop-below>td{border-bottom:2px solid var(--indigo) !important;background:#F5F3FF;}
+    @keyframes exSlide{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+    .ex-row.ex-anim{animation:exSlide .22s ease both;}
+    .btn-dup{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:4px;display:inline-flex;align-items:center;border-radius:4px;transition:.15s;vertical-align:middle;}
+    .btn-dup:hover{color:var(--indigo);background:#EEF2FF;}
+
     .nav-dropdown{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:background .2s,color .2s,border-color .2s;border-left:3px solid transparent;user-select:none;}
     .nav-dropdown:hover{background:#F8FAFC;color:var(--indigo);}
     .nav-dropdown.open{background:linear-gradient(90deg,#EEF2FF 0%,#F5F3FF 100%);color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
@@ -917,12 +931,92 @@ function renderBlocks(){
   if(!day.blocks.length){container.innerHTML=`<div class="empty-day"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>Usa el botón "+ Bloque" para agregar bloques de ejercicios.</p></div>`;return;}
   container.innerHTML=day.blocks.map((blk,bi)=>{
     const label=BLOCK_LABELS[blk.block_type]||blk.block_type;
-    const rows=blk.exercises.map((ex,ei)=>`<tr data-bi="${bi}" data-ei="${ei}"><td><span class="ex-name">${esc(ex.training_name)||'<em style="color:#9CA3AF">Sin nombre</em>'}</span><span class="ex-muscle">${esc(ex.muscle_group_name)}</span></td><td><input type="number" min="1" max="20" style="width:52px" value="${esc(ex.series)}" placeholder="—" onchange="updateEx(${bi},${ei},'series',this.value)"/></td><td><input type="text" style="width:64px" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateEx(${bi},${ei},'repetitions',this.value)"/></td><td><input type="number" style="width:60px" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateEx(${bi},${ei},'break_time',this.value)"/></td><td><select style="width:72px" onchange="updateEx(${bi},${ei},'intensity_type',this.value)"><option value=""${!ex.intensity_type?' selected':''}>—</option><option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option><option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option><option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option><option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option></select></td><td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td><td><input type="text" style="width:90px" value="${esc(ex.notes)}" placeholder="Notas…" onchange="updateEx(${bi},${ei},'notes',this.value)"/></td><td><button style="background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;display:flex;align-items:center;" onclick="removeExercise(${bi},${ei})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>`).join('');
-    return`<div class="block" data-block-idx="${bi}"><div class="block-header"><span class="block-badge ${blk.block_type}">${label}</span><button class="block-rm" onclick="removeBlock(${bi})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>${blk.exercises.length?`<table class="exercise-table"><thead><tr><th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Intensidad</th><th>Valor</th><th>Notas</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:''}<button class="add-exercise-btn" onclick="openPicker(${bi})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar ejercicio</button></div>`;
+    const GRIP='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="9" y1="5" x2="15" y2="5"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/><line x1="9" y1="21" x2="15" y2="21"/></svg>';
+    const COPY_ICO='<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    const rows=blk.exercises.map((ex,ei)=>`<tr class="ex-row" draggable="true" data-bi="${bi}" data-ei="${ei}"><td class="ex-drag-handle" title="Arrastrar para reordenar">${GRIP}</td><td><span class="ex-name">${esc(ex.training_name)||'<em style="color:#9CA3AF">Sin nombre</em>'}</span><span class="ex-muscle">${esc(ex.muscle_group_name)}</span></td><td><input type="number" min="1" max="20" style="width:52px" value="${esc(ex.series)}" placeholder="—" onchange="updateEx(${bi},${ei},'series',this.value)"/></td><td><input type="text" style="width:64px" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateEx(${bi},${ei},'repetitions',this.value)"/></td><td><input type="number" style="width:60px" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateEx(${bi},${ei},'break_time',this.value)"/></td><td><select style="width:72px" onchange="updateEx(${bi},${ei},'intensity_type',this.value)"><option value=""${!ex.intensity_type?' selected':''}>—</option><option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option><option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option><option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option><option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option></select></td><td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td><td><input type="text" style="width:90px" value="${esc(ex.notes)}" placeholder="Notas…" onchange="updateEx(${bi},${ei},'notes',this.value)"/></td><td style="white-space:nowrap"><button class="btn-dup" title="Duplicar" onclick="duplicateExercise(${bi},${ei})">${COPY_ICO}</button><button style="background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;display:inline-flex;align-items:center;border-radius:4px;" onclick="removeExercise(${bi},${ei})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>`).join('');
+    return`<div class="block" data-block-idx="${bi}"><div class="block-header"><span class="block-badge ${blk.block_type}">${label}</span><button class="block-rm" onclick="removeBlock(${bi})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>${blk.exercises.length?`<table class="exercise-table"><thead><tr><th class="ex-th-drag"></th><th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Intensidad</th><th>Valor</th><th>Notas</th><th></th></tr></thead><tbody data-bi="${bi}">${rows}</tbody></table>`:''}<button class="add-exercise-btn" onclick="openPicker(${bi})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar ejercicio</button></div>`;
   }).join('');
+  setupExerciseDrag();
 }
 function updateEx(bi,ei,field,value){const ex=routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei];if(field==='series'||field==='break_time')ex[field]=parseInt(value)||null;else if(field==='intensity_value')ex[field]=parseFloat(value)||null;else ex[field]=value;}
 function removeExercise(bi,ei){routineData.days_list[selectedDayIdx].blocks[bi].exercises.splice(ei,1);renderBlocks();}
+
+function duplicateExercise(bi,ei){
+  const blk=routineData.days_list[selectedDayIdx].blocks[bi];
+  const src=blk.exercises[ei];
+  const copy=Object.assign({},src);
+  blk.exercises.splice(ei+1,0,copy);
+  blk.exercises.forEach((e,i)=>{e.order_index=i;});
+  renderBlocks();
+  // highlight the duplicate
+  setTimeout(()=>{
+    const rows=document.querySelectorAll(`.ex-row[data-bi="${bi}"][data-ei="${ei+1}"]`);
+    rows.forEach(r=>{r.style.background='#EEF2FF';setTimeout(()=>{r.style.background='';},600);});
+  },50);
+}
+
+let _exDrag={srcBi:null,srcEi:null,active:false};
+function setupExerciseDrag(){
+  document.querySelectorAll('.ex-row').forEach(row=>{
+    // only start drag from the grip handle
+    row.addEventListener('mousedown',e=>{
+      row.draggable=!!e.target.closest('.ex-drag-handle');
+    });
+    row.addEventListener('dragstart',e=>{
+      if(!row.draggable)return;
+      _exDrag.srcBi=parseInt(row.dataset.bi);
+      _exDrag.srcEi=parseInt(row.dataset.ei);
+      _exDrag.active=true;
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain','');
+      setTimeout(()=>row.classList.add('ex-dragging'),0);
+    });
+    row.addEventListener('dragend',()=>{
+      row.classList.remove('ex-dragging');
+      row.draggable=true;
+      _exDrag.active=false;
+      document.querySelectorAll('.drop-above,.drop-below').forEach(r=>r.classList.remove('drop-above','drop-below'));
+    });
+    row.addEventListener('dragover',e=>{
+      if(!_exDrag.active)return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      document.querySelectorAll('.drop-above,.drop-below').forEach(r=>r.classList.remove('drop-above','drop-below'));
+      const mid=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;
+      row.classList.add(e.clientY<mid?'drop-above':'drop-below');
+    });
+    row.addEventListener('dragleave',e=>{
+      if(!e.relatedTarget||!row.contains(e.relatedTarget))
+        row.classList.remove('drop-above','drop-below');
+    });
+    row.addEventListener('drop',e=>{
+      e.preventDefault();
+      row.classList.remove('drop-above','drop-below');
+      const tgtBi=parseInt(row.dataset.bi);
+      const tgtEi=parseInt(row.dataset.ei);
+      if(!_exDrag.active||_exDrag.srcBi===null)return;
+      if(_exDrag.srcBi!==tgtBi){showToast('Solo puedes reordenar dentro del mismo bloque','error');return;}
+      if(_exDrag.srcEi===tgtEi){return;}
+      const blk=routineData.days_list[selectedDayIdx].blocks[tgtBi];
+      const mid=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;
+      let insertAt=e.clientY<mid?tgtEi:tgtEi+1;
+      const [moved]=blk.exercises.splice(_exDrag.srcEi,1);
+      if(_exDrag.srcEi<insertAt)insertAt--;
+      blk.exercises.splice(insertAt,0,moved);
+      blk.exercises.forEach((ex,i)=>{ex.order_index=i;});
+      _exDrag={srcBi:null,srcEi:null,active:false};
+      renderBlocks();
+      // staggered slide-in animation for all rows after reorder
+      let i=0;
+      document.querySelectorAll('.ex-row').forEach(r=>{
+        r.style.animationDelay=`${i*28}ms`;
+        r.classList.add('ex-anim');
+        i++;
+        r.addEventListener('animationend',()=>{r.classList.remove('ex-anim');r.style.animationDelay='';},{once:true});
+      });
+    });
+  });
+}
 
 async function saveRoutine(){
   if(!routineData.name){showToast('El nombre es obligatorio','error');return;}

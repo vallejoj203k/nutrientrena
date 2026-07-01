@@ -1444,8 +1444,11 @@ async function loadClient() {
 
     const [dietR, routineR] = clientPlansRes;
     if (dietR.ok) {
-      const arr = ((await dietR.json()).data || []);
+      const dietRaw = await dietR.json();
+      console.log('[NUT] /diets/client raw:', JSON.stringify(dietRaw).slice(0, 600));
+      const arr = (dietRaw.data || []);
       clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
+      console.log('[NUT] clientDiets after parse:', clientDiets.length, clientDiets);
       if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
     }
     if (routineR.ok) {
@@ -4714,6 +4717,8 @@ async function renderNutricionTab() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
 
+  console.log('[NUT] clientDiets:', clientDiets.length, clientDiets.map(d => d.id + ' ' + d.title));
+
   if (!clientDiets.length) {
     el.innerHTML = `<div style="padding:40px;text-align:center;color:#9CA3AF;">
       <div style="margin-bottom:12px;color:#D1D5DB;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div>
@@ -4726,14 +4731,17 @@ async function renderNutricionTab() {
   if (!_nutDetailLoaded) {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando plan nutricional…</div>';
     const diet = clientDiets[_nutActiveDietIdx] || clientDiets[0];
+    console.log('[NUT] fetching detail for diet:', diet.id, diet.title);
     try {
       const r = await fetch(`${API}/diets/${diet.id}/edit`, { headers: h() });
+      console.log('[NUT] /edit status:', r.status);
       const j = await r.json();
+      console.log('[NUT] /edit response:', JSON.stringify(j).slice(0, 500));
       _nutDetail = _nutNormalize(j.data || j);
-      // Carry the diet_type name from the list response (lost in flatMap)
       if (!_nutDetail.diet_type) _nutDetail.diet_type = diet.diet_type || null;
       _nutDetailLoaded = true;
-    } catch {
+    } catch (e) {
+      console.error('[NUT] fetch error:', e);
       el.innerHTML = '<div style="padding:40px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar el plan nutricional.</div>';
       return;
     }

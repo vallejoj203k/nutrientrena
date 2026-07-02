@@ -969,7 +969,7 @@ function renderBlocks(){
     const GRIP='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="9" y1="5" x2="15" y2="5"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/><line x1="9" y1="21" x2="15" y2="21"/></svg>';
     const COPY_ICO='<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
     const EDIT_ICO='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-    const rows=blk.exercises.map((ex,ei)=>`<tr class="ex-row" draggable="true" data-bi="${bi}" data-ei="${ei}"><td class="ex-drag-handle" title="Arrastrar para reordenar">${GRIP}</td><td class="ex-name-cell" onclick="openPicker(${bi},${ei})" title="Clic para cambiar ejercicio"><span class="ex-name">${esc(ex.training_name)||'<em style="color:#9CA3AF">Elegir ejercicio</em>'}</span><span class="ex-muscle">${esc(ex.muscle_group_name)}</span><span class="ex-edit-hint">${EDIT_ICO} cambiar</span></td><td><input type="number" min="1" max="20" style="width:52px" value="${esc(ex.series)}" placeholder="—" onchange="updateEx(${bi},${ei},'series',this.value)"/></td><td><input type="text" style="width:64px" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateEx(${bi},${ei},'repetitions',this.value)"/></td><td><input type="number" style="width:60px" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateEx(${bi},${ei},'break_time',this.value)"/></td><td><select style="width:72px" onchange="updateEx(${bi},${ei},'intensity_type',this.value)"><option value=""${!ex.intensity_type?' selected':''}>—</option><option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option><option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option><option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option><option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option></select></td><td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td><td style="vertical-align:top"><span class="ex-notes-wrap" data-value="${esc(ex.notes)||''}"><textarea rows="1" placeholder="Notas…" oninput="updateEx(${bi},${ei},'notes',this.value);this.parentNode.dataset.value=this.value" onchange="updateEx(${bi},${ei},'notes',this.value)">${esc(ex.notes)}</textarea></span></td><td style="white-space:nowrap"><button class="btn-dup" title="Duplicar ejercicio" onclick="duplicateExercise(${bi},${ei})">${COPY_ICO}</button><button style="background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;display:inline-flex;align-items:center;border-radius:4px;" title="Eliminar ejercicio" onclick="removeExercise(${bi},${ei})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>`).join('');
+    const rows=blk.exercises.map((ex,ei)=>`<tr class="ex-row" ondragstart="return false" data-bi="${bi}" data-ei="${ei}"><td class="ex-drag-handle" title="Arrastrar para reordenar">${GRIP}</td><td class="ex-name-cell" onclick="openPicker(${bi},${ei})" title="Clic para cambiar ejercicio"><span class="ex-name">${esc(ex.training_name)||'<em style="color:#9CA3AF">Elegir ejercicio</em>'}</span><span class="ex-muscle">${esc(ex.muscle_group_name)}</span><span class="ex-edit-hint">${EDIT_ICO} cambiar</span></td><td><input type="number" min="1" max="20" style="width:52px" value="${esc(ex.series)}" placeholder="—" onchange="updateEx(${bi},${ei},'series',this.value)"/></td><td><input type="text" style="width:64px" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateEx(${bi},${ei},'repetitions',this.value)"/></td><td><input type="number" style="width:60px" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateEx(${bi},${ei},'break_time',this.value)"/></td><td><select style="width:72px" onchange="updateEx(${bi},${ei},'intensity_type',this.value)"><option value=""${!ex.intensity_type?' selected':''}>—</option><option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option><option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option><option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option><option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option></select></td><td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td><td style="vertical-align:top"><span class="ex-notes-wrap" data-value="${esc(ex.notes)||''}"><textarea rows="1" placeholder="Notas…" oninput="updateEx(${bi},${ei},'notes',this.value);this.parentNode.dataset.value=this.value" onchange="updateEx(${bi},${ei},'notes',this.value)">${esc(ex.notes)}</textarea></span></td><td style="white-space:nowrap"><button class="btn-dup" title="Duplicar ejercicio" onclick="duplicateExercise(${bi},${ei})">${COPY_ICO}</button><button style="background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;display:inline-flex;align-items:center;border-radius:4px;" title="Eliminar ejercicio" onclick="removeExercise(${bi},${ei})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>`).join('');
     return`<div class="block" data-block-idx="${bi}"><div class="block-header"><span class="block-badge ${blk.block_type}">${label}</span><button class="block-rm" onclick="removeBlock(${bi})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>${blk.exercises.length?`<table class="exercise-table"><thead><tr><th class="ex-th-drag"></th><th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Intensidad</th><th>Valor</th><th>Notas</th><th></th></tr></thead><tbody data-bi="${bi}">${rows}</tbody></table>`:''}<button class="add-exercise-btn" onclick="openPicker(${bi})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar ejercicio</button></div>`;
   }).join('');
   setupExerciseDrag();
@@ -994,126 +994,118 @@ function duplicateExercise(bi,ei){
   openPicker(bi,ei+1);
 }
 
-// Single global Escape listener — points to the current drag's abort fn
-let _exAbort=null;
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&_exAbort)_exAbort();});
+// ── Exercise drag state (module-level so document listeners are added once) ──
+let _exDrag={ghost:null,srcRow:null,srcBi:null,rowMap:null,offX:0,offY:0,moved:false,startX:0,startY:0};
+
+function _exAbortDrag(){
+  if(_exDrag.ghost){_exDrag.ghost.remove();_exDrag.ghost=null;}
+  if(_exDrag.srcRow){_exDrag.srcRow.classList.remove('ex-placeholder');_exDrag.srcRow=null;}
+  _exDrag.srcBi=null; _exDrag.moved=false;
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&_exDrag.srcRow)_exAbortDrag();});
+
+// pointermove and pointerup live on document — never miss an event regardless of where pointer lands
+document.addEventListener('pointermove',e=>{
+  const d=_exDrag;
+  if(!d.srcRow)return;
+  if(!d.moved){
+    if(Math.hypot(e.clientX-d.startX,e.clientY-d.startY)<5)return;
+    d.moved=true;
+    const rect=d.srcRow.getBoundingClientRect();
+    const tbl=document.createElement('table');
+    tbl.className='exercise-table';
+    tbl.style.cssText=`width:${rect.width}px;border-collapse:collapse;table-layout:fixed;`;
+    const tb=document.createElement('tbody');
+    tb.appendChild(d.srcRow.cloneNode(true));
+    tbl.appendChild(tb);
+    d.ghost=document.createElement('div');
+    d.ghost.appendChild(tbl);
+    Object.assign(d.ghost.style,{
+      position:'fixed',top:rect.top+'px',left:rect.left+'px',
+      width:rect.width+'px',zIndex:'9999',pointerEvents:'none',
+      borderRadius:'8px',background:'#fff',overflow:'hidden',
+      boxShadow:'0 16px 48px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.12)',
+      transform:'rotate(2deg) scale(1.03)',opacity:'0',transition:'opacity .08s',
+    });
+    document.body.appendChild(d.ghost);
+    requestAnimationFrame(()=>{if(d.ghost)d.ghost.style.opacity='.97';});
+    d.srcRow.classList.add('ex-placeholder');
+  }
+  if(!d.ghost)return;
+  d.ghost.style.top=(e.clientY-d.offY)+'px';
+  d.ghost.style.left=(e.clientX-d.offX)+'px';
+
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  if(!el)return;
+  const tgt=el.closest('tr.ex-row');
+  if(!tgt||tgt===d.srcRow||parseInt(tgt.dataset.bi)!==d.srcBi)return;
+  const tr=tgt.getBoundingClientRect();
+  const tbody=tgt.closest('tbody');
+  if(e.clientY<tr.top+tr.height/2){tbody.insertBefore(d.srcRow,tgt);}
+  else{tbody.insertBefore(d.srcRow,tgt.nextSibling);}
+});
+
+document.addEventListener('pointerup',()=>{
+  const d=_exDrag;
+  if(!d.srcRow)return;
+  if(!d.moved){_exAbortDrag();return;} // tap on handle with no movement
+
+  const tbody=d.srcRow.closest('tbody');
+  if(!tbody){_exAbortDrag();return;} // row was detached mid-drag
+
+  const newOrder=[...tbody.querySelectorAll('tr.ex-row')].map(r=>d.rowMap.get(r)).filter(Boolean);
+  routineData.days_list[selectedDayIdx].blocks[d.srcBi].exercises=newOrder;
+  newOrder.forEach((ex,i)=>{ex.order_index=i;});
+
+  const movedEx=d.rowMap.get(d.srcRow);
+  const newEi=newOrder.indexOf(movedEx);
+  const si=d.srcBi;
+
+  if(d.ghost){
+    const finalRect=d.srcRow.getBoundingClientRect();
+    Object.assign(d.ghost.style,{
+      transition:'top .22s cubic-bezier(.22,1,.36,1),left .22s cubic-bezier(.22,1,.36,1),transform .2s,opacity .15s .05s,box-shadow .2s',
+      top:finalRect.top+'px',left:finalRect.left+'px',
+      transform:'rotate(0deg) scale(1)',opacity:'0',boxShadow:'0 2px 8px rgba(0,0,0,.06)',
+    });
+    const g=d.ghost; d.ghost=null;
+    setTimeout(()=>g.remove(),280);
+  }
+
+  d.srcRow.classList.remove('ex-placeholder');
+  d.srcRow=null; d.srcBi=null; d.moved=false;
+
+  renderBlocks();
+  if(newEi>=0){
+    const settled=document.querySelector(`tr.ex-row[data-bi="${si}"][data-ei="${newEi}"]`);
+    if(settled){settled.classList.add('ex-settle');setTimeout(()=>settled.classList.remove('ex-settle'),600);}
+  }
+});
 
 function setupExerciseDrag(){
-  const rowMap=new Map();
+  // Rebuild rowMap each time blocks are rendered
+  _exDrag.rowMap=new Map();
   document.querySelectorAll('.ex-row').forEach(row=>{
     const bi=parseInt(row.dataset.bi),ei=parseInt(row.dataset.ei);
-    rowMap.set(row,routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei]);
+    _exDrag.rowMap.set(row,routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei]);
   });
-
-  let ghost=null,srcRow=null,srcBi=null,offX=0,offY=0,moved=false,startX=0,startY=0;
-
-  function abortDrag(){
-    if(ghost){ghost.remove();ghost=null;}
-    if(srcRow){srcRow.classList.remove('ex-placeholder');srcRow=null;}
-    srcBi=null; moved=false; _exAbort=null;
-  }
 
   document.querySelectorAll('.ex-drag-handle').forEach(handle=>{
     handle.addEventListener('pointerdown',e=>{
       e.preventDefault();
-      abortDrag(); // clear any leftover state from a previous interrupted drag
-      srcRow=handle.closest('tr');
-      if(!srcRow)return;
-      srcBi=parseInt(srcRow.dataset.bi);
-      startX=e.clientX; startY=e.clientY;
-      const rect=srcRow.getBoundingClientRect();
-      offX=e.clientX-rect.left; offY=e.clientY-rect.top;
-      _exAbort=abortDrag;
+      _exAbortDrag(); // clear any stale state
+      const row=handle.closest('tr');
+      if(!row)return;
+      _exDrag.srcRow=row;
+      _exDrag.srcBi=parseInt(row.dataset.bi);
+      _exDrag.startX=e.clientX; _exDrag.startY=e.clientY;
+      const rect=row.getBoundingClientRect();
+      _exDrag.offX=e.clientX-rect.left; _exDrag.offY=e.clientY-rect.top;
+      _exDrag.moved=false;
+      // Capture on handle so pointer events still route through the global document listeners
       handle.setPointerCapture(e.pointerId);
     });
-
-    handle.addEventListener('pointermove',e=>{
-      if(!srcRow)return;
-
-      // Defer ghost creation until user actually moves ≥5 px (avoids flash on plain clicks)
-      if(!moved){
-        if(Math.hypot(e.clientX-startX,e.clientY-startY)<5)return;
-        moved=true;
-        const rect=srcRow.getBoundingClientRect();
-        const tbl=document.createElement('table');
-        tbl.className='exercise-table';
-        tbl.style.cssText=`width:${rect.width}px;border-collapse:collapse;table-layout:fixed;`;
-        const tb=document.createElement('tbody');
-        tb.appendChild(srcRow.cloneNode(true));
-        tbl.appendChild(tb);
-        ghost=document.createElement('div');
-        ghost.appendChild(tbl);
-        Object.assign(ghost.style,{
-          position:'fixed',top:rect.top+'px',left:rect.left+'px',
-          width:rect.width+'px',zIndex:'9999',pointerEvents:'none',
-          borderRadius:'8px',background:'#fff',overflow:'hidden',
-          boxShadow:'0 16px 48px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.12)',
-          transform:'rotate(2deg) scale(1.03)',opacity:'0',
-          transition:'opacity .08s',
-        });
-        document.body.appendChild(ghost);
-        requestAnimationFrame(()=>{if(ghost)ghost.style.opacity='.97';});
-        srcRow.classList.add('ex-placeholder');
-      }
-
-      if(!ghost)return;
-      ghost.style.top=(e.clientY-offY)+'px';
-      ghost.style.left=(e.clientX-offX)+'px';
-
-      const el=document.elementFromPoint(e.clientX,e.clientY);
-      if(!el)return;
-      const tgt=el.closest('tr.ex-row');
-      if(!tgt||tgt===srcRow||parseInt(tgt.dataset.bi)!==srcBi)return;
-      const tr=tgt.getBoundingClientRect();
-      const tbody=tgt.closest('tbody');
-      if(e.clientY<tr.top+tr.height/2){
-        tbody.insertBefore(srcRow,tgt);
-      }else{
-        tbody.insertBefore(srcRow,tgt.nextSibling);
-      }
-    });
-
-    handle.addEventListener('pointerup',()=>{
-      if(!srcRow){return;}
-      if(!moved){srcRow=null;srcBi=null;_exAbort=null;return;} // just a click, no drag
-
-      const tbody=srcRow.closest('tbody');
-      if(!tbody){abortDrag();return;} // row detached (e.g. renderBlocks called externally)
-
-      const newOrder=[...tbody.querySelectorAll('tr.ex-row')].map(r=>rowMap.get(r)).filter(Boolean);
-      routineData.days_list[selectedDayIdx].blocks[srcBi].exercises=newOrder;
-      newOrder.forEach((ex,i)=>{ex.order_index=i;});
-
-      const movedEx=rowMap.get(srcRow);
-      const newEi=newOrder.indexOf(movedEx);
-      const si=srcBi;
-
-      // Snap ghost to final slot, let it fade independently (no setTimeout delay on renderBlocks)
-      if(ghost){
-        const finalRect=srcRow.getBoundingClientRect();
-        Object.assign(ghost.style,{
-          transition:'top .22s cubic-bezier(.22,1,.36,1),left .22s cubic-bezier(.22,1,.36,1),transform .2s,opacity .15s .05s,box-shadow .2s',
-          top:finalRect.top+'px',left:finalRect.left+'px',
-          transform:'rotate(0deg) scale(1)',opacity:'0',
-          boxShadow:'0 2px 8px rgba(0,0,0,.06)',
-        });
-        const g=ghost; ghost=null;
-        setTimeout(()=>g.remove(),280);
-      }
-
-      srcRow.classList.remove('ex-placeholder');
-      srcRow=null; srcBi=null; moved=false; _exAbort=null;
-
-      // Re-render immediately — no race-condition delay
-      renderBlocks();
-
-      if(newEi>=0){
-        const settled=document.querySelector(`tr.ex-row[data-bi="${si}"][data-ei="${newEi}"]`);
-        if(settled){settled.classList.add('ex-settle');setTimeout(()=>settled.classList.remove('ex-settle'),600);}
-      }
-    });
-
-    handle.addEventListener('pointercancel',abortDrag);
   });
 }
 

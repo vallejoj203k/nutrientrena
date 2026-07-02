@@ -4803,11 +4803,20 @@ async function renderNutricionTab() {
   _renderNutUI();
 }
 
-// Normalize API response: map item.quantity → item.quantity_calc (our internal name)
+// Normalize API response: map item.quantity → item.quantity_calc, aliment.id → aliment_id
 function _nutNormalize(det) {
   (det.foods || []).forEach(meal => {
     (meal.detail || []).forEach(item => {
       if (item.quantity_calc == null) item.quantity_calc = item.quantity ?? 0;
+      // API may not include a top-level aliment_id; derive it from the nested aliment object
+      if (!item.aliment_id && item.aliment?.id) item.aliment_id = item.aliment.id;
+      // Normalise aliment macro field names (API may use 'protein'/'carbs'/'fat' without 's')
+      if (item.aliment) {
+        const a = item.aliment;
+        if (a.protein  != null && a.proteins == null) a.proteins = a.protein;
+        if (a.carbs    != null && a.carbohydrates == null) a.carbohydrates = a.carbs;
+        if (a.fat      != null && a.fats == null) a.fats = a.fat;
+      }
     });
   });
   return det;
@@ -5041,12 +5050,9 @@ async function openNutEditor() {
   _nutWorking = _nutNormalize(JSON.parse(JSON.stringify(_nutDetail)));
   _nutEditorMealIdx = 0;
   document.getElementById('nutEditorName').value = _nutWorking.title || '';
-  document.getElementById('nutEdMacKcal').value = _nutWorking.calories  || '';
-  document.getElementById('nutEdMacProt').value = _nutWorking.proteins  || '';
-  document.getElementById('nutEdMacCarb').value = _nutWorking.carbs     || '';
-  document.getElementById('nutEdMacFat').value  = _nutWorking.fats      || '';
   _renderNutEditorSidebar();
   _renderNutEditorContent();
+  _nutRecalcHeaderMacros();
   document.getElementById('nutEditorOverlay').classList.add('open');
 }
 
@@ -5178,6 +5184,7 @@ function _nutRemoveFoodCard(seq) {
   const subEl = document.getElementById('nutFcMealSub');
   if (subEl) subEl.textContent = _nutMealKcalStr(meal);
   _renderNutEditorSidebar();
+  _nutRecalcHeaderMacros();
 }
 
 function _nutAcSearch(seq, val) {
@@ -5249,6 +5256,27 @@ function _nutCalcMacros(a, qty, unit) {
   };
 }
 
+function _nutRecalcHeaderMacros() {
+  if (!_nutWorking) return;
+  let tKcal = 0, tProt = 0, tCarb = 0, tFat = 0;
+  (_nutWorking.foods || []).forEach(meal => {
+    (meal.detail || []).filter(i => !i.delete && i.aliment).forEach(item => {
+      const m = _nutCalcMacros(item.aliment, item.quantity_calc || 0, item.unit || _nutUnitFromAliment(item.aliment));
+      tKcal += m.kcal; tProt += m.prot; tCarb += m.carb; tFat += m.fat;
+    });
+  });
+  const fmt = v => parseFloat(v.toFixed(1));
+  const upd = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  upd('nutEdMacKcal', Math.round(tKcal));
+  upd('nutEdMacProt', fmt(tProt));
+  upd('nutEdMacCarb', fmt(tCarb));
+  upd('nutEdMacFat',  fmt(tFat));
+  _nutWorking.calories = Math.round(tKcal);
+  _nutWorking.proteins = fmt(tProt);
+  _nutWorking.carbs    = fmt(tCarb);
+  _nutWorking.fats     = fmt(tFat);
+}
+
 function _nutSelectAliment(seq, alimentId) {
   const cached = _nutAcCache[alimentId];
   if (!cached) return;
@@ -5295,6 +5323,7 @@ function _nutUpdateFoodCardQty(seq, val) {
   const subEl = document.getElementById('nutFcMealSub');
   if (subEl) subEl.textContent = _nutMealKcalStr(meal);
   _renderNutEditorSidebar();
+  _nutRecalcHeaderMacros();
 }
 
 function _nutCloseAcDrop(seq) {

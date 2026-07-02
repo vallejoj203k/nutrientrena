@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
+from app.schemas.nutrition.aliment import QuantityTypeOut
 
 
 class DietFoodAlimentCreate(BaseModel):
@@ -51,7 +52,7 @@ class AlimentSimpleOut(BaseModel):
     proteins: Optional[float] = None
     carbohydrates: Optional[float] = None
     fats: Optional[float] = None
-    quantity_type: Optional[dict] = None
+    quantity_type: Optional[QuantityTypeOut] = None
     quantity_unit: Optional[str] = None
     model_config = {"from_attributes": True}
 

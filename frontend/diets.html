@@ -1211,7 +1211,7 @@ function renderMealSidebar() {
       if (!row.aliment_id) return;
       var qEl = document.getElementById('fqty-' + row.id);
       var qtyRaw = parseFloat(qEl ? qEl.value : (row.quantity || '')) || 0;
-      totK += ((row.calories||0)/100) * qtyRaw * getUnitMult(row.unit || 'gr');
+      totK += ((row.calories||0)/100) * qtyRaw * getUnitMult(row.unit || 'g');
     });
     var sub = totK > 0 ? Math.round(totK) + ' kcal' : 'Vacía · toca para añadir';
     return '<div class="ms-meal-item' + (isActive ? ' active' : '') + '" onclick="selectMeal(' + meal.id + ')">'
@@ -1289,7 +1289,7 @@ function addMeal(prefill) {
         fats: (dfa.aliment && dfa.aliment.fats != null) ? dfa.aliment.fats : null,
         calories: (dfa.aliment && dfa.aliment.calories != null) ? dfa.aliment.calories : null,
         quantity: dfa.quantity != null ? String(dfa.quantity) : '',
-        unit: (dfa.aliment && dfa.aliment.quantity_unit) || 'gr',
+        unit: (dfa.aliment && dfa.aliment.quantity_unit) || 'g',
         _source: 'platform'
       });
     });
@@ -1322,7 +1322,7 @@ function _renderFoodCard(mid, row) {
     + '<input type="hidden" id="fqty-' + rid + '"/>'
     + '<div class="food-qty-badge" id="fqty-badge-' + rid + '" style="display:none;">'
     + '<span class="food-qty-text" id="fqty-disp-' + rid + '">—</span>'
-    + '<span class="food-qty-unit" id="fqty-unit-' + rid + '">gr</span>'
+    + '<span class="food-qty-unit" id="fqty-unit-' + rid + '">g</span>'
     + '</div>'
     + '<div class="food-macros"><span class="fmc kcal" id="fkcal-' + rid + '">--- kcal</span><span class="fmc prot" id="fprot-' + rid + '">--- P</span><span class="fmc carb" id="fcarb-' + rid + '">--- C</span><span class="fmc fat" id="ffat-' + rid + '">--- G</span></div>'
     + '</div>';
@@ -1374,7 +1374,7 @@ function addFoodRow(mid, detail) {
     fats: detail.fats != null ? detail.fats : null,
     calories: detail.calories != null ? detail.calories : null,
     quantity: detail.quantity != null ? String(detail.quantity) : '',
-    unit: detail.unit || 'gr',
+    unit: detail.unit || 'g',
     _source: 'platform'
   };
   meal.rows.push(row);
@@ -1400,7 +1400,7 @@ function _showQtyBadge(rid, qty, unit) {
   var val = parseFloat(qty);
   if (badge) badge.style.display = val ? 'flex' : 'none';
   if (disp) disp.textContent = val % 1 === 0 ? val : val.toFixed(1);
-  if (unitEl) unitEl.textContent = unit || 'gr';
+  if (unitEl) unitEl.textContent = unit || 'g';
 }
 
 function updateRowMacros(row) {
@@ -1414,7 +1414,7 @@ function updateRowMacros(row) {
   }
   var qEl = ge('fqty-' + row.id);
   var qtyRaw = parseFloat(qEl ? qEl.value : (row.quantity || '')) || 0;
-  var unit = row.unit || 'gr';
+  var unit = row.unit || 'g';
   var qtyG = qtyRaw * getUnitMult(unit);
   var k = ((row.calories||0)/100)*qtyG, p = ((row.proteins||0)/100)*qtyG;
   var c = ((row.carbohydrates||0)/100)*qtyG, f = ((row.fats||0)/100)*qtyG;
@@ -1439,7 +1439,7 @@ function recalcTotalMacros() {
       if (!row.aliment_id) return;
       var qEl = document.getElementById('fqty-' + row.id);
       var qtyRaw = parseFloat(qEl ? qEl.value : (row.quantity || '')) || 0;
-      var qtyG = qtyRaw * getUnitMult(row.unit || 'gr');
+      var qtyG = qtyRaw * getUnitMult(row.unit || 'g');
       k += ((row.calories||0)/100)*qtyG; p += ((row.proteins||0)/100)*qtyG;
       c += ((row.carbohydrates||0)/100)*qtyG; f += ((row.fats||0)/100)*qtyG;
     });
@@ -1532,7 +1532,7 @@ function selectAliment(rid, alimentId) {
     row.carbohydrates = m.carbohydrates != null ? m.carbohydrates : null;
     row.fats = m.fats != null ? m.fats : null;
     row.calories = m.calories != null ? m.calories : null;
-    row.unit = m.quantity_unit || 'gr';
+    row.unit = m.quantity_unit || 'g';
     if (!row.quantity) {
       row.quantity = String(m.quantity != null ? m.quantity : 100);
     }

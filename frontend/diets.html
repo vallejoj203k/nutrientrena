@@ -149,6 +149,23 @@
     .dp-stepper-btn:hover{border-color:#4F46E5;color:#4F46E5;}
     .dp-stepper-val{font-size:20px;font-weight:800;color:#111;min-width:28px;text-align:center;}
     .dp-stepper-unit{font-size:13px;color:#9CA3AF;}
+
+    /* Pathologies collapsible */
+    .dp-patho-toggle{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;user-select:none;transition:.15s;margin-top:8px;}
+    .dp-patho-toggle:hover{border-color:#4F46E5;background:#EEF2FF;}
+    .dp-patho-toggle-label{font-size:13px;font-weight:700;color:#374151;display:flex;align-items:center;gap:8px;}
+    .dp-patho-toggle-badge{background:#4F46E5;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:none;}
+    .dp-patho-toggle-badge.visible{display:inline-block;}
+    .dp-patho-arrow{transition:transform .25s;color:#9CA3AF;}
+    .dp-patho-arrow.open{transform:rotate(180deg);}
+    .dp-patho-body{display:none;padding:16px;background:#fff;border:1.5px solid #E5E7EB;border-top:none;border-radius:0 0 10px 10px;margin-top:-4px;}
+    .dp-patho-body.open{display:block;}
+    .dp-patho-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    @media(max-width:520px){.dp-patho-grid{grid-template-columns:1fr;}}
+    .dp-patho-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;border:1.5px solid #E5E7EB;cursor:pointer;transition:.15s;font-size:13px;color:#374151;}
+    .dp-patho-item:hover{border-color:#4F46E5;background:#EEF2FF;color:#4F46E5;}
+    .dp-patho-item.checked{border-color:#4F46E5;background:#EEF2FF;color:#4F46E5;font-weight:600;}
+    .dp-patho-item input[type=checkbox]{accent-color:#4F46E5;width:15px;height:15px;flex-shrink:0;}
     .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
     .sec-card-head{padding:16px 20px;border-bottom:1px solid #EBEBEB;font-size:14px;font-weight:700;color:#111;}
     .sec-card-body{padding:20px;}
@@ -566,17 +583,17 @@
     <div class="dp-step1-scroll">
     <div class="dp-form">
 
-      <div class="dp-section-title">Información general</div>
-
-      <div class="form-group">
-        <label>Nombre de la dieta *</label>
-        <input id="f_title" placeholder="Ej: Definición · Alta proteína · 1800 kcal" oninput="updatePreview()" style="font-size:16px;"/>
+      <!-- NOMBRE DE LA DIETA -->
+      <div class="dp-section-title" style="margin-top:0;">Nombre de la dieta</div>
+      <div class="form-group" style="margin-bottom:24px;">
+        <input id="f_title" placeholder="Ej: Definición · Alta proteína · 1800 kcal" oninput="updatePreview()" style="font-size:16px;font-weight:600;"/>
       </div>
 
-      <div class="form-row" style="margin-bottom:0;">
-        <div class="form-group">
+      <!-- TIPO DIETA + NÚMERO DE COMIDAS -->
+      <div class="form-row" style="margin-bottom:24px;align-items:flex-end;">
+        <div class="form-group" style="flex:1;margin-bottom:0;">
           <label>Tipo de dieta</label>
-          <select id="f_type" style="font-size:16px;">
+          <select id="f_type" style="font-size:15px;">
             <option value="">Seleccionar...</option>
             <option value="Deficit">Déficit</option>
             <option value="Superavit">Superávit</option>
@@ -585,60 +602,53 @@
             <option value="Mediterranea">Mediterránea</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Estilo alimentario</label>
-          <select id="f_style" style="font-size:16px;">
-            <option value="">Seleccionar...</option>
-            <option value="Omnivora">Omnívora</option>
-            <option value="Vegetariana">Vegetariana</option>
-            <option value="Vegana">Vegana</option>
-            <option value="Saludable">Saludable</option>
-            <option value="Low carb">Low carb</option>
-            <option value="Alto carbo">Alto carbo</option>
-          </select>
+        <div class="form-group" style="flex:0 0 auto;margin-bottom:0;">
+          <label style="white-space:nowrap;">Número de comidas</label>
+          <div class="dp-stepper" style="margin-top:6px;">
+            <button class="dp-stepper-btn" onclick="changeMealCount(-1)">−</button>
+            <span class="dp-stepper-val" id="mealCountVal">3</span>
+            <button class="dp-stepper-btn" onclick="changeMealCount(1)">+</button>
+            <span class="dp-stepper-unit">comidas/día</span>
+          </div>
         </div>
       </div>
 
-      <div class="dp-section-title">Macros y calorías <span style="font-weight:400;color:#9CA3AF;">(opcional)</span></div>
+      <!-- CALORÍAS OBJETIVO -->
+      <div class="dp-section-title">Calorías objetivo <span style="font-weight:400;color:#9CA3AF;">(opcional)</span></div>
+      <div class="form-group" style="max-width:240px;margin-bottom:24px;">
+        <input id="f_calories" type="number" placeholder="1800 kcal" oninput="updatePreview()" style="font-size:16px;font-weight:600;"/>
+      </div>
 
-      <div class="dp-macros-row">
-        <div class="form-group">
-          <label>Calorías (kcal)</label>
-          <input id="f_calories" type="number" placeholder="1800" oninput="updatePreview()" style="font-size:16px;"/>
-        </div>
-        <div class="form-group">
-          <label>Proteínas (g)</label>
-          <input id="f_proteins" type="number" placeholder="150" oninput="updatePreview()" style="font-size:16px;"/>
-        </div>
-        <div class="form-group">
-          <label>Carbos (g)</label>
-          <input id="f_carbs" type="number" placeholder="180" oninput="updatePreview()" style="font-size:16px;"/>
-        </div>
-        <div class="form-group">
-          <label>Grasas (g)</label>
-          <input id="f_fats" type="number" placeholder="60" oninput="updatePreview()" style="font-size:16px;"/>
+      <!-- NOTAS DEL NUTRICIONISTA -->
+      <div class="dp-section-title">Notas del nutricionista <span style="font-weight:400;color:#9CA3AF;">(opcional)</span></div>
+      <div class="form-group" style="margin-bottom:24px;">
+        <textarea id="f_notes" placeholder="Indicaciones especiales, restricciones, contexto clínico..." rows="3" style="font-size:14px;resize:vertical;line-height:1.5;"></textarea>
+      </div>
+
+      <!-- PATOLOGÍAS -->
+      <div class="dp-section-title">Patologías / condiciones</div>
+      <div class="dp-patho-toggle" onclick="togglePatho()" id="pathoToggle">
+        <span class="dp-patho-toggle-label">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Seleccionar patologías
+          <span class="dp-patho-toggle-badge" id="pathoBadge">0</span>
+        </span>
+        <svg class="dp-patho-arrow" id="pathoArrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="dp-patho-body" id="pathoBody">
+        <div class="dp-patho-grid" id="pathoGrid">
+          <div style="color:#9CA3AF;font-size:13px;padding:8px 0;">Cargando...</div>
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Déficit (kcal)</label>
-          <input id="f_deficit" type="number" placeholder="300" style="font-size:16px;"/>
-        </div>
-        <div class="form-group">
-          <label>Superávit (kcal)</label>
-          <input id="f_surplus" type="number" placeholder="0" style="font-size:16px;"/>
-        </div>
-      </div>
-
-      <div class="dp-section-title">Número de comidas</div>
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
-        <div class="dp-stepper">
-          <button class="dp-stepper-btn" onclick="changeMealCount(-1)">−</button>
-          <span class="dp-stepper-val" id="mealCountVal">3</span>
-          <button class="dp-stepper-btn" onclick="changeMealCount(1)">+</button>
-          <span class="dp-stepper-unit">comidas/día</span>
-        </div>
+      <!-- hidden macro fields (still needed for save payload) -->
+      <div style="display:none;">
+        <input id="f_proteins" type="number"/>
+        <input id="f_carbs" type="number"/>
+        <input id="f_fats" type="number"/>
+        <input id="f_deficit" type="number"/>
+        <input id="f_surplus" type="number"/>
+        <input id="f_style" type="text"/>
       </div>
 
     </div>
@@ -753,6 +763,7 @@ let _meals = [], _mealSeq = 0, _rowSeq = 0, _acTimers = {}, _macroCache = {};
 let allClients = [], _refClientId = null;
 let _activeMealId = null;
 let activeFilter = 'all';
+let _pathologiesList = [], _pathologiesLoaded = false;
 
 let confirmDeleteFn = function(){};
 function openConfirm(title, text, fn) {
@@ -949,6 +960,7 @@ async function openForm(id) {
   document.getElementById('formViewTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
   var _fe = document.getElementById('formError'); if(_fe){_fe.textContent='';_fe.style.display='none';}
   _refClientId = null;
+  await _ensurePathologies();
   clearForm();
   populateRefClientSel();
 
@@ -967,6 +979,9 @@ async function openForm(id) {
       document.getElementById('f_surplus').value  = det.surplus  || '';
       if (d.diet_type) document.getElementById('f_type').value = d.diet_type;
       if (d.style || det.style) document.getElementById('f_style').value = d.style || det.style || '';
+      var fnotes = document.getElementById('f_notes'); if (fnotes) fnotes.value = d.notes || '';
+      var selectedPathoIds = (d.pathologies || []).map(function(p){ return p.id; });
+      _renderPathoGrid(selectedPathoIds);
       _meals = []; _mealSeq = 0; _rowSeq = 0;
       document.getElementById('mealsContainer').innerHTML = '';
       (d.foods || []).forEach(function(food){ addMeal(food); });
@@ -1040,14 +1055,72 @@ function changeMealCount(delta) {
   renderMealSidebar();
 }
 
+async function _ensurePathologies() {
+  if (_pathologiesLoaded) return;
+  try {
+    var r = await fetch(API + '/pathologies/findAll', { headers: { Authorization: 'Bearer ' + token } });
+    var j = await r.json();
+    _pathologiesList = (j.data || j) || [];
+    _pathologiesLoaded = true;
+  } catch(e) { _pathologiesList = []; }
+}
+
+function _renderPathoGrid(selectedIds) {
+  var grid = document.getElementById('pathoGrid');
+  if (!grid) return;
+  selectedIds = selectedIds || [];
+  grid.innerHTML = _pathologiesList.map(function(p) {
+    var checked = selectedIds.indexOf(p.id) >= 0;
+    return '<label class="dp-patho-item' + (checked ? ' checked' : '') + '" onclick="togglePathoItem(this,' + p.id + ')">' +
+      '<input type="checkbox" value="' + p.id + '"' + (checked ? ' checked' : '') + ' onclick="event.stopPropagation()"/>' +
+      p.name + '</label>';
+  }).join('');
+  _updatePathoBadge();
+}
+
+function togglePathoItem(el, id) {
+  var cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.classList.toggle('checked', cb.checked);
+  _updatePathoBadge();
+}
+
+function _updatePathoBadge() {
+  var checked = document.querySelectorAll('#pathoGrid input[type=checkbox]:checked');
+  var badge = document.getElementById('pathoBadge');
+  if (!badge) return;
+  var count = checked.length;
+  badge.textContent = count;
+  badge.classList.toggle('visible', count > 0);
+}
+
+function togglePatho() {
+  var body = document.getElementById('pathoBody');
+  var arrow = document.getElementById('pathoArrow');
+  if (!body) return;
+  var isOpen = body.classList.toggle('open');
+  if (arrow) arrow.classList.toggle('open', isOpen);
+}
+
+function _getSelectedPathologyIds() {
+  var checked = document.querySelectorAll('#pathoGrid input[type=checkbox]:checked');
+  return Array.from(checked).map(function(cb){ return parseInt(cb.value); });
+}
+
 function clearForm() {
   ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_deficit','f_surplus'].forEach(function(id){
-    document.getElementById(id).value = '';
+    var el = document.getElementById(id); if (el) el.value = '';
   });
-  document.getElementById('f_type').value  = '';
-  document.getElementById('f_style').value = '';
+  var ftype = document.getElementById('f_type'); if (ftype) ftype.value = '';
+  var fstyle = document.getElementById('f_style'); if (fstyle) fstyle.value = '';
+  var fnotes = document.getElementById('f_notes'); if (fnotes) fnotes.value = '';
   document.getElementById('mealsContainer').innerHTML = '';
   _meals = []; _mealSeq = 0; _rowSeq = 0; _refClientId = null; _activeMealId = null;
+  _renderPathoGrid([]);
+  var pathoBody = document.getElementById('pathoBody');
+  if (pathoBody) { pathoBody.classList.remove('open'); }
+  var pathoArrow = document.getElementById('pathoArrow');
+  if (pathoArrow) { pathoArrow.classList.remove('open'); }
   var mcv = document.getElementById('mealCountVal');
   if (mcv) mcv.textContent = '3';
   var list = document.getElementById('msSidebarList');
@@ -1634,13 +1707,16 @@ async function saveDiet() {
     return f;
   }).filter(function(f){ return f.detail.length > 0; });
   var pNum = function(id){ var v = document.getElementById(id).value; return v !== '' ? parseFloat(v) : null; };
+  var notesEl = document.getElementById('f_notes');
   var body = {
     title: title,
     diet_type: document.getElementById('f_type').value || null,
-    style:     document.getElementById('f_style').value || null,
+    style:     (document.getElementById('f_style') || {}).value || null,
     calories:  pNum('f_calories'), proteins: pNum('f_proteins'),
     carbs: pNum('f_carbs'), fats: pNum('f_fats'),
     deficit: pNum('f_deficit'), surplus: pNum('f_surplus'),
+    notes: notesEl ? notesEl.value.trim() || null : null,
+    pathology_ids: _getSelectedPathologyIds(),
     foods: foods,
   };
   if (editingId) body.id = editingId;

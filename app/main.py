@@ -17,7 +17,7 @@ from app.routers import (
     calendar_tasks, team, organizations, contracts,
 )
 from app.routers import settings as settings_router
-from app.routers.nutrition import type_food, group_food, aliments, diets, recipes, client_aliments
+from app.routers.nutrition import type_food, group_food, aliments, diets, recipes, client_aliments, pathologies
 from app.routers.chat import router as chat_router, router_ws as chat_ws_router
 
 # ── CORS origins ──────────────────────────────────────────────────────────────
@@ -58,6 +58,7 @@ _tags_metadata = [
     {"name": "Nutrition - TypeFood", "description": "Tipos de alimento (proteína, carbohidrato, grasa, etc.)."},
     {"name": "Nutrition - GroupFood", "description": "Grupos de alimentos (carnes, verduras, lácteos, etc.)."},
     {"name": "Nutrition - Client Aliments", "description": "Alimentos personalizados por cliente creados por el coach."},
+    {"name": "Nutrition - Pathologies", "description": "Catálogo de patologías/condiciones asociables a dietas."},
     {"name": "Client Exercises", "description": "Ejercicios personalizados por cliente creados por el coach."},
 ]
 
@@ -126,6 +127,7 @@ app.include_router(aliments.router, prefix=API_PREFIX)
 app.include_router(diets.router, prefix=API_PREFIX)
 app.include_router(recipes.router, prefix=API_PREFIX)
 app.include_router(client_aliments.router, prefix=API_PREFIX)
+app.include_router(pathologies.router, prefix=API_PREFIX)
 app.include_router(client_exercises.router, prefix=API_PREFIX)
 app.include_router(session_logs.router, prefix=API_PREFIX)
 app.include_router(client_tasks.router, prefix=API_PREFIX)

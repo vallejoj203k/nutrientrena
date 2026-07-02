@@ -34,6 +34,8 @@ class DietCreate(BaseModel):
     deficit: Optional[float] = None
     surplus: Optional[float] = None
     foods: Optional[List[DietFoodCreate]] = []
+    pathology_ids: Optional[List[int]] = []
+    notes: Optional[str] = None
 
 
 class DietUpdate(DietCreate):
@@ -84,6 +86,12 @@ class DietDetailOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PathologyOut(BaseModel):
+    id: int
+    name: str
+    model_config = {"from_attributes": True}
+
+
 class DietOut(BaseModel):
     id: str
     title: str
@@ -95,4 +103,6 @@ class DietOut(BaseModel):
     created_at: Optional[datetime] = None
     detail: Optional[DietDetailOut] = None
     foods: List[DietFoodOut] = []
+    pathologies: List[PathologyOut] = []
+    notes: Optional[str] = None
     model_config = {"from_attributes": True}

@@ -1,8 +1,23 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text, Boolean
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text, Boolean, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
+
+# Join table (no ORM class needed)
+diet_pathologies_table = Table(
+    'diet_pathologies', Base.metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('diet_id', String(36), ForeignKey('diets.id', ondelete='CASCADE'), nullable=False),
+    Column('pathology_id', Integer, ForeignKey('pathologies.id', ondelete='CASCADE'), nullable=False),
+)
+
+
+class Pathology(Base):
+    __tablename__ = 'pathologies'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    state = Column(Integer, default=1)
 
 
 class Diet(Base):
@@ -12,6 +27,7 @@ class Diet(Base):
     title = Column(String(255), nullable=False)
     calories = Column(Float, nullable=True)
     quantity = Column(Float, nullable=True)
+    notes = Column(Text, nullable=True)
     type_id = Column(Integer, ForeignKey("type_foods.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
@@ -27,6 +43,7 @@ class Diet(Base):
                           cascade="all, delete-orphan")
     foods = relationship("DietFood", back_populates="diet", cascade="all, delete-orphan",
                          order_by="DietFood.id")
+    pathologies = relationship("Pathology", secondary="diet_pathologies", lazy="joined")
 
 
 class DietDetail(Base):

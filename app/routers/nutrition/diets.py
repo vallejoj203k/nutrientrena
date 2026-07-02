@@ -9,7 +9,7 @@ from app.core.dependencies import (
     verify_client_access, SUPERADMIN, ADMIN, COACH,
 )
 from app.core.responses import send_response, send_error
-from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment
+from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment, Pathology, diet_pathologies_table
 from app.models.nutrition.aliment import Aliment
 from app.schemas.nutrition.diet import DietCreate, DietUpdate, DietOut, DietFoodCreate, DietFoodAlimentCreate
 from app.pdf.diet_pdf import generate_diet_pdf
@@ -43,6 +43,14 @@ def _clone_aliment(db: Session, source: Aliment) -> Aliment:
     db.add(clone)
     db.flush()
     return clone
+
+
+def _save_pathologies(db: Session, diet_id: str, pathology_ids: list):
+    db.execute(
+        diet_pathologies_table.delete().where(diet_pathologies_table.c.diet_id == diet_id)
+    )
+    for pid in (pathology_ids or []):
+        db.execute(diet_pathologies_table.insert().values(diet_id=diet_id, pathology_id=pid))
 
 
 def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: int):
@@ -181,6 +189,7 @@ def assigned(
         calories=data.calories,
         quantity=data.quantity,
         type_id=data.type_id,
+        notes=data.notes,
         user_id=client_detail.user_id,
         created_user_id=current_user.id,
     )
@@ -189,6 +198,7 @@ def assigned(
 
     _save_detail(db, diet.id, data)
     _save_foods(db, diet.id, data.foods or [], current_user.id)
+    _save_pathologies(db, diet.id, data.pathology_ids or [])
     db.commit()
     db.refresh(diet)
     return send_response(_serialize(diet), "Dieta asignada")
@@ -235,6 +245,7 @@ def create(
         calories=data.calories,
         quantity=data.quantity,
         type_id=data.type_id,
+        notes=data.notes,
         user_id=current_user.id,
         created_user_id=current_user.id,
         organization_id=org.org_id,
@@ -244,6 +255,7 @@ def create(
 
     _save_detail(db, diet.id, data)
     _save_foods(db, diet.id, data.foods or [], current_user.id)
+    _save_pathologies(db, diet.id, data.pathology_ids or [])
     db.commit()
     db.refresh(diet)
     return send_response(_serialize(diet), "Dieta creada")
@@ -263,10 +275,13 @@ def updated(id: str, data: DietUpdate, db: Session = Depends(get_db), current_us
         diet.quantity = data.quantity
     if data.type_id is not None:
         diet.type_id = data.type_id
+    if data.notes is not None:
+        diet.notes = data.notes
     diet.updated_user_id = current_user.id
 
     _save_detail(db, diet.id, data)
     _save_foods(db, diet.id, data.foods or [], current_user.id)
+    _save_pathologies(db, diet.id, data.pathology_ids or [])
     db.commit()
     db.refresh(diet)
     return send_response(_serialize(diet), "Dieta actualizada")

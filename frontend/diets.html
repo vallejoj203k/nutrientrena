@@ -1289,7 +1289,8 @@ function addMeal(prefill) {
         fats: (dfa.aliment && dfa.aliment.fats != null) ? dfa.aliment.fats : null,
         calories: (dfa.aliment && dfa.aliment.calories != null) ? dfa.aliment.calories : null,
         quantity: dfa.quantity != null ? String(dfa.quantity) : '',
-        unit: 'gr', _source: 'platform'
+        unit: (dfa.aliment && dfa.aliment.quantity_type && dfa.aliment.quantity_type.name) || 'gr',
+        _source: 'platform'
       });
     });
   }
@@ -1321,7 +1322,7 @@ function _renderFoodCard(mid, row) {
     + '<input type="hidden" id="fqty-' + rid + '"/>'
     + '<div class="food-qty-badge" id="fqty-badge-' + rid + '" style="display:none;">'
     + '<span class="food-qty-text" id="fqty-disp-' + rid + '">—</span>'
-    + '<span class="food-qty-unit">gr</span>'
+    + '<span class="food-qty-unit" id="fqty-unit-' + rid + '">gr</span>'
     + '</div>'
     + '<div class="food-macros"><span class="fmc kcal" id="fkcal-' + rid + '">--- kcal</span><span class="fmc prot" id="fprot-' + rid + '">--- P</span><span class="fmc carb" id="fcarb-' + rid + '">--- C</span><span class="fmc fat" id="ffat-' + rid + '">--- G</span></div>'
     + '</div>';
@@ -1329,7 +1330,7 @@ function _renderFoodCard(mid, row) {
   if (row.aliment_name) { var aEl = document.getElementById('fiac-' + rid); if (aEl) aEl.value = row.aliment_name; }
   if (row.quantity) {
     var qEl = document.getElementById('fqty-' + rid); if (qEl) qEl.value = row.quantity;
-    _showQtyBadge(rid, row.quantity);
+    _showQtyBadge(rid, row.quantity, row.unit);
   }
   updateRowMacros(row);
 }
@@ -1373,7 +1374,8 @@ function addFoodRow(mid, detail) {
     fats: detail.fats != null ? detail.fats : null,
     calories: detail.calories != null ? detail.calories : null,
     quantity: detail.quantity != null ? String(detail.quantity) : '',
-    unit: 'gr', _source: 'platform'
+    unit: detail.unit || 'gr',
+    _source: 'platform'
   };
   meal.rows.push(row);
   _renderFoodCard(mid, row);
@@ -1391,12 +1393,14 @@ function getUnitMult(unit) {
   return (unit === 'kg' || unit === 'l') ? 1000 : (unit === 'cucharada' ? 15 : (unit === 'taza' ? 240 : 1));
 }
 
-function _showQtyBadge(rid, qty) {
+function _showQtyBadge(rid, qty, unit) {
   var badge = document.getElementById('fqty-badge-' + rid);
-  var disp = document.getElementById('fqty-disp-' + rid);
+  var disp  = document.getElementById('fqty-disp-'  + rid);
+  var unitEl = document.getElementById('fqty-unit-' + rid);
   var val = parseFloat(qty);
   if (badge) badge.style.display = val ? 'flex' : 'none';
   if (disp) disp.textContent = val % 1 === 0 ? val : val.toFixed(1);
+  if (unitEl) unitEl.textContent = unit || 'gr';
 }
 
 function updateRowMacros(row) {
@@ -1498,7 +1502,7 @@ function showAcDrop(rid, items) {
     drop.classList.add('open');
     return;
   }
-  items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories, quantity: a.quantity }; });
+  items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories, quantity: a.quantity, quantity_type: a.quantity_type }; });
   drop.innerHTML = items.map(function(a){
     var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
       + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">🌐 Plataforma')
@@ -1528,13 +1532,13 @@ function selectAliment(rid, alimentId) {
     row.carbohydrates = m.carbohydrates != null ? m.carbohydrates : null;
     row.fats = m.fats != null ? m.fats : null;
     row.calories = m.calories != null ? m.calories : null;
+    row.unit = (m.quantity_type && m.quantity_type.name) || 'gr';
     if (!row.quantity) {
-      var qty = String(m.quantity != null ? m.quantity : 100);
-      row.quantity = qty;
+      row.quantity = String(m.quantity != null ? m.quantity : 100);
     }
     var qEl = document.getElementById('fqty-' + rid);
     if (qEl) qEl.value = row.quantity;
-    _showQtyBadge(rid, row.quantity);
+    _showQtyBadge(rid, row.quantity, row.unit);
     updateRowMacros(row);
     if (mid) recalcMealMacros(mid);
   }

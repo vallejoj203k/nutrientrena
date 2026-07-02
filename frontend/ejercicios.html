@@ -94,6 +94,9 @@
     .form-group{margin-bottom:16px;}
     .form-group label{display:block;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
     .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .auto-grow-wrap{display:inline-grid;width:100%;}
+    .auto-grow-wrap::after{content:attr(data-value) "\00a0";visibility:hidden;white-space:pre-wrap;word-break:break-word;grid-area:1/1;font-size:14px;padding:10px 12px;border:1px solid transparent;pointer-events:none;font-family:inherit;line-height:1.5;}
+    .auto-grow-wrap textarea{grid-area:1/1;resize:none;overflow:hidden;min-height:80px;line-height:1.5;}
     .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--indigo);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .img-upload-zone{border:2px dashed #E5E7EB;border-radius:10px;padding:20px 12px;text-align:center;cursor:pointer;transition:.15s;background:#FAFAFA;color:#9CA3AF;font-size:12px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
@@ -359,7 +362,10 @@
       </div>
       <div class="form-group">
         <label>Descripción</label>
-        <textarea id="ex_desc" rows="3" placeholder="Descripción del ejercicio…"></textarea>
+        <span class="auto-grow-wrap" id="ex_desc_wrap">
+          <textarea id="ex_desc" rows="1" placeholder="Descripción del ejercicio…"
+            oninput="this.parentNode.dataset.value=this.value"></textarea>
+        </span>
       </div>
       <div class="form-row" style="align-items:flex-start">
         <div class="form-group" style="flex:0 0 140px">
@@ -682,6 +688,7 @@ async function openExerciseModal(id=null){
   editingExerciseId=id;
   document.getElementById('exerciseModalTitle').textContent=id?'Editar ejercicio':'Nuevo ejercicio';
   ['ex_name','ex_desc'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('ex_desc_wrap').dataset.value='';
   _setExVideoPreview(null);
   document.getElementById('ex_type').value='';
   document.getElementById('ex_location').value='';
@@ -698,6 +705,7 @@ async function openExerciseModal(id=null){
       const d=await r.json();const ex=d.data||d;
       document.getElementById('ex_name').value=ex.name||'';
       document.getElementById('ex_desc').value=ex.description||'';
+      document.getElementById('ex_desc_wrap').dataset.value=ex.description||'';
       document.getElementById('ex_mg').value=ex.muscle_group_id||'';
       const sec=ex.secondary_muscle_group_ids?.length?ex.secondary_muscle_group_ids:(ex.secondary_muscle_group_id?[ex.secondary_muscle_group_id]:[]);
       setMs2Values(sec);

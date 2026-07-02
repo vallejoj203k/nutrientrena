@@ -7,20 +7,21 @@ from app.database import Base
 
 VALID_TASK_TYPES = {
     "rutina", "cardio", "descanso", "nutricion", "checkin",
-    "foto", "mensaje", "video", "sesion", "otro",
+    "foto", "mensaje", "video", "sesion", "formulario", "otro",
 }
 
 COLOR_MAP = {
-    "rutina":    "#4F46E5",
-    "cardio":    "#EF4444",
-    "descanso":  "#6B7280",
-    "nutricion": "#10B981",
-    "checkin":   "#F59E0B",
-    "foto":      "#8B5CF6",
-    "mensaje":   "#3B82F6",
-    "video":     "#EC4899",
-    "sesion":    "#0EA5E9",
-    "otro":      "#9CA3AF",
+    "rutina":      "#4F46E5",
+    "cardio":      "#EF4444",
+    "descanso":    "#6B7280",
+    "nutricion":   "#10B981",
+    "checkin":     "#F59E0B",
+    "foto":        "#8B5CF6",
+    "mensaje":     "#3B82F6",
+    "video":       "#EC4899",
+    "sesion":      "#0EA5E9",
+    "formulario":  "#F97316",
+    "otro":        "#9CA3AF",
 }
 
 

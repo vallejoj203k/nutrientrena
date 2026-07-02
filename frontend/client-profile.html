@@ -5404,6 +5404,7 @@ async function saveNutChanges() {
   _nutWorking.carbs    = _pNum('nutEdMacCarb') ?? _nutWorking.carbs;
   _nutWorking.fats     = _pNum('nutEdMacFat')  ?? _nutWorking.fats;
   const payload = {
+    id: String(_nutDetail.id),
     title: _nutWorking.title,
     calories: _nutWorking.calories,
     proteins: _nutWorking.proteins,

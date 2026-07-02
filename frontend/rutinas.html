@@ -238,13 +238,12 @@
     .ex-drag-handle{width:26px;padding:0 6px;text-align:center;cursor:grab;color:#D1D5DB;vertical-align:middle;user-select:none;}
     .ex-drag-handle:hover{color:#9CA3AF;}
     .ex-drag-handle:active{cursor:grabbing;}
-    .ex-row{transition:background .12s,transform .12s;}
-    .ex-row.ex-dragging{opacity:.12;background:#F3F4F6;transform:scale(.99);}
-    .ex-row.ex-dragging>td{background:repeating-linear-gradient(135deg,#F3F4F6 0px,#F3F4F6 5px,#FAFAFA 5px,#FAFAFA 10px) !important;}
-    .ex-row.drop-above>td{border-top:3px solid var(--indigo) !important;background:linear-gradient(180deg,rgba(99,102,241,.1) 0%,transparent 70%) !important;padding-top:10px !important;transition:padding .15s ease;}
-    .ex-row.drop-below>td{border-bottom:3px solid var(--indigo) !important;background:linear-gradient(0deg,rgba(99,102,241,.1) 0%,transparent 70%) !important;padding-bottom:10px !important;transition:padding .15s ease;}
-    @keyframes exDrop{0%{opacity:0;transform:translateX(-10px) scale(.97);}55%{transform:translateX(2px) scale(1.01);}100%{opacity:1;transform:translateX(0) scale(1);}}
-    .ex-row.ex-anim{animation:exDrop .32s cubic-bezier(.34,1.4,.64,1) both;}
+    .ex-row{transition:background .12s;}
+    /* Trello-style drag: placeholder keeps layout space, ghost floats */
+    .ex-row.ex-placeholder>td{background:#EEF2FF !important;border-color:transparent !important;}
+    .ex-row.ex-placeholder>td>*{visibility:hidden;}
+    @keyframes exSettle{0%{background:rgba(99,102,241,.15);}100%{background:transparent;}}
+    .ex-row.ex-settle>td{animation:exSettle .55s ease both;}
     .btn-dup{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:4px;display:inline-flex;align-items:center;border-radius:4px;transition:.15s;vertical-align:middle;}
     .btn-dup:hover{color:var(--indigo);background:#EEF2FF;}
     .ex-name-cell{cursor:pointer;}
@@ -995,65 +994,103 @@ function duplicateExercise(bi,ei){
   openPicker(bi,ei+1);
 }
 
-let _exDrag={srcBi:null,srcEi:null,active:false};
 function setupExerciseDrag(){
+  // Build row→exerciseData map before any DOM mutation
+  const rowMap=new Map();
   document.querySelectorAll('.ex-row').forEach(row=>{
-    // only start drag from the grip handle
-    row.addEventListener('mousedown',e=>{
-      row.draggable=!!e.target.closest('.ex-drag-handle');
-    });
-    row.addEventListener('dragstart',e=>{
-      if(!row.draggable)return;
-      _exDrag.srcBi=parseInt(row.dataset.bi);
-      _exDrag.srcEi=parseInt(row.dataset.ei);
-      _exDrag.active=true;
-      e.dataTransfer.effectAllowed='move';
-      e.dataTransfer.setData('text/plain','');
-      setTimeout(()=>row.classList.add('ex-dragging'),0);
-    });
-    row.addEventListener('dragend',()=>{
-      row.classList.remove('ex-dragging');
-      row.draggable=true;
-      _exDrag.active=false;
-      document.querySelectorAll('.drop-above,.drop-below').forEach(r=>r.classList.remove('drop-above','drop-below'));
-    });
-    row.addEventListener('dragover',e=>{
-      if(!_exDrag.active)return;
+    const bi=parseInt(row.dataset.bi),ei=parseInt(row.dataset.ei);
+    rowMap.set(row,routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei]);
+  });
+
+  let ghost=null,srcRow=null,srcBi=null,offX=0,offY=0;
+
+  document.querySelectorAll('.ex-drag-handle').forEach(handle=>{
+    handle.addEventListener('pointerdown',e=>{
       e.preventDefault();
-      e.dataTransfer.dropEffect='move';
-      document.querySelectorAll('.drop-above,.drop-below').forEach(r=>r.classList.remove('drop-above','drop-below'));
-      const mid=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;
-      row.classList.add(e.clientY<mid?'drop-above':'drop-below');
-    });
-    row.addEventListener('dragleave',e=>{
-      if(!e.relatedTarget||!row.contains(e.relatedTarget))
-        row.classList.remove('drop-above','drop-below');
-    });
-    row.addEventListener('drop',e=>{
-      e.preventDefault();
-      row.classList.remove('drop-above','drop-below');
-      const tgtBi=parseInt(row.dataset.bi);
-      const tgtEi=parseInt(row.dataset.ei);
-      if(!_exDrag.active||_exDrag.srcBi===null)return;
-      if(_exDrag.srcBi!==tgtBi){showToast('Solo puedes reordenar dentro del mismo bloque','error');return;}
-      if(_exDrag.srcEi===tgtEi){return;}
-      const blk=routineData.days_list[selectedDayIdx].blocks[tgtBi];
-      const mid=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;
-      let insertAt=e.clientY<mid?tgtEi:tgtEi+1;
-      const [moved]=blk.exercises.splice(_exDrag.srcEi,1);
-      if(_exDrag.srcEi<insertAt)insertAt--;
-      blk.exercises.splice(insertAt,0,moved);
-      blk.exercises.forEach((ex,i)=>{ex.order_index=i;});
-      _exDrag={srcBi:null,srcEi:null,active:false};
-      renderBlocks();
-      // staggered slide-in animation for all rows after reorder
-      let i=0;
-      document.querySelectorAll('.ex-row').forEach(r=>{
-        r.style.animationDelay=`${i*28}ms`;
-        r.classList.add('ex-anim');
-        i++;
-        r.addEventListener('animationend',()=>{r.classList.remove('ex-anim');r.style.animationDelay='';},{once:true});
+      srcRow=handle.closest('tr');
+      if(!srcRow)return;
+      srcBi=parseInt(srcRow.dataset.bi);
+      const rect=srcRow.getBoundingClientRect();
+      offX=e.clientX-rect.left; offY=e.clientY-rect.top;
+
+      // Ghost: clone the row rendered inside a proper table so columns align
+      const tbl=document.createElement('table');
+      tbl.className='exercise-table';
+      tbl.style.cssText=`width:${rect.width}px;border-collapse:collapse;table-layout:fixed;`;
+      const tb=document.createElement('tbody');
+      tb.appendChild(srcRow.cloneNode(true));
+      tbl.appendChild(tb);
+      ghost=document.createElement('div');
+      ghost.appendChild(tbl);
+      Object.assign(ghost.style,{
+        position:'fixed',top:rect.top+'px',left:rect.left+'px',
+        width:rect.width+'px',zIndex:'9999',pointerEvents:'none',
+        borderRadius:'8px',background:'#fff',overflow:'hidden',
+        boxShadow:'0 16px 48px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.12)',
+        transform:'rotate(2deg) scale(1.03)',opacity:'.97',
       });
+      document.body.appendChild(ghost);
+
+      // Original row becomes an indigo-tinted placeholder spacer
+      srcRow.classList.add('ex-placeholder');
+      handle.setPointerCapture(e.pointerId);
+    });
+
+    handle.addEventListener('pointermove',e=>{
+      if(!ghost||!srcRow)return;
+      ghost.style.top=(e.clientY-offY)+'px';
+      ghost.style.left=(e.clientX-offX)+'px';
+
+      // Find the row the ghost is hovering over
+      const el=document.elementFromPoint(e.clientX,e.clientY);
+      if(!el)return;
+      const tgt=el.closest('tr.ex-row');
+      if(!tgt||tgt===srcRow||parseInt(tgt.dataset.bi)!==srcBi)return;
+
+      const tr=tgt.getBoundingClientRect();
+      const tbody=tgt.closest('tbody');
+      // Move the placeholder to the correct slot — this IS the live reorder
+      if(e.clientY<tr.top+tr.height/2){
+        tbody.insertBefore(srcRow,tgt);
+      }else{
+        tbody.insertBefore(srcRow,tgt.nextSibling);
+      }
+    });
+
+    handle.addEventListener('pointerup',()=>{
+      if(!ghost||!srcRow)return;
+      // Sync routineData from current DOM order
+      const tbody=srcRow.closest('tbody');
+      const newOrder=[...tbody.querySelectorAll('tr.ex-row')].map(r=>rowMap.get(r)).filter(Boolean);
+      routineData.days_list[selectedDayIdx].blocks[srcBi].exercises=newOrder;
+      newOrder.forEach((ex,i)=>{ex.order_index=i;});
+
+      // Snap ghost to the placeholder's final screen position, then fade
+      const finalRect=srcRow.getBoundingClientRect();
+      Object.assign(ghost.style,{
+        transition:'top .22s cubic-bezier(.22,1,.36,1),left .22s cubic-bezier(.22,1,.36,1),transform .22s,opacity .16s .06s,box-shadow .2s',
+        top:finalRect.top+'px',left:finalRect.left+'px',
+        transform:'rotate(0deg) scale(1)',opacity:'0',
+        boxShadow:'0 2px 8px rgba(0,0,0,.06)',
+      });
+
+      const g=ghost,si=srcBi,sr=srcRow;
+      ghost=null; srcRow=null; srcBi=null;
+      sr.classList.remove('ex-placeholder');
+
+      setTimeout(()=>{
+        g.remove();
+        renderBlocks();
+        // Brief indigo flash on the settled row
+        const newEi=newOrder.indexOf(rowMap.get(sr));
+        if(newEi>=0){const settled=document.querySelector(`tr.ex-row[data-bi="${si}"][data-ei="${newEi}"]`);if(settled){settled.classList.add('ex-settle');setTimeout(()=>settled.classList.remove('ex-settle'),600);}}
+      },230);
+    });
+
+    handle.addEventListener('pointercancel',()=>{
+      if(ghost){ghost.remove();ghost=null;}
+      if(srcRow){srcRow.classList.remove('ex-placeholder');srcRow=null;}
+      srcBi=null;
     });
   });
 }

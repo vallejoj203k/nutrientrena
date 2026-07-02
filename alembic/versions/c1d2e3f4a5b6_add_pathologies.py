@@ -7,7 +7,7 @@ Depends on: None
 Create Date: 2026-07-02
 """
 from alembic import op
-import sqlalchemy as sa
+from sqlalchemy import text
 
 revision = 'c1d2e3f4a5b6'
 down_revision = ('bc1de2ef3fa4', 'l1m2n3o4p5q6')
@@ -25,33 +25,46 @@ PATHOLOGIES = [
 
 def upgrade():
     bind = op.get_bind()
-    from sqlalchemy import inspect, text
-    existing = inspect(bind).get_table_names()
 
-    # Add notes column to diets if missing
-    cols = [c['name'] for c in inspect(bind).get_columns('diets')]
-    if 'notes' not in cols:
-        op.add_column('diets', sa.Column('notes', sa.Text(), nullable=True))
+    # Add notes column — ignore error if it already exists
+    try:
+        bind.execute(text("ALTER TABLE diets ADD COLUMN notes TEXT"))
+    except Exception:
+        pass
 
-    if 'pathologies' not in existing:
-        op.create_table(
-            'pathologies',
-            sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-            sa.Column('name', sa.String(255), nullable=False),
-            sa.Column('state', sa.Integer(), nullable=False, server_default='1'),
-        )
+    # Pathologies catalog
+    bind.execute(text("""
+        CREATE TABLE IF NOT EXISTS pathologies (
+            id   INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            state INT NOT NULL DEFAULT 1,
+            PRIMARY KEY (id)
+        ) DEFAULT CHARSET=utf8mb4
+    """))
+
+    row = bind.execute(text("SELECT COUNT(*) FROM pathologies")).fetchone()
+    if row and row[0] == 0:
         for name in PATHOLOGIES:
-            bind.execute(text("INSERT INTO pathologies (name) VALUES (:n)"), {'n': name})
+            bind.execute(text("INSERT INTO pathologies (name) VALUES (:n)"), {"n": name})
 
-    if 'diet_pathologies' not in existing:
-        op.create_table(
-            'diet_pathologies',
-            sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-            sa.Column('diet_id', sa.String(36), sa.ForeignKey('diets.id', ondelete='CASCADE'), nullable=False),
-            sa.Column('pathology_id', sa.Integer(), sa.ForeignKey('pathologies.id', ondelete='CASCADE'), nullable=False),
-        )
+    # Join table
+    bind.execute(text("""
+        CREATE TABLE IF NOT EXISTS diet_pathologies (
+            id           INT NOT NULL AUTO_INCREMENT,
+            diet_id      VARCHAR(36) NOT NULL,
+            pathology_id INT NOT NULL,
+            PRIMARY KEY (id),
+            CONSTRAINT fk_dp_diet      FOREIGN KEY (diet_id)      REFERENCES diets(id)       ON DELETE CASCADE,
+            CONSTRAINT fk_dp_pathology FOREIGN KEY (pathology_id) REFERENCES pathologies(id) ON DELETE CASCADE
+        ) DEFAULT CHARSET=utf8mb4
+    """))
 
 
 def downgrade():
-    op.drop_table('diet_pathologies')
-    op.drop_table('pathologies')
+    bind = op.get_bind()
+    bind.execute(text("DROP TABLE IF EXISTS diet_pathologies"))
+    bind.execute(text("DROP TABLE IF EXISTS pathologies"))
+    try:
+        bind.execute(text("ALTER TABLE diets DROP COLUMN notes"))
+    except Exception:
+        pass

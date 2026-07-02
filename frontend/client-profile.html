@@ -1041,7 +1041,7 @@
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>
         Entrenamiento
       </button>
-      <button class="tab-btn" id="tab-nutricion-btn" onclick="showTab('nutricion')">
+      <button class="tab-btn" id="tab-nutricion-btn" onclick="showTab('nutricion');renderNutricionTab()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9S3 15.97 3 11a9 9 0 0 1 9-9z"/><path d="M12 8v4l2 2"/></svg>
         Nutrición
       </button>
@@ -4738,9 +4738,11 @@ async function renderNutricionTab() {
     try {
       const r = await fetch(`${API}/diets/${diet.id}/edit`, { headers: h() });
       console.log('[NUT] /edit status:', r.status);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const j = await r.json();
       console.log('[NUT] /edit response:', JSON.stringify(j).slice(0, 500));
-      _nutDetail = _nutNormalize(j.data || j);
+      if (!j.data) throw new Error('No diet data in response');
+      _nutDetail = _nutNormalize(j.data);
       if (!_nutDetail.diet_type) _nutDetail.diet_type = diet.diet_type || null;
       _nutDetailLoaded = true;
     } catch (e) {
@@ -5417,7 +5419,7 @@ async function confirmAssignDiet() {
       clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
       if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
     }
-    renderNutricionTab();
+    await renderNutricionTab();
   } catch { document.getElementById('assignDietError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; }
 }

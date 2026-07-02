@@ -3742,13 +3742,16 @@ async function openCalTaskModal(prefillDate) {
 }
 
 function _selCalType(type) {
+  const extra = document.getElementById(`ctex-${type}`);
+  const alreadyOpen = _calNewType === type && extra?.classList.contains('open');
+
   _calNewType = type;
   document.querySelectorAll('.cal-type-row').forEach(r => r.classList.remove('sel'));
   document.querySelectorAll('.cal-type-extra').forEach(e => e.classList.remove('open'));
+
   const row = document.getElementById(`ctr-${type}`);
   if (row) row.classList.add('sel');
-  const extra = document.getElementById(`ctex-${type}`);
-  if (extra) extra.classList.add('open');
+  if (!alreadyOpen && extra) extra.classList.add('open');
 }
 
 function closeCalTaskModal() {

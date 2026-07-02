@@ -688,24 +688,35 @@
     .nut-edit-qty:focus{border-color:#16A34A;}
     .nut-edit-rm{background:none;border:1px solid #FECACA;border-radius:6px;color:#DC2626;padding:4px 8px;font-size:12px;cursor:pointer;flex-shrink:0;}
     .nut-edit-add-food-btn{display:flex;align-items:center;gap:6px;border:1.5px dashed #D1D5DB;border-radius:8px;padding:10px 14px;font-size:13px;color:#16A34A;font-weight:600;background:none;cursor:pointer;margin-top:12px;width:100%;box-sizing:border-box;}
-    /* Food picker */
-    .nut-pk-ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;}
-    .nut-pk-ovl.open{display:flex;}
-    .nut-pk-box{background:#fff;border-radius:16px;width:480px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2);}
-    .nut-pk-hd{padding:16px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;}
-    .nut-pk-hd-title{font-size:15px;font-weight:700;color:#111;}
-    .nut-pk-close{background:none;border:none;font-size:20px;cursor:pointer;color:#6B7280;line-height:1;}
-    .nut-pk-search{border:1px solid #E5E7EB;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;margin:12px 20px;display:block;width:calc(100% - 40px);box-sizing:border-box;}
-    .nut-pk-pills{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 10px;}
-    .nut-pk-pill{border:1.5px solid #E5E7EB;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;background:none;color:#6B7280;}
-    .nut-pk-pill.sel{border-color:#16A34A;background:#F0FDF4;color:#166534;}
-    .nut-pk-list{flex:1;overflow-y:auto;padding:4px 20px 12px;}
-    .nut-pk-item{display:flex;align-items:center;justify-content:space-between;padding:10px 8px;border-radius:8px;cursor:pointer;gap:10px;}
-    .nut-pk-item:hover{background:#F0FDF4;}
-    .nut-pk-item-info{flex:1;min-width:0;}
-    .nut-pk-item-name{font-size:13px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .nut-pk-item-mac{font-size:11px;color:#9CA3AF;}
-    .nut-pk-item-add{background:#16A34A;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
+    /* Inline food card (nut editor) */
+    .nut-fc{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;margin-bottom:8px;}
+    .nut-fc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .nut-fc-ac{flex:1;position:relative;}
+    .nut-fc-ac input{width:100%;padding:8px 11px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;background:#fff;transition:border-color .15s;box-sizing:border-box;}
+    .nut-fc-ac input:focus{border-color:#16A34A;}
+    .nut-fc-drop{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:600;max-height:200px;overflow-y:auto;display:none;margin-top:2px;}
+    .nut-fc-drop.open{display:block;}
+    .nut-fc-drop-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #EBEBEB;}
+    .nut-fc-drop-item:last-child{border-bottom:none;}
+    .nut-fc-drop-item:hover{background:#F0FDF4;}
+    .nut-fc-drop-name{font-weight:600;color:#111827;}
+    .nut-fc-drop-mac{font-size:11px;color:#9CA3AF;margin-top:1px;}
+    .nut-fc-rm{background:none;border:1px solid #FECACA;border-radius:6px;color:#DC2626;padding:5px 7px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;transition:.15s;}
+    .nut-fc-rm:hover{background:#FEE2E2;}
+    .nut-fc-bottom{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .nut-fc-qty{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .nut-fc-qty input{border:1px solid #E5E7EB;border-radius:7px;padding:5px 8px;font-size:13px;width:70px;text-align:center;outline:none;}
+    .nut-fc-qty input:focus{border-color:#16A34A;}
+    .nut-fc-qty input:disabled{background:#F9FAFB;color:#D1D5DB;}
+    .nut-fc-unit{font-size:11px;color:#6B7280;}
+    .nut-fc-macros{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
+    .nut-fmc{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+    .nut-fmc.kcal{background:#FEF3C7;color:#D97706;}
+    .nut-fmc.prot{background:#EDE9FE;color:#4F46E5;}
+    .nut-fmc.carb{background:#FED7AA;color:#C2410C;}
+    .nut-fmc.fat{background:#FEE2E2;color:#DC2626;}
+    /* Food picker (legacy, kept hidden) */
+    .nut-pk-ovl{display:none!important;}
   </style>
   <style>
 /* ── Screenshot redesign ── */
@@ -4691,6 +4702,9 @@ let _nutFoodPickerMealIdx = 0;
 let _nutFoodGroups = [];
 let _nutFoodGrpsLoaded = false;
 let _nutPersonalCopyId = null;
+let _nutFcSeq = 0;
+let _nutAcTimers = {};
+const _nutAcCache = {};
 let _nutMealsPerDay = 4;
 
 const _NUT_DAY_ABV  = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
@@ -5051,41 +5065,210 @@ function _renderNutEditorSidebar() {
   `).join('');
 }
 
+function _nutMealKcalStr(meal) {
+  const k = Math.round(_nutMealKcal(meal));
+  const cnt = (meal.detail || []).filter(i => !i.delete).length;
+  return `${k} kcal · ${cnt} alimento${cnt !== 1 ? 's' : ''}`;
+}
+
 function _renderNutEditorContent() {
   const meals = _nutWorking?.foods || [];
   const meal = meals[_nutEditorMealIdx];
   const el = document.getElementById('nutEditorContent');
   if (!meal) { el.innerHTML = '<div style="color:#9CA3AF;font-size:13px;padding-top:20px;">Selecciona una comida del panel izquierdo.</div>'; return; }
-  const items = meal.detail || [];
+
+  // Assign _seq to items that don't have one yet (existing items from API)
+  (meal.detail || []).forEach(item => { if (!item._seq) item._seq = ++_nutFcSeq; });
+
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div>
         <input value="${esc(meal.name||'')}" style="font-size:16px;font-weight:700;border:none;outline:none;color:#111;background:transparent;" oninput="_nutWorking.foods[${_nutEditorMealIdx}].name=this.value;_renderNutEditorSidebar()">
-        <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${Math.round(_nutMealKcal(meal))} kcal · ${items.length} alimentos</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px;" id="nutFcMealSub">${_nutMealKcalStr(meal)}</div>
       </div>
       <button onclick="removeNutMeal(${_nutEditorMealIdx})" style="background:none;border:1px solid #FECACA;color:#DC2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">Eliminar comida</button>
     </div>
-    ${items.map((item, ii) => {
-      const a = item.aliment || {};
-      const kcal = Math.round((a.calories||0)/100*(item.quantity_calc||0));
-      const p = Math.round((a.proteins||0)/100*(item.quantity_calc||0));
-      const c = Math.round((a.carbohydrates||0)/100*(item.quantity_calc||0));
-      const f = Math.round((a.fats||0)/100*(item.quantity_calc||0));
-      return `<div class="nut-edit-food-row">
-        <div style="flex:1;min-width:0;">
-          <div class="nut-edit-food-name">${esc(a.name||item.aliment_id||'Alimento')}</div>
-          <div class="nut-edit-food-macros">${kcal} kcal · P:${p}g C:${c}g G:${f}g</div>
-        </div>
-        <input type="number" class="nut-edit-qty" value="${Math.round(item.quantity_calc||0)}" min="0" step="5" oninput="updateNutFoodQty(${_nutEditorMealIdx},${ii},this.value)">
-        <span class="nut-edit-qty-unit" style="font-size:11px;color:#9CA3AF;">g</span>
-        <button class="nut-edit-rm" onclick="removeNutFood(${_nutEditorMealIdx},${ii})">×</button>
-      </div>`;
-    }).join('')}
-    <button class="nut-edit-add-food-btn" onclick="openNutFoodPk(${_nutEditorMealIdx})">
+    <div id="nutFcList"></div>
+    <button class="nut-edit-add-food-btn" onclick="_nutAddFoodCard(${_nutEditorMealIdx})">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Añadir alimento
     </button>
   `;
+
+  // Render existing (non-deleted) items as inline food cards
+  (meal.detail || []).filter(i => !i.delete).forEach(item => _nutRenderFoodCard(item._seq));
+}
+
+function _nutFindItemBySeq(seq) {
+  const meals = _nutWorking?.foods || [];
+  for (let mi = 0; mi < meals.length; mi++) {
+    const idx = (meals[mi].detail || []).findIndex(i => i._seq === seq);
+    if (idx !== -1) return { meal: meals[mi], item: meals[mi].detail[idx], mi, idx };
+  }
+  return null;
+}
+
+function _nutAddFoodCard(mealIdx) {
+  if (!_nutWorking?.foods?.[mealIdx]) return;
+  if (!_nutWorking.foods[mealIdx].detail) _nutWorking.foods[mealIdx].detail = [];
+  const seq = ++_nutFcSeq;
+  _nutWorking.foods[mealIdx].detail.push({
+    _seq: seq, aliment_id: null, quantity_calc: 100, order: _nutWorking.foods[mealIdx].detail.length, aliment: null,
+  });
+  _nutRenderFoodCard(seq);
+  setTimeout(() => { const inp = document.getElementById(`nutfc-inp-${seq}`); if (inp) inp.focus(); }, 50);
+}
+
+function _nutRenderFoodCard(seq) {
+  const container = document.getElementById('nutFcList');
+  if (!container) return;
+  const found = _nutFindItemBySeq(seq);
+  if (!found) return;
+  const { item } = found;
+  const a = item.aliment || {};
+  const name = a.name || '';
+  const qty = Math.round(item.quantity_calc || 0);
+  const kcal = Math.round((a.calories||0)/100*qty);
+  const prot = Math.round((a.proteins||0)/100*qty);
+  const carb = Math.round((a.carbohydrates||0)/100*qty);
+  const fat  = Math.round((a.fats||0)/100*qty);
+  const hasFood = !!item.aliment_id;
+
+  const card = document.createElement('div');
+  card.className = 'nut-fc';
+  card.id = `nutfc-${seq}`;
+  card.innerHTML = `
+    <div class="nut-fc-top">
+      <div class="nut-fc-ac">
+        <input type="text" id="nutfc-inp-${seq}" value="${esc(name)}" placeholder="Buscar alimento en base de datos..." autocomplete="off"
+          oninput="_nutAcSearch(${seq},this.value)"
+          onfocus="_nutAcSearch(${seq},this.value)"
+          onblur="setTimeout(()=>_nutCloseAcDrop(${seq}),200)">
+        <div class="nut-fc-drop" id="nutfc-drop-${seq}"></div>
+      </div>
+      <button class="nut-fc-rm" onclick="_nutRemoveFoodCard(${seq})" title="Quitar">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="nut-fc-bottom">
+      <div class="nut-fc-qty">
+        <input type="number" id="nutfc-qty-${seq}" value="${qty}" min="0" step="5"
+          oninput="_nutUpdateFoodCardQty(${seq},this.value)"
+          ${!hasFood ? 'disabled' : ''}>
+        <span class="nut-fc-unit" id="nutfc-unit-${seq}">g</span>
+      </div>
+      <div class="nut-fc-macros">
+        <span class="nut-fmc kcal" id="nutfc-k-${seq}">${hasFood ? kcal+' kcal' : '—'}</span>
+        <span class="nut-fmc prot" id="nutfc-p-${seq}">${hasFood ? prot+'g P' : '—'}</span>
+        <span class="nut-fmc carb" id="nutfc-c-${seq}">${hasFood ? carb+'g C' : '—'}</span>
+        <span class="nut-fmc fat"  id="nutfc-f-${seq}">${hasFood ? fat+'g G'  : '—'}</span>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+}
+
+function _nutRemoveFoodCard(seq) {
+  const found = _nutFindItemBySeq(seq);
+  if (!found) return;
+  const { meal, item, idx } = found;
+  if (item.id) item.delete = true;
+  else meal.detail.splice(idx, 1);
+  const card = document.getElementById(`nutfc-${seq}`);
+  if (card) card.remove();
+  const subEl = document.getElementById('nutFcMealSub');
+  if (subEl) subEl.textContent = _nutMealKcalStr(meal);
+  _renderNutEditorSidebar();
+}
+
+function _nutAcSearch(seq, val) {
+  clearTimeout(_nutAcTimers[seq]);
+  const drop = document.getElementById(`nutfc-drop-${seq}`);
+  if (!val || val.length < 2) { if (drop) drop.classList.remove('open'); return; }
+  drop.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#9CA3AF;">Buscando…</div>';
+  drop.classList.add('open');
+  _nutAcTimers[seq] = setTimeout(async () => {
+    try {
+      const params = new URLSearchParams({ search: val, per_page: 12, page: 1 });
+      const r = await fetch(`${API}/aliments/search?${params}`, { headers: h() });
+      const j = await r.json();
+      const items = (j.data?.data || j.data || []);
+      _nutShowAcDrop(seq, Array.isArray(items) ? items : []);
+    } catch { if (drop) drop.classList.remove('open'); }
+  }, 250);
+}
+
+function _nutShowAcDrop(seq, items) {
+  const drop = document.getElementById(`nutfc-drop-${seq}`);
+  if (!drop) return;
+  if (!items.length) {
+    drop.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#9CA3AF;">Sin resultados</div>';
+    drop.classList.add('open');
+    return;
+  }
+  items.forEach(a => { _nutAcCache[a.id] = a; });
+  drop.innerHTML = items.map(a => {
+    const p = Math.round(a.proteins||0), c = Math.round(a.carbohydrates||0), f = Math.round(a.fats||0), k = Math.round(a.calories||0);
+    const safeId = JSON.stringify(String(a.id));
+    return `<div class="nut-fc-drop-item" onmousedown="event.preventDefault();_nutSelectAliment(${seq},${safeId})">
+      <div class="nut-fc-drop-name">${esc(a.name||'')}
+        <span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;background:#EEF2FF;color:#4F46E5;">Plataforma</span>
+      </div>
+      <div class="nut-fc-drop-mac">${k} kcal · P:${p}g C:${c}g G:${f}g <span style="color:#D1D5DB;">/ 100g</span></div>
+    </div>`;
+  }).join('');
+  drop.classList.add('open');
+}
+
+function _nutSelectAliment(seq, alimentId) {
+  const cached = _nutAcCache[alimentId];
+  if (!cached) return;
+  const found = _nutFindItemBySeq(seq);
+  if (!found) return;
+  const { item, meal } = found;
+  item.aliment_id = alimentId;
+  item.aliment = {
+    name: cached.name || '',
+    proteins: parseFloat(cached.proteins) || 0,
+    carbohydrates: parseFloat(cached.carbohydrates) || 0,
+    fats: parseFloat(cached.fats) || 0,
+    calories: parseFloat(cached.calories) || 0,
+  };
+  if (!item.quantity_calc) item.quantity_calc = parseFloat(cached.quantity) || 100;
+
+  const inp = document.getElementById(`nutfc-inp-${seq}`);
+  if (inp) inp.value = cached.name || '';
+  _nutCloseAcDrop(seq);
+
+  const qtyInp = document.getElementById(`nutfc-qty-${seq}`);
+  if (qtyInp) { qtyInp.disabled = false; qtyInp.value = item.quantity_calc; }
+  _nutUpdateFoodCardQty(seq, item.quantity_calc);
+}
+
+function _nutUpdateFoodCardQty(seq, val) {
+  const found = _nutFindItemBySeq(seq);
+  if (!found?.item?.aliment) return;
+  const { item, meal } = found;
+  item.quantity_calc = parseFloat(val) || 0;
+  const qty = item.quantity_calc;
+  const a = item.aliment;
+  const kcal = Math.round((a.calories||0)/100*qty);
+  const prot = Math.round((a.proteins||0)/100*qty);
+  const carb = Math.round((a.carbohydrates||0)/100*qty);
+  const fat  = Math.round((a.fats||0)/100*qty);
+  const upd = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  upd(`nutfc-k-${seq}`, kcal+' kcal');
+  upd(`nutfc-p-${seq}`, prot+'g P');
+  upd(`nutfc-c-${seq}`, carb+'g C');
+  upd(`nutfc-f-${seq}`, fat+'g G');
+  const subEl = document.getElementById('nutFcMealSub');
+  if (subEl) subEl.textContent = _nutMealKcalStr(meal);
+  _renderNutEditorSidebar();
+}
+
+function _nutCloseAcDrop(seq) {
+  const drop = document.getElementById(`nutfc-drop-${seq}`);
+  if (drop) drop.classList.remove('open');
 }
 
 function selectNutEditorMeal(idx) {
@@ -5166,7 +5349,7 @@ async function saveNutChanges() {
       ...(meal.id ? { id: meal.id } : {}),
       ...(meal.delete ? { delete: true } : {}),
       name: meal.name,
-      detail: (meal.detail || []).map((item, ii) => ({
+      detail: (meal.detail || []).filter(item => item.aliment_id || item.id).map((item, ii) => ({
         ...(item.id ? { id: item.id } : {}),
         ...(item.delete ? { delete: true } : {}),
         aliment_id: item.aliment_id,

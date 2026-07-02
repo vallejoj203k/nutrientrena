@@ -40,6 +40,7 @@ def _clone_aliment(db: Session, source: Aliment) -> Aliment:
         brand=source.brand,
         name=source.name,
         quantity=source.quantity,
+        quantity_unit=source.quantity_unit,
         quantity_type_id=source.quantity_type_id,
         proteins=source.proteins,
         carbohydrates=source.carbohydrates,

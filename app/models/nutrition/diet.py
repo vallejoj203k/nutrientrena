@@ -43,7 +43,7 @@ class Diet(Base):
                           cascade="all, delete-orphan")
     foods = relationship("DietFood", back_populates="diet", cascade="all, delete-orphan",
                          order_by="DietFood.id")
-    pathologies = relationship("Pathology", secondary="diet_pathologies", lazy="joined")
+    pathologies = relationship("Pathology", secondary="diet_pathologies", lazy="noload")
 
 
 class DietDetail(Base):

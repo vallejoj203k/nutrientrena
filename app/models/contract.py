@@ -24,7 +24,7 @@ class Contract(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     coach_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    client_id = Column(Integer, ForeignKey("user_details.id"), nullable=True)
+    client_id = Column(String(36), ForeignKey("user_details.id"), nullable=True)
     template_id = Column(Integer, ForeignKey("contract_templates.id", ondelete="SET NULL"), nullable=True)
     title = Column(String(255), nullable=False)
     type = Column(String(50), nullable=False, default="servicio")

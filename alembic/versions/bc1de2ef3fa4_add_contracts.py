@@ -5,7 +5,7 @@ Revises: ab2bc3cd4de5
 Create Date: 2026-06-25
 """
 from alembic import op
-import sqlalchemy as sa
+from sqlalchemy import text
 
 revision = 'bc1de2ef3fa4'
 down_revision = 'ab2bc3cd4de5'
@@ -14,38 +14,43 @@ depends_on = None
 
 
 def upgrade():
-    from sqlalchemy import inspect
     bind = op.get_bind()
-    existing = inspect(bind).get_table_names()
 
-    if 'contract_templates' not in existing:
-        op.create_table(
-            'contract_templates',
-            sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-            sa.Column('coach_id', sa.Integer(), sa.ForeignKey('users.id'), nullable=False),
-            sa.Column('title', sa.String(255), nullable=False),
-            sa.Column('type', sa.String(50), nullable=False, server_default='servicio'),
-            sa.Column('content', sa.Text(), nullable=False),
-            sa.Column('created_at', sa.DateTime(), server_default=sa.func.now()),
-            sa.Column('updated_at', sa.DateTime(), server_default=sa.func.now(), onupdate=sa.func.now()),
-        )
+    bind.execute(text("""
+        CREATE TABLE IF NOT EXISTS contract_templates (
+            id         INT NOT NULL AUTO_INCREMENT,
+            coach_id   INT NOT NULL,
+            title      VARCHAR(255) NOT NULL,
+            type       VARCHAR(50) NOT NULL DEFAULT 'servicio',
+            content    TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            CONSTRAINT fk_ct_coach FOREIGN KEY (coach_id) REFERENCES users(id)
+        ) DEFAULT CHARSET=utf8mb4
+    """))
 
-    if 'contracts' not in existing:
-        op.create_table(
-            'contracts',
-            sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-            sa.Column('coach_id', sa.Integer(), sa.ForeignKey('users.id'), nullable=False),
-            sa.Column('client_id', sa.Integer(), sa.ForeignKey('user_details.id'), nullable=True),
-            sa.Column('template_id', sa.Integer(), sa.ForeignKey('contract_templates.id', ondelete='SET NULL'), nullable=True),
-            sa.Column('title', sa.String(255), nullable=False),
-            sa.Column('type', sa.String(50), nullable=False, server_default='servicio'),
-            sa.Column('content', sa.Text(), nullable=False),
-            sa.Column('status', sa.String(20), nullable=False, server_default='borrador'),
-            sa.Column('created_at', sa.DateTime(), server_default=sa.func.now()),
-            sa.Column('updated_at', sa.DateTime(), server_default=sa.func.now(), onupdate=sa.func.now()),
-        )
+    bind.execute(text("""
+        CREATE TABLE IF NOT EXISTS contracts (
+            id          INT NOT NULL AUTO_INCREMENT,
+            coach_id    INT NOT NULL,
+            client_id   VARCHAR(36),
+            template_id INT,
+            title       VARCHAR(255) NOT NULL,
+            type        VARCHAR(50) NOT NULL DEFAULT 'servicio',
+            content     TEXT NOT NULL,
+            status      VARCHAR(20) NOT NULL DEFAULT 'borrador',
+            created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            CONSTRAINT fk_c_coach    FOREIGN KEY (coach_id)    REFERENCES users(id),
+            CONSTRAINT fk_c_client   FOREIGN KEY (client_id)   REFERENCES user_details(id) ON DELETE SET NULL,
+            CONSTRAINT fk_c_template FOREIGN KEY (template_id) REFERENCES contract_templates(id) ON DELETE SET NULL
+        ) DEFAULT CHARSET=utf8mb4
+    """))
 
 
 def downgrade():
-    op.drop_table('contracts')
-    op.drop_table('contract_templates')
+    bind = op.get_bind()
+    bind.execute(text("DROP TABLE IF EXISTS contracts"))
+    bind.execute(text("DROP TABLE IF EXISTS contract_templates"))

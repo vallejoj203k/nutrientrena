@@ -753,7 +753,7 @@
 .prog-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#22C55E,#4ADE80);transition:width .6s;}
 .prog-bar-pct{font-size:11px;font-weight:700;color:#16A34A;white-space:nowrap;}
 
-.weight-chart-section{background:#fff;border-bottom:1px solid #E5E7EB;padding:16px 24px;flex-shrink:0;}
+.weight-chart-section{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 24px;margin:16px 24px 0;}
 .wc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .wc-title{font-size:14px;font-weight:700;color:#111827;}
 .wc-legend{display:flex;align-items:center;gap:12px;font-size:11px;color:#6B7280;}
@@ -1024,18 +1024,6 @@
       </div>
     </div>
 
-    <!-- Weight chart (above tabs) -->
-    <div class="weight-chart-section" id="weightChartSection">
-      <div class="wc-header">
-        <span class="wc-title">Seguimiento de peso · Proyección vs Real</span>
-        <div class="wc-legend">
-          <div class="wc-legend-item"><div class="wc-dot-green"></div> Real</div>
-          <div class="wc-legend-item"><div class="wc-dot-purple"></div> Objetivo</div>
-        </div>
-      </div>
-      <div id="weightChartContainer" style="height:180px;"></div>
-    </div>
-
     <!-- Tabs bar -->
     <div class="tabs-bar">
       <button class="tab-btn active" id="tab-resumen-btn" onclick="showTab('resumen')">
@@ -1081,6 +1069,17 @@
 
       <!-- ── RESUMEN ── -->
       <div class="tab-pane active" id="tab-resumen">
+        <!-- Weight chart -->
+        <div class="weight-chart-section" id="weightChartSection">
+          <div class="wc-header">
+            <span class="wc-title">Seguimiento de peso · Proyección vs Real</span>
+            <div class="wc-legend">
+              <div class="wc-legend-item"><div class="wc-dot-green"></div> Real</div>
+              <div class="wc-legend-item"><div class="wc-dot-purple"></div> Objetivo</div>
+            </div>
+          </div>
+          <div id="weightChartContainer" style="height:180px;"></div>
+        </div>
         <div class="res-new-grid">
           <div id="resDatosCard"></div>
           <div class="res-right-col">

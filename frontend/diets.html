@@ -1289,7 +1289,7 @@ function addMeal(prefill) {
         fats: (dfa.aliment && dfa.aliment.fats != null) ? dfa.aliment.fats : null,
         calories: (dfa.aliment && dfa.aliment.calories != null) ? dfa.aliment.calories : null,
         quantity: dfa.quantity != null ? String(dfa.quantity) : '',
-        unit: (dfa.aliment && dfa.aliment.quantity_type && dfa.aliment.quantity_type.name) || 'gr',
+        unit: (dfa.aliment && dfa.aliment.quantity_unit) || 'gr',
         _source: 'platform'
       });
     });
@@ -1502,7 +1502,7 @@ function showAcDrop(rid, items) {
     drop.classList.add('open');
     return;
   }
-  items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories, quantity: a.quantity, quantity_type: a.quantity_type }; });
+  items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories, quantity: a.quantity, quantity_unit: a.quantity_unit }; });
   drop.innerHTML = items.map(function(a){
     var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
       + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">🌐 Plataforma')
@@ -1532,7 +1532,7 @@ function selectAliment(rid, alimentId) {
     row.carbohydrates = m.carbohydrates != null ? m.carbohydrates : null;
     row.fats = m.fats != null ? m.fats : null;
     row.calories = m.calories != null ? m.calories : null;
-    row.unit = (m.quantity_type && m.quantity_type.name) || 'gr';
+    row.unit = m.quantity_unit || 'gr';
     if (!row.quantity) {
       row.quantity = String(m.quantity != null ? m.quantity : 100);
     }

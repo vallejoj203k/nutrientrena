@@ -3165,9 +3165,27 @@ async function saveTarget() {
     <button class="nut-edit-close" onclick="closeNutEditor()">×</button>
     <div style="flex:1;min-width:0;">
       <input id="nutEditorName" type="text" placeholder="Nombre de la dieta" style="font-size:16px;font-weight:700;border:none;outline:none;width:100%;background:transparent;color:#111;" oninput="_nutWorking&&(_nutWorking.title=this.value)">
-      <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Editor de dieta</div>
+      <div style="font-size:12px;color:#16A34A;margin-top:1px;font-weight:600;">✓ Copia personal — solo afecta a este cliente</div>
     </div>
     <button class="nut-edit-save" id="nutEditorSaveBtn" onclick="saveNutChanges()">Guardar cambios</button>
+  </div>
+  <div style="display:flex;gap:8px;padding:10px 24px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;flex-shrink:0;flex-wrap:wrap;">
+    <div style="flex:1;min-width:90px;">
+      <div style="font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;margin-bottom:3px;">Calorías</div>
+      <input type="number" id="nutEdMacKcal" style="width:100%;padding:6px 8px;border:1.5px solid #E5E7EB;border-radius:6px;font-size:13px;font-weight:700;color:#7C3AED;outline:none;" placeholder="—" oninput="_nutWorking&&(_nutWorking.calories=parseFloat(this.value)||null)">
+    </div>
+    <div style="flex:1;min-width:90px;">
+      <div style="font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;margin-bottom:3px;">Proteínas (g)</div>
+      <input type="number" id="nutEdMacProt" style="width:100%;padding:6px 8px;border:1.5px solid #E5E7EB;border-radius:6px;font-size:13px;font-weight:700;color:#16A34A;outline:none;" placeholder="—" oninput="_nutWorking&&(_nutWorking.proteins=parseFloat(this.value)||null)">
+    </div>
+    <div style="flex:1;min-width:90px;">
+      <div style="font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;margin-bottom:3px;">Carbohidratos (g)</div>
+      <input type="number" id="nutEdMacCarb" style="width:100%;padding:6px 8px;border:1.5px solid #E5E7EB;border-radius:6px;font-size:13px;font-weight:700;color:#D97706;outline:none;" placeholder="—" oninput="_nutWorking&&(_nutWorking.carbs=parseFloat(this.value)||null)">
+    </div>
+    <div style="flex:1;min-width:90px;">
+      <div style="font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;margin-bottom:3px;">Grasas (g)</div>
+      <input type="number" id="nutEdMacFat" style="width:100%;padding:6px 8px;border:1.5px solid #E5E7EB;border-radius:6px;font-size:13px;font-weight:700;color:#DC2626;outline:none;" placeholder="—" oninput="_nutWorking&&(_nutWorking.fats=parseFloat(this.value)||null)">
+    </div>
   </div>
   <div class="nut-edit-body">
     <div class="nut-edit-side">
@@ -4672,6 +4690,7 @@ let _nutFoodGrpId = null;
 let _nutFoodPickerMealIdx = 0;
 let _nutFoodGroups = [];
 let _nutFoodGrpsLoaded = false;
+let _nutPersonalCopyId = null;
 let _nutMealsPerDay = 4;
 
 const _NUT_DAY_ABV  = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
@@ -4892,12 +4911,126 @@ function setNutMealsPerDay(n) {
   _renderNutUI();
 }
 
-/* ── Diet editor ── */
-function openNutEditor() {
-  if (!_nutDetail) return;
+/* ── Diet editor (personal copy per client) ── */
+async function openNutEditor() {
+  if (!clientDiets[0]) return;
+  const currentId = String(clientDiets[0].id);
+  const sessKey = `nut_pers_${clientId}`;
+  const knownPersonalId = _nutPersonalCopyId ? String(_nutPersonalCopyId) : (sessionStorage.getItem(sessKey) || null);
+
+  let targetId = null;
+
+  if (currentId === knownPersonalId) {
+    // Already pointing to the personal copy for this session
+    targetId = currentId;
+  } else {
+    // Need to create a personal copy of the diet
+    const ovl = document.getElementById('nutEditorOverlay');
+    document.getElementById('nutEditorMealList').innerHTML = '';
+    document.getElementById('nutEditorContent').innerHTML =
+      '<div style="padding:60px 20px;text-align:center;">'
+      + '<div style="font-size:14px;color:#6B7280;margin-bottom:6px;font-weight:600;">Preparando editor personal…</div>'
+      + '<div style="font-size:12px;color:#D1D5DB;">Creando una copia exclusiva para este cliente</div>'
+      + '</div>';
+    document.getElementById('nutEditorName').value = '';
+    ovl.classList.add('open');
+
+    try {
+      // 1. Fetch full diet data
+      const r = await fetch(`${API}/diets/${currentId}/edit`, { headers: h() });
+      if (!r.ok) throw new Error('No se pudo cargar la dieta');
+      const j = await r.json();
+      const src = j.data || j;
+      const srcDet = src.detail || {};
+
+      // 2. Build payload for personal copy
+      const foods = (src.foods || []).map(meal => ({
+        name: meal.name || 'Comida',
+        detail: (meal.detail || []).filter(item => item.aliment_id).map((item, i) => ({
+          aliment_id: item.aliment_id,
+          quantity_calc: parseFloat(item.quantity_calc ?? item.quantity) || 0,
+          order: i,
+        })),
+      })).filter(f => f.detail.length > 0);
+
+      const body = {
+        title:    src.title    || 'Dieta personal',
+        diet_type: src.diet_type || null,
+        calories:  src.calories  || null,
+        proteins:  srcDet.proteins || src.proteins || null,
+        carbs:     srcDet.carbs    || src.carbs    || null,
+        fats:      srcDet.fats     || src.fats     || null,
+        deficit:   srcDet.deficit  || src.deficit  || null,
+        surplus:   srcDet.surplus  || src.surplus  || null,
+        foods,
+      };
+
+      // 3. Create new personal diet
+      const cr = await fetch(`${API}/diets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...h() },
+        body: JSON.stringify(body),
+      });
+      if (!cr.ok) throw new Error('No se pudo crear la copia personal');
+      const cj = await cr.json();
+      const newId = String(cj.data?.id || cj.id || '');
+      if (!newId) throw new Error('No se recibió ID de la dieta personal');
+
+      // 4. Assign personal copy to this client
+      const ar = await fetch(`${API}/diets/${newId}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...h() },
+        body: JSON.stringify({ client_id: clientId }),
+      });
+      if (!ar.ok) throw new Error('No se pudo asignar la copia al cliente');
+
+      // 5. Track the personal copy for this session
+      _nutPersonalCopyId = newId;
+      sessionStorage.setItem(sessKey, newId);
+      targetId = newId;
+
+      // 6. Refresh clientDiets to reflect the new assignment
+      const dr = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
+      if (dr.ok) {
+        const dj = await dr.json();
+        const arr = dj.data || [];
+        clientDiets = Array.isArray(arr)
+          ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id)
+          : [];
+        if (clientDiets.length) _clientDietId = clientDiets[0].id;
+      }
+      _nutDetail = null;
+      _nutDetailLoaded = false;
+
+    } catch (e) {
+      document.getElementById('nutEditorOverlay').classList.remove('open');
+      showToast(e.message || 'Error al preparar el editor', 'error');
+      return;
+    }
+  }
+
+  // Load the personal copy detail if not already loaded
+  if (!_nutDetail || String(_nutDetail.id) !== targetId) {
+    try {
+      const r = await fetch(`${API}/diets/${targetId}/edit`, { headers: h() });
+      if (!r.ok) throw new Error();
+      const j = await r.json();
+      _nutDetail = _nutNormalize(j.data || j);
+      _nutDetailLoaded = true;
+    } catch {
+      document.getElementById('nutEditorOverlay').classList.remove('open');
+      showToast('Error al cargar el editor', 'error');
+      return;
+    }
+  }
+
   _nutWorking = _nutNormalize(JSON.parse(JSON.stringify(_nutDetail)));
   _nutEditorMealIdx = 0;
   document.getElementById('nutEditorName').value = _nutWorking.title || '';
+  document.getElementById('nutEdMacKcal').value = _nutWorking.calories  || '';
+  document.getElementById('nutEdMacProt').value = _nutWorking.proteins  || '';
+  document.getElementById('nutEdMacCarb').value = _nutWorking.carbs     || '';
+  document.getElementById('nutEdMacFat').value  = _nutWorking.fats      || '';
   _renderNutEditorSidebar();
   _renderNutEditorContent();
   document.getElementById('nutEditorOverlay').classList.add('open');
@@ -5014,6 +5147,11 @@ async function saveNutChanges() {
   const btn = document.getElementById('nutEditorSaveBtn');
   btn.disabled = true; btn.textContent = 'Guardando…';
   _nutWorking.title = document.getElementById('nutEditorName').value.trim() || _nutWorking.title;
+  const _pNum = id => { const v = document.getElementById(id)?.value; return (v !== '' && v != null) ? parseFloat(v) || null : null; };
+  _nutWorking.calories = _pNum('nutEdMacKcal') ?? _nutWorking.calories;
+  _nutWorking.proteins = _pNum('nutEdMacProt') ?? _nutWorking.proteins;
+  _nutWorking.carbs    = _pNum('nutEdMacCarb') ?? _nutWorking.carbs;
+  _nutWorking.fats     = _pNum('nutEdMacFat')  ?? _nutWorking.fats;
   const payload = {
     title: _nutWorking.title,
     calories: _nutWorking.calories,
@@ -5047,6 +5185,8 @@ async function saveNutChanges() {
     if (!r.ok) { showToast(j.detail || j.message || 'Error al guardar', 'error'); return; }
     showToast('Cambios guardados', 'success');
     _nutDetailLoaded = false;
+    _nutPersonalCopyId = String(_nutDetail?.id || '');
+    sessionStorage.setItem(`nut_pers_${clientId}`, String(_nutDetail?.id || ''));
     closeNutEditor();
     await renderNutricionTab();
   } catch { showToast('Error de conexión', 'error'); }

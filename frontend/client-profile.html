@@ -705,16 +705,14 @@
     .nut-fc-rm:hover{background:#FEE2E2;}
     .nut-fc-bottom{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
     .nut-fc-qty{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-    .nut-fc-qty input{border:1px solid #E5E7EB;border-radius:7px;padding:5px 8px;font-size:13px;width:70px;text-align:center;outline:none;}
-    .nut-fc-qty input:focus{border-color:#16A34A;}
-    .nut-fc-qty input:disabled{background:#F9FAFB;color:#D1D5DB;}
-    .nut-fc-unit{font-size:11px;color:#6B7280;}
+    .nut-fc-qty-val{font-size:14px;font-weight:700;color:#111827;min-width:28px;}
+    .nut-fc-unit{font-size:12px;color:#6B7280;font-weight:500;}
     .nut-fc-macros{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
     .nut-fmc{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
-    .nut-fmc.kcal{background:#FEF3C7;color:#D97706;}
-    .nut-fmc.prot{background:#EDE9FE;color:#4F46E5;}
-    .nut-fmc.carb{background:#FED7AA;color:#C2410C;}
-    .nut-fmc.fat{background:#FEE2E2;color:#DC2626;}
+    .nut-fmc.kcal{background:#EEF2FF;color:#4F46E5;}
+    .nut-fmc.prot{background:#DBEAFE;color:#2563EB;}
+    .nut-fmc.carb{background:#FEF3C7;color:#D97706;}
+    .nut-fmc.fat{background:#EDE9FE;color:#6366F1;}
     /* Food picker (legacy, kept hidden) */
     .nut-pk-ovl{display:none!important;}
   </style>
@@ -5157,9 +5155,7 @@ function _nutRenderFoodCard(seq) {
     </div>
     <div class="nut-fc-bottom">
       <div class="nut-fc-qty">
-        <input type="number" id="nutfc-qty-${seq}" value="${qty}" min="0" step="5"
-          oninput="_nutUpdateFoodCardQty(${seq},this.value)"
-          ${!hasFood ? 'disabled' : ''}>
+        <span class="nut-fc-qty-val" id="nutfc-qty-${seq}">${hasFood ? qty : '—'}</span>
         <span class="nut-fc-unit" id="nutfc-unit-${seq}">${unit}</span>
       </div>
       <div class="nut-fc-macros">
@@ -5304,8 +5300,8 @@ function _nutSelectAliment(seq, alimentId) {
   const unitEl = document.getElementById(`nutfc-unit-${seq}`);
   if (unitEl) unitEl.textContent = unit;
 
-  const qtyInp = document.getElementById(`nutfc-qty-${seq}`);
-  if (qtyInp) { qtyInp.disabled = false; qtyInp.value = item.quantity_calc; }
+  const qtyEl = document.getElementById(`nutfc-qty-${seq}`);
+  if (qtyEl) qtyEl.textContent = item.quantity_calc;
   _nutUpdateFoodCardQty(seq, item.quantity_calc);
 }
 
@@ -5317,6 +5313,7 @@ function _nutUpdateFoodCardQty(seq, val) {
   const { kcal, prot, carb, fat } = _nutCalcMacros(item.aliment, item.quantity_calc, item.unit);
   const fmt = v => Number.isInteger(v) ? v : v.toFixed(1);
   const upd = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  upd(`nutfc-qty-${seq}`, item.quantity_calc);
   upd(`nutfc-k-${seq}`, fmt(kcal) + ' kcal');
   upd(`nutfc-p-${seq}`, fmt(prot) + 'g P');
   upd(`nutfc-c-${seq}`, fmt(carb) + 'g C');

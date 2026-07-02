@@ -198,10 +198,9 @@
     .food-card-top .ac-wrap input{width:100%;padding:8px 11px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;background:#fff;transition:border-color .15s;}
     .food-card-top .ac-wrap input:focus{border-color:var(--indigo);}
     .food-card-bottom{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-    .food-qty-wrap{display:flex;align-items:center;gap:5px;}
-    .food-qty-wrap input[type=number]{width:76px;padding:6px 9px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;text-align:center;background:#fff;transition:border-color .15s;}
-    .food-qty-wrap input[type=number]:focus{border-color:var(--indigo);}
-    .food-qty-wrap select{padding:6px 9px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;outline:none;color:#374151;background:#fff;}
+    .food-qty-badge{display:flex;align-items:center;gap:4px;padding:4px 10px;background:#F3F4F6;border-radius:7px;flex-shrink:0;}
+    .food-qty-text{font-size:13px;font-weight:700;color:#111827;}
+    .food-qty-unit{font-size:11px;color:#6B7280;}
     .food-macros{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
     .fmc{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
     .fmc.kcal{background:#FEF3C7;color:#D97706;}
@@ -388,8 +387,6 @@
       .form-group select,
       .form-group textarea,
       .food-card-top .ac-wrap input,
-      .food-qty-wrap input,
-      .food-qty-wrap select,
       .meal-name-input{font-size:16px !important;}
 
       /* ── Food cards ── */
@@ -1321,14 +1318,19 @@ function _renderFoodCard(mid, row) {
     + '<button class="del-row-btn" onclick="removeFoodRow(' + mid + ',' + rid + ')" title="Quitar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
     + '</div>'
     + '<div class="food-card-bottom">'
-    + '<div class="food-qty-wrap"><input type="number" id="fqty-' + rid + '" min="0" step="0.1" placeholder="0" oninput="onQtyChange(' + mid + ',' + rid + ')"/>'
-    + '<select id="funit-' + rid + '" onchange="onUnitChange(' + mid + ',' + rid + ',this.value)"><option value="gr">gr</option><option value="kg">kg</option><option value="ml">ml</option><option value="l">l</option><option value="unidad">unidad</option><option value="cucharada">cucharada</option><option value="taza">taza</option></select></div>'
+    + '<input type="hidden" id="fqty-' + rid + '"/>'
+    + '<div class="food-qty-badge" id="fqty-badge-' + rid + '" style="display:none;">'
+    + '<span class="food-qty-text" id="fqty-disp-' + rid + '">—</span>'
+    + '<span class="food-qty-unit">gr</span>'
+    + '</div>'
     + '<div class="food-macros"><span class="fmc kcal" id="fkcal-' + rid + '">--- kcal</span><span class="fmc prot" id="fprot-' + rid + '">--- P</span><span class="fmc carb" id="fcarb-' + rid + '">--- C</span><span class="fmc fat" id="ffat-' + rid + '">--- G</span></div>'
     + '</div>';
   container.appendChild(card);
   if (row.aliment_name) { var aEl = document.getElementById('fiac-' + rid); if (aEl) aEl.value = row.aliment_name; }
-  if (row.quantity) { var qEl = document.getElementById('fqty-' + rid); if (qEl) qEl.value = row.quantity; }
-  if (row.unit && row.unit !== 'gr') { var uEl = document.getElementById('funit-' + rid); if (uEl) uEl.value = row.unit; }
+  if (row.quantity) {
+    var qEl = document.getElementById('fqty-' + rid); if (qEl) qEl.value = row.quantity;
+    _showQtyBadge(rid, row.quantity);
+  }
   updateRowMacros(row);
 }
 
@@ -1386,32 +1388,15 @@ function removeFoodRow(mid, rid) {
 }
 
 function getUnitMult(unit) {
-  switch (unit) {
-    case 'kg': return 1000;
-    case 'l':  return 1000;
-    case 'cucharada': return 15;
-    case 'taza': return 240;
-    default: return 1; // gr, ml, unidad
-  }
+  return (unit === 'kg' || unit === 'l') ? 1000 : (unit === 'cucharada' ? 15 : (unit === 'taza' ? 240 : 1));
 }
 
-function onQtyChange(mid, rid) {
-  var meal = _meals.find(function(m){ return m.id == mid; });
-  if (!meal) return;
-  var row = meal.rows.find(function(r){ return r.id == rid; });
-  if (!row) return;
-  var qEl = document.getElementById('fqty-' + rid);
-  if (qEl) row.quantity = qEl.value;
-  updateRowMacros(row); recalcMealMacros(mid);
-}
-
-function onUnitChange(mid, rid, unit) {
-  var meal = _meals.find(function(m){ return m.id == mid; });
-  if (!meal) return;
-  var row = meal.rows.find(function(r){ return r.id == rid; });
-  if (!row) return;
-  row.unit = unit;
-  updateRowMacros(row); recalcMealMacros(mid);
+function _showQtyBadge(rid, qty) {
+  var badge = document.getElementById('fqty-badge-' + rid);
+  var disp = document.getElementById('fqty-disp-' + rid);
+  var val = parseFloat(qty);
+  if (badge) badge.style.display = val ? 'flex' : 'none';
+  if (disp) disp.textContent = val % 1 === 0 ? val : val.toFixed(1);
 }
 
 function updateRowMacros(row) {
@@ -1513,7 +1498,7 @@ function showAcDrop(rid, items) {
     drop.classList.add('open');
     return;
   }
-  items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories }; });
+  items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories, quantity: a.quantity }; });
   drop.innerHTML = items.map(function(a){
     var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
       + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">🌐 Plataforma')
@@ -1544,10 +1529,12 @@ function selectAliment(rid, alimentId) {
     row.fats = m.fats != null ? m.fats : null;
     row.calories = m.calories != null ? m.calories : null;
     if (!row.quantity) {
-      row.quantity = '100';
-      var qEl = document.getElementById('fqty-' + rid);
-      if (qEl) qEl.value = '100';
+      var qty = String(m.quantity != null ? m.quantity : 100);
+      row.quantity = qty;
     }
+    var qEl = document.getElementById('fqty-' + rid);
+    if (qEl) qEl.value = row.quantity;
+    _showQtyBadge(rid, row.quantity);
     updateRowMacros(row);
     if (mid) recalcMealMacros(mid);
   }

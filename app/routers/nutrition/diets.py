@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
 from sqlalchemy import or_
@@ -19,6 +19,15 @@ router = APIRouter(prefix="/diets", tags=["Nutrition - Diets"])
 
 def _get_or_404(db: Session, diet_id: str):
     return db.query(Diet).filter(Diet.id == diet_id).first()
+
+
+def _get_or_404_with_pathologies(db: Session, diet_id: str):
+    return (
+        db.query(Diet)
+        .options(selectinload(Diet.pathologies))
+        .filter(Diet.id == diet_id)
+        .first()
+    )
 
 
 def _serialize(diet: Diet) -> dict:
@@ -206,7 +215,7 @@ def assigned(
 
 @router.get("/{id}/edit", summary="Ver dieta", description="Retorna el detalle completo de una dieta con alimentos y macros.")
 def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
-    diet = _get_or_404(db, id)
+    diet = _get_or_404_with_pathologies(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
     return send_response(_serialize(diet), "OK")

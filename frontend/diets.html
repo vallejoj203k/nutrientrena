@@ -822,6 +822,7 @@ function getDietTipo(d) {
 async function loadDiets() {
   try {
     var r = await fetch(API + '/diets/findAll', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) { document.getElementById('dietsTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:48px;color:#DC2626;">Error al cargar las dietas.</td></tr>'; return; }
     var j = await r.json();
     allDiets = j.data || j || [];
     if (!Array.isArray(allDiets)) allDiets = [];
@@ -1055,14 +1056,28 @@ function changeMealCount(delta) {
   renderMealSidebar();
 }
 
+var _PATHO_FALLBACK = [
+  {id:1,name:'Diabetes tipo 2'},{id:2,name:'Resistencia a la insulina'},{id:3,name:'Hipotiroidismo'},
+  {id:4,name:'SOP'},{id:5,name:'Enfermedad celíaca'},{id:6,name:'Crohn/Colitis'},
+  {id:7,name:'SIBO'},{id:8,name:'Reflujo/GERD'},{id:9,name:'Hipertensión'},
+  {id:10,name:'Hipercolesterolemia'},{id:11,name:'Gota'},{id:12,name:'Insuficiencia renal'},
+  {id:13,name:'Hígado graso'},{id:14,name:'Anemia ferropénica'},{id:15,name:'Osteoporosis'},
+  {id:16,name:'Intolerancia a la lactosa'},{id:17,name:'Alergia al gluten'},{id:18,name:'Alergia a frutos secos'},
+];
+
 async function _ensurePathologies() {
   if (_pathologiesLoaded) return;
   try {
     var r = await fetch(API + '/pathologies/findAll', { headers: { Authorization: 'Bearer ' + token } });
-    var j = await r.json();
-    _pathologiesList = (j.data || j) || [];
-    _pathologiesLoaded = true;
-  } catch(e) { _pathologiesList = []; }
+    if (r.ok) {
+      var j = await r.json();
+      var list = j.data || j || [];
+      _pathologiesList = Array.isArray(list) && list.length > 0 ? list : _PATHO_FALLBACK;
+    } else {
+      _pathologiesList = _PATHO_FALLBACK;
+    }
+  } catch(e) { _pathologiesList = _PATHO_FALLBACK; }
+  _pathologiesLoaded = true;
 }
 
 function _renderPathoGrid(selectedIds) {

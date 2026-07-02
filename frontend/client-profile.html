@@ -5127,12 +5127,11 @@ function _nutRenderFoodCard(seq) {
   const { item } = found;
   const a = item.aliment || {};
   const name = a.name || '';
-  const qty = Math.round(item.quantity_calc || 0);
-  const kcal = Math.round((a.calories||0)/100*qty);
-  const prot = Math.round((a.proteins||0)/100*qty);
-  const carb = Math.round((a.carbohydrates||0)/100*qty);
-  const fat  = Math.round((a.fats||0)/100*qty);
   const hasFood = !!item.aliment_id;
+  const unit = item.unit || _nutUnitFromAliment(a);
+  const qty = item.quantity_calc || 0;
+  const { kcal, prot, carb, fat } = hasFood ? _nutCalcMacros(a, qty, unit) : {kcal:0,prot:0,carb:0,fat:0};
+  const fmt = v => Number.isInteger(v) ? v : v.toFixed(1);
 
   const card = document.createElement('div');
   card.className = 'nut-fc';
@@ -5155,13 +5154,13 @@ function _nutRenderFoodCard(seq) {
         <input type="number" id="nutfc-qty-${seq}" value="${qty}" min="0" step="5"
           oninput="_nutUpdateFoodCardQty(${seq},this.value)"
           ${!hasFood ? 'disabled' : ''}>
-        <span class="nut-fc-unit" id="nutfc-unit-${seq}">g</span>
+        <span class="nut-fc-unit" id="nutfc-unit-${seq}">${unit}</span>
       </div>
       <div class="nut-fc-macros">
-        <span class="nut-fmc kcal" id="nutfc-k-${seq}">${hasFood ? kcal+' kcal' : '—'}</span>
-        <span class="nut-fmc prot" id="nutfc-p-${seq}">${hasFood ? prot+'g P' : '—'}</span>
-        <span class="nut-fmc carb" id="nutfc-c-${seq}">${hasFood ? carb+'g C' : '—'}</span>
-        <span class="nut-fmc fat"  id="nutfc-f-${seq}">${hasFood ? fat+'g G'  : '—'}</span>
+        <span class="nut-fmc kcal" id="nutfc-k-${seq}">${hasFood ? fmt(kcal)+' kcal' : '—'}</span>
+        <span class="nut-fmc prot" id="nutfc-p-${seq}">${hasFood ? fmt(prot)+'g P' : '—'}</span>
+        <span class="nut-fmc carb" id="nutfc-c-${seq}">${hasFood ? fmt(carb)+'g C' : '—'}</span>
+        <span class="nut-fmc fat"  id="nutfc-f-${seq}">${hasFood ? fmt(fat)+'g G'  : '—'}</span>
       </div>
     </div>
   `;
@@ -5220,13 +5219,45 @@ function _nutShowAcDrop(seq, items) {
   drop.classList.add('open');
 }
 
+function _nutUnitFromAliment(a) {
+  if (!a) return 'g';
+  const qt = a.quantity_type && (a.quantity_type.description || a.quantity_type.name);
+  if (!qt) return a.quantity_unit || 'g';
+  const qtLow = qt.toLowerCase();
+  if (qtLow === 'ml') return 'ml';
+  if (qtLow === 'ud' || qtLow === 'unidad' || qtLow === 'unidades') return 'ud';
+  if (qtLow === 'oz') return 'oz';
+  if (qtLow === 'kg') return 'kg';
+  if (qtLow === 'l') return 'l';
+  return 'g';
+}
+
+function _nutUnitMult(unit) {
+  if (unit === 'kg' || unit === 'l') return 1000;
+  if (unit === 'cucharada') return 15;
+  if (unit === 'taza') return 240;
+  return 1;
+}
+
+function _nutCalcMacros(a, qty, unit) {
+  const g = qty * _nutUnitMult(unit || 'g');
+  return {
+    kcal: Math.round((a.calories||0)/100*g),
+    prot: +(((a.proteins||0)/100*g).toFixed(1)),
+    carb: +(((a.carbohydrates||0)/100*g).toFixed(1)),
+    fat:  +(((a.fats||0)/100*g).toFixed(1)),
+  };
+}
+
 function _nutSelectAliment(seq, alimentId) {
   const cached = _nutAcCache[alimentId];
   if (!cached) return;
   const found = _nutFindItemBySeq(seq);
   if (!found) return;
   const { item, meal } = found;
+  const unit = _nutUnitFromAliment(cached);
   item.aliment_id = alimentId;
+  item.unit = unit;
   item.aliment = {
     name: cached.name || '',
     proteins: parseFloat(cached.proteins) || 0,
@@ -5234,11 +5265,15 @@ function _nutSelectAliment(seq, alimentId) {
     fats: parseFloat(cached.fats) || 0,
     calories: parseFloat(cached.calories) || 0,
   };
-  if (!item.quantity_calc) item.quantity_calc = parseFloat(cached.quantity) || 100;
+  // Use aliment's default quantity, or 1 for units, or 100g otherwise
+  item.quantity_calc = parseFloat(cached.quantity) || (unit === 'ud' ? 1 : 100);
 
   const inp = document.getElementById(`nutfc-inp-${seq}`);
   if (inp) inp.value = cached.name || '';
   _nutCloseAcDrop(seq);
+
+  const unitEl = document.getElementById(`nutfc-unit-${seq}`);
+  if (unitEl) unitEl.textContent = unit;
 
   const qtyInp = document.getElementById(`nutfc-qty-${seq}`);
   if (qtyInp) { qtyInp.disabled = false; qtyInp.value = item.quantity_calc; }
@@ -5250,17 +5285,13 @@ function _nutUpdateFoodCardQty(seq, val) {
   if (!found?.item?.aliment) return;
   const { item, meal } = found;
   item.quantity_calc = parseFloat(val) || 0;
-  const qty = item.quantity_calc;
-  const a = item.aliment;
-  const kcal = Math.round((a.calories||0)/100*qty);
-  const prot = Math.round((a.proteins||0)/100*qty);
-  const carb = Math.round((a.carbohydrates||0)/100*qty);
-  const fat  = Math.round((a.fats||0)/100*qty);
+  const { kcal, prot, carb, fat } = _nutCalcMacros(item.aliment, item.quantity_calc, item.unit);
+  const fmt = v => Number.isInteger(v) ? v : v.toFixed(1);
   const upd = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
-  upd(`nutfc-k-${seq}`, kcal+' kcal');
-  upd(`nutfc-p-${seq}`, prot+'g P');
-  upd(`nutfc-c-${seq}`, carb+'g C');
-  upd(`nutfc-f-${seq}`, fat+'g G');
+  upd(`nutfc-k-${seq}`, fmt(kcal) + ' kcal');
+  upd(`nutfc-p-${seq}`, fmt(prot) + 'g P');
+  upd(`nutfc-c-${seq}`, fmt(carb) + 'g C');
+  upd(`nutfc-f-${seq}`, fmt(fat)  + 'g G');
   const subEl = document.getElementById('nutFcMealSub');
   if (subEl) subEl.textContent = _nutMealKcalStr(meal);
   _renderNutEditorSidebar();

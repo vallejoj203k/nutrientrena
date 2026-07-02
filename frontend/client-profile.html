@@ -694,7 +694,7 @@
     .nut-fc-ac{flex:1;position:relative;}
     .nut-fc-ac input{width:100%;padding:8px 11px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;background:#fff;transition:border-color .15s;box-sizing:border-box;}
     .nut-fc-ac input:focus{border-color:#16A34A;}
-    .nut-fc-drop{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:600;max-height:200px;overflow-y:auto;display:none;margin-top:2px;}
+    .nut-fc-drop{position:fixed;background:#fff;border:1px solid #E5E7EB;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:9999;max-height:200px;overflow-y:auto;display:none;}
     .nut-fc-drop.open{display:block;}
     .nut-fc-drop-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #EBEBEB;}
     .nut-fc-drop-item:last-child{border-bottom:none;}
@@ -5192,6 +5192,7 @@ function _nutAcSearch(seq, val) {
   const drop = document.getElementById(`nutfc-drop-${seq}`);
   if (!val || val.length < 2) { if (drop) drop.classList.remove('open'); return; }
   drop.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#9CA3AF;">Buscando…</div>';
+  _nutPositionDrop(seq);
   drop.classList.add('open');
   _nutAcTimers[seq] = setTimeout(async () => {
     try {
@@ -5223,6 +5224,7 @@ function _nutShowAcDrop(seq, items) {
       <div class="nut-fc-drop-mac">${k} kcal · P:${p}g C:${c}g G:${f}g <span style="color:#D1D5DB;">/ 100g</span></div>
     </div>`;
   }).join('');
+  _nutPositionDrop(seq);
   drop.classList.add('open');
 }
 
@@ -5324,6 +5326,16 @@ function _nutUpdateFoodCardQty(seq, val) {
   if (subEl) subEl.textContent = _nutMealKcalStr(meal);
   _renderNutEditorSidebar();
   _nutRecalcHeaderMacros();
+}
+
+function _nutPositionDrop(seq) {
+  const inp = document.getElementById(`nutfc-inp-${seq}`);
+  const drop = document.getElementById(`nutfc-drop-${seq}`);
+  if (!inp || !drop) return;
+  const r = inp.getBoundingClientRect();
+  drop.style.top  = (r.bottom + 2) + 'px';
+  drop.style.left = r.left + 'px';
+  drop.style.width = r.width + 'px';
 }
 
 function _nutCloseAcDrop(seq) {

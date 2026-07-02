@@ -12,14 +12,19 @@ echo "  MYSQLDATABASE = ${MYSQLDATABASE:-(no seteado)}"
 echo "  DB_HOST       = ${DB_HOST:-(no seteado)}"
 echo "=========================================="
 
+echo ">>> Alembic heads actuales (en archivos):"
+alembic heads 2>&1 || true
+
 echo ">>> Corriendo migraciones..."
-if alembic upgrade head; then
+alembic upgrade heads 2>&1
+MIGRATION_EXIT=$?
+if [ $MIGRATION_EXIT -eq 0 ]; then
     echo ">>> Migraciones OK"
     echo ">>> Cargando seeds iniciales..."
     python -m app.seeds.run_seeds && echo ">>> Seeds OK" || echo ">>> Seeds fallaron (continuando)"
 else
-    echo ">>> MIGRACIONES FALLARON — revisa DATABASE_URL"
-    echo ">>> Iniciando servidor de todos modos para diagnóstico..."
+    echo ">>> MIGRACIONES FALLARON (exit=$MIGRATION_EXIT) — intentando upgrade head como fallback..."
+    alembic upgrade head 2>&1 || echo ">>> Fallback tambien fallo — iniciando servidor de todos modos"
 fi
 
 echo ">>> Iniciando servidor en puerto ${PORT:-8000}..."

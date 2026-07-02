@@ -5213,11 +5213,10 @@ function _nutShowAcDrop(seq, items) {
     drop.classList.add('open');
     return;
   }
-  items.forEach(a => { _nutAcCache[a.id] = a; });
+  items.forEach(a => { _nutAcCache[String(a.id)] = a; });
   drop.innerHTML = items.map(a => {
     const p = Math.round(a.proteins||0), c = Math.round(a.carbohydrates||0), f = Math.round(a.fats||0), k = Math.round(a.calories||0);
-    const safeId = JSON.stringify(String(a.id));
-    return `<div class="nut-fc-drop-item" onmousedown="event.preventDefault();_nutSelectAliment(${seq},${safeId})">
+    return `<div class="nut-fc-drop-item" onmousedown="event.preventDefault();_nutSelectAliment(${seq},'${a.id}')">
       <div class="nut-fc-drop-name">${esc(a.name||'')}
         <span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;background:#EEF2FF;color:#4F46E5;">Plataforma</span>
       </div>

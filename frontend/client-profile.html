@@ -3173,7 +3173,7 @@ async function saveTarget() {
     <button class="nut-edit-close" onclick="closeNutEditor()">×</button>
     <div style="flex:1;min-width:0;">
       <input id="nutEditorName" type="text" placeholder="Nombre de la dieta" style="font-size:16px;font-weight:700;border:none;outline:none;width:100%;background:transparent;color:#111;" oninput="_nutWorking&&(_nutWorking.title=this.value)">
-      <div style="font-size:12px;color:#16A34A;margin-top:1px;font-weight:600;">✓ Copia personal — solo afecta a este cliente</div>
+      <div style="font-size:12px;color:#4F46E5;margin-top:1px;font-weight:600;">✓ Plan personal — los cambios se guardan para este cliente</div>
     </div>
     <button class="nut-edit-save" id="nutEditorSaveBtn" onclick="saveNutChanges()">Guardar cambios</button>
   </div>
@@ -4698,7 +4698,7 @@ let _nutFoodGrpId = null;
 let _nutFoodPickerMealIdx = 0;
 let _nutFoodGroups = [];
 let _nutFoodGrpsLoaded = false;
-let _nutPersonalCopyId = null;
+
 let _nutFcSeq = 0;
 let _nutAcTimers = {};
 const _nutAcCache = {};
@@ -4931,115 +4931,30 @@ function setNutMealsPerDay(n) {
   _renderNutUI();
 }
 
-/* ── Diet editor (personal copy per client) ── */
+/* ── Diet editor ── */
 async function openNutEditor() {
   if (!clientDiets[0]) return;
-  const currentId = String(clientDiets[0].id);
-  const sessKey = `nut_pers_${clientId}`;
-  const knownPersonalId = _nutPersonalCopyId ? String(_nutPersonalCopyId) : (sessionStorage.getItem(sessKey) || null);
+  const targetId = String(clientDiets[0].id);
+  const ovl = document.getElementById('nutEditorOverlay');
 
-  let targetId = null;
-
-  if (currentId === knownPersonalId) {
-    // Already pointing to the personal copy for this session
-    targetId = currentId;
-  } else {
-    // Need to create a personal copy of the diet
-    const ovl = document.getElementById('nutEditorOverlay');
+  if (!_nutDetail || String(_nutDetail.id) !== targetId) {
     document.getElementById('nutEditorMealList').innerHTML = '';
     document.getElementById('nutEditorContent').innerHTML =
       '<div style="padding:60px 20px;text-align:center;">'
-      + '<div style="font-size:14px;color:#6B7280;margin-bottom:6px;font-weight:600;">Preparando editor personal…</div>'
-      + '<div style="font-size:12px;color:#D1D5DB;">Creando una copia exclusiva para este cliente</div>'
+      + '<div style="font-size:14px;color:#6B7280;font-weight:600;">Cargando plan…</div>'
       + '</div>';
     document.getElementById('nutEditorName').value = '';
     ovl.classList.add('open');
 
     try {
-      // 1. Fetch full diet data
-      const r = await fetch(`${API}/diets/${currentId}/edit`, { headers: h() });
-      if (!r.ok) throw new Error('No se pudo cargar la dieta');
-      const j = await r.json();
-      const src = j.data || j;
-      const srcDet = src.detail || {};
-
-      // 2. Build payload for personal copy
-      const foods = (src.foods || []).map(meal => ({
-        name: meal.name || 'Comida',
-        detail: (meal.detail || []).filter(item => item.aliment_id).map((item, i) => ({
-          aliment_id: item.aliment_id,
-          quantity_calc: parseFloat(item.quantity_calc ?? item.quantity) || 0,
-          order: i,
-        })),
-      })).filter(f => f.detail.length > 0);
-
-      const body = {
-        title:    src.title    || 'Dieta personal',
-        diet_type: src.diet_type || null,
-        calories:  src.calories  || null,
-        proteins:  srcDet.proteins || src.proteins || null,
-        carbs:     srcDet.carbs    || src.carbs    || null,
-        fats:      srcDet.fats     || src.fats     || null,
-        deficit:   srcDet.deficit  || src.deficit  || null,
-        surplus:   srcDet.surplus  || src.surplus  || null,
-        foods,
-      };
-
-      // 3. Create new personal diet
-      const cr = await fetch(`${API}/diets`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...h() },
-        body: JSON.stringify(body),
-      });
-      if (!cr.ok) throw new Error('No se pudo crear la copia personal');
-      const cj = await cr.json();
-      const newId = String(cj.data?.id || cj.id || '');
-      if (!newId) throw new Error('No se recibió ID de la dieta personal');
-
-      // 4. Assign personal copy to this client
-      const ar = await fetch(`${API}/diets/${newId}/assign`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...h() },
-        body: JSON.stringify({ client_id: clientId }),
-      });
-      if (!ar.ok) throw new Error('No se pudo asignar la copia al cliente');
-
-      // 5. Track the personal copy for this session
-      _nutPersonalCopyId = newId;
-      sessionStorage.setItem(sessKey, newId);
-      targetId = newId;
-
-      // 6. Refresh clientDiets to reflect the new assignment
-      const dr = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
-      if (dr.ok) {
-        const dj = await dr.json();
-        const arr = dj.data || [];
-        clientDiets = Array.isArray(arr)
-          ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id)
-          : [];
-        if (clientDiets.length) _clientDietId = clientDiets[0].id;
-      }
-      _nutDetail = null;
-      _nutDetailLoaded = false;
-
-    } catch (e) {
-      document.getElementById('nutEditorOverlay').classList.remove('open');
-      showToast(e.message || 'Error al preparar el editor', 'error');
-      return;
-    }
-  }
-
-  // Load the personal copy detail if not already loaded
-  if (!_nutDetail || String(_nutDetail.id) !== targetId) {
-    try {
       const r = await fetch(`${API}/diets/${targetId}/edit`, { headers: h() });
-      if (!r.ok) throw new Error();
+      if (!r.ok) throw new Error('No se pudo cargar la dieta');
       const j = await r.json();
       _nutDetail = _nutNormalize(j.data || j);
       _nutDetailLoaded = true;
-    } catch {
-      document.getElementById('nutEditorOverlay').classList.remove('open');
-      showToast('Error al cargar el editor', 'error');
+    } catch (e) {
+      ovl.classList.remove('open');
+      showToast(e.message || 'Error al cargar el editor', 'error');
       return;
     }
   }
@@ -5050,7 +4965,7 @@ async function openNutEditor() {
   _renderNutEditorSidebar();
   _renderNutEditorContent();
   _nutRecalcHeaderMacros();
-  document.getElementById('nutEditorOverlay').classList.add('open');
+  ovl.classList.add('open');
 }
 
 function closeNutEditor() {
@@ -5436,9 +5351,7 @@ async function saveNutChanges() {
     if (!r.ok) { showToast(j.detail || j.message || 'Error al guardar', 'error'); return; }
     showToast('Cambios guardados', 'success');
     const savedId = String(_nutDetail.id);
-    _nutPersonalCopyId = savedId;
-    sessionStorage.setItem(`nut_pers_${clientId}`, savedId);
-    // Re-fetch the saved diet directly so the view reflects the changes
+    // Re-fetch the saved diet so the view reflects the changes
     try {
       const refr = await fetch(`${API}/diets/${savedId}/edit`, { headers: h() });
       if (refr.ok) { const rj = await refr.json(); _nutDetail = _nutNormalize(rj.data || rj); _nutDetailLoaded = true; }

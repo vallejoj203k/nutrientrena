@@ -397,7 +397,43 @@
       /* ── Sidebar cards ── */
       .sb-card{padding:12px;}
       .save-btn{padding:14px;font-size:15px;}
+      .diets-grid{grid-template-columns:1fr;}
     }
+
+    /* ── Diets card grid ── */
+    .diets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
+    .diet-card{background:#fff;border-radius:14px;padding:20px;border:1px solid #E5E7EB;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:.18s;position:relative;}
+    .diet-card:hover{border-color:var(--indigo);box-shadow:0 4px 16px rgba(79,70,229,.12);transform:translateY(-1px);}
+    .dc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;}
+    .dc-title{font-size:15px;font-weight:800;color:#111;line-height:1.25;}
+    .dc-kcal{font-size:15px;font-weight:800;color:#7C3AED;}
+    .dc-menu{background:none;border:1.5px solid #E5E7EB;border-radius:7px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;flex-shrink:0;}
+    .dc-menu:hover{background:#F3F4F6;color:#374151;border-color:#D1D5DB;}
+    .dc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+    .dc-tag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+    .dc-tag-type{background:#EDE9FE;color:#6D28D9;}
+    .dc-tag-meals{background:#DBEAFE;color:#1D4ED8;}
+    .dc-tag-plan{background:#D1FAE5;color:#059669;}
+    .dc-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+    .dc-macro{background:#F9FAFB;border-radius:9px;padding:10px 6px;text-align:center;}
+    .dc-macro-val{font-size:17px;font-weight:800;line-height:1;margin-bottom:3px;}
+    .dc-macro-lbl{font-size:10px;color:#9CA3AF;font-weight:500;}
+    .dc-macro.kcal .dc-macro-val{color:#7C3AED;}
+    .dc-macro.prot .dc-macro-val{color:#059669;}
+    .dc-macro.carb .dc-macro-val{color:#D97706;}
+    .dc-macro.fat  .dc-macro-val{color:#DC2626;}
+    .diet-card-new{background:#fff;border-radius:14px;padding:20px;border:2px dashed #D1D5DB;cursor:pointer;transition:.18s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#9CA3AF;min-height:160px;font-size:13px;font-weight:600;}
+    .diet-card-new:hover{border-color:var(--indigo);color:var(--indigo);background:#EEF2FF;}
+    .diet-card-new svg{opacity:.5;transition:.18s;}
+    .diet-card-new:hover svg{opacity:1;}
+    /* card dropdown menu */
+    .dc-dropdown{position:absolute;top:54px;right:16px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;min-width:150px;overflow:hidden;display:none;}
+    .dc-dropdown.open{display:block;}
+    .dc-dd-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;color:#374151;cursor:pointer;transition:background .1s;}
+    .dc-dd-item:hover{background:#F5F3FF;color:var(--indigo);}
+    .dc-dd-item.danger{color:#DC2626;}
+    .dc-dd-item.danger:hover{background:#FEE2E2;color:#DC2626;}
+    .dc-dd-sep{height:1px;background:#F3F4F6;margin:4px 0;}
   </style>
 </head>
 <body>
@@ -518,25 +554,9 @@
       <span class="total-label" id="dietTotalLabel"></span>
     </div>
 
-    <div style="flex:1;overflow-y:auto;padding:16px 28px 28px;">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Tipo</th>
-              <th>Calorias</th>
-              <th>Proteina</th>
-              <th>Comidas</th>
-              <th>Asignados</th>
-              <th>Actualizado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="dietsTbody">
-            <tr><td colspan="8" style="text-align:center;padding:48px;color:#9CA3AF;">Cargando dietas...</td></tr>
-          </tbody>
-        </table>
+    <div style="flex:1;overflow-y:auto;padding:20px 28px 32px;">
+      <div class="diets-grid" id="dietsGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:48px;color:#9CA3AF;">Cargando dietas…</div>
       </div>
     </div>
   </div>
@@ -819,13 +839,13 @@ function getDietTipo(d) {
 async function loadDiets() {
   try {
     var r = await fetch(API + '/diets/findAll', { headers: { Authorization: 'Bearer ' + token } });
-    if (!r.ok) { document.getElementById('dietsTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:48px;color:#DC2626;">Error al cargar las dietas.</td></tr>'; return; }
+    if (!r.ok) { document.getElementById('dietsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:#DC2626;">Error al cargar las dietas.</div>'; return; }
     var j = await r.json();
     allDiets = j.data || j || [];
     if (!Array.isArray(allDiets)) allDiets = [];
     applyFilter();
   } catch(e) {
-    document.getElementById('dietsTbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:48px;color:#DC2626;">Error al cargar las dietas.</td></tr>';
+    document.getElementById('dietsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:#DC2626;">Error al cargar las dietas.</div>';
   }
 }
 
@@ -892,17 +912,22 @@ function applyFilter() {
   renderTable(diets);
 }
 
+// Close any open card dropdown when clicking outside
+document.addEventListener('click', function(){ document.querySelectorAll('.dc-dropdown.open').forEach(function(d){d.classList.remove('open');}); });
+
 function renderTable(diets) {
   document.getElementById('dietTotalLabel').textContent = diets.length + ' dieta' + (diets.length !== 1 ? 's' : '');
-  var tbody = document.getElementById('dietsTbody');
+  var grid = document.getElementById('dietsGrid');
   if (!diets.length) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><h3>No hay dietas</h3><p>Crea tu primera dieta con el boton &quot;+ Nueva dieta&quot;.</p></div></td></tr>';
+    grid.innerHTML = '<div style="grid-column:1/-1" class="empty"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><h3>No hay dietas</h3><p>Crea tu primera dieta con el botón "+ Nueva dieta".</p></div>'
+      + '<div class="diet-card-new" onclick="openForm()"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva dieta</div>';
     return;
   }
-  tbody.innerHTML = diets.map(dietRow).join('');
+  grid.innerHTML = diets.map(dietCard).join('')
+    + '<div class="diet-card-new" onclick="openForm()"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva dieta</div>';
 }
 
-function dietRow(d) {
+function dietCard(d) {
   var _rid = parseInt(localStorage.getItem('role_id') || '0');
   var _isAdmin = _rid === 1 || _rid === 2;
   var isPlatformAdmin = d.organization_id == null;
@@ -910,38 +935,54 @@ function dietRow(d) {
   var det = d.detail || {};
   var kcal = d.calories ? Math.round(d.calories) : null;
   var prot = det.proteins ? Math.round(det.proteins) : null;
+  var carb = det.carbs ? Math.round(det.carbs) : null;
+  var fat  = det.fats  ? Math.round(det.fats)  : null;
   var comidas = (d.foods || []).length;
   var tipo = getDietTipo(d);
-  var asignados = d.assigned_count != null ? d.assigned_count : 0;
-  var updated = relDate(d.updated_at || d.created_at);
-  var id = esc(d.id), title = esc(d.title || '');
-  var tipoBadge = tipo === 'Deficit'
-    ? '<span class="badge badge-blue">' + esc(tipo) + '</span>'
-    : tipo === 'Superavit'
-    ? '<span class="badge badge-green">' + esc(tipo) + '</span>'
-    : '<span class="badge badge-gray">' + esc(tipo) + '</span>';
-  var styleTag = (d.style || det.style) ? '<div style="font-size:11px;background:#F3F4F6;color:#374151;padding:1px 8px;border-radius:20px;display:inline-block;margin-top:3px;">' + esc(d.style || det.style) + '</div>' : '';
-  var platformTag = isPlatformAdmin ? '<span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#F3F4F6;color:#6B7280;margin-left:6px;">Plataforma</span>' : '';
-  return '<tr onclick="openForm(\'' + id + '\')">'
-    + '<td><div style="display:flex;align-items:center;gap:12px;">'
-    + '<div style="width:38px;height:38px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">&#x1F372;</div>'
-    + '<div><div style="font-weight:700;color:#111827;font-size:13px;">' + title + platformTag + '</div>' + styleTag + '</div>'
-    + '</div></td>'
-    + '<td>' + tipoBadge + '</td>'
-    + '<td style="font-size:13px;color:#374151;">' + (kcal != null ? '<span>' + kcal + ' kcal</span>' : '---') + '</td>'
-    + '<td style="font-size:13px;color:#374151;">' + (prot != null ? prot + 'g' : '---') + '</td>'
-    + '<td style="font-size:13px;color:#374151;">' + comidas + '</td>'
-    + '<td style="font-size:13px;color:#374151;"><span style="display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' + asignados + '</span></td>'
-    + '<td style="font-size:12px;color:#9CA3AF;">' + updated + '</td>'
-    + '<td onclick="event.stopPropagation()"><div class="row-actions">'
-    + '<button class="btn-assign" onclick="openAssign(\'' + id + '\',\'' + title + '\')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>'
-    + (canEdit
-      ? '<button class="btn-row-icon" onclick="openForm(\'' + id + '\')" title="Editar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
-        + '<button class="btn-row-icon" onclick="downloadPdf(\'' + id + '\',\'' + title + '\')" title="PDF"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg></button>'
-        + '<button class="btn-row-icon danger" title="Eliminar" onclick="openConfirm(\'Eliminar dieta\',\'Esta accion no se puede deshacer.\',function(){deleteDiet(\'' + id + '\')})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></button>'
-      : '<span style="color:#9CA3AF;font-size:11px;">Solo lectura</span>')
-    + '</div></td></tr>';
+  var id = String(d.id), title = esc(d.title || 'Sin nombre');
+  var styleLabel = esc(d.style || det.style || tipo || '');
+
+  var macroVal = function(v, unit) { return v != null ? v + (unit||'') : '—'; };
+
+  return '<div class="diet-card" onclick="openForm(\'' + id + '\')">'
+    // header
+    + '<div class="dc-head">'
+    +   '<div><div class="dc-title">' + title + (isPlatformAdmin ? ' <span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#F3F4F6;color:#6B7280;">Plataforma</span>' : '') + '</div></div>'
+    +   '<button class="dc-menu" onclick="event.stopPropagation();toggleDcMenu(this)" title="Opciones"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>'
+    + '</div>'
+    // tags
+    + '<div class="dc-tags">'
+    +   (styleLabel ? '<span class="dc-tag dc-tag-type">' + styleLabel + '</span>' : '')
+    +   (comidas ? '<span class="dc-tag dc-tag-meals">' + comidas + ' comida' + (comidas !== 1 ? 's' : '') + '</span>' : '')
+    +   (comidas ? '<span class="dc-tag dc-tag-plan">✓ Plan</span>' : '')
+    + '</div>'
+    // macros
+    + '<div class="dc-macros">'
+    +   '<div class="dc-macro kcal"><div class="dc-macro-val">' + macroVal(kcal) + '</div><div class="dc-macro-lbl">kcal</div></div>'
+    +   '<div class="dc-macro prot"><div class="dc-macro-val">' + macroVal(prot,'g') + '</div><div class="dc-macro-lbl">Prot.</div></div>'
+    +   '<div class="dc-macro carb"><div class="dc-macro-val">' + macroVal(carb,'g') + '</div><div class="dc-macro-lbl">Carb.</div></div>'
+    +   '<div class="dc-macro fat"><div class="dc-macro-val">'  + macroVal(fat,'g')  + '</div><div class="dc-macro-lbl">Grasa</div></div>'
+    + '</div>'
+    // dropdown menu
+    + '<div class="dc-dropdown">'
+    +   '<div class="dc-dd-item" onclick="event.stopPropagation();closeDcMenus();openAssign(\'' + id + '\',\'' + title + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</div>'
+    +   (canEdit
+      ? '<div class="dc-dd-item" onclick="event.stopPropagation();closeDcMenus();openForm(\'' + id + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</div>'
+        + '<div class="dc-dd-item" onclick="event.stopPropagation();closeDcMenus();downloadPdf(\'' + id + '\',\'' + title + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>Descargar PDF</div>'
+        + '<div class="dc-dd-sep"></div>'
+        + '<div class="dc-dd-item danger" onclick="event.stopPropagation();closeDcMenus();openConfirm(\'Eliminar dieta\',\'Esta acción no se puede deshacer.\',function(){deleteDiet(\'' + id + '\')})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar</div>'
+      : '<div class="dc-dd-item" style="color:#9CA3AF;cursor:default;">Solo lectura</div>')
+    + '</div>'
+    + '</div>';
 }
+
+function toggleDcMenu(btn) {
+  var dd = btn.parentElement.parentElement.querySelector('.dc-dropdown');
+  var wasOpen = dd.classList.contains('open');
+  closeDcMenus();
+  if (!wasOpen) dd.classList.add('open');
+}
+function closeDcMenus() { document.querySelectorAll('.dc-dropdown.open').forEach(function(d){d.classList.remove('open');}); }
 
 async function deleteDiet(id) {
   closeConfirm();

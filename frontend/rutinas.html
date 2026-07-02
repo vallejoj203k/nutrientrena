@@ -994,62 +994,78 @@ function duplicateExercise(bi,ei){
   openPicker(bi,ei+1);
 }
 
+// Single global Escape listener — points to the current drag's abort fn
+let _exAbort=null;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&_exAbort)_exAbort();});
+
 function setupExerciseDrag(){
-  // Build row→exerciseData map before any DOM mutation
   const rowMap=new Map();
   document.querySelectorAll('.ex-row').forEach(row=>{
     const bi=parseInt(row.dataset.bi),ei=parseInt(row.dataset.ei);
     rowMap.set(row,routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei]);
   });
 
-  let ghost=null,srcRow=null,srcBi=null,offX=0,offY=0;
+  let ghost=null,srcRow=null,srcBi=null,offX=0,offY=0,moved=false,startX=0,startY=0;
+
+  function abortDrag(){
+    if(ghost){ghost.remove();ghost=null;}
+    if(srcRow){srcRow.classList.remove('ex-placeholder');srcRow=null;}
+    srcBi=null; moved=false; _exAbort=null;
+  }
 
   document.querySelectorAll('.ex-drag-handle').forEach(handle=>{
     handle.addEventListener('pointerdown',e=>{
       e.preventDefault();
+      abortDrag(); // clear any leftover state from a previous interrupted drag
       srcRow=handle.closest('tr');
       if(!srcRow)return;
       srcBi=parseInt(srcRow.dataset.bi);
+      startX=e.clientX; startY=e.clientY;
       const rect=srcRow.getBoundingClientRect();
       offX=e.clientX-rect.left; offY=e.clientY-rect.top;
-
-      // Ghost: clone the row rendered inside a proper table so columns align
-      const tbl=document.createElement('table');
-      tbl.className='exercise-table';
-      tbl.style.cssText=`width:${rect.width}px;border-collapse:collapse;table-layout:fixed;`;
-      const tb=document.createElement('tbody');
-      tb.appendChild(srcRow.cloneNode(true));
-      tbl.appendChild(tb);
-      ghost=document.createElement('div');
-      ghost.appendChild(tbl);
-      Object.assign(ghost.style,{
-        position:'fixed',top:rect.top+'px',left:rect.left+'px',
-        width:rect.width+'px',zIndex:'9999',pointerEvents:'none',
-        borderRadius:'8px',background:'#fff',overflow:'hidden',
-        boxShadow:'0 16px 48px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.12)',
-        transform:'rotate(2deg) scale(1.03)',opacity:'.97',
-      });
-      document.body.appendChild(ghost);
-
-      // Original row becomes an indigo-tinted placeholder spacer
-      srcRow.classList.add('ex-placeholder');
+      _exAbort=abortDrag;
       handle.setPointerCapture(e.pointerId);
     });
 
     handle.addEventListener('pointermove',e=>{
-      if(!ghost||!srcRow)return;
+      if(!srcRow)return;
+
+      // Defer ghost creation until user actually moves ≥5 px (avoids flash on plain clicks)
+      if(!moved){
+        if(Math.hypot(e.clientX-startX,e.clientY-startY)<5)return;
+        moved=true;
+        const rect=srcRow.getBoundingClientRect();
+        const tbl=document.createElement('table');
+        tbl.className='exercise-table';
+        tbl.style.cssText=`width:${rect.width}px;border-collapse:collapse;table-layout:fixed;`;
+        const tb=document.createElement('tbody');
+        tb.appendChild(srcRow.cloneNode(true));
+        tbl.appendChild(tb);
+        ghost=document.createElement('div');
+        ghost.appendChild(tbl);
+        Object.assign(ghost.style,{
+          position:'fixed',top:rect.top+'px',left:rect.left+'px',
+          width:rect.width+'px',zIndex:'9999',pointerEvents:'none',
+          borderRadius:'8px',background:'#fff',overflow:'hidden',
+          boxShadow:'0 16px 48px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.12)',
+          transform:'rotate(2deg) scale(1.03)',opacity:'0',
+          transition:'opacity .08s',
+        });
+        document.body.appendChild(ghost);
+        requestAnimationFrame(()=>{if(ghost)ghost.style.opacity='.97';});
+        srcRow.classList.add('ex-placeholder');
+      }
+
+      if(!ghost)return;
       ghost.style.top=(e.clientY-offY)+'px';
       ghost.style.left=(e.clientX-offX)+'px';
 
-      // Find the row the ghost is hovering over
       const el=document.elementFromPoint(e.clientX,e.clientY);
       if(!el)return;
       const tgt=el.closest('tr.ex-row');
       if(!tgt||tgt===srcRow||parseInt(tgt.dataset.bi)!==srcBi)return;
-
       const tr=tgt.getBoundingClientRect();
       const tbody=tgt.closest('tbody');
-      // Move the placeholder to the correct slot — this IS the live reorder
       if(e.clientY<tr.top+tr.height/2){
         tbody.insertBefore(srcRow,tgt);
       }else{
@@ -1058,40 +1074,46 @@ function setupExerciseDrag(){
     });
 
     handle.addEventListener('pointerup',()=>{
-      if(!ghost||!srcRow)return;
-      // Sync routineData from current DOM order
+      if(!srcRow){return;}
+      if(!moved){srcRow=null;srcBi=null;_exAbort=null;return;} // just a click, no drag
+
       const tbody=srcRow.closest('tbody');
+      if(!tbody){abortDrag();return;} // row detached (e.g. renderBlocks called externally)
+
       const newOrder=[...tbody.querySelectorAll('tr.ex-row')].map(r=>rowMap.get(r)).filter(Boolean);
       routineData.days_list[selectedDayIdx].blocks[srcBi].exercises=newOrder;
       newOrder.forEach((ex,i)=>{ex.order_index=i;});
 
-      // Snap ghost to the placeholder's final screen position, then fade
-      const finalRect=srcRow.getBoundingClientRect();
-      Object.assign(ghost.style,{
-        transition:'top .22s cubic-bezier(.22,1,.36,1),left .22s cubic-bezier(.22,1,.36,1),transform .22s,opacity .16s .06s,box-shadow .2s',
-        top:finalRect.top+'px',left:finalRect.left+'px',
-        transform:'rotate(0deg) scale(1)',opacity:'0',
-        boxShadow:'0 2px 8px rgba(0,0,0,.06)',
-      });
+      const movedEx=rowMap.get(srcRow);
+      const newEi=newOrder.indexOf(movedEx);
+      const si=srcBi;
 
-      const g=ghost,si=srcBi,sr=srcRow;
-      ghost=null; srcRow=null; srcBi=null;
-      sr.classList.remove('ex-placeholder');
+      // Snap ghost to final slot, let it fade independently (no setTimeout delay on renderBlocks)
+      if(ghost){
+        const finalRect=srcRow.getBoundingClientRect();
+        Object.assign(ghost.style,{
+          transition:'top .22s cubic-bezier(.22,1,.36,1),left .22s cubic-bezier(.22,1,.36,1),transform .2s,opacity .15s .05s,box-shadow .2s',
+          top:finalRect.top+'px',left:finalRect.left+'px',
+          transform:'rotate(0deg) scale(1)',opacity:'0',
+          boxShadow:'0 2px 8px rgba(0,0,0,.06)',
+        });
+        const g=ghost; ghost=null;
+        setTimeout(()=>g.remove(),280);
+      }
 
-      setTimeout(()=>{
-        g.remove();
-        renderBlocks();
-        // Brief indigo flash on the settled row
-        const newEi=newOrder.indexOf(rowMap.get(sr));
-        if(newEi>=0){const settled=document.querySelector(`tr.ex-row[data-bi="${si}"][data-ei="${newEi}"]`);if(settled){settled.classList.add('ex-settle');setTimeout(()=>settled.classList.remove('ex-settle'),600);}}
-      },230);
+      srcRow.classList.remove('ex-placeholder');
+      srcRow=null; srcBi=null; moved=false; _exAbort=null;
+
+      // Re-render immediately — no race-condition delay
+      renderBlocks();
+
+      if(newEi>=0){
+        const settled=document.querySelector(`tr.ex-row[data-bi="${si}"][data-ei="${newEi}"]`);
+        if(settled){settled.classList.add('ex-settle');setTimeout(()=>settled.classList.remove('ex-settle'),600);}
+      }
     });
 
-    handle.addEventListener('pointercancel',()=>{
-      if(ghost){ghost.remove();ghost=null;}
-      if(srcRow){srcRow.classList.remove('ex-placeholder');srcRow=null;}
-      srcBi=null;
-    });
+    handle.addEventListener('pointercancel',abortDrag);
   });
 }
 

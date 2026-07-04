@@ -847,7 +847,7 @@
       </div>
     </div>
     <div class="fsm-bar">
-      <span class="fsm-bar-lbl">🍎 Alimentos</span>
+      <span class="fsm-bar-lbl"><svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg> Alimentos</span>
       <button class="fsm-create-btn" onclick="fsmCreateAliment()">+ Crear alimento</button>
     </div>
     <div class="fsm-pills" id="fsmPills"></div>
@@ -1525,10 +1525,10 @@ function renderActiveMealContent(mid) {
     + '</div>'
     + '</div>'
     + '<div class="msv2-stats">'
-    +   '<div class="msv2-stat"><div class="msv2-stat-ico">🔥</div><div><div class="msv2-stat-lbl">Kcal</div><div class="msv2-stat-val" id="msv2K-' + mid + '">0</div></div></div>'
-    +   '<div class="msv2-stat"><div class="msv2-stat-ico">🥩</div><div><div class="msv2-stat-lbl">Proteínas</div><div class="msv2-stat-val" id="msv2P-' + mid + '">0g</div></div></div>'
-    +   '<div class="msv2-stat"><div class="msv2-stat-ico">🌽</div><div><div class="msv2-stat-lbl">Carbos</div><div class="msv2-stat-val" id="msv2C-' + mid + '">0g</div></div></div>'
-    +   '<div class="msv2-stat"><div class="msv2-stat-ico">💧</div><div><div class="msv2-stat-lbl">Grasas</div><div class="msv2-stat-val" id="msv2F-' + mid + '">0g</div></div></div>'
+    +   '<div class="msv2-stat"><div class="msv2-stat-ico" style="color:#F97316;"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div><div><div class="msv2-stat-lbl">Kcal</div><div class="msv2-stat-val" id="msv2K-' + mid + '">0</div></div></div>'
+    +   '<div class="msv2-stat"><div class="msv2-stat-ico" style="color:#EF4444;"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg></div><div><div class="msv2-stat-lbl">Proteínas</div><div class="msv2-stat-val" id="msv2P-' + mid + '">0g</div></div></div>'
+    +   '<div class="msv2-stat"><div class="msv2-stat-ico" style="color:#D97706;"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/></svg></div><div><div class="msv2-stat-lbl">Carbos</div><div class="msv2-stat-val" id="msv2C-' + mid + '">0g</div></div></div>'
+    +   '<div class="msv2-stat"><div class="msv2-stat-ico" style="color:#3B82F6;"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div><div><div class="msv2-stat-lbl">Grasas</div><div class="msv2-stat-val" id="msv2F-' + mid + '">0g</div></div></div>'
     + '</div>'
     + '<div id="mrows-' + mid + '"></div>'
     + '<div class="msv2-empty" id="msv2Empty-' + mid + '" onclick="openFoodSearch(' + mid + ')" style="display:none;">'
@@ -1637,7 +1637,7 @@ function _renderFoodCard(mid, row) {
   var card = document.createElement('div');
   card.className = 'msv2-food-row'; card.id = 'frow-' + rid;
   card.innerHTML =
-    '<div class="msv2-food-ico">🍎</div>'
+    '<div class="msv2-food-ico" style="color:#EF4444;"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg></div>'
     + '<div class="msv2-food-info">'
     + '<div class="msv2-food-name">' + esc(row.aliment_name || 'Alimento') + '</div>'
     + '<div class="msv2-food-desc">' + desc + '</div>'
@@ -1831,7 +1831,7 @@ function showAcDrop(rid, items) {
   items.forEach(function(a){ _macroCache[a.id] = { name: a.name, proteins: a.proteins, carbohydrates: a.carbohydrates, fats: a.fats, calories: a.calories, quantity: a.quantity, quantity_unit: a.quantity_unit, quantity_type: a.quantity_type }; });
   drop.innerHTML = items.map(function(a){
     var srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
-      + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">🌐 Plataforma')
+      + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">Personal' : 'background:#EEF2FF;color:#4F46E5;">Plataforma')
       + '</span>';
     return '<div class="ac-item" onmousedown="selectAliment(' + rid + ',' + JSON.stringify(a.id).replace(/"/g, '&quot;') + ')">'
       + '<div class="ac-name">' + esc(a.name) + srcBadge + '</div>'
@@ -1969,7 +1969,7 @@ function fsmRenderList(items) {
     var desc = qty + unitTxt + ' · ' + k + ' kcal · P' + p + 'g · C' + c + 'g · G' + f + 'g';
     var gname = groupName(a.group_food_id);
     return '<div class="fsm-item" onclick="fsmPick(\'' + a.id + '\')">'
-      + '<div class="fsm-item-ico">🍎</div>'
+      + '<div class="fsm-item-ico" style="color:#EF4444;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg></div>'
       + '<div class="fsm-item-info">'
       + '<div class="fsm-item-name">' + esc(a.name || '') + (a.brand ? ' <span style="font-weight:500;color:#9CA3AF;">· ' + esc(a.brand) + '</span>' : '') + '</div>'
       + '<div class="fsm-item-desc">' + desc + '</div>'

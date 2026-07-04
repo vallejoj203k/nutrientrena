@@ -3590,6 +3590,7 @@ async function calDeleteTask(taskId, dateStr) {
 }
 
 async function calDeleteChipTask(taskId, dateStr) {
+  if (!confirm('¿Eliminar esta tarea?')) return;
   try {
     const r = await fetch(`${API}/calendar-tasks/${taskId}`, { method: 'DELETE', headers: h() });
     const j = await r.json();
@@ -4323,6 +4324,7 @@ function addBuilderDay() {
 
 function removeBldDay(idx) {
   if ((_bld.days_list || []).length <= 1) { showToast('Debe haber al menos un día', 'error'); return; }
+  if (!confirm('¿Eliminar este día y todos sus ejercicios?')) return;
   _bld.days_list.splice(idx, 1);
   if (_bldDayIdx >= _bld.days_list.length) _bldDayIdx = _bld.days_list.length - 1;
   _renderBuilderSidebar();
@@ -4351,6 +4353,7 @@ function updateBldEx(dayIdx, exIdx, field, value) {
 }
 
 function removeBldEx(dayIdx, exIdx) {
+  if (!confirm('¿Eliminar este ejercicio?')) return;
   const exArr = _bldExFromDay(dayIdx);
   exArr.splice(exIdx, 1);
   exArr.forEach((ex, i) => { ex.order_index = i; });
@@ -5086,6 +5089,7 @@ function _nutRenderFoodCard(seq) {
 function _nutRemoveFoodCard(seq) {
   const found = _nutFindItemBySeq(seq);
   if (!found) return;
+  if (!confirm('¿Eliminar este alimento?')) return;
   const { meal, item, idx } = found;
   if (item.id) item.delete = true;
   else meal.detail.splice(idx, 1);
@@ -5270,6 +5274,7 @@ function addNutMeal() {
 
 function removeNutMeal(idx) {
   if (!_nutWorking?.foods || _nutWorking.foods.length <= 1) { showToast('Debe haber al menos una comida', 'error'); return; }
+  if (!confirm('¿Eliminar esta comida y todos sus alimentos?')) return;
   // Mark for deletion if has server id, else splice
   const meal = _nutWorking.foods[idx];
   if (meal.id) meal.delete = true;
@@ -5301,6 +5306,7 @@ function removeNutFood(mealIdx, itemIdx) {
   if (!_nutWorking?.foods?.[mealIdx]) return;
   const items = _nutWorking.foods[mealIdx].detail;
   if (!items) return;
+  if (!confirm('¿Eliminar este alimento?')) return;
   const item = items[itemIdx];
   if (item.id) item.delete = true;
   else items.splice(itemIdx, 1);

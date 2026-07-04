@@ -553,6 +553,7 @@ async function toggleTask(taskId, clientId) {
 
 async function removeTask(taskId, clientId, ev) {
   ev.stopPropagation();
+  if (!confirm('¿Eliminar esta tarea?')) return;
   try {
     const r = await fetch(`${API}/client-tasks/${taskId}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` }});
     if (!r.ok) return;

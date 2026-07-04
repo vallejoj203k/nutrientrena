@@ -1517,6 +1517,7 @@ function _renderFoodCard(mid, row) {
 }
 
 function removeMeal(mid) {
+  if (!confirm('¿Eliminar esta comida y todos sus alimentos?')) return;
   if (_activeMealId == mid) {
     _activeMealId = null;
     var cnt = document.getElementById('msContent');
@@ -1564,6 +1565,7 @@ function addFoodRow(mid, detail) {
 }
 
 function removeFoodRow(mid, rid) {
+  if (!confirm('¿Eliminar este alimento?')) return;
   var meal = _meals.find(function(m){ return m.id == mid; });
   if (meal) meal.rows = meal.rows.filter(function(r){ return r.id != rid; });
   var el = document.getElementById('frow-' + rid); if (el) el.remove();

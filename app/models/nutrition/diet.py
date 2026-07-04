@@ -76,6 +76,7 @@ class DietFood(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     diet_id = Column(String(36), ForeignKey("diets.id"), nullable=False)
     name = Column(String(255), nullable=False)
+    time = Column(String(10), nullable=True)  # e.g. "08:30"
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

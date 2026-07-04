@@ -33,7 +33,8 @@ class RoutineBlock(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     routine_id = Column(Integer, ForeignKey("routines.id"), nullable=False)
     routine_day_id = Column(Integer, ForeignKey("routine_days.id"), nullable=False)
-    block_type = Column(String(20), default="normal")  # warmup/normal/superset/circuit
+    block_type = Column(String(20), default="normal")  # warmup/normal/superset/circuit/text
+    content = Column(Text, nullable=True)  # free text for 'text' blocks
     order_index = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -1024,6 +1024,7 @@ function renderDrawerAssigned(p) {
 
 async function unassignClient(clientId) {
   if (!drawerProgramId) return;
+  if (!confirm('¿Quitar este cliente del programa?')) return;
   const data = await apiFetch(`/api/programs/${drawerProgramId}/clients/${clientId}`, { method: 'DELETE' });
   if (data && data.success) {
     const idx = programs.findIndex(x => x.id === drawerProgramId);

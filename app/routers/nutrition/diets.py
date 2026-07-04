@@ -80,8 +80,10 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
             if not food:
                 continue
             food.name = food_data.name
+            if food_data.time is not None:
+                food.time = food_data.time or None
         else:
-            food = DietFood(diet_id=diet_id, name=food_data.name)
+            food = DietFood(diet_id=diet_id, name=food_data.name, time=food_data.time)
             db.add(food)
             db.flush()
 
@@ -351,6 +353,7 @@ def assign_to_client(
     foods_data = [
         DietFoodCreate(
             name=food.name,
+            time=food.time,
             detail=[
                 DietFoodAlimentCreate(
                     aliment_id=dfa.aliment_id,

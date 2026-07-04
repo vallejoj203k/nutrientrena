@@ -144,6 +144,9 @@
     .block-badge.normal{background:#EFF6FF;color:#2563EB;}
     .block-badge.superset{background:#EEF2FF;color:#4F46E5;}
     .block-badge.circuit{background:#D1FAE5;color:#059669;}
+    .block-badge.text{background:#F3F4F6;color:#374151;}
+    .block-text-area{width:100%;min-height:80px;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;font-size:13px;color:#374151;font-family:inherit;resize:vertical;outline:none;line-height:1.5;}
+    .block-text-area:focus{border-color:#4F46E5;}
     .block-rm{margin-left:auto;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:18px;line-height:1;padding:2px 6px;border-radius:4px;}
     .block-rm:hover{color:#EF4444;background:#FEF2F2;}
     .exercise-table{width:100%;border-collapse:collapse;}
@@ -518,6 +521,7 @@
               <button onclick="addBlock('normal');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h2a2 2 0 0 1 2 2v0a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Normal</button>
               <button onclick="addBlock('superset');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Superserie</button>
               <button onclick="addBlock('circuit');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Circuito</button>
+              <button onclick="addBlock('text');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg> Texto</button>
             </div>
           </div>
         </div>
@@ -740,11 +744,15 @@ async function downloadPdf(id,title){
   catch{showToast('Error al cargar la rutina','error');}
 }
 function printRoutineHtml(rt){
-  const BLOCK_TYPE_LABEL={warmup:'Calentamiento',normal:'Normal',superset:'Superserie',circuit:'Circuito'};
+  const BLOCK_TYPE_LABEL={warmup:'Calentamiento',normal:'Normal',superset:'Superserie',circuit:'Circuito',text:'Texto'};
   const e2=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const daysSections=(rt.days_list||[]).map(day=>{
     const blocks=(day.blocks||[]).map(blk=>{
       const typeLabel=BLOCK_TYPE_LABEL[blk.block_type]||blk.block_type||'Normal';
+      if(blk.block_type==='text'){
+        if(!blk.content)return'';
+        return`<div class="block"><div class="block-label">${typeLabel}</div><p style="font-size:13px;color:#374151;background:#F9FAFB;padding:10px 12px;border-radius:6px;white-space:pre-wrap;">${e2(blk.content)}</p></div>`;
+      }
       const exRows=(blk.exercises||[]).map(ex=>{const cols=[e2(ex.training_name||'—'),e2(ex.muscle_group_name||''),ex.series?`${ex.series} series`:'',ex.repetitions?`${ex.repetitions} reps`:'',ex.break_time?`${ex.break_time}s desc`:''].filter(Boolean);return`<tr><td>${cols.join('</td><td>')}</td></tr>`;}).join('');
       return`<div class="block"><div class="block-label">${typeLabel}</div><table><thead><tr><th>Ejercicio</th><th>Músculo</th><th>Series</th><th>Reps</th><th>Descanso</th></tr></thead><tbody>${exRows||'<tr><td colspan="5" style="color:#999">Sin ejercicios</td></tr>'}</tbody></table></div>`;
     }).join('');
@@ -867,7 +875,7 @@ async function openForm(id=null){
       routineData.name=rt.name||'';routineData.days=rt.days||0;routineData.time=rt.time||0;
       routineData.gender_id=rt.gender_id||null;routineData.training_level_id=rt.training_level_id||null;
       routineData.training=rt.training||'';routineData.notes=rt.notes||'';
-      routineData.days_list=(rt.days_list||[]).map(day=>({day_name:day.day_name||'',description:day.description||'',blocks:(day.blocks||[]).map(blk=>({block_type:blk.block_type||'normal',order_index:blk.order_index||0,exercises:(blk.exercises||[]).map(ex=>({training_id:ex.training_id,training_name:ex.training_name||'',muscle_group_name:ex.muscle_group_name||'',series:ex.series||null,repetitions:ex.repetitions||'',break_time:ex.break_time||null,intensity_type:ex.intensity_type||'',intensity_value:ex.intensity_value||null,notes:ex.notes||'',order_index:ex.order_index||0}))}))})  );
+      routineData.days_list=(rt.days_list||[]).map(day=>({day_name:day.day_name||'',description:day.description||'',blocks:(day.blocks||[]).map(blk=>({block_type:blk.block_type||'normal',content:blk.content||'',order_index:blk.order_index||0,exercises:(blk.exercises||[]).map(ex=>({training_id:ex.training_id,training_name:ex.training_name||'',muscle_group_name:ex.muscle_group_name||'',series:ex.series||null,repetitions:ex.repetitions||'',break_time:ex.break_time||null,intensity_type:ex.intensity_type||'',intensity_value:ex.intensity_value||null,notes:ex.notes||'',order_index:ex.order_index||0}))}))})  );
     }catch{showToast('Error al cargar la rutina','error');return;}
   }
   openRutinaPanel();
@@ -910,7 +918,7 @@ function wizardNext(){
 }
 
 function addDay(){const idx=routineData.days_list.length;routineData.days_list.push({day_name:`Día ${idx+1}`,description:'',blocks:[]});renderDaysList();selectDay(routineData.days_list.length-1);}
-function removeDay(idx){routineData.days_list.splice(idx,1);if(selectedDayIdx>=routineData.days_list.length)selectedDayIdx=Math.max(0,routineData.days_list.length-1);renderDaysList();renderBlocks();}
+function removeDay(idx){if(!confirm('¿Eliminar este día y todos sus ejercicios?'))return;routineData.days_list.splice(idx,1);if(selectedDayIdx>=routineData.days_list.length)selectedDayIdx=Math.max(0,routineData.days_list.length-1);renderDaysList();renderBlocks();}
 function duplicateDay(idx){
   const src=routineData.days_list[idx];
   const newName=`Día ${routineData.days_list.length+1}`;
@@ -919,6 +927,7 @@ function duplicateDay(idx){
     description:src.description||'',
     blocks:src.blocks.map(blk=>({
       block_type:blk.block_type,
+      content:blk.content||'',
       order_index:blk.order_index,
       exercises:blk.exercises.map(ex=>({...ex}))
     }))
@@ -954,11 +963,13 @@ const BLOCK_LABELS={
   normal:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h2a2 2 0 0 1 2 2v0a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Normal',
   superset:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Superserie',
   circuit:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Circuito',
+  text:'<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg> Texto',
 };
 function toggleBlockMenu(){document.getElementById('blockTypeMenu').classList.toggle('open');}
 document.addEventListener('click',(e)=>{if(!e.target.closest('.add-block-wrap'))document.getElementById('blockTypeMenu')?.classList.remove('open');});
-function addBlock(type='normal'){if(!routineData.days_list.length){showToast('Agrega un día primero','error');return;}const day=routineData.days_list[selectedDayIdx];day.blocks.push({block_type:type,order_index:day.blocks.length,exercises:[]});renderBlocks();}
-function removeBlock(blockIdx){routineData.days_list[selectedDayIdx].blocks.splice(blockIdx,1);renderBlocks();}
+function addBlock(type='normal'){if(!routineData.days_list.length){showToast('Agrega un día primero','error');return;}const day=routineData.days_list[selectedDayIdx];day.blocks.push({block_type:type,content:'',order_index:day.blocks.length,exercises:[]});renderBlocks();}
+function updateBlockContent(bi,value){routineData.days_list[selectedDayIdx].blocks[bi].content=value;}
+function removeBlock(blockIdx){const blk=routineData.days_list[selectedDayIdx].blocks[blockIdx];const msg=blk?.block_type==='text'?'¿Eliminar este bloque de texto?':'¿Eliminar este bloque y todos sus ejercicios?';if(!confirm(msg))return;routineData.days_list[selectedDayIdx].blocks.splice(blockIdx,1);renderBlocks();}
 function renderBlocks(){
   const container=document.getElementById('blocksList');const titleEl=document.getElementById('selectedDayName');
   if(!routineData.days_list.length){titleEl.textContent='Selecciona un día';container.innerHTML=`<div class="empty-day"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg><p>Agrega un día y crea bloques de ejercicios.</p></div>`;return;}
@@ -970,12 +981,15 @@ function renderBlocks(){
     const COPY_ICO='<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
     const EDIT_ICO='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
     const rows=blk.exercises.map((ex,ei)=>`<tr class="ex-row" ondragstart="return false" data-bi="${bi}" data-ei="${ei}"><td class="ex-drag-handle" title="Arrastrar para reordenar">${GRIP}</td><td class="ex-name-cell" onclick="openPicker(${bi},${ei})" title="Clic para cambiar ejercicio"><span class="ex-name">${esc(ex.training_name)||'<em style="color:#9CA3AF">Elegir ejercicio</em>'}</span><span class="ex-muscle">${esc(ex.muscle_group_name)}</span><span class="ex-edit-hint">${EDIT_ICO} cambiar</span></td><td><input type="number" min="1" max="20" style="width:52px" value="${esc(ex.series)}" placeholder="—" onchange="updateEx(${bi},${ei},'series',this.value)"/></td><td><input type="text" style="width:64px" value="${esc(ex.repetitions)}" placeholder="8-12" onchange="updateEx(${bi},${ei},'repetitions',this.value)"/></td><td><input type="number" style="width:60px" value="${esc(ex.break_time)}" placeholder="seg" onchange="updateEx(${bi},${ei},'break_time',this.value)"/></td><td><select style="width:72px" onchange="updateEx(${bi},${ei},'intensity_type',this.value)"><option value=""${!ex.intensity_type?' selected':''}>—</option><option value="rpe"${ex.intensity_type==='rpe'?' selected':''}>RPE</option><option value="rir"${ex.intensity_type==='rir'?' selected':''}>RIR</option><option value="pct1rm"${ex.intensity_type==='pct1rm'?' selected':''}>%1RM</option><option value="weight"${ex.intensity_type==='weight'?' selected':''}>Peso</option></select></td><td><input type="number" step="0.5" style="width:60px" value="${esc(ex.intensity_value)}" placeholder="Val." onchange="updateEx(${bi},${ei},'intensity_value',this.value)"/></td><td style="vertical-align:top"><span class="ex-notes-wrap" data-value="${esc(ex.notes)||''}"><textarea rows="1" placeholder="Notas…" oninput="updateEx(${bi},${ei},'notes',this.value);this.parentNode.dataset.value=this.value" onchange="updateEx(${bi},${ei},'notes',this.value)">${esc(ex.notes)}</textarea></span></td><td style="white-space:nowrap"><button class="btn-dup" title="Duplicar ejercicio" onclick="duplicateExercise(${bi},${ei})">${COPY_ICO}</button><button style="background:none;border:none;cursor:pointer;color:#EF4444;padding:4px;display:inline-flex;align-items:center;border-radius:4px;" title="Eliminar ejercicio" onclick="removeExercise(${bi},${ei})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>`).join('');
+    if(blk.block_type==='text'){
+      return`<div class="block" data-block-idx="${bi}"><div class="block-header"><span class="block-badge text">${label}</span><button class="block-rm" onclick="removeBlock(${bi})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><textarea class="block-text-area" placeholder="Escribe instrucciones, indicaciones o notas para este día…" oninput="updateBlockContent(${bi},this.value)">${esc(blk.content)}</textarea></div>`;
+    }
     return`<div class="block" data-block-idx="${bi}"><div class="block-header"><span class="block-badge ${blk.block_type}">${label}</span><button class="block-rm" onclick="removeBlock(${bi})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>${blk.exercises.length?`<table class="exercise-table"><thead><tr><th class="ex-th-drag"></th><th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Intensidad</th><th>Valor</th><th>Notas</th><th></th></tr></thead><tbody data-bi="${bi}">${rows}</tbody></table>`:''}<button class="add-exercise-btn" onclick="openPicker(${bi})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar ejercicio</button></div>`;
   }).join('');
   setupExerciseDrag();
 }
 function updateEx(bi,ei,field,value){const ex=routineData.days_list[selectedDayIdx].blocks[bi].exercises[ei];if(field==='series'||field==='break_time')ex[field]=parseInt(value)||null;else if(field==='intensity_value')ex[field]=parseFloat(value)||null;else ex[field]=value;}
-function removeExercise(bi,ei){routineData.days_list[selectedDayIdx].blocks[bi].exercises.splice(ei,1);renderBlocks();}
+function removeExercise(bi,ei){if(!confirm('¿Eliminar este ejercicio?'))return;routineData.days_list[selectedDayIdx].blocks[bi].exercises.splice(ei,1);renderBlocks();}
 
 function duplicateExercise(bi,ei){
   const blk=routineData.days_list[selectedDayIdx].blocks[bi];
@@ -1119,7 +1133,7 @@ async function saveRoutine(){
     training_level_id:routineData.training_level_id||null,
     training:routineData.training||null,
     notes:routineData.notes||null,
-    days_list:routineData.days_list.map((day,i)=>({day_name:day.day_name,description:day.description||null,blocks:day.blocks.map((blk,bi)=>({block_type:blk.block_type,order_index:bi,exercises:blk.exercises.map((ex,ei)=>({training_id:ex.training_id||null,series:parseInt(ex.series)||null,repetitions:ex.repetitions||null,break_time:parseInt(ex.break_time)||null,intensity_type:ex.intensity_type||null,intensity_value:parseFloat(ex.intensity_value)||null,notes:ex.notes||null,order_index:ei}))}))})  )};
+    days_list:routineData.days_list.map((day,i)=>({day_name:day.day_name,description:day.description||null,blocks:day.blocks.map((blk,bi)=>({block_type:blk.block_type,content:blk.content||null,order_index:bi,exercises:blk.exercises.map((ex,ei)=>({training_id:ex.training_id||null,series:parseInt(ex.series)||null,repetitions:ex.repetitions||null,break_time:parseInt(ex.break_time)||null,intensity_type:ex.intensity_type||null,intensity_value:parseFloat(ex.intensity_value)||null,notes:ex.notes||null,order_index:ei}))}))})  )};
   const btn=document.getElementById('saveRoutineBtn');btn.disabled=true;btn.textContent='Guardando…';
   try{
     const url=editingRoutineId?`${API}/routines/${editingRoutineId}/update`:`${API}/routines`;const method=editingRoutineId?'PUT':'POST';

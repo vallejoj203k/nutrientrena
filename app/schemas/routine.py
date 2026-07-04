@@ -147,7 +147,8 @@ class ExerciseInBlockCreate(BaseModel):
 
 
 class BlockCreate(BaseModel):
-    block_type: str = "normal"  # warmup/normal/superset/circuit
+    block_type: str = "normal"  # warmup/normal/superset/circuit/text
+    content: Optional[str] = None  # free text for 'text' blocks
     order_index: int = 0
     exercises: List[ExerciseInBlockCreate] = []
 
@@ -203,6 +204,7 @@ class ExerciseInBlockOut(BaseModel):
 class BlockOut(BaseModel):
     id: Optional[int] = None
     block_type: str
+    content: Optional[str] = None
     order_index: int
     exercises: List[ExerciseInBlockOut] = []
     model_config = {"from_attributes": True}

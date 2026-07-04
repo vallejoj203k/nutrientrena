@@ -48,6 +48,7 @@ class DietUpdate(DietCreate):
 class AlimentSimpleOut(BaseModel):
     id: str
     name: str
+    group_food_id: Optional[int] = None
     quantity: Optional[float] = None
     calories: Optional[float] = None
     proteins: Optional[float] = None

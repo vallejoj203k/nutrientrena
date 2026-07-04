@@ -4082,7 +4082,12 @@ function _renderEntDayContent(day, idx) {
   const label = day.label || day.name || `Día ${idx+1}`;
   const dayAbr = DAY_ABR[idx] || '';
 
-  if (!allEx.length) {
+  const textBlocksHtml = blocks
+    .filter(b => b.block_type === 'text' && b.content)
+    .map(b => `<div style="margin:12px 20px 0;padding:10px 14px;background:#F9FAFB;border-left:3px solid #7C3AED;border-radius:6px;font-size:13px;color:#374151;white-space:pre-wrap;">${esc(b.content)}</div>`)
+    .join('');
+
+  if (!allEx.length && !textBlocksHtml) {
     return `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
       <p style="font-size:14px;font-weight:600;color:#374151;margin:0 0 4px;">${dayAbr} · Descanso</p>
       <p style="font-size:12px;margin:0;">Sin ejercicios programados</p>
@@ -4117,7 +4122,8 @@ function _renderEntDayContent(day, idx) {
         Editar este día
       </button>
     </div>
-    <div style="overflow-x:auto;">
+    ${textBlocksHtml}
+    ${allEx.length ? `<div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <thead><tr style="background:#F9FAFB;">
           <th style="text-align:left;padding:9px 20px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Ejercicio</th>
@@ -4129,7 +4135,7 @@ function _renderEntDayContent(day, idx) {
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
-    </div>
+    </div>` : '<div style="padding-bottom:16px;"></div>'}
   </div>`;
 }
 
@@ -4471,6 +4477,7 @@ async function saveBuilderChanges() {
       description: day.description || '',
       blocks: (day.blocks || []).map((blk, bi) => ({
         block_type: blk.block_type || 'normal',
+        content: blk.content || null,
         order_index: bi,
         exercises: (blk.exercises || []).map((ex, ei) => ({
           training_id: ex.training_id,

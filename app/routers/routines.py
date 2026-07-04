@@ -121,6 +121,7 @@ def _create_days_v2(db: Session, routine_id: int, days_data: list):
                 routine_id=routine_id,
                 routine_day_id=day.id,
                 block_type=blk_data.block_type or "normal",
+                content=blk_data.content,
                 order_index=blk_data.order_index or 0,
             )
             db.add(blk)
@@ -168,6 +169,7 @@ def _clone_days(db: Session, source: Routine, new_routine_id: int):
                 routine_id=new_routine_id,
                 routine_day_id=new_day.id,
                 block_type=blk.block_type,
+                content=blk.content,
                 order_index=blk.order_index,
             )
             db.add(new_blk)
@@ -445,7 +447,7 @@ def clone_to_client(
         for blk in sorted(day.blocks, key=lambda b: b.order_index):
             new_blk = RoutineBlock(
                 routine_id=new_routine.id, routine_day_id=new_day.id,
-                block_type=blk.block_type, order_index=blk.order_index,
+                block_type=blk.block_type, content=blk.content, order_index=blk.order_index,
             )
             db.add(new_blk)
             db.flush()

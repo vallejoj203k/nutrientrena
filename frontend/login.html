@@ -7,21 +7,26 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html, body { height: 100%; }
+
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      min-height: 100dvh;
+      height: 100dvh;
       display: flex;
-      overflow-y: auto;
+      overflow: hidden;
     }
 
     /* ── Panel izquierdo ── */
     .left {
-      flex: 1;
-      overflow: hidden;
+      flex: 1 1 auto;
+      min-width: 0;
       position: relative;
+      overflow: hidden;
     }
 
     .left img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -31,13 +36,14 @@
 
     /* ── Panel derecho ── */
     .right {
-      width: 480px;
-      min-width: 380px;
+      width: clamp(360px, 38vw, 520px);
+      flex-shrink: 0;
+      height: 100%;
       background: #F3F4F6;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: clamp(20px, 4vh, 48px) clamp(18px, 3vw, 48px);
     }
 
     .form-box {
@@ -45,7 +51,8 @@
       max-width: 380px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: clamp(14px, 2.2vh, 20px);
+      margin: auto; /* centers vertically, but allows scroll on short screens */
     }
 
     /* Logo */
@@ -162,19 +169,19 @@
     }
 
     /* Responsive */
-    @media (max-width: 720px) {
+    @media (max-width: 820px) {
       .left { display: none; }
-      .right {
-        width: 100%;
-        padding: 32px 24px;
-        min-height: 100dvh;
-        align-items: flex-start;
-        padding-top: 48px;
-      }
-      .form-box { max-width: 100%; }
+      .right { width: 100%; }
+      .form-box { max-width: 420px; }
+    }
+    @media (max-height: 560px) {
+      .logo-banner { padding: 12px 20px; }
+      .logo-text { font-size: 24px; }
+      .input-group input { padding: 11px 12px 11px 42px; }
+      .btn-login { padding: 12px; }
     }
     @media (max-width: 400px) {
-      .right { padding: 32px 16px; padding-top: 40px; }
+      .right { padding: 24px 16px; }
       .logo-text { font-size: 26px; }
       .input-group input { font-size: 16px; } /* prevent iOS zoom */
       .btn-login { font-size: 15px; }

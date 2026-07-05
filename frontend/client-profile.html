@@ -698,8 +698,12 @@
     .nut-fc-drop.open{display:block;}
     /* ── Diet editor window (plan de comidas, ported from diets.html) ── */
     .ne-backdrop{position:fixed;inset:0;background:rgba(17,17,17,.45);z-index:400;display:none;padding:14px;}
-    .ne-backdrop.open{display:flex;}
+    .ne-backdrop.open{display:flex;animation:neBackdropIn .25s ease;}
     .ne-window{background:#fff;border-radius:18px;flex:1;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.3);}
+    .ne-backdrop.open .ne-window{animation:neWindowIn .32s cubic-bezier(.34,1.3,.5,1);}
+    @keyframes neBackdropIn{from{background:rgba(17,17,17,0);}to{background:rgba(17,17,17,.45);}}
+    @keyframes neWindowIn{from{transform:scale(.55);opacity:0;}to{transform:scale(1);opacity:1;}}
+    @media(prefers-reduced-motion:reduce){.ne-backdrop.open,.ne-backdrop.open .ne-window{animation:none;}}
     .ne-bar{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
     .ne-close{background:none;border:none;cursor:pointer;color:#6B7280;padding:6px;border-radius:8px;display:flex;transition:.15s;flex-shrink:0;}
     .ne-close:hover{background:#F3F4F6;color:#111;}
@@ -801,6 +805,37 @@
     .fsm-item-desc{font-size:12.5px;color:#9CA3AF;margin-top:1px;}
     .fsm-item-chip{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:#FEF3C7;color:#B45309;flex-shrink:0;white-space:nowrap;}
     .fsm-msg{padding:32px;text-align:center;color:#9CA3AF;font-size:13px;}
+    .fsm-create-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;border:none;background:#111827;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
+    .fsm-create-btn:hover{background:#374151;}
+    .fsm-create-link{display:inline-block;margin-top:10px;padding:9px 18px;border-radius:10px;border:none;background:#111827;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;}
+    .fsm-create-link:hover{background:#374151;}
+
+    /* ── Create aliment modal ── */
+    .ca-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .ca-overlay.open{opacity:1;pointer-events:all;}
+    .ca-modal{background:#fff;border-radius:16px;width:680px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;}
+    .ca-overlay.open .ca-modal{transform:translateY(0);}
+    .ca-modal-header{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 0;}
+    .ca-modal-title{font-size:20px;font-weight:800;color:#111;}
+    .ca-modal-close{width:32px;height:32px;border:none;background:#F3F4F6;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
+    .ca-modal-close:hover{background:#E5E7EB;color:#111;}
+    .ca-form{padding:20px 28px 28px;}
+    .ca-row{display:grid;gap:14px;margin-bottom:14px;}
+    .ca-row-3{grid-template-columns:2fr 1.5fr 1.5fr;}
+    .ca-row-2{grid-template-columns:2fr 1fr;}
+    .ca-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;}
+    .ca-input{width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .ca-input:focus{border-color:#7C3AED;box-shadow:0 0 0 3px #F3EEFB;}
+    .ca-section-label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;}
+    .ca-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+    .ca-actions{display:flex;gap:10px;margin-top:24px;}
+    .ca-btn-primary{flex:1;padding:14px;background:#7C3AED;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
+    .ca-btn-primary:hover{background:#6D28D9;}
+    .ca-btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+    .ca-btn-cancel{padding:14px 22px;background:#F3F4F6;color:#374151;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+    .ca-btn-cancel:hover{background:#E5E7EB;}
+    .ca-error{color:#DC2626;font-size:12px;margin-top:8px;font-weight:600;}
+    @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
     .nut-fc-drop-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #EBEBEB;}
     .nut-fc-drop-item:last-child{border-bottom:none;}
     .nut-fc-drop-item:hover{background:#F0FDF4;}
@@ -3320,10 +3355,67 @@ async function saveTarget() {
     </div>
     <div class="fsm-bar">
       <span class="fsm-bar-lbl"><svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg> Alimentos</span>
+      <button class="fsm-create-btn" onclick="openCreateAlimentModal()">+ Crear alimento</button>
     </div>
     <div class="fsm-pills" id="fsmPills"></div>
     <div class="fsm-list" id="fsmList">
       <div class="fsm-msg">Cargando alimentos…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Create Aliment Modal ── -->
+<div class="ca-overlay" id="createAlimentOverlay" onclick="if(event.target===this)closeCreateAlimentModal()">
+  <div class="ca-modal">
+    <div class="ca-modal-header">
+      <h2 class="ca-modal-title">Crear alimento</h2>
+      <button class="ca-modal-close" onclick="closeCreateAlimentModal()">✕</button>
+    </div>
+    <div class="ca-form">
+      <div class="ca-row ca-row-3">
+        <div>
+          <label class="ca-label">Nombre del alimento *</label>
+          <input id="ca_name" class="ca-input" placeholder="Ej: Pechuga de pollo"/>
+        </div>
+        <div>
+          <label class="ca-label">Grupo</label>
+          <select id="ca_group" class="ca-input">
+            <option value="">Seleccionar...</option>
+          </select>
+        </div>
+        <div>
+          <label class="ca-label">Marca <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input id="ca_brand" class="ca-input" placeholder="Ej: Hacendado"/>
+        </div>
+      </div>
+      <div class="ca-row ca-row-2">
+        <div>
+          <label class="ca-label">Cantidad de referencia</label>
+          <input id="ca_quantity" class="ca-input" type="number" min="1" value="100" placeholder="100"/>
+        </div>
+        <div>
+          <label class="ca-label">Unidad</label>
+          <select id="ca_unit" class="ca-input">
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+            <option value="ml">ml</option>
+            <option value="l">l</option>
+            <option value="unidad">unidad</option>
+          </select>
+        </div>
+      </div>
+      <div class="ca-section-label">Macronutrientes por 100g</div>
+      <div class="ca-macro-grid">
+        <div><label class="ca-label">Calorías (kcal)</label><input id="ca_calories" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Proteínas (g)</label><input id="ca_proteins" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Carbohidratos (g)</label><input id="ca_carbs" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Grasas (g)</label><input id="ca_fats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+      </div>
+      <div class="ca-error" id="ca_error"></div>
+      <div class="ca-actions">
+        <button class="ca-btn-primary" id="ca_submit_btn" onclick="submitCreateAliment()">Crear y añadir a la comida</button>
+        <button class="ca-btn-cancel" onclick="closeCreateAlimentModal()">Cancelar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -5434,7 +5526,8 @@ function fsmRenderList(items) {
   const list = document.getElementById('fsmList');
   if (!list) return;
   if (!items.length) {
-    list.innerHTML = '<div class="fsm-msg">Sin resultados. Prueba otra búsqueda.</div>';
+    list.innerHTML = '<div class="fsm-msg">No se encontró el alimento.<br>'
+      + '<button class="fsm-create-link" onclick="openCreateAlimentModal()">+ Crear este alimento</button></div>';
     return;
   }
   const groupName = gid => { const g = _fsmGroups.find(x => x.id === gid); return g ? g.name : null; };
@@ -5484,6 +5577,69 @@ function fsmPick(alimentId) {
   neRenderSidebar();
   closeFoodSearch();
   showToast('Alimento añadido', 'success');
+}
+
+/* ── Create aliment from the food search ── */
+
+function openCreateAlimentModal() {
+  const sel = document.getElementById('ca_group');
+  sel.innerHTML = '<option value="">Seleccionar...</option>'
+    + _fsmGroups.map(g => '<option value="' + g.id + '">' + esc(g.name || '') + '</option>').join('');
+  ['ca_name', 'ca_brand', 'ca_calories', 'ca_proteins', 'ca_carbs', 'ca_fats'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('ca_quantity').value = '100';
+  document.getElementById('ca_unit').value = 'g';
+  document.getElementById('ca_error').textContent = '';
+  // Pre-fill name with the current search text
+  const q = (document.getElementById('fsmInput')?.value || '').trim();
+  if (q) document.getElementById('ca_name').value = q;
+  document.getElementById('createAlimentOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('ca_name').focus(), 100);
+}
+
+function closeCreateAlimentModal() {
+  document.getElementById('createAlimentOverlay').classList.remove('open');
+}
+
+async function submitCreateAliment() {
+  const name = (document.getElementById('ca_name').value || '').trim();
+  const errEl = document.getElementById('ca_error');
+  if (!name) { errEl.textContent = 'El nombre es obligatorio'; return; }
+  const btn = document.getElementById('ca_submit_btn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  errEl.textContent = '';
+  const toF = id => { const v = parseFloat((document.getElementById(id) || {}).value); return isNaN(v) ? null : v; };
+  const body = {
+    name: name,
+    brand: (document.getElementById('ca_brand').value || '').trim() || null,
+    group_food_id: parseInt(document.getElementById('ca_group').value) || null,
+    quantity: toF('ca_quantity') || 100,
+    quantity_unit: document.getElementById('ca_unit').value || 'g',
+    calories: toF('ca_calories'),
+    proteins: toF('ca_proteins'),
+    carbohydrates: toF('ca_carbs'),
+    fats: toF('ca_fats'),
+  };
+  try {
+    const r = await fetch(`${API}/aliments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!r.ok) { errEl.textContent = j.message || j.detail || 'Error al guardar'; return; }
+    const newAl = j.data || j;
+    if (!newAl.id) { errEl.textContent = 'No se recibió el alimento creado'; return; }
+    closeCreateAlimentModal();
+    showToast('Alimento "' + name + '" creado', 'success');
+    // Add it directly to the meal being edited
+    if (_fsmMid !== null) {
+      _fsmCache[newAl.id] = Object.assign({}, body, newAl);
+      fsmPick(newAl.id);
+    }
+  } catch { errEl.textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; btn.textContent = 'Crear y añadir a la comida'; }
 }
 
 /* ── Save ── */

@@ -35,6 +35,7 @@ class AlimentDescription(Base):
     zinc = Column(Float, nullable=True)
     water = Column(Float, nullable=True)
     fiber = Column(Float, nullable=True)
+    sugars = Column(Float, nullable=True)
     cholesterol = Column(Float, nullable=True)
     saturated_fats = Column(Float, nullable=True)
     mono_saturated_fats = Column(Float, nullable=True)

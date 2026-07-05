@@ -828,6 +828,12 @@
     .ca-input:focus{border-color:#7C3AED;box-shadow:0 0 0 3px #F3EEFB;}
     .ca-section-label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;}
     .ca-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+    .ca-macro-grid-2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .ca-micro-toggle{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;color:#6B7280;font-size:12px;font-weight:600;border:none;background:none;user-select:none;width:100%;margin-top:8px;}
+    .ca-micro-toggle:hover{color:#7C3AED;}
+    .ca-micro-body{display:none;}
+    .ca-micro-body.open{display:block;}
+    .ca-micro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
     .ca-actions{display:flex;gap:10px;margin-top:24px;}
     .ca-btn-primary{flex:1;padding:14px;background:#7C3AED;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
     .ca-btn-primary:hover{background:#6D28D9;}
@@ -835,7 +841,7 @@
     .ca-btn-cancel{padding:14px 22px;background:#F3F4F6;color:#374151;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
     .ca-btn-cancel:hover{background:#E5E7EB;}
     .ca-error{color:#DC2626;font-size:12px;margin-top:8px;font-weight:600;}
-    @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
+    @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-macro-grid-2{grid-template-columns:1fr 1fr;}.ca-micro-grid{grid-template-columns:1fr 1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
     .nut-fc-drop-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #EBEBEB;}
     .nut-fc-drop-item:last-child{border-bottom:none;}
     .nut-fc-drop-item:hover{background:#F0FDF4;}
@@ -3411,6 +3417,26 @@ async function saveTarget() {
         <div><label class="ca-label">Carbohidratos (g)</label><input id="ca_carbs" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
         <div><label class="ca-label">Grasas (g)</label><input id="ca_fats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
       </div>
+      <div class="ca-macro-grid-2">
+        <div><label class="ca-label">Fibra (g)</label><input id="ca_fiber" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Azúcares (g)</label><input id="ca_sugars" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Grasas saturadas (g)</label><input id="ca_satfats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+      </div>
+      <button class="ca-micro-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.ca-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Micronutrientes <span style="color:#9CA3AF;font-weight:400;">(opcional — útil para planes con patologías)</span>
+        <span class="ca-arr" style="margin-left:auto;">▼</span>
+      </button>
+      <div class="ca-micro-body">
+        <div class="ca-micro-grid">
+          <div><label class="ca-label">Sodio (mg)</label><input id="ca_sodium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Potasio (mg)</label><input id="ca_potassium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Calcio (mg)</label><input id="ca_calcium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Hierro (mg)</label><input id="ca_iron" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Vitamina C (mg)</label><input id="ca_vit_c" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+          <div><label class="ca-label">Colesterol (mg)</label><input id="ca_cholesterol" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        </div>
+      </div>
       <div class="ca-error" id="ca_error"></div>
       <div class="ca-actions">
         <button class="ca-btn-primary" id="ca_submit_btn" onclick="submitCreateAliment()">Crear y añadir a la comida</button>
@@ -5585,12 +5611,18 @@ function openCreateAlimentModal() {
   const sel = document.getElementById('ca_group');
   sel.innerHTML = '<option value="">Seleccionar...</option>'
     + _fsmGroups.map(g => '<option value="' + g.id + '">' + esc(g.name || '') + '</option>').join('');
-  ['ca_name', 'ca_brand', 'ca_calories', 'ca_proteins', 'ca_carbs', 'ca_fats'].forEach(id => {
+  ['ca_name', 'ca_brand', 'ca_calories', 'ca_proteins', 'ca_carbs', 'ca_fats',
+   'ca_fiber', 'ca_sugars', 'ca_satfats', 'ca_sodium', 'ca_potassium', 'ca_calcium',
+   'ca_iron', 'ca_vit_c', 'ca_cholesterol'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('ca_quantity').value = '100';
   document.getElementById('ca_unit').value = 'g';
   document.getElementById('ca_error').textContent = '';
+  const micro = document.querySelector('#createAlimentOverlay .ca-micro-body');
+  if (micro) micro.classList.remove('open');
+  const arr = document.querySelector('#createAlimentOverlay .ca-arr');
+  if (arr) arr.textContent = '▼';
   // Pre-fill name with the current search text
   const q = (document.getElementById('fsmInput')?.value || '').trim();
   if (q) document.getElementById('ca_name').value = q;
@@ -5610,6 +5642,18 @@ async function submitCreateAliment() {
   btn.disabled = true; btn.textContent = 'Guardando…';
   errEl.textContent = '';
   const toF = id => { const v = parseFloat((document.getElementById(id) || {}).value); return isNaN(v) ? null : v; };
+  const description = {
+    fiber: toF('ca_fiber'),
+    sugars: toF('ca_sugars'),
+    saturated_fats: toF('ca_satfats'),
+    sodium: toF('ca_sodium'),
+    potassium: toF('ca_potassium'),
+    calcium: toF('ca_calcium'),
+    iron: toF('ca_iron'),
+    vitc: toF('ca_vit_c'),
+    cholesterol: toF('ca_cholesterol'),
+  };
+  const hasDesc = Object.values(description).some(v => v != null);
   const body = {
     name: name,
     brand: (document.getElementById('ca_brand').value || '').trim() || null,
@@ -5620,6 +5664,7 @@ async function submitCreateAliment() {
     proteins: toF('ca_proteins'),
     carbohydrates: toF('ca_carbs'),
     fats: toF('ca_fats'),
+    description: hasDesc ? description : null,
   };
   try {
     const r = await fetch(`${API}/aliments`, {

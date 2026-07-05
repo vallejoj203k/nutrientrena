@@ -2329,6 +2329,18 @@ async function submitCreateAliment() {
   btn.disabled = true; btn.textContent = 'Guardando...';
   if(errEl) errEl.textContent = '';
   var toF = function(id) { var v = parseFloat((document.getElementById(id)||{}).value); return isNaN(v) ? null : v; };
+  var description = {
+    fiber: toF('ca_fiber'),
+    sugars: toF('ca_sugars'),
+    saturated_fats: toF('ca_satfats'),
+    sodium: toF('ca_sodium'),
+    potassium: toF('ca_potassium'),
+    calcium: toF('ca_calcium'),
+    iron: toF('ca_iron'),
+    vitc: toF('ca_vit_c'),
+    cholesterol: toF('ca_cholesterol'),
+  };
+  var hasDesc = Object.keys(description).some(function(k){ return description[k] != null; });
   var body = {
     name: name,
     brand: (document.getElementById('ca_brand').value || '').trim() || null,
@@ -2339,15 +2351,7 @@ async function submitCreateAliment() {
     proteins: toF('ca_proteins'),
     carbohydrates: toF('ca_carbs'),
     fats: toF('ca_fats'),
-    fiber: toF('ca_fiber'),
-    sugars: toF('ca_sugars'),
-    saturated_fats: toF('ca_satfats'),
-    sodium: toF('ca_sodium'),
-    potassium: toF('ca_potassium'),
-    calcium: toF('ca_calcium'),
-    iron: toF('ca_iron'),
-    vitamin_c: toF('ca_vit_c'),
-    cholesterol: toF('ca_cholesterol'),
+    description: hasDesc ? description : null,
   };
   try {
     var r = await fetch(API + '/aliments', {

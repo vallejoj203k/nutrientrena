@@ -28,6 +28,7 @@ class AlimentDescriptionIn(BaseModel):
     zinc: Optional[float] = None
     water: Optional[float] = None
     fiber: Optional[float] = None
+    sugars: Optional[float] = None
     cholesterol: Optional[float] = None
     saturated_fats: Optional[float] = None
     mono_saturated_fats: Optional[float] = None

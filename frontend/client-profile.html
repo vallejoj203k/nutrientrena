@@ -674,6 +674,10 @@
     .nut-adj-save:hover{background:#EEF2FF;}
     .nut-adj-reset{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
     .nut-adj-reset:hover{background:rgba(255,255,255,.28);}
+    .nut-card-hint{font-size:12.5px;color:rgba(255,255,255,.85);line-height:1.6;padding:6px 0;}
+    .nut-card-hint b{color:#fff;}
+    .nut-hint-btn{display:block;margin-top:10px;background:#fff;color:#4F46E5;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;transition:.15s;}
+    .nut-hint-btn:hover{background:#EEF2FF;}
     .nut-seg-row{display:flex;gap:4px;margin-bottom:10px;}
     .nut-seg-btn{background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;transition:.15s;}
     .nut-seg-btn.sel{background:#fff;color:#4F46E5;}
@@ -5216,7 +5220,6 @@ function _renderNutUI() {
         }).join('')}</div>
       </div>
     </div>
-    ${macros?`
     <div class="nut-cards">
       <div class="nut-card">
         <div class="nut-card-title">Datos personales</div>
@@ -5228,6 +5231,21 @@ function _renderNutUI() {
         <div class="nut-card-row"><span>Nivel actividad</span><span class="nut-card-val">${esc(clientData?.activity?.name||clientData?.level_activity?.name||'—')}</span></div>
         <div class="nut-card-row"><span>Objetivo</span><span class="nut-card-val">${esc(clientData?.objective?.name||'—')}</span></div>
       </div>
+      ${!macros?`
+      <div class="nut-card">
+        <div class="nut-card-title">Tu meta diaria</div>
+        <div class="nut-card-hint">
+          Para calcular la meta diaria automáticamente completa
+          <b>${[!parseFloat(clientData?.weight)&&'peso',!parseFloat(clientData?.height)&&'altura',!parseFloat(clientData?.age)&&'edad'].filter(Boolean).join(', ')||'los datos'}</b>
+          del cliente.
+          <button class="nut-hint-btn" onclick="location.href='client-form.html?id='+clientId">Completar datos</button>
+        </div>
+      </div>
+      <div class="nut-card">
+        <div class="nut-card-title">Gramos por comida</div>
+        <div class="nut-card-hint">Disponible cuando se calcule la meta diaria.</div>
+      </div>
+      `:`
       <div class="nut-card">
         <div class="nut-card-title">Tu meta diaria${macros.custom?'<span class="nut-custom-tag">Personalizado</span>':''}<button class="nut-ajust-btn" onclick="${_nutEditMacros?'cancelNutAdjust()':'openNutAdjust()'}">${_nutEditMacros?'Cancelar':'Ajustar'}</button></div>
         <div class="nut-card-row"><span>IMC</span><span class="nut-card-val">${macros.imc} kg/m²</span></div>
@@ -5263,7 +5281,8 @@ function _renderNutUI() {
         ${macros.deficit?`<div class="nut-card-row"><span>Déficit</span><span class="nut-card-val warn">${macros.deficit}%</span></div>`:''}
         ${macros.surplus?`<div class="nut-card-row"><span>Excedente</span><span class="nut-card-val g">${macros.surplus}%</span></div>`:''}
       </div>
-    </div>`:''}
+      `}
+    </div>
   `;
 }
 

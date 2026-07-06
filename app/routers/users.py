@@ -34,6 +34,10 @@ def _serialize(detail: UserDetail, db: Session) -> dict:
     role_users = db.query(RoleUser).filter(RoleUser.user_id == detail.user_id).all()
     out["roles"] = [{"id": ru.role_id, "name": ru.role.name if ru.role else None} for ru in role_users]
     out["email"] = detail.user.email if detail.user else None
+    # Nested parameter objects so the frontend can show names, not just ids
+    out["gender"] = {"id": detail.gender.id, "name": detail.gender.description} if detail.gender else None
+    out["activity"] = {"id": detail.activity.id, "name": detail.activity.description} if detail.activity else None
+    out["objective"] = {"id": detail.objective.id, "name": detail.objective.description} if detail.objective else None
     return out
 
 
@@ -71,6 +75,8 @@ def create(
         phone=data.phone,
         height=data.height,
         weight=data.weight,
+        age=data.age,
+        body_fat=data.body_fat,
         occupation=data.occupation,
         country_code=data.country_code,
         gender_id=data.gender_id,

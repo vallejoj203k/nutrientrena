@@ -663,6 +663,17 @@
     .nut-card-val.g{color:#A5B4FC;}
     .nut-card-val.warn{color:#FCA5A5;}
     .nut-ajust-btn{background:rgba(255,255,255,.18);border:none;border-radius:6px;padding:4px 10px;font-size:11px;color:#fff;font-weight:600;cursor:pointer;}
+    .nut-ajust-btn:hover{background:rgba(255,255,255,.3);}
+    .nut-custom-tag{background:rgba(255,255,255,.22);border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;margin-left:8px;letter-spacing:.3px;}
+    .nut-adj-inp{width:76px;border:none;border-radius:6px;padding:5px 8px;font-size:13px;font-weight:700;color:#111827;background:#fff;outline:none;text-align:right;font-family:inherit;}
+    .nut-adj-slider-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;font-size:12px;color:rgba(255,255,255,.9);}
+    .nut-adj-slider-row b{font-weight:800;color:#fff;}
+    .nut-adj-slider-row input[type=range]{flex:1;max-width:140px;accent-color:#fff;cursor:pointer;}
+    .nut-adj-btns{display:flex;gap:8px;margin-top:10px;}
+    .nut-adj-save{flex:1;background:#fff;color:#4F46E5;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;transition:.15s;}
+    .nut-adj-save:hover{background:#EEF2FF;}
+    .nut-adj-reset{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
+    .nut-adj-reset:hover{background:rgba(255,255,255,.28);}
     .nut-seg-row{display:flex;gap:4px;margin-bottom:10px;}
     .nut-seg-btn{background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;transition:.15s;}
     .nut-seg-btn.sel{background:#fff;color:#4F46E5;}
@@ -5037,6 +5048,21 @@ function _calcClientMacros(c) {
     surplus:kcal>tdee?Math.round((kcal/tdee-1)*100):0};
 }
 
+/* Custom macros set via "Ajustar" — local to this profile view, overrides the
+   automatic Harris-Benedict calc until cleared (not persisted across reloads) */
+let _nutCustomMacros = null;
+let _nutEditMacros = false;
+
+function _nutEffMacros() {
+  const base = _calcClientMacros(clientData);
+  if (!base) return null;
+  if (!_nutCustomMacros) return base;
+  const c = _nutCustomMacros;
+  const kcal = Math.round(c.proteins * 4 + c.carbs * 4 + c.fats * 9);
+  return { ...base, proteins: c.proteins, carbs: c.carbs, fats: c.fats,
+           deficit: c.deficit, surplus: c.surplus, kcal, custom: true };
+}
+
 async function renderNutricionTab() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
@@ -5114,7 +5140,7 @@ function _renderNutUI() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
   const det = _nutDetail || {};
-  const macros = _calcClientMacros(clientData);
+  const macros = _nutEffMacros();
   const totalKcal = Math.round(_nutTotalKcal(det)) || Math.round(det.calories || 0);
   const daysPerWeek = det.quantity || 7;
   const isLibre = _nutDayIdx >= daysPerWeek;
@@ -5187,16 +5213,29 @@ function _renderNutUI() {
         <div class="nut-card-row"><span>Objetivo</span><span class="nut-card-val">${esc(clientData?.objective?.name||'—')}</span></div>
       </div>
       <div class="nut-card">
-        <div class="nut-card-title">Tu meta diaria<button class="nut-ajust-btn" onclick="openNutAdjust()">Ajustar</button></div>
+        <div class="nut-card-title">Tu meta diaria${macros.custom?'<span class="nut-custom-tag">Personalizado</span>':''}<button class="nut-ajust-btn" onclick="${_nutEditMacros?'cancelNutAdjust()':'openNutAdjust()'}">${_nutEditMacros?'Cancelar':'Ajustar'}</button></div>
         <div class="nut-card-row"><span>IMC</span><span class="nut-card-val">${macros.imc} kg/m²</span></div>
         <div class="nut-card-row"><span>Masa corporal magra</span><span class="nut-card-val">${macros.lean} Kg</span></div>
         <div class="nut-card-row"><span>TMB</span><span class="nut-card-val">${macros.tmb} kcal</span></div>
         <div class="nut-card-row"><span>TDEE (gasto real)</span><span class="nut-card-val">${macros.tdee} kcal</span></div>
-        <div class="nut-card-row"><span>Proteínas</span><span class="nut-card-val g">2.2 g/kg · ${macros.proteins}g</span></div>
+        ${_nutEditMacros?`
+        <div class="nut-card-row"><span>Proteínas (g)</span><input class="nut-adj-inp" id="nutAdjP" type="number" min="0" value="${macros.proteins}" oninput="_nutAdjKcalPreview()"></div>
+        <div class="nut-card-row"><span>Carbohidratos (g)</span><input class="nut-adj-inp" id="nutAdjC" type="number" min="0" value="${macros.carbs}" oninput="_nutAdjKcalPreview()"></div>
+        <div class="nut-card-row"><span>Grasas (g)</span><input class="nut-adj-inp" id="nutAdjF" type="number" min="0" value="${macros.fats}" oninput="_nutAdjKcalPreview()"></div>
+        <div class="nut-adj-slider-row"><span>Déficit <b id="nutAdjDefLbl">${macros.deficit}%</b></span><input type="range" min="0" max="30" step="1" value="${macros.deficit}" id="nutAdjDef" oninput="_nutAdjSlide('def',this.value)"></div>
+        <div class="nut-adj-slider-row"><span>Superávit <b id="nutAdjSurLbl">${macros.surplus}%</b></span><input type="range" min="0" max="30" step="1" value="${macros.surplus}" id="nutAdjSur" oninput="_nutAdjSlide('sur',this.value)"></div>
+        <div class="nut-card-row" style="margin-top:4px;background:rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;"><span style="font-size:11px;">Objetivo: <b id="nutAdjKcal">${macros.kcal}</b> kcal</span></div>
+        <div class="nut-adj-btns">
+          <button class="nut-adj-save" onclick="saveNutAdjust()">Guardar</button>
+          ${_nutCustomMacros?'<button class="nut-adj-reset" onclick="resetNutAdjust()">Restablecer auto</button>':''}
+        </div>
+        `:`
+        <div class="nut-card-row"><span>Proteínas</span><span class="nut-card-val g">${macros.custom?'':'2.2 g/kg · '}${macros.proteins}g</span></div>
         <div class="nut-card-row"><span>Carbohidratos</span><span class="nut-card-val g">${macros.carbs}g</span></div>
-        <div class="nut-card-row"><span>Grasas</span><span class="nut-card-val${macros.fats>80?' warn':' g'}">0.9 g/kg · ${macros.fats}g</span></div>
+        <div class="nut-card-row"><span>Grasas</span><span class="nut-card-val${macros.fats>80?' warn':' g'}">${macros.custom?'':'0.9 g/kg · '}${macros.fats}g</span></div>
         ${macros.deficit?`<div class="nut-card-row" style="margin-top:4px;background:rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;"><span style="font-size:11px;">Déficit ${macros.deficit}% · Obj: ${macros.kcal} kcal</span></div>`:''}
         ${macros.surplus?`<div class="nut-card-row" style="margin-top:4px;background:rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;"><span style="font-size:11px;">Superávit ${macros.surplus}% · Obj: ${macros.kcal} kcal</span></div>`:''}
+        `}
       </div>
       <div class="nut-card">
         <div class="nut-card-title">Gramos por comida</div>
@@ -5791,8 +5830,68 @@ async function saveNutChanges() {
   finally { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
 }
 
+/* ── "Ajustar" edit mode for Tu meta diaria ── */
+
 function openNutAdjust() {
-  showToast('Función disponible próximamente', 'info');
+  _nutEditMacros = true;
+  _renderNutUI();
+}
+
+function cancelNutAdjust() {
+  _nutEditMacros = false;
+  _renderNutUI();
+}
+
+function resetNutAdjust() {
+  _nutCustomMacros = null;
+  _nutEditMacros = false;
+  _renderNutUI();
+  showToast('Macros restablecidos al cálculo automático', 'success');
+}
+
+function _nutAdjRead() {
+  const gv = id => parseFloat(document.getElementById(id)?.value) || 0;
+  return { p: gv('nutAdjP'), c: gv('nutAdjC'), f: gv('nutAdjF'),
+           def: gv('nutAdjDef'), sur: gv('nutAdjSur') };
+}
+
+function _nutAdjKcalPreview() {
+  const v = _nutAdjRead();
+  const el = document.getElementById('nutAdjKcal');
+  if (el) el.textContent = Math.round(v.p * 4 + v.c * 4 + v.f * 9);
+}
+
+/* Moving a slider sets the kcal target from the TDEE and auto-fits carbs
+   (protein and fat stay as typed). The two sliders are mutually exclusive. */
+function _nutAdjSlide(kind, val) {
+  val = parseInt(val) || 0;
+  const other = kind === 'def' ? 'nutAdjSur' : 'nutAdjDef';
+  const otherLbl = kind === 'def' ? 'nutAdjSurLbl' : 'nutAdjDefLbl';
+  if (val > 0) {
+    document.getElementById(other).value = 0;
+    document.getElementById(otherLbl).textContent = '0%';
+  }
+  document.getElementById(kind === 'def' ? 'nutAdjDefLbl' : 'nutAdjSurLbl').textContent = val + '%';
+  const base = _calcClientMacros(clientData);
+  if (!base) return;
+  const v = _nutAdjRead();
+  const kcalTarget = Math.round(base.tdee * (1 - v.def / 100 + v.sur / 100));
+  const carbs = Math.max(0, Math.round((kcalTarget - v.p * 4 - v.f * 9) / 4));
+  const cEl = document.getElementById('nutAdjC');
+  if (cEl) cEl.value = carbs;
+  _nutAdjKcalPreview();
+}
+
+function saveNutAdjust() {
+  const v = _nutAdjRead();
+  if (!v.p && !v.c && !v.f) { showToast('Indica al menos un macro', 'error'); return; }
+  _nutCustomMacros = {
+    proteins: Math.round(v.p), carbs: Math.round(v.c), fats: Math.round(v.f),
+    deficit: Math.round(v.def), surplus: Math.round(v.sur),
+  };
+  _nutEditMacros = false;
+  _renderNutUI();
+  showToast('Meta diaria personalizada guardada', 'success');
 }
 
 /* ══════════════════════════════════════════════

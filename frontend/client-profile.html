@@ -674,6 +674,7 @@
     .nut-adj-save:hover{background:#EEF2FF;}
     .nut-adj-reset{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
     .nut-adj-reset:hover{background:rgba(255,255,255,.28);}
+    .nut-adj-sel{max-width:150px;border:none;border-radius:6px;padding:5px 8px;font-size:12px;font-weight:700;color:#111827;background:#fff;outline:none;cursor:pointer;font-family:inherit;}
     .nut-card-hint{font-size:12.5px;color:rgba(255,255,255,.85);line-height:1.6;padding:6px 0;}
     .nut-card-hint b{color:#fff;}
     .nut-hint-btn{display:block;margin-top:10px;background:#fff;color:#4F46E5;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;transition:.15s;}
@@ -5222,7 +5223,17 @@ function _renderNutUI() {
     </div>
     <div class="nut-cards">
       <div class="nut-card">
-        <div class="nut-card-title">Datos personales</div>
+        <div class="nut-card-title">Datos personales<button class="nut-ajust-btn" onclick="${_nutEditPersonal?'cancelNutPersonal()':'openNutPersonal()'}">${_nutEditPersonal?'Cancelar':'Editar'}</button></div>
+        ${_nutEditPersonal?`
+        <div class="nut-card-row"><span>Género</span><select class="nut-adj-sel" id="nutPersGender">${_nutParamOptions('gender', clientData?.gender?.id||clientData?.gender_id)}</select></div>
+        <div class="nut-card-row"><span>Edad (años)</span><input class="nut-adj-inp" id="nutPersAge" type="number" min="10" max="100" value="${clientData?.age||''}"></div>
+        <div class="nut-card-row"><span>Altura (cm)</span><input class="nut-adj-inp" id="nutPersHeight" type="number" min="100" max="250" value="${clientData?.height||''}"></div>
+        <div class="nut-card-row"><span>Peso (kg)</span><input class="nut-adj-inp" id="nutPersWeight" type="number" min="30" max="300" step="0.1" value="${clientData?.weight||''}"></div>
+        <div class="nut-card-row"><span>Grasa corporal (%)</span><input class="nut-adj-inp" id="nutPersFat" type="number" min="3" max="60" step="0.1" value="${clientData?.body_fat||''}"></div>
+        <div class="nut-card-row"><span>Nivel actividad</span><select class="nut-adj-sel" id="nutPersActivity">${_nutParamOptions('activity', clientData?.activity?.id||clientData?.activity_id)}</select></div>
+        <div class="nut-card-row"><span>Objetivo</span><select class="nut-adj-sel" id="nutPersObjective">${_nutParamOptions('objective', clientData?.objective?.id||clientData?.objective_id)}</select></div>
+        <div class="nut-adj-btns"><button class="nut-adj-save" id="nutPersSaveBtn" onclick="saveNutPersonal()">Guardar</button></div>
+        `:`
         <div class="nut-card-row"><span>Género</span><span class="nut-card-val">${esc(clientData?.gender?.name||'—')}</span></div>
         <div class="nut-card-row"><span>Edad</span><span class="nut-card-val">${clientData?.age||'—'} años</span></div>
         <div class="nut-card-row"><span>Altura</span><span class="nut-card-val">${clientData?.height||'—'} cm</span></div>
@@ -5230,6 +5241,7 @@ function _renderNutUI() {
         <div class="nut-card-row"><span>Grasa corporal</span><span class="nut-card-val">${clientData?.body_fat?clientData.body_fat+'%':'—'}</span></div>
         <div class="nut-card-row"><span>Nivel actividad</span><span class="nut-card-val">${esc(clientData?.activity?.name||clientData?.level_activity?.name||'—')}</span></div>
         <div class="nut-card-row"><span>Objetivo</span><span class="nut-card-val">${esc(clientData?.objective?.name||'—')}</span></div>
+        `}
       </div>
       ${!macros?`
       <div class="nut-card">
@@ -5863,6 +5875,84 @@ async function saveNutChanges() {
     _renderNutUI();
   } catch { showToast('Error de conexión', 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
+}
+
+/* ── Inline edit mode for Datos personales ── */
+
+let _nutEditPersonal = false;
+let _nutParamOpts = null; // { gender:[{id,name}], activity:[...], objective:[...] }
+
+function _nutParamOptions(kind, selectedId) {
+  const opts = (_nutParamOpts && _nutParamOpts[kind]) || [];
+  return '<option value="">—</option>' + opts.map(o =>
+    `<option value="${o.id}"${o.id == selectedId ? ' selected' : ''}>${esc(o.name)}</option>`
+  ).join('');
+}
+
+async function _nutLoadParamOpts() {
+  if (_nutParamOpts) return;
+  const load = async (paramName) => {
+    try {
+      const r1 = await fetch(`${API}/parameters/search?search=${encodeURIComponent(paramName)}`, { headers: h() });
+      const j1 = await r1.json();
+      const params = j1.data || j1;
+      const param = Array.isArray(params) ? params.find(p => p.description?.toLowerCase() === paramName.toLowerCase()) : null;
+      if (!param) return [];
+      const r2 = await fetch(`${API}/parameters-detail/search?parameter_id=${param.id}`, { headers: h() });
+      const j2 = await r2.json();
+      const items = j2.data || j2;
+      return (Array.isArray(items) ? items : []).map(s => ({ id: s.id, name: s.description || s.name }));
+    } catch { return []; }
+  };
+  const [gender, activity, objective] = await Promise.all([
+    load('Genero'), load('Nivel de actividad'), load('Objetivo Usuario'),
+  ]);
+  _nutParamOpts = { gender, activity, objective };
+}
+
+async function openNutPersonal() {
+  await _nutLoadParamOpts();
+  _nutEditPersonal = true;
+  _renderNutUI();
+}
+
+function cancelNutPersonal() {
+  _nutEditPersonal = false;
+  _renderNutUI();
+}
+
+async function saveNutPersonal() {
+  const btn = document.getElementById('nutPersSaveBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const num = id => { const v = document.getElementById(id)?.value; return v !== '' && v != null ? parseFloat(v) : null; };
+  const sel = id => { const v = document.getElementById(id)?.value; return v ? parseInt(v) : null; };
+  const body = {};
+  const age = num('nutPersAge');         if (age != null) body.age = Math.round(age);
+  const height = num('nutPersHeight');   if (height != null) body.height = height;
+  const weight = num('nutPersWeight');   if (weight != null) body.weight = weight;
+  const fat = num('nutPersFat');         if (fat != null) body.body_fat = fat;
+  const genderId = sel('nutPersGender');       if (genderId) body.gender_id = genderId;
+  const activityId = sel('nutPersActivity');   if (activityId) body.activity_id = activityId;
+  const objectiveId = sel('nutPersObjective'); if (objectiveId) body.objective_id = objectiveId;
+  try {
+    const r = await fetch(`${API}/users/${clientId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json();
+    if (!r.ok) { showToast(j.detail || j.message || 'Error al guardar', 'error'); return; }
+    // Reflect locally so macros recalc without a reload
+    Object.assign(clientData, body);
+    const findOpt = (kind, id) => (_nutParamOpts?.[kind] || []).find(o => o.id === id) || null;
+    if (body.gender_id) clientData.gender = findOpt('gender', body.gender_id);
+    if (body.activity_id) clientData.activity = findOpt('activity', body.activity_id);
+    if (body.objective_id) clientData.objective = findOpt('objective', body.objective_id);
+    _nutEditPersonal = false;
+    _renderNutUI();
+    showToast('Datos personales guardados', 'success');
+  } catch { showToast('Error de conexión', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Guardar'; }
 }
 
 /* ── "Ajustar" edit mode for Tu meta diaria ── */

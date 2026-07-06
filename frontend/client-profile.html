@@ -621,6 +621,10 @@
     .nut-banner-badge{font-size:10px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.75);text-transform:uppercase;margin-bottom:4px;}
     .nut-banner-title{font-size:22px;font-weight:800;line-height:1.2;}
     .nut-banner-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;}
+    .nut-banner-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 12px;font-size:12px;color:#fff;font-weight:700;cursor:pointer;transition:.15s;}
+    .nut-banner-btn:hover{background:rgba(255,255,255,.3);}
+    .nut-banner-btn.danger{background:rgba(220,38,38,.35);border-color:rgba(255,255,255,.25);}
+    .nut-banner-btn.danger:hover{background:rgba(220,38,38,.55);}
     .nut-banner-stats{display:flex;gap:10px;flex-shrink:0;}
     .nut-stat-chip{background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;text-align:center;min-width:68px;}
     .nut-stat-chip-val{font-size:18px;font-weight:800;}
@@ -4383,7 +4387,8 @@ function _renderEntTrainingUI() {
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <button class="btn btn-ghost btn-sm" onclick="_downloadEntPdf()" style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
-        <button class="btn btn-primary btn-sm" onclick="openAssignRoutineModal()">Cambiar plan</button>
+        <button class="btn btn-primary btn-sm" onclick="changeEntPlan()">Cambiar plan</button>
+        <button class="btn btn-sm" onclick="removeEntPlan()" style="display:flex;align-items:center;gap:5px;background:#fff;border:1.5px solid #FECACA;color:#DC2626;border-radius:8px;font-weight:700;cursor:pointer;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar</button>
       </div>
     </div>
 
@@ -5176,6 +5181,10 @@ function _renderNutUI() {
         <div class="nut-banner-badge">Plan Activo</div>
         <div class="nut-banner-title">${esc(det.title || 'Plan nutricional')}</div>
         <div class="nut-banner-sub">${daysPerWeek} días · ${esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
+          <button class="nut-banner-btn danger" onclick="removeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
+        </div>
       </div>
       <div class="nut-banner-stats">
         <div class="nut-stat-chip"><div class="nut-stat-chip-val">${daysPerWeek}</div><div class="nut-stat-chip-lbl">días/sem</div></div>
@@ -6235,6 +6244,60 @@ function toggleLibrary(el){
 let _assignDiets = [], _selectedDietId = null;
 let _assignRoutines = [], _selectedRoutineId = null;
 
+/* ── Change / remove assigned plans ── */
+
+let _assignReplaceDietId = null;
+let _assignReplaceRoutineId = null;
+
+function changeNutPlan() {
+  _assignReplaceDietId = clientDiets[0]?.id || null;
+  openAssignDietModal();
+}
+
+async function removeNutPlan() {
+  if (!clientDiets[0]) return;
+  if (!confirm(`¿Eliminar el plan nutricional "${clientDiets[0].title || ''}" de este cliente? Esta acción no se puede deshacer.`)) return;
+  try {
+    const r = await fetch(`${API}/diets/${clientDiets[0].id}`, { method: 'DELETE', headers: h() });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { showToast(j.detail || j.message || 'Error al eliminar el plan', 'error'); return; }
+    _nutDetail = null; _nutDetailLoaded = false; _nutActiveDietIdx = 0;
+    try {
+      const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
+      const jd = await rd.json();
+      const arr = jd.data || [];
+      clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
+    } catch { clientDiets = []; }
+    showToast('Plan nutricional eliminado', 'success');
+    renderNutricionTab();
+    renderActivePlan();
+  } catch { showToast('Error de conexión', 'error'); }
+}
+
+function changeEntPlan() {
+  _assignReplaceRoutineId = clientRoutines[0]?.id || null;
+  openAssignRoutineModal();
+}
+
+async function removeEntPlan() {
+  if (!clientRoutines[0]) return;
+  if (!confirm(`¿Eliminar el plan de entrenamiento "${clientRoutines[0].name || ''}" de este cliente? Esta acción no se puede deshacer.`)) return;
+  try {
+    const r = await fetch(`${API}/routines/${clientRoutines[0].id}`, { method: 'DELETE', headers: h() });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { showToast(j.detail || j.message || 'Error al eliminar el plan', 'error'); return; }
+    try {
+      const rr = await fetch(`${API}/routines/client/${clientId}`, { headers: h() });
+      const jr = await rr.json();
+      clientRoutines = Array.isArray(jr.data) ? jr.data : [];
+    } catch { clientRoutines = []; }
+    _entDetailLoaded = false; _entSelectedDay = 0;
+    showToast('Plan de entrenamiento eliminado', 'success');
+    renderEntrenamientoTab();
+    renderActivePlan();
+  } catch { showToast('Error de conexión', 'error'); }
+}
+
 async function openAssignDietModal() {
   _selectedDietId = null;
   document.getElementById('assignDietError').textContent = '';
@@ -6256,6 +6319,7 @@ async function openAssignDietModal() {
 function closeAssignDietModal() {
   document.getElementById('assignDietOverlay').classList.remove('open');
   _selectedDietId = null;
+  _assignReplaceDietId = null;
 }
 
 function renderAssignDietList(diets) {
@@ -6308,6 +6372,11 @@ async function confirmAssignDiet() {
     });
     const j = await r.json();
     if (!r.ok) { document.getElementById('assignDietError').textContent = j.detail || j.message || 'Error al asignar'; return; }
+    // "Cambiar plan": remove the plan being replaced once the new one is assigned
+    if (_assignReplaceDietId && String(_assignReplaceDietId) !== String(j.data?.id || '')) {
+      try { await fetch(`${API}/diets/${_assignReplaceDietId}`, { method: 'DELETE', headers: h() }); } catch {}
+    }
+    _assignReplaceDietId = null;
     _nutDetailLoaded = false;
     _nutDetail = null;
     _nutActiveDietIdx = 0;
@@ -6362,6 +6431,7 @@ async function openAssignRoutineModal() {
 function closeAssignRoutineModal() {
   document.getElementById('assignRoutineOverlay').classList.remove('open');
   _selectedRoutineId = null;
+  _assignReplaceRoutineId = null;
 }
 
 function renderAssignRoutineList(routines) {
@@ -6413,6 +6483,11 @@ async function confirmAssignRoutine() {
     });
     const j = await r.json();
     if (!r.ok) { document.getElementById('assignRoutineError').textContent = j.detail || j.message || 'Error al asignar'; return; }
+    // "Cambiar plan": remove the plan being replaced once the new one is assigned
+    if (_assignReplaceRoutineId && String(_assignReplaceRoutineId) !== String(j.data?.id || '')) {
+      try { await fetch(`${API}/routines/${_assignReplaceRoutineId}`, { method: 'DELETE', headers: h() }); } catch {}
+    }
+    _assignReplaceRoutineId = null;
     closeAssignRoutineModal();
 
     // Send PDF to client email automatically

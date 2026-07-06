@@ -403,6 +403,11 @@ def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SU
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
+    # Detach references so FKs don't block the delete (history is kept)
+    from app.models.plan import PlanDelivery
+    from app.models.session_log import WorkoutSession
+    db.query(PlanDelivery).filter(PlanDelivery.routine_id == id).update({"routine_id": None})
+    db.query(WorkoutSession).filter(WorkoutSession.routine_id == id).update({"routine_id": None})
     db.delete(routine)
     db.commit()
     return send_response(None, "Rutina eliminada")

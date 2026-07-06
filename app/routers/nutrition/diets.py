@@ -304,6 +304,9 @@ def delete(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SU
     diet = _get_or_404(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
+    # Detach delivery records so the FK doesn't block the delete (history is kept)
+    from app.models.plan import PlanDelivery
+    db.query(PlanDelivery).filter(PlanDelivery.diet_id == id).update({"diet_id": None})
     db.delete(diet)
     db.commit()
     return send_response(None, "Dieta eliminada")

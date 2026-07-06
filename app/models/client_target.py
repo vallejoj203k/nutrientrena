@@ -16,6 +16,8 @@ class ClientTarget(Base):
     proteins = Column(Float, nullable=True)
     carbs = Column(Float, nullable=True)
     fats = Column(Float, nullable=True)
+    deficit = Column(Float, nullable=True)   # % below TDEE
+    surplus = Column(Float, nullable=True)   # % above TDEE
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

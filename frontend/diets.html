@@ -423,6 +423,15 @@
     .ca-section-label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;}
     .ca-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
     .ca-macro-grid-2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .ca-micro-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 22px;margin-top:6px;}
+    .ca-micro-col-head{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
+    .ca-micro-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:6px;}
+    .ca-micro-row label{font-size:12.5px;color:#374151;flex:1;min-width:0;}
+    .ca-micro-inp{display:flex;align-items:center;gap:4px;}
+    .ca-micro-inp input{width:68px;padding:5px 7px;border:1px solid #E5E7EB;border-radius:6px;font-size:12.5px;color:#111;outline:none;text-align:right;font-family:inherit;}
+    .ca-micro-inp input:focus{border-color:#4F46E5;}
+    .ca-micro-inp span{font-size:11px;color:#9CA3AF;width:20px;}
+    .ca-form-group{margin-top:14px;}
     .ca-micro-toggle{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;color:#6B7280;font-size:12px;font-weight:600;border:none;background:none;user-select:none;}
     .ca-micro-toggle:hover{color:#4F46E5;}
     .ca-micro-body{display:none;}
@@ -437,7 +446,7 @@
     .ca-error{color:#DC2626;font-size:12px;margin-top:8px;font-weight:600;}
     .ca-create-link{display:block;width:100%;padding:9px 11px;text-align:left;font-size:12px;font-weight:600;color:#4F46E5;background:#EEF2FF;border:none;border-top:1px solid #E5E7EB;cursor:pointer;transition:.15s;}
     .ca-create-link:hover{background:#E0E7FF;}
-    @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-macro-grid-2{grid-template-columns:1fr 1fr;}.ca-micro-grid{grid-template-columns:1fr 1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
+    @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-macro-grid-2{grid-template-columns:1fr 1fr;}.ca-micro-grid{grid-template-columns:1fr 1fr;}.ca-micro-cols{grid-template-columns:1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
 
     /* ── Mobile hamburger ── */
     .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;flex-shrink:0;}
@@ -2449,7 +2458,10 @@ function openCreateAlimentModal(rid) {
     sel.innerHTML = '<option value="">Seleccionar...</option>';
     _alimentGroups.forEach(function(g) { sel.innerHTML += '<option value="' + g.id + '">' + esc(g.name) + '</option>'; });
   });
-  ['ca_name','ca_brand','ca_calories','ca_proteins','ca_carbs','ca_fats','ca_fiber','ca_sugars','ca_satfats','ca_sodium','ca_potassium','ca_calcium','ca_iron','ca_vit_c','ca_cholesterol'].forEach(function(id) {
+  ['ca_name','ca_brand','ca_calories','ca_proteins','ca_carbs','ca_fats','ca_fiber','ca_sugars','ca_satfats','ca_comments',
+   'ca_vita','ca_vitb1','ca_vitb2','ca_vitb3','ca_vitb5','ca_vitb6','ca_vitb9','ca_vitb12','ca_vitc','ca_vitd','ca_vite','ca_vitk',
+   'ca_calcium','ca_iron','ca_magnesium','ca_phosphorus','ca_potassium','ca_sodium','ca_zinc','ca_selenium','ca_copper','ca_manganese',
+   'ca_cholesterol','ca_monofats','ca_polifats','ca_water','ca_glycemic'].forEach(function(id) {
     var el = document.getElementById(id); if (el) el.value = '';
   });
   var qty = document.getElementById('ca_quantity'); if (qty) qty.value = '100';
@@ -2474,15 +2486,20 @@ async function submitCreateAliment() {
   if(errEl) errEl.textContent = '';
   var toF = function(id) { var v = parseFloat((document.getElementById(id)||{}).value); return isNaN(v) ? null : v; };
   var description = {
+    vita: toF('ca_vita'), vitb1: toF('ca_vitb1'), vitb2: toF('ca_vitb2'), vitb3: toF('ca_vitb3'),
+    vitb5: toF('ca_vitb5'), vitb6: toF('ca_vitb6'), vitb9: toF('ca_vitb9'), vitb12: toF('ca_vitb12'),
+    vitc: toF('ca_vitc'), vitd: toF('ca_vitd'), vite: toF('ca_vite'), vitk: toF('ca_vitk'),
+    calcium: toF('ca_calcium'), iron: toF('ca_iron'), magnesium: toF('ca_magnesium'),
+    phosphorus: toF('ca_phosphorus'), potassium: toF('ca_potassium'), sodium: toF('ca_sodium'),
+    zinc: toF('ca_zinc'), selenium: toF('ca_selenium'), copper: toF('ca_copper'), manganese: toF('ca_manganese'),
     fiber: toF('ca_fiber'),
     sugars: toF('ca_sugars'),
     saturated_fats: toF('ca_satfats'),
-    sodium: toF('ca_sodium'),
-    potassium: toF('ca_potassium'),
-    calcium: toF('ca_calcium'),
-    iron: toF('ca_iron'),
-    vitc: toF('ca_vit_c'),
+    mono_saturated_fats: toF('ca_monofats'),
+    poli_saturated_fats: toF('ca_polifats'),
     cholesterol: toF('ca_cholesterol'),
+    water: toF('ca_water'),
+    glycemic_index: toF('ca_glycemic'),
   };
   var hasDesc = Object.keys(description).some(function(k){ return description[k] != null; });
   var body = {
@@ -2495,6 +2512,7 @@ async function submitCreateAliment() {
     proteins: toF('ca_proteins'),
     carbohydrates: toF('ca_carbs'),
     fats: toF('ca_fats'),
+    comments: (document.getElementById('ca_comments')?.value || '').trim() || null,
     description: hasDesc ? description : null,
   };
   try {
@@ -2580,11 +2598,14 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
         <div>
           <label class="ca-label">Unidad</label>
           <select id="ca_unit" class="ca-input">
-            <option value="g">g</option>
-            <option value="kg">kg</option>
+            <option value="g">g (gramos)</option>
             <option value="ml">ml</option>
-            <option value="l">l</option>
-            <option value="unidad">unidad</option>
+            <option value="oz">oz</option>
+            <option value="unidad">Unidad</option>
+            <option value="taza">Taza</option>
+            <option value="cda">Cucharada</option>
+            <option value="cdta">Cucharadita</option>
+            <option value="porcion">Porción</option>
           </select>
         </div>
       </div>
@@ -2601,19 +2622,53 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
         <div><label class="ca-label">Grasas saturadas (g)</label><input id="ca_satfats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
       </div>
       <button class="ca-micro-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.ca-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5c0 2.1-1.3 3.9-3.1 4.7C16.1 12.9 18 15.3 18 18v1H6v-1c0-2.7 1.9-5.1 4.1-6.3A5 5 0 0 1 12 2z"/></svg>
         Micronutrientes <span style="color:#9CA3AF;font-weight:400;">(opcional — útil para planes con patologías)</span>
         <span class="ca-arr" style="margin-left:auto;">▼</span>
       </button>
       <div class="ca-micro-body">
-        <div class="ca-micro-grid">
-          <div><label class="ca-label">Sodio (mg)</label><input id="ca_sodium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
-          <div><label class="ca-label">Potasio (mg)</label><input id="ca_potassium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
-          <div><label class="ca-label">Calcio (mg)</label><input id="ca_calcium" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
-          <div><label class="ca-label">Hierro (mg)</label><input id="ca_iron" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
-          <div><label class="ca-label">Vitamina C (mg)</label><input id="ca_vit_c" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
-          <div><label class="ca-label">Colesterol (mg)</label><input id="ca_cholesterol" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div class="ca-micro-cols">
+          <div>
+            <div class="ca-micro-col-head">Vitaminas</div>
+            <div class="ca-micro-row"><label>Vitamina A</label><div class="ca-micro-inp"><input id="ca_vita" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B1</label><div class="ca-micro-inp"><input id="ca_vitb1" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B2</label><div class="ca-micro-inp"><input id="ca_vitb2" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B3</label><div class="ca-micro-inp"><input id="ca_vitb3" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B5</label><div class="ca-micro-inp"><input id="ca_vitb5" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B6</label><div class="ca-micro-inp"><input id="ca_vitb6" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B9</label><div class="ca-micro-inp"><input id="ca_vitb9" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B12</label><div class="ca-micro-inp"><input id="ca_vitb12" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina C</label><div class="ca-micro-inp"><input id="ca_vitc" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina D</label><div class="ca-micro-inp"><input id="ca_vitd" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina E</label><div class="ca-micro-inp"><input id="ca_vite" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina K</label><div class="ca-micro-inp"><input id="ca_vitk" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          </div>
+          <div>
+            <div class="ca-micro-col-head">Minerales</div>
+            <div class="ca-micro-row"><label>Calcio</label><div class="ca-micro-inp"><input id="ca_calcium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Hierro</label><div class="ca-micro-inp"><input id="ca_iron" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Magnesio</label><div class="ca-micro-inp"><input id="ca_magnesium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Fósforo</label><div class="ca-micro-inp"><input id="ca_phosphorus" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Potasio</label><div class="ca-micro-inp"><input id="ca_potassium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Sodio</label><div class="ca-micro-inp"><input id="ca_sodium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Zinc</label><div class="ca-micro-inp"><input id="ca_zinc" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Selenio</label><div class="ca-micro-inp"><input id="ca_selenium" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Cobre</label><div class="ca-micro-inp"><input id="ca_copper" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Manganeso</label><div class="ca-micro-inp"><input id="ca_manganese" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          </div>
+          <div>
+            <div class="ca-micro-col-head">Otros</div>
+            <div class="ca-micro-row"><label>Colesterol</label><div class="ca-micro-inp"><input id="ca_cholesterol" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>G. monoinsaturadas</label><div class="ca-micro-inp"><input id="ca_monofats" type="number" step="0.01" min="0" placeholder="0"/><span>g</span></div></div>
+            <div class="ca-micro-row"><label>G. poliinsaturadas</label><div class="ca-micro-inp"><input id="ca_polifats" type="number" step="0.01" min="0" placeholder="0"/><span>g</span></div></div>
+            <div class="ca-micro-row"><label>Agua</label><div class="ca-micro-inp"><input id="ca_water" type="number" step="0.1" min="0" placeholder="0"/><span>g</span></div></div>
+            <div class="ca-micro-row"><label>Índice glucémico</label><div class="ca-micro-inp"><input id="ca_glycemic" type="number" step="1" min="0" placeholder="0"/><span></span></div></div>
+          </div>
         </div>
+      </div>
+      <div class="ca-form-group">
+        <label class="ca-label">Comentarios</label>
+        <textarea id="ca_comments" class="ca-input" placeholder="Notas adicionales…" maxlength="500" rows="2" style="resize:vertical;"></textarea>
       </div>
       <div class="ca-error" id="ca_error"></div>
       <div class="ca-actions">

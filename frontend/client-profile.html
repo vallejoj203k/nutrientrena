@@ -6255,23 +6255,27 @@ function changeNutPlan() {
 }
 
 async function removeNutPlan() {
-  if (!clientDiets[0]) return;
-  if (!confirm(`¿Eliminar el plan nutricional "${clientDiets[0].title || ''}" de este cliente? Esta acción no se puede deshacer.`)) return;
-  try {
-    const r = await fetch(`${API}/diets/${clientDiets[0].id}`, { method: 'DELETE', headers: h() });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) { showToast(j.detail || j.message || 'Error al eliminar el plan', 'error'); return; }
-    _nutDetail = null; _nutDetailLoaded = false; _nutActiveDietIdx = 0;
+  if (!clientDiets.length) return;
+  const extra = clientDiets.length > 1 ? ` (y ${clientDiets.length - 1} plan${clientDiets.length > 2 ? 'es' : ''} anterior${clientDiets.length > 2 ? 'es' : ''} acumulado${clientDiets.length > 2 ? 's' : ''})` : '';
+  if (!confirm(`¿Eliminar el plan nutricional "${clientDiets[0].title || ''}"${extra} de este cliente? Esta acción no se puede deshacer.`)) return;
+  let failed = 0;
+  for (const d of clientDiets) {
     try {
-      const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
-      const jd = await rd.json();
-      const arr = jd.data || [];
-      clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
-    } catch { clientDiets = []; }
-    showToast('Plan nutricional eliminado', 'success');
-    renderNutricionTab();
-    renderActivePlan();
-  } catch { showToast('Error de conexión', 'error'); }
+      const r = await fetch(`${API}/diets/${d.id}`, { method: 'DELETE', headers: h() });
+      if (!r.ok) failed++;
+    } catch { failed++; }
+  }
+  _nutDetail = null; _nutDetailLoaded = false; _nutActiveDietIdx = 0;
+  try {
+    const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
+    const jd = await rd.json();
+    const arr = jd.data || [];
+    clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
+  } catch { clientDiets = []; }
+  if (failed) showToast(`No se pudieron eliminar ${failed} plan(es)`, 'error');
+  else showToast('Plan nutricional eliminado', 'success');
+  renderNutricionTab();
+  renderActivePlan();
 }
 
 function changeEntPlan() {
@@ -6280,22 +6284,26 @@ function changeEntPlan() {
 }
 
 async function removeEntPlan() {
-  if (!clientRoutines[0]) return;
-  if (!confirm(`¿Eliminar el plan de entrenamiento "${clientRoutines[0].name || ''}" de este cliente? Esta acción no se puede deshacer.`)) return;
-  try {
-    const r = await fetch(`${API}/routines/${clientRoutines[0].id}`, { method: 'DELETE', headers: h() });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) { showToast(j.detail || j.message || 'Error al eliminar el plan', 'error'); return; }
+  if (!clientRoutines.length) return;
+  const extra = clientRoutines.length > 1 ? ` (y ${clientRoutines.length - 1} plan${clientRoutines.length > 2 ? 'es' : ''} anterior${clientRoutines.length > 2 ? 'es' : ''} acumulado${clientRoutines.length > 2 ? 's' : ''})` : '';
+  if (!confirm(`¿Eliminar el plan de entrenamiento "${clientRoutines[0].name || ''}"${extra} de este cliente? Esta acción no se puede deshacer.`)) return;
+  let failed = 0;
+  for (const rt of clientRoutines) {
     try {
-      const rr = await fetch(`${API}/routines/client/${clientId}`, { headers: h() });
-      const jr = await rr.json();
-      clientRoutines = Array.isArray(jr.data) ? jr.data : [];
-    } catch { clientRoutines = []; }
-    _entDetailLoaded = false; _entSelectedDay = 0;
-    showToast('Plan de entrenamiento eliminado', 'success');
-    renderEntrenamientoTab();
-    renderActivePlan();
-  } catch { showToast('Error de conexión', 'error'); }
+      const r = await fetch(`${API}/routines/${rt.id}`, { method: 'DELETE', headers: h() });
+      if (!r.ok) failed++;
+    } catch { failed++; }
+  }
+  try {
+    const rr = await fetch(`${API}/routines/client/${clientId}`, { headers: h() });
+    const jr = await rr.json();
+    clientRoutines = Array.isArray(jr.data) ? jr.data : [];
+  } catch { clientRoutines = []; }
+  _entDetailLoaded = false; _entSelectedDay = 0;
+  if (failed) showToast(`No se pudieron eliminar ${failed} plan(es)`, 'error');
+  else showToast('Plan de entrenamiento eliminado', 'success');
+  renderEntrenamientoTab();
+  renderActivePlan();
 }
 
 async function openAssignDietModal() {

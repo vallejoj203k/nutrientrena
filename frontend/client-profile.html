@@ -1005,6 +1005,44 @@
 .ph2-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
 .ph2-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#6B7280;}
 
+/* ── Persistent client panel (top of every section) ── */
+.cp-panel{display:grid;grid-template-columns:340px 1fr;gap:16px;padding:20px 24px 8px;align-items:start;}
+@media(max-width:960px){.cp-panel{grid-template-columns:1fr;}}
+.cp-id-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;}
+.cp-id-head{background:linear-gradient(135deg,#7C3AED 0%,#9333EA 100%);padding:22px 20px;text-align:center;color:#fff;}
+.cp-avatar{width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;margin:0 auto 10px;cursor:pointer;overflow:hidden;border:2px solid rgba(255,255,255,.4);}
+.cp-avatar img{width:100%;height:100%;object-fit:cover;}
+.cp-id-name{font-size:18px;font-weight:800;line-height:1.2;}
+.cp-id-obj{font-size:12px;opacity:.85;margin-top:2px;}
+.cp-id-body{padding:6px 18px 14px;}
+.cp-id-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #F3F4F6;font-size:13px;}
+.cp-id-row:last-child{border-bottom:none;}
+.cp-id-k{color:#6B7280;}
+.cp-id-v{color:#111827;font-weight:700;text-align:right;display:flex;align-items:center;gap:8px;}
+.cp-weight-add{width:22px;height:22px;border-radius:50%;background:#22C55E;color:#fff;border:none;cursor:pointer;font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;}
+.cp-weight-add:hover{background:#16A34A;}
+.cp-right{display:flex;flex-direction:column;gap:14px;}
+.cp-dates{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:640px){.cp-dates{grid-template-columns:1fr;}}
+.cp-date-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;text-align:center;}
+.cp-date-val{font-size:19px;font-weight:800;color:#7C3AED;line-height:1.1;}
+.cp-date-lbl{font-size:12px;color:#6B7280;margin-top:5px;}
+.cp-chart-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;}
+.cp-chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.cp-chart-title{font-size:14px;font-weight:700;color:#111827;}
+.cp-chart-link{font-size:12px;font-weight:600;color:#7C3AED;background:none;border:none;cursor:pointer;}
+.cp-chart-link:hover{text-decoration:underline;}
+.cp-chart-legend{display:flex;gap:12px;font-size:11px;color:#6B7280;}
+.cp-legend-item{display:flex;align-items:center;gap:5px;}
+.cp-dot-green{width:18px;height:2px;background:#22C55E;border-radius:1px;}
+.cp-dot-purple{width:18px;height:0;border-top:2px dashed #7C3AED;}
+.cp-progress{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px 18px;}
+.cp-progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px;}
+.cp-progress-lbl{color:#6B7280;font-weight:600;}
+.cp-progress-pct{color:#22C55E;font-weight:800;}
+.cp-progress-bar{height:8px;background:#F3F4F6;border-radius:20px;overflow:hidden;}
+.cp-progress-fill{height:100%;background:linear-gradient(90deg,#22C55E,#16A34A);border-radius:20px;transition:width .4s;}
+
 .prog-section{background:#fff;border-bottom:1px solid #E5E7EB;padding:12px 24px 16px;flex-shrink:0;}
 .prog-boxes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px;}
 .prog-box{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;}
@@ -1252,8 +1290,8 @@
 
   <!-- Real content (hidden until loaded) -->
   <div id="profileArea" style="display:none;flex:1;overflow:hidden;display:none;flex-direction:column;">
-    <!-- Profile header v2 -->
-    <div class="ph2" id="ph2Wrap">
+    <!-- Profile header v2 (hidden: absorbed into the persistent client panel) -->
+    <div class="ph2" id="ph2Wrap" style="display:none;">
       <div class="ph2-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()" title="Cambiar foto">
         <div class="ph2-avatar-overlay">
           <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -1331,19 +1369,11 @@
     <!-- Tab panes -->
     <div class="content">
 
+      <!-- ── Persistent client panel (visible on every section) ── -->
+      <div class="cp-panel" id="clientPanel"></div>
+
       <!-- ── RESUMEN ── -->
       <div class="tab-pane active" id="tab-resumen">
-        <!-- Weight chart -->
-        <div class="weight-chart-section" id="weightChartSection">
-          <div class="wc-header">
-            <span class="wc-title">Seguimiento de peso · Proyección vs Real</span>
-            <div class="wc-legend">
-              <div class="wc-legend-item"><div class="wc-dot-green"></div> Real</div>
-              <div class="wc-legend-item"><div class="wc-dot-purple"></div> Objetivo</div>
-            </div>
-          </div>
-          <div id="weightChartContainer" style="height:180px;"></div>
-        </div>
         <div class="res-new-grid">
           <div id="resDatosCard"></div>
           <div class="res-right-col">
@@ -1352,6 +1382,8 @@
           </div>
         </div>
         <!-- Hidden legacy IDs used by other code paths -->
+        <div style="display:none;" id="weightChartSection"></div>
+        <div style="display:none;" id="weightChartContainerOld"></div>
         <div style="display:none;" id="resStats"></div>
         <div style="display:none;" id="resChartCard"></div>
         <div style="display:none;" id="resObjCard"></div>
@@ -1774,6 +1806,9 @@ function renderAll() {
   const ph2Sessions = document.getElementById('ph2Sessions');
   if (ph2Sessions && deliveries.length) { ph2Sessions.style.display='flex'; ph2Sessions.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ${deliveries.length} sesiones`; }
 
+  // ── Persistent client panel (top of every section) ──
+  _renderClientPanel();
+
   // ── New Resumen tab ──
   renderResumenTab();
 
@@ -1823,8 +1858,84 @@ function renderResumenTab() {
   _loadResumenExtras();
 }
 
-/* ── Program progress section ── */
+/* ── Persistent client panel (top of every section) ── */
+function _renderClientPanel() {
+  const el = document.getElementById('clientPanel');
+  if (!el || !clientData) return;
+  const c = clientData;
+  const name = `${c.first_name || c.name || ''} ${c.last_name || ''}`.trim() || 'Sin nombre';
+  const initials = name.split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('') || 'C';
+  const obj = c.objective?.name || c.objective?.description || c.objective_name || c.goal || '—';
+  const pesoIni = c.weight ? `${c.weight} kg` : '—';
+  const pesoAct = (checkins[0]?.weight ?? c.weight) != null ? `${checkins[0]?.weight ?? c.weight} kg` : '—';
+  const country = c.country?.name || c.country_name || c.country_code || '—';
+  const fmtD = d => d ? new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  const start = c.start_date || c.fecha_inicio, end = c.end_date || c.fecha_fin;
+
+  let weekStr = '—', progPct = 0;
+  if (start) {
+    const startD = new Date(start), now = new Date();
+    const weeksDone = Math.floor((now - startD) / (7 * 86400000)) + 1;
+    if (end) {
+      const endD = new Date(end);
+      const totalWeeks = Math.max(1, Math.round((endD - startD) / (7 * 86400000)));
+      weekStr = `${Math.max(0, weeksDone)} / ${totalWeeks}`;
+      progPct = endD <= now ? 100 : Math.max(0, Math.min(100, Math.round(((now - startD) / (endD - startD)) * 100)));
+    } else {
+      weekStr = String(Math.max(0, weeksDone));
+    }
+  }
+
+  const avatarInner = (c.photo || c.photo_url) ? `<img src="${esc(c.photo || c.photo_url)}" alt="${esc(name)}"/>` : esc(initials);
+
+  el.innerHTML = `
+    <div class="cp-id-card">
+      <div class="cp-id-head">
+        <div class="cp-avatar" onclick="document.getElementById('avatarInput').click()" title="Cambiar foto">${avatarInner}</div>
+        <div class="cp-id-name">${esc(name)}</div>
+        <div class="cp-id-obj">${esc(obj)}</div>
+      </div>
+      <div class="cp-id-body">
+        <div class="cp-id-row"><span class="cp-id-k">Correo</span><span class="cp-id-v">${esc(c.email || '—')}</span></div>
+        <div class="cp-id-row"><span class="cp-id-k">Género</span><span class="cp-id-v">${esc(c.gender?.name || c.gender?.description || '—')}</span></div>
+        <div class="cp-id-row"><span class="cp-id-k">Peso inicial</span><span class="cp-id-v">${pesoIni}</span></div>
+        <div class="cp-id-row"><span class="cp-id-k">Peso actual</span><span class="cp-id-v">${pesoAct}<button class="cp-weight-add" onclick="showTab('progreso');renderProgresoTab&&renderProgresoTab();" title="Registrar peso">+</button></span></div>
+        <div class="cp-id-row"><span class="cp-id-k">Altura</span><span class="cp-id-v">${c.height ? c.height + ' cm' : '—'}</span></div>
+        <div class="cp-id-row"><span class="cp-id-k">País</span><span class="cp-id-v">${esc(country)}</span></div>
+        <div class="cp-id-row"><span class="cp-id-k">Teléfono</span><span class="cp-id-v">${esc(c.phone || '—')}</span></div>
+      </div>
+    </div>
+    <div class="cp-right">
+      <div class="cp-dates">
+        <div class="cp-date-card"><div class="cp-date-val">${fmtD(start)}</div><div class="cp-date-lbl">Fecha de inicio</div></div>
+        <div class="cp-date-card"><div class="cp-date-val">${weekStr}</div><div class="cp-date-lbl">Semanas transcurridas</div></div>
+        <div class="cp-date-card"><div class="cp-date-val">${fmtD(end)}</div><div class="cp-date-lbl">Fecha de fin</div></div>
+      </div>
+      <div class="cp-chart-card">
+        <div class="cp-chart-head">
+          <span class="cp-chart-title">Seguimiento de peso · Real vs Objetivo</span>
+          <button class="cp-chart-link" onclick="showTab('progreso');renderProgresoTab&&renderProgresoTab();">Editar en Progreso →</button>
+        </div>
+        <div class="cp-chart-legend" style="margin-bottom:8px;">
+          <span class="cp-legend-item"><span class="cp-dot-green"></span> Real</span>
+          <span class="cp-legend-item"><span class="cp-dot-purple"></span> Objetivo</span>
+        </div>
+        <div id="weightChartContainer" style="height:180px;"></div>
+      </div>
+      <div class="cp-progress">
+        <div class="cp-progress-top"><span class="cp-progress-lbl">Progreso del programa</span><span class="cp-progress-pct">${progPct}%</span></div>
+        <div class="cp-progress-bar"><div class="cp-progress-fill" style="width:${progPct}%;"></div></div>
+      </div>
+    </div>`;
+
+  _renderWeightChart();
+}
+
+/* ── Program progress section (legacy — replaced by the persistent panel) ── */
 function _renderProgSection() {
+  return; // progress now lives in the persistent client panel
+}
+function _renderProgSectionLegacy() {
   const c = clientData;
   const start = c.start_date || c.fecha_inicio;
   const end   = c.end_date   || c.fecha_fin;

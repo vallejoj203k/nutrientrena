@@ -11,6 +11,8 @@ class UserCreateRequest(BaseModel):
     phone: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None
+    age: Optional[int] = None
+    body_fat: Optional[float] = None
     occupation: Optional[str] = None
     country_code: Optional[str] = None
     gender_id: Optional[int] = None
@@ -46,6 +48,8 @@ class UserUpdateRequest(BaseModel):
     phone: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None
+    age: Optional[int] = None
+    body_fat: Optional[float] = None
     occupation: Optional[str] = None
     country_code: Optional[str] = None
     gender_id: Optional[int] = None
@@ -114,6 +118,8 @@ class UserDetailOut(BaseModel):
     phone: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None
+    age: Optional[int] = None
+    body_fat: Optional[float] = None
     occupation: Optional[str] = None
     country_code: Optional[str] = None
     gender_id: Optional[int] = None

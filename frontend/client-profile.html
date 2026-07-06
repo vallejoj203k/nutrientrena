@@ -4389,7 +4389,7 @@ function _renderEntTrainingUI() {
           <h2 style="font-size:26px;font-weight:900;margin:0 0 4px;line-height:1.1;">${esc(r.name)}</h2>
           <p style="margin:0;opacity:.75;font-size:13px;">${chips}</p>
           <div class="plan-btn-row">
-            <button class="nut-banner-btn" onclick="_downloadEntPdf()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
+            <button class="nut-banner-btn" onclick="_downloadEntPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
             <button class="nut-banner-btn" onclick="changeEntPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
             <button class="nut-banner-btn danger" onclick="removeEntPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
           </div>
@@ -4519,16 +4519,47 @@ function selectEntDay(idx) {
   if (content) content.innerHTML = _renderEntDayContent(days[idx], idx);
 }
 
-function _downloadEntPdf() {
-  const r = clientRoutines[0];
-  if (!r || !r.id) { showToast('Sin rutina asignada', 'error'); return; }
-  window.open(`${API}/routines/${r.id}/pdf`, '_blank');
+/* Downloads an authenticated PDF: window.open can't send the bearer token,
+   so we fetch the blob with the auth header and trigger a save. */
+async function _downloadPlanPdf(url, filename, btn) {
+  const label = btn ? btn.innerHTML : null;
+  if (btn) { btn.disabled = true; btn.innerHTML = 'Generando PDF…'; }
+  try {
+    const r = await fetch(url, { headers: h() });
+    if (!r.ok) {
+      let msg = 'No se pudo generar el PDF';
+      try { const j = await r.json(); msg = j.detail || j.message || msg; } catch {}
+      showToast(msg, 'error');
+      return;
+    }
+    const blob = await r.blob();
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(objUrl), 1000);
+  } catch {
+    showToast('Error de conexión al generar el PDF', 'error');
+  } finally {
+    if (btn && label !== null) { btn.disabled = false; btn.innerHTML = label; }
+  }
 }
 
-function _downloadNutPdf() {
+function _downloadEntPdf(ev) {
+  const r = clientRoutines[0];
+  if (!r || !r.id) { showToast('Sin rutina asignada', 'error'); return; }
+  const name = (r.name || 'rutina').replace(/\s+/g, '_').toLowerCase();
+  _downloadPlanPdf(`${API}/routines/${r.id}/pdf`, `${name}.pdf`, ev?.currentTarget);
+}
+
+function _downloadNutPdf(ev) {
   const d = clientDiets[0];
   if (!d || !d.id) { showToast('Sin dieta asignada', 'error'); return; }
-  window.open(`${API}/diets/${d.id}/pdf`, '_blank');
+  const name = (d.title || 'dieta').replace(/\s+/g, '_').toLowerCase();
+  _downloadPlanPdf(`${API}/diets/${d.id}/pdf`, `${name}.pdf`, ev?.currentTarget);
 }
 
 /* ══════════════════════════════════════════════
@@ -5182,7 +5213,7 @@ function _renderNutUI() {
         <div class="nut-banner-title">${esc(det.title || 'Plan nutricional')}</div>
         <div class="nut-banner-sub">${daysPerWeek} días · ${esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
         <div class="plan-btn-row">
-          <button class="nut-banner-btn" onclick="_downloadNutPdf()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
+          <button class="nut-banner-btn" onclick="_downloadNutPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
           <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
           <button class="nut-banner-btn danger" onclick="removeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
         </div>

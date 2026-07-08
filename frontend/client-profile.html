@@ -1087,6 +1087,36 @@
 .res-action-btn.warn{background:#EF4444;}
 .res-action-btn.warn:hover{background:#DC2626;}
 
+/* ── Resumen v2 (image-2 layout) ── */
+.res-obj-sel{width:100%;padding:11px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;color:#374151;background:#F9FAFB;outline:none;cursor:pointer;font-family:inherit;}
+.res-obj-sel:focus{border-color:#7C3AED;background:#fff;}
+.res-plan-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;}
+.res-plan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.res-plan-eyebrow{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;}
+.res-plan-link{background:none;border:none;color:#7C3AED;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.res-plan-link:hover{text-decoration:underline;}
+.res-plan-name{font-size:17px;font-weight:800;color:#111827;margin-top:8px;line-height:1.25;}
+.res-plan-price{font-size:14px;color:#6B7280;margin-top:6px;}
+.res-plan-price b{font-size:22px;font-weight:900;color:#7C3AED;}
+.res-plan-price span{font-size:13px;}
+.res-plan-badge{display:inline-block;margin-top:12px;background:#DCFCE7;color:#16A34A;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;}
+.restr-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:20px 22px;}
+.restr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;}
+.restr-title{font-size:16px;font-weight:800;color:#111827;}
+.restr-sub{font-size:13px;color:#9CA3AF;margin-top:2px;}
+.restr-edit-btn{flex-shrink:0;border:1.5px solid #E5E7EB;background:#fff;color:#374151;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
+.restr-edit-btn:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF;}
+.restr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px 18px;}
+.restr-col-head{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:9px;}
+.restr-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.restr-chip{font-size:12px;font-weight:600;padding:4px 11px;border-radius:20px;}
+.restr-chip.red{background:#FEE2E2;color:#DC2626;}
+.restr-chip.amber{background:#FEF3C7;color:#D97706;}
+.restr-chip.gray{background:#F3F4F6;color:#6B7280;}
+.restr-chip.blue{background:#DBEAFE;color:#2563EB;}
+.restr-chip.green{background:#DCFCE7;color:#16A34A;}
+.restr-empty{font-size:13px;color:#D1D5DB;}
+
 /* Progreso sub-tabs */
 .pg-subtabs-bar{display:flex;gap:2px;padding:12px 24px 0;background:#fff;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
 .pg-stab{padding:8px 16px;border:none;background:none;font-size:13px;font-weight:500;color:#6B7280;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:.15s;}
@@ -1377,11 +1407,13 @@
         <div class="res-new-grid">
           <div id="resDatosCard"></div>
           <div class="res-right-col">
+            <div id="resPlanCard"></div>
             <div id="resStatsCard" class="res-stats-card"></div>
-            <div id="resActionsCard" class="res-actions-card"></div>
           </div>
         </div>
+        <div id="resRestrCard" style="margin-top:16px;"></div>
         <!-- Hidden legacy IDs used by other code paths -->
+        <div style="display:none;" id="resActionsCard"></div>
         <div style="display:none;" id="weightChartSection"></div>
         <div style="display:none;" id="weightChartContainerOld"></div>
         <div style="display:none;" id="resStats"></div>
@@ -1526,6 +1558,21 @@
 </div>
 
 <!-- ── Assign Diet Modal ── -->
+<!-- ── Restricciones y preferencias Modal ── -->
+<div class="modal-overlay" id="restrModalOverlay" onclick="if(event.target===this)closeRestrModal()">
+  <div class="modal" style="width:480px;">
+    <div class="modal-head">
+      <h2>Restricciones y preferencias</h2>
+      <button class="modal-close" onclick="closeRestrModal()">×</button>
+    </div>
+    <div class="modal-body" id="restrModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeRestrModal()">Cancelar</button>
+      <button class="btn btn-primary" id="restrSaveBtn" onclick="saveRestrModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="assignDietOverlay" onclick="if(event.target===this)closeAssignDietModal()">
   <div class="modal" style="width:520px;">
     <div class="modal-head">
@@ -1850,9 +1897,11 @@ function renderAll() {
 
 /* ── Resumen tab ── */
 function renderResumenTab() {
+  _nutLoadParamOpts().then(() => _renderResDatos());
   _renderResDatos();
+  _renderResPlan();
   _renderResStatsNew();
-  _renderResActionsNew();
+  _renderResRestr();
   _renderProgSection();
   _renderWeightChart();
   _loadResumenExtras();
@@ -2004,32 +2053,70 @@ function _renderWeightChart() {
   </svg>`;
 }
 
-/* ── Resumen: datos del cliente ── */
+/* ── Resumen: datos del cliente (image-2 layout) ── */
 function _renderResDatos() {
   const el=document.getElementById('resDatosCard');
   if(!el) return;
   const c=clientData;
-  const objName=c.objective_name||c.objective?.description||c.goal||'—';
-  const planName=c.plan_name||(clientDiets[0]?.title)||(clientDiets[0]?.name)||'—';
+  const objName=c.objective?.name||c.objective?.description||c.objective_name||c.goal||'—';
   const start=c.start_date||c.fecha_inicio;
   const end=c.end_date||c.fecha_fin;
   const fmtD=d=>d?new Date(d).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}):'—';
-  const peso=(checkins[0]?.weight??c.weight)?`${checkins[0]?.weight??c.weight} kg`:'—';
-  const precio=c.precio?`€${Number(c.precio).toFixed(0)}`:'—';
-  const sesiones=deliveries.length||checkins.length;
+  const peso=(checkins[0]?.weight??c.weight)!=null?`${checkins[0]?.weight??c.weight} kg`:'—';
+  const sesiones=deliveries.length||checkins.length||0;
+  const objOpts=(_nutParamOpts?.objective||[]).map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join('');
   el.innerHTML=`<div class="res-datos-card">
     <div class="res-datos-head">Datos del cliente</div>
-    <div class="res-datos-row"><span class="res-datos-key">Objetivo</span><span class="res-datos-val">${esc(objName)}</span></div>
-    <div class="res-datos-row"><span class="res-datos-key">Plan</span><span class="res-datos-val">${esc(planName)}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Objetivo actual</span><span class="res-datos-val">${esc(objName)}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Inicio</span><span class="res-datos-val">${fmtD(start)}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Fin programa</span><span class="res-datos-val">${fmtD(end)}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Peso</span><span class="res-datos-val">${peso}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Sesiones</span><span class="res-datos-val">${sesiones}</span></div>
-    <div class="res-datos-row"><span class="res-datos-key">Precio</span><span class="res-datos-val">${precio}</span></div>
+    <div style="padding:14px 16px 16px;">
+      <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">Cambiar objetivo (nueva etapa)</div>
+      <select class="res-obj-sel" id="resObjSel" onchange="changeClientObjective(this.value)">
+        <option value="">Selecciona nuevo objetivo…</option>${objOpts}
+      </select>
+    </div>
   </div>`;
 }
 
-/* ── Resumen: activity stats ── */
+async function changeClientObjective(objId) {
+  if (!objId) return;
+  try {
+    const r = await fetch(`${API}/users/${clientId}/update`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ objective_id: parseInt(objId) }),
+    });
+    if (!r.ok) { showToast('No se pudo cambiar el objetivo', 'error'); return; }
+    const opt = (_nutParamOpts?.objective || []).find(o => o.id == objId);
+    clientData.objective_id = parseInt(objId);
+    if (opt) clientData.objective = { id: opt.id, name: opt.name };
+    _renderResDatos(); _renderClientPanel();
+    showToast('Objetivo actualizado', 'success');
+  } catch { showToast('Error de conexión', 'error'); }
+}
+
+/* ── Resumen: plan contratado ── */
+function _renderResPlan() {
+  const el=document.getElementById('resPlanCard');
+  if(!el) return;
+  const c=clientData;
+  const planName=c.plan_comprado||c.plan_name||(clientDiets[0]?.title)||'Sin plan asignado';
+  const precio=c.precio!=null?`${Number(c.precio).toFixed(0)}€`:'—';
+  const seguimiento=c.consentimiento_evolucion!==false;
+  el.innerHTML=`<div class="res-plan-card">
+    <div class="res-plan-head">
+      <span class="res-plan-eyebrow">Plan contratado</span>
+      <button class="res-plan-link" onclick="showTab('nutricion');renderNutricionTab&&renderNutricionTab();">Ver detalle →</button>
+    </div>
+    <div class="res-plan-name">${esc(planName)}</div>
+    <div class="res-plan-price"><b>${precio}</b>${c.precio!=null?' <span>/ mensual</span>':''}</div>
+    ${seguimiento?'<span class="res-plan-badge">Con seguimiento</span>':''}
+  </div>`;
+}
+
+/* ── Resumen: actividad + adherencia ── */
 function _renderResStatsNew() {
   const el=document.getElementById('resStatsCard');
   if(!el) return;
@@ -2048,27 +2135,100 @@ function _renderResStatsNew() {
     objPct=(total>0?Math.min(100,Math.round(done/total*100)):100)+'%';
   }
   el.innerHTML=`
-    <div style="font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Actividad reciente</div>
     <div class="res-stat-row"><span class="res-stat-key">Último check-in</span><span class="res-stat-val2${lastCiGreen?' green':''}">${lastCiStr}</span></div>
-    <div class="res-stat-row"><span class="res-stat-key">Adherencia entreno</span><span class="res-stat-val2" id="resAdhTrain">—</span></div>
-    <div class="res-stat-row"><span class="res-stat-key">Adherencia nutrición</span><span class="res-stat-val2" id="resAdhNutr">—</span></div>
-    <div class="res-stat-row"><span class="res-stat-key">Progreso objetivo</span><span class="res-stat-val2">${objPct}</span></div>`;
+    <div class="res-stat-row"><span class="res-stat-key">Adherencia entreno</span><span class="res-stat-val2 green" id="resAdhTrain">—</span></div>
+    <div class="res-stat-row"><span class="res-stat-key">Adherencia nutrición</span><span class="res-stat-val2 green" id="resAdhNutr">—</span></div>
+    <div class="res-stat-row"><span class="res-stat-key">Progreso objetivo</span><span class="res-stat-val2" style="color:#7C3AED;">${objPct}</span></div>`;
+  _loadAdherence();
 }
 
-/* ── Resumen: acciones rápidas ── */
-function _renderResActionsNew() {
-  const el=document.getElementById('resActionsCard');
-  if(!el) return;
-  el.innerHTML=`
-    <div class="res-actions-title">Acciones rápidas</div>
-    <div class="res-actions-row">
-      <button class="res-action-btn" onclick="openWhatsApp()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensaje</button>
-      <button class="res-action-btn" onclick="showTab('progreso');renderProgresoTab()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-in</button>
-      <button class="res-action-btn" onclick="openAssignRoutineModal()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>Ajustar rutina</button>
-      <button class="res-action-btn" onclick="openAssignDietModal()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>Ajustar dieta</button>
-      <button class="res-action-btn warn" onclick="darDeBaja()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Marcar en riesgo</button>
-    </div>`;
+async function _loadAdherence() {
+  try {
+    const r = await fetch(`${API}/calendar-tasks/adherence/${clientId}`, { headers: h() });
+    if (!r.ok) return;
+    const j = await r.json();
+    const d = j.data || j;
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v != null ? v + '%' : '—'; };
+    set('resAdhTrain', d.training);
+    set('resAdhNutr', d.nutrition);
+  } catch {}
 }
+
+/* ── Resumen: restricciones y preferencias ── */
+const _RESTR_DEFS = [
+  { key: 'allergies',        label: 'Alergias',      icon: '⚠️', cls: 'red' },
+  { key: 'intolerances',     label: 'Intolerancias', icon: '🚫', cls: 'amber' },
+  { key: 'dislikes',         label: 'No le gusta',   icon: '📌', cls: 'gray' },
+  { key: 'injuries',         label: 'Lesiones',      icon: '🩹', cls: 'red' },
+  { key: 'equipment',        label: 'Equipamiento',  icon: '🏋️', cls: 'blue' },
+  { key: 'food_preferences', label: 'Preferencias',  icon: '⭐', cls: 'green' },
+];
+
+function _restrTags(val) {
+  return (val || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function _renderResRestr() {
+  const el = document.getElementById('resRestrCard');
+  if (!el) return;
+  const c = clientData;
+  const cols = _RESTR_DEFS.map(d => {
+    const tags = _restrTags(c[d.key]);
+    const chips = tags.length
+      ? tags.map(t => `<span class="restr-chip ${d.cls}">${esc(t)}</span>`).join('')
+      : '<span class="restr-empty">—</span>';
+    return `<div class="restr-col">
+      <div class="restr-col-head">${d.icon} ${d.label.toUpperCase()}</div>
+      <div class="restr-chips">${chips}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="restr-card">
+    <div class="restr-head">
+      <div>
+        <div class="restr-title">Restricciones y preferencias</div>
+        <div class="restr-sub">Las reglas que tú (y la IA en el futuro) debéis respetar al crear sus planes.</div>
+      </div>
+      <button class="restr-edit-btn" onclick="openRestrModal()">Editar</button>
+    </div>
+    <div class="restr-grid">${cols}</div>
+  </div>`;
+}
+
+function openRestrModal() {
+  const c = clientData;
+  const rows = _RESTR_DEFS.map(d => `
+    <div class="form-group" style="margin-bottom:12px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:5px;">${d.icon} ${d.label} <span style="font-weight:400;color:#9CA3AF;">(separa con comas)</span></label>
+      <input id="restr-${d.key}" value="${esc(c[d.key] || '')}" style="width:100%;padding:9px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;" placeholder="Ej: Frutos secos, Marisco"/>
+    </div>`).join('');
+  document.getElementById('restrModalBody').innerHTML = rows;
+  document.getElementById('restrModalOverlay').classList.add('open');
+}
+
+function closeRestrModal() {
+  document.getElementById('restrModalOverlay').classList.remove('open');
+}
+
+async function saveRestrModal() {
+  const btn = document.getElementById('restrSaveBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const body = {};
+  _RESTR_DEFS.forEach(d => { body[d.key] = (document.getElementById('restr-' + d.key)?.value || '').trim() || null; });
+  try {
+    const r = await fetch(`${API}/users/${clientId}/update`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) { showToast('No se pudo guardar', 'error'); return; }
+    Object.assign(clientData, body);
+    closeRestrModal();
+    _renderResRestr();
+    showToast('Restricciones guardadas', 'success');
+  } catch { showToast('Error de conexión', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Guardar'; }
+}
+
+function _renderResActionsNew() { /* replaced by plan/restrictions cards */ }
 
 /* ── Dar de baja ── */
 function darDeBaja() {

@@ -67,9 +67,18 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
     return send_response(TrainingOut.from_orm_training(obj).model_dump(), "OK")
 
 
+def _apply_secondary_ids(payload: dict):
+    """Normalize secondary_muscle_group_ids (list) into the CSV column + single id."""
+    if "secondary_muscle_group_ids" in payload:
+        ids = payload.pop("secondary_muscle_group_ids") or []
+        payload["secondary_muscle_group_ids"] = ",".join(str(i) for i in ids) if ids else None
+        payload["secondary_muscle_group_id"] = ids[0] if ids else None
+    return payload
+
+
 @router.post("", summary="Crear ejercicio", description="Agrega un nuevo ejercicio al catálogo.")
 def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
-    obj = Training(**data.model_dump())
+    obj = Training(**_apply_secondary_ids(data.model_dump()))
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -81,7 +90,7 @@ def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depe
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
-    for f, v in data.model_dump(exclude_unset=True).items():
+    for f, v in _apply_secondary_ids(data.model_dump(exclude_unset=True)).items():
         setattr(obj, f, v)
     db.commit()
     db.refresh(obj)

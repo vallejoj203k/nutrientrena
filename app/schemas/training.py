@@ -8,6 +8,7 @@ class TrainingCreate(BaseModel):
     description: Optional[str] = None
     muscle_group_id: Optional[int] = None
     secondary_muscle_group_id: Optional[int] = None
+    secondary_muscle_group_ids: Optional[List[int]] = None
     image: Optional[str] = None
     video_url: Optional[str] = None
     exercise_type: Optional[str] = None  # compound/isolation/cardio/mobility
@@ -19,6 +20,7 @@ class TrainingUpdate(BaseModel):
     description: Optional[str] = None
     muscle_group_id: Optional[int] = None
     secondary_muscle_group_id: Optional[int] = None
+    secondary_muscle_group_ids: Optional[List[int]] = None
     image: Optional[str] = None
     video_url: Optional[str] = None
     exercise_type: Optional[str] = None
@@ -39,6 +41,7 @@ class TrainingOut(BaseModel):
     muscle_group_name: Optional[str] = None
     secondary_muscle_group_id: Optional[int] = None
     secondary_muscle_group_name: Optional[str] = None
+    secondary_muscle_group_ids: List[int] = []
     image: Optional[str] = None
     video_url: Optional[str] = None
     exercise_type: Optional[str] = None
@@ -50,6 +53,10 @@ class TrainingOut(BaseModel):
 
     @classmethod
     def from_orm_training(cls, t):
+        raw = t.secondary_muscle_group_ids
+        sec_ids = [int(x) for x in str(raw).split(",") if str(x).strip().isdigit()] if raw else []
+        if not sec_ids and t.secondary_muscle_group_id:
+            sec_ids = [t.secondary_muscle_group_id]
         return cls(
             id=t.id,
             name=t.name,
@@ -58,6 +65,7 @@ class TrainingOut(BaseModel):
             muscle_group_name=t.muscle_group.name if t.muscle_group else None,
             secondary_muscle_group_id=t.secondary_muscle_group_id,
             secondary_muscle_group_name=t.secondary_muscle_group.name if t.secondary_muscle_group else None,
+            secondary_muscle_group_ids=sec_ids,
             image=t.image,
             video_url=t.video_url,
             exercise_type=t.exercise_type,

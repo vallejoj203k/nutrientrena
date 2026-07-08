@@ -11,7 +11,8 @@ class Training(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id"), nullable=True)
-    secondary_muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id"), nullable=True)
+    secondary_muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id"), nullable=True)  # first of the set (back-compat)
+    secondary_muscle_group_ids = Column(Text, nullable=True)  # comma-separated muscle group ids
     image = Column(String(500), nullable=True)
     video_url = Column(String(500), nullable=True)
     exercise_type = Column(String(20), nullable=True)  # compound/isolation/cardio/mobility

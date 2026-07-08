@@ -9,7 +9,26 @@ class CheckinCreate(BaseModel):
     weight: Optional[float] = None
     notes: Optional[str] = None
     photo_url: Optional[str] = None
+    photo2: Optional[str] = None
+    photo3: Optional[str] = None
     body_fat: Optional[float] = None
+    muscle_mass: Optional[float] = None
+    waist: Optional[float] = None
+    chest: Optional[float] = None
+    hips: Optional[float] = None
+    arms: Optional[float] = None
+    legs: Optional[float] = None
+
+
+class CheckinUpdate(BaseModel):
+    checkin_date: Optional[date] = None
+    weight: Optional[float] = None
+    notes: Optional[str] = None
+    photo_url: Optional[str] = None
+    photo2: Optional[str] = None
+    photo3: Optional[str] = None
+    body_fat: Optional[float] = None
+    muscle_mass: Optional[float] = None
     waist: Optional[float] = None
     chest: Optional[float] = None
     hips: Optional[float] = None
@@ -37,7 +56,10 @@ class CheckinOut(BaseModel):
     notes: Optional[str] = None
     coach_notes: Optional[str] = None
     photo_url: Optional[str] = None
+    photo2: Optional[str] = None
+    photo3: Optional[str] = None
     body_fat: Optional[float] = None
+    muscle_mass: Optional[float] = None
     waist: Optional[float] = None
     chest: Optional[float] = None
     hips: Optional[float] = None

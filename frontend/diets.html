@@ -763,11 +763,6 @@
           <label>Tipo de dieta</label>
           <select id="f_type" style="font-size:15px;">
             <option value="">Seleccionar...</option>
-            <option value="Deficit">Déficit</option>
-            <option value="Superavit">Superávit</option>
-            <option value="Mantenimiento">Mantenimiento</option>
-            <option value="Cetogenica">Cetogénica</option>
-            <option value="Mediterranea">Mediterránea</option>
           </select>
         </div>
         <div class="form-group" style="flex:0 0 auto;margin-bottom:0;">
@@ -1018,6 +1013,7 @@ if (!token) location.href = 'login.html';
 
 let allDiets = [], editingId = null, assigningId = null;
 let _meals = [], _mealSeq = 0, _rowSeq = 0, _acTimers = {}, _macroCache = {};
+var _dietTypes = [];
 let allClients = [], _refClientId = null;
 let _activeMealId = null;
 let activeFilter = 'all';
@@ -1070,6 +1066,10 @@ function relDate(s) {
 }
 
 function getDietTipo(d) {
+  if (d.type_id != null) {
+    var t = _dietTypes.find(function(x){ return x.id === d.type_id; });
+    if (t && t.name) return t.name;
+  }
   if (d.diet_type) return d.diet_type;
   var det = d.detail || {};
   if (parseFloat(det.deficit) > 0) return 'Deficit';
@@ -1078,6 +1078,7 @@ function getDietTipo(d) {
 }
 
 async function loadDiets() {
+  if (!_dietTypes.length) await loadDietTypes();
   try {
     var r = await fetch(API + '/diets/findAll', { headers: { Authorization: 'Bearer ' + token } });
     if (!r.ok) { document.getElementById('dietsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:#DC2626;">Error al cargar las dietas.</div>'; return; }
@@ -1300,6 +1301,7 @@ async function openForm(id) {
   _refClientId = null;
   await _ensurePathologies();
   clearForm();
+  await loadDietTypes();  // refresh so newly-created types from nutrition-catalog appear
   populateRefClientSel();
 
   if (id) {
@@ -1315,7 +1317,7 @@ async function openForm(id) {
       document.getElementById('f_fats').value     = det.fats     || '';
       document.getElementById('f_deficit').value  = det.deficit  || '';
       document.getElementById('f_surplus').value  = det.surplus  || '';
-      if (d.diet_type) document.getElementById('f_type').value = d.diet_type;
+      _renderDietTypeOptions(d.type_id != null ? d.type_id : '');
       if (d.style || det.style) document.getElementById('f_style').value = d.style || det.style || '';
       var fnotes = document.getElementById('f_notes'); if (fnotes) fnotes.value = d.notes || '';
       var selectedPathoIds = (d.pathologies || []).map(function(p){ return p.id; });
@@ -2362,7 +2364,7 @@ async function saveDiet() {
   var notesEl = document.getElementById('f_notes');
   var body = {
     title: title,
-    diet_type: document.getElementById('f_type').value || null,
+    type_id:   parseInt(document.getElementById('f_type').value) || null,
     style:     (document.getElementById('f_style') || {}).value || null,
     calories:  pNum('f_calories'), proteins: pNum('f_proteins'),
     carbs: pNum('f_carbs'), fats: pNum('f_fats'),
@@ -2429,6 +2431,7 @@ async function downloadPdf(id, title) {
 
 initUser();
 loadDiets();
+loadDietTypes();
 _fsmLoadGroups();
 loadClients();
 
@@ -2448,6 +2451,25 @@ async function loadAlimentGroups() {
     var j = await r.json();
     _alimentGroups = j.data || [];
   } catch(e) {}
+}
+
+// Diet types come from the same catalog as nutrition-catalog.html "Tipos de Dieta"
+async function loadDietTypes() {
+  try {
+    var r = await fetch(API + '/typeFood/findAll', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) return;
+    var j = await r.json();
+    _dietTypes = Array.isArray(j.data) ? j.data : (Array.isArray(j) ? j : []);
+  } catch(e) {}
+  _renderDietTypeOptions();
+}
+function _renderDietTypeOptions(selectedId) {
+  var sel = document.getElementById('f_type');
+  if (!sel) return;
+  var cur = selectedId != null ? String(selectedId) : sel.value;
+  sel.innerHTML = '<option value="">Seleccionar...</option>'
+    + _dietTypes.map(function(t){ return '<option value="' + t.id + '">' + esc(t.name || '') + '</option>'; }).join('');
+  if (cur) sel.value = cur;
 }
 
 function openCreateAlimentModal(rid) {

@@ -336,6 +336,13 @@
     .msv2-food-desc{font-size:12px;color:#9CA3AF;margin-top:1px;}
     .msv2-food-rm{background:none;border:none;cursor:pointer;color:#D1D5DB;padding:6px;border-radius:6px;display:flex;transition:.15s;flex-shrink:0;}
     .msv2-food-rm:hover{color:#DC2626;background:#FEF2F2;}
+    .msv2-food-edit{background:none;border:none;cursor:pointer;color:#D1D5DB;padding:6px;border-radius:6px;display:flex;transition:.15s;flex-shrink:0;}
+    .msv2-food-edit:hover{color:#4F46E5;background:#EEF2FF;}
+    .msv2-food-save{background:#7C3AED;border:none;cursor:pointer;color:#fff;padding:6px;border-radius:6px;display:flex;transition:.15s;flex-shrink:0;}
+    .msv2-food-save:hover{background:#6D28D9;}
+    .msv2-food-editrow{display:flex;align-items:center;gap:6px;margin-top:3px;}
+    .msv2-food-editrow input{width:90px;padding:5px 8px;border:1.5px solid #7C3AED;border-radius:7px;font-size:13px;font-weight:700;color:#111827;outline:none;font-family:inherit;text-align:right;}
+    .msv2-food-editrow span{font-size:12px;color:#9CA3AF;font-weight:600;}
     @media(max-width:900px){.msv2-stats{grid-template-columns:repeat(2,1fr);}}
 
     /* ── Food search modal ── */
@@ -1692,10 +1699,7 @@ function addMeal(prefill) {
   return meal;
 }
 
-function _renderFoodCard(mid, row) {
-  var container = document.getElementById('mrows-' + mid);
-  if (!container) return;
-  if (document.getElementById('frow-' + row.id)) return;
+function _foodRowInner(mid, row) {
   var rid = row.id;
   var qty = parseFloat(row.quantity) || 0;
   var qtyG = qty * getUnitMult(row.unit || 'g');
@@ -1705,16 +1709,71 @@ function _renderFoodCard(mid, row) {
   var f = Math.round(((row.fats||0)/100)*qtyG*10)/10;
   var qtyTxt = qty ? (qty % 1 === 0 ? qty : qty.toFixed(1)) + (row.unit === 'unidad' ? ' ud' : (row.unit || 'g')) : '—';
   var desc = qtyTxt + ' · ' + k + ' kcal · P' + p + 'g · C' + c + 'g · G' + f + 'g';
-  var card = document.createElement('div');
-  card.className = 'msv2-food-row'; card.id = 'frow-' + rid;
-  card.innerHTML =
-    (function(){ var gi = _foodGroupIcon(row.group_food_id, 18); return '<div class="msv2-food-ico" style="background:' + gi.bg + ';">' + gi.svg + '</div>'; })()
+  var gi = _foodGroupIcon(row.group_food_id, 18);
+  return '<div class="msv2-food-ico" style="background:' + gi.bg + ';">' + gi.svg + '</div>'
     + '<div class="msv2-food-info">'
     + '<div class="msv2-food-name">' + esc(row.aliment_name || 'Alimento') + '</div>'
     + '<div class="msv2-food-desc">' + desc + '</div>'
     + '</div>'
+    + '<button class="msv2-food-edit" onclick="editFoodRow(' + mid + ',' + rid + ')" title="Editar cantidad"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
     + '<button class="msv2-food-rm" onclick="removeFoodRow(' + mid + ',' + rid + ')" title="Eliminar alimento"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></button>';
+}
+
+function _renderFoodCard(mid, row) {
+  var container = document.getElementById('mrows-' + mid);
+  if (!container) return;
+  if (document.getElementById('frow-' + row.id)) return;
+  var card = document.createElement('div');
+  card.className = 'msv2-food-row'; card.id = 'frow-' + row.id;
+  card.innerHTML = _foodRowInner(mid, row);
   container.appendChild(card);
+}
+
+function _findMealRow(mid, rid) {
+  var meal = _meals.find(function(m){ return m.id == mid; });
+  if (!meal) return null;
+  var row = meal.rows.find(function(r){ return r.id == rid; });
+  return row ? { meal: meal, row: row } : null;
+}
+
+function editFoodRow(mid, rid) {
+  var found = _findMealRow(mid, rid);
+  if (!found) return;
+  var row = found.row;
+  var card = document.getElementById('frow-' + rid);
+  if (!card) return;
+  var gi = _foodGroupIcon(row.group_food_id, 18);
+  var unit = row.unit || 'g';
+  var unitTxt = unit === 'unidad' ? 'ud' : unit;
+  card.innerHTML =
+    '<div class="msv2-food-ico" style="background:' + gi.bg + ';">' + gi.svg + '</div>'
+    + '<div class="msv2-food-info">'
+    + '<div class="msv2-food-name">' + esc(row.aliment_name || 'Alimento') + '</div>'
+    + '<div class="msv2-food-editrow"><input type="number" min="0" step="any" id="edqty-' + rid + '" value="' + (parseFloat(row.quantity) || 0) + '"><span>' + unitTxt + '</span></div>'
+    + '</div>'
+    + '<button class="msv2-food-save" onclick="saveFoodRowQty(' + mid + ',' + rid + ')" title="Guardar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>'
+    + '<button class="msv2-food-rm" onclick="_cancelEditFoodRow(' + mid + ',' + rid + ')" title="Cancelar"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+  var inp = document.getElementById('edqty-' + rid);
+  if (inp) { inp.focus(); inp.select(); inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();saveFoodRowQty(mid,rid);} if(e.key==='Escape'){_cancelEditFoodRow(mid,rid);} }); }
+}
+
+function _cancelEditFoodRow(mid, rid) {
+  var found = _findMealRow(mid, rid);
+  if (!found) return;
+  var card = document.getElementById('frow-' + rid);
+  if (card) card.innerHTML = _foodRowInner(mid, found.row);
+}
+
+function saveFoodRowQty(mid, rid) {
+  var found = _findMealRow(mid, rid);
+  if (!found) return;
+  var v = parseFloat((document.getElementById('edqty-' + rid) || {}).value);
+  if (!(v > 0)) { toast('Indica una cantidad válida', 'error'); return; }
+  found.row.quantity = String(v);
+  var card = document.getElementById('frow-' + rid);
+  if (card) card.innerHTML = _foodRowInner(mid, found.row);
+  updateMealHeaderStats(mid);
+  recalcMealMacros(mid);
 }
 
 function removeMeal(mid) {

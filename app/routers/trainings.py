@@ -86,3 +86,17 @@ def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depe
     db.commit()
     db.refresh(obj)
     return send_response(TrainingOut.from_orm_training(obj).model_dump(), "Actualizado")
+
+
+@router.delete("/{id}", summary="Eliminar ejercicio", description="Elimina un ejercicio del catálogo.")
+def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+    obj = _get_or_404(db, id)
+    if not obj:
+        return send_error("Ejercicio no encontrado")
+    # Detach references so FKs don't block the delete (routine history is kept)
+    from app.models.routine import RoutineDayDetail
+    db.query(RoutineDayDetail).filter(RoutineDayDetail.training_id == id).update({"training_id": None})
+    db.query(TrainingClient).filter(TrainingClient.training_id == id).delete()
+    db.delete(obj)
+    db.commit()
+    return send_response(None, "Ejercicio eliminado")

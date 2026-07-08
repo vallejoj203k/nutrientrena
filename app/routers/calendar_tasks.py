@@ -229,6 +229,42 @@ def list_for_client(
 
 
 @router.get(
+    "/adherence/{client_id}",
+    summary="Adherencia del cliente",
+    description="Porcentaje de tareas completadas (entreno y nutrición) sobre las programadas hasta hoy.",
+)
+def adherence(
+    client_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+):
+    _assert_client_access(current_user, client_id, db)
+    today = datetime.utcnow().date()
+    tasks = (
+        db.query(CalendarTask)
+        .filter(
+            CalendarTask.client_user_detail_id == client_id,
+            CalendarTask.task_date <= today,
+        )
+        .all()
+    )
+    TRAIN_TYPES = {"rutina", "cardio", "sesion"}
+    NUTR_TYPES = {"nutricion"}
+
+    def pct(types):
+        rel = [t for t in tasks if t.task_type in types]
+        if not rel:
+            return None
+        done = sum(1 for t in rel if t.done)
+        return round(done / len(rel) * 100)
+
+    return send_response(
+        {"training": pct(TRAIN_TYPES), "nutrition": pct(NUTR_TYPES)},
+        "OK",
+    )
+
+
+@router.get(
     "/week/{client_id}",
     summary="Vista semanal del cliente",
     description=(

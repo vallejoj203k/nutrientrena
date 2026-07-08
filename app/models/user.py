@@ -50,6 +50,13 @@ class UserDetail(Base):
     age = Column(Integer, nullable=True)
     body_fat = Column(Float, nullable=True)  # % body fat
     occupation = Column(String(255), nullable=True)
+    # Restrictions & preferences (comma-separated tags)
+    allergies = Column(Text, nullable=True)
+    intolerances = Column(Text, nullable=True)
+    dislikes = Column(Text, nullable=True)
+    injuries = Column(Text, nullable=True)
+    equipment = Column(Text, nullable=True)
+    food_preferences = Column(Text, nullable=True)
     country_code = Column(String(10), ForeignKey("countries.code"), nullable=True)
     gender_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     activity_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)

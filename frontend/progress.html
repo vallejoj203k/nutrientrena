@@ -614,14 +614,14 @@ function onClientSearch() {
   ).slice(0, 20);
   if (!filtered.length) { dd.classList.remove('open'); return; }
   dd.innerHTML = filtered.map(c => `
-    <div class="client-option" onclick="selectClient(${c.user_id || c.id})">
+    <div class="client-option" onclick="selectClient('${c.id}')">
       ${esc(c.name || c.email)} <span style="color:#9CA3AF;font-size:11px;">${esc(c.email || '')}</span>
     </div>`).join('');
   dd.classList.add('open');
 }
 
 async function selectClient(id) {
-  const client = _clients.find(c => (c.user_id || c.id) === id);
+  const client = _clients.find(c => String(c.id) === String(id));
   if (!client) return;
   _selectedUserId = id;
   _selectedUserName = client.name || client.email || 'cliente';
@@ -653,12 +653,19 @@ function clearClient() {
 async function loadRecords() {
   const from = document.getElementById('filterFrom').value;
   const to = document.getElementById('filterTo').value;
-  let qs = `?user_id=${_selectedUserId}`;
-  if (from) qs += `&from=${from}`;
-  if (to) qs += `&to=${to}`;
   try {
-    const r = await apiFetch('/progress-day-users/search' + qs);
-    _records = r.data || [];
+    // Unified source: weekly check-ins (same data as the client profile Progreso tab)
+    const r = await apiFetch(`/checkins/client/${_selectedUserId}?limit=100`);
+    const list = r.data?.checkins || r.data || [];
+    _records = list.map(c => ({
+      id: c.id,
+      date: c.checkin_date,
+      weight: c.weight, body_fat: c.body_fat, muscle_mass: c.muscle_mass,
+      waist: c.waist, hip: c.hips, chest: c.chest, arm: c.arms, thigh: c.legs,
+      notes: c.notes, photo: c.photo_url, photo2: c.photo2, photo3: c.photo3,
+    }));
+    if (from) _records = _records.filter(x => x.date >= from);
+    if (to)   _records = _records.filter(x => x.date <= to);
   } catch { _records = []; }
   renderStats(_records);
   renderChart(_records);
@@ -916,28 +923,28 @@ async function saveRecord() {
   if (!dateVal) { showToast('La fecha es obligatoria', true); return; }
 
   const payload = {
-    user_id: _selectedUserId,
-    date: dateVal,
+    client_user_detail_id: _selectedUserId,
+    checkin_date: dateVal,
     weight: parseOptFloat('fWeight'),
     body_fat: parseOptFloat('fBodyFat'),
     muscle_mass: parseOptFloat('fMuscleMass'),
     waist: parseOptFloat('fWaist'),
-    hip: parseOptFloat('fHip'),
+    hips: parseOptFloat('fHip'),
     chest: parseOptFloat('fChest'),
-    arm: parseOptFloat('fArm'),
-    thigh: parseOptFloat('fThigh'),
+    arms: parseOptFloat('fArm'),
+    legs: parseOptFloat('fThigh'),
     notes: document.getElementById('fNotes').value.trim() || null,
-    photo: _photoUrls[0],
+    photo_url: _photoUrls[0],
     photo2: _photoUrls[1],
     photo3: _photoUrls[2],
   };
 
   try {
     if (_editId) {
-      await apiFetch(`/progress-day-users/${_editId}`, { method: 'PUT', body: JSON.stringify(payload) });
+      await apiFetch(`/checkins/${_editId}/update`, { method: 'PUT', body: JSON.stringify(payload) });
       showToast('Registro actualizado');
     } else {
-      await apiFetch('/progress-day-users/upsert', { method: 'POST', body: JSON.stringify(payload) });
+      await apiFetch('/checkins', { method: 'POST', body: JSON.stringify(payload) });
       showToast('Registro guardado');
     }
     closeModal();
@@ -958,7 +965,7 @@ function closeDelOverlay() {
 
 async function confirmDelete() {
   try {
-    await apiFetch(`/progress-day-users/delete/${_deleteId}`, { method: 'DELETE' });
+    await apiFetch(`/checkins/${_deleteId}`, { method: 'DELETE' });
     showToast('Registro eliminado');
     await loadRecords();
   } catch { showToast('Error al eliminar', true); }

@@ -11,7 +11,7 @@ from app.core.responses import send_response, send_error
 from app.core.email import notify_coach_checkin, notify_client_coach_notes
 from app.models.checkin import WeeklyCheckin
 from app.models.user import UserDetail, UserParent, User
-from app.schemas.checkin import CheckinCreate, CheckinCoachUpdate, CheckinOut
+from app.schemas.checkin import CheckinCreate, CheckinCoachUpdate, CheckinUpdate, CheckinOut
 
 
 def _get_coach_for_client(client_detail_id: str, db: Session):
@@ -57,7 +57,10 @@ def create_checkin(
         weight=data.weight,
         notes=data.notes,
         photo_url=data.photo_url,
+        photo2=data.photo2,
+        photo3=data.photo3,
         body_fat=data.body_fat,
+        muscle_mass=data.muscle_mass,
         waist=data.waist,
         chest=data.chest,
         hips=data.hips,
@@ -197,16 +200,36 @@ def add_coach_notes(
     return send_response(CheckinOut.model_validate(checkin).model_dump(), "Notas actualizadas")
 
 
-# ── Delete: admin only ────────────────────────────────────────────────────────
-@router.delete("/{id}", summary="Eliminar check-in", description="Elimina un check-in (solo administradores).")
-def delete_checkin(
+# ── Update all own fields: admin, coach ───────────────────────────────────────
+@router.put("/{id}/update", summary="Actualizar check-in", description="Edita los datos de un check-in (fecha, peso, medidas, notas, fotos).")
+def update_checkin(
     id: str,
+    data: CheckinUpdate,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     checkin = db.query(WeeklyCheckin).filter(WeeklyCheckin.id == id).first()
     if not checkin:
         return send_error("Check-in no encontrado")
+    verify_client_access(checkin.client_user_detail_id, current_user, db)
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(checkin, field, value)
+    db.commit()
+    db.refresh(checkin)
+    return send_response(CheckinOut.model_validate(checkin).model_dump(), "Check-in actualizado")
+
+
+# ── Delete: admin, coach ──────────────────────────────────────────────────────
+@router.delete("/{id}", summary="Eliminar check-in", description="Elimina un check-in.")
+def delete_checkin(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    checkin = db.query(WeeklyCheckin).filter(WeeklyCheckin.id == id).first()
+    if not checkin:
+        return send_error("Check-in no encontrado")
+    verify_client_access(checkin.client_user_detail_id, current_user, db)
     db.delete(checkin)
     db.commit()
     return send_response(None, "Check-in eliminado")

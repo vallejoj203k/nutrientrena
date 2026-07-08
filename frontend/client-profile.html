@@ -806,7 +806,34 @@
     }
     .fsm-overlay{position:fixed;inset:0;background:rgba(17,17,17,.45);z-index:1200;display:none;align-items:flex-start;justify-content:center;padding:48px 16px;}
     .fsm-overlay.open{display:flex;}
-    .fsm-panel{background:#fff;border-radius:20px;width:100%;max-width:920px;max-height:calc(100vh - 96px);display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.25);overflow:hidden;}
+    .fsm-panel{background:#fff;border-radius:20px;width:100%;max-width:1100px;max-height:calc(100vh - 96px);display:flex;flex-direction:row;box-shadow:0 24px 64px rgba(0,0,0,.25);overflow:hidden;}
+    .fsm-left{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+    .fsm-detail{width:360px;flex-shrink:0;border-left:1px solid #EEF0F3;background:#FAFBFC;display:flex;flex-direction:column;overflow-y:auto;}
+    .fsm-detail-body{flex:1;padding:26px 26px 16px;}
+    .fsm-detail-eyebrow{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+    .fsm-detail-name{font-size:22px;font-weight:800;color:#111827;margin-bottom:8px;line-height:1.2;}
+    .fsm-qty-row{display:flex;align-items:stretch;gap:10px;margin-top:4px;}
+    .fsm-qty-btn{width:48px;border:1px solid #E5E7EB;border-radius:12px;background:#fff;font-size:20px;font-weight:700;color:#374151;cursor:pointer;transition:.15s;flex-shrink:0;}
+    .fsm-qty-btn:hover{border-color:#7C3AED;color:#7C3AED;}
+    .fsm-qty-box{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid #E5E7EB;border-radius:12px;background:#fff;padding:12px 8px;}
+    .fsm-qty-box input{width:80px;border:none;outline:none;font-size:22px;font-weight:800;color:#111827;text-align:center;background:transparent;font-family:inherit;-moz-appearance:textfield;}
+    .fsm-qty-box input::-webkit-outer-spin-button,.fsm-qty-box input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+    .fsm-qty-unit{font-size:13px;color:#9CA3AF;font-weight:600;}
+    .fsm-qty-presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .fsm-qty-preset{padding:7px 14px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;}
+    .fsm-qty-preset:hover{border-color:#7C3AED;color:#7C3AED;}
+    .fsm-qty-preset.sel{background:#7C3AED;color:#fff;border-color:#7C3AED;}
+    .fsm-portion{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:16px 18px;margin-top:20px;}
+    .fsm-portion-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+    .fsm-portion-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F3F4F6;font-size:13.5px;color:#374151;}
+    .fsm-portion-row:last-child{border-bottom:none;}
+    .fsm-portion-lbl{display:inline-flex;align-items:center;gap:8px;}
+    .fsm-portion-val{color:#9CA3AF;font-size:12px;}
+    .fsm-portion-val b{font-size:16px;font-weight:800;color:#111827;margin-right:2px;}
+    .fsm-add-btn{margin:0 26px 22px;padding:16px;border:none;border-radius:14px;background:#7C3AED;color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;}
+    .fsm-add-btn:hover{background:#6D28D9;}
+    .fsm-item.sel{background:#F3EEFB;}
+    @media(max-width:860px){.fsm-panel{flex-direction:column;overflow-y:auto;}.fsm-left{overflow:visible;}.fsm-list{max-height:280px;}.fsm-detail{width:100%;border-left:none;border-top:1px solid #EEF0F3;}}
     .fsm-head{padding:24px 28px 0;position:relative;flex-shrink:0;}
     .fsm-eyebrow{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
     .fsm-title{font-size:24px;font-weight:800;color:#111827;}
@@ -3744,24 +3771,51 @@ async function saveTarget() {
 <!-- ── Food Search Modal ── -->
 <div class="fsm-overlay" id="fsmOverlay" onclick="if(event.target===this)closeFoodSearch()">
   <div class="fsm-panel">
-    <div class="fsm-head">
-      <div class="fsm-eyebrow" id="fsmEyebrow">AÑADIR A COMIDA</div>
-      <div class="fsm-title">Buscar alimentos</div>
-      <button class="fsm-close" onclick="closeFoodSearch()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="fsm-search-wrap">
-      <div class="fsm-search">
-        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="fsmInput" placeholder="Buscar alimento, marca o código…" autocomplete="off" oninput="fsmSearchDebounced()"/>
+    <div class="fsm-left">
+      <div class="fsm-head">
+        <div class="fsm-eyebrow" id="fsmEyebrow">AÑADIR A COMIDA</div>
+        <div class="fsm-title">Buscar alimentos</div>
+        <button class="fsm-close" onclick="closeFoodSearch()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="fsm-search-wrap">
+        <div class="fsm-search">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="fsmInput" placeholder="Buscar alimento, marca o código…" autocomplete="off" oninput="fsmSearchDebounced()"/>
+        </div>
+      </div>
+      <div class="fsm-bar">
+        <span class="fsm-bar-lbl"><svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg> Alimentos</span>
+        <button class="fsm-create-btn" onclick="openCreateAlimentModal()">+ Crear alimento</button>
+      </div>
+      <div class="fsm-pills" id="fsmPills"></div>
+      <div class="fsm-list" id="fsmList">
+        <div class="fsm-msg">Cargando alimentos…</div>
       </div>
     </div>
-    <div class="fsm-bar">
-      <span class="fsm-bar-lbl"><svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg> Alimentos</span>
-      <button class="fsm-create-btn" onclick="openCreateAlimentModal()">+ Crear alimento</button>
-    </div>
-    <div class="fsm-pills" id="fsmPills"></div>
-    <div class="fsm-list" id="fsmList">
-      <div class="fsm-msg">Cargando alimentos…</div>
+    <div class="fsm-detail" id="fsmDetail" style="display:none;">
+      <div class="fsm-detail-body">
+        <div class="fsm-detail-eyebrow">Detalle</div>
+        <div class="fsm-detail-name" id="fsmDetName">—</div>
+        <span class="fsm-item-chip" id="fsmDetChip" style="display:none;"></span>
+        <div class="fsm-detail-eyebrow" style="margin-top:22px;">Cantidad</div>
+        <div class="fsm-qty-row">
+          <button class="fsm-qty-btn" onclick="fsmQtyStep(-1)">−</button>
+          <div class="fsm-qty-box">
+            <input id="fsmQtyInput" type="number" min="0" step="any" oninput="fsmQtyChanged(this.value)">
+            <span class="fsm-qty-unit" id="fsmQtyUnit">g</span>
+          </div>
+          <button class="fsm-qty-btn" onclick="fsmQtyStep(1)">+</button>
+        </div>
+        <div class="fsm-qty-presets" id="fsmQtyPresets"></div>
+        <div class="fsm-portion">
+          <div class="fsm-portion-title">Aporte de esta ración</div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Calorías</span><span class="fsm-portion-val"><b id="fsmPorK">0</b> kcal</span></div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg> Proteínas</span><span class="fsm-portion-val"><b id="fsmPorP">0</b> g</span></div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/></svg> Carbohidratos</span><span class="fsm-portion-val"><b id="fsmPorC">0</b> g</span></div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#3B82F6" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg> Grasas</span><span class="fsm-portion-val"><b id="fsmPorF">0</b> g</span></div>
+        </div>
+      </div>
+      <button class="fsm-add-btn" id="fsmAddBtn" onclick="fsmConfirmAdd()">+ Añadir</button>
     </div>
   </div>
 </div>
@@ -5861,45 +5915,14 @@ function _neFindRow(mid, rid) {
   return row ? { meal, row } : null;
 }
 
+// Editing a food opens the same search modal as adding; confirming replaces the row
 function neEditFoodRow(mid, rid) {
   const found = _neFindRow(mid, rid);
   if (!found) return;
-  const row = found.row;
-  const card = document.getElementById('nerow-' + rid);
-  if (!card) return;
-  const gi = _foodGroupIcon(row.group_food_id, 18);
-  const unit = row.unit || 'g';
-  const unitTxt = unit === 'unidad' ? 'ud' : unit;
-  card.innerHTML =
-    '<div class="msv2-food-ico" style="background:' + gi.bg + ';">' + gi.svg + '</div>'
-    + '<div class="msv2-food-info">'
-    + '<div class="msv2-food-name">' + esc(row.aliment_name || 'Alimento') + '</div>'
-    + '<div class="msv2-food-editrow"><input type="number" min="0" step="any" id="nedqty-' + rid + '" value="' + (parseFloat(row.quantity) || 0) + '"><span>' + unitTxt + '</span></div>'
-    + '</div>'
-    + '<button class="msv2-food-save" onclick="neSaveFoodRowQty(' + mid + ',' + rid + ')" title="Guardar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>'
-    + '<button class="msv2-food-rm" onclick="_neCancelEditFoodRow(' + mid + ',' + rid + ')" title="Cancelar"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
-  const inp = document.getElementById('nedqty-' + rid);
-  if (inp) { inp.focus(); inp.select(); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); neSaveFoodRowQty(mid, rid); } if (e.key === 'Escape') { _neCancelEditFoodRow(mid, rid); } }); }
-}
-
-function _neCancelEditFoodRow(mid, rid) {
-  const found = _neFindRow(mid, rid);
-  if (!found) return;
-  const card = document.getElementById('nerow-' + rid);
-  if (card) card.innerHTML = _neFoodRowInner(mid, found.row);
-}
-
-function neSaveFoodRowQty(mid, rid) {
-  const found = _neFindRow(mid, rid);
-  if (!found) return;
-  const v = parseFloat((document.getElementById('nedqty-' + rid) || {}).value);
-  if (!(v > 0)) { showToast('Indica una cantidad válida', 'error'); return; }
-  found.row.quantity = String(v);
-  const card = document.getElementById('nerow-' + rid);
-  if (card) card.innerHTML = _neFoodRowInner(mid, found.row);
-  neUpdateMealStats(mid);
-  neRecalcTotals();
-  neRenderSidebar();
+  openFoodSearch(mid);
+  _fsmEditRid = rid;
+  const meal = found.meal;
+  document.getElementById('fsmEyebrow').textContent = 'EDITAR EN ' + ((meal && meal.name) || 'COMIDA').toUpperCase();
 }
 
 function neRemoveFoodRow(mid, rid) {
@@ -5959,6 +5982,7 @@ function neRecalcTotals() {
 /* ── Food search modal (ported from diets.html) ── */
 
 let _fsmMid = null, _fsmGroupId = null, _fsmGroups = [], _fsmGroupsLoaded = false, _fsmTimer = null;
+let _fsmSelId = null, _fsmQty = 0, _fsmEditRid = null;
 const _fsmCache = {};
 
 var _FG_PATHS = {
@@ -5998,7 +6022,10 @@ function _foodGroupIcon(groupId, size) {
 
 function openFoodSearch(mid) {
   _fsmMid = mid;
+  _fsmEditRid = null;
   _fsmGroupId = null;
+  _fsmSelId = null;
+  document.getElementById('fsmDetail').style.display = 'none';
   const meal = _neMeal(mid);
   document.getElementById('fsmEyebrow').textContent = 'AÑADIR A ' + ((meal && meal.name) || 'COMIDA').toUpperCase();
   const inp = document.getElementById('fsmInput');
@@ -6013,6 +6040,107 @@ function openFoodSearch(mid) {
 function closeFoodSearch() {
   document.getElementById('fsmOverlay').classList.remove('open');
   _fsmMid = null;
+  _fsmEditRid = null;
+}
+
+/* ── Detail panel: select food, adjust quantity, live portion macros ── */
+function _fsmPresetsFor(unit) {
+  if (unit === 'unidad') return [1, 2, 3, 4, 5];
+  if (unit === 'kg' || unit === 'l') return [0.25, 0.5, 1, 1.5, 2];
+  if (unit === 'oz') return [1, 2, 4, 6, 8];
+  return [50, 100, 150, 200, 250];
+}
+function fsmSelect(alimentId) {
+  const a = _fsmCache[alimentId];
+  if (!a) return;
+  _fsmSelId = alimentId;
+  document.querySelectorAll('.fsm-item.sel').forEach(el => el.classList.remove('sel'));
+  const row = document.getElementById('fsmit-' + alimentId);
+  if (row) row.classList.add('sel');
+  const unit = _nutUnitFromAliment(a);
+  _fsmQty = a.quantity != null ? parseFloat(a.quantity) : 100;
+  document.getElementById('fsmDetName').textContent = a.name || '—';
+  const chip = document.getElementById('fsmDetChip');
+  const g = _fsmGroups.find(x => x.id === a.group_food_id);
+  if (g) { chip.textContent = g.name; chip.style.display = 'inline-block'; } else chip.style.display = 'none';
+  document.getElementById('fsmQtyInput').value = _fsmQty;
+  document.getElementById('fsmQtyUnit').textContent = unit === 'unidad' ? 'ud' : unit;
+  _fsmRenderPresets(unit);
+  const meal = _neMeal(_fsmMid);
+  document.getElementById('fsmAddBtn').textContent = (_fsmEditRid != null ? 'Actualizar en ' : '+ Añadir a ') + ((meal && meal.name) || 'la comida');
+  fsmRecalcPortion();
+  document.getElementById('fsmDetail').style.display = 'flex';
+}
+function _fsmRenderPresets(unit) {
+  const el = document.getElementById('fsmQtyPresets');
+  const unitTxt = unit === 'unidad' ? ' ud' : unit;
+  el.innerHTML = _fsmPresetsFor(unit).map(v => '<button class="fsm-qty-preset' + (v === _fsmQty ? ' sel' : '') + '" onclick="fsmSetQty(' + v + ')">' + v + unitTxt + '</button>').join('');
+}
+function fsmSetQty(v) {
+  _fsmQty = v;
+  document.getElementById('fsmQtyInput').value = v;
+  const a = _fsmCache[_fsmSelId];
+  _fsmRenderPresets(_nutUnitFromAliment(a));
+  fsmRecalcPortion();
+}
+function fsmQtyStep(dir) {
+  const a = _fsmCache[_fsmSelId];
+  if (!a) return;
+  const unit = _nutUnitFromAliment(a);
+  const step = unit === 'unidad' ? 1 : ((unit === 'kg' || unit === 'l') ? 0.25 : 10);
+  fsmSetQty(Math.max(0, Math.round(((_fsmQty || 0) + dir * step) * 100) / 100));
+}
+function fsmQtyChanged(v) {
+  _fsmQty = parseFloat(v) || 0;
+  const a = _fsmCache[_fsmSelId];
+  if (a) _fsmRenderPresets(_nutUnitFromAliment(a));
+  fsmRecalcPortion();
+}
+function fsmRecalcPortion() {
+  const a = _fsmCache[_fsmSelId];
+  if (!a) return;
+  const qtyG = (_fsmQty || 0) * _nutUnitMult(_nutUnitFromAliment(a));
+  const fmt = v => Math.round(v * 10) / 10;
+  document.getElementById('fsmPorK').textContent = Math.round(((a.calories || 0) / 100) * qtyG);
+  document.getElementById('fsmPorP').textContent = fmt(((a.proteins || 0) / 100) * qtyG);
+  document.getElementById('fsmPorC').textContent = fmt(((a.carbohydrates || 0) / 100) * qtyG);
+  document.getElementById('fsmPorF').textContent = fmt(((a.fats || 0) / 100) * qtyG);
+}
+function fsmConfirmAdd() {
+  const a = _fsmCache[_fsmSelId];
+  if (!a || _fsmMid === null) return;
+  if (!(_fsmQty > 0)) { showToast('Indica una cantidad válida', 'error'); return; }
+  const mid = _fsmMid;
+  const data = {
+    aliment_id: a.id,
+    aliment_name: a.name || '',
+    group_food_id: a.group_food_id != null ? a.group_food_id : null,
+    proteins: a.proteins != null ? a.proteins : null,
+    carbohydrates: a.carbohydrates != null ? a.carbohydrates : null,
+    fats: a.fats != null ? a.fats : null,
+    calories: a.calories != null ? a.calories : null,
+    quantity: String(_fsmQty),
+    unit: _nutUnitFromAliment(a),
+  };
+  if (_fsmEditRid != null) {
+    const found = _neFindRow(mid, _fsmEditRid);
+    if (found) {
+      Object.assign(found.row, data);
+      const card = document.getElementById('nerow-' + _fsmEditRid);
+      if (card) card.innerHTML = _neFoodRowInner(mid, found.row);
+      neUpdateMealStats(mid); neRecalcTotals(); neRenderSidebar();
+      closeFoodSearch();
+      showToast('Alimento actualizado', 'success');
+      return;
+    }
+  }
+  const meal = _neMeal(mid);
+  if (!meal) return;
+  meal.rows.push(Object.assign({ id: ++_neRowSeq, db_id: null }, data));
+  neRenderFoodRow(mid, meal.rows[meal.rows.length - 1]);
+  neUpdateMealStats(mid); neRecalcTotals(); neRenderSidebar();
+  closeFoodSearch();
+  showToast('Alimento añadido', 'success');
 }
 
 async function _fsmLoadGroups() {
@@ -6079,7 +6207,7 @@ function fsmRenderList(items) {
     const desc = qty + unitTxt + ' · ' + k + ' kcal · P' + p + 'g · C' + c + 'g · G' + f + 'g';
     const gname = groupName(a.group_food_id);
     const gi = _foodGroupIcon(a.group_food_id, 19);
-    return '<div class="fsm-item" onclick="fsmPick(\'' + a.id + '\')">'
+    return '<div class="fsm-item" id="fsmit-' + a.id + '" onclick="fsmSelect(\'' + a.id + '\')">'
       + '<div class="fsm-item-ico" style="background:' + gi.bg + ';">' + gi.svg + '</div>'
       + '<div class="fsm-item-info">'
       + '<div class="fsm-item-name">' + esc(a.name || '') + (a.brand ? ' <span style="font-weight:500;color:#9CA3AF;">· ' + esc(a.brand) + '</span>' : '') + '</div>'

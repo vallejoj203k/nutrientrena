@@ -1736,44 +1736,14 @@ function _findMealRow(mid, rid) {
   return row ? { meal: meal, row: row } : null;
 }
 
+// Editing a food opens the same search modal as adding; confirming replaces the row
 function editFoodRow(mid, rid) {
   var found = _findMealRow(mid, rid);
   if (!found) return;
-  var row = found.row;
-  var card = document.getElementById('frow-' + rid);
-  if (!card) return;
-  var gi = _foodGroupIcon(row.group_food_id, 18);
-  var unit = row.unit || 'g';
-  var unitTxt = unit === 'unidad' ? 'ud' : unit;
-  card.innerHTML =
-    '<div class="msv2-food-ico" style="background:' + gi.bg + ';">' + gi.svg + '</div>'
-    + '<div class="msv2-food-info">'
-    + '<div class="msv2-food-name">' + esc(row.aliment_name || 'Alimento') + '</div>'
-    + '<div class="msv2-food-editrow"><input type="number" min="0" step="any" id="edqty-' + rid + '" value="' + (parseFloat(row.quantity) || 0) + '"><span>' + unitTxt + '</span></div>'
-    + '</div>'
-    + '<button class="msv2-food-save" onclick="saveFoodRowQty(' + mid + ',' + rid + ')" title="Guardar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>'
-    + '<button class="msv2-food-rm" onclick="_cancelEditFoodRow(' + mid + ',' + rid + ')" title="Cancelar"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
-  var inp = document.getElementById('edqty-' + rid);
-  if (inp) { inp.focus(); inp.select(); inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();saveFoodRowQty(mid,rid);} if(e.key==='Escape'){_cancelEditFoodRow(mid,rid);} }); }
-}
-
-function _cancelEditFoodRow(mid, rid) {
-  var found = _findMealRow(mid, rid);
-  if (!found) return;
-  var card = document.getElementById('frow-' + rid);
-  if (card) card.innerHTML = _foodRowInner(mid, found.row);
-}
-
-function saveFoodRowQty(mid, rid) {
-  var found = _findMealRow(mid, rid);
-  if (!found) return;
-  var v = parseFloat((document.getElementById('edqty-' + rid) || {}).value);
-  if (!(v > 0)) { toast('Indica una cantidad válida', 'error'); return; }
-  found.row.quantity = String(v);
-  var card = document.getElementById('frow-' + rid);
-  if (card) card.innerHTML = _foodRowInner(mid, found.row);
-  updateMealHeaderStats(mid);
-  recalcMealMacros(mid);
+  openFoodSearch(mid);
+  _fsmEditRid = rid;
+  var meal = found.meal;
+  document.getElementById('fsmEyebrow').textContent = 'EDITAR EN ' + ((meal && meal.name) || 'COMIDA').toUpperCase();
 }
 
 function removeMeal(mid) {
@@ -2046,8 +2016,11 @@ function _foodGroupIcon(groupId, size) {
   };
 }
 
+var _fsmEditRid = null;  // when set, confirming replaces this existing row instead of adding
+
 function openFoodSearch(mid) {
   _fsmMid = mid;
+  _fsmEditRid = null;
   _fsmGroupId = null;
   _fsmSelId = null;
   document.getElementById('fsmDetail').style.display = 'none';
@@ -2065,6 +2038,7 @@ function openFoodSearch(mid) {
 function closeFoodSearch() {
   document.getElementById('fsmOverlay').classList.remove('open');
   _fsmMid = null;
+  _fsmEditRid = null;
 }
 
 async function _fsmLoadGroups() {
@@ -2235,7 +2209,7 @@ function fsmConfirmAdd() {
   if (!a || _fsmMid === null) return;
   if (!(_fsmQty > 0)) { toast('Indica una cantidad válida', 'error'); return; }
   var mid = _fsmMid;
-  addFoodRow(mid, {
+  var data = {
     aliment_id: a.id,
     aliment_name: a.name || '',
     group_food_id: a.group_food_id != null ? a.group_food_id : null,
@@ -2245,7 +2219,20 @@ function fsmConfirmAdd() {
     calories: a.calories != null ? a.calories : null,
     quantity: String(_fsmQty),
     unit: _unitFromAliment(a),
-  });
+  };
+  if (_fsmEditRid != null) {
+    var found = _findMealRow(mid, _fsmEditRid);
+    if (found) {
+      Object.assign(found.row, data);
+      var card = document.getElementById('frow-' + _fsmEditRid);
+      if (card) card.innerHTML = _foodRowInner(mid, found.row);
+      updateMealHeaderStats(mid); recalcMealMacros(mid);
+      closeFoodSearch();
+      toast('Alimento actualizado', 'success');
+      return;
+    }
+  }
+  addFoodRow(mid, data);
   updateMealHeaderStats(mid);
   closeFoodSearch();
   toast('Alimento añadido', 'success');

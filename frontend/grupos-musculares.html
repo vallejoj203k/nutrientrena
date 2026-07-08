@@ -430,7 +430,7 @@ function renderMuscleGroups(items){
       <div class="mg-cover">${coverInner}</div>
       <div class="mg-body">
         <div class="mg-name">${esc(mg.name)}</div>
-        <div class="mg-desc">${esc(mg.description||'Sin descripción')}</div>
+        ${mg.description?`<div class="mg-desc">${esc(mg.description)}</div>`:''}
         <div class="mg-footer">
           <span class="badge ${mg.state?'badge-green':'badge-gray'}">${mg.state?'Activo':'Inactivo'}</span>
         </div>

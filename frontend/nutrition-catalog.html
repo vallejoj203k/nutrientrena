@@ -158,6 +158,21 @@
     .form-group textarea{min-height:72px;resize:vertical;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
     .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 12px;}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px;}
+    .al-micro-toggle{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;cursor:pointer;padding:12px 0 10px;border-top:1px solid #EBEBEB;margin-top:8px;color:#374151;font-size:13px;font-weight:700;user-select:none;}
+    .al-micro-toggle:hover{color:var(--indigo);}
+    .al-micro-toggle .al-arr{margin-left:auto;font-size:11px;color:#9CA3AF;}
+    .al-micro-sub{font-size:12px;color:#9CA3AF;font-weight:400;}
+    .al-micro-body{display:none;margin-top:8px;}
+    .al-micro-body.open{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 22px;}
+    .al-micro-col-head{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
+    .al-micro-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:6px;}
+    .al-micro-row label{font-size:12.5px;color:#374151;flex:1;min-width:0;}
+    .al-micro-inp{display:flex;align-items:center;gap:4px;}
+    .al-micro-inp input{width:64px;padding:5px 7px;border:1px solid #E5E7EB;border-radius:6px;font-size:12.5px;color:#111;outline:none;text-align:right;font-family:inherit;}
+    .al-micro-inp input:focus{border-color:var(--indigo);}
+    .al-micro-inp span{font-size:11px;color:#9CA3AF;width:20px;}
+    @media(max-width:600px){.form-row-3{grid-template-columns:1fr 1fr;}.al-micro-body.open{grid-template-columns:1fr;}}
     .section-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;display:flex;align-items:center;justify-content:space-between;}
     .form-error{color:#DC2626;font-size:12px;margin-top:6px;}
 
@@ -578,7 +593,7 @@
 
 <!-- ── Aliment modal ── -->
 <div class="modal-overlay" id="al_overlay" onclick="if(event.target===this)closeAlimentModal()">
-  <div class="modal">
+  <div class="modal" style="width:720px;">
     <div class="modal-head">
       <h2 id="al_modalTitle">Nuevo alimento</h2>
       <button class="modal-close" onclick="closeAlimentModal()">×</button>
@@ -592,29 +607,78 @@
       <div class="form-row">
         <div class="form-group"><label>Grupo de alimento</label><select id="al_fGroup"><option value="">— Sin grupo —</option></select></div>
         <div class="form-group">
-          <label>Cantidad</label>
+          <label>Cantidad de referencia</label>
           <div style="display:flex;gap:6px;">
             <input id="al_fQty" type="number" step="0.1" min="0" placeholder="100" style="flex:1;min-width:0;"/>
             <select id="al_fUnit" style="width:110px;padding:10px 8px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;background:#fff;">
-              <option value="gr">gr</option>
-              <option value="kg">kg</option>
+              <option value="g">g (gramos)</option>
               <option value="ml">ml</option>
-              <option value="l">l</option>
-              <option value="unidad">unidad</option>
-              <option value="cucharada">cucharada</option>
-              <option value="taza">taza</option>
+              <option value="oz">oz</option>
+              <option value="unidad">Unidad</option>
+              <option value="taza">Taza</option>
+              <option value="cda">Cucharada</option>
+              <option value="cdta">Cucharadita</option>
+              <option value="porcion">Porción</option>
             </select>
           </div>
         </div>
       </div>
-      <div class="section-title">Macronutrientes (por porción)</div>
+      <div class="section-title">Macronutrientes (por 100g)</div>
       <div class="form-row-4">
+        <div class="form-group"><label>Calorías (kcal)</label><input id="al_fCalories" type="number" step="0.1" min="0" placeholder="0"/></div>
         <div class="form-group"><label>Proteínas (g)</label><input id="al_fProteins" type="number" step="0.1" min="0" placeholder="0"/></div>
-        <div class="form-group"><label>Carbs (g)</label><input id="al_fCarbs" type="number" step="0.1" min="0" placeholder="0"/></div>
+        <div class="form-group"><label>Carbohidratos (g)</label><input id="al_fCarbs" type="number" step="0.1" min="0" placeholder="0"/></div>
         <div class="form-group"><label>Grasas (g)</label><input id="al_fFats" type="number" step="0.1" min="0" placeholder="0"/></div>
-        <div class="form-group"><label>Calorías</label><input id="al_fCalories" type="number" step="1" min="0" placeholder="0"/></div>
       </div>
-      <div class="form-group"><label>Comentarios</label><textarea id="al_fComments" placeholder="Notas adicionales…" maxlength="500"></textarea></div>
+      <div class="form-row-3">
+        <div class="form-group"><label>Fibra (g)</label><input id="al_fFiber" type="number" step="0.1" min="0" placeholder="0"/></div>
+        <div class="form-group"><label>Azúcares (g)</label><input id="al_fSugars" type="number" step="0.1" min="0" placeholder="0"/></div>
+        <div class="form-group"><label>Grasas saturadas (g)</label><input id="al_fSatFats" type="number" step="0.01" min="0" placeholder="0"/></div>
+      </div>
+      <button type="button" class="al-micro-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.al-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5c0 2.1-1.3 3.9-3.1 4.7C16.1 12.9 18 15.3 18 18v1H6v-1c0-2.7 1.9-5.1 4.1-6.3A5 5 0 0 1 12 2z"/></svg>
+        Micronutrientes <span class="al-micro-sub">(opcional — útil para planes con patologías)</span>
+        <span class="al-arr">▼</span>
+      </button>
+      <div class="al-micro-body">
+        <div>
+          <div class="al-micro-col-head">Vitaminas</div>
+          <div class="al-micro-row"><label>Vitamina A</label><div class="al-micro-inp"><input id="al_fVita" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina B1</label><div class="al-micro-inp"><input id="al_fVitb1" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina B2</label><div class="al-micro-inp"><input id="al_fVitb2" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina B3</label><div class="al-micro-inp"><input id="al_fVitb3" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina B5</label><div class="al-micro-inp"><input id="al_fVitb5" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina B6</label><div class="al-micro-inp"><input id="al_fVitb6" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina B9</label><div class="al-micro-inp"><input id="al_fVitb9" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina B12</label><div class="al-micro-inp"><input id="al_fVitb12" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina C</label><div class="al-micro-inp"><input id="al_fVitc" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina D</label><div class="al-micro-inp"><input id="al_fVitd" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina E</label><div class="al-micro-inp"><input id="al_fVite" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Vitamina K</label><div class="al-micro-inp"><input id="al_fVitk" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+        </div>
+        <div>
+          <div class="al-micro-col-head">Minerales</div>
+          <div class="al-micro-row"><label>Calcio</label><div class="al-micro-inp"><input id="al_fCalcium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Hierro</label><div class="al-micro-inp"><input id="al_fIron" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Magnesio</label><div class="al-micro-inp"><input id="al_fMagnesium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Fósforo</label><div class="al-micro-inp"><input id="al_fPhosphorus" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Potasio</label><div class="al-micro-inp"><input id="al_fPotassium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Sodio</label><div class="al-micro-inp"><input id="al_fSodium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Zinc</label><div class="al-micro-inp"><input id="al_fZinc" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Selenio</label><div class="al-micro-inp"><input id="al_fSelenium" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Cobre</label><div class="al-micro-inp"><input id="al_fCopper" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>Manganeso</label><div class="al-micro-inp"><input id="al_fManganese" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+        </div>
+        <div>
+          <div class="al-micro-col-head">Otros</div>
+          <div class="al-micro-row"><label>Colesterol</label><div class="al-micro-inp"><input id="al_fCholesterol" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+          <div class="al-micro-row"><label>G. monoinsaturadas</label><div class="al-micro-inp"><input id="al_fMonoFats" type="number" step="0.01" min="0" placeholder="0"/><span>g</span></div></div>
+          <div class="al-micro-row"><label>G. poliinsaturadas</label><div class="al-micro-inp"><input id="al_fPoliFats" type="number" step="0.01" min="0" placeholder="0"/><span>g</span></div></div>
+          <div class="al-micro-row"><label>Agua</label><div class="al-micro-inp"><input id="al_fWater" type="number" step="0.1" min="0" placeholder="0"/><span>g</span></div></div>
+          <div class="al-micro-row"><label>Índice glucémico</label><div class="al-micro-inp"><input id="al_fGlycemic" type="number" step="1" min="0" placeholder="0"/><span></span></div></div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px;"><label>Comentarios</label><textarea id="al_fComments" placeholder="Notas adicionales…" maxlength="500"></textarea></div>
       <div class="form-error" id="al_modalError"></div>
     </div>
     <div class="modal-footer">
@@ -879,6 +943,16 @@ async function openAlimentEdit(id) {
   } catch { toast('Error de conexión', 'error'); }
 }
 
+const _AL_DESC_FIELDS = {
+  al_fVita:'vita', al_fVitb1:'vitb1', al_fVitb2:'vitb2', al_fVitb3:'vitb3', al_fVitb5:'vitb5',
+  al_fVitb6:'vitb6', al_fVitb9:'vitb9', al_fVitb12:'vitb12', al_fVitc:'vitc', al_fVitd:'vitd',
+  al_fVite:'vite', al_fVitk:'vitk', al_fCalcium:'calcium', al_fIron:'iron', al_fMagnesium:'magnesium',
+  al_fPhosphorus:'phosphorus', al_fPotassium:'potassium', al_fSodium:'sodium', al_fZinc:'zinc',
+  al_fSelenium:'selenium', al_fCopper:'copper', al_fManganese:'manganese', al_fFiber:'fiber',
+  al_fSugars:'sugars', al_fSatFats:'saturated_fats', al_fMonoFats:'mono_saturated_fats',
+  al_fPoliFats:'poli_saturated_fats', al_fCholesterol:'cholesterol', al_fWater:'water', al_fGlycemic:'glycemic_index',
+};
+
 function openAlimentModalWith(item) {
   document.getElementById('al_modalTitle').textContent     = item ? 'Editar alimento' : 'Nuevo alimento';
   document.getElementById('al_editId').value               = item?.id ?? '';
@@ -886,12 +960,18 @@ function openAlimentModalWith(item) {
   document.getElementById('al_fBrand').value               = item?.brand ?? '';
   document.getElementById('al_fGroup').value               = item?.group_food_id ?? '';
   document.getElementById('al_fQty').value                 = item?.quantity ?? '';
-  document.getElementById('al_fUnit').value                = item?.unit     ?? 'gr';
+  document.getElementById('al_fUnit').value                = item?.quantity_unit ?? item?.unit ?? 'g';
   document.getElementById('al_fProteins').value            = item?.proteins ?? '';
   document.getElementById('al_fCarbs').value               = item?.carbohydrates ?? '';
   document.getElementById('al_fFats').value                = item?.fats ?? '';
   document.getElementById('al_fCalories').value            = item?.calories ?? '';
   document.getElementById('al_fComments').value            = item?.comments ?? '';
+  const d = item?.description || {};
+  Object.entries(_AL_DESC_FIELDS).forEach(([elId, key]) => {
+    const el = document.getElementById(elId); if (el) el.value = d[key] ?? '';
+  });
+  const micro = document.querySelector('#al_overlay .al-micro-body'); if (micro) micro.classList.remove('open');
+  const arr = document.querySelector('#al_overlay .al-arr'); if (arr) arr.textContent = '▼';
   document.getElementById('al_modalError').textContent     = '';
   document.getElementById('al_saveBtn').disabled           = false;
   document.getElementById('al_saveBtnLabel').textContent   = 'Guardar';
@@ -913,17 +993,22 @@ async function saveAliment() {
   btn.disabled = true; lbl.textContent = 'Guardando…';
   document.getElementById('al_modalError').textContent = '';
   const toF = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+  const gv = id => document.getElementById(id)?.value;
+  const description = {};
+  Object.entries(_AL_DESC_FIELDS).forEach(([elId, key]) => { description[key] = toF(gv(elId)); });
+  const hasDesc = Object.values(description).some(v => v != null);
   const body = {
     name,
     brand:         document.getElementById('al_fBrand').value.trim() || null,
     group_food_id: parseInt(document.getElementById('al_fGroup').value) || null,
     quantity:      toF(document.getElementById('al_fQty').value),
-    unit:          document.getElementById('al_fUnit').value || null,
+    quantity_unit: document.getElementById('al_fUnit').value || null,
     proteins:      toF(document.getElementById('al_fProteins').value),
     carbohydrates: toF(document.getElementById('al_fCarbs').value),
     fats:          toF(document.getElementById('al_fFats').value),
     calories:      toF(document.getElementById('al_fCalories').value),
     comments:      document.getElementById('al_fComments').value.trim() || null,
+    description:   hasDesc ? description : null,
   };
   const url    = id ? `${API}/aliments/${id}/update` : `${API}/aliments`;
   const method = id ? 'PUT' : 'POST';

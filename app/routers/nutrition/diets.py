@@ -109,6 +109,17 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
                     DietFoodAliment.id == aliment_data.id
                 ).first()
                 if dfa:
+                    # If the chosen aliment changed, re-clone the new source and repoint.
+                    # dfa.aliment_id points to a clone; its parent_id is the source aliment.
+                    current_source = dfa.aliment.parent_id if dfa.aliment else None
+                    unchanged = (
+                        str(dfa.aliment_id) == str(aliment_data.aliment_id)
+                        or str(current_source) == str(aliment_data.aliment_id)
+                    )
+                    if not unchanged:
+                        cloned = _clone_aliment(db, source_aliment)
+                        cloned.created_user_id = current_user_id
+                        dfa.aliment_id = cloned.id
                     dfa.quantity = aliment_data.quantity_calc
                     dfa.order = aliment_data.order or 0
                     kept_ids.add(dfa.id)
@@ -127,6 +138,13 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
             db.add(dfa)
             db.flush()
             kept_ids.add(dfa.id)
+
+        # Remove aliments deleted in the editor (existing rows no longer sent)
+        for orphan in db.query(DietFoodAliment).filter(
+            DietFoodAliment.diet_food_id == food.id
+        ).all():
+            if orphan.id not in kept_ids:
+                db.delete(orphan)
 
 
 @router.get("/findAll", summary="Listar dietas", description="Retorna todas las dietas del coach autenticado.")

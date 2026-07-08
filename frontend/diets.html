@@ -2397,8 +2397,7 @@ async function saveDiet() {
     var detail = meal.rows
       .filter(function(r){ return r.aliment_id; })
       .map(function(r, i) {
-        var qElS = document.getElementById('fqty-' + r.id);
-        var obj = { aliment_id: r.aliment_id, quantity_calc: parseFloat(qElS ? qElS.value : (r.quantity || '')) || null, order: i };
+        var obj = { aliment_id: r.aliment_id, quantity_calc: parseFloat(r.quantity) || null, order: i };
         if (r.db_id) obj.id = r.db_id;
         return obj;
       });

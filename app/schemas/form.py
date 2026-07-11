@@ -29,6 +29,7 @@ class FormFieldOut(BaseModel):
 class FormTemplateCreate(BaseModel):
     title: str
     description: Optional[str] = None
+    category: str = "checkin"
     is_default: bool = False
     fields: List[FormFieldCreate] = []
 
@@ -36,6 +37,7 @@ class FormTemplateCreate(BaseModel):
 class FormTemplateUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
+    category: Optional[str] = None
     is_default: Optional[bool] = None
     fields: Optional[List[FormFieldCreate]] = None
 
@@ -44,6 +46,7 @@ class FormTemplateOut(BaseModel):
     id: int
     title: str
     description: Optional[str] = None
+    category: Optional[str] = "checkin"
     is_default: bool
     created_at: Optional[datetime] = None
     fields: List[FormFieldOut] = []

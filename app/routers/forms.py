@@ -77,6 +77,7 @@ def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), cur
     template = FormTemplate(
         title=data.title,
         description=data.description,
+        category=data.category or "checkin",
         is_default=data.is_default,
         created_by=current_user.id,
     )
@@ -110,9 +111,12 @@ def get_default(db: Session = Depends(get_db), current_user=Depends(require_role
     return send_response(FormTemplateOut.model_validate(template).model_dump(), "OK")
 
 
-@router_templates.get("", summary="Listar plantillas", description="Retorna todas las plantillas de formulario creadas por el usuario autenticado.")
-def list_templates(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
-    templates = db.query(FormTemplate).filter(FormTemplate.created_by == current_user.id).all()
+@router_templates.get("", summary="Listar plantillas", description="Retorna las plantillas de formulario creadas por el usuario autenticado. Se puede filtrar por categoría (checkin|onboarding|survey).")
+def list_templates(category: str | None = None, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+    query = db.query(FormTemplate).filter(FormTemplate.created_by == current_user.id)
+    if category:
+        query = query.filter(FormTemplate.category == category)
+    templates = query.all()
     return send_response([FormTemplateOut.model_validate(t).model_dump() for t in templates], "OK")
 
 
@@ -134,6 +138,8 @@ def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get
         template.title = data.title
     if data.description is not None:
         template.description = data.description
+    if data.category is not None:
+        template.category = data.category
     if data.is_default is not None:
         if data.is_default:
             db.query(FormTemplate).filter(

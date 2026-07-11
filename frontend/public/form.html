@@ -238,6 +238,10 @@
     label.innerHTML = esc(field.label) + (field.required ? '<span class="req">*</span>' : '');
     wrap.appendChild(label);
 
+    // Tipos especiales que construyen su propia interfaz
+    if (field.field_type === 'scale') { wrap.appendChild(buildScale(field)); return wrap; }
+    if (field.field_type === 'photo') { wrap.appendChild(buildPhoto(field)); return wrap; }
+
     let input;
     const isParamSelect = PARAM_SELECT_KEYS.includes(field.field_key) && _paramOptions[field.field_key]?.length;
 
@@ -283,6 +287,60 @@
 
     wrap.appendChild(input);
     return wrap;
+  }
+
+  function buildScale(field) {
+    const box = document.createElement('div');
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden'; hidden.id = `field_${field.field_key}`; hidden.name = field.field_key;
+    box.appendChild(hidden);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
+    for (let n = 1; n <= 10; n++) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = n;
+      b.style.cssText = 'width:38px;height:38px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;font-size:14px;font-weight:600;color:#374151;cursor:pointer;transition:.12s;';
+      b.onclick = () => {
+        hidden.value = String(n);
+        row.querySelectorAll('button').forEach(x => { x.style.background = '#fff'; x.style.color = '#374151'; x.style.borderColor = '#E5E7EB'; });
+        b.style.background = 'var(--purple)'; b.style.color = '#fff'; b.style.borderColor = 'var(--purple)';
+        updateProgress();
+      };
+      row.appendChild(b);
+    }
+    box.appendChild(row);
+    return box;
+  }
+
+  function buildPhoto(field) {
+    const box = document.createElement('div');
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden'; hidden.id = `field_${field.field_key}`; hidden.name = field.field_key;
+    box.appendChild(hidden);
+    const drop = document.createElement('label');
+    drop.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #D1D5DB;border-radius:10px;padding:20px;color:#6B7280;font-size:13px;cursor:pointer;background:#FAFBFC;';
+    drop.innerHTML = '<span>📷 Toca para subir una foto</span>';
+    const file = document.createElement('input');
+    file.type = 'file'; file.accept = 'image/*'; file.style.display = 'none';
+    drop.appendChild(file);
+    const status = document.createElement('div');
+    status.style.cssText = 'font-size:12px;color:#6B7280;margin-top:8px;';
+    file.addEventListener('change', async () => {
+      const f = file.files[0]; if (!f) return;
+      status.textContent = 'Subiendo…';
+      const fd = new FormData(); fd.append('file', f);
+      try {
+        const r = await fetch(`${API}/public/form/${assignmentId}/upload`, { method: 'POST', body: fd });
+        const j = await r.json();
+        const url = (j.data && j.data.url) || j.url;
+        if (!r.ok || !url) throw new Error(j.message || 'Error');
+        hidden.value = url;
+        status.innerHTML = `<img src="${url}" style="max-width:130px;border-radius:8px;margin-top:6px;display:block;"/>`;
+        updateProgress();
+      } catch (e) { status.textContent = 'No se pudo subir la foto. Inténtalo de nuevo.'; }
+    });
+    box.appendChild(drop); box.appendChild(status);
+    return box;
   }
 
   function buildParamSelect(fieldKey) {

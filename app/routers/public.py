@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends
+import uuid
+from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from datetime import datetime
 
+from app.config import settings
 from app.database import get_db
 from app.core.responses import send_response, send_error
+from app.routers.files import _get_r2_client, _public_url, ALLOWED_TYPES, MAX_SIZE_MB
 from app.models.form import FormAssignment, FormResponse, PROFILE_FIELD_MAP
 from app.models.user import UserDetail, UserParent, User
 from app.models.parameter import Parameter, ParameterDetail
@@ -70,6 +73,36 @@ def get_public_form(assignment_id: str, db: Session = Depends(get_db)):
     if not assignment:
         return send_error("Formulario no encontrado", code=404)
     return send_response(FormAssignmentOut.model_validate(assignment).model_dump(), "OK")
+
+
+@router.post("/form/{assignment_id}/upload", summary="Subir foto de un formulario público", description="Permite al cliente subir una imagen para un campo de tipo foto, sin autenticación. Solo funciona si la asignación existe y sigue pendiente.")
+async def upload_public_form_photo(assignment_id: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    assignment = db.query(FormAssignment).filter(FormAssignment.id == assignment_id).first()
+    if not assignment:
+        return send_error("Formulario no encontrado", code=404)
+    if assignment.status == "submitted":
+        return send_error("El formulario ya fue enviado", code=400)
+    if not settings.AWS_BUCKET:
+        return send_error("Almacenamiento no configurado", code=500)
+    if file.content_type not in ALLOWED_TYPES:
+        return send_error("Tipo de archivo no permitido. Usa JPG, PNG, WEBP o GIF.", code=400)
+    content = await file.read()
+    if len(content) > MAX_SIZE_MB * 1024 * 1024:
+        return send_error(f"El archivo supera el límite de {MAX_SIZE_MB} MB", code=400)
+    ext = file.filename.rsplit(".", 1)[-1].lower() if file.filename and "." in file.filename else "jpg"
+    key = f"checkins/{uuid.uuid4()}.{ext}"
+    try:
+        r2 = _get_r2_client()
+        r2.put_object(
+            Bucket=settings.AWS_BUCKET,
+            Key=key,
+            Body=content,
+            ContentType=file.content_type,
+            CacheControl="public, max-age=31536000",
+        )
+    except Exception as e:
+        return send_error(f"Error al subir el archivo: {str(e)}", code=500)
+    return send_response({"url": _public_url(key)}, "OK")
 
 
 @router.post("/form/{assignment_id}/submit", summary="Enviar formulario público", description="El cliente envía sus respuestas sin necesitar autenticación. Actualiza su perfil automáticamente.")

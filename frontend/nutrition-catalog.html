@@ -1649,6 +1649,13 @@ loadUser();
 loadPendingBadge();
 loadAlGroups().then(() => loadAliments(1));
 
+// Open a specific sub-tab when arriving from the Librería header (?tab=tipos|grupos|recetas|alimentos)
+(function(){
+  var t = new URLSearchParams(window.location.search).get('tab');
+  var valid = ['alimentos','recetas','tipos','grupos'];
+  if (t && valid.indexOf(t) >= 0) { try { showTab(t); } catch(e){} }
+})();
+
 // ── Sidebar role adaptation ───────────────────────────────────────────────────
 function adaptSidebar() {
   const rid = parseInt(localStorage.getItem('role_id') || '0');

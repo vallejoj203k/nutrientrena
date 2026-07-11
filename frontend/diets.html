@@ -36,6 +36,63 @@
     .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
     .page-header-title{font-size:17px;font-weight:800;color:#111827;}
     .page-header-right{display:flex;align-items:center;gap:10px;}
+
+    /* ── Librería: colores base (paleta centralizada) ── */
+    :root{
+      --lib-primary:#4F46E5; --lib-primary-hover:#4338CA; --lib-primary-soft:#EEF2FF;
+      --cat-entrenamiento:#4F46E5; --cat-nutricion:#F59E0B; --cat-formularios:#10B981; --cat-documentos:#6366F1;
+      --lib-border:#E5E7EB; --lib-text:#111827; --lib-muted:#6B7280;
+    }
+    /* ── Librería: cabecera unificada ── */
+    .lib-header{background:#fff;border-bottom:1px solid var(--lib-border);padding:18px 28px 0;flex-shrink:0;}
+    .lib-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .lib-title{font-size:22px;font-weight:800;color:var(--lib-text);}
+    .lib-sub{font-size:13px;color:var(--lib-muted);margin-top:2px;}
+    .lib-cats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+    .lib-cat{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:12px;border:1px solid var(--lib-border);background:#fff;color:#374151;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;}
+    .lib-cat:hover{border-color:#CBD5E1;}
+    .lib-cat.active{color:#fff;border-color:transparent;}
+    .lib-cat.active.c-entrenamiento{background:var(--cat-entrenamiento);}
+    .lib-cat.active.c-nutricion{background:var(--cat-nutricion);}
+    .lib-cat.active.c-formularios{background:var(--cat-formularios);}
+    .lib-cat.active.c-documentos{background:var(--cat-documentos);}
+    .lib-subtabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto;align-items:center;}
+    .lib-subtab{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--lib-muted);cursor:pointer;text-decoration:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s;}
+    .lib-subtab:hover{color:var(--lib-text);}
+    .lib-subtab.active{color:var(--lib-primary);border-bottom-color:var(--lib-primary);}
+    .lib-subtab-count{font-size:11px;font-weight:700;color:#9CA3AF;}
+    .lib-subtab.active .lib-subtab-count{color:var(--lib-primary);}
+    .lib-subtabs-note{margin-left:auto;font-size:12px;color:#9CA3AF;white-space:nowrap;padding-left:16px;}
+    .lib-info{display:flex;gap:12px;align-items:flex-start;background:#F9FAFB;border:1px solid #F0F1F3;border-radius:12px;padding:14px 16px;margin:16px 0 4px;}
+    .lib-info svg{flex-shrink:0;color:#9CA3AF;margin-top:1px;}
+    .lib-info-title{font-size:13px;font-weight:700;color:#374151;}
+    .lib-info-text{font-size:12.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;}
+    /* ── Librería: tabla de dietas ── */
+    .lib-table-wrap{flex:1;overflow-y:auto;padding:8px 28px 32px;}
+    .lib-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--lib-border);border-radius:14px;overflow:hidden;}
+    .lib-table thead th{text-align:left;padding:12px 16px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--lib-border);background:#fff;white-space:nowrap;}
+    .lib-table thead th.num{text-align:right;}
+    .lib-table tbody td{padding:13px 16px;font-size:13.5px;color:#374151;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
+    .lib-table tbody tr:last-child td{border-bottom:none;}
+    .lib-table tbody tr:hover td{background:#FAFBFC;}
+    .lib-td-name{display:flex;align-items:center;gap:12px;}
+    .lib-td-ico{width:36px;height:36px;border-radius:10px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .lib-td-title{font-size:14px;font-weight:700;color:var(--lib-text);display:flex;align-items:center;gap:7px;}
+    .lib-td-subtype{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .lib-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+    .lib-tag-mia{background:#DBEAFE;color:#2563EB;}
+    .lib-tag-plantilla{background:#F3F4F6;color:#6B7280;}
+    .lib-td-kcal{font-weight:700;color:var(--lib-text);display:inline-flex;align-items:center;gap:5px;}
+    .lib-td-num{text-align:right;font-weight:600;color:#374151;font-variant-numeric:tabular-nums;}
+    .lib-td-comidas{text-align:right;color:var(--lib-primary);font-weight:700;}
+    .lib-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+    .lib-btn-assign{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--lib-primary);color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
+    .lib-btn-assign:hover{background:var(--lib-primary-hover);}
+    .lib-icon-btn{width:30px;height:30px;border:none;background:none;border-radius:7px;cursor:pointer;color:#9CA3AF;display:inline-flex;align-items:center;justify-content:center;transition:.15s;position:relative;}
+    .lib-icon-btn:hover{background:#F3F4F6;color:#374151;}
+    .lib-menu-wrap{position:relative;display:inline-flex;}
+    .lib-menu-dd{position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--lib-border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;min-width:160px;overflow:hidden;display:none;}
+    .lib-menu-dd.open{display:block;}
     .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
     .btn-primary{background:var(--indigo);color:#fff;}
     .btn-primary:hover{background:var(--indigo-dark);}
@@ -676,32 +733,57 @@
 <div class="main">
 
   <div id="listView">
-    <div class="page-header">
-      <div class="page-header-left">
-        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <a class="page-header-back" href="nutricion.html">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          Nutricion
-        </a>
-        <div class="page-header-divider"></div>
-        <div class="page-header-title">Dietas</div>
+    <!-- ── Cabecera unificada de Librería ── -->
+    <div class="lib-header">
+      <div class="lib-head-top">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú" style="flex-shrink:0;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <div class="lib-title">Librería</div>
+            <div class="lib-sub">Contenido reutilizable para asignar a tus clientes.</div>
+          </div>
+        </div>
+        <div class="page-header-right">
+          <button class="lib-btn-assign" onclick="openForm()" style="padding:9px 18px;font-size:13px;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva dieta
+          </button>
+          <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+        </div>
       </div>
-      <div class="page-header-right">
-        <button class="btn btn-primary" onclick="openForm()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          + Nueva dieta
-        </button>
-      
-        <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+      <!-- Categorías -->
+      <div class="lib-cats">
+        <a class="lib-cat c-entrenamiento" href="rutinas.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>Entrenamiento</a>
+        <a class="lib-cat c-nutricion active" href="diets.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrición</a>
+        <a class="lib-cat c-formularios" href="forms.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Formularios</a>
+        <a class="lib-cat c-documentos" href="documentos.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Documentos</a>
+      </div>
+      <!-- Sub-pestañas de Nutrición -->
+      <div class="lib-subtabs">
+        <a class="lib-subtab active" href="diets.html">Dietas <span class="lib-subtab-count" id="subcountDietas"></span></a>
+        <a class="lib-subtab" href="menus.html">Menús</a>
+        <a class="lib-subtab" href="recipes.html">Recetas</a>
+        <a class="lib-subtab" href="aliments.html">Alimentos</a>
+        <a class="lib-subtab" href="nutrition-catalog.html?tab=tipos">Tipos de dieta</a>
+        <a class="lib-subtab" href="nutrition-catalog.html?tab=grupos">Grupos de alimentos</a>
+        <span class="lib-subtabs-note">Dietas, menús, recetas y alimentos</span>
+      </div>
+      <!-- Info -->
+      <div class="lib-info">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <div class="lib-info-title">¿Qué es una dieta?</div>
+          <div class="lib-info-text">Un plan de alimentación de un día (desayuno, comida, cena…) con sus recetas y cantidades. Se asigna a un cliente.</div>
+        </div>
       </div>
     </div>
 
     <div class="toolbar">
       <div class="search-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="Buscar dietas..." oninput="applyFilter()"/>
+        <input type="text" id="searchInput" placeholder="Buscar en dietas..." oninput="applyFilter()"/>
       </div>
       <div class="filter-pills">
         <button class="pill active" data-filter="all" onclick="setFilter('all')">Todas</button>
@@ -712,10 +794,16 @@
       <span class="total-label" id="dietTotalLabel"></span>
     </div>
 
-    <div style="flex:1;overflow-y:auto;padding:20px 28px 32px;">
-      <div class="diets-grid" id="dietsGrid">
-        <div style="grid-column:1/-1;text-align:center;padding:48px;color:#9CA3AF;">Cargando dietas…</div>
-      </div>
+    <div class="lib-table-wrap">
+      <table class="lib-table">
+        <thead><tr>
+          <th>Nombre</th><th>Tipo</th><th class="num">Kcal</th><th class="num">Prot</th>
+          <th class="num">Carb</th><th class="num">Grasa</th><th class="num">Comidas</th><th class="num">Acciones</th>
+        </tr></thead>
+        <tbody id="dietsTbody">
+          <tr><td colspan="8" style="text-align:center;padding:40px;color:#9CA3AF;">Cargando dietas…</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -1166,15 +1254,75 @@ document.addEventListener('click', function(){ document.querySelectorAll('.dc-dr
 
 function renderTable(diets) {
   document.getElementById('dietTotalLabel').textContent = diets.length + ' dieta' + (diets.length !== 1 ? 's' : '');
-  var grid = document.getElementById('dietsGrid');
+  var sc = document.getElementById('subcountDietas'); if (sc) sc.textContent = allDiets.length || '';
+  var tb = document.getElementById('dietsTbody');
+  if (!tb) return;
   if (!diets.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1" class="empty"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><h3>No hay dietas</h3><p>Crea tu primera dieta con el botón "+ Nueva dieta".</p></div>'
-      + '<div class="diet-card-new" onclick="openForm()"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva dieta</div>';
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:44px;color:#9CA3AF;">No hay dietas. Crea la primera con “Nueva dieta”.</td></tr>';
     return;
   }
-  grid.innerHTML = diets.map(dietCard).join('')
-    + '<div class="diet-card-new" onclick="openForm()"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva dieta</div>';
+  tb.innerHTML = diets.map(dietRow).join('');
 }
+
+function _dietFoodIcon() {
+  return '<svg width="19" height="19" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>';
+}
+
+function dietRow(d) {
+  var _rid = parseInt(localStorage.getItem('role_id') || '0');
+  var _isAdmin = _rid === 1 || _rid === 2;
+  var isPlatformAdmin = d.organization_id == null;
+  var canEdit = _isAdmin || !isPlatformAdmin;
+  var det = d.detail || {};
+  var kcal = d.calories ? Math.round(d.calories) : null;
+  var prot = det.proteins ? Math.round(det.proteins) : null;
+  var carb = det.carbs ? Math.round(det.carbs) : null;
+  var fat  = det.fats  ? Math.round(det.fats)  : null;
+  var comidas = (d.foods || []).length;
+  var tipo = getDietTipo(d);
+  var id = String(d.id), title = esc(d.title || 'Sin nombre');
+  var tag = isPlatformAdmin
+    ? '<span class="lib-tag lib-tag-plantilla">Plantilla</span>'
+    : '<span class="lib-tag lib-tag-mia">Mía</span>';
+  var num = function(v, u){ return v != null ? v + (u || '') : '—'; };
+  var flame = '<svg width="13" height="13" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>';
+
+  var menuItems = canEdit
+    ? '<div class="dc-dd-item" onclick="event.stopPropagation();closeRowMenus();openForm(\'' + id + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</div>'
+      + '<div class="dc-dd-item" onclick="event.stopPropagation();closeRowMenus();downloadPdf(\'' + id + '\',\'' + title + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Descargar PDF</div>'
+      + '<div class="dc-dd-item" onclick="event.stopPropagation();closeRowMenus();duplicateDiet(\'' + id + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Duplicar</div>'
+      + '<div class="dc-dd-sep"></div>'
+      + '<div class="dc-dd-item danger" onclick="event.stopPropagation();closeRowMenus();openConfirm(\'Eliminar dieta\',\'Esta acción no se puede deshacer.\',function(){deleteDiet(\'' + id + '\')})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar</div>'
+    : '<div class="dc-dd-item" style="color:#9CA3AF;cursor:default;">Solo lectura</div>';
+
+  return '<tr>'
+    + '<td><div class="lib-td-name"><div class="lib-td-ico">' + _dietFoodIcon() + '</div>'
+    +   '<div><div class="lib-td-title">' + title + ' ' + tag + '</div>'
+    +   '<div class="lib-td-subtype">' + esc(tipo) + '</div></div></div></td>'
+    + '<td>' + esc(tipo) + '</td>'
+    + '<td class="lib-td-num"><span class="lib-td-kcal">' + flame + (kcal != null ? kcal : '—') + '</span></td>'
+    + '<td class="lib-td-num">' + num(prot, 'g') + '</td>'
+    + '<td class="lib-td-num">' + num(carb, 'g') + '</td>'
+    + '<td class="lib-td-num">' + num(fat, 'g') + '</td>'
+    + '<td class="lib-td-comidas">' + comidas + '</td>'
+    + '<td><div class="lib-actions">'
+    +   '<button class="lib-btn-assign" onclick="openAssign(\'' + id + '\',\'' + title + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>'
+    +   '<button class="lib-icon-btn" onclick="openDietPreview(\'' + id + '\')" title="Ver detalle"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>'
+    +   '<div class="lib-menu-wrap"><button class="lib-icon-btn" onclick="toggleRowMenu(event,this)" title="Más"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>'
+    +     '<div class="lib-menu-dd">' + menuItems + '</div></div>'
+    + '</div></td>'
+    + '</tr>';
+}
+
+function toggleRowMenu(e, btn) {
+  e.stopPropagation();
+  var dd = btn.nextElementSibling;
+  var wasOpen = dd.classList.contains('open');
+  closeRowMenus();
+  if (!wasOpen) dd.classList.add('open');
+}
+function closeRowMenus() { document.querySelectorAll('.lib-menu-dd.open').forEach(function(d){ d.classList.remove('open'); }); }
+document.addEventListener('click', function(){ closeRowMenus(); });
 
 function dietCard(d) {
   var _rid = parseInt(localStorage.getItem('role_id') || '0');

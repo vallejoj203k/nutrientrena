@@ -36,6 +36,37 @@
     /* ── Main wrapper ── */
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;}
 
+    /* ── Librería: colores base (paleta centralizada) ── */
+    :root{
+      --lib-primary:#4F46E5; --lib-primary-hover:#4338CA; --lib-primary-soft:#EEF2FF;
+      --cat-entrenamiento:#4F46E5; --cat-nutricion:#F59E0B; --cat-formularios:#10B981; --cat-documentos:#6366F1;
+      --lib-border:#E5E7EB; --lib-text:#111827; --lib-muted:#6B7280;
+    }
+    /* ── Librería: cabecera unificada ── */
+    .lib-header{background:#fff;border-bottom:1px solid var(--lib-border);padding:18px 28px 0;flex-shrink:0;}
+    .lib-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .lib-title{font-size:22px;font-weight:800;color:var(--lib-text);}
+    .lib-sub{font-size:13px;color:var(--lib-muted);margin-top:2px;}
+    .lib-cats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+    .lib-cat{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:12px;border:1px solid var(--lib-border);background:#fff;color:#374151;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;}
+    .lib-cat:hover{border-color:#CBD5E1;}
+    .lib-cat.active{color:#fff;border-color:transparent;}
+    .lib-cat.active.c-entrenamiento{background:var(--cat-entrenamiento);}
+    .lib-cat.active.c-nutricion{background:var(--cat-nutricion);}
+    .lib-cat.active.c-formularios{background:var(--cat-formularios);}
+    .lib-cat.active.c-documentos{background:var(--cat-documentos);}
+    .lib-subtabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto;align-items:center;}
+    .lib-subtab{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--lib-muted);cursor:pointer;text-decoration:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s;}
+    .lib-subtab:hover{color:var(--lib-text);}
+    .lib-subtab.active{color:var(--lib-primary);border-bottom-color:var(--lib-primary);}
+    .lib-subtab-count{font-size:11px;font-weight:700;color:#9CA3AF;}
+    .lib-subtab.active .lib-subtab-count{color:var(--lib-primary);}
+    .lib-subtabs-note{margin-left:auto;font-size:12px;color:#9CA3AF;white-space:nowrap;padding-left:16px;}
+    .lib-info{display:flex;gap:12px;align-items:flex-start;background:#F9FAFB;border:1px solid #F0F1F3;border-radius:12px;padding:14px 16px;margin:16px 0 4px;}
+    .lib-info svg{flex-shrink:0;color:#9CA3AF;margin-top:1px;}
+    .lib-info-title{font-size:13px;font-weight:700;color:#374151;}
+    .lib-info-text{font-size:12.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;}
+
     /* ── List view: page header ── */
     .page-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:20px 28px 0;flex-shrink:0;}
     .ph-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
@@ -418,35 +449,53 @@
 
   <!-- ═══ LIST VIEW ═══ -->
   <div id="listView">
-    <div class="page-header">
-      <div class="ph-top">
-        <div class="ph-title"><h1>Librería</h1><p>Contenido reutilizable para asignar a tus clientes.</p>
-    <span id="topbarRoleBadge" style="margin-left:auto;font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
-  </div>
-        <button class="btn-new" onclick="openForm()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nuevo menú semanal
-        </button>
+    <!-- ── Cabecera unificada de Librería ── -->
+    <div class="lib-header">
+      <div class="lib-head-top">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú" style="flex-shrink:0;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <div class="lib-title">Librería</div>
+            <div class="lib-sub">Contenido reutilizable para asignar a tus clientes.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="lib-btn-assign" onclick="openForm()" style="padding:9px 18px;font-size:13px;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo menú semanal
+          </button>
+          <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+        </div>
       </div>
-      <div class="main-tabs">
-        <button class="main-tab" onclick="location.href='rutinas.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Entrenamiento</button>
-        <button class="main-tab active"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="#F59E0B" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span>Nutrición</button>
-        <button class="main-tab" onclick="location.href='forms.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Formularios</button>
-        <button class="main-tab" onclick="location.href='documentos.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span>Documentos</button>
+      <!-- Categorías -->
+      <div class="lib-cats">
+        <a class="lib-cat c-entrenamiento" href="rutinas.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>Entrenamiento</a>
+        <a class="lib-cat c-nutricion active" href="diets.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrición</a>
+        <a class="lib-cat c-formularios" href="forms.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Formularios</a>
+        <a class="lib-cat c-documentos" href="documentos.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Documentos</a>
+      </div>
+      <!-- Sub-pestañas de Nutrición -->
+      <div class="lib-subtabs">
+        <a class="lib-subtab" href="diets.html">Dietas</a>
+        <a class="lib-subtab active" href="menus.html">Menús <span class="lib-subtab-count" id="menuCount"></span></a>
+        <a class="lib-subtab" href="recipes.html">Recetas</a>
+        <a class="lib-subtab" href="aliments.html">Alimentos</a>
+        <a class="lib-subtab" href="nutrition-catalog.html?tab=tipos">Tipos de dieta</a>
+        <a class="lib-subtab" href="nutrition-catalog.html?tab=grupos">Grupos de alimentos</a>
+        <span class="lib-subtabs-note">Dietas, menús, recetas y alimentos</span>
+      </div>
+      <!-- Info -->
+      <div class="lib-info">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <div class="lib-info-title">¿Qué es un menú?</div>
+          <div class="lib-info-text">Un planificador semanal: 7 dietas (una por día) agrupadas para asignar como bloque dentro de un programa. Ej.: «Semana 1 · Recomposición».</div>
+        </div>
       </div>
     </div>
     <div class="content-area">
-      <div class="sub-bar">
-        <div class="sub-tabs">
-          <a class="sub-tab" href="diets.html">Dietas <span class="sub-count">—</span></a>
-          <a class="sub-tab active" href="menus.html">Menús <span class="sub-count" id="menuCount">—</span></a>
-          <a class="sub-tab" href="recipes.html">Recetas <span class="sub-count">—</span></a>
-          <a class="sub-tab" href="aliments.html">Alimentos <span class="sub-count">—</span></a>
-          <a class="sub-tab" href="nutrition-catalog.html?tab=tipos">Tipos de dieta <span class="sub-count">—</span></a>
-          <a class="sub-tab" href="nutrition-catalog.html?tab=grupos">Grupos de alimentos <span class="sub-count">—</span></a>
-        </div>
-        <span class="sub-bar-right">Dietas, menús, recetas y alimentos</span>
-      </div>
       <div class="toolbar">
         <button class="filter-btn" onclick="cycleFilter()">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -460,13 +509,6 @@
         <div class="view-toggle">
           <button class="view-btn active"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
           <button class="view-btn"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
-        </div>
-      </div>
-      <div class="info-callout">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div class="info-callout-text">
-          <strong>¿Qué es un menú?</strong>
-          <p>Un planificador semanal: 7 dietas (una por día) agrupadas para asignar como bloque dentro de un programa. Ej.: «Semana 1 · Recomposición».</p>
         </div>
       </div>
       <div class="scroll-area">

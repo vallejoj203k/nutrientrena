@@ -36,6 +36,41 @@
     .page-header-divider{width:1px;height:24px;background:#E5E7EB;flex-shrink:0;}
     .page-header-title{font-size:17px;font-weight:800;color:#111827;}
     .page-header-right{display:flex;align-items:center;gap:10px;}
+
+    /* ── Librería: colores base (paleta centralizada) ── */
+    :root{
+      --lib-primary:#4F46E5; --lib-primary-hover:#4338CA; --lib-primary-soft:#EEF2FF;
+      --cat-entrenamiento:#4F46E5; --cat-nutricion:#F59E0B; --cat-formularios:#10B981; --cat-documentos:#6366F1;
+      --lib-border:#E5E7EB; --lib-text:#111827; --lib-muted:#6B7280;
+    }
+    /* ── Librería: cabecera unificada ── */
+    .lib-header{background:#fff;border-bottom:1px solid var(--lib-border);padding:18px 28px 0;flex-shrink:0;}
+    .lib-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .lib-title{font-size:22px;font-weight:800;color:var(--lib-text);}
+    .lib-sub{font-size:13px;color:var(--lib-muted);margin-top:2px;}
+    .lib-cats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+    .lib-cat{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:12px;border:1px solid var(--lib-border);background:#fff;color:#374151;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;}
+    .lib-cat:hover{border-color:#CBD5E1;}
+    .lib-cat.active{color:#fff;border-color:transparent;}
+    .lib-cat.active.c-entrenamiento{background:var(--cat-entrenamiento);}
+    .lib-cat.active.c-nutricion{background:var(--cat-nutricion);}
+    .lib-cat.active.c-formularios{background:var(--cat-formularios);}
+    .lib-cat.active.c-documentos{background:var(--cat-documentos);}
+    .lib-subtabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto;align-items:center;}
+    .lib-subtab{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--lib-muted);cursor:pointer;text-decoration:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s;}
+    .lib-subtab:hover{color:var(--lib-text);}
+    .lib-subtab.active{color:var(--lib-primary);border-bottom-color:var(--lib-primary);}
+    .lib-subtab-count{font-size:11px;font-weight:700;color:#9CA3AF;}
+    .lib-subtab.active .lib-subtab-count{color:var(--lib-primary);}
+    .lib-subtabs-note{margin-left:auto;font-size:12px;color:#9CA3AF;white-space:nowrap;padding-left:16px;}
+    .lib-info{display:flex;gap:12px;align-items:flex-start;background:#F9FAFB;border:1px solid #F0F1F3;border-radius:12px;padding:14px 16px;margin:16px 0 4px;}
+    .lib-info svg{flex-shrink:0;color:#9CA3AF;margin-top:1px;}
+    .lib-info-title{font-size:13px;font-weight:700;color:#374151;}
+    .lib-info-text{font-size:12.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;}
+    /* ── Filtro desplegable de grupo muscular ── */
+    .filter-select{padding:9px 34px 9px 14px;border:1px solid var(--lib-border);border-radius:10px;font-size:13px;font-weight:600;color:#374151;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 12px center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;outline:none;transition:.15s;min-width:220px;}
+    .filter-select:hover{border-color:#CBD5E1;}
+    .filter-select:focus{border-color:var(--lib-primary);}
     .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
     .btn-primary{background:var(--indigo);color:#fff;}
     .btn-primary:hover{background:var(--indigo-dark);}
@@ -277,25 +312,48 @@
 </aside>
 
 <div class="main">
-  <div class="page-header">
-    <div class="page-header-left">
-      <a class="page-header-back" href="routines.html">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        Entrenamiento
-      </a>
-      <div class="page-header-divider"></div>
-      <div>
-        <div class="page-header-title">Ejercicios</div>
+  <!-- ── Cabecera unificada de Librería ── -->
+  <div class="lib-header">
+    <div class="lib-head-top">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú" style="flex-shrink:0;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="lib-title">Librería</div>
+          <div class="lib-sub">Contenido reutilizable para asignar a tus clientes.</div>
+        </div>
       </div>
-    </div>
-    <div class="page-header-right">
-      <button class="btn btn-primary" onclick="openExerciseModal()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo ejercicio
-      </button>
-    
+      <div class="page-header-right">
+        <button class="btn btn-primary" onclick="openExerciseModal()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo ejercicio
+        </button>
         <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
       </div>
+    </div>
+    <!-- Categorías -->
+    <div class="lib-cats">
+      <a class="lib-cat c-entrenamiento active" href="rutinas.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>Entrenamiento</a>
+      <a class="lib-cat c-nutricion" href="diets.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrición</a>
+      <a class="lib-cat c-formularios" href="forms.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Formularios</a>
+      <a class="lib-cat c-documentos" href="documentos.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Documentos</a>
+    </div>
+    <!-- Sub-pestañas de Entrenamiento -->
+    <div class="lib-subtabs">
+      <a class="lib-subtab" href="rutinas.html">Rutinas</a>
+      <a class="lib-subtab active" href="ejercicios.html">Ejercicios <span class="lib-subtab-count" id="subcountEjercicios"></span></a>
+      <a class="lib-subtab" href="grupos-musculares.html">Grupos musculares</a>
+      <span class="lib-subtabs-note">Rutinas, ejercicios y grupos musculares</span>
+    </div>
+    <!-- Info -->
+    <div class="lib-info">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <div class="lib-info-title">¿Qué es un ejercicio?</div>
+        <div class="lib-info-text">Un movimiento concreto (press de banca, sentadilla…) con su grupo muscular, tipo y localización. Los ejercicios son las piezas con las que se construyen las rutinas.</div>
+      </div>
+    </div>
   </div>
 
   <div class="toolbar">
@@ -303,7 +361,9 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="searchExercises" placeholder="Buscar ejercicio…" oninput="loadExercises(1)"/>
     </div>
-    <div class="filter-pills" id="exMgPills"></div>
+    <select class="filter-select" id="exMgSelect" onchange="setExMg(this.value ? parseInt(this.value) : null)">
+      <option value="">Todos los grupos musculares</option>
+    </select>
     <span class="total-label" id="exTotalLabel"></span>
   </div>
 
@@ -533,10 +593,11 @@ async function loadMuscleGroupsForFilters(){
 }
 
 function renderExMgPills(){
-  const container=document.getElementById('exMgPills');
-  container.innerHTML=`
-    <button class="pill${!exMgFilter?' active':''}" onclick="setExMg(null)">Todos</button>
-    ${allMuscleGroups.map(mg=>`<button class="pill${exMgFilter===mg.id?' active':''}" onclick="setExMg(${mg.id})">${esc(mg.name)}</button>`).join('')}`;
+  const sel=document.getElementById('exMgSelect');
+  if(!sel)return;
+  sel.innerHTML=`<option value="">Todos los grupos musculares</option>`+
+    allMuscleGroups.map(mg=>`<option value="${mg.id}">${esc(mg.name)}</option>`).join('');
+  sel.value=exMgFilter?String(exMgFilter):'';
 }
 
 function setExMg(id){exMgFilter=id;renderExMgPills();loadExercises(1);}
@@ -555,6 +616,7 @@ async function loadExercises(page=1){
     const total=result.total||0;
     const lastPage=result.last_page||1;
     document.getElementById('exTotalLabel').textContent=`${total} ejercicio${total!==1?'s':''}`;
+    const _sc=document.getElementById('subcountEjercicios');if(_sc)_sc.textContent=total;
     renderExercisesTable(items);
     renderExPagination(page,lastPage);
   }catch(e){

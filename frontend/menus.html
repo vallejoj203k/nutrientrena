@@ -81,6 +81,36 @@
     /* ── Cards grid ── */
     .cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
     @media(max-width:1100px){.cards-grid{grid-template-columns:1fr;}}
+    /* ── Tabla (diseño Lovable) ── */
+    .lib-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;}
+    .lib-table thead th{text-align:left;padding:12px 16px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
+    .lib-table thead th.num{text-align:right;}
+    .lib-table tbody td{padding:13px 16px;font-size:13.5px;color:#374151;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
+    .lib-table tbody tr:last-child td{border-bottom:none;}
+    .lib-table tbody tr:hover td{background:#FAFBFC;}
+    .lib-td-name{display:flex;align-items:center;gap:12px;}
+    .lib-td-ico{width:36px;height:36px;border-radius:10px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;}
+    .lib-td-title{font-size:14px;font-weight:700;color:#111827;display:flex;align-items:center;gap:6px;}
+    .lib-td-desc{font-size:13px;color:#6B7280;max-width:340px;}
+    .lib-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+    .lib-tag-mia{background:#DBEAFE;color:#2563EB;}
+    .lib-tag-plantilla{background:#F3F4F6;color:#6B7280;}
+    .lib-td-kcal{font-weight:700;color:#111827;display:inline-flex;align-items:center;gap:5px;}
+    .lib-td-num{text-align:right;font-weight:600;color:#374151;font-variant-numeric:tabular-nums;}
+    .lib-star{background:none;border:none;cursor:pointer;padding:0;display:inline-flex;}
+    .lib-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+    .lib-btn-assign{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#4F46E5;color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
+    .lib-btn-assign:hover{background:#4338CA;}
+    .lib-icon-btn{width:30px;height:30px;border:none;background:none;border-radius:7px;cursor:pointer;color:#9CA3AF;display:inline-flex;align-items:center;justify-content:center;transition:.15s;}
+    .lib-icon-btn:hover{background:#F3F4F6;color:#374151;}
+    .lib-menu-wrap{position:relative;display:inline-flex;}
+    .lib-menu-dd{position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;min-width:160px;overflow:hidden;display:none;}
+    .lib-menu-dd.open{display:block;}
+    .lib-dd-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;color:#374151;cursor:pointer;transition:.1s;}
+    .lib-dd-item:hover{background:#F5F3FF;color:#4F46E5;}
+    .lib-dd-item.danger{color:#DC2626;}
+    .lib-dd-item.danger:hover{background:#FEE2E2;}
+    .lib-dd-sep{height:1px;background:#F3F4F6;margin:4px 0;}
     .menu-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:20px;transition:box-shadow .15s,border-color .15s;}
     .menu-card:hover{border-color:#D1D5DB;box-shadow:0 4px 16px rgba(0,0,0,.07);}
     .mc-header{display:flex;align-items:flex-start;gap:13px;margin-bottom:16px;}
@@ -399,19 +429,21 @@
         </button>
       </div>
       <div class="main-tabs">
-        <button class="main-tab" onclick="location.href='diets.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Entrenamiento</button>
+        <button class="main-tab" onclick="location.href='rutinas.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Entrenamiento</button>
         <button class="main-tab active"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="#F59E0B" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span>Nutrición</button>
-        <button class="main-tab"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Formularios</button>
-        <button class="main-tab"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span>Documentos</button>
+        <button class="main-tab" onclick="location.href='forms.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Formularios</button>
+        <button class="main-tab" onclick="location.href='documentos.html'"><span class="tab-icon"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></span>Documentos</button>
       </div>
     </div>
     <div class="content-area">
       <div class="sub-bar">
         <div class="sub-tabs">
-          <a class="sub-tab" href="diets.html">Dietas <span class="sub-count" id="dietCount">—</span></a>
+          <a class="sub-tab" href="diets.html">Dietas <span class="sub-count">—</span></a>
           <a class="sub-tab active" href="menus.html">Menús <span class="sub-count" id="menuCount">—</span></a>
-          <a class="sub-tab" href="#">Recetas <span class="sub-count">—</span></a>
-          <a class="sub-tab" href="#">Alimentos <span class="sub-count">—</span></a>
+          <a class="sub-tab" href="recipes.html">Recetas <span class="sub-count">—</span></a>
+          <a class="sub-tab" href="aliments.html">Alimentos <span class="sub-count">—</span></a>
+          <a class="sub-tab" href="nutrition-catalog.html?tab=tipos">Tipos de dieta <span class="sub-count">—</span></a>
+          <a class="sub-tab" href="nutrition-catalog.html?tab=grupos">Grupos de alimentos <span class="sub-count">—</span></a>
         </div>
         <span class="sub-bar-right">Dietas, menús, recetas y alimentos</span>
       </div>
@@ -437,7 +469,17 @@
           <p>Un planificador semanal: 7 dietas (una por día) agrupadas para asignar como bloque dentro de un programa. Ej.: «Semana 1 · Recomposición».</p>
         </div>
       </div>
-      <div class="scroll-area"><div id="cardsContent"><div class="empty-state"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>Cargando menús…</h3></div></div></div>
+      <div class="scroll-area">
+        <table class="lib-table">
+          <thead><tr>
+            <th>Nombre</th><th>Descripción</th><th class="num">Media kcal</th>
+            <th class="num">Días</th><th>Origen</th><th class="num">Acciones</th>
+          </tr></thead>
+          <tbody id="menusTbody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:#9CA3AF;">Cargando menús…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div><!-- #listView -->
 
@@ -648,12 +690,66 @@ function applyFilter() {
 }
 
 function renderCards(menus) {
-  const el = document.getElementById('cardsContent');
+  const tb = document.getElementById('menusTbody');
+  if (!tb) return;
+  const sc = document.getElementById('menuCount'); if (sc) sc.textContent = allMenus.length || '';
   if (!menus.length) {
-    el.innerHTML = `<div class="empty-state"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>No hay menús</h3><p>Crea tu primer menú semanal con el botón "Nuevo menú semanal".</p></div>`;
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:44px;color:#9CA3AF;">No hay menús. Crea el primero con “Nuevo menú semanal”.</td></tr>';
     return;
   }
-  el.innerHTML = `<div class="cards-grid">${menus.map(menuCard).join('')}</div>`;
+  tb.innerHTML = menus.map(menuRow).join('');
+}
+
+function menuRow(m) {
+  const days = m.days || [];
+  const kcals = DAYS.map((_,i) => { const d=days.find(x=>x.day_index===i); return d?.calories||0; });
+  const filled = kcals.filter(Boolean).length;
+  const avg = filled ? Math.round(kcals.filter(Boolean).reduce((a,b)=>a+b,0)/filled) : 0;
+  const isFav = m.is_favorite;
+  const isTemplate = m.organization_id == null;
+  const id = esc(m.id), name = esc(m.name||'');
+  const tag = isTemplate ? '<span class="lib-tag lib-tag-plantilla">Plantilla</span>' : '<span class="lib-tag lib-tag-mia">Mía</span>';
+  const flame = '<svg width="13" height="13" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>';
+  const star = `<button class="lib-star" onclick="toggleFav('${id}',${!isFav},this)" title="Favorito"><svg width="14" height="14" fill="${isFav?'#F59E0B':'none'}" stroke="${isFav?'#F59E0B':'#D1D5DB'}" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`;
+  const menuItems =
+    '<div class="lib-dd-item" onclick="event.stopPropagation();closeRowMenus();openForm(\'' + id + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</div>'
+    + '<div class="lib-dd-item" onclick="event.stopPropagation();closeRowMenus();toggleFav(\'' + id + '\',' + (!isFav) + ')">' + (isFav ? 'Quitar de favoritos' : 'Marcar favorito') + '</div>'
+    + '<div class="lib-dd-sep"></div>'
+    + '<div class="lib-dd-item danger" onclick="event.stopPropagation();closeRowMenus();deleteMenu(\'' + id + '\',\'' + name + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar</div>';
+  return '<tr>'
+    + '<td><div class="lib-td-name"><div class="lib-td-ico">📅</div>'
+    +   '<div class="lib-td-title">' + name + ' ' + star + '</div></div></td>'
+    + '<td><div class="lib-td-desc">' + esc(m.description||'—') + '</div></td>'
+    + '<td class="lib-td-num"><span class="lib-td-kcal">' + flame + avg + '</span></td>'
+    + '<td class="lib-td-num">' + filled + '/7</td>'
+    + '<td>' + tag + '</td>'
+    + '<td><div class="lib-actions">'
+    +   '<button class="lib-btn-assign" onclick="openAssign(\'' + id + '\',\'' + name + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>'
+    +   '<div class="lib-menu-wrap"><button class="lib-icon-btn" onclick="toggleRowMenu(event,this)" title="Más"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>'
+    +     '<div class="lib-menu-dd">' + menuItems + '</div></div>'
+    + '</div></td>'
+    + '</tr>';
+}
+
+function toggleRowMenu(e, btn) {
+  e.stopPropagation();
+  const dd = btn.nextElementSibling;
+  const wasOpen = dd.classList.contains('open');
+  closeRowMenus();
+  if (!wasOpen) dd.classList.add('open');
+}
+function closeRowMenus() { document.querySelectorAll('.lib-menu-dd.open').forEach(d => d.classList.remove('open')); }
+document.addEventListener('click', () => closeRowMenus());
+
+async function deleteMenu(id, name) {
+  if (!confirm(`¿Eliminar el menú "${name}"? Esta acción no se puede deshacer.`)) return;
+  try {
+    const r = await fetch(`${API}/weekly-menus/${id}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
+    if (!r.ok) throw new Error();
+    allMenus = allMenus.filter(m => String(m.id) !== String(id));
+    toast('Menú eliminado','success');
+    applyFilter();
+  } catch { toast('Error al eliminar','error'); }
 }
 
 function menuCard(m) {
@@ -693,9 +789,8 @@ function menuCard(m) {
 async function toggleFav(id, newVal, btn) {
   try {
     await fetch(`${API}/weekly-menus/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({is_favorite:newVal}) });
-    const m = allMenus.find(x=>x.id==id); if(m) m.is_favorite=newVal;
-    btn.className=`mc-star${newVal?' active':''}`;
-    btn.innerHTML=`<svg width="16" height="16" fill="${newVal?'#F59E0B':'none'}" stroke="${newVal?'#F59E0B':'currentColor'}" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+    const m = allMenus.find(x=>String(x.id)==String(id)); if(m) m.is_favorite=newVal;
+    applyFilter();  // re-render the table so the star + filter reflect the change
   } catch { toast('Error al actualizar','error'); }
 }
 

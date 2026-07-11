@@ -28,6 +28,9 @@ class FormTemplate(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
+    # Categoría de la plantilla para la Librería › Formularios:
+    # "checkin" (seguimiento periódico), "onboarding" (bienvenida) o "survey" (encuesta).
+    category = Column(String(30), nullable=False, default="checkin", server_default="checkin")
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_default = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)

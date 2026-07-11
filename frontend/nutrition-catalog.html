@@ -40,6 +40,37 @@
     .page-header-title{font-size:17px;font-weight:800;color:#111827;}
     .page-header-right{display:flex;align-items:center;gap:10px;}
 
+    /* ── Librería: colores base (paleta centralizada) ── */
+    :root{
+      --lib-primary:#4F46E5; --lib-primary-hover:#4338CA; --lib-primary-soft:#EEF2FF;
+      --cat-entrenamiento:#4F46E5; --cat-nutricion:#F59E0B; --cat-formularios:#10B981; --cat-documentos:#6366F1;
+      --lib-border:#E5E7EB; --lib-text:#111827; --lib-muted:#6B7280;
+    }
+    /* ── Librería: cabecera unificada ── */
+    .lib-header{background:#fff;border-bottom:1px solid var(--lib-border);padding:18px 28px 0;flex-shrink:0;}
+    .lib-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .lib-title{font-size:22px;font-weight:800;color:var(--lib-text);}
+    .lib-sub{font-size:13px;color:var(--lib-muted);margin-top:2px;}
+    .lib-cats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+    .lib-cat{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:12px;border:1px solid var(--lib-border);background:#fff;color:#374151;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;}
+    .lib-cat:hover{border-color:#CBD5E1;}
+    .lib-cat.active{color:#fff;border-color:transparent;}
+    .lib-cat.active.c-entrenamiento{background:var(--cat-entrenamiento);}
+    .lib-cat.active.c-nutricion{background:var(--cat-nutricion);}
+    .lib-cat.active.c-formularios{background:var(--cat-formularios);}
+    .lib-cat.active.c-documentos{background:var(--cat-documentos);}
+    .lib-subtabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto;align-items:center;}
+    .lib-subtab{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--lib-muted);cursor:pointer;text-decoration:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s;}
+    .lib-subtab:hover{color:var(--lib-text);}
+    .lib-subtab.active{color:var(--lib-primary);border-bottom-color:var(--lib-primary);}
+    .lib-subtab-count{font-size:11px;font-weight:700;color:#9CA3AF;}
+    .lib-subtab.active .lib-subtab-count{color:var(--lib-primary);}
+    .lib-subtabs-note{margin-left:auto;font-size:12px;color:#9CA3AF;white-space:nowrap;padding-left:16px;}
+    .lib-info{display:flex;gap:12px;align-items:flex-start;background:#F9FAFB;border:1px solid #F0F1F3;border-radius:12px;padding:14px 16px;margin:16px 0 4px;}
+    .lib-info svg{flex-shrink:0;color:#9CA3AF;margin-top:1px;}
+    .lib-info-title{font-size:13px;font-weight:700;color:#374151;}
+    .lib-info-text{font-size:12.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;}
+
     .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
     .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
     .topbar-left h1{font-size:18px;font-weight:700;color:#111;}
@@ -433,24 +464,47 @@
 
 <!-- ── Main ── -->
 <div class="main">
-  <div class="topbar">
-    <div class="topbar-left">
-      <h1>Biblioteca de Nutrición</h1>
-      <p>Alimentos, recetas, tipos y grupos de alimento</p>
-    </div>
-    <div class="topbar-actions" id="topbarActions">
-      <!-- updated dynamically per tab -->
-    
+  <!-- ── Cabecera unificada de Librería ── -->
+  <div class="lib-header">
+    <div class="lib-head-top">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú" style="flex-shrink:0;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="lib-title">Librería</div>
+          <div class="lib-sub">Contenido reutilizable para asignar a tus clientes.</div>
+        </div>
+      </div>
+      <div class="page-header-right">
         <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
       </div>
-  </div>
-
-  <!-- Tab nav -->
-  <div class="tab-nav">
-    <button id="tabnav-alimentos" class="tab-btn active" onclick="showTab('alimentos')">Alimentos</button>
-    <button id="tabnav-recetas"   class="tab-btn" onclick="showTab('recetas')">Recetas</button>
-    <button id="tabnav-tipos"     class="tab-btn" onclick="showTab('tipos')">Tipos de Dieta</button>
-    <button id="tabnav-grupos"    class="tab-btn" onclick="showTab('grupos')">Grupos de Alimento</button>
+    </div>
+    <!-- Categorías -->
+    <div class="lib-cats">
+      <a class="lib-cat c-entrenamiento" href="rutinas.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>Entrenamiento</a>
+      <a class="lib-cat c-nutricion active" href="diets.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrición</a>
+      <a class="lib-cat c-formularios" href="forms.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Formularios</a>
+      <a class="lib-cat c-documentos" href="documentos.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Documentos</a>
+    </div>
+    <!-- Sub-pestañas de Nutrición -->
+    <div class="lib-subtabs">
+      <a class="lib-subtab" href="diets.html">Dietas</a>
+      <a class="lib-subtab" href="menus.html">Menús</a>
+      <a class="lib-subtab" href="recipes.html">Recetas</a>
+      <a class="lib-subtab" href="aliments.html">Alimentos</a>
+      <a class="lib-subtab" data-tab="tipos" href="nutrition-catalog.html?tab=tipos" onclick="event.preventDefault();showTab('tipos');history.replaceState(null,'','?tab=tipos');">Tipos de dieta <span class="lib-subtab-count" id="subcountTipos"></span></a>
+      <a class="lib-subtab" data-tab="grupos" href="nutrition-catalog.html?tab=grupos" onclick="event.preventDefault();showTab('grupos');history.replaceState(null,'','?tab=grupos');">Grupos de alimentos <span class="lib-subtab-count" id="subcountGrupos"></span></a>
+      <span class="lib-subtabs-note">Dietas, menús, recetas y alimentos</span>
+    </div>
+    <!-- Info -->
+    <div class="lib-info" id="libInfoBox">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <div class="lib-info-title" id="libInfoTitle">¿Qué es un tipo de dieta?</div>
+        <div class="lib-info-text" id="libInfoText">Una clasificación para organizar tus dietas (déficit, volumen, cetogénica…). Se asigna a cada dieta para filtrarlas y ordenarlas.</div>
+      </div>
+    </div>
   </div>
 
   <div class="tab-content">
@@ -817,11 +871,25 @@ const fmt   = v => v != null ? Number(v).toFixed(1) : '—';
 if (!token) location.href = 'login.html';
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
+var _libInfo = {
+  tipos:  { title: '¿Qué es un tipo de dieta?', text: 'Una clasificación para organizar tus dietas (déficit, volumen, cetogénica…). Se asigna a cada dieta para filtrarlas y ordenarlas.' },
+  grupos: { title: '¿Qué son los grupos de alimentos?', text: 'Categorías para clasificar los alimentos (carnes, lácteos, verduras…). Ayudan a filtrar y organizar tu base de datos nutricional.' }
+};
+
 function showTab(name) {
   ['alimentos','recetas','tipos','grupos'].forEach(t => {
-    document.getElementById(`tab-${t}`).style.display = t === name ? '' : 'none';
-    document.getElementById(`tabnav-${t}`).classList.toggle('active', t === name);
+    var pane = document.getElementById('tab-' + t);
+    if (pane) pane.style.display = t === name ? '' : 'none';
   });
+  document.querySelectorAll('.lib-subtab[data-tab]').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-tab') === name);
+  });
+  var info = _libInfo[name];
+  if (info) {
+    var it = document.getElementById('libInfoTitle'), ix = document.getElementById('libInfoText');
+    if (it) it.textContent = info.title;
+    if (ix) ix.textContent = info.text;
+  }
   if (name === 'alimentos' && !al_loaded) loadAliments(1);
   if (name === 'recetas'   && !rc_loaded) loadRecipes(1);
   if (name === 'tipos'     && !tf_loaded) loadTypeFood();
@@ -1460,6 +1528,7 @@ function renderTypeFood() {
   const q = (document.getElementById('tf_search').value || '').toLowerCase();
   const items = tf_items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.description||'').toLowerCase().includes(q));
   document.getElementById('tf_count_badge').textContent = `${items.length} tipo${items.length !== 1 ? 's' : ''}`;
+  var _sc = document.getElementById('subcountTipos'); if (_sc) _sc.textContent = tf_items.length;
   const tbody = document.getElementById('tf_tbody');
   if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Sin registros</td></tr>`; return; }
   tbody.innerHTML = items.map(item => `
@@ -1495,6 +1564,7 @@ function renderGroupFood() {
   const q = (document.getElementById('gf_search').value || '').toLowerCase();
   const items = gf_items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.description||'').toLowerCase().includes(q));
   document.getElementById('gf_count_badge').textContent = `${items.length} grupo${items.length !== 1 ? 's' : ''}`;
+  var _sc = document.getElementById('subcountGrupos'); if (_sc) _sc.textContent = gf_items.length;
   const tbody = document.getElementById('gf_tbody');
   if (!items.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="3">Sin registros</td></tr>`; return; }
   tbody.innerHTML = items.map(item => `
@@ -1647,13 +1717,16 @@ function logout() { localStorage.clear(); location.href = 'login.html'; }
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadUser();
 loadPendingBadge();
-loadAlGroups().then(() => loadAliments(1));
+// Grupos de alimento se comparten desde aquí (poblá el filtro y gf_items)
+loadAlGroups();
 
-// Open a specific sub-tab when arriving from the Librería header (?tab=tipos|grupos|recetas|alimentos)
+// La cabecera unificada usa esta página como destino de «Tipos de dieta» y
+// «Grupos de alimentos». Se abre la sub-pestaña según ?tab (por defecto: tipos).
 (function(){
   var t = new URLSearchParams(window.location.search).get('tab');
   var valid = ['alimentos','recetas','tipos','grupos'];
-  if (t && valid.indexOf(t) >= 0) { try { showTab(t); } catch(e){} }
+  if (!(t && valid.indexOf(t) >= 0)) t = 'tipos';
+  try { showTab(t); } catch(e){}
 })();
 
 // ── Sidebar role adaptation ───────────────────────────────────────────────────

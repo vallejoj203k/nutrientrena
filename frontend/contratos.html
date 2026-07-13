@@ -129,11 +129,18 @@
     .tpl-pick-title{font-size:13px;font-weight:700;color:#111827;margin-bottom:4px;}
     .tpl-pick-type{font-size:11px;color:#6B7280;}
     /* Variable hints */
-    .var-hints{background:#F8FAFC;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;margin-bottom:14px;}
-    .var-hints-title{font-size:11px;font-weight:700;color:#374151;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
-    .var-chips{display:flex;gap:6px;flex-wrap:wrap;}
-    .var-chip{background:#EEF2FF;color:var(--indigo);font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:monospace;}
-    .var-chip:hover{background:#C7D2FE;}
+    .var-hints{background:#F9FAFB;border:1px solid #EEF0F3;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+    .var-hints-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+    .var-hints-head svg{color:var(--indigo);flex-shrink:0;}
+    .var-hints-title{font-size:12.5px;font-weight:700;color:#374151;}
+    .var-hints-sub{font-size:11px;color:#9CA3AF;margin-left:auto;white-space:nowrap;}
+    .var-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:8px;}
+    .var-item{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;padding:9px 12px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;cursor:pointer;transition:.15s;position:relative;}
+    .var-item:hover{border-color:var(--indigo);background:#F5F3FF;box-shadow:0 2px 8px rgba(79,70,229,.08);}
+    .var-item-name{font-size:12.5px;font-weight:600;color:#111827;padding-right:16px;}
+    .var-item-code{font-size:11px;font-family:'Courier New',monospace;color:var(--indigo);background:#EEF2FF;padding:1px 6px;border-radius:5px;}
+    .var-item::after{content:'+';position:absolute;top:7px;right:10px;color:#C4C7CE;font-size:16px;font-weight:700;line-height:1;transition:.15s;}
+    .var-item:hover::after{color:var(--indigo);}
     /* Preview pane */
     .preview-pane{background:#F8FAFC;border:1px solid #E5E7EB;border-radius:8px;padding:16px;font-size:12px;color:#374151;line-height:1.7;white-space:pre-wrap;font-family:'Courier New',monospace;max-height:320px;overflow-y:auto;}
     /* Contract viewer */
@@ -342,16 +349,20 @@
           </select>
         </div>
         <div class="var-hints">
-          <div class="var-hints-title">Variables disponibles — haz clic para insertar</div>
-          <div class="var-chips">
-            <span class="var-chip" onclick="insertVar('{{nombre_cliente}}')">{{nombre_cliente}}</span>
-            <span class="var-chip" onclick="insertVar('{{coach_nombre}}')">{{coach_nombre}}</span>
-            <span class="var-chip" onclick="insertVar('{{fecha}}')">{{fecha}}</span>
-            <span class="var-chip" onclick="insertVar('{{servicio}}')">{{servicio}}</span>
-            <span class="var-chip" onclick="insertVar('{{precio}}')">{{precio}}</span>
-            <span class="var-chip" onclick="insertVar('{{duracion}}')">{{duracion}}</span>
-            <span class="var-chip" onclick="insertVar('{{contacto_emergencia}}')">{{contacto_emergencia}}</span>
-            <span class="var-chip" onclick="insertVar('{{telefono_emergencia}}')">{{telefono_emergencia}}</span>
+          <div class="var-hints-head">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+            <span class="var-hints-title">Variables disponibles</span>
+            <span class="var-hints-sub">Haz clic para insertar en el contrato</span>
+          </div>
+          <div class="var-grid">
+            <button type="button" class="var-item" onclick="insertVar('{{nombre_cliente}}')"><span class="var-item-name">Nombre del cliente</span><code class="var-item-code">{{nombre_cliente}}</code></button>
+            <button type="button" class="var-item" onclick="insertVar('{{coach_nombre}}')"><span class="var-item-name">Nombre del coach</span><code class="var-item-code">{{coach_nombre}}</code></button>
+            <button type="button" class="var-item" onclick="insertVar('{{fecha}}')"><span class="var-item-name">Fecha</span><code class="var-item-code">{{fecha}}</code></button>
+            <button type="button" class="var-item" onclick="insertVar('{{servicio}}')"><span class="var-item-name">Servicio</span><code class="var-item-code">{{servicio}}</code></button>
+            <button type="button" class="var-item" onclick="insertVar('{{precio}}')"><span class="var-item-name">Precio</span><code class="var-item-code">{{precio}}</code></button>
+            <button type="button" class="var-item" onclick="insertVar('{{duracion}}')"><span class="var-item-name">Duración</span><code class="var-item-code">{{duracion}}</code></button>
+            <button type="button" class="var-item" onclick="insertVar('{{contacto_emergencia}}')"><span class="var-item-name">Contacto de emergencia</span><code class="var-item-code">{{contacto_emergencia}}</code></button>
+            <button type="button" class="var-item" onclick="insertVar('{{telefono_emergencia}}')"><span class="var-item-name">Teléfono de emergencia</span><code class="var-item-code">{{telefono_emergencia}}</code></button>
           </div>
         </div>
         <div class="form-group">

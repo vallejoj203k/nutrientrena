@@ -1098,7 +1098,7 @@
 .wc-dot-purple{width:20px;height:0;border-top:2px dashed #7C3AED;}
 
 /* Resumen new layout */
-.res-new-grid{display:grid;grid-template-columns:1fr 320px;gap:16px;}
+.res-new-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:stretch;}
 @media(max-width:900px){.res-new-grid{grid-template-columns:1fr;}}
 .res-datos-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:0;overflow:hidden;}
 .res-datos-head{padding:14px 16px;border-bottom:1px solid #F3F4F6;font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;}
@@ -1124,16 +1124,18 @@
 /* ── Resumen v2 (image-2 layout) ── */
 .res-obj-sel{width:100%;padding:11px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;color:#374151;background:#F9FAFB;outline:none;cursor:pointer;font-family:inherit;}
 .res-obj-sel:focus{border-color:#7C3AED;background:#fff;}
-.res-plan-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;}
+.res-plan-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;height:100%;min-height:280px;}
 .res-plan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
 .res-plan-eyebrow{font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;}
-.res-plan-link{background:none;border:none;color:#7C3AED;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.res-plan-link{background:none;border:none;color:#4F46E5;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .res-plan-link:hover{text-decoration:underline;}
 .res-plan-name{font-size:17px;font-weight:800;color:#111827;margin-top:8px;line-height:1.25;}
 .res-plan-price{font-size:14px;color:#6B7280;margin-top:6px;}
-.res-plan-price b{font-size:22px;font-weight:900;color:#7C3AED;}
+.res-plan-price b{font-size:22px;font-weight:900;color:#4F46E5;}
 .res-plan-price span{font-size:13px;}
-.res-plan-badge{display:inline-block;margin-top:12px;background:#DCFCE7;color:#16A34A;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;}
+.res-plan-badge{display:inline-block;margin-top:12px;background:#DCFCE7;color:#16A34A;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;align-self:flex-start;}
+.res-plan-stats{margin-top:auto;padding-top:18px;}
+.res-plan-stats .res-stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid #F3F4F6;margin-bottom:0;}
 .restr-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:20px 22px;}
 .restr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;}
 .restr-title{font-size:16px;font-weight:800;color:#111827;}
@@ -2096,18 +2098,26 @@ function _renderResDatos() {
   const start=c.start_date||c.fecha_inicio;
   const end=c.end_date||c.fecha_fin;
   const fmtD=d=>d?new Date(d).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}):'—';
-  const peso=(checkins[0]?.weight??c.weight)!=null?`${checkins[0]?.weight??c.weight} kg`:'—';
+  const pesoIni=c.weight!=null?`${c.weight} kg`:'—';
+  const pesoAct=(checkins[0]?.weight??c.weight)!=null?`${checkins[0]?.weight??c.weight} kg`:'—';
+  const genero=c.gender?.name||c.gender?.description||'—';
+  const altura=c.height?`${c.height} cm`:'—';
   const sesiones=deliveries.length||checkins.length||0;
   const objOpts=(_nutParamOpts?.objective||[]).map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join('');
   el.innerHTML=`<div class="res-datos-card">
     <div class="res-datos-head">Datos del cliente</div>
+    <div class="res-datos-row"><span class="res-datos-key">Correo</span><span class="res-datos-val">${esc(c.email||'—')}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Teléfono</span><span class="res-datos-val">${esc(c.phone||'—')}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Género</span><span class="res-datos-val">${esc(genero)}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Altura</span><span class="res-datos-val">${altura}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Objetivo actual</span><span class="res-datos-val">${esc(objName)}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Inicio</span><span class="res-datos-val">${fmtD(start)}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Fin programa</span><span class="res-datos-val">${fmtD(end)}</span></div>
-    <div class="res-datos-row"><span class="res-datos-key">Peso</span><span class="res-datos-val">${peso}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Peso inicial</span><span class="res-datos-val">${pesoIni}</span></div>
+    <div class="res-datos-row"><span class="res-datos-key">Peso actual</span><span class="res-datos-val">${pesoAct}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Sesiones</span><span class="res-datos-val">${sesiones}</span></div>
     <div style="padding:14px 16px 16px;">
-      <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">Cambiar objetivo (nueva etapa)</div>
+      <div style="font-size:11px;color:#9CA3AF;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;">Cambiar objetivo (nueva etapa)</div>
       <select class="res-obj-sel" id="resObjSel" onchange="changeClientObjective(this.value)">
         <option value="">Selecciona nuevo objetivo…</option>${objOpts}
       </select>
@@ -2131,7 +2141,7 @@ async function changeClientObjective(objId) {
   } catch { showToast('Error de conexión', 'error'); }
 }
 
-/* ── Resumen: plan contratado ── */
+/* ── Resumen: plan contratado (con métricas al fondo) ── */
 function _renderResPlan() {
   const el=document.getElementById('resPlanCard');
   if(!el) return;
@@ -2139,20 +2149,40 @@ function _renderResPlan() {
   const planName=c.plan_comprado||c.plan_name||(clientDiets[0]?.title)||'Sin plan asignado';
   const precio=c.precio!=null?`${Number(c.precio).toFixed(0)}€`:'—';
   const seguimiento=c.consentimiento_evolucion!==false;
+  const stCard=document.getElementById('resStatsCard');
+  if(stCard) stCard.style.display='none'; // las métricas ahora viven dentro de la tarjeta del plan
   el.innerHTML=`<div class="res-plan-card">
     <div class="res-plan-head">
       <span class="res-plan-eyebrow">Plan contratado</span>
       <button class="res-plan-link" onclick="showTab('nutricion');renderNutricionTab&&renderNutricionTab();">Ver detalle →</button>
     </div>
-    <div class="res-plan-name">${esc(planName)}</div>
+    <div class="res-plan-name" id="resPlanName">${esc(planName)}</div>
     <div class="res-plan-price"><b>${precio}</b>${c.precio!=null?' <span>/ mensual</span>':''}</div>
     ${seguimiento?'<span class="res-plan-badge">Con seguimiento</span>':''}
+    <div class="res-plan-stats" id="resPlanStats"></div>
   </div>`;
+  _loadResPlanProgram();
 }
 
-/* ── Resumen: actividad + adherencia ── */
+/* Trae el programa/fase real del cliente para el nombre del plan */
+async function _loadResPlanProgram() {
+  try {
+    const r = await fetch(`${API}/users/clients/portfolio`, { headers: h() });
+    if (!r.ok) return;
+    const j = await r.json();
+    const list = (j.data && j.data.clients) || [];
+    const me = list.find(x => String(x.id) === String(clientId));
+    const prog = me && me.program;
+    if (prog && prog.name) {
+      const nameEl = document.getElementById('resPlanName');
+      if (nameEl) nameEl.textContent = prog.phase_name ? `${prog.name} · ${prog.phase_name}` : prog.name;
+    }
+  } catch {}
+}
+
+/* ── Resumen: actividad + adherencia (dentro de la tarjeta del plan) ── */
 function _renderResStatsNew() {
-  const el=document.getElementById('resStatsCard');
+  const el=document.getElementById('resPlanStats')||document.getElementById('resStatsCard');
   if(!el) return;
   const latest=checkins[0];
   let lastCiStr='—',lastCiGreen=false;
@@ -2172,7 +2202,7 @@ function _renderResStatsNew() {
     <div class="res-stat-row"><span class="res-stat-key">Último check-in</span><span class="res-stat-val2${lastCiGreen?' green':''}">${lastCiStr}</span></div>
     <div class="res-stat-row"><span class="res-stat-key">Adherencia entreno</span><span class="res-stat-val2 green" id="resAdhTrain">—</span></div>
     <div class="res-stat-row"><span class="res-stat-key">Adherencia nutrición</span><span class="res-stat-val2 green" id="resAdhNutr">—</span></div>
-    <div class="res-stat-row"><span class="res-stat-key">Progreso objetivo</span><span class="res-stat-val2" style="color:#7C3AED;">${objPct}</span></div>`;
+    <div class="res-stat-row"><span class="res-stat-key">Progreso objetivo</span><span class="res-stat-val2" style="color:#4F46E5;">${objPct}</span></div>`;
   _loadAdherence();
 }
 

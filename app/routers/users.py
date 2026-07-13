@@ -200,6 +200,10 @@ class _LifecycleRequest(_BaseModel):
     lifecycle_status: str
 
 
+class _ChatEnabledRequest(_BaseModel):
+    chat_enabled: bool
+
+
 @router.get("/clients/portfolio", summary="Cartera de clientes", description="Lista enriquecida de los clientes del coach con adherencia (últimos 30 días), programa/fase, último check-in y agregados para las tarjetas de resumen.")
 def clients_portfolio(
     db: Session = Depends(get_db),
@@ -337,6 +341,22 @@ def update_lifecycle_status(
     detail.lifecycle_status = status_val
     db.commit()
     return send_response({"lifecycle_status": status_val}, "Estado actualizado")
+
+
+@router.put("/client/{detail_id}/chat-enabled", summary="Activar/desactivar el chat del cliente", description="Habilita o deshabilita el chat de un cliente (solo guarda el estado).")
+def update_chat_enabled(
+    detail_id: str,
+    data: _ChatEnabledRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    verify_client_access(detail_id, current_user, db)
+    detail = _get_detail_or_404(db, detail_id)
+    if not detail:
+        return send_error("Cliente no encontrado", code=404)
+    detail.chat_enabled = bool(data.chat_enabled)
+    db.commit()
+    return send_response({"chat_enabled": detail.chat_enabled}, "Chat actualizado")
 
 
 # ── Search: staff only ────────────────────────────────────────────────────────

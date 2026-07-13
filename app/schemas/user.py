@@ -145,6 +145,7 @@ class UserDetailOut(BaseModel):
     status_id: Optional[int] = None
     objective_id: Optional[int] = None
     lifecycle_status: Optional[str] = "activo"
+    chat_enabled: Optional[bool] = True
     defecit: Optional[float] = None
     excedente: Optional[float] = None
     start_date: Optional[datetime] = None

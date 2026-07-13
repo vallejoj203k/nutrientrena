@@ -65,6 +65,8 @@ class UserDetail(Base):
     # Estado del ciclo de vida del cliente (independiente del estado CRM/status_id):
     # activo / pendiente / pausado / finalizado. Controla las pestañas de "Clientes".
     lifecycle_status = Column(String(20), nullable=False, default="activo", server_default="activo")
+    # Chat habilitado para este cliente (el coach puede activarlo/desactivarlo).
+    chat_enabled = Column(Boolean, nullable=False, default=True, server_default="1")
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
     defecit = Column(Float, nullable=True)

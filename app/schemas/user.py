@@ -144,6 +144,7 @@ class UserDetailOut(BaseModel):
     activity_id: Optional[int] = None
     status_id: Optional[int] = None
     objective_id: Optional[int] = None
+    lifecycle_status: Optional[str] = "activo"
     defecit: Optional[float] = None
     excedente: Optional[float] = None
     start_date: Optional[datetime] = None

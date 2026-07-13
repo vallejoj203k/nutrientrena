@@ -44,6 +44,58 @@
     .empty-icon{width:72px;height:72px;border-radius:20px;background:var(--pale);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;color:var(--accent);}
     .empty-title{font-size:20px;font-weight:800;color:#111827;margin-bottom:8px;}
     .empty-desc{font-size:14px;color:#6B7280;line-height:1.7;}
+
+    /* ── Librería: colores base + cabecera unificada ── */
+    :root{--lib-primary:#4F46E5;--lib-primary-hover:#4338CA;--lib-primary-soft:#EEF2FF;--cat-entrenamiento:#4F46E5;--cat-nutricion:#F59E0B;--cat-formularios:#10B981;--cat-documentos:#6366F1;--lib-border:#E5E7EB;--lib-text:#111827;--lib-muted:#6B7280;}
+    .lib-header{background:#fff;border-bottom:1px solid var(--lib-border);padding:18px 28px 0;flex-shrink:0;}
+    .lib-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .lib-title{font-size:22px;font-weight:800;color:var(--lib-text);}
+    .lib-sub{font-size:13px;color:var(--lib-muted);margin-top:2px;}
+    .lib-cats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+    .lib-cat{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:12px;border:1px solid var(--lib-border);background:#fff;color:#374151;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;}
+    .lib-cat:hover{border-color:#CBD5E1;}
+    .lib-cat.active{color:#fff;border-color:transparent;}
+    .lib-cat.active.c-entrenamiento{background:var(--cat-entrenamiento);}
+    .lib-cat.active.c-nutricion{background:var(--cat-nutricion);}
+    .lib-cat.active.c-formularios{background:var(--cat-formularios);}
+    .lib-cat.active.c-documentos{background:var(--cat-documentos);}
+    .lib-subtabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto;align-items:center;}
+    .lib-subtab{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--lib-muted);cursor:pointer;text-decoration:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s;}
+    .lib-subtab:hover{color:var(--lib-text);}
+    .lib-subtab.active{color:var(--lib-primary);border-bottom-color:var(--lib-primary);}
+    .lib-subtab-count{font-size:11px;font-weight:700;color:#9CA3AF;}
+    .lib-subtab.active .lib-subtab-count{color:var(--lib-primary);}
+    .lib-subtabs-note{margin-left:auto;font-size:12px;color:#9CA3AF;white-space:nowrap;padding-left:16px;}
+    .lib-info{display:flex;gap:12px;align-items:flex-start;background:#F9FAFB;border:1px solid #F0F1F3;border-radius:12px;padding:14px 16px;margin:16px 0 4px;}
+    .lib-info svg{flex-shrink:0;color:#9CA3AF;margin-top:1px;}
+    .lib-info-title{font-size:13px;font-weight:700;color:#374151;}
+    .lib-info-text{font-size:12.5px;color:#9CA3AF;margin-top:2px;line-height:1.5;}
+    .btn-primary{background:var(--lib-primary);color:#fff;}
+    .btn-primary:hover{background:var(--lib-primary-hover);}
+    /* ── Documentos: toolbar + tabla ── */
+    .doc-toolbar{display:flex;align-items:center;gap:10px;padding:14px 28px 0;flex-shrink:0;flex-wrap:wrap;}
+    .doc-search{position:relative;flex:1;min-width:200px;max-width:340px;}
+    .doc-search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--lib-border);border-radius:9px;font-size:13px;outline:none;}
+    .doc-search input:focus{border-color:var(--lib-primary);}
+    .doc-search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .doc-total{font-size:13px;color:#6B7280;margin-left:auto;}
+    .doc-scroll{flex:1;overflow-y:auto;padding:16px 28px 32px;}
+    .doc-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--lib-border);border-radius:14px;overflow:hidden;}
+    .doc-table thead th{text-align:left;padding:12px 16px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--lib-border);white-space:nowrap;}
+    .doc-table thead th.num{text-align:right;}
+    .doc-table tbody td{padding:13px 16px;font-size:13.5px;color:#374151;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
+    .doc-table tbody tr:last-child td{border-bottom:none;}
+    .doc-table tbody tr:hover td{background:#FAFBFC;}
+    .doc-name{display:flex;align-items:center;gap:12px;}
+    .doc-ico{width:38px;height:38px;border-radius:10px;background:#FEE2E2;color:#DC2626;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .doc-title{font-size:14px;font-weight:700;color:var(--lib-text);}
+    .doc-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+    .doc-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:var(--lib-primary-soft);color:var(--lib-primary);border:none;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:none;transition:.15s;white-space:nowrap;}
+    .doc-btn:hover{background:#E0E7FF;}
+    .doc-icon-btn{width:30px;height:30px;border:none;background:none;border-radius:7px;cursor:pointer;color:#9CA3AF;display:inline-flex;align-items:center;justify-content:center;transition:.15s;}
+    .doc-icon-btn:hover{background:#FEE2E2;color:#DC2626;}
+    .doc-empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .doc-empty svg{opacity:.3;margin-bottom:12px;}
     .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:400;}
     .toast.show{transform:translateY(0);opacity:1;}
         /* ── Mobile hamburger ── */
@@ -170,23 +222,65 @@
   </div>
 </aside>
 <div class="main">
-  <div class="page-header">
-    <div class="ph-left">
-      <a class="ph-back" href="documentos.html"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Documentos</a>
-      <div class="ph-div">
-    <span id="topbarRoleBadge" style="margin-left:auto;font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
-  </div>
-      <div><div class="ph-title">Guías</div><div class="ph-sub">Recursos educativos para tus clientes</div></div>
+  <!-- ── Cabecera unificada de Librería ── -->
+  <div class="lib-header">
+    <div class="lib-head-top">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú" style="flex-shrink:0;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="lib-title">Librería</div>
+          <div class="lib-sub">Contenido reutilizable para asignar a tus clientes.</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn btn-primary" onclick="document.getElementById('docFile').click()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Subir PDF
+        </button>
+        <input type="file" id="docFile" accept="application/pdf" style="display:none" onchange="uploadDoc(this)"/>
+        <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+      </div>
     </div>
-    <button class="btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva guía</button>
-  </div>
-  <div class="content">
-    <div class="empty-state">
-      <div class="empty-badge">Próximamente</div>
-      <div class="empty-icon"><svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
-      <div class="empty-title">Guías</div>
-      <div class="empty-desc">Pronto podrás crear y compartir guías educativas, manuales de ejercicios y consejos de nutrición en formato PDF para enviar a tus clientes.</div>
+    <div class="lib-cats">
+      <a class="lib-cat c-entrenamiento" href="rutinas.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>Entrenamiento</a>
+      <a class="lib-cat c-nutricion" href="diets.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrición</a>
+      <a class="lib-cat c-formularios" href="forms.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Formularios</a>
+      <a class="lib-cat c-documentos active" href="documentos.html"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Documentos</a>
     </div>
+    <div class="lib-subtabs">
+      <a class="lib-subtab" href="contratos.html">Contratos</a>
+      <a class="lib-subtab active" href="guias.html">Guías <span class="lib-subtab-count" id="docCount"></span></a>
+      <a class="lib-subtab" href="plantillas.html">Plantillas</a>
+      <span class="lib-subtabs-note">Contratos, guías y plantillas</span>
+    </div>
+    <div class="lib-info">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <div class="lib-info-title">¿Qué son las guías?</div>
+        <div class="lib-info-text">Documentos PDF educativos (manuales, consejos, recursos) que subes para compartir con tus clientes.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-toolbar">
+    <div class="doc-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="docSearch" placeholder="Buscar documento…" oninput="renderDocs()"/>
+    </div>
+    <span class="doc-total" id="docTotal"></span>
+  </div>
+
+  <div class="doc-scroll">
+    <table class="doc-table">
+      <thead><tr>
+        <th>Documento</th><th class="num">Tamaño</th><th>Subido</th><th class="num">Acciones</th>
+      </tr></thead>
+      <tbody id="docBody">
+        <tr><td colspan="4" style="text-align:center;padding:40px;color:#9CA3AF;">Cargando…</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -196,7 +290,57 @@ let token=localStorage.getItem('token')||'';
 function authHeaders(){return{'Content-Type':'application/json',Authorization:`Bearer ${token}`};}
 async function initUser(){if(!token){location.href='login.html';return;}try{const r=await fetch(`${API}/auth/me`,{headers:authHeaders()});if(!r.ok)throw new Error();const u=(await r.json()).data||{};document.getElementById('sidebarName').textContent=u.name||u.email||'—';document.getElementById('sidebarRole').textContent=u.role?.name||'';(function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name||u.email||'U')[0].toUpperCase();}})()}catch{}}
 function logout(){localStorage.removeItem('token');localStorage.removeItem('role_id');location.href='login.html';}
+
+// ── Documentos (almacén de PDFs) ──
+const DOC_CATEGORY='guias';
+let _docs=[];
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show';clearTimeout(el._t);el._t=setTimeout(()=>{el.className='toast';},2600);}
+function escd(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtSize(kb){if(kb==null)return '—';if(kb<1024)return Math.round(kb)+' KB';return (kb/1024).toFixed(1)+' MB';}
+function timeAgo(iso){if(!iso)return '—';const d=new Date(iso),now=new Date();const diff=Math.floor((now-d)/86400000);if(diff<=0)return 'hoy';if(diff===1)return 'ayer';if(diff<30)return 'hace '+diff+' días';return d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});}
+async function loadDocs(){
+  try{
+    const r=await fetch(`${API}/documents?category=${DOC_CATEGORY}`,{headers:authHeaders()});
+    if(r.status===401){location.href='login.html';return;}
+    const j=await r.json();_docs=Array.isArray(j.data)?j.data:[];renderDocs();
+  }catch{document.getElementById('docBody').innerHTML='<tr><td colspan="4" style="text-align:center;padding:40px;color:#DC2626;">Error al cargar</td></tr>';}
+}
+function renderDocs(){
+  const q=(document.getElementById('docSearch').value||'').toLowerCase();
+  const list=_docs.filter(d=>!q||(d.name||'').toLowerCase().includes(q));
+  document.getElementById('docTotal').textContent=`${_docs.length} documento${_docs.length!==1?'s':''}`;
+  const c=document.getElementById('docCount'); if(c) c.textContent=_docs.length||'';
+  const tb=document.getElementById('docBody');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="4"><div class="doc-empty"><svg width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div style="font-weight:600;color:#6B7280;">${q?'Sin resultados':'Aún no hay documentos'}</div>${q?'':'<div style="font-size:12px;margin-top:2px;">Sube tu primer PDF con «Subir PDF».</div>'}</div></td></tr>`;return;}
+  tb.innerHTML=list.map(d=>`<tr>
+    <td><div class="doc-name"><div class="doc-ico"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="doc-title">${escd(d.name)}</div></div></td>
+    <td class="num" style="text-align:right;color:#6B7280;">${fmtSize(d.size_kb)}</td>
+    <td style="color:#6B7280;">${timeAgo(d.created_at)}</td>
+    <td><div class="doc-actions"><a class="doc-btn" href="${escd(d.file_url)}" target="_blank" rel="noopener"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Ver</a><button class="doc-icon-btn" title="Eliminar" onclick="deleteDoc(${d.id},'${escd(d.name).replace(/'/g,"\\'")}')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></td>
+  </tr>`).join('');
+}
+async function uploadDoc(input){
+  const f=input.files&&input.files[0]; if(!f)return;
+  if(f.type!=='application/pdf'){toast('Solo se permiten archivos PDF');input.value='';return;}
+  toast('Subiendo…');
+  const fd=new FormData();fd.append('file',f);fd.append('category',DOC_CATEGORY);fd.append('name',f.name);
+  try{
+    const r=await fetch(`${API}/documents`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd});
+    const j=await r.json();
+    if(!r.ok){toast(j.message||'No se pudo subir');return;}
+    toast('Documento subido');loadDocs();
+  }catch{toast('Error de conexión');}
+  finally{input.value='';}
+}
+async function deleteDoc(id,name){
+  if(!confirm('¿Eliminar «'+name+'»? No se puede deshacer.'))return;
+  try{
+    const r=await fetch(`${API}/documents/${id}`,{method:'DELETE',headers:authHeaders()});
+    if(!r.ok)throw new Error();toast('Documento eliminado');loadDocs();
+  }catch{toast('No se pudo eliminar');}
+}
 initUser();
+loadDocs();
 </script>
 <script>
 var _flyoutMenus={
@@ -274,7 +418,7 @@ function toggleLibrary(el){
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 
-function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');s.classList.toggle('open');o.classList.toggle('open');}
+function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 </script>
 

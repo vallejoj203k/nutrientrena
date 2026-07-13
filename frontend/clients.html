@@ -121,14 +121,22 @@
     .stat-num{font-size:30px;font-weight:800;color:#111827;line-height:1;}
     .stat-lbl{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-top:8px;}
     .stat-hint{font-size:11.5px;color:#9CA3AF;margin-top:3px;}
-    /* Acordeón de ayuda */
-    .help-acc{background:#fff;border:1px solid #EEF0F3;border-radius:12px;margin-bottom:18px;overflow:hidden;}
-    .help-acc-btn{width:100%;display:flex;align-items:center;gap:9px;padding:12px 16px;background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#374151;text-align:left;}
-    .help-acc-btn svg.chev{margin-left:auto;transition:transform .2s;color:#9CA3AF;}
+    /* Guía de estados (desplegable) */
+    .help-acc{margin-bottom:18px;}
+    .help-acc-btn{display:inline-flex;align-items:center;gap:9px;padding:10px 16px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;text-align:left;transition:.15s;}
+    .help-acc-btn:hover{border-color:#CBD5E1;}
+    .help-acc-btn svg.chev{transition:transform .2s;color:#9CA3AF;}
     .help-acc.open .help-acc-btn svg.chev{transform:rotate(180deg);}
-    .help-acc-body{display:none;padding:0 16px 14px 40px;font-size:12.5px;color:#6B7280;line-height:1.7;}
-    .help-acc.open .help-acc-body{display:block;}
-    .help-acc-body b{color:#374151;}
+    .help-acc-body{display:none;margin-top:12px;background:#fff;border:1px solid #EEF0F3;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.03);padding:18px 8px;}
+    .help-acc.open .help-acc-body{display:grid;grid-template-columns:1.3fr repeat(4,1fr);}
+    .guide-col{padding:2px 18px;border-left:1px solid #F0F1F3;}
+    .guide-col:first-child{border-left:none;}
+    .guide-intro-title{font-size:13.5px;font-weight:700;color:#111827;}
+    .guide-intro-sub{font-size:12px;color:#9CA3AF;margin-top:4px;line-height:1.5;}
+    .guide-name{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#374151;margin-bottom:6px;}
+    .guide-desc{font-size:12px;color:#9CA3AF;line-height:1.55;}
+    @media(max-width:960px){.help-acc.open .help-acc-body{grid-template-columns:1fr 1fr;gap:14px 0;} .guide-col:nth-child(odd){border-left:none;} }
+    @media(max-width:560px){.help-acc.open .help-acc-body{grid-template-columns:1fr;} .guide-col{border-left:none;} }
     /* Pestañas de ciclo */
     .cli-tabs{display:flex;gap:2px;border-bottom:1px solid #E5E7EB;margin-bottom:2px;}
     .cli-tab{padding:12px 16px;font-size:13.5px;font-weight:600;color:#9CA3AF;cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;transition:.15s;display:inline-flex;align-items:center;gap:7px;}
@@ -375,18 +383,34 @@
         </div>
       </div>
 
-      <!-- Ayuda de estados -->
+      <!-- Guía de estados -->
       <div class="help-acc" id="helpAcc">
-        <button class="help-acc-btn" onclick="document.getElementById('helpAcc').classList.toggle('open')">
+        <button class="help-acc-btn" onclick="toggleGuide()">
           <svg width="15" height="15" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          ¿Qué significa cada estado?
+          <span id="helpLabel">¿Qué significa cada estado?</span>
           <svg class="chev" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="help-acc-body">
-          <b>Activo</b>: cliente en programa activo. &nbsp;·&nbsp;
-          <b>Pendiente</b>: contratado pero aún sin iniciar (formulario/plan por completar). &nbsp;·&nbsp;
-          <b>Pausado</b>: en pausa temporal (vacaciones, lesión…). &nbsp;·&nbsp;
-          <b>Finalizado</b>: relación terminada.
+          <div class="guide-col">
+            <div class="guide-intro-title">Estados del cliente</div>
+            <div class="guide-intro-sub">Tú decides cuándo cambiarlos.</div>
+          </div>
+          <div class="guide-col">
+            <div class="guide-name"><svg width="15" height="15" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Activo</div>
+            <div class="guide-desc">Está recibiendo el servicio con normalidad.</div>
+          </div>
+          <div class="guide-col">
+            <div class="guide-name"><svg width="15" height="15" fill="none" stroke="#F59E0B" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pendiente</div>
+            <div class="guide-desc">Aún requiere preparación antes de empezar.</div>
+          </div>
+          <div class="guide-col">
+            <div class="guide-name"><svg width="15" height="15" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>Pausado</div>
+            <div class="guide-desc">El servicio está detenido temporalmente.</div>
+          </div>
+          <div class="guide-col">
+            <div class="guide-name"><svg width="15" height="15" fill="none" stroke="#94A3B8" stroke-width="2" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>Finalizado</div>
+            <div class="guide-desc">El programa o la relación profesional terminó.</div>
+          </div>
         </div>
       </div>
 
@@ -582,6 +606,12 @@ function applyFilters(){
 function onSearch(){
   clearTimeout(searchTimer);
   searchTimer=setTimeout(applyFilters,250);
+}
+
+function toggleGuide(){
+  const acc=document.getElementById('helpAcc');
+  const open=acc.classList.toggle('open');
+  document.getElementById('helpLabel').textContent=open?'Ocultar guía de estados':'¿Qué significa cada estado?';
 }
 
 async function updateStatus(id,val,el){

@@ -365,6 +365,9 @@
             <button type="button" class="var-item" onclick="insertVar('{{contacto_emergencia}}')"><span class="var-item-name">Contacto de emergencia</span><code class="var-item-code">{{contacto_emergencia}}</code></button>
             <button type="button" class="var-item" onclick="insertVar('{{telefono_emergencia}}')"><span class="var-item-name">Teléfono de emergencia</span><code class="var-item-code">{{telefono_emergencia}}</code></button>
           </div>
+          <div style="font-size:11.5px;color:#9CA3AF;margin-top:11px;line-height:1.5;">
+            Al generar el PDF, cada variable se sustituye por el dato real (nombre del cliente, tu nombre, fecha…). Las que no tengan un dato asociado se muestran como un espacio en blanco para rellenar a mano.
+          </div>
         </div>
         <div class="form-group">
           <label>Contenido del contrato</label>
@@ -710,13 +713,25 @@ function insertVar(v){
 function updatePreview(){
   const content=document.getElementById('nc_content').value;
   const clientSel=document.getElementById('nc_client');
-  const clientName=clientSel.options[clientSel.selectedIndex]?.text.replace('Sin cliente asignado','')||'';
+  const clientName=(clientSel.options[clientSel.selectedIndex]?.text||'').replace('Sin cliente asignado','').trim();
   const today=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
   const coach=currentUser.name||'Tu nombre';
-  let preview=content
-    .replace(/\{\{nombre_cliente\}\}/g,clientName||'[Nombre del cliente]')
-    .replace(/\{\{coach_nombre\}\}/g,coach)
-    .replace(/\{\{fecha\}\}/g,today);
+  const typeSel=document.getElementById('nc_type');
+  const servicio=typeSel?((typeSel.options[typeSel.selectedIndex]?.text)||'Servicios'):'Servicios';
+  const BLANK='__________';
+  const vals={
+    nombre_cliente: clientName||BLANK,
+    coach_nombre: coach||BLANK,
+    fecha: today,
+    servicio: servicio,
+    precio: BLANK,
+    duracion: BLANK,
+    contacto_emergencia: BLANK,
+    telefono_emergencia: BLANK,
+  };
+  let preview=content;
+  for(const k in vals){ preview=preview.split('{{'+k+'}}').join(vals[k]); }
+  preview=preview.replace(/\{\{\s*\w+\s*\}\}/g, BLANK);
   document.getElementById('nc_preview').textContent=preview;
 }
 

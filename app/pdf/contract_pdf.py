@@ -2,6 +2,8 @@
 Generador de PDF para contratos usando ReportLab.
 """
 import io
+import re
+from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib.colors import HexColor, white
@@ -27,6 +29,48 @@ TYPE_LABELS = {
 }
 
 
+_BLANK = "__________"
+
+
+def _contract_values(contract) -> dict:
+    """Valores reales con los que se sustituyen las variables {{...}} del contrato."""
+    client = getattr(contract, "client", None)
+    client_name = ""
+    if client:
+        client_name = f"{client.name or ''} {client.last_name or ''}".strip()
+    coach_name = ""
+    try:
+        coach_name = (contract.coach.name or "").strip() if getattr(contract, "coach", None) else ""
+    except Exception:
+        coach_name = ""
+    fecha = (contract.created_at or datetime.utcnow()).strftime("%d/%m/%Y")
+    precio = ""
+    if client and getattr(client, "precio", None) is not None:
+        precio = f"{client.precio:.0f} € / mes"
+    telefono = client.phone if client and getattr(client, "phone", None) else ""
+    servicio = TYPE_LABELS.get(getattr(contract, "type", None), "Servicios")
+    return {
+        "nombre_cliente": client_name or _BLANK,
+        "coach_nombre": coach_name or _BLANK,
+        "fecha": fecha,
+        "servicio": servicio,
+        "precio": precio or _BLANK,
+        "duracion": _BLANK,
+        "contacto_emergencia": _BLANK,
+        "telefono_emergencia": telefono or _BLANK,
+    }
+
+
+def _substitute(text, contract) -> str:
+    """Reemplaza las variables {{clave}} por sus valores; cualquier variable
+    desconocida se convierte en un espacio en blanco rellenable."""
+    text = text or ""
+    for key, val in _contract_values(contract).items():
+        text = text.replace("{{" + key + "}}", val)
+    text = re.sub(r"\{\{\s*\w+\s*\}\}", _BLANK, text)
+    return text
+
+
 def generate_contract_pdf(contract) -> bytes:
     """Recibe un objeto Contract (con relaciones cargadas) y devuelve bytes PDF."""
     buffer = io.BytesIO()
@@ -46,7 +90,8 @@ def generate_contract_pdf(contract) -> bytes:
             fontSize=22,
             textColor=INDIGO,
             alignment=TA_CENTER,
-            spaceAfter=2,
+            leading=26,
+            spaceAfter=8,
         ),
         "doc_type": ParagraphStyle(
             "DocType",
@@ -54,7 +99,9 @@ def generate_contract_pdf(contract) -> bytes:
             fontSize=10,
             textColor=GRAY_TEXT,
             alignment=TA_CENTER,
-            spaceAfter=4,
+            leading=14,
+            spaceBefore=2,
+            spaceAfter=10,
         ),
         "title": ParagraphStyle(
             "Title",
@@ -106,7 +153,7 @@ def generate_contract_pdf(contract) -> bytes:
     story.append(Spacer(1, 0.4 * cm))
 
     # ── Title & meta ──────────────────────────────────────────────────────────
-    story.append(Paragraph(contract.title, styles["title"]))
+    story.append(Paragraph(_substitute(contract.title, contract), styles["title"]))
 
     client_name = ""
     if contract.client:
@@ -123,7 +170,7 @@ def generate_contract_pdf(contract) -> bytes:
     story.append(Spacer(1, 0.5 * cm))
 
     # ── Content ───────────────────────────────────────────────────────────────
-    for line in (contract.content or "").splitlines():
+    for line in _substitute(contract.content, contract).splitlines():
         stripped = line.strip()
         if not stripped:
             story.append(Spacer(1, 0.2 * cm))

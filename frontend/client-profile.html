@@ -1021,7 +1021,23 @@
 .bc-link:hover{color:#4F46E5;}
 .bc-sep{color:#D1D5DB;}
 .bc-current{color:#111827;font-weight:600;}
-.bc-actions{margin-left:auto;display:flex;gap:8px;}
+.bc-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
+/* Chat toggle + estado (cabecera del perfil) */
+.chat-toggle{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid;transition:.15s;white-space:nowrap;}
+.chat-toggle.on{background:#ECFDF5;border-color:#A7F3D0;color:#059669;}
+.chat-toggle.off{background:#F3F4F6;border-color:#E5E7EB;color:#6B7280;}
+.chat-toggle:disabled{opacity:.6;cursor:default;}
+.status-dd{position:relative;display:inline-block;}
+.status-dd-btn{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;transition:.15s;white-space:nowrap;}
+.status-dd-btn:hover{border-color:#CBD5E1;}
+.status-dd-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.14);z-index:300;width:300px;padding:6px;display:none;}
+.status-dd.open .status-dd-menu{display:block;}
+.status-opt{display:flex;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;transition:.12s;text-align:left;}
+.status-opt:hover{background:#F9FAFB;}
+.status-opt.active{background:#F5F3FF;}
+.status-opt svg{flex-shrink:0;margin-top:1px;}
+.status-opt-name{font-size:13px;font-weight:700;color:#111827;}
+.status-opt-desc{font-size:12px;color:#9CA3AF;margin-top:2px;line-height:1.4;}
 .btn-outline-purple{padding:7px 16px;border:1.5px solid #4F46E5;background:#fff;color:#4F46E5;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
 .btn-outline-purple:hover{background:#EEF2FF;}
 .btn-red{padding:7px 16px;border:none;background:#DC2626;color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
@@ -1326,6 +1342,11 @@
     <span class="bc-sep">/</span>
     <span class="bc-current" id="bcClientName">…</span>
     <div class="bc-actions">
+      <button class="chat-toggle off" id="chatToggleBtn" onclick="toggleChatEnabled()">Chat</button>
+      <div class="status-dd" id="statusDd">
+        <button class="status-dd-btn" id="statusDdBtn" onclick="event.stopPropagation();document.getElementById('statusDd').classList.toggle('open')">Estado</button>
+        <div class="status-dd-menu" id="statusDdMenu"></div>
+      </div>
       <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
       <button class="btn-outline-purple" onclick="location.href='client-form.html?id='+clientId">Editar</button>
       <button class="btn-red" id="btnDarBaja" onclick="darDeBaja()">Dar de baja</button>
@@ -1924,6 +1945,9 @@ function renderAll() {
 
   // ── Persistent client panel (top of every section) ──
   _renderClientPanel();
+
+  // ── Controles de cabecera: chat activado + estado ──
+  _renderHeaderControls();
 
   // ── New Resumen tab ──
   renderResumenTab();
@@ -2941,7 +2965,78 @@ function renderProfileHeader() {
   document.getElementById('profileBadges').innerHTML = badges.join('');
   const waBtn = document.getElementById('waBtn');
   if (waBtn) waBtn.style.display = c.whatsapp_link ? 'inline-flex' : 'none';
+  _renderHeaderControls();
 }
+
+/* ── Cabecera: chat activado + estado del cliente ── */
+const _LC_META = {
+  activo:     { label: 'Activo',     color: '#22C55E', desc: 'Está recibiendo el servicio con normalidad.',        icon: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' },
+  pendiente:  { label: 'Pendiente',  color: '#F59E0B', desc: 'Aún requiere preparación antes de empezar.',          icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
+  pausado:    { label: 'Pausado',    color: '#9CA3AF', desc: 'El servicio está detenido temporalmente.',            icon: '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>' },
+  finalizado: { label: 'Finalizado', color: '#94A3B8', desc: 'El programa o la relación profesional terminó.',      icon: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>' },
+};
+
+function _renderHeaderControls() {
+  const c = clientData || {};
+  // Chat toggle
+  const on = c.chat_enabled !== false;
+  const cb = document.getElementById('chatToggleBtn');
+  if (cb) {
+    cb.className = 'chat-toggle ' + (on ? 'on' : 'off');
+    cb.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${on ? 'Chat activado' : 'Chat desactivado'}`;
+  }
+  // Estado
+  const lc = c.lifecycle_status || 'activo';
+  const m = _LC_META[lc] || _LC_META.activo;
+  const sb = document.getElementById('statusDdBtn');
+  if (sb) sb.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block;"></span>${m.label}<svg width="14" height="14" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24" style="margin-left:2px;"><polyline points="6 9 12 15 18 9"/></svg>`;
+  const menu = document.getElementById('statusDdMenu');
+  if (menu) menu.innerHTML = Object.keys(_LC_META).map(k => {
+    const o = _LC_META[k];
+    return `<div class="status-opt${k === lc ? ' active' : ''}" onclick="setLifecycleStatus('${k}')">
+      <svg width="16" height="16" fill="none" stroke="${o.color}" stroke-width="2" viewBox="0 0 24 24">${o.icon}</svg>
+      <div><div class="status-opt-name">${o.label}</div><div class="status-opt-desc">${o.desc}</div></div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleChatEnabled() {
+  const cur = clientData.chat_enabled !== false;
+  const nv = !cur;
+  const btn = document.getElementById('chatToggleBtn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/users/client/${clientId}/chat-enabled`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ chat_enabled: nv }),
+    });
+    if (!r.ok) throw new Error();
+    clientData.chat_enabled = nv;
+    _renderHeaderControls();
+    showToast(nv ? 'Chat activado' : 'Chat desactivado', 'success');
+  } catch { showToast('No se pudo actualizar el chat', ''); }
+  finally { btn.disabled = false; }
+}
+
+async function setLifecycleStatus(val) {
+  const dd = document.getElementById('statusDd');
+  if (dd) dd.classList.remove('open');
+  try {
+    const r = await fetch(`${API}/users/client/${clientId}/lifecycle-status`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ lifecycle_status: val }),
+    });
+    if (!r.ok) throw new Error();
+    clientData.lifecycle_status = val;
+    _renderHeaderControls();
+    showToast('Estado actualizado', 'success');
+  } catch { showToast('No se pudo actualizar el estado', ''); }
+}
+
+document.addEventListener('click', function () {
+  const dd = document.getElementById('statusDd');
+  if (dd) dd.classList.remove('open');
+});
 
 /* ── Mini chart ── */
 function renderMiniChart(weights) {

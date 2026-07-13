@@ -101,6 +101,59 @@
     .page-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
     .page-btn:disabled{opacity:.4;cursor:default;}
 
+    /* ── Cartera (rediseño) ── */
+    .cli-scroll{flex:1;overflow-y:auto;padding:26px 28px 32px;background:var(--gray-bg);}
+    .cli-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+    .cli-eyebrow{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
+    .cli-title{font-size:28px;font-weight:800;color:#111827;margin-top:2px;}
+    .cli-sub{font-size:13.5px;color:#6B7280;margin-top:4px;}
+    .cli-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .cli-search{position:relative;}
+    .cli-search input{width:260px;max-width:60vw;padding:10px 14px 10px 38px;border:1px solid #E5E7EB;border-radius:10px;font-size:13px;outline:none;background:#fff;transition:.15s;}
+    .cli-search input:focus{border-color:var(--indigo);}
+    .cli-search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
+    .btn-filtros{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;transition:.15s;}
+    .btn-filtros:hover{border-color:#CBD5E1;}
+    /* Tarjetas de resumen */
+    .stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;}
+    .stat-card{background:#fff;border:1px solid #EEF0F3;border-radius:16px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+    .stat-ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+    .stat-num{font-size:30px;font-weight:800;color:#111827;line-height:1;}
+    .stat-lbl{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-top:8px;}
+    .stat-hint{font-size:11.5px;color:#9CA3AF;margin-top:3px;}
+    /* Acordeón de ayuda */
+    .help-acc{background:#fff;border:1px solid #EEF0F3;border-radius:12px;margin-bottom:18px;overflow:hidden;}
+    .help-acc-btn{width:100%;display:flex;align-items:center;gap:9px;padding:12px 16px;background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#374151;text-align:left;}
+    .help-acc-btn svg.chev{margin-left:auto;transition:transform .2s;color:#9CA3AF;}
+    .help-acc.open .help-acc-btn svg.chev{transform:rotate(180deg);}
+    .help-acc-body{display:none;padding:0 16px 14px 40px;font-size:12.5px;color:#6B7280;line-height:1.7;}
+    .help-acc.open .help-acc-body{display:block;}
+    .help-acc-body b{color:#374151;}
+    /* Pestañas de ciclo */
+    .cli-tabs{display:flex;gap:2px;border-bottom:1px solid #E5E7EB;margin-bottom:2px;}
+    .cli-tab{padding:12px 16px;font-size:13.5px;font-weight:600;color:#9CA3AF;cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;transition:.15s;display:inline-flex;align-items:center;gap:7px;}
+    .cli-tab:hover{color:#374151;}
+    .cli-tab.active{color:var(--indigo);border-bottom-color:var(--indigo);}
+    .cli-tab .tab-count{font-size:11px;font-weight:700;background:#F3F4F6;color:#6B7280;padding:1px 8px;border-radius:20px;}
+    .cli-tab.active .tab-count{background:#EEF2FF;color:var(--indigo);}
+    /* Tabla en tarjeta */
+    .cli-table-card{background:#fff;border:1px solid #EEF0F3;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+    .cli-table-card table{width:100%;border-collapse:collapse;}
+    .cli-table-card thead th{text-align:left;padding:13px 18px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #F0F1F3;white-space:nowrap;}
+    .cli-table-card tbody td{padding:15px 18px;border-bottom:1px solid #F5F6F8;vertical-align:middle;font-size:13px;}
+    .cli-table-card tbody tr:last-child td{border-bottom:none;}
+    .cli-table-card tbody tr{cursor:pointer;transition:background .12s;}
+    .cli-table-card tbody tr:hover{background:#FAFBFC;}
+    .adh-wrap{min-width:120px;}
+    .adh-top{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:#111827;margin-bottom:5px;}
+    .adh-bar{height:6px;border-radius:6px;background:#F0F1F3;overflow:hidden;}
+    .adh-fill{height:100%;border-radius:6px;}
+    .estado-select{appearance:none;-webkit-appearance:none;border:1px solid #E5E7EB;border-radius:9px;padding:6px 28px 6px 12px;font-size:12.5px;font-weight:600;color:#374151;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 9px center;cursor:pointer;outline:none;}
+    .estado-select:focus{border-color:var(--indigo);}
+    .row-chevron{color:#C4C7CE;display:flex;justify-content:flex-end;}
+    @media(max-width:1000px){.stat-cards{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:620px){.stat-cards{grid-template-columns:1fr;} .cli-table-card{overflow-x:auto;}}
+
     /* Empty + skeleton */
     .sk{background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:5px;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -266,60 +319,111 @@
 <div class="main">
   <div id="listView">
 
-    <!-- Topbar -->
-    <div class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <div class="topbar-left">
-        <h1>Clientes</h1>
-        <p class="subtitle">Gestiona todos tus clientes: pendientes de inicio, activos en programa e inactivos.</p>
+    <div class="cli-scroll">
+      <!-- Encabezado -->
+      <div class="cli-head">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú" style="background:none;border:none;cursor:pointer;margin-top:4px;">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <div class="cli-eyebrow">Mi cartera</div>
+            <div class="cli-title">Clientes</div>
+            <div class="cli-sub" id="cliSub">Cargando…</div>
+          </div>
+        </div>
+        <div class="cli-actions">
+          <div class="cli-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Buscar cliente…" oninput="onSearch()"/>
+          </div>
+          <button class="btn-filtros" onclick="cycleAdhFilter()" id="btnFiltros">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span id="filtrosLabel">Filtros</span>
+          </button>
+          <button class="btn-new" onclick="location.href='client-form.html'">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Nuevo cliente</span>
+          </button>
+          <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:5px 10px;border-radius:20px;white-space:nowrap;"></span>
+        </div>
       </div>
-      <div class="topbar-right">
-        <div class="search-bar">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="searchInput" placeholder="Buscar cliente…" oninput="onSearch()"/>
-        
-        <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+
+      <!-- Tarjetas de resumen -->
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="stat-ico" style="background:#EEF2FF;color:#4F46E5;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="stat-num" id="statActivos">—</div>
+          <div class="stat-lbl">Activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="stat-num" id="statRiesgo">—</div>
+          <div class="stat-lbl">En riesgo</div>
+          <div class="stat-hint">Activos con adherencia &lt; 70%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="stat-num" id="statPendiente">—</div>
+          <div class="stat-lbl">Check-in pendiente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico" style="background:#EEF2FF;color:#4F46E5;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+          <div class="stat-num" id="statAdh">—</div>
+          <div class="stat-lbl">Adherencia media</div>
+          <div class="stat-hint">Últimos 30 días</div>
+        </div>
       </div>
-        <button class="btn-new" onclick="location.href='client-form.html'">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>Nuevo cliente</span>
+
+      <!-- Ayuda de estados -->
+      <div class="help-acc" id="helpAcc">
+        <button class="help-acc-btn" onclick="document.getElementById('helpAcc').classList.toggle('open')">
+          <svg width="15" height="15" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          ¿Qué significa cada estado?
+          <svg class="chev" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
+        <div class="help-acc-body">
+          <b>Activo</b>: cliente en programa activo. &nbsp;·&nbsp;
+          <b>Pendiente</b>: contratado pero aún sin iniciar (formulario/plan por completar). &nbsp;·&nbsp;
+          <b>Pausado</b>: en pausa temporal (vacaciones, lesión…). &nbsp;·&nbsp;
+          <b>Finalizado</b>: relación terminada.
+        </div>
       </div>
-    </div>
 
-    <!-- Tabs -->
-    <div class="tabs-bar">
-      <div class="tab" id="tab-pendiente" onclick="setTab('pendiente')">Pendientes <span class="tab-count" id="cnt-pendiente">0</span></div>
-      <div class="tab active" id="tab-activo" onclick="setTab('activo')">Activos <span class="tab-count" id="cnt-activo">0</span></div>
-      <div class="tab" id="tab-inactivo" onclick="setTab('inactivo')">Inactivos <span class="tab-count" id="cnt-inactivo">0</span></div>
-    </div>
-
-    <!-- Table -->
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Plan</th>
-            <th>Objetivo</th>
-            <th>Estado</th>
-            <th>Check-in</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-      <div id="emptyState" class="empty-state" style="display:none;">
-        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        <p>No se encontraron clientes</p>
+      <!-- Pestañas de ciclo -->
+      <div class="cli-tabs">
+        <button class="cli-tab active" id="tab-activo" onclick="setTab('activo')">Activos <span class="tab-count" id="cnt-activo">0</span></button>
+        <button class="cli-tab" id="tab-pendiente" onclick="setTab('pendiente')">Pendientes <span class="tab-count" id="cnt-pendiente">0</span></button>
+        <button class="cli-tab" id="tab-pausado" onclick="setTab('pausado')">Pausados <span class="tab-count" id="cnt-pausado">0</span></button>
+        <button class="cli-tab" id="tab-finalizado" onclick="setTab('finalizado')">Finalizados <span class="tab-count" id="cnt-finalizado">0</span></button>
       </div>
-    </div>
 
-    <div class="pagination">
-      <span class="page-info" id="pageInfo">—</span>
-      <div class="page-btns" id="pageBtns"></div>
+      <!-- Tabla -->
+      <div class="cli-table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Plan</th>
+              <th>Objetivo</th>
+              <th>Adherencia</th>
+              <th>Estado</th>
+              <th>Check-in</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <p>No hay clientes en esta pestaña</p>
+        </div>
+      </div>
+
+      <div class="pagination" style="background:none;border:none;padding:14px 2px 0;">
+        <span class="page-info" id="pageInfo">—</span>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -338,6 +442,8 @@ let filtered    = [];
 let statuses    = [];
 let searchTimer = null;
 let activeTab   = 'activo';
+let stats       = {};
+let adhFilter   = 'all';
 
 const AVATAR_PALETTE = ['#4F46E5','#2563EB','#059669','#D97706','#DC2626','#7C3AED','#DB2777','#0D9488','#EA580C','#0284C7'];
 
@@ -396,70 +502,65 @@ function logout(){
   localStorage.clear(); location.href='login.html';
 }
 
-// ── Load statuses ─────────────────────────────────────────────────────────────
-async function loadStatuses(){
-  try{
-    const r=await fetch(`${API}/parameters/search?q=Estado+del+Cliente`,{headers:{Authorization:`Bearer ${token}`}});
-    if(!r.ok) return;
-    const j=await r.json();
-    const items=(j.data||j)?.details||j.data||[];
-    statuses=Array.isArray(items)?items:[];
-  }catch{}
-}
+const LIFECYCLE_LABELS={activo:'Activo',pendiente:'Pendiente',pausado:'Pausado',finalizado:'Finalizado'};
+const LIFECYCLE_STYLE={
+  activo:{dot:'#22C55E'}, pendiente:{dot:'#F59E0B'},
+  pausado:{dot:'#9CA3AF'}, finalizado:{dot:'#94A3B8'},
+};
+function lifecycleOf(c){ return c.lifecycle_status||'activo'; }
 
-// ── Load clients ──────────────────────────────────────────────────────────────
+// ── Load clients (cartera enriquecida) ────────────────────────────────────────
 async function load(){
   renderSkeleton();
   try{
-    const r=await fetch(`${API}/users/client/findAll`,{headers:{Authorization:`Bearer ${token}`}});
+    const r=await fetch(`${API}/users/clients/portfolio`,{headers:{Authorization:`Bearer ${token}`}});
     if(r.status===401){logout();return;}
     const j=await r.json();
-    allClients=j.data||j||[];
-    if(!Array.isArray(allClients)) allClients=[];
+    const data=j.data||j||{};
+    allClients=Array.isArray(data.clients)?data.clients:[];
+    stats=data.stats||{};
+    renderStats();
     updateCounts();
     applyFilters();
   }catch{
-    document.getElementById('tableBody').innerHTML=`<tr><td colspan="6" style="text-align:center;padding:40px;color:#9CA3AF;">Error al cargar clientes</td></tr>`;
+    document.getElementById('tableBody').innerHTML=`<tr><td colspan="7" style="text-align:center;padding:40px;color:#9CA3AF;">Error al cargar clientes</td></tr>`;
   }
 }
 
-function getStatusName(id){
-  const s=statuses.find(x=>x.id==id);
-  return s?(s.description||s.name):null;
-}
-
-function getStatusCategory(id){
-  const name=(getStatusName(id)||'').toLowerCase();
-  if(name.includes('activ')) return 'activo';
-  if(name.includes('pendi')) return 'pendiente';
-  if(name.includes('paus'))  return 'pausado';
-  if(name.includes('final')||name.includes('inactiv')) return 'finalizado';
-  return 'other';
-}
-
-function getTabCategory(statusId){
-  const cat=getStatusCategory(statusId);
-  if(cat==='pausado'||cat==='finalizado'||cat==='other') return 'inactivo';
-  return cat; // 'activo' or 'pendiente'
+function renderStats(){
+  const s=stats||{};
+  document.getElementById('statActivos').textContent=s.activos??0;
+  document.getElementById('statRiesgo').textContent=s.en_riesgo??0;
+  document.getElementById('statPendiente').textContent=s.checkin_pendiente??0;
+  document.getElementById('statAdh').textContent=(s.adherencia_media!=null?s.adherencia_media+'%':'—');
+  const total=s.total??allClients.length;
+  const att=s.requieren_atencion??0;
+  document.getElementById('cliSub').textContent=`${total} cliente${total!==1?'s':''} · ${att} requiere${att!==1?'n':''} atención`;
 }
 
 function updateCounts(){
-  const counts={pendiente:0,activo:0,inactivo:0};
-  allClients.forEach(c=>{
-    const cat=getTabCategory(c.status_id);
-    if(counts[cat]!==undefined) counts[cat]++;
-  });
-  Object.entries(counts).forEach(([k,v])=>{
-    const el=document.getElementById('cnt-'+k);
-    if(el) el.textContent=v;
-  });
+  const counts={activo:0,pendiente:0,pausado:0,finalizado:0};
+  allClients.forEach(c=>{ const k=lifecycleOf(c); if(counts[k]!==undefined) counts[k]++; });
+  Object.entries(counts).forEach(([k,v])=>{ const el=document.getElementById('cnt-'+k); if(el) el.textContent=v; });
 }
 
 // ── Filters & tabs ────────────────────────────────────────────────────────────
 function setTab(tab){
   activeTab=tab;
-  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.cli-tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+tab)?.classList.add('active');
+  currentPage=1;
+  applyFilters();
+}
+
+function cycleAdhFilter(){
+  const order=['all','riesgo','pendiente'];
+  const labels={all:'Filtros',riesgo:'En riesgo <70%',pendiente:'Check-in pendiente'};
+  adhFilter=order[(order.indexOf(adhFilter)+1)%order.length];
+  document.getElementById('filtrosLabel').textContent=labels[adhFilter];
+  const b=document.getElementById('btnFiltros');
+  b.style.borderColor=adhFilter==='all'?'':'#4F46E5';
+  b.style.color=adhFilter==='all'?'':'#4F46E5';
   currentPage=1;
   applyFilters();
 }
@@ -467,9 +568,12 @@ function setTab(tab){
 function applyFilters(){
   const q=document.getElementById('searchInput').value.toLowerCase();
   filtered=allClients.filter(c=>{
-    const name=`${c.first_name||''} ${c.last_name||''} ${c.email||''}`.toLowerCase();
-    const tabOk=getTabCategory(c.status_id)===activeTab;
-    return tabOk && (!q||name.includes(q));
+    if(lifecycleOf(c)!==activeTab) return false;
+    const name=`${c.name||''} ${c.last_name||''} ${c.email||''}`.toLowerCase();
+    if(q&&!name.includes(q)) return false;
+    if(adhFilter==='riesgo'&&!(c.adherence!=null&&c.adherence<70)) return false;
+    if(adhFilter==='pendiente'&&!c.checkin_pending) return false;
+    return true;
   });
   currentPage=1;
   renderTable();
@@ -478,6 +582,20 @@ function applyFilters(){
 function onSearch(){
   clearTimeout(searchTimer);
   searchTimer=setTimeout(applyFilters,250);
+}
+
+async function updateStatus(id,val,el){
+  el.disabled=true;
+  try{
+    const r=await fetch(`${API}/users/client/${id}/lifecycle-status`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
+      body:JSON.stringify({lifecycle_status:val}),
+    });
+    if(!r.ok) throw new Error();
+    toast('Estado actualizado','success');
+    load();
+  }catch{ toast('No se pudo actualizar el estado',''); el.disabled=false; }
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -490,21 +608,16 @@ function renderSkeleton(){
         <div class="sk" style="width:150px;height:11px;"></div></div></div></td>
       <td><div class="sk" style="width:120px;height:13px;margin-bottom:4px;"></div><div class="sk" style="width:90px;height:11px;"></div></td>
       <td><div class="sk" style="width:90px;height:13px;"></div></td>
-      <td><div class="sk" style="width:70px;height:22px;border-radius:20px;"></div></td>
+      <td><div class="sk" style="width:100px;height:13px;"></div></td>
+      <td><div class="sk" style="width:80px;height:28px;border-radius:9px;"></div></td>
       <td><div class="sk" style="width:80px;height:13px;"></div></td>
-      <td><div class="sk" style="width:50px;height:28px;border-radius:7px;"></div></td>
+      <td><div class="sk" style="width:16px;height:16px;"></div></td>
     </tr>`).join('');
   document.getElementById('tableBody').innerHTML=rows;
   document.getElementById('emptyState').style.display='none';
 }
 
-const STATUS_STYLE={
-  activo:    {bg:'#DCFCE7',fg:'#166534',dot:'#22C55E'},
-  pendiente: {bg:'#FEF3C7',fg:'#92400E',dot:'#F59E0B'},
-  pausado:   {bg:'#F3F4F6',fg:'#374151',dot:'#9CA3AF'},
-  finalizado:{bg:'#F1F5F9',fg:'#475569',dot:'#94A3B8'},
-  other:     {bg:'#EEF2FF',fg:'#3730A3',dot:'#818CF8'},
-};
+function adhColor(pct){ return pct>=70?'#4F46E5':(pct>=50?'#F59E0B':'#EF4444'); }
 
 function renderTable(){
   const start=(currentPage-1)*PAGE_SIZE;
@@ -523,28 +636,54 @@ function renderTable(){
   document.getElementById('emptyState').style.display='none';
 
   document.getElementById('tableBody').innerHTML=page.map(c=>{
-    const fullName=`${c.first_name||''} ${c.last_name||''}`.trim()||'Sin nombre';
+    const fullName=`${c.name||''} ${c.last_name||''}`.trim()||'Sin nombre';
     const init=initials(fullName);
     const bgColor=avatarColor(fullName);
-    const statusName=getStatusName(c.status_id);
-    const cat=getStatusCategory(c.status_id);
-    const st=STATUS_STYLE[cat]||STATUS_STYLE.other;
+    const lc=lifecycleOf(c);
 
-    const planName=c.plan_name||c.diet_name||c.routine_name||null;
-    const planSub=c.plan_phase?`Fase ${c.plan_phase}${c.weeks_left?' · '+c.weeks_left+' sem restantes':''}`:
-                  (c.diet_name&&c.routine_name?c.routine_name:null);
+    // Plan
+    const prog=c.program;
+    let planCell;
+    if(prog&&prog.name){
+      const parts=[];
+      if(prog.phase_name) parts.push(esc(prog.phase_name));
+      if(prog.weeks_remaining!=null) parts.push(`${prog.weeks_remaining} sem restantes`);
+      planCell=`<div class="plan-name">${esc(prog.name)}</div>${parts.length?`<div class="plan-sub">${parts.join(' · ')}</div>`:''}`;
+    }else{
+      planCell=`<span style="color:#9CA3AF;font-size:12px;">Sin plan</span>`;
+    }
 
-    const lastCk=c.last_checkin_date||c.last_checkin;
-    const daysDiff=lastCk?Math.floor((new Date()-new Date(lastCk))/86400000):999;
-    const isOverdue=daysDiff>7;
-    const ckText=isOverdue?null:timeAgo(lastCk);
-    const ckCls=isOverdue?'overdue':daysDiff<=3?'recent':'';
+    // Adherencia
+    const pct=c.adherence;
+    const adhCell=(pct==null)
+      ?`<span style="color:#9CA3AF;font-size:12px;">—</span>`
+      :`<div class="adh-wrap"><div class="adh-top"><span>${pct}%</span></div><div class="adh-bar"><div class="adh-fill" style="width:${Math.min(100,pct)}%;background:${adhColor(pct)};"></div></div></div>`;
 
-    const objName=c.objective_name||c.objective?.description||'—';
+    // Estado (desplegable editable)
+    const dot=(LIFECYCLE_STYLE[lc]||{}).dot||'#9CA3AF';
+    const estadoCell=`<span style="display:inline-flex;align-items:center;gap:7px;">
+      <span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></span>
+      <select class="estado-select" onclick="event.stopPropagation()" onchange="event.stopPropagation();updateStatus('${c.id}',this.value,this)">
+        ${['activo','pendiente','pausado','finalizado'].map(s=>`<option value="${s}" ${s===lc?'selected':''}>${LIFECYCLE_LABELS[s]}</option>`).join('')}
+      </select></span>`;
+
+    // Check-in
+    const lastCk=c.last_checkin_date;
+    let ckCell;
+    if(lastCk){
+      const col=c.checkin_pending?'#D97706':'#6B7280';
+      ckCell=`<div class="checkin-cell" style="color:${col};">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ${esc(timeAgo(lastCk)||'—')}</div>`;
+    }else{
+      ckCell=`<div class="checkin-cell" style="color:#D97706;">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Sin check-in</div>`;
+    }
 
     return `<tr onclick="viewClient('${c.id}')">
       <td>
-        <div class="cell-client">
+        <div class="cell-client" style="display:flex;align-items:center;gap:12px;">
           <div class="c-avatar" style="background:${bgColor};overflow:hidden;">${c.photo ? `<img src="${esc(c.photo)}" style="width:100%;height:100%;object-fit:cover;">` : init}</div>
           <div>
             <div class="c-name">${esc(fullName)}</div>
@@ -552,39 +691,12 @@ function renderTable(){
           </div>
         </div>
       </td>
-      <td>
-        ${planName
-          ?`<div class="plan-name">${esc(planName)}</div>${planSub?`<div class="plan-sub">${esc(planSub)}</div>`:''}`
-          :`<span style="color:#9CA3AF;font-size:12px;">Sin plan</span>`}
-      </td>
-      <td style="color:#374151;font-size:13px;">${esc(objName)}</td>
-      <td>
-        ${statusName
-          ?`<span class="status-pill" style="background:${st.bg};color:${st.fg};">
-              <span style="width:6px;height:6px;border-radius:50%;background:${st.dot};display:inline-block;"></span>
-              ${esc(statusName)}
-            </span>`
-          :`<span style="color:#9CA3AF;font-size:12px;">—</span>`}
-      </td>
-      <td>
-        ${isOverdue
-          ?`<div class="checkin-cell overdue">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              Pendiente
-            </div>`
-          :ckText
-            ?`<div class="checkin-cell ${ckCls}">
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                ${esc(ckText)}
-              </div>`
-            :`<span style="color:#9CA3AF;font-size:12px;">—</span>`}
-      </td>
-      <td onclick="event.stopPropagation()">
-        <button class="btn-ver" onclick="viewClient('${c.id}')">
-          Ver
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </td>
+      <td>${planCell}</td>
+      <td style="color:#374151;font-size:13px;">${esc(c.objective?.name||'—')}</td>
+      <td>${adhCell}</td>
+      <td onclick="event.stopPropagation()">${estadoCell}</td>
+      <td>${ckCell}</td>
+      <td><div class="row-chevron"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></td>
     </tr>`;
   }).join('');
 
@@ -637,7 +749,7 @@ function adaptSidebar(){
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadUser();
-loadStatuses().then(()=>load());
+load();
 loadPendingBadge();
 adaptSidebar();
 </script>

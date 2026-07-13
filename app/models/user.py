@@ -62,6 +62,9 @@ class UserDetail(Base):
     activity_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     status_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     objective_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
+    # Estado del ciclo de vida del cliente (independiente del estado CRM/status_id):
+    # activo / pendiente / pausado / finalizado. Controla las pestañas de "Clientes".
+    lifecycle_status = Column(String(20), nullable=False, default="activo", server_default="activo")
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
     defecit = Column(Float, nullable=True)

@@ -12,6 +12,11 @@ from app.core.responses import send_response, send_error
 from app.models.user import User, UserDetail, RoleUser, UserParent
 from app.models.role import Role, CLIENT
 from app.models.parameter import ParameterDetail, Parameter
+from app.models.program import ProgramClient
+from app.models.calendar_task import CalendarTask
+from app.models.checkin import WeeklyCheckin
+from datetime import datetime, timedelta
+import math
 from app.schemas.user import (
     UserCreateRequest, UserUpdateRequest, UserStateRequest,
     UserAssignRequest, WeeksTrainingRequest, UserDetailOut,
@@ -182,6 +187,156 @@ def find_all(
         details = filter_clients_by_role(details, current_user, db)
 
     return send_response([_serialize(d, db) for d in details], "OK")
+
+
+# ── Clients portfolio (enriquecido para la página de Clientes) ────────────────
+_TRAIN_TYPES = {"rutina", "cardio", "sesion"}
+_NUTR_TYPES = {"nutricion"}
+_ADH_TYPES = list(_TRAIN_TYPES | _NUTR_TYPES)
+_VALID_LIFECYCLE = {"activo", "pendiente", "pausado", "finalizado"}
+
+
+class _LifecycleRequest(_BaseModel):
+    lifecycle_status: str
+
+
+@router.get("/clients/portfolio", summary="Cartera de clientes", description="Lista enriquecida de los clientes del coach con adherencia (últimos 30 días), programa/fase, último check-in y agregados para las tarjetas de resumen.")
+def clients_portfolio(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    role = db.query(Role).filter(Role.slug == "client").first()
+    if not role:
+        return send_error("Rol no encontrado")
+
+    role_user_ids = [ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == role.id).all()]
+    details = db.query(UserDetail).filter(UserDetail.user_id.in_(role_user_ids)).all()
+    details = filter_clients_by_role(details, current_user, db)
+
+    detail_ids = [d.id for d in details]
+    user_ids = [d.user_id for d in details]
+    today = datetime.utcnow().date()
+    floor30 = today - timedelta(days=30)
+
+    # ── Adherencia últimos 30 días (batch) ──
+    adh: dict = {}
+    if detail_ids:
+        tasks = (
+            db.query(CalendarTask)
+            .filter(
+                CalendarTask.client_user_detail_id.in_(detail_ids),
+                CalendarTask.task_date >= floor30,
+                CalendarTask.task_date <= today,
+                CalendarTask.task_type.in_(_ADH_TYPES),
+            )
+            .all()
+        )
+        for t in tasks:
+            a = adh.setdefault(t.client_user_detail_id, {"done": 0, "total": 0})
+            a["total"] += 1
+            if t.done:
+                a["done"] += 1
+
+    def adh_pct(did):
+        a = adh.get(did)
+        if not a or not a["total"]:
+            return None
+        return round(a["done"] / a["total"] * 100)
+
+    # ── Último check-in (batch) ──
+    last_ci: dict = {}
+    if detail_ids:
+        rows = (
+            db.query(WeeklyCheckin.client_user_detail_id, WeeklyCheckin.checkin_date)
+            .filter(WeeklyCheckin.client_user_detail_id.in_(detail_ids))
+            .all()
+        )
+        for did, cdate in rows:
+            if cdate and (did not in last_ci or cdate > last_ci[did]):
+                last_ci[did] = cdate
+
+    # ── Programa asignado más reciente por cliente (batch) ──
+    prog_by_user: dict = {}
+    if user_ids:
+        for pc in db.query(ProgramClient).filter(ProgramClient.client_id.in_(user_ids)).all():
+            prev = prog_by_user.get(pc.client_id)
+            pc_at = pc.assigned_at or datetime.min
+            if prev is None or pc_at > (prev[0] or datetime.min):
+                prog_by_user[pc.client_id] = (pc.assigned_at, pc.program)
+
+    def program_info(uid):
+        entry = prog_by_user.get(uid)
+        if not entry or not entry[1]:
+            return None
+        assigned_at, program = entry
+        phases = sorted(program.phases, key=lambda p: p.order)
+        total_weeks = sum(p.weeks for p in phases) if phases else 0
+        assigned_date = assigned_at.date() if assigned_at else today
+        elapsed_weeks = max(0, (today - assigned_date).days / 7.0)
+        phase_name, cum = None, 0
+        for p in phases:
+            cum += p.weeks
+            if elapsed_weeks < cum:
+                phase_name = p.name
+                break
+        if phase_name is None and phases:
+            phase_name = phases[-1].name
+        weeks_remaining = max(0, math.ceil(total_weeks - elapsed_weeks)) if total_weeks else None
+        return {"name": program.name, "phase_name": phase_name, "weeks_remaining": weeks_remaining}
+
+    clients = []
+    for d in details:
+        lci = last_ci.get(d.id)
+        pending = (lci is None) or ((today - lci).days >= 7)
+        clients.append({
+            "id": d.id,
+            "user_id": d.user_id,
+            "name": d.name,
+            "last_name": d.last_name,
+            "email": d.user.email if d.user else None,
+            "photo": d.photo,
+            "lifecycle_status": d.lifecycle_status or "activo",
+            "objective": {"id": d.objective.id, "name": d.objective.description} if d.objective else None,
+            "program": program_info(d.user_id),
+            "adherence": adh_pct(d.id),
+            "last_checkin_date": lci.isoformat() if lci else None,
+            "checkin_pending": pending,
+        })
+
+    activos = [c for c in clients if c["lifecycle_status"] == "activo"]
+    en_riesgo = [c for c in activos if c["adherence"] is not None and c["adherence"] < 70]
+    checkin_pendiente = [c for c in activos if c["checkin_pending"]]
+    adh_vals = [c["adherence"] for c in activos if c["adherence"] is not None]
+    adherencia_media = round(sum(adh_vals) / len(adh_vals)) if adh_vals else None
+
+    stats = {
+        "total": len(clients),
+        "requieren_atencion": len(en_riesgo),
+        "activos": len(activos),
+        "en_riesgo": len(en_riesgo),
+        "checkin_pendiente": len(checkin_pendiente),
+        "adherencia_media": adherencia_media,
+    }
+    return send_response({"stats": stats, "clients": clients}, "OK")
+
+
+@router.put("/client/{detail_id}/lifecycle-status", summary="Actualizar estado del ciclo del cliente", description="Cambia el estado del ciclo de vida del cliente (activo/pendiente/pausado/finalizado).")
+def update_lifecycle_status(
+    detail_id: str,
+    data: _LifecycleRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    status_val = (data.lifecycle_status or "").strip().lower()
+    if status_val not in _VALID_LIFECYCLE:
+        return send_error("Estado no válido")
+    verify_client_access(detail_id, current_user, db)
+    detail = _get_detail_or_404(db, detail_id)
+    if not detail:
+        return send_error("Cliente no encontrado", code=404)
+    detail.lifecycle_status = status_val
+    db.commit()
+    return send_response({"lifecycle_status": status_val}, "Estado actualizado")
 
 
 # ── Search: staff only ────────────────────────────────────────────────────────

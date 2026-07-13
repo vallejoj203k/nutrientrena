@@ -335,7 +335,7 @@
           </div>
           <div class="form-group" style="flex:0 0 170px;">
             <label>Tipo</label>
-            <select id="nc_type">
+            <select id="nc_type" onchange="updatePreview()">
               <option value="servicio">Servicios</option>
               <option value="consentimiento">Consentimiento</option>
               <option value="acuerdo">Acuerdo</option>
@@ -345,7 +345,7 @@
         </div>
         <div class="form-group">
           <label>Cliente (opcional)</label>
-          <select id="nc_client">
+          <select id="nc_client" onchange="updatePreview()">
             <option value="">Sin cliente asignado</option>
           </select>
         </div>
@@ -366,7 +366,7 @@
             <button type="button" class="var-item" onclick="insertVar('{{telefono_emergencia}}')"><span class="var-item-name">Teléfono de emergencia</span><code class="var-item-code">{{telefono_emergencia}}</code></button>
           </div>
           <div style="font-size:11.5px;color:#9CA3AF;margin-top:11px;line-height:1.5;">
-            Al generar el PDF, cada variable se sustituye por el dato real (nombre del cliente, tu nombre, fecha…). Las que no tengan un dato asociado se muestran como un espacio en blanco para rellenar a mano.
+            Elige un <b>cliente</b> arriba y las variables se rellenan solas con sus datos (nombre, teléfono, precio…), tu nombre como coach y la fecha. Lo ves al instante en la vista previa. Las variables sin dato quedan como un espacio en blanco para rellenar a mano.
           </div>
         </div>
         <div class="form-group">
@@ -712,22 +712,25 @@ function insertVar(v){
 
 function updatePreview(){
   const content=document.getElementById('nc_content').value;
-  const clientSel=document.getElementById('nc_client');
-  const clientName=(clientSel.options[clientSel.selectedIndex]?.text||'').replace('Sin cliente asignado','').trim();
+  const cid=document.getElementById('nc_client').value;
+  const client=allClients.find(c=>String(c.id)===String(cid));
+  const clientName=client?((client.name||'')+' '+(client.last_name||'')).trim():'';
   const today=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
   const coach=currentUser.name||'Tu nombre';
   const typeSel=document.getElementById('nc_type');
   const servicio=typeSel?((typeSel.options[typeSel.selectedIndex]?.text)||'Servicios'):'Servicios';
   const BLANK='__________';
+  const precio=(client&&client.precio!=null)?(Number(client.precio).toFixed(0)+' € / mes'):BLANK;
+  const telefono=(client&&client.phone)?client.phone:BLANK;
   const vals={
     nombre_cliente: clientName||BLANK,
     coach_nombre: coach||BLANK,
     fecha: today,
     servicio: servicio,
-    precio: BLANK,
+    precio: precio,
     duracion: BLANK,
     contacto_emergencia: BLANK,
-    telefono_emergencia: BLANK,
+    telefono_emergencia: telefono,
   };
   let preview=content;
   for(const k in vals){ preview=preview.split('{{'+k+'}}').join(vals[k]); }

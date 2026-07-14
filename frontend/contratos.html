@@ -572,9 +572,11 @@ let currentFilter='';
 
 async function loadClients(){
   try{
-    const r=await fetch(`${API}/users?role_id=6&per_page=200`,{headers:h()});
+    // Endpoint acotado: un coach solo ve SUS clientes (con nombre, teléfono y precio)
+    const r=await fetch(`${API}/users/client/findAll`,{headers:h()});
     const d=await r.json();
-    allClients=(d.data?.data||d.data||[]);
+    const arr=(d.data?.data||d.data||[]);
+    allClients=Array.isArray(arr)?arr:[];
   }catch{}
 }
 

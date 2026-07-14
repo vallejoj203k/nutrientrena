@@ -686,16 +686,18 @@ function renderTemplates(){
 let ncStep=1;
 let selectedTemplateId=null;
 
-function openNewContractModal(){
+async function openNewContractModal(){
   ncStep=1;
   selectedTemplateId=null;
   renderTemplatePicker();
-  populateClientSelect('nc_client');
   document.getElementById('nc_title').value='';
   document.getElementById('nc_type').value='servicio';
   document.getElementById('nc_content').value='';
   showNcStep(1);
   document.getElementById('newContractOverlay').classList.add('open');
+  // Asegura que el desplegable tenga los clientes del coach (reintenta si está vacío)
+  if(!allClients.length){ await loadClients(); }
+  populateClientSelect('nc_client');
 }
 function closeNewContractModal(){document.getElementById('newContractOverlay').classList.remove('open');}
 

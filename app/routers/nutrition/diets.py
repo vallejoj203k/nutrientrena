@@ -335,28 +335,15 @@ class _AssignBody(DietCreate):
     title: str = ""
 
 
-@router.post("/{id}/assign", summary="Asignar dieta existente a cliente", description="Copia una dieta del catálogo del coach al cliente especificado.")
-def assign_to_client(
-    id: str,
-    body: _AssignBody,
-    db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
-):
-    from app.models.user import UserDetail
-    source = _get_or_404(db, id)
-    if not source:
-        return send_error("Dieta no encontrada")
-    client_detail = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
-    if not client_detail:
-        return send_error("Cliente no encontrado")
-
+def copy_diet_to_user(db: Session, source: Diet, target_user_id: int, created_user_id: int) -> Diet:
+    """Copia una dieta (detalle + comidas) al usuario destino. No hace commit."""
     new_diet = Diet(
         title=source.title,
         calories=source.calories,
         quantity=source.quantity,
         type_id=source.type_id,
-        user_id=client_detail.user_id,
-        created_user_id=current_user.id,
+        user_id=target_user_id,
+        created_user_id=created_user_id,
     )
     db.add(new_diet)
     db.flush()
@@ -386,7 +373,26 @@ def assign_to_client(
         )
         for food in source.foods
     ]
-    _save_foods(db, new_diet.id, foods_data, current_user.id)
+    _save_foods(db, new_diet.id, foods_data, created_user_id)
+    return new_diet
+
+
+@router.post("/{id}/assign", summary="Asignar dieta existente a cliente", description="Copia una dieta del catálogo del coach al cliente especificado.")
+def assign_to_client(
+    id: str,
+    body: _AssignBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    from app.models.user import UserDetail
+    source = _get_or_404(db, id)
+    if not source:
+        return send_error("Dieta no encontrada")
+    client_detail = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
+    if not client_detail:
+        return send_error("Cliente no encontrado")
+
+    new_diet = copy_diet_to_user(db, source, client_detail.user_id, current_user.id)
     db.commit()
     db.refresh(new_diet)
     return send_response(_serialize(new_diet), "Dieta asignada al cliente")

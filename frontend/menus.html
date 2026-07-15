@@ -211,7 +211,8 @@
     .empty-state p{font-size:13px;}
 
     /* ── Form View (full page) ── */
-    #formView{display:none;flex:1;flex-direction:column;overflow:hidden;background:var(--gray-bg);}
+    /* Pantalla completa: tapa el sidebar de la app, como en el prototipo */
+    #formView{display:none;position:fixed;inset:0;z-index:500;flex-direction:column;overflow:hidden;background:var(--gray-bg);}
     #formView.active{display:flex;}
     /* ── Constructor de menú (diseño prototipo) ── */
     .mbx-eyebrow{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
@@ -405,7 +406,8 @@
       .form-row{grid-template-columns:1fr;}
       /* Fix form view scroll */
       #listView{display:block;overflow:visible;height:auto;}
-      #formView,#formView.active{display:block;overflow:visible;height:auto;}
+      #formView{display:none;}
+      #formView.active{display:block;position:fixed;inset:0;overflow-y:auto;height:100%;}
       .content-area{display:block;overflow:visible;height:auto;}
       .fv-body{display:block;overflow-y:visible;height:auto;padding:16px;}
     }

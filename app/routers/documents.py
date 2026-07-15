@@ -1,22 +1,34 @@
 import uuid
 from fastapi import APIRouter, Depends, UploadFile, File, Form
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
 from app.core.responses import send_response, send_error
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import require_role_ids, verify_client_access, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.email import _send
 from app.routers.files import _get_r2_client, _public_url
 from app.models.document import Document
+from app.models.user import User, UserDetail
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
+
+
+class _SendRequest(BaseModel):
+    client_user_detail_id: str
 
 _CATEGORIES = {"contratos", "guias", "plantillas"}
 _ALLOWED = {"application/pdf"}
 _MAX_MB = 25
 
 
-def _serialize(d: Document) -> dict:
+def _serialize(d: Document, db: Session | None = None) -> dict:
+    client_name = None
+    if d.client_user_detail_id and db is not None:
+        detail = db.query(UserDetail).filter(UserDetail.id == d.client_user_detail_id).first()
+        if detail:
+            client_name = f"{detail.name or ''} {detail.last_name or ''}".strip() or None
     return {
         "id": d.id,
         "name": d.name,
@@ -25,6 +37,7 @@ def _serialize(d: Document) -> dict:
         "size_kb": d.size_kb,
         "content_type": d.content_type,
         "client_user_detail_id": d.client_user_detail_id,
+        "client_name": client_name,
         "created_at": d.created_at.isoformat() if d.created_at else None,
     }
 
@@ -88,7 +101,52 @@ def list_documents(
     if category:
         q = q.filter(Document.category == category)
     docs = q.order_by(Document.created_at.desc(), Document.id.desc()).all()
-    return send_response([_serialize(d) for d in docs], "OK")
+    return send_response([_serialize(d, db) for d in docs], "OK")
+
+
+@router.post("/{doc_id}/send", summary="Asignar y enviar documento a un cliente", description="Asigna el documento a un cliente del coach y le envía el enlace por email.")
+def send_document(
+    doc_id: int,
+    data: _SendRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    doc = db.query(Document).filter(Document.id == doc_id, Document.coach_id == current_user.id).first()
+    if not doc:
+        return send_error("Documento no encontrado", code=404)
+    verify_client_access(data.client_user_detail_id, current_user, db)
+    detail = db.query(UserDetail).filter(UserDetail.id == data.client_user_detail_id).first()
+    if not detail:
+        return send_error("Cliente no encontrado", code=404)
+
+    client_email = None
+    if detail.user_id:
+        user = db.query(User).filter(User.id == detail.user_id).first()
+        if user:
+            client_email = user.email
+    if not client_email:
+        return send_error("El cliente no tiene email registrado", code=422)
+
+    # Asignar el documento al cliente
+    doc.client_user_detail_id = detail.id
+    db.commit()
+
+    client_name = f"{detail.name or ''} {detail.last_name or ''}".strip() or "Cliente"
+    coach_name = current_user.name or current_user.email
+    html = f"""
+<div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px 24px;">
+  <h2 style="color:#4F46E5;margin-bottom:8px;">Alzum.io</h2>
+  <p style="color:#374151;font-size:15px;">Hola <strong>{client_name}</strong>,</p>
+  <p style="color:#374151;font-size:15px;">Tu entrenador/a <strong>{coach_name}</strong> te ha compartido el siguiente documento:</p>
+  <p style="color:#111827;font-size:16px;font-weight:700;margin:20px 0 12px;">{doc.name}</p>
+  <p style="margin:0 0 24px;"><a href="{doc.file_url}" style="display:inline-block;background:#4F46E5;color:#fff;text-decoration:none;padding:11px 22px;border-radius:9px;font-size:14px;font-weight:700;">Ver documento (PDF)</a></p>
+  <hr style="border:none;border-top:1px solid #E5E7EB;margin:24px 0;"/>
+  <p style="color:#9CA3AF;font-size:12px;text-align:center;">Alzum.io — Gestión de coaching deportivo</p>
+</div>"""
+    ok, msg = _send(client_email, f"{doc.name} — {coach_name}", html)
+    if not ok:
+        return send_error(f"Documento asignado, pero el email falló: {msg}", code=502)
+    return send_response(_serialize(doc, db), "Documento enviado")
 
 
 @router.delete("/{doc_id}", summary="Eliminar documento", description="Elimina un documento del coach y su archivo en el almacenamiento.")

@@ -209,6 +209,61 @@
     /* ── Form View (full page) ── */
     #formView{display:none;flex:1;flex-direction:column;overflow:hidden;background:var(--gray-bg);}
     #formView.active{display:flex;}
+    /* ── Constructor de menú (diseño prototipo) ── */
+    .mbx-eyebrow{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
+    .mbx-htitle{font-size:17px;font-weight:800;color:#111827;margin-top:1px;}
+    .mbx-pills{display:flex;background:#F3F4F6;border-radius:10px;padding:3px;gap:2px;}
+    .mbx-pill{padding:7px 16px;border:none;border-radius:8px;background:none;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;transition:.15s;}
+    .mbx-pill.active{background:var(--lib-primary,#4F46E5);color:#fff;}
+    .mbx-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 28px;background:#fff;border-bottom:1px solid #EEF0F3;flex-shrink:0;}
+    .mbx-inputs input{width:100%;padding:12px 16px;border:1px solid #E5E7EB;border-radius:12px;font-size:14px;outline:none;transition:.15s;background:#fff;color:#111;}
+    .mbx-inputs input:focus{border-color:var(--lib-primary,#4F46E5);}
+    .mbx-layout{flex:1;display:flex;overflow:hidden;}
+    .mbx-side{width:300px;min-width:300px;background:#fff;border-right:1px solid #EEF0F3;display:flex;flex-direction:column;overflow:hidden;}
+    .mbx-side-head{padding:16px 16px 8px;flex-shrink:0;}
+    .mbx-side-title{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;}
+    .mbx-side-count{font-size:12.5px;color:#6B7280;margin-top:3px;}
+    .mbx-days{flex:1;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:9px;}
+    .mbx-day{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:11px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;transition:.15s;position:relative;}
+    .mbx-day:hover{border-color:#CBD5E1;}
+    .mbx-day.sel{background:#EEF0FE;border-color:var(--lib-primary,#4F46E5);}
+    .mbx-day.dragover{border-style:dashed;border-color:var(--lib-primary,#4F46E5);}
+    .mbx-day-grip{color:#C4C7CE;cursor:grab;flex-shrink:0;margin-top:2px;}
+    .mbx-day-info{flex:1;min-width:0;}
+    .mbx-day-name{font-size:14px;font-weight:700;color:#111827;}
+    .mbx-day.sel .mbx-day-name{color:var(--lib-primary,#4F46E5);}
+    .mbx-day-sub{font-size:12px;color:#9CA3AF;font-style:italic;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mbx-day-sub.filled{color:#374151;font-style:normal;font-weight:600;}
+    .mbx-day-x{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:2px;border-radius:6px;flex-shrink:0;line-height:1;font-size:15px;}
+    .mbx-day-x:hover{color:#DC2626;background:#FEE2E2;}
+    .mbx-addday{margin:6px 14px;padding:12px;border:1.5px dashed #C7CBF5;border-radius:12px;background:#F8F9FE;color:var(--lib-primary,#4F46E5);font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s;flex-shrink:0;}
+    .mbx-addday:hover{background:#EEF0FE;}
+    .mbx-addday:disabled{opacity:.45;cursor:default;}
+    .mbx-total{margin:10px 14px 16px;background:#fff;border:1px solid #EEF0F3;border-radius:12px;padding:13px 16px;flex-shrink:0;}
+    .mbx-total-title{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:9px;}
+    .mbx-total-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:left;}
+    .mbx-total-lbl{font-size:11px;color:#9CA3AF;}
+    .mbx-total-val{font-size:16px;font-weight:800;margin-top:2px;}
+    .mbx-total-val.kcal{color:#F59E0B;}
+    .mbx-total-val.prot{color:var(--lib-primary,#4F46E5);}
+    .mbx-total-val.days{color:#F59E0B;}
+    .mbx-canvas{flex:1;overflow-y:auto;padding:26px 30px;}
+    .mbx-empty{border:1.5px dashed #D8DCE3;border-radius:18px;padding:64px 24px;text-align:center;max-width:860px;margin:0 auto;}
+    .mbx-empty-ico{width:68px;height:68px;border-radius:18px;background:#E7E9FD;color:var(--lib-primary,#4F46E5);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+    .mbx-empty h3{font-size:20px;font-weight:800;color:#111827;}
+    .mbx-empty p{font-size:14px;color:#9CA3AF;margin-top:6px;}
+    .mbx-empty-btns{display:flex;gap:12px;justify-content:center;margin-top:22px;flex-wrap:wrap;}
+    .mbx-btn-solid{padding:12px 22px;border:none;border-radius:12px;background:var(--lib-primary,#4F46E5);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+    .mbx-btn-solid:hover{background:var(--lib-primary-hover,#4338CA);}
+    .mbx-btn-dash{padding:12px 22px;border:1.5px dashed #C7CBF5;border-radius:12px;background:#fff;color:var(--lib-primary,#4F46E5);font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+    .mbx-btn-dash:hover{background:#F8F9FE;}
+    .mbx-dietcard{background:#fff;border:1px solid #EEF0F3;border-radius:18px;padding:26px;max-width:860px;margin:0 auto;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .mbx-dietcard-top{display:flex;align-items:center;gap:16px;}
+    .mbx-dietcard-ico{width:56px;height:56px;border-radius:14px;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px;}
+    .mbx-dietcard-name{font-size:19px;font-weight:800;color:#111827;}
+    .mbx-dietcard-meta{font-size:13.5px;color:#6B7280;margin-top:3px;}
+    .mbx-dietcard-btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+    @media(max-width:900px){.mbx-inputs{grid-template-columns:1fr;} .mbx-layout{flex-direction:column;overflow:visible;} .mbx-side{width:100%;min-width:0;border-right:none;border-bottom:1px solid #EEF0F3;} .mbx-days{max-height:300px;}}
 
     .fv-header{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
     .fv-header-left{display:flex;align-items:center;gap:14px;}
@@ -559,7 +614,7 @@
     </div>
   </div><!-- #listView -->
 
-  <!-- ═══ FORM VIEW ═══ -->
+  <!-- ═══ FORM VIEW (constructor de menú, diseño prototipo) ═══ -->
   <div id="formView">
     <div class="fv-header">
       <div class="fv-header-left">
@@ -567,11 +622,15 @@
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
         <div>
-          <div class="fv-htitle" id="formTitle">Nuevo menú semanal</div>
-          <div class="fv-hsub">Un menú agrupa 7 dietas (una por día) para asignar completo a un cliente.</div>
+          <div class="mbx-eyebrow">Librería · Nutrición</div>
+          <div class="mbx-htitle" id="formTitle">Nuevo menú</div>
         </div>
       </div>
-      <div class="fv-header-right">
+      <div class="fv-header-right" style="display:flex;align-items:center;gap:12px;">
+        <div class="mbx-pills">
+          <button class="mbx-pill" id="pillInfo" onclick="mbxGoInfo()">Información</button>
+          <button class="mbx-pill active" id="pillDias" onclick="mbxGoDias()">Días del menú</button>
+        </div>
         <button class="btn-fv-cancel" onclick="closeForm()">Cancelar</button>
         <button class="btn-fv-save" id="saveBtn" onclick="saveMenu()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -580,77 +639,36 @@
       </div>
     </div>
 
-    <div class="fv-body">
-      <!-- Left column -->
-      <div class="fv-left">
-        <!-- Section 1: datos -->
-        <div class="fv-section">
-          <div class="sec-hdr">
-            <div class="sec-num">1</div>
-            <div class="sec-hdr-text">
-              <h3>Datos del menú</h3>
-              <p>Dale un nombre claro para encontrarlo después</p>
-            </div>
-          </div>
-          <div class="fg">
-            <label>Nombre del menú</label>
-            <input id="f_name" placeholder="Ej: Recomposición · Semana 1" oninput="updateSummary()"/>
-          </div>
-          <div class="fg">
-            <label>Descripción corta</label>
-            <textarea id="f_desc" placeholder="Ej: 2.200 kcal equilibrado, alta saciedad" rows="2"></textarea>
-          </div>
-          <div id="formError" style="color:#DC2626;font-size:12px;padding-top:4px;"></div>
-        </div>
+    <!-- Información básica -->
+    <div class="mbx-inputs">
+      <input id="f_name" placeholder="Nombre del menú · ej: Recomposición · Semana 1"/>
+      <input id="f_desc" placeholder="Descripción corta (opcional)"/>
+    </div>
+    <div id="formError" style="color:#DC2626;font-size:12.5px;padding:6px 28px 0;background:#fff;display:none;"></div>
 
-        <!-- Section 2: days -->
-        <div class="fv-section">
-          <div class="sec-hdr">
-            <div class="sec-num">2</div>
-            <div class="sec-hdr-text">
-              <h3>Asigna una dieta a cada día</h3>
-              <p>Pulsa un día para buscar y asignar dieta. Puedes repetir dietas.</p>
-            </div>
-          </div>
-          <div class="days-list" id="daysList"></div>
+    <div class="mbx-layout">
+      <!-- Sidebar de días -->
+      <div class="mbx-side">
+        <div class="mbx-side-head">
+          <div class="mbx-side-title">Días del menú</div>
+          <div class="mbx-side-count" id="mbxDayCount">0 días</div>
         </div>
-      </div>
-
-      <!-- Right sidebar -->
-      <div class="fv-right">
-        <div class="fv-card">
-          <div class="fv-card-title">Resumen semanal</div>
-          <div class="summary-stats">
-            <div class="sum-stat">
-              <div class="sum-icon">🔥</div>
-              <div class="sum-val" id="sumKcal">—</div>
-              <div class="sum-unit">kcal/día</div>
-            </div>
-            <div class="sum-stat">
-              <div class="sum-icon" style="font-size:16px;color:#6366F1;">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <div class="sum-val" id="sumProt">—</div>
-              <div class="sum-unit">prot/día</div>
-            </div>
-            <div class="sum-stat">
-              <div class="sum-icon" style="font-size:16px;color:var(--orange);">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </div>
-              <div class="sum-val" id="sumDays">0/7</div>
-              <div class="sum-unit">días</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="fv-card">
-          <div class="fv-card-title">Atajos</div>
-          <div class="shortcut-sub">Rellenar toda la semana con la misma dieta:</div>
-          <div class="shortcut-list" id="shortcutList">
-            <div style="font-size:12px;color:#9CA3AF;">Cargando dietas…</div>
+        <div class="mbx-days" id="mbxDays"></div>
+        <button class="mbx-addday" id="mbxAddDay" onclick="addMenuDay()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Añadir día
+        </button>
+        <div class="mbx-total">
+          <div class="mbx-total-title">Total del menú</div>
+          <div class="mbx-total-grid">
+            <div><div class="mbx-total-lbl">media kcal</div><div class="mbx-total-val kcal" id="sumKcal">0</div></div>
+            <div><div class="mbx-total-lbl">media P</div><div class="mbx-total-val prot" id="sumProt">0g</div></div>
+            <div><div class="mbx-total-lbl">días</div><div class="mbx-total-val days" id="sumDays">0/0</div></div>
           </div>
         </div>
       </div>
+      <!-- Lienzo del día seleccionado -->
+      <div class="mbx-canvas" id="mbxCanvas"></div>
     </div>
   </div><!-- #formView -->
 
@@ -954,13 +972,16 @@ async function toggleFav(id, newVal, btn) {
 }
 
 // ── Form View ─────────────────────────────────────────────────────────────────
+const MAX_MENU_DAYS = 7; // el resto de vistas (tabla, panel) asumen menús de hasta 7 días
+
 async function openForm(id = null) {
   editingId = id;
   daySelections = Array(7).fill(null);
+  selectedDayIdx = 0;
   document.getElementById('f_name').value = '';
   document.getElementById('f_desc').value = '';
-  document.getElementById('formError').textContent = '';
-  document.getElementById('formTitle').textContent = id ? 'Editar menú' : 'Nuevo menú semanal';
+  const fe = document.getElementById('formError'); fe.textContent = ''; fe.style.display = 'none';
+  document.getElementById('formTitle').textContent = id ? 'Editar menú' : 'Nuevo menú';
   document.getElementById('saveBtnLabel').textContent = id ? 'Guardar cambios' : 'Crear menú';
 
   if (id) {
@@ -970,13 +991,15 @@ async function openForm(id = null) {
       const m = j.data || j;
       document.getElementById('f_name').value = m.name || '';
       document.getElementById('f_desc').value = m.description || '';
+      const maxIdx = Math.max(0, ...((m.days || []).map(d => d.day_index)));
+      daySelections = Array(Math.min(MAX_MENU_DAYS, Math.max(1, maxIdx + 1))).fill(null);
       (m.days || []).forEach(d => {
-        if (d.day_index >= 0 && d.day_index < 7) {
+        if (d.day_index >= 0 && d.day_index < daySelections.length) {
           daySelections[d.day_index] = d.diet_id ? {
             diet_id: d.diet_id,
             title: d.diet_title || d.diet_id,
             calories: d.calories || null,
-            proteins: null,
+            proteins: d.proteins || null,
             foods_count: null,
           } : null;
         }
@@ -985,10 +1008,20 @@ async function openForm(id = null) {
   }
 
   renderDayRows();
-  renderShortcuts();
   updateSummary();
   document.getElementById('listView').style.display = 'none';
   document.getElementById('formView').classList.add('active');
+}
+
+// Pills de navegación del constructor
+function mbxGoInfo(){
+  document.getElementById('pillInfo').classList.add('active');
+  document.getElementById('pillDias').classList.remove('active');
+  document.getElementById('f_name').focus();
+}
+function mbxGoDias(){
+  document.getElementById('pillDias').classList.add('active');
+  document.getElementById('pillInfo').classList.remove('active');
 }
 
 function closeForm() {
@@ -997,47 +1030,121 @@ function closeForm() {
   editingId = null;
 }
 
-// ── Day rows ──────────────────────────────────────────────────────────────────
+// ── Constructor: sidebar de días + lienzo ─────────────────────────────────────
+let selectedDayIdx = 0;
+let _dragIdx = null;
+
 function renderDayRows() {
-  const list = document.getElementById('daysList');
-  list.innerHTML = DAYS.map((lbl, i) => {
-    const sel = daySelections[i];
-    if (sel) {
-      const meta = [
-        sel.calories ? `${Math.round(sel.calories)} kcal` : '',
-        sel.proteins ? `${Math.round(sel.proteins)}g prot` : '',
-        sel.foods_count != null ? `${sel.foods_count} comidas` : '',
-      ].filter(Boolean).join(' · ');
-      return `<div class="day-row-item filled">
-        <div class="day-badge-lbl">${lbl}</div>
-        <div class="day-diet-icon">🍲</div>
-        <div class="day-diet-info">
-          <div class="day-diet-name">${esc(sel.title)}</div>
-          ${meta ? `<div class="day-diet-meta">${meta}</div>` : ''}
-        </div>
-        <div class="day-row-actions">
-          <button class="day-btn" title="Cambiar dieta" onclick="openPicker(${i})">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="day-btn clear" title="Quitar dieta" onclick="clearDay(${i})">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-      </div>`;
-    } else {
-      return `<div class="day-row-item" onclick="openPicker(${i})">
-        <div class="day-badge-lbl">${lbl}</div>
-        <div class="day-empty-label">Sin dieta asignada</div>
-        <div class="day-row-actions">
-          <button class="day-add-btn" onclick="openPicker(${i})">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Asignar
-          </button>
-        </div>
-      </div>`;
-    }
-  }).join('');
+  if (selectedDayIdx >= daySelections.length) selectedDayIdx = Math.max(0, daySelections.length - 1);
+  document.getElementById('mbxDayCount').textContent = daySelections.length + ' día' + (daySelections.length !== 1 ? 's' : '');
+  const grip = '<span class="mbx-day-grip"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg></span>';
+  document.getElementById('mbxDays').innerHTML = daySelections.map((sel, i) => `
+    <div class="mbx-day${i === selectedDayIdx ? ' sel' : ''}" draggable="true" data-idx="${i}"
+         onclick="selectMenuDay(${i})"
+         ondragstart="mbxDragStart(event,${i})" ondragover="mbxDragOver(event,${i})"
+         ondragleave="mbxDragLeave(event)" ondrop="mbxDrop(event,${i})" ondragend="mbxDragEnd(event)">
+      ${grip}
+      <div class="mbx-day-info">
+        <div class="mbx-day-name">Día ${i + 1}</div>
+        <div class="mbx-day-sub${sel ? ' filled' : ''}">${sel ? esc(sel.title) : 'Sin dieta'}</div>
+      </div>
+      <button class="mbx-day-x" title="Quitar día" onclick="event.stopPropagation();removeMenuDay(${i})">×</button>
+    </div>`).join('');
+  document.getElementById('mbxAddDay').disabled = daySelections.length >= MAX_MENU_DAYS;
+  renderDayCanvas();
 }
+
+function renderDayCanvas() {
+  const el = document.getElementById('mbxCanvas');
+  if (!daySelections.length) {
+    el.innerHTML = '<div class="mbx-empty"><h3>Sin días</h3><p>Añade un día para empezar a construir el menú.</p></div>';
+    return;
+  }
+  const i = selectedDayIdx, sel = daySelections[i];
+  if (!sel) {
+    el.innerHTML = `
+      <div class="mbx-empty">
+        <div class="mbx-empty-ico"><svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+        <h3>Día ${i + 1} sin dieta</h3>
+        <p>Asigna una dieta existente de tu librería o crea una nueva para este día.</p>
+        <div class="mbx-empty-btns">
+          <button class="mbx-btn-solid" onclick="openPicker(${i})">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Asignar dieta existente
+          </button>
+          <button class="mbx-btn-dash" onclick="createDietForDay()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Crear dieta nueva
+          </button>
+        </div>
+      </div>`;
+    return;
+  }
+  const meta = [
+    sel.calories ? `${Math.round(sel.calories)} kcal` : '',
+    sel.proteins ? `${Math.round(sel.proteins)}g prot` : '',
+    sel.foods_count != null ? `${sel.foods_count} comidas` : '',
+  ].filter(Boolean).join(' · ');
+  el.innerHTML = `
+    <div class="mbx-dietcard">
+      <div class="mbx-dietcard-top">
+        <div class="mbx-dietcard-ico">🍲</div>
+        <div>
+          <div class="mbx-dietcard-name">${esc(sel.title)}</div>
+          ${meta ? `<div class="mbx-dietcard-meta">${meta}</div>` : ''}
+        </div>
+      </div>
+      <div class="mbx-dietcard-btns">
+        <button class="mbx-btn-solid" onclick="openPicker(${i})">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Cambiar dieta
+        </button>
+        <button class="mbx-btn-dash" style="border-color:#FECACA;color:#DC2626;" onclick="clearDay(${i})">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Quitar dieta
+        </button>
+      </div>
+    </div>`;
+}
+
+function selectMenuDay(i) { selectedDayIdx = i; renderDayRows(); }
+
+function addMenuDay() {
+  if (daySelections.length >= MAX_MENU_DAYS) { toast('Un menú admite hasta ' + MAX_MENU_DAYS + ' días', 'error'); return; }
+  daySelections.push(null);
+  selectedDayIdx = daySelections.length - 1;
+  renderDayRows(); updateSummary();
+}
+
+function removeMenuDay(i) {
+  if (daySelections.length <= 1) { toast('El menú debe tener al menos un día', 'error'); return; }
+  daySelections.splice(i, 1);
+  if (selectedDayIdx >= daySelections.length) selectedDayIdx = daySelections.length - 1;
+  renderDayRows(); updateSummary();
+}
+
+// Reordenar días arrastrando
+function mbxDragStart(e, i) { _dragIdx = i; e.dataTransfer.effectAllowed = 'move'; }
+function mbxDragOver(e, i)  { e.preventDefault(); e.currentTarget.classList.add('dragover'); }
+function mbxDragLeave(e)    { e.currentTarget.classList.remove('dragover'); }
+function mbxDragEnd(e)      { document.querySelectorAll('.mbx-day.dragover').forEach(d => d.classList.remove('dragover')); }
+function mbxDrop(e, i) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  if (_dragIdx == null || _dragIdx === i) return;
+  const moved = daySelections.splice(_dragIdx, 1)[0];
+  daySelections.splice(i, 0, moved);
+  selectedDayIdx = i;
+  _dragIdx = null;
+  renderDayRows(); updateSummary();
+}
+
+function createDietForDay() {
+  window.open('diets.html', '_blank');
+  toast('Crea la dieta en la pestaña nueva; al volver aquí se recargará la lista', '');
+}
+// Al volver a esta pestaña, recargar dietas para que aparezcan las recién creadas
+window.addEventListener('focus', () => { if (document.getElementById('formView').classList.contains('active')) loadDiets(); });
 
 function clearDay(i) {
   daySelections[i] = null;
@@ -1048,7 +1155,7 @@ function clearDay(i) {
 // ── Diet picker ───────────────────────────────────────────────────────────────
 function openPicker(dayIdx) {
   pickerDayIdx = dayIdx;
-  document.getElementById('pickerTitle').textContent = `Dieta para ${DAYS[dayIdx]}`;
+  document.getElementById('pickerTitle').textContent = `Dieta para el Día ${dayIdx + 1}`;
   document.getElementById('pickerSearch').value = '';
   renderPickerList(allDiets);
   document.getElementById('pickerOverlay').classList.add('open');
@@ -1091,45 +1198,32 @@ function selectDietForDay(dayIdx, dietId, title, calories, proteins, foodsCount)
   updateSummary();
 }
 
-// ── Shortcuts ─────────────────────────────────────────────────────────────────
-function renderShortcuts() {
-  const list = document.getElementById('shortcutList');
-  const top = allDiets.slice(0, 5);
-  if (!top.length) { list.innerHTML = `<div style="font-size:12px;color:#9CA3AF;">No hay dietas disponibles</div>`; return; }
-  list.innerHTML = top.map(d =>
-    `<div class="shortcut-item" onclick="fillAllDays('${esc(d.id)}','${esc(d.title||'')}',${d.calories||0},${(d.detail||{}).proteins||0},${(d.foods||[]).length})">
-      <span>${esc(d.title||'')}</span>
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>`
-  ).join('');
-}
-
-function fillAllDays(dietId, title, calories, proteins, foodsCount) {
-  daySelections = Array(7).fill(null).map(() => ({ diet_id: dietId, title, calories: calories||null, proteins: proteins||null, foods_count: foodsCount||null }));
-  renderDayRows();
-  updateSummary();
-}
-
-// ── Summary ───────────────────────────────────────────────────────────────────
+// ── Total del menú ───────────────────────────────────────────────────────────
 function updateSummary() {
   const filled = daySelections.filter(Boolean);
   const count = filled.length;
   const avgKcal = count ? Math.round(filled.reduce((a,d) => a+(d.calories||0),0)/count) : 0;
   const avgProt = count ? Math.round(filled.reduce((a,d) => a+(d.proteins||0),0)/count) : 0;
-  document.getElementById('sumKcal').textContent = count ? avgKcal : '—';
-  document.getElementById('sumProt').textContent = count ? `${avgProt}g` : '—';
-  document.getElementById('sumDays').textContent = `${count}/7`;
+  document.getElementById('sumKcal').textContent = avgKcal;
+  document.getElementById('sumProt').textContent = `${avgProt}g`;
+  document.getElementById('sumDays').textContent = `${count}/${daySelections.length}`;
 }
 
 // ── Save ──────────────────────────────────────────────────────────────────────
+function _showFormError(msg) {
+  const fe = document.getElementById('formError');
+  fe.textContent = msg || '';
+  fe.style.display = msg ? 'block' : 'none';
+}
+
 async function saveMenu() {
   const name = document.getElementById('f_name').value.trim();
-  if (!name) { document.getElementById('formError').textContent = 'El nombre es obligatorio'; return; }
+  if (!name) { _showFormError('El nombre es obligatorio'); mbxGoInfo(); return; }
 
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
   document.getElementById('saveBtnLabel').textContent = 'Guardando…';
-  document.getElementById('formError').textContent = '';
+  _showFormError('');
 
   const days = daySelections.map((sel, i) => ({ day_index: i, diet_id: sel?.diet_id || null }));
   const body = { name, description: document.getElementById('f_desc').value.trim() || null, days };
@@ -1139,9 +1233,9 @@ async function saveMenu() {
     const method = editingId ? 'PUT' : 'POST';
     const r = await fetch(url, { method, headers: {'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body: JSON.stringify(body) });
     const j = await r.json();
-    if (!r.ok) { document.getElementById('formError').textContent = j.detail || j.message || 'Error al guardar'; return; }
+    if (!r.ok) { _showFormError(j.detail || j.message || "Error al guardar"); return; }
     closeForm(); toast(editingId ? 'Menú actualizado' : 'Menú creado', 'success'); loadMenus();
-  } catch { document.getElementById('formError').textContent = 'Error de conexión'; }
+  } catch { _showFormError('Error de conexión'); }
   finally { btn.disabled=false; document.getElementById('saveBtnLabel').textContent = editingId ? 'Guardar cambios' : 'Crear menú'; }
 }
 

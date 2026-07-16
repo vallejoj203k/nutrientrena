@@ -16,6 +16,7 @@ def _serialize(m: WeeklyMenu) -> dict:
     for d in m.days:
         days.append({
             "day_index": d.day_index,
+            "name": d.name,
             "diet_id": d.diet_id,
             "diet_title": d.diet.title if d.diet else None,
             "calories": d.diet.calories if d.diet else None,
@@ -60,6 +61,7 @@ def create_menu(
         db.add(WeeklyMenuDay(
             menu_id=menu.id,
             day_index=d.day_index,
+            name=d.name,
             diet_id=d.diet_id,
         ))
 
@@ -101,7 +103,7 @@ def update_menu(
     if data.days is not None:
         db.query(WeeklyMenuDay).filter(WeeklyMenuDay.menu_id == id).delete()
         for d in data.days:
-            db.add(WeeklyMenuDay(menu_id=id, day_index=d.day_index, diet_id=d.diet_id))
+            db.add(WeeklyMenuDay(menu_id=id, day_index=d.day_index, name=d.name, diet_id=d.diet_id))
 
     db.commit()
     db.refresh(menu)

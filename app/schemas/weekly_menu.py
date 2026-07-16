@@ -5,11 +5,13 @@ from datetime import datetime
 
 class WeeklyMenuDayIn(BaseModel):
     day_index: int
+    name: Optional[str] = None
     diet_id: Optional[str] = None
 
 
 class WeeklyMenuDayOut(BaseModel):
     day_index: int
+    name: Optional[str] = None
     diet_id: Optional[str] = None
     calories: Optional[float] = None
     diet_title: Optional[str] = None

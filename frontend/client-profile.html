@@ -5988,6 +5988,8 @@ async function openNutEditor() {
   _neActiveMealId = _neMeals[0].id;
   neRenderSidebar();
   neRenderMeal(_neActiveMealId);
+  // Asegurar que la meta diaria del cliente esté cargada antes de pintar el riel
+  if (!_target) { try { await loadTarget(); } catch (e) {} }
   _neRenderClientRail();
   neRecalcTotals();
   if (!_fsmGroupsLoaded) _fsmLoadGroups();
@@ -6011,6 +6013,22 @@ function _neRenderClientRail() {
     </div>`;
   const hasGoals = t.calories || t.proteins || t.carbs || t.fats;
 
+  // Qué debe consumir el cliente al día (los objetivos, en grande)
+  const goalCell = (val, unit, lbl, color) => `
+    <div style="background:#F9FAFB;border-radius:10px;padding:9px 6px;text-align:center;">
+      <div style="font-size:17px;font-weight:800;color:${color};line-height:1.15;">${val != null ? Math.round(val) + unit : '—'}</div>
+      <div style="font-size:9.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">${lbl}</div>
+    </div>`;
+  const goalsGrid = hasGoals ? `
+    <div style="font-size:11px;color:#6B7280;margin-bottom:8px;">Lo que debe consumir al día:</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">
+      ${goalCell(t.calories, '', 'Kcal', '#F59E0B')}
+      ${goalCell(t.proteins, 'g', 'Prot', '#16A34A')}
+      ${goalCell(t.carbs, 'g', 'Carb', '#F97316')}
+      ${goalCell(t.fats, 'g', 'Grasa', '#DC2626')}
+    </div>
+    <div style="font-size:11px;color:#6B7280;margin-bottom:8px;">Progreso de esta dieta:</div>` : '';
+
   const chips = (val, cls) => (val || '').split(',').map(s => s.trim()).filter(Boolean)
     .map(x => `<span class="ncr-chip ${cls}">${esc(x)}</span>`).join('');
   const restr = chips(c.allergies, 'red') + chips(c.intolerances, 'amber') + chips(c.dislikes, 'gray');
@@ -6019,8 +6037,8 @@ function _neRenderClientRail() {
     <div class="ncr-sec">Meta diaria del cliente</div>
     <div class="ncr-card">
       ${hasGoals
-        ? goalRow('ncrK', 'Calorías') + goalRow('ncrP', 'Proteínas') + goalRow('ncrC', 'Carbos') + goalRow('ncrF', 'Grasas')
-        : '<div class="ncr-empty">Sin macros objetivo definidos. Ajusta las metas para ver el progreso aquí.</div>'}
+        ? goalsGrid + goalRow('ncrK', 'Calorías') + goalRow('ncrP', 'Proteínas') + goalRow('ncrC', 'Carbos') + goalRow('ncrF', 'Grasas')
+        : '<div class="ncr-empty">Este cliente aún no tiene macros objetivo. Pulsa «Ajustar macros» para definir qué debe consumir al día y verás aquí el progreso de la dieta.</div>'}
       <button class="ncr-adjust" onclick="openTargetModal()">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Ajustar macros

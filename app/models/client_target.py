@@ -18,6 +18,10 @@ class ClientTarget(Base):
     fats = Column(Float, nullable=True)
     deficit = Column(Float, nullable=True)   # % below TDEE
     surplus = Column(Float, nullable=True)   # % above TDEE
+    # Ajustes del planificador de macros (g por kg de masa corporal magra)
+    protein_ratio = Column(Float, nullable=True)  # default 2.0 g/kg MCM
+    fat_ratio = Column(Float, nullable=True)      # default 0.9 g/kg MCM
+    meal_count = Column(Integer, nullable=True)   # nº de comidas/día (3-6)
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

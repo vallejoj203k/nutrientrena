@@ -361,6 +361,19 @@
     .picker-foot{padding:12px 24px 20px;flex-shrink:0;}
     .picker-newdiet{width:100%;padding:13px;border:1.5px dashed #C7CBF5;border-radius:12px;background:#fff;color:var(--lib-primary,#4F46E5);font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s;}
     .picker-newdiet:hover{background:#F8F9FE;}
+    /* ── Modal: crear dieta rápida ── */
+    .nd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:750;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .nd-overlay.open{opacity:1;pointer-events:all;}
+    .nd-box{background:#fff;border-radius:20px;width:520px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.22);transform:translateY(14px);transition:.2s;padding:22px 24px;}
+    .nd-overlay.open .nd-box{transform:translateY(0);}
+    .nd-eyebrow{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
+    .nd-title{font-size:18px;font-weight:800;color:#111827;margin-top:2px;}
+    .nd-sub{font-size:12.5px;color:#9CA3AF;margin-top:4px;line-height:1.5;}
+    .nd-lbl{display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px;}
+    .nd-box input,.nd-box select{width:100%;padding:11px 13px;border:1px solid #E5E7EB;border-radius:10px;font-size:14px;outline:none;transition:.15s;color:#111;background:#fff;}
+    .nd-box input:focus,.nd-box select:focus{border-color:var(--lib-primary,#4F46E5);}
+    .nd-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .nd-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
     .picker-list::-webkit-scrollbar{width:4px;}
     .picker-list::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:2px;}
     .picker-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:background .1s;}
@@ -712,6 +725,42 @@
       <button class="picker-newdiet" onclick="closePicker();createDietForDay()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Crear dieta nueva
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: crear dieta rápida (sin salir del constructor) ── -->
+<div class="nd-overlay" id="ndOverlay" onclick="if(event.target===this)closeNewDiet()">
+  <div class="nd-box">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+      <div>
+        <div class="nd-eyebrow">Crear dieta</div>
+        <div class="nd-title" id="ndTitle">Dieta nueva para el Día 1</div>
+        <div class="nd-sub">Se crea en tu Librería y se asigna a este día. Las comidas las completas después en el editor de dietas.</div>
+      </div>
+      <button class="picker-close" onclick="closeNewDiet()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <label class="nd-lbl">Nombre de la dieta *</label>
+    <input id="nd_name" placeholder="Ej: Definición 1.800 kcal"/>
+    <label class="nd-lbl">Tipo de dieta</label>
+    <select id="nd_type"><option value="">— Sin tipo —</option></select>
+    <label class="nd-lbl">Calorías objetivo (kcal/día)</label>
+    <input id="nd_kcal" type="number" min="0" placeholder="Ej: 1800"/>
+    <label class="nd-lbl">Macros (opcional, en gramos)</label>
+    <div class="nd-macros">
+      <input id="nd_prot" type="number" min="0" placeholder="Proteína"/>
+      <input id="nd_carb" type="number" min="0" placeholder="Carbos"/>
+      <input id="nd_fat"  type="number" min="0" placeholder="Grasa"/>
+    </div>
+    <div id="ndError" style="color:#DC2626;font-size:12.5px;margin-top:10px;min-height:16px;"></div>
+    <div class="nd-foot">
+      <button class="btn" style="background:#F3F4F6;color:#374151;" onclick="closeNewDiet()">Cancelar</button>
+      <button class="btn btn-primary" id="ndSaveBtn" onclick="saveNewDiet()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Crear y asignar al día
       </button>
     </div>
   </div>
@@ -1130,6 +1179,10 @@ function renderDayCanvas() {
           Quitar dieta
         </button>
       </div>
+      <a href="diets.html?edit=${encodeURIComponent(sel.diet_id)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:13px;font-weight:600;color:var(--lib-primary,#4F46E5);text-decoration:none;">
+        Completar comidas en el editor
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>`;
 }
 
@@ -1165,9 +1218,54 @@ function mbxDrop(e, i) {
   renderDayRows(); updateSummary();
 }
 
+// ── Crear dieta rápida sin salir del constructor ──
 function createDietForDay() {
-  window.open('diets.html', '_blank');
-  toast('Crea la dieta en la pestaña nueva; al volver aquí se recargará la lista', '');
+  document.getElementById('ndTitle').textContent = `Dieta nueva para el Día ${selectedDayIdx + 1}`;
+  ['nd_name','nd_kcal','nd_prot','nd_carb','nd_fat'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ndError').textContent = '';
+  _loadDietTypes().then(() => {
+    const sel = document.getElementById('nd_type');
+    sel.innerHTML = '<option value="">— Sin tipo —</option>' +
+      Object.entries(_dietTypes || {}).map(([id, name]) => `<option value="${id}">${esc(name)}</option>`).join('');
+  });
+  document.getElementById('ndOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('nd_name').focus(), 80);
+}
+function closeNewDiet() { document.getElementById('ndOverlay').classList.remove('open'); }
+
+async function saveNewDiet() {
+  const name = document.getElementById('nd_name').value.trim();
+  const errEl = document.getElementById('ndError');
+  if (!name) { errEl.textContent = 'El nombre es obligatorio'; return; }
+  const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+  const body = {
+    title: name,
+    calories: num('nd_kcal'),
+    type_id: parseInt(document.getElementById('nd_type').value) || null,
+    proteins: num('nd_prot'),
+    carbs: num('nd_carb'),
+    fats: num('nd_fat'),
+    foods: [],
+  };
+  const btn = document.getElementById('ndSaveBtn');
+  btn.disabled = true; errEl.textContent = '';
+  try {
+    const r = await fetch(`${API}/diets`, { method: 'POST', headers: {'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) { errEl.textContent = j.detail || j.message || 'Error al crear la dieta'; return; }
+    const d = j.data || j;
+    // Asignar al día seleccionado y refrescar la lista de dietas
+    daySelections[selectedDayIdx] = {
+      diet_id: d.id, title: d.title || name,
+      calories: d.calories ?? body.calories, proteins: (d.detail || {}).proteins ?? body.proteins,
+      foods_count: 0, _isNew: true,
+    };
+    closeNewDiet();
+    renderDayRows(); updateSummary();
+    loadDiets();
+    toast('Dieta creada y asignada al Día ' + (selectedDayIdx + 1), 'success');
+  } catch { errEl.textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; }
 }
 // Al volver a esta pestaña, recargar dietas para que aparezcan las recién creadas
 window.addEventListener('focus', () => { if (document.getElementById('formView').classList.contains('active')) loadDiets(); });

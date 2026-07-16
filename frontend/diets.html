@@ -1495,6 +1495,11 @@ async function openForm(id) {
 }
 
 function closeForm() {
+  if (typeof _EMBED !== 'undefined' && _EMBED) {
+    // Modo embebido: cancelar/cerrar avisa al constructor de menús
+    window.parent.postMessage({ type: 'dietClosed' }, window.location.origin);
+    return;
+  }
   var panel = document.getElementById('dietPanel');
   panel.classList.remove('open');
   setTimeout(function(){ panel.style.visibility = 'hidden'; }, 420);
@@ -2575,6 +2580,17 @@ async function saveDiet() {
     var r = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
     var j = await r.json();
     if (!r.ok) { var fe=document.getElementById('formError');if(fe){fe.textContent=j.detail||j.message||'Error al guardar';fe.style.display='block';} return; }
+    if (typeof _EMBED !== 'undefined' && _EMBED) {
+      // Modo embebido: avisar al constructor de menús y no tocar la vista de lista
+      var saved = j.data || j;
+      window.parent.postMessage({ type: 'dietSaved', diet: {
+        id: saved.id, title: saved.title,
+        calories: saved.calories != null ? saved.calories : body.calories,
+        proteins: (saved.detail && saved.detail.proteins != null) ? saved.detail.proteins : body.proteins,
+        foods_count: (saved.foods || body.foods || []).length,
+      }}, window.location.origin);
+      return;
+    }
     closeForm(); toast(editingId ? 'Dieta actualizada' : 'Dieta creada', 'success'); loadDiets();
   } catch(e) { var fe=document.getElementById('formError');if(fe){fe.textContent='Error de conexion';fe.style.display='block';} }
   finally { btn.textContent = 'Guardar dieta'; btn.disabled = false; }
@@ -2630,11 +2646,24 @@ loadDietTypes();
 _fsmLoadGroups();
 loadClients();
 
-// Abrir una dieta directamente en el editor al llegar con ?edit=ID
-// (lo usa el constructor de menús: «Completar comidas en el editor»)
+// Modo embebido (?embed=1): el constructor de menús incrusta esta página en un
+// iframe para crear/editar dietas con el editor completo sin salir de menús.
+// Se ocultan sidebar y listado, se abre el editor directo, y al guardar/cerrar
+// se avisa al padre por postMessage.
+var _EMBED = new URLSearchParams(window.location.search).get('embed') === '1';
+
+// Abrir una dieta directamente en el editor al llegar con ?edit=ID (o ?new=1)
 (function(){
-  var editId = new URLSearchParams(window.location.search).get('edit');
-  if (editId) { try { openForm(editId); } catch(e){} }
+  var params = new URLSearchParams(window.location.search);
+  var editId = params.get('edit');
+  if (_EMBED) {
+    var sb = document.getElementById('sidebar'); if (sb) sb.style.display = 'none';
+    var lv = document.getElementById('listView'); if (lv) lv.style.display = 'none';
+    document.body.style.background = 'transparent';
+    openForm(editId || null);
+  } else if (editId) {
+    try { openForm(editId); } catch(e){}
+  }
 })();
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();

@@ -52,6 +52,9 @@ class ClientTargetCreate(BaseModel):
     fats: Optional[float] = None
     deficit: Optional[float] = None
     surplus: Optional[float] = None
+    protein_ratio: Optional[float] = None
+    fat_ratio: Optional[float] = None
+    meal_count: Optional[int] = None
     notes: Optional[str] = None
 
 
@@ -67,6 +70,9 @@ class ClientTargetOut(BaseModel):
     fats: Optional[float] = None
     deficit: Optional[float] = None
     surplus: Optional[float] = None
+    protein_ratio: Optional[float] = None
+    fat_ratio: Optional[float] = None
+    meal_count: Optional[int] = None
     notes: Optional[str] = None
 
     model_config = {"from_attributes": True}

@@ -3716,7 +3716,7 @@ async function loadTarget() {
   } catch { _target = null; }
   // Re-sembrar el planificador con los ajustes guardados y repintar si procede
   _nutPlanner = null;
-  if (document.getElementById('nutricionContent')?.innerHTML) { try { _renderNutUI(); } catch (e) {} }
+  if (document.getElementById('npPlannerZone')) { try { _npRerender(); } catch (e) {} }
   renderTargetTab();
 }
 
@@ -5796,7 +5796,7 @@ function npRestoreRatios(){
   _plannerChanged(true);
 }
 function _plannerChanged(fullRender){
-  if(fullRender){ _renderNutUI(); } else { _npUpdateOutputs(); }
+  if(fullRender){ _npRerender(); } else { _npUpdateOutputs(); }
   _plannerSaveDebounced();
   const ovl=document.getElementById('nutEditorOverlay');
   if(ovl&&ovl.classList.contains('open')) _neRenderClientRail();
@@ -5880,11 +5880,14 @@ async function renderNutricionTab() {
   }
 
   if (!clientDiets.length) {
-    el.innerHTML = `<div style="padding:40px;text-align:center;color:#9CA3AF;">
+    // Sin dieta asignada: aviso + el planificador de macros SIEMPRE visible,
+    // para preparar la meta del cliente antes de asignarle un plan.
+    el.innerHTML = `<div style="padding:32px 20px 4px;text-align:center;color:#9CA3AF;">
       <div style="margin-bottom:12px;color:#D1D5DB;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div>
       <p style="margin-bottom:16px;">Sin dieta asignada.</p>
       <button class="btn btn-primary btn-sm" onclick="openAssignDietModal()">+ Asignar dieta</button>
-    </div>`;
+    </div>
+    <div id="npPlannerZone">${_npPlannerHTML(_nutEffMacros())}</div>`;
     return;
   }
 
@@ -5999,6 +6002,21 @@ function _renderNutUI() {
         }).join('')}</div>
       </div>
     </div>
+    <div id="npPlannerZone">${_npPlannerHTML(macros)}</div>
+  `;
+}
+
+/* Re-renderiza solo el planificador (funciona con o sin dieta asignada) */
+function _npRerender() {
+  const z = document.getElementById('npPlannerZone');
+  if (z) z.innerHTML = _npPlannerHTML(_nutEffMacros());
+  else _renderNutUI();
+}
+
+/* HTML del planificador de macros — visible para TODOS los clientes,
+   tengan o no dieta asignada */
+function _npPlannerHTML(macros) {
+  return `
     <div class="nut-cards">
       <!-- ── Datos personales (editable en línea) ── -->
       <div class="np-card">
@@ -6020,7 +6038,7 @@ function _renderNutUI() {
           ${macros?`
           <div class="np-defbox">
             <div class="np-defbox-top"><span id="npAdjName">${macros.adjPct<0?'% Déficit':(macros.adjPct>0?'% Superávit':'% Ajuste')}</span><b id="npAdjVal">${macros.adjPct>0?'+':''}${macros.adjPct}%</b></div>
-            <input type="range" class="np-range red" min="-30" max="20" step="1" value="${macros.adjPct}" oninput="npSetAdj(this.value)" onchange="_renderNutUI()">
+            <input type="range" class="np-range red" min="-30" max="20" step="1" value="${macros.adjPct}" oninput="npSetAdj(this.value)" onchange="_npRerender()">
             <div class="np-defbox-foot"><span><span id="npTdeeFoot">TDEE ${macros.tdee} kcal → </span><b id="npKcalFoot">${macros.kcal} kcal</b></span><button class="np-restore" onclick="npRestoreAdj()">Restaurar</button></div>
           </div>`:''}
         </div>
@@ -6062,15 +6080,15 @@ function _renderNutUI() {
           <div class="np-seg">${[3,4,5,6].map(n=>`<button class="np-seg-btn${macros.mealCount===n?' sel':''}" onclick="setNutMealsPerDay(${n})">${n}</button>`).join('')}</div>
           <div class="np-slider-row">
             <div class="np-slider-top"><span>Proteína g/kg MCM${macros.autoMacro==='p'?'<span class="np-auto-tag">auto</span>':''}</span><b id="npSlPVal">${macros.pRatio} · ${macros.proteins}g</b></div>
-            <input type="range" class="np-range" id="npSlP" min="1" max="3.5" step="0.1" value="${macros.pRatio}" oninput="npSetRatio('p',this.value)" onchange="_renderNutUI()">
+            <input type="range" class="np-range" id="npSlP" min="1" max="3.5" step="0.1" value="${macros.pRatio}" oninput="npSetRatio('p',this.value)" onchange="_npRerender()">
           </div>
           <div class="np-slider-row">
             <div class="np-slider-top"><span>Carbos g/kg MCM${macros.autoMacro==='carb'?'<span class="np-auto-tag">auto</span>':''}</span><b id="npSlCVal">${macros.cRatio} · ${macros.carbs}g</b></div>
-            <input type="range" class="np-range amber" id="npSlC" min="1" max="8" step="0.1" value="${macros.cRatio}" oninput="npSetRatio('c',this.value)" onchange="_renderNutUI()">
+            <input type="range" class="np-range amber" id="npSlC" min="1" max="8" step="0.1" value="${macros.cRatio}" oninput="npSetRatio('c',this.value)" onchange="_npRerender()">
           </div>
           <div class="np-slider-row">
             <div class="np-slider-top"><span>Grasas g/kg MCM${macros.autoMacro==='fat'?'<span class="np-auto-tag">auto</span>':''}</span><b id="npSlFVal">${macros.fRatio} · ${macros.fats}g</b></div>
-            <input type="range" class="np-range amber" id="npSlF" min="0.4" max="2" step="0.05" value="${macros.fRatio}" oninput="npSetRatio('f',this.value)" onchange="_renderNutUI()">
+            <input type="range" class="np-range amber" id="npSlF" min="0.4" max="2" step="0.05" value="${macros.fRatio}" oninput="npSetRatio('f',this.value)" onchange="_npRerender()">
           </div>
           <div class="np-note">El macro marcado como <b>auto</b> se recalcula para cuadrar <b id="npNoteKcal">${macros.kcal}</b> kcal. Mueve proteína, carbos o grasas y el otro se ajusta solo.</div>
           <button class="np-restore" style="margin-bottom:10px;" onclick="npRestoreRatios()">Restaurar valores por defecto (2 · 0,9 g/kg MCM)</button>
@@ -6122,7 +6140,7 @@ function setNutMealsPerDay(n) {
   _plannerSeed();
   _nutPlanner.mealCount = n;
   _nutMealsPerDay = n;
-  _renderNutUI();
+  _npRerender();
   _plannerSaveDebounced();
 }
 
@@ -6146,7 +6164,7 @@ async function npSavePersonal(objectiveChanged) {
   if (activityId) clientData.activity = { ...(clientData.activity||{}), id: activityId, name: document.getElementById('nutPersActivity')?.selectedOptions[0]?.textContent || clientData.activity?.name };
   if (objectiveId) clientData.objective = { ...(clientData.objective||{}), id: objectiveId, name: document.getElementById('nutPersObjective')?.selectedOptions[0]?.textContent || clientData.objective?.name };
   if (objectiveChanged) { _plannerSeed(); _nutPlanner.adjPct = _plannerObjectivePct(clientData); }
-  _renderNutUI();
+  _npRerender();
   _plannerSaveDebounced();
   try {
     const r = await fetch(`${API}/users/${clientId}/update`, {

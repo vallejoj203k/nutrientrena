@@ -42,6 +42,10 @@
       --cat-entrenamiento:#4F46E5; --cat-nutricion:#F59E0B; --cat-formularios:#10B981; --cat-documentos:#6366F1;
       --lib-border:#E5E7EB; --lib-text:#111827; --lib-muted:#6B7280;
     }
+    /* Botones estándar (mismos que el resto de páginas de la Librería) */
+    .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--lib-primary);color:#fff;}
+    .btn-primary:hover{background:var(--lib-primary-hover);}
     /* ── Librería: cabecera unificada ── */
     .lib-header{background:#fff;border-bottom:1px solid var(--lib-border);padding:18px 28px 0;flex-shrink:0;}
     .lib-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
@@ -207,7 +211,8 @@
     .empty-state p{font-size:13px;}
 
     /* ── Form View (full page) ── */
-    #formView{display:none;flex:1;flex-direction:column;overflow:hidden;background:var(--gray-bg);}
+    /* Pantalla completa: tapa el sidebar de la app, como en el prototipo */
+    #formView{display:none;position:fixed;inset:0;z-index:500;flex-direction:column;overflow:hidden;background:var(--gray-bg);}
     #formView.active{display:flex;}
     /* ── Constructor de menú (diseño prototipo) ── */
     .mbx-eyebrow{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;}
@@ -401,7 +406,8 @@
       .form-row{grid-template-columns:1fr;}
       /* Fix form view scroll */
       #listView{display:block;overflow:visible;height:auto;}
-      #formView,#formView.active{display:block;overflow:visible;height:auto;}
+      #formView{display:none;}
+      #formView.active{display:block;position:fixed;inset:0;overflow-y:auto;height:100%;}
       .content-area{display:block;overflow:visible;height:auto;}
       .fv-body{display:block;overflow-y:visible;height:auto;padding:16px;}
     }
@@ -551,9 +557,9 @@
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button class="lib-btn-assign" onclick="openForm()" style="padding:9px 18px;font-size:13px;">
+          <button class="btn btn-primary" onclick="openForm()">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuevo menú semanal
+            Nuevo menú
           </button>
           <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
         </div>

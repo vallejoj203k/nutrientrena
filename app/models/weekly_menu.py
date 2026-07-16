@@ -26,6 +26,8 @@ class WeeklyMenuDay(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     menu_id = Column(String(36), ForeignKey("weekly_menus.id", ondelete="CASCADE"), nullable=False)
     day_index = Column(Integer, nullable=False)  # 0=LUN … 6=DOM
+    # Nombre personalizado del día ("Lunes", "Día de entreno"…); null = "Día N"
+    name = Column(String(100), nullable=True)
     diet_id = Column(String(36), ForeignKey("diets.id", ondelete="SET NULL"), nullable=True)
 
     diet = relationship("Diet", foreign_keys=[diet_id])

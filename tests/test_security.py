@@ -7,14 +7,18 @@ class TestSecurityHeaders:
     def test_health_has_security_headers(self, client):
         r = client.get("/api/health")
         assert r.headers.get("x-content-type-options") == "nosniff"
-        assert r.headers.get("x-frame-options") == "DENY"
+        # SAMEORIGIN (no DENY): la app incrusta sus propias páginas en iframes
+        # (p. ej. el editor de dietas dentro del constructor de menús), pero
+        # ningún sitio externo puede embeberla.
+        assert r.headers.get("x-frame-options") == "SAMEORIGIN"
+        assert r.headers.get("content-security-policy") == "frame-ancestors 'self'"
         assert r.headers.get("x-xss-protection") == "1; mode=block"
         assert r.headers.get("referrer-policy") == "strict-origin-when-cross-origin"
 
     def test_api_response_has_security_headers(self, client, admin_headers):
         r = client.get("/api/auth/me", headers=admin_headers)
         assert r.headers.get("x-content-type-options") == "nosniff"
-        assert r.headers.get("x-frame-options") == "DENY"
+        assert r.headers.get("x-frame-options") == "SAMEORIGIN"
 
     def test_error_response_has_security_headers(self, client):
         r = client.get("/api/auth/me")   # no token → 403

@@ -3828,7 +3828,8 @@ async function saveTarget() {
     _target = d.data;
     closeTargetModal();
     renderTargetTab();
-    // Si el editor de dieta está abierto, refrescar el riel con las metas nuevas
+    // Re-sembrar los macros manuales desde el target nuevo y refrescar el riel
+    _nutCustomSeeded = false; _nutCustomMacros = null;
     if (document.getElementById('nutEditorOverlay')?.classList.contains('open')) _neRenderClientRail();
     showToast('Objetivos guardados');
   } catch { document.getElementById('tm_err').textContent = 'Error de conexión'; }
@@ -6004,6 +6005,9 @@ function _neRenderClientRail() {
   if (!el) return;
   const c = clientData || {};
   const t = _target || {};
+  // Misma fuente que la tarjeta "Tu meta diaria" de la pestaña Nutrición:
+  // Harris-Benedict + actividad + objetivo, con los ajustes manuales si existen.
+  const m = (typeof _nutEffMacros === 'function') ? _nutEffMacros() : null;
   const pesoAct = (checkins && checkins[0] && checkins[0].weight != null) ? checkins[0].weight : c.weight;
 
   const goalRow = (id, lbl) => `
@@ -6011,7 +6015,6 @@ function _neRenderClientRail() {
       <div class="ncr-goal-top"><span>${lbl}</span><b id="${id}Txt">—</b></div>
       <div class="ncr-goal-bar"><div class="ncr-goal-fill" id="${id}Bar" style="width:0%"></div></div>
     </div>`;
-  const hasGoals = t.calories || t.proteins || t.carbs || t.fats;
 
   // Qué debe consumir el cliente al día (los objetivos, en grande)
   const goalCell = (val, unit, lbl, color) => `
@@ -6019,14 +6022,20 @@ function _neRenderClientRail() {
       <div style="font-size:17px;font-weight:800;color:${color};line-height:1.15;">${val != null ? Math.round(val) + unit : '—'}</div>
       <div style="font-size:9.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">${lbl}</div>
     </div>`;
-  const goalsGrid = hasGoals ? `
+  const infoLine = m ? [
+    m.deficit ? `Déficit ${m.deficit}%` : (m.surplus ? `Superávit ${m.surplus}%` : ''),
+    `TDEE ${m.tdee} kcal`,
+    m.custom ? 'Ajuste manual' : '',
+  ].filter(Boolean).join(' · ') : '';
+  const goalsGrid = m ? `
     <div style="font-size:11px;color:#6B7280;margin-bottom:8px;">Lo que debe consumir al día:</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">
-      ${goalCell(t.calories, '', 'Kcal', '#F59E0B')}
-      ${goalCell(t.proteins, 'g', 'Prot', '#16A34A')}
-      ${goalCell(t.carbs, 'g', 'Carb', '#F97316')}
-      ${goalCell(t.fats, 'g', 'Grasa', '#DC2626')}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:${infoLine ? '8' : '14'}px;">
+      ${goalCell(m.kcal, '', 'Kcal', '#F59E0B')}
+      ${goalCell(m.proteins, 'g', 'Prot', '#16A34A')}
+      ${goalCell(m.carbs, 'g', 'Carb', '#F97316')}
+      ${goalCell(m.fats, 'g', 'Grasa', '#DC2626')}
     </div>
+    ${infoLine ? `<div style="font-size:11px;color:#9CA3AF;margin-bottom:12px;">${infoLine}</div>` : ''}
     <div style="font-size:11px;color:#6B7280;margin-bottom:8px;">Progreso de esta dieta:</div>` : '';
 
   const chips = (val, cls) => (val || '').split(',').map(s => s.trim()).filter(Boolean)
@@ -6036,9 +6045,9 @@ function _neRenderClientRail() {
   el.innerHTML = `
     <div class="ncr-sec">Meta diaria del cliente</div>
     <div class="ncr-card">
-      ${hasGoals
+      ${m
         ? goalsGrid + goalRow('ncrK', 'Calorías') + goalRow('ncrP', 'Proteínas') + goalRow('ncrC', 'Carbos') + goalRow('ncrF', 'Grasas')
-        : '<div class="ncr-empty">Este cliente aún no tiene macros objetivo. Pulsa «Ajustar macros» para definir qué debe consumir al día y verás aquí el progreso de la dieta.</div>'}
+        : '<div class="ncr-empty">Faltan datos del cliente (peso, altura o edad) para calcular su meta diaria. Complétalos en la pestaña Nutrición → Datos personales.</div>'}
       <button class="ncr-adjust" onclick="openTargetModal()">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Ajustar macros
@@ -6061,7 +6070,8 @@ function _neRenderClientRail() {
 }
 
 function _neUpdateRailProgress() {
-  const t = _target || {};
+  const m = (typeof _nutEffMacros === 'function') ? _nutEffMacros() : null;
+  if (!m) return;
   const tot = neTotals();
   const set = (id, now, goal, unit, color) => {
     const txt = document.getElementById(id + 'Txt'), bar = document.getElementById(id + 'Bar');
@@ -6074,10 +6084,10 @@ function _neUpdateRailProgress() {
     const over = now > goal * 1.05, near = now >= goal * 0.9 && !over;
     bar.style.background = over ? '#EF4444' : (near ? '#22C55E' : color);
   };
-  set('ncrK', tot.k, t.calories, ' kcal', '#F59E0B');
-  set('ncrP', tot.p, t.proteins, 'g', '#4F46E5');
-  set('ncrC', tot.c, t.carbs, 'g', '#F97316');
-  set('ncrF', tot.f, t.fats, 'g', '#DC2626');
+  set('ncrK', tot.k, m.kcal, ' kcal', '#F59E0B');
+  set('ncrP', tot.p, m.proteins, 'g', '#4F46E5');
+  set('ncrC', tot.c, m.carbs, 'g', '#F97316');
+  set('ncrF', tot.f, m.fats, 'g', '#DC2626');
 }
 
 function closeNutEditor() {

@@ -102,7 +102,29 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
                 Aliment.id == aliment_data.aliment_id
             ).first()
             if not source_aliment:
-                continue
+                # Puede ser un alimento personal (client_aliments): clonarlo a
+                # aliments para que la dieta lo referencie como cualquier otro.
+                from app.models.nutrition.client_aliment import ClientAliment
+                ca = db.query(ClientAliment).filter(
+                    ClientAliment.id == aliment_data.aliment_id
+                ).first()
+                if not ca:
+                    continue
+                source_aliment = Aliment(
+                    group_food_id=ca.group_food_id,
+                    brand=ca.brand,
+                    name=ca.name,
+                    quantity=ca.quantity,
+                    quantity_unit=ca.quantity_unit,
+                    proteins=ca.proteins,
+                    carbohydrates=ca.carbohydrates,
+                    fats=ca.fats,
+                    calories=ca.calories,
+                    comments=ca.comments,
+                    created_user_id=current_user_id,
+                )
+                db.add(source_aliment)
+                db.flush()
 
             if aliment_data.id:
                 dfa = db.query(DietFoodAliment).filter(

@@ -1131,6 +1131,7 @@ async function initUser() {
     if (r.status === 401) { logout(); return; }
     const j = await r.json();
     const u = j.data || j;
+    _meUserId = u.id || null; // para los alimentos personales (client-aliments)
     const name = u.name || ((u.first_name||'') + ' ' + (u.last_name||'')).trim() || u.email || 'Usuario';
     document.getElementById('sidebarName').textContent = name;
     document.getElementById('sidebarRole').textContent = (u.roles && u.roles[0] && u.roles[0].name) || (u.role && u.role.name) || u.role || '';
@@ -2134,6 +2135,7 @@ function closeAc(rid) { var el = document.getElementById('facdrop-' + rid); if (
 // --- Food search modal ---
 
 var _fsmMid = null, _fsmGroupId = null, _fsmGroups = [], _fsmGroupsLoaded = false, _fsmTimer = null, _fsmCache = {};
+var _meUserId = null;
 
 // Icon per food group, matched by keywords in the group name
 var _FG_PATHS = {
@@ -2210,6 +2212,7 @@ function fsmRenderPills() {
   var el = document.getElementById('fsmPills');
   if (!el) return;
   el.innerHTML = '<button class="fsm-pill' + (_fsmGroupId === null ? ' sel' : '') + '" onclick="fsmSetGroup(null)">Todos</button>'
+    + '<button class="fsm-pill' + (_fsmGroupId === 'personal' ? ' sel' : '') + '" style="' + (_fsmGroupId === 'personal' ? '' : 'color:#059669;border-color:#A7F3D0;') + '" onclick="fsmSetGroup(\'personal\')">Personal</button>'
     + _fsmGroups.map(function(g){
         return '<button class="fsm-pill' + (_fsmGroupId === g.id ? ' sel' : '') + '" onclick="fsmSetGroup(' + g.id + ')">' + esc(g.name || '') + '</button>';
       }).join('');
@@ -2234,10 +2237,19 @@ async function fsmFetch(q) {
   list.innerHTML = '<div class="fsm-msg">Buscando…</div>';
   try {
     var params = new URLSearchParams({ search: q || '', per_page: 30, page: 1 });
-    if (_fsmGroupId) params.set('group_food_id', _fsmGroupId);
-    var r = await fetch(API + '/aliments/search?' + params, { headers: { Authorization: 'Bearer ' + token } });
+    var url;
+    if (_fsmGroupId === 'personal') {
+      // Alimentos personales del usuario (solo los ve él y el superadmin)
+      params.set('client_id', _meUserId);
+      url = API + '/client-aliments/search?' + params;
+    } else {
+      if (_fsmGroupId) params.set('group_food_id', _fsmGroupId);
+      url = API + '/aliments/search?' + params;
+    }
+    var r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
     var d = await r.json();
     var items = (d.data && d.data.data) || [];
+    if (_fsmGroupId === 'personal') items.forEach(function(a){ a._personal = true; });
     fsmRenderList(items);
   } catch(e) {
     list.innerHTML = '<div class="fsm-msg">Error al buscar alimentos.</div>';
@@ -2272,7 +2284,7 @@ function fsmRenderList(items) {
       + '<div class="fsm-item-name">' + esc(a.name || '') + (a.brand ? ' <span style="font-weight:500;color:#9CA3AF;">· ' + esc(a.brand) + '</span>' : '') + '</div>'
       + '<div class="fsm-item-desc">' + desc + '</div>'
       + '</div>'
-      + (gname ? '<span class="fsm-item-chip">' + esc(gname) + '</span>' : '')
+      + (a._personal ? '<span class="fsm-item-chip" style="background:#ECFDF5;color:#059669;">Personal</span>' : (gname ? '<span class="fsm-item-chip">' + esc(gname) + '</span>' : ''))
       + '</div>';
   }).join('');
 }
@@ -2769,7 +2781,11 @@ async function submitCreateAliment() {
     description: hasDesc ? description : null,
   };
   try {
-    var r = await fetch(API + '/aliments', {
+    // Los alimentos creados desde el editor de dietas van a la categoría
+    // PERSONAL del usuario (client-aliments): solo los ve él (y el superadmin).
+    body.client_id = _meUserId;
+    delete body.description; // los personales no guardan micronutrientes
+    var r = await fetch(API + '/client-aliments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify(body)

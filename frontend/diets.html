@@ -167,7 +167,27 @@
     .dp-steps{display:flex;gap:4px;margin:0 auto;}
     .dp-step{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;background:#F3F4F6;color:#6B7280;}
     .dp-step:hover{background:#E5E7EB;}
-    .dp-step.active{background:#EEF2FF;color:#4F46E5;}
+    .dp-step.active{background:#4F46E5;color:#fff;}
+    .dp-eyebrow{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;line-height:1.2;}
+    /* Paso Información (diseño prototipo) */
+    .dgi-card{background:#fff;border:1px solid #EEF0F3;border-radius:18px;padding:28px 30px;max-width:820px;margin:26px auto;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+    .dgi-lbl{display:block;font-size:10.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px;margin:0 0 8px;}
+    .dgi-inp,.dgi-sel,.dgi-ta{width:100%;padding:12px 14px;border:1px solid #E5E7EB;border-radius:11px;font-size:14.5px;color:#111;background:#fff;outline:none;transition:.15s;font-family:inherit;}
+    .dgi-inp:focus,.dgi-sel:focus,.dgi-ta:focus{border-color:#4F46E5;}
+    .dgi-gap{margin-bottom:22px;}
+    .dgo-box{border:1px solid #EEF0F3;border-radius:14px;padding:16px 18px;background:#FBFBFD;margin-bottom:22px;}
+    .dgo-title{font-size:10.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px;}
+    .dgo-opt{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:13px 15px;margin-bottom:9px;cursor:pointer;transition:.15s;}
+    .dgo-opt:last-child{margin-bottom:0;}
+    .dgo-opt:hover{border-color:#CBD5E1;}
+    .dgo-opt.sel{background:#EEF0FE;border-color:#4F46E5;}
+    .dgo-radio{width:16px;height:16px;border:2px solid #D1D5DB;border-radius:50%;flex-shrink:0;margin-top:2px;position:relative;transition:.15s;}
+    .dgo-opt.sel .dgo-radio{border-color:#4F46E5;}
+    .dgo-opt.sel .dgo-radio::after{content:'';position:absolute;inset:2.5px;background:#4F46E5;border-radius:50%;}
+    .dgo-name{font-size:14.5px;font-weight:700;color:#111827;}
+    .dgo-desc{font-size:12.5px;color:#8B93A7;margin-top:2px;line-height:1.45;}
+    .dgo-fields{margin-top:12px;padding:14px 15px;background:#fff;border:1px dashed #C7CBF5;border-radius:12px;}
+    .dgo-fields-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
     .dp-step-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:rgba(0,0,0,.08);flex-shrink:0;}
     .dp-step.active .dp-step-num{background:#4F46E5;color:#fff;}
     .dp-save-header{padding:8px 20px;border-radius:8px;background:#4F46E5;color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
@@ -818,25 +838,28 @@
 
   <!-- Header -->
   <div class="dp-header">
-    <button class="dp-close" onclick="closeForm()">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      <span class="dp-title" id="formViewTitle">Nueva dieta</span>
+    <button class="dp-close" onclick="closeForm()" style="align-items:flex-start;">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-top:3px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <span style="text-align:left;">
+        <span class="dp-eyebrow" style="display:block;">Librería · Nutrición</span>
+        <span class="dp-title" id="formViewTitle">Nueva dieta</span>
+      </span>
     </button>
 
     <div class="dp-steps">
       <button class="dp-step active" id="step1Btn" onclick="goToStep(1)">
-        <span class="dp-step-num">1</span>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         Información
       </button>
       <button class="dp-step" id="step2Btn" onclick="goToStep(2)">
-        <span class="dp-step-num">2</span>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
         Plan de comidas
       </button>
     </div>
 
     <button class="dp-save-header" onclick="saveDiet()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      <span>Guardar dieta</span>
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="dpSaveLbl">Crear dieta</span>
     </button>
   </div>
 
@@ -845,25 +868,23 @@
   <!-- ── Paso 1: Información ── -->
   <div class="dp-body active" id="dpStep1">
     <div class="dp-step1-scroll">
-    <div class="dp-form">
+    <div class="dgi-card">
 
       <!-- NOMBRE DE LA DIETA -->
-      <div class="dp-section-title" style="margin-top:0;">Nombre de la dieta</div>
-      <div class="form-group" style="margin-bottom:24px;">
-        <input id="f_title" placeholder="Ej: Definición · Alta proteína · 1800 kcal" oninput="updatePreview()" style="font-size:16px;font-weight:600;"/>
+      <div class="dgi-gap">
+        <label class="dgi-lbl">Nombre de la dieta</label>
+        <input class="dgi-inp" id="f_title" placeholder="Ej: Recomposición · 2100 kcal" oninput="updatePreview()" style="font-weight:600;"/>
       </div>
 
-      <!-- TIPO DIETA + NÚMERO DE COMIDAS -->
-      <div class="form-row" style="margin-bottom:24px;align-items:flex-end;">
-        <div class="form-group" style="flex:1;margin-bottom:0;">
-          <label>Tipo de dieta</label>
-          <select id="f_type" style="font-size:15px;">
-            <option value="">Seleccionar...</option>
-          </select>
+      <!-- TIPO DE DIETA + Nº COMIDAS -->
+      <div class="dgi-gap" style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <label class="dgi-lbl">Tipo de dieta</label>
+          <select class="dgi-sel" id="f_type"><option value="">Seleccionar...</option></select>
         </div>
-        <div class="form-group" style="flex:0 0 auto;margin-bottom:0;">
-          <label style="white-space:nowrap;">Número de comidas</label>
-          <div class="dp-stepper" style="margin-top:6px;">
+        <div style="flex:0 0 auto;">
+          <label class="dgi-lbl">Número de comidas</label>
+          <div class="dp-stepper" style="margin-top:0;">
             <button class="dp-stepper-btn" onclick="changeMealCount(-1)">−</button>
             <span class="dp-stepper-val" id="mealCountVal">3</span>
             <button class="dp-stepper-btn" onclick="changeMealCount(1)">+</button>
@@ -872,24 +893,54 @@
         </div>
       </div>
 
-      <!-- CALORÍAS OBJETIVO -->
-      <div class="dp-section-title">Calorías objetivo <span style="font-weight:400;color:#9CA3AF;">(opcional)</span></div>
-      <div class="form-group" style="max-width:240px;margin-bottom:24px;">
-        <input id="f_calories" type="number" placeholder="1800 kcal" oninput="updatePreview()" style="font-size:16px;font-weight:600;"/>
+      <!-- OBJETIVO NUTRICIONAL DE ESTA PLANTILLA -->
+      <div class="dgo-box">
+        <div class="dgo-title">Objetivo nutricional de esta plantilla</div>
+        <div class="dgo-opt sel" id="dgoLibre" onclick="setGoalMode('libre')">
+          <span class="dgo-radio"></span>
+          <div>
+            <div class="dgo-name">Sin objetivo (construcción libre)</div>
+            <div class="dgo-desc">La plantilla no fija metas. Al asignarla a un cliente se usarán las suyas.</div>
+          </div>
+        </div>
+        <div class="dgo-opt" id="dgoKcal" onclick="setGoalMode('kcal')">
+          <span class="dgo-radio"></span>
+          <div style="flex:1;">
+            <div class="dgo-name">Sólo calorías objetivo</div>
+            <div class="dgo-desc">Fija un total kcal. Ideal para plantillas orientativas.</div>
+            <div class="dgo-fields" id="dgoKcalFields" style="display:none;" onclick="event.stopPropagation()">
+              <label class="dgi-lbl">Calorías objetivo (kcal/día)</label>
+              <input class="dgi-inp" id="f_calories" type="number" placeholder="Ej: 2100" oninput="updatePreview()" style="max-width:220px;font-weight:600;"/>
+            </div>
+          </div>
+        </div>
+        <div class="dgo-opt" id="dgoMacros" onclick="setGoalMode('macros')">
+          <span class="dgo-radio"></span>
+          <div style="flex:1;">
+            <div class="dgo-name">Calorías + macros (P/C/G)</div>
+            <div class="dgo-desc">Fija kcal y macros exactos. Recomendado para planes cerrados.</div>
+            <div class="dgo-fields" id="dgoMacroFields" style="display:none;" onclick="event.stopPropagation()">
+              <div class="dgo-fields-grid">
+                <div><label class="dgi-lbl">Proteínas (g)</label><input class="dgi-inp" id="f_proteins" type="number" placeholder="0"/></div>
+                <div><label class="dgi-lbl">Carbos (g)</label><input class="dgi-inp" id="f_carbs" type="number" placeholder="0"/></div>
+                <div><label class="dgi-lbl">Grasas (g)</label><input class="dgi-inp" id="f_fats" type="number" placeholder="0"/></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- NOTAS DEL NUTRICIONISTA -->
-      <div class="dp-section-title">Notas del nutricionista <span style="font-weight:400;color:#9CA3AF;">(opcional)</span></div>
-      <div class="form-group" style="margin-bottom:24px;">
-        <textarea id="f_notes" placeholder="Indicaciones especiales, restricciones, contexto clínico..." rows="3" style="font-size:14px;resize:vertical;line-height:1.5;"></textarea>
+      <div class="dgi-gap">
+        <label class="dgi-lbl">Notas del nutricionista (opcional)</label>
+        <textarea class="dgi-ta" id="f_notes" placeholder="Instrucciones generales, contexto clínico…" rows="3" style="resize:vertical;line-height:1.5;"></textarea>
       </div>
 
       <!-- PATOLOGÍAS -->
-      <div class="dp-section-title">Patologías / condiciones</div>
       <div class="dp-patho-toggle" onclick="togglePatho()" id="pathoToggle">
         <span class="dp-patho-toggle-label">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          Seleccionar patologías
+          <svg width="16" height="16" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><polyline points="9 12 11 14 15 10" stroke="#EF4444"/></svg>
+          Patologías
           <span class="dp-patho-toggle-badge" id="pathoBadge">0</span>
         </span>
         <svg class="dp-patho-arrow" id="pathoArrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
@@ -900,25 +951,20 @@
         </div>
       </div>
 
-      <!-- hidden macro fields (still needed for save payload) -->
+      <!-- campos ocultos (siguen en el payload de guardado) -->
       <div style="display:none;">
-        <input id="f_proteins" type="number"/>
-        <input id="f_carbs" type="number"/>
-        <input id="f_fats" type="number"/>
         <input id="f_deficit" type="number"/>
         <input id="f_surplus" type="number"/>
         <input id="f_style" type="text"/>
       </div>
 
+      <button class="dp-next-btn" style="margin-top:26px;" onclick="goToStep(2)">
+        Siguiente: Plan de comidas
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-left:6px;"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+      </button>
+
     </div>
     </div><!-- /.dp-step1-scroll -->
-
-    <div class="dp-footer">
-      <button class="dp-next-btn" onclick="goToStep(2)">
-        Siguiente → Plan de comidas
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-left:6px;"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
   </div>
 
   <!-- ── Paso 2: Plan de comidas ── -->
@@ -1455,6 +1501,7 @@ async function openForm(id) {
   id = id || null;
   editingId = id;
   document.getElementById('formViewTitle').textContent = id ? 'Editar dieta' : 'Nueva dieta';
+  var _sl = document.getElementById('dpSaveLbl'); if (_sl) _sl.textContent = id ? 'Guardar dieta' : 'Crear dieta';
   var _fe = document.getElementById('formError'); if(_fe){_fe.textContent='';_fe.style.display='none';}
   _refClientId = null;
   await _ensurePathologies();
@@ -1473,6 +1520,8 @@ async function openForm(id) {
       document.getElementById('f_proteins').value = det.proteins || '';
       document.getElementById('f_carbs').value    = det.carbs    || '';
       document.getElementById('f_fats').value     = det.fats     || '';
+      // Inferir el objetivo nutricional de la plantilla desde los datos guardados
+      setGoalMode((det.proteins || det.carbs || det.fats) ? 'macros' : (d.calories ? 'kcal' : 'libre'));
       document.getElementById('f_deficit').value  = det.deficit  || '';
       document.getElementById('f_surplus').value  = det.surplus  || '';
       _renderDietTypeOptions(d.type_id != null ? d.type_id : '');
@@ -1624,6 +1673,22 @@ function _getSelectedPathologyIds() {
   return Array.from(checked).map(function(cb){ return parseInt(cb.value); });
 }
 
+/* ── Objetivo nutricional de la plantilla (Sin objetivo / kcal / kcal+macros) ── */
+var _goalMode = 'libre';
+function setGoalMode(mode) {
+  _goalMode = mode;
+  var map = { libre: 'dgoLibre', kcal: 'dgoKcal', macros: 'dgoMacros' };
+  Object.keys(map).forEach(function(k){
+    var el = document.getElementById(map[k]);
+    if (el) el.classList.toggle('sel', k === mode);
+  });
+  var kf = document.getElementById('dgoKcalFields');
+  var mf = document.getElementById('dgoMacroFields');
+  // kcal se muestra en modo kcal; en modo macros la kcal va junto a los macros
+  if (kf) kf.style.display = (mode === 'kcal' || mode === 'macros') ? 'block' : 'none';
+  if (mf) mf.style.display = mode === 'macros' ? 'block' : 'none';
+}
+
 function clearForm() {
   ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_deficit','f_surplus'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
@@ -1631,6 +1696,7 @@ function clearForm() {
   var ftype = document.getElementById('f_type'); if (ftype) ftype.value = '';
   var fstyle = document.getElementById('f_style'); if (fstyle) fstyle.value = '';
   var fnotes = document.getElementById('f_notes'); if (fnotes) fnotes.value = '';
+  setGoalMode('libre');
   document.getElementById('mealsContainer').innerHTML = '';
   _meals = []; _mealSeq = 0; _rowSeq = 0; _refClientId = null; _activeMealId = null;
   _renderPathoGrid([]);
@@ -2585,6 +2651,9 @@ async function saveDiet() {
     pathology_ids: _getSelectedPathologyIds(),
     foods: foods,
   };
+  // El modo de objetivo decide qué metas guarda la plantilla
+  if (_goalMode === 'libre') { body.calories = null; body.proteins = null; body.carbs = null; body.fats = null; }
+  else if (_goalMode === 'kcal') { body.proteins = null; body.carbs = null; body.fats = null; }
   if (editingId) body.id = editingId;
   try {
     var url    = editingId ? API + '/diets/' + editingId + '/update' : API + '/diets';

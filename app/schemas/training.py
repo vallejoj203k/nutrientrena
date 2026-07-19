@@ -15,6 +15,7 @@ class TrainingCreate(BaseModel):
     location: Optional[str] = None  # gym/home/outdoor/both
     material: Optional[str] = None
     difficulty: Optional[int] = None  # 1/2/3
+    movement_pattern: Optional[str] = None
     rec_series: Optional[str] = None
     rec_reps: Optional[str] = None
     rec_rest: Optional[str] = None
@@ -32,6 +33,7 @@ class TrainingUpdate(BaseModel):
     location: Optional[str] = None
     material: Optional[str] = None
     difficulty: Optional[int] = None
+    movement_pattern: Optional[str] = None
     rec_series: Optional[str] = None
     rec_reps: Optional[str] = None
     rec_rest: Optional[str] = None
@@ -58,6 +60,7 @@ class TrainingOut(BaseModel):
     location: Optional[str] = None
     material: Optional[str] = None
     difficulty: Optional[int] = None
+    movement_pattern: Optional[str] = None
     rec_series: Optional[str] = None
     rec_reps: Optional[str] = None
     rec_rest: Optional[str] = None
@@ -87,6 +90,7 @@ class TrainingOut(BaseModel):
             location=t.location,
             material=t.material,
             difficulty=t.difficulty,
+            movement_pattern=t.movement_pattern,
             rec_series=t.rec_series,
             rec_reps=t.rec_reps,
             rec_rest=t.rec_rest,

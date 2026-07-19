@@ -267,6 +267,47 @@
     .xv-act-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
     .xv-act-btn:hover{background:#F9FAFB;border-color:#D1D5DB;}
     .xv-empty{padding:40px 16px;text-align:center;color:#9CA3AF;font-size:13px;}
+    /* ── Formulario de ejercicio a pantalla completa (prototipo) ── */
+    .xf-panel{position:fixed;inset:0;background:#F8FAFC;z-index:650;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);visibility:hidden;}
+    .xf-panel.open{transform:translateX(0);visibility:visible;}
+    .xf-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:66px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+    .xf-close{background:none;border:none;cursor:pointer;color:#6B7280;padding:6px;border-radius:8px;display:flex;transition:.15s;flex-shrink:0;}
+    .xf-close:hover{background:#F3F4F6;color:#111827;}
+    .xf-bar-title{font-size:17px;font-weight:800;color:#111827;line-height:1.2;}
+    .xf-bar-sub{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .xf-bar-actions{margin-left:auto;display:flex;gap:10px;}
+    .xf-cancel{padding:9px 18px;border-radius:9px;border:1px solid #E5E7EB;background:#fff;font-size:13px;font-weight:700;color:#374151;cursor:pointer;transition:.15s;}
+    .xf-cancel:hover{background:#F3F4F6;}
+    .xf-create{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:9px;border:none;background:#4ADE80;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
+    .xf-create:hover{background:#22C55E;}
+    .xf-create:disabled{opacity:.6;cursor:not-allowed;}
+    .xf-body{flex:1;overflow-y:auto;padding:32px 20px 60px;}
+    .xf-col{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:18px;}
+    .xf-card{background:#fff;border:1px solid #EEF0F3;border-radius:16px;padding:24px 26px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+    .xf-sec-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:18px;}
+    .xf-req{color:#EF4444;}
+    .xf-img-row{display:flex;align-items:flex-start;gap:14px;}
+    .xf-img-zone{width:104px;height:104px;border:2px dashed #E5E7EB;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#C7CBD4;cursor:pointer;background:#FAFAFA;overflow:hidden;flex-shrink:0;transition:.15s;}
+    .xf-img-zone:hover{border-color:var(--indigo);color:var(--indigo);background:#F5F3FF;}
+    .xf-img-zone img{width:100%;height:100%;object-fit:cover;}
+    .xf-upload-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;border:1px solid #E5E7EB;background:#fff;font-size:13px;font-weight:700;color:#374151;cursor:pointer;transition:.15s;}
+    .xf-upload-btn:hover{background:#F3F4F6;}
+    .xf-adv-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+    .xf-adv-title{font-size:15px;font-weight:800;color:#111827;}
+    .xf-adv-sub{font-size:12.5px;color:#9CA3AF;margin-top:2px;}
+    .xf-chev{transition:transform .25s;color:#9CA3AF;flex-shrink:0;}
+    .xf-adv-head.open .xf-chev{transform:rotate(180deg);}
+    .xf-adv-body{display:none;margin-top:20px;border-top:1px solid #F3F4F6;padding-top:20px;}
+    .xf-adv-body.open{display:block;}
+    .xf-chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .xf-chip{padding:7px 14px;border-radius:9px;border:1px solid #E5E7EB;background:#F9FAFB;font-size:12.5px;font-weight:600;color:#374151;cursor:pointer;transition:.15s;}
+    .xf-chip:hover{border-color:#CBD5E1;}
+    .xf-chip.sel{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+    .xf-lvls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+    .xf-lvl{padding:12px;border-radius:10px;border:1px solid #E5E7EB;background:#F9FAFB;font-size:13.5px;font-weight:700;color:#374151;cursor:pointer;transition:.15s;text-align:center;}
+    .xf-lvl:hover{border-color:#CBD5E1;}
+    .xf-lvl.sel{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+    @media(max-width:640px){.xf-lvls{grid-template-columns:1fr;}.xf-card{padding:18px 16px;}}
     /* ── Modal de asignación ── */
     .assign-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;align-items:center;justify-content:center;}
     .assign-overlay.open{display:flex;}
@@ -488,141 +529,146 @@
   </div>
 </div>
 
-<!-- Exercise Modal -->
-<div class="modal-overlay" id="exerciseOverlay" onclick="if(event.target===this)closeExerciseModal()">
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="exerciseModalTitle">Nuevo ejercicio</h2>
-      <button class="modal-close" onclick="closeExerciseModal()">×</button>
+<!-- Formulario de ejercicio (pantalla completa) -->
+<div class="xf-panel" id="exercisePanel">
+  <div class="xf-bar">
+    <button class="xf-close" onclick="closeExerciseModal()" title="Cerrar">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div>
+      <div class="xf-bar-title" id="exerciseModalTitle">Nuevo ejercicio</div>
+      <div class="xf-bar-sub" id="exerciseModalSub">Añade un ejercicio a tu librería</div>
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Nombre *</label>
-        <input id="ex_name" placeholder="Ej: Press de banca"/>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Grupo muscular principal</label>
-          <select id="ex_mg"></select>
-        </div>
-        <div class="form-group">
-          <label>Grupo muscular secundario</label>
-          <div class="ms-wrap" id="ms2Wrap">
-            <button type="button" class="ms-btn" id="ms2Btn" onclick="toggleMs2(event)">
-              <span id="ms2Label">Sin especificar</span>
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="ms-dropdown" id="ms2Dropdown"></div>
+    <div class="xf-bar-actions">
+      <button class="xf-cancel" onclick="closeExerciseModal()">Cancelar</button>
+      <button class="xf-create" id="xfSaveBtn" onclick="saveExercise()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="xfSaveLbl">Crear ejercicio</span>
+      </button>
+    </div>
+  </div>
+  <div class="xf-body">
+    <div class="xf-col">
+
+      <!-- Información básica -->
+      <div class="xf-card">
+        <div class="xf-sec-title">Información básica</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre del ejercicio <span class="xf-req">*</span></label>
+            <input id="ex_name" placeholder="Ej: Press de banca"/>
           </div>
-          <div class="ms-chips" id="ms2Chips"></div>
+          <div class="form-group">
+            <label>Tipo de ejercicio</label>
+            <select id="ex_type">
+              <option value="">Seleccionar...</option>
+              <option value="compound">Compuesto</option>
+              <option value="isolation">Aislamiento</option>
+              <option value="cardio">Cardio</option>
+              <option value="mobility">Movilidad</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div class="form-row">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Grupo muscular principal <span class="xf-req">*</span></label>
+            <select id="ex_mg"></select>
+          </div>
+          <div class="form-group">
+            <label>Grupo muscular secundario</label>
+            <div class="ms-wrap" id="ms2Wrap">
+              <button type="button" class="ms-btn" id="ms2Btn" onclick="toggleMs2(event)">
+                <span id="ms2Label">Ninguno</span>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="ms-dropdown" id="ms2Dropdown"></div>
+            </div>
+            <div class="ms-chips" id="ms2Chips"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Localización</label>
+            <select id="ex_location">
+              <option value="">Seleccionar...</option>
+              <option value="gym">Gimnasio</option>
+              <option value="home">Casa</option>
+              <option value="outdoor">Exterior</option>
+              <option value="both">Ambos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>URL del vídeo</label>
+            <input id="ex_video" placeholder="https://youtube.com/..." oninput="onExVideoUrlInput(this.value)"/>
+            <input type="file" id="ex_videoFile" accept="video/*" style="display:none" onchange="uploadExVideo(this)"/>
+            <div id="ex_videoZone" style="margin-top:6px;">
+              <button type="button" class="xf-upload-btn" style="padding:7px 12px;font-size:12px;" onclick="document.getElementById('ex_videoFile').click()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                O subir archivo de vídeo
+              </button>
+            </div>
+            <div id="ex_videoPreview" class="video-preview-bar" style="display:none;margin-top:6px;">
+              <button class="play-btn" id="ex_videoPlayBtn" type="button" title="Vista previa"><svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+              <span id="ex_videoLabel" class="video-preview-label"></span>
+              <button type="button" style="flex-shrink:0;background:rgba(0,0,0,.45);border:none;border-radius:50%;width:22px;height:22px;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1;" onclick="removeExVideo()" title="Quitar">×</button>
+            </div>
+          </div>
+        </div>
         <div class="form-group">
-          <label>Tipo de ejercicio</label>
-          <select id="ex_type">
-            <option value="">Sin especificar</option>
-            <option value="compound">Compuesto</option>
-            <option value="isolation">Aislamiento</option>
-            <option value="cardio">Cardio</option>
-            <option value="mobility">Movilidad</option>
-          </select>
+          <label>Descripción <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(cada línea se muestra como un paso numerado de la ejecución)</span></label>
+          <span class="auto-grow-wrap" id="ex_desc_wrap">
+            <textarea id="ex_desc" rows="1" placeholder="Técnica, indicaciones, cues..."
+              oninput="this.parentNode.dataset.value=this.value"></textarea>
+          </span>
         </div>
-        <div class="form-group">
-          <label>Localización</label>
-          <select id="ex_location">
-            <option value="">Sin especificar</option>
-            <option value="gym">Gimnasio</option>
-            <option value="home">Casa</option>
-            <option value="outdoor">Exterior</option>
-            <option value="both">Ambos</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Material</label>
-          <input id="ex_material" list="materialOptions" placeholder="Ej: Barra, Mancuernas, Sin equipo…"/>
-          <datalist id="materialOptions">
-            <option value="Barra"></option>
-            <option value="Mancuernas"></option>
-            <option value="Kettlebell"></option>
-            <option value="Poleas / Cable"></option>
-            <option value="Máquina"></option>
-            <option value="Banco"></option>
-            <option value="Barra dominadas"></option>
-            <option value="Bandas elásticas"></option>
-            <option value="Sin equipo"></option>
-          </datalist>
-        </div>
-        <div class="form-group">
-          <label>Dificultad</label>
-          <select id="ex_difficulty">
-            <option value="">Sin especificar</option>
-            <option value="1">Principiante</option>
-            <option value="2">Intermedio</option>
-            <option value="3">Avanzado</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Series recomendadas <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(opcional)</span></label>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-          <input id="ex_rec_series" placeholder="Series · Ej: 3-4"/>
-          <input id="ex_rec_reps" placeholder="Reps · Ej: 8-12"/>
-          <input id="ex_rec_rest" placeholder="Descanso · Ej: 60-90s"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Descripción / Ejecución <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(cada línea se muestra como un paso numerado)</span></label>
-        <span class="auto-grow-wrap" id="ex_desc_wrap">
-          <textarea id="ex_desc" rows="1" placeholder="Descripción del ejercicio…"
-            oninput="this.parentNode.dataset.value=this.value"></textarea>
-        </span>
-      </div>
-      <div class="form-row" style="align-items:flex-start">
-        <div class="form-group" style="flex:0 0 140px">
+        <div class="form-group" style="margin-bottom:0;">
           <label>Imagen</label>
           <input type="file" id="ex_imageFile" accept="image/*" style="display:none" onchange="uploadExImage(this)"/>
-          <div id="ex_imageZone" class="img-upload-zone" onclick="document.getElementById('ex_imageFile').click()">
-            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span>Subir imagen</span>
-          </div>
-          <div id="ex_imagePreview" class="img-preview-wrap" style="display:none">
-            <img id="ex_imagePreviewImg" src="" alt=""/>
-            <button class="img-preview-remove" onclick="removeExImage()" title="Quitar">×</button>
+          <div class="xf-img-row">
+            <div class="xf-img-zone" id="ex_imageZone" onclick="document.getElementById('ex_imageFile').click()">
+              <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div id="ex_imagePreview" class="img-preview-wrap" style="display:none;width:104px;height:104px;flex-shrink:0;">
+              <img id="ex_imagePreviewImg" src="" alt=""/>
+              <button class="img-preview-remove" onclick="removeExImage()" title="Quitar">×</button>
+            </div>
+            <button type="button" class="xf-upload-btn" onclick="document.getElementById('ex_imageFile').click()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Subir imagen
+            </button>
           </div>
         </div>
-        <div class="form-group" style="flex:1">
-          <label>Video</label>
-          <input type="file" id="ex_videoFile" accept="video/*" style="display:none" onchange="uploadExVideo(this)"/>
-          <div id="ex_videoZone" class="img-upload-zone" style="aspect-ratio:16/9;"
-               onclick="document.getElementById('ex_videoFile').click()"
-               ondragover="event.preventDefault();this.classList.add('drag-over')"
-               ondragleave="this.classList.remove('drag-over')"
-               ondrop="onExVideoDrop(event)">
-            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polygon points="10 12 15 15 10 18 10 12" fill="currentColor" stroke="none" stroke-width="0"/></svg>
-            <span>Arrastra un video o haz clic</span>
+      </div>
+
+      <!-- Información avanzada -->
+      <div class="xf-card">
+        <div class="xf-adv-head" id="xfAdvHead" onclick="toggleXfAdv()">
+          <div>
+            <div class="xf-adv-title">Información avanzada</div>
+            <div class="xf-adv-sub">Equipamiento, nivel y patrón de movimiento</div>
           </div>
-          <div id="ex_videoPreview" class="video-preview-bar" style="display:none">
-            <button class="play-btn" id="ex_videoPlayBtn" type="button" title="Vista previa"><svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
-            <span id="ex_videoLabel" class="video-preview-label"></span>
-            <button type="button" style="flex-shrink:0;background:rgba(0,0,0,.45);border:none;border-radius:50%;width:22px;height:22px;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1;" onclick="removeExVideo()" title="Quitar">×</button>
+          <svg class="xf-chev" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="xf-adv-body" id="xfAdvBody">
+          <div class="xf-sec-title">Equipamiento</div>
+          <div class="xf-chips" id="xfEquipChips" style="margin-bottom:20px;"></div>
+          <div class="xf-sec-title">Nivel</div>
+          <div class="xf-lvls" style="margin-bottom:20px;">
+            <button type="button" class="xf-lvl" id="xfLvl-1" onclick="setXfLevel(1)">Principiante</button>
+            <button type="button" class="xf-lvl" id="xfLvl-2" onclick="setXfLevel(2)">Intermedio</button>
+            <button type="button" class="xf-lvl" id="xfLvl-3" onclick="setXfLevel(3)">Avanzado</button>
           </div>
-          <input id="ex_video" placeholder="O pega una URL de YouTube, Vimeo…" style="margin-top:6px" oninput="onExVideoUrlInput(this.value)"/>
+          <div class="xf-sec-title">Patrón de movimiento</div>
+          <div class="xf-chips" id="xfPatChips" style="margin-bottom:20px;"></div>
+          <div class="xf-sec-title">Series recomendadas <span style="text-transform:none;letter-spacing:0;font-weight:400;">(se muestran en la ficha del ejercicio)</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <input id="ex_rec_series" placeholder="Series · Ej: 3-4" style="padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;font-family:inherit;"/>
+            <input id="ex_rec_reps" placeholder="Reps · Ej: 8-12" style="padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;font-family:inherit;"/>
+            <input id="ex_rec_rest" placeholder="Descanso · Ej: 60-90s" style="padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;font-family:inherit;"/>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label>Estado</label>
-        <select id="ex_state">
-          <option value="1">Activo</option>
-          <option value="0">Inactivo</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeExerciseModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveExercise()">Guardar ejercicio</button>
+
     </div>
   </div>
 </div>
@@ -765,7 +811,7 @@ let editingExerciseId=null;
 let _exItems=[];
 
 const DIFF_LABELS={1:'Principiante',2:'Intermedio',3:'Avanzado'};
-const MATERIAL_OPTIONS=['Barra','Mancuernas','Kettlebell','Poleas / Cable','Máquina','Banco','Barra dominadas','Bandas elásticas','Sin equipo'];
+const MATERIAL_OPTIONS=['Peso corporal','Mancuernas','Barra','Banco','Polea','Máquina','Banda elástica','Kettlebell','Multipower','TRX','Disco','Cajón / step','Balón medicinal','Fitball','Rack','Cable','Landmine'];
 
 async function loadMuscleGroupsForFilters(){
   if(allMuscleGroups.length){renderFilterMenus();return;}
@@ -928,6 +974,7 @@ async function duplicateExercise(id){
       image:ex.image||null,video_url:ex.video_url||null,
       exercise_type:ex.exercise_type||null,location:ex.location||null,
       material:ex.material||null,difficulty:ex.difficulty||null,
+      movement_pattern:ex.movement_pattern||null,
       rec_series:ex.rec_series||null,rec_reps:ex.rec_reps||null,rec_rest:ex.rec_rest||null,
     };
     const r2=await fetch(`${API}/trainings`,{method:'POST',headers:authHeaders(),body:JSON.stringify(payload)});
@@ -1076,23 +1123,60 @@ async function deleteExercise(id, name){
   }catch{showToast('Error de conexión','error');}
 }
 
+// ── Información avanzada: equipamiento, nivel y patrón de movimiento ──────────
+const EQUIP_OPTIONS=['Peso corporal','Mancuernas','Barra','Banco','Polea','Máquina','Banda elástica','Kettlebell','Multipower','TRX','Disco','Cajón / step','Balón medicinal','Fitball','Rack','Cable','Landmine'];
+const PATTERN_OPTIONS=['Empuje horizontal','Empuje vertical','Tirón horizontal','Tirón vertical','Bisagra de cadera','Dominante de rodilla','Flexión de rodilla','Zancada / unilateral','Extensión de cadera','Flexión de codo','Extensión de codo','Flexión de muñeca','Abducción de hombro','Aducción / abducción de cadera','Rotación externa','Rotación interna','Anti-extensión','Anti-rotación','Flexión de tronco','Extensión lumbar','Flexión plantar','Dorsiflexión','Carga / transporte','Metabólico / cuerpo completo','Movilidad / control motor'];
+let _xfEquip=new Set();
+let _xfPattern=new Set();
+let _xfLevel=null;
+
+function _renderXfChips(containerId,options,selectedSet,toggleFnName){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=options.map(opt=>`<button type="button" class="xf-chip${selectedSet.has(opt)?' sel':''}" onclick="${toggleFnName}('${esc(opt).replace(/'/g,"\\'")}')">${esc(opt)}</button>`).join('');
+}
+function renderXfEquip(){
+  // conserva valores guardados que no estén en la lista estándar
+  const extras=[..._xfEquip].filter(v=>!EQUIP_OPTIONS.includes(v));
+  _renderXfChips('xfEquipChips',EQUIP_OPTIONS.concat(extras),_xfEquip,'toggleXfEquip');
+}
+function renderXfPattern(){
+  const extras=[..._xfPattern].filter(v=>!PATTERN_OPTIONS.includes(v));
+  _renderXfChips('xfPatChips',PATTERN_OPTIONS.concat(extras),_xfPattern,'toggleXfPattern');
+}
+function toggleXfEquip(v){if(_xfEquip.has(v))_xfEquip.delete(v);else _xfEquip.add(v);renderXfEquip();}
+function toggleXfPattern(v){if(_xfPattern.has(v))_xfPattern.delete(v);else _xfPattern.add(v);renderXfPattern();}
+function setXfLevel(k){
+  _xfLevel=_xfLevel===k?null:k;
+  [1,2,3].forEach(i=>{const b=document.getElementById('xfLvl-'+i);if(b)b.classList.toggle('sel',_xfLevel===i);});
+}
+function toggleXfAdv(force){
+  const head=document.getElementById('xfAdvHead');
+  const body=document.getElementById('xfAdvBody');
+  const open=typeof force==='boolean'?force:!body.classList.contains('open');
+  body.classList.toggle('open',open);
+  head.classList.toggle('open',open);
+}
+
 async function openExerciseModal(id=null){
   editingExerciseId=id;
   document.getElementById('exerciseModalTitle').textContent=id?'Editar ejercicio':'Nuevo ejercicio';
-  ['ex_name','ex_desc'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('exerciseModalSub').textContent=id?'Modifica los datos del ejercicio':'Añade un ejercicio a tu librería';
+  document.getElementById('xfSaveLbl').textContent=id?'Guardar cambios':'Crear ejercicio';
+  ['ex_name','ex_desc','ex_rec_series','ex_rec_reps','ex_rec_rest'].forEach(f=>document.getElementById(f).value='');
   document.getElementById('ex_desc_wrap').dataset.value='';
   _setExVideoPreview(null);
   document.getElementById('ex_type').value='';
   document.getElementById('ex_location').value='';
-  ['ex_material','ex_rec_series','ex_rec_reps','ex_rec_rest'].forEach(f=>document.getElementById(f).value='');
-  document.getElementById('ex_difficulty').value='';
-  document.getElementById('ex_state').value='1';
   document.getElementById('ex_imageFile').value='';
   setExImagePreview(null);
+  _xfEquip=new Set();_xfPattern=new Set();_xfLevel=null;
+  setXfLevel(null);renderXfEquip();renderXfPattern();
+  toggleXfAdv(false);
   await loadMuscleGroupsForFilters();
   const mgSelect=document.getElementById('ex_mg');
-  mgSelect.innerHTML=`<option value="">Sin especificar</option>`+allMuscleGroups.map(mg=>`<option value="${mg.id}">${esc(mg.name)}</option>`).join('');
-  _ms2Selected=[];_ms2Query='';renderMs2Dropdown();
+  mgSelect.innerHTML=`<option value="">Seleccionar...</option>`+allMuscleGroups.map(mg=>`<option value="${mg.id}">${esc(mg.name)}</option>`).join('');
+  _ms2Selected=[];_ms2Query='';renderMs2Dropdown();updateMs2Ui();
   if(id){
     try{
       const r=await fetch(`${API}/trainings/${id}/edit`,{headers:authHeaders()});
@@ -1105,19 +1189,23 @@ async function openExerciseModal(id=null){
       setMs2Values(sec);
       document.getElementById('ex_type').value=ex.exercise_type||'';
       document.getElementById('ex_location').value=ex.location||'';
-      document.getElementById('ex_material').value=ex.material||'';
-      document.getElementById('ex_difficulty').value=ex.difficulty||'';
+      _xfEquip=new Set(String(ex.material||'').split(',').map(s=>s.trim()).filter(Boolean));
+      _xfPattern=new Set(String(ex.movement_pattern||'').split(',').map(s=>s.trim()).filter(Boolean));
+      _xfLevel=ex.difficulty||null;
+      renderXfEquip();renderXfPattern();
+      [1,2,3].forEach(i=>{const b=document.getElementById('xfLvl-'+i);if(b)b.classList.toggle('sel',_xfLevel===i);});
       document.getElementById('ex_rec_series').value=ex.rec_series||'';
       document.getElementById('ex_rec_reps').value=ex.rec_reps||'';
       document.getElementById('ex_rec_rest').value=ex.rec_rest||'';
+      if(_xfEquip.size||_xfPattern.size||_xfLevel||ex.rec_series||ex.rec_reps||ex.rec_rest)toggleXfAdv(true);
       setExImagePreview(ex.image||null);
       _setExVideoPreview(ex.video_url||null);
-      document.getElementById('ex_state').value=ex.state??1;
     }catch{showToast('Error al cargar ejercicio','error');return;}
   }
-  document.getElementById('exerciseOverlay').classList.add('open');
+  document.getElementById('exercisePanel').classList.add('open');
+  document.querySelector('#exercisePanel .xf-body').scrollTop=0;
 }
-function closeExerciseModal(){document.getElementById('exerciseOverlay').classList.remove('open');editingExerciseId=null;}
+function closeExerciseModal(){document.getElementById('exercisePanel').classList.remove('open');editingExerciseId=null;}
 
 async function saveExercise(){
   const name=document.getElementById('ex_name').value.trim();
@@ -1130,14 +1218,14 @@ async function saveExercise(){
     secondary_muscle_group_ids:_ms2Selected.length?_ms2Selected:null,
     exercise_type:document.getElementById('ex_type').value||null,
     location:document.getElementById('ex_location').value||null,
-    material:document.getElementById('ex_material').value.trim()||null,
-    difficulty:parseInt(document.getElementById('ex_difficulty').value)||null,
+    material:[..._xfEquip].join(', ')||null,
+    difficulty:_xfLevel||null,
+    movement_pattern:[..._xfPattern].join(', ')||null,
     rec_series:document.getElementById('ex_rec_series').value.trim()||null,
     rec_reps:document.getElementById('ex_rec_reps').value.trim()||null,
     rec_rest:document.getElementById('ex_rec_rest').value.trim()||null,
     image:_exImageUrl||null,
     video_url:document.getElementById('ex_video').value.trim()||null,
-    state:parseInt(document.getElementById('ex_state').value),
   };
   try{
     const url=editingExerciseId?`${API}/trainings/${editingExerciseId}/update`:`${API}/trainings`;

@@ -202,6 +202,99 @@
     .flyout-item:hover{background:#F5F3FF;color:#4F46E5;}
     .flyout-item svg{opacity:.6;flex-shrink:0;}
     .flyout-item:hover svg{opacity:1;}
+    /* ── Píldoras de dificultad ── */
+    .lvl-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.2px;}
+    .lvl-1{background:#DCFCE7;color:#166534;}
+    .lvl-2{background:#FEF3C7;color:#92400E;}
+    .lvl-3{background:#FEE2E2;color:#991B1B;}
+    /* ── Fila de ejercicio ── */
+    .exi{width:38px;height:38px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);overflow:hidden;}
+    .exi img{width:100%;height:100%;object-fit:cover;}
+    .btn-assign{padding:6px 14px;background:var(--indigo);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;white-space:nowrap;}
+    .btn-assign:hover{background:var(--indigo-dark);}
+    .btn-row-icon{width:30px;height:30px;border:1.5px solid #E5E7EB;background:#fff;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;flex-shrink:0;}
+    .btn-row-icon:hover{background:var(--indigo-pale);color:var(--indigo);border-color:var(--indigo);}
+    .row-actions{display:flex;align-items:center;gap:5px;justify-content:flex-end;}
+    /* ── Filtros desplegables tipo píldora ── */
+    .fp-wrap{position:relative;}
+    .fp-menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:120;min-width:180px;max-height:260px;overflow-y:auto;display:none;padding:4px;}
+    .fp-menu.open{display:block;}
+    .fp-item{display:block;width:100%;padding:8px 12px;font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;border-radius:7px;transition:.12s;}
+    .fp-item:hover{background:#EEF2FF;color:var(--indigo);}
+    .fp-item.sel{background:var(--indigo);color:#fff;}
+    /* ── Toggle lista/cuadrícula ── */
+    .view-toggle{display:flex;border:1.5px solid #E5E7EB;border-radius:9px;overflow:hidden;}
+    .view-toggle button{padding:7px 10px;background:#fff;border:none;cursor:pointer;color:#9CA3AF;display:flex;transition:.15s;}
+    .view-toggle button.active{background:#111827;color:#fff;}
+    /* ── Vista cuadrícula ── */
+    .ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+    .exg-card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;transition:.15s;cursor:pointer;display:flex;flex-direction:column;}
+    .exg-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px);}
+    .exg-img{height:120px;background:#F6F7F9;display:flex;align-items:center;justify-content:center;color:#C7CBD4;overflow:hidden;flex-shrink:0;}
+    .exg-img img{width:100%;height:100%;object-fit:cover;}
+    .exg-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1;}
+    .exg-name{font-size:13.5px;font-weight:700;color:#111827;}
+    .exg-sub{font-size:12px;color:#9CA3AF;}
+    .exg-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto;align-items:center;}
+    .exg-foot{display:flex;gap:6px;margin-top:8px;}
+    /* ── Panel lateral "Ver ejercicio" (prototipo) ── */
+    .xv-overlay{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:600;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .xv-overlay.open{opacity:1;pointer-events:all;}
+    .xv-panel{position:fixed;top:0;right:0;bottom:0;width:min(500px,100vw);background:#fff;z-index:601;transform:translateX(100%);transition:transform .38s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:-16px 0 48px rgba(0,0,0,.14);}
+    .xv-panel.open{transform:translateX(0);}
+    .xv-close{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;z-index:2;}
+    .xv-close:hover{background:#F3F4F6;color:#111827;}
+    .xv-body{flex:1;overflow-y:auto;padding:22px 26px 26px;}
+    .xv-chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding-right:44px;}
+    .xv-chip-outline{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:600;background:#fff;color:#6B7280;border:1.5px solid #E5E7EB;}
+    .xv-title{font-size:24px;font-weight:800;color:#111827;line-height:1.2;}
+    .xv-sub{font-size:14px;color:#6B7280;margin:7px 0 18px;}
+    .xv-imgbox{position:relative;border:1px solid #E5E7EB;border-radius:14px;background:#FAFBFC;min-height:190px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:20px;color:#C7CBD4;}
+    .xv-imgbox img{max-width:100%;max-height:260px;object-fit:contain;display:block;}
+    .xv-play{position:absolute;bottom:10px;right:10px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;border:none;background:rgba(17,24,39,.8);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;}
+    .xv-play:hover{background:#111827;}
+    .xv-sec-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin:0 0 10px;}
+    .xv-step{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:13.5px;color:#111827;line-height:1.5;}
+    .xv-step-num{color:var(--indigo);font-weight:700;flex-shrink:0;}
+    .xv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;}
+    .xv-card{border:1px solid #E5E7EB;border-radius:12px;padding:16px 10px;text-align:center;background:#fff;}
+    .xv-card svg{color:#9CA3AF;margin-bottom:8px;}
+    .xv-card-val{font-size:16px;font-weight:800;color:#111827;}
+    .xv-card-lbl{font-size:11px;color:#9CA3AF;margin-top:2px;}
+    .xv-assign-btn{width:100%;margin-top:22px;padding:13px;border-radius:12px;border:none;background:#6366F1;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .xv-assign-btn:hover{background:#4F46E5;}
+    .xv-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .xv-act-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
+    .xv-act-btn:hover{background:#F9FAFB;border-color:#D1D5DB;}
+    .xv-empty{padding:40px 16px;text-align:center;color:#9CA3AF;font-size:13px;}
+    /* ── Modal de asignación ── */
+    .assign-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;align-items:center;justify-content:center;}
+    .assign-overlay.open{display:flex;}
+    .assign-modal{background:#fff;border-radius:16px;width:440px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+    .assign-modal-head{padding:20px 20px 14px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;}
+    .assign-modal-head h3{font-size:15px;font-weight:700;color:#111827;margin:0;}
+    .assign-modal-head button{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:4px;}
+    .assign-search{padding:12px 16px;border-bottom:1px solid #F3F4F6;}
+    .assign-search input{width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;}
+    .assign-search input:focus{border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+    .assign-list{overflow-y:auto;flex:1;padding:8px;}
+    .assign-client-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:.12s;}
+    .assign-client-row:hover{background:#F9FAFB;}
+    .assign-client-row.selected{background:#EEF2FF;}
+    .assign-avatar{width:34px;height:34px;border-radius:50%;background:#EEF2FF;color:#6366F1;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+    .assign-avatar img{width:100%;height:100%;object-fit:cover;}
+    .assign-client-name{font-size:13px;font-weight:600;color:#111827;}
+    .assign-client-email{font-size:11px;color:#9CA3AF;}
+    .assign-check{margin-left:auto;width:18px;height:18px;border-radius:5px;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .assign-client-row.selected .assign-check{background:#6366F1;border-color:#6366F1;}
+    .assign-empty{text-align:center;padding:32px 16px;color:#9CA3AF;font-size:13px;}
+    .assign-footer{padding:14px 16px;border-top:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .assign-count{font-size:12px;color:#6B7280;}
+    .assign-footer-btns{display:flex;gap:8px;}
+    .assign-btn-cancel{padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#374151;cursor:pointer;}
+    .assign-btn-save{padding:8px 18px;border:none;border-radius:8px;background:#6366F1;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .assign-btn-save:hover{background:#4F46E5;}
+    .assign-btn-save:disabled{opacity:.5;cursor:not-allowed;}
       /* ── Mobile hamburger ── */
     .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;flex-shrink:0;}
     .menu-btn:hover{background:rgba(255,255,255,.1);}
@@ -356,15 +449,35 @@
     </div>
   </div>
 
-  <div class="toolbar">
-    <div class="search-wrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="searchExercises" placeholder="Buscar ejercicio…" oninput="loadExercises(1)"/>
-    </div>
-    <select class="filter-select" id="exMgSelect" onchange="setExMg(this.value ? parseInt(this.value) : null)">
-      <option value="">Todos los grupos musculares</option>
+  <div class="toolbar" style="border-bottom:none;padding-bottom:4px;">
+    <select class="filter-select" id="exShowingSelect" style="min-width:190px;" onchange="setExShowing(this.value)">
+      <option value="">Mostrando: Todas</option>
+      <option value="1">Mostrando: Activos</option>
+      <option value="0">Mostrando: Archivados</option>
     </select>
     <span class="total-label" id="exTotalLabel"></span>
+    <div class="view-toggle">
+      <button id="exViewList" class="active" onclick="setExView('list')" title="Vista de lista"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+      <button id="exViewGrid" onclick="setExView('grid')" title="Vista de cuadrícula"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+    </div>
+  </div>
+  <div class="toolbar" style="padding-top:4px;">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchExercises" placeholder="Buscar en ejercicios…" oninput="loadExercises(1)"/>
+    </div>
+    <div class="fp-wrap">
+      <button class="pill" id="fpGrupoBtn" onclick="toggleFp(event,'fpGrupoMenu')">Grupo</button>
+      <div class="fp-menu" id="fpGrupoMenu"></div>
+    </div>
+    <div class="fp-wrap">
+      <button class="pill" id="fpDifBtn" onclick="toggleFp(event,'fpDifMenu')">Dificultad</button>
+      <div class="fp-menu" id="fpDifMenu"></div>
+    </div>
+    <div class="fp-wrap">
+      <button class="pill" id="fpMatBtn" onclick="toggleFp(event,'fpMatMenu')">Material</button>
+      <div class="fp-menu" id="fpMatMenu"></div>
+    </div>
   </div>
 
   <div class="content">
@@ -426,8 +539,42 @@
           </select>
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Material</label>
+          <input id="ex_material" list="materialOptions" placeholder="Ej: Barra, Mancuernas, Sin equipo…"/>
+          <datalist id="materialOptions">
+            <option value="Barra"></option>
+            <option value="Mancuernas"></option>
+            <option value="Kettlebell"></option>
+            <option value="Poleas / Cable"></option>
+            <option value="Máquina"></option>
+            <option value="Banco"></option>
+            <option value="Barra dominadas"></option>
+            <option value="Bandas elásticas"></option>
+            <option value="Sin equipo"></option>
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label>Dificultad</label>
+          <select id="ex_difficulty">
+            <option value="">Sin especificar</option>
+            <option value="1">Principiante</option>
+            <option value="2">Intermedio</option>
+            <option value="3">Avanzado</option>
+          </select>
+        </div>
+      </div>
       <div class="form-group">
-        <label>Descripción</label>
+        <label>Series recomendadas <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(opcional)</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <input id="ex_rec_series" placeholder="Series · Ej: 3-4"/>
+          <input id="ex_rec_reps" placeholder="Reps · Ej: 8-12"/>
+          <input id="ex_rec_rest" placeholder="Descanso · Ej: 60-90s"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descripción / Ejecución <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(cada línea se muestra como un paso numerado)</span></label>
         <span class="auto-grow-wrap" id="ex_desc_wrap">
           <textarea id="ex_desc" rows="1" placeholder="Descripción del ejercicio…"
             oninput="this.parentNode.dataset.value=this.value"></textarea>
@@ -508,6 +655,36 @@
   </div>
 </div>
 
+<!-- Panel lateral "Ver ejercicio" -->
+<div class="xv-overlay" id="xvOverlay" onclick="closeExerciseView()"></div>
+<div class="xv-panel" id="xvPanel">
+  <button class="xv-close" onclick="closeExerciseView()" title="Cerrar">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="xv-body" id="xvBody"></div>
+</div>
+
+<!-- Modal asignar ejercicio -->
+<div class="assign-overlay" id="assignOverlay" onclick="if(event.target===this)closeAssignModal()">
+  <div class="assign-modal">
+    <div class="assign-modal-head">
+      <h3 id="assignModalTitle">Asignar ejercicio</h3>
+      <button onclick="closeAssignModal()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="assign-search">
+      <input type="text" id="assignSearch" placeholder="Buscar cliente…" oninput="_filterAssignClients()">
+    </div>
+    <div class="assign-list" id="assignList"></div>
+    <div class="assign-footer">
+      <span class="assign-count" id="assignCount">0 seleccionados</span>
+      <div class="assign-footer-btns">
+        <button class="assign-btn-cancel" onclick="closeAssignModal()">Cancelar</button>
+        <button class="assign-btn-save" id="assignSaveBtn" onclick="saveAssignment()" disabled>Asignar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -580,27 +757,63 @@ function adaptSidebar(){
 let allMuscleGroups=[];
 let exPage=1;
 let exMgFilter=null;
+let exDifFilter=null;
+let exMatFilter=null;
+let exStateFilter='';
+let exView=localStorage.getItem('ex_view')||'list';
 let editingExerciseId=null;
+let _exItems=[];
+
+const DIFF_LABELS={1:'Principiante',2:'Intermedio',3:'Avanzado'};
+const MATERIAL_OPTIONS=['Barra','Mancuernas','Kettlebell','Poleas / Cable','Máquina','Banco','Barra dominadas','Bandas elásticas','Sin equipo'];
 
 async function loadMuscleGroupsForFilters(){
-  if(allMuscleGroups.length){renderExMgPills();return;}
+  if(allMuscleGroups.length){renderFilterMenus();return;}
   try{
     const r=await fetch(`${API}/muscle-groups/findAll`,{headers:authHeaders()});
     const d=await r.json();
     allMuscleGroups=d.data||[];
-    renderExMgPills();
+    renderFilterMenus();
   }catch{}
 }
 
-function renderExMgPills(){
-  const sel=document.getElementById('exMgSelect');
-  if(!sel)return;
-  sel.innerHTML=`<option value="">Todos los grupos musculares</option>`+
-    allMuscleGroups.map(mg=>`<option value="${mg.id}">${esc(mg.name)}</option>`).join('');
-  sel.value=exMgFilter?String(exMgFilter):'';
+function toggleFp(e,menuId){
+  e.stopPropagation();
+  document.querySelectorAll('.fp-menu').forEach(m=>{if(m.id!==menuId)m.classList.remove('open');});
+  document.getElementById(menuId).classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.fp-wrap'))document.querySelectorAll('.fp-menu').forEach(m=>m.classList.remove('open'));
+});
+
+function renderFilterMenus(){
+  const g=document.getElementById('fpGrupoMenu');
+  if(g)g.innerHTML=`<button class="fp-item${exMgFilter===null?' sel':''}" onclick="setExMg(null)">Todos los grupos</button>`+
+    allMuscleGroups.map(mg=>`<button class="fp-item${exMgFilter===mg.id?' sel':''}" onclick="setExMg(${mg.id})">${esc(mg.name)}</button>`).join('');
+  const dMenu=document.getElementById('fpDifMenu');
+  if(dMenu)dMenu.innerHTML=`<button class="fp-item${exDifFilter===null?' sel':''}" onclick="setExDif(null)">Todas</button>`+
+    [1,2,3].map(k=>`<button class="fp-item${exDifFilter===k?' sel':''}" onclick="setExDif(${k})">${DIFF_LABELS[k]}</button>`).join('');
+  const m=document.getElementById('fpMatMenu');
+  if(m)m.innerHTML=`<button class="fp-item${exMatFilter===null?' sel':''}" onclick="setExMat(null)">Todos</button>`+
+    MATERIAL_OPTIONS.map(mat=>`<button class="fp-item${exMatFilter===mat?' sel':''}" onclick="setExMat('${esc(mat)}')">${esc(mat)}</button>`).join('');
+  const gb=document.getElementById('fpGrupoBtn');
+  if(gb){const mg=allMuscleGroups.find(x=>x.id===exMgFilter);gb.textContent=mg?`Grupo: ${mg.name}`:'Grupo';gb.classList.toggle('active',!!mg);}
+  const db=document.getElementById('fpDifBtn');
+  if(db){db.textContent=exDifFilter?`Dificultad: ${DIFF_LABELS[exDifFilter]}`:'Dificultad';db.classList.toggle('active',!!exDifFilter);}
+  const mb=document.getElementById('fpMatBtn');
+  if(mb){mb.textContent=exMatFilter?`Material: ${exMatFilter}`:'Material';mb.classList.toggle('active',!!exMatFilter);}
 }
 
-function setExMg(id){exMgFilter=id;renderExMgPills();loadExercises(1);}
+function setExMg(id){exMgFilter=id;renderFilterMenus();loadExercises(1);}
+function setExDif(k){exDifFilter=k;renderFilterMenus();loadExercises(1);}
+function setExMat(mat){exMatFilter=mat;renderFilterMenus();loadExercises(1);}
+function setExShowing(v){exStateFilter=v;loadExercises(1);}
+function setExView(v){
+  exView=v;localStorage.setItem('ex_view',v);
+  document.getElementById('exViewList').classList.toggle('active',v==='list');
+  document.getElementById('exViewGrid').classList.toggle('active',v==='grid');
+  if(_exItems.length)renderExercisesTable(_exItems);
+}
 
 async function loadExercises(page=1){
   exPage=page;
@@ -608,6 +821,9 @@ async function loadExercises(page=1){
   const params=new URLSearchParams({page,per_page:20});
   if(search)params.set('search',search);
   if(exMgFilter)params.set('muscle_group_id',exMgFilter);
+  if(exDifFilter)params.set('difficulty',exDifFilter);
+  if(exMatFilter)params.set('material',exMatFilter);
+  if(exStateFilter!=='')params.set('state',exStateFilter);
   try{
     const r=await fetch(`${API}/trainings/search?${params}`,{headers:authHeaders()});
     const d=await r.json();
@@ -617,6 +833,7 @@ async function loadExercises(page=1){
     const lastPage=result.last_page||1;
     document.getElementById('exTotalLabel').textContent=`${total} ejercicio${total!==1?'s':''}`;
     const _sc=document.getElementById('subcountEjercicios');if(_sc)_sc.textContent=total;
+    _exItems=items;
     renderExercisesTable(items);
     renderExPagination(page,lastPage);
   }catch(e){
@@ -627,22 +844,107 @@ async function loadExercises(page=1){
 const EX_TYPE_LABELS={compound:'Compuesto',isolation:'Aislamiento',cardio:'Cardio',mobility:'Movilidad'};
 const EX_LOC_LABELS={gym:'Gimnasio',home:'Casa',outdoor:'Exterior',both:'Ambos'};
 
+const _EX_PLACEHOLDER_SVG='<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>';
+
+function _exIcon(ex,size){
+  size=size||38;
+  return ex.image
+    ?`<div class="exi" style="width:${size}px;height:${size}px;"><img src="${esc(ex.image)}" alt=""></div>`
+    :`<div class="exi" style="width:${size}px;height:${size}px;">${_EX_PLACEHOLDER_SVG}</div>`;
+}
+
+function _exActionsHtml(ex){
+  return `<div class="row-actions">
+    <button class="btn-assign" onclick="event.stopPropagation();openAssignModal(${ex.id},'${esc(ex.name).replace(/'/g,"\\'")}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>
+    <button class="btn-row-icon" onclick="event.stopPropagation();openExerciseView(${ex.id})" title="Ver"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <button class="btn-row-icon" onclick="showExRowMenu(event,${ex.id})" title="Más opciones"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+  </div>`;
+}
+
 function renderExercisesTable(items){
   const wrap=document.getElementById('exercisesTable');
   if(!items.length){
-    wrap.innerHTML=`<div class="empty"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h3>Sin ejercicios</h3><p>Crea tu primer ejercicio.</p></div>`;
+    wrap.className='';
+    wrap.innerHTML=`<div class="table-wrap"><div class="empty"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h3>Sin ejercicios</h3><p>Crea tu primer ejercicio con el botón "+ Nuevo ejercicio".</p></div></div>`;
     return;
   }
-  wrap.innerHTML=`<table><thead><tr><th>Nombre</th><th>Grupo Muscular</th><th>Tipo</th><th>Localización</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-    ${items.map(ex=>`<tr>
-      <td><strong>${esc(ex.name)}</strong>${ex.description?`<br><small style="color:#9CA3AF">${esc(ex.description.substring(0,60))}${ex.description.length>60?'…':''}</small>`:''}</td>
-      <td>${ex.muscle_group_name?`<span class="badge badge-purple">${esc(ex.muscle_group_name)}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
-      <td>${ex.exercise_type?`<span class="badge badge-blue">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
-      <td>${ex.location?`<span class="badge badge-orange">${esc(EX_LOC_LABELS[ex.location]||ex.location)}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
-      <td><span class="badge ${ex.state?'badge-green':'badge-gray'}">${ex.state?'Activo':'Inactivo'}</span></td>
-      <td style="display:flex;gap:5px;align-items:center;">${ex.video_url?`<button class="play-btn" onclick="playVideo('${ex.video_url.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="Reproducir video"><svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>`:''}<button class="btn-icon" onclick="openExerciseModal(${ex.id})" title="Editar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon btn-icon-danger" onclick="deleteExercise(${ex.id},'${esc(ex.name).replace(/'/g,"\\'")}')" title="Eliminar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
+  if(exView==='grid'){
+    wrap.className='';
+    wrap.innerHTML=`<div class="ex-grid">${items.map(ex=>`
+      <div class="exg-card" onclick="openExerciseView(${ex.id})">
+        <div class="exg-img">${ex.image?`<img src="${esc(ex.image)}" alt="">`:_EX_PLACEHOLDER_SVG.replace('width="18" height="18"','width="34" height="34"')}</div>
+        <div class="exg-body">
+          <div class="exg-name">${esc(ex.name)}${ex.state?'':' <span class="badge badge-gray">Archivado</span>'}</div>
+          <div class="exg-sub">${[ex.muscle_group_name,ex.material].filter(Boolean).map(esc).join(' · ')||'—'}</div>
+          <div class="exg-chips">
+            ${ex.exercise_type?`<span class="badge badge-gray">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:''}
+            ${ex.difficulty?`<span class="lvl-pill lvl-${ex.difficulty}">${DIFF_LABELS[ex.difficulty]}</span>`:''}
+          </div>
+          <div class="exg-foot" onclick="event.stopPropagation()">${_exActionsHtml(ex)}</div>
+        </div>
+      </div>`).join('')}</div>`;
+    return;
+  }
+  wrap.className='table-wrap';
+  wrap.innerHTML=`<table><thead><tr><th>Ejercicio</th><th>Grupo</th><th>Material</th><th>Tipo</th><th>Dificultad</th><th style="text-align:right;">Acciones</th></tr></thead><tbody>
+    ${items.map(ex=>`<tr onclick="openExerciseView(${ex.id})" style="cursor:pointer;">
+      <td><div style="display:flex;align-items:center;gap:12px;">${_exIcon(ex)}<div><div style="font-weight:700;color:#111827;font-size:13px;">${esc(ex.name)}</div>${ex.state?'':'<span class="badge badge-gray" style="margin-top:3px;">Archivado</span>'}</div></div></td>
+      <td style="color:#374151;">${esc(ex.muscle_group_name||'—')}</td>
+      <td style="color:#6B7280;">${esc(ex.material||'—')}</td>
+      <td>${ex.exercise_type?`<span class="badge badge-gray">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
+      <td>${ex.difficulty?`<span class="lvl-pill lvl-${ex.difficulty}">${DIFF_LABELS[ex.difficulty]}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
+      <td onclick="event.stopPropagation()">${_exActionsHtml(ex)}</td>
     </tr>`).join('')}
   </tbody></table>`;
+}
+
+function showExRowMenu(e,id){
+  e.stopPropagation();document.querySelectorAll('.row-menu').forEach(m=>m.remove());
+  const ex=_exItems.find(x=>x.id===id)||{};
+  const btn=e.currentTarget;const rect=btn.getBoundingClientRect();
+  const menu=document.createElement('div');menu.className='row-menu';
+  menu.style.cssText=`position:fixed;top:${rect.bottom+4}px;right:${window.innerWidth-rect.right}px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:300;min-width:170px;overflow:hidden;`;
+  const item=(label,svg,fn,danger)=>`<button onclick="${fn};this.closest('.row-menu').remove();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:${danger?'#DC2626':'#374151'};background:none;border:none;cursor:pointer;text-align:left;">${svg} ${label}</button>`;
+  menu.innerHTML=
+    item('Editar','<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',`openExerciseModal(${id})`)
+    +(ex.video_url?item('Ver video','<svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>',`playVideo('${String(ex.video_url).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')`):'')
+    +item('Duplicar','<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',`duplicateExercise(${id})`)
+    +item(ex.state?'Archivar':'Activar','<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>',`archiveExercise(${id},${ex.state?0:1})`)
+    +'<div style="height:1px;background:#F3F4F6;margin:4px 0;"></div>'
+    +item('Eliminar','<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>',`deleteExercise(${id},'${esc(ex.name||'').replace(/'/g,"\\'")}')`,true);
+  document.body.appendChild(menu);document.addEventListener('click',()=>menu.remove(),{once:true});
+}
+
+async function duplicateExercise(id){
+  try{
+    const r=await fetch(`${API}/trainings/${id}/edit`,{headers:authHeaders()});
+    const d=await r.json();const ex=d.data||d;
+    const payload={
+      name:(ex.name||'Ejercicio')+' (copia)',
+      description:ex.description||null,
+      muscle_group_id:ex.muscle_group_id||null,
+      secondary_muscle_group_id:ex.secondary_muscle_group_id||null,
+      secondary_muscle_group_ids:ex.secondary_muscle_group_ids?.length?ex.secondary_muscle_group_ids:null,
+      image:ex.image||null,video_url:ex.video_url||null,
+      exercise_type:ex.exercise_type||null,location:ex.location||null,
+      material:ex.material||null,difficulty:ex.difficulty||null,
+      rec_series:ex.rec_series||null,rec_reps:ex.rec_reps||null,rec_rest:ex.rec_rest||null,
+    };
+    const r2=await fetch(`${API}/trainings`,{method:'POST',headers:authHeaders(),body:JSON.stringify(payload)});
+    const d2=await r2.json();
+    if(!r2.ok)throw new Error(d2.message||`HTTP ${r2.status}`);
+    showToast('Ejercicio duplicado','success');loadExercises(exPage);
+  }catch(e){showToast(e.message||'Error al duplicar','error');}
+}
+
+async function archiveExercise(id,newState){
+  try{
+    const r=await fetch(`${API}/trainings/${id}/update`,{method:'PUT',headers:authHeaders(),body:JSON.stringify({state:newState})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.message||`HTTP ${r.status}`);
+    showToast(newState?'Ejercicio activado':'Ejercicio archivado','success');
+    loadExercises(exPage);
+  }catch(e){showToast(e.message||'Error','error');}
 }
 
 function renderExPagination(page,lastPage){
@@ -782,6 +1084,8 @@ async function openExerciseModal(id=null){
   _setExVideoPreview(null);
   document.getElementById('ex_type').value='';
   document.getElementById('ex_location').value='';
+  ['ex_material','ex_rec_series','ex_rec_reps','ex_rec_rest'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('ex_difficulty').value='';
   document.getElementById('ex_state').value='1';
   document.getElementById('ex_imageFile').value='';
   setExImagePreview(null);
@@ -801,6 +1105,11 @@ async function openExerciseModal(id=null){
       setMs2Values(sec);
       document.getElementById('ex_type').value=ex.exercise_type||'';
       document.getElementById('ex_location').value=ex.location||'';
+      document.getElementById('ex_material').value=ex.material||'';
+      document.getElementById('ex_difficulty').value=ex.difficulty||'';
+      document.getElementById('ex_rec_series').value=ex.rec_series||'';
+      document.getElementById('ex_rec_reps').value=ex.rec_reps||'';
+      document.getElementById('ex_rec_rest').value=ex.rec_rest||'';
       setExImagePreview(ex.image||null);
       _setExVideoPreview(ex.video_url||null);
       document.getElementById('ex_state').value=ex.state??1;
@@ -821,6 +1130,11 @@ async function saveExercise(){
     secondary_muscle_group_ids:_ms2Selected.length?_ms2Selected:null,
     exercise_type:document.getElementById('ex_type').value||null,
     location:document.getElementById('ex_location').value||null,
+    material:document.getElementById('ex_material').value.trim()||null,
+    difficulty:parseInt(document.getElementById('ex_difficulty').value)||null,
+    rec_series:document.getElementById('ex_rec_series').value.trim()||null,
+    rec_reps:document.getElementById('ex_rec_reps').value.trim()||null,
+    rec_rest:document.getElementById('ex_rec_rest').value.trim()||null,
     image:_exImageUrl||null,
     video_url:document.getElementById('ex_video').value.trim()||null,
     state:parseInt(document.getElementById('ex_state').value),
@@ -836,7 +1150,165 @@ async function saveExercise(){
   }catch(e){showToast(e.message||'Error al guardar','error');}
 }
 
+// ── Panel lateral "Ver ejercicio" ─────────────────────────────────────────────
+let _xvId=null;
+
+async function openExerciseView(id){
+  _xvId=id;
+  document.getElementById('xvOverlay').classList.add('open');
+  document.getElementById('xvPanel').classList.add('open');
+  document.getElementById('xvBody').innerHTML='<div class="xv-empty">Cargando ejercicio…</div>';
+  try{
+    const r=await fetch(`${API}/trainings/${id}/edit`,{headers:authHeaders()});
+    if(!r.ok)throw new Error();
+    const d=await r.json();
+    renderExerciseView(d.data||d,id);
+  }catch{
+    document.getElementById('xvBody').innerHTML='<div class="xv-empty">Error al cargar el ejercicio.</div>';
+  }
+}
+
+function closeExerciseView(){
+  document.getElementById('xvOverlay').classList.remove('open');
+  document.getElementById('xvPanel').classList.remove('open');
+  _xvId=null;
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('xvPanel').classList.contains('open'))closeExerciseView();
+});
+
+function renderExerciseView(ex,id){
+  const chips=[
+    ex.difficulty?`<span class="lvl-pill lvl-${ex.difficulty}">${DIFF_LABELS[ex.difficulty]}</span>`:'',
+    ex.exercise_type?`<span class="xv-chip-outline">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:'',
+    ex.state?'':'<span class="badge badge-gray">Archivado</span>',
+  ].filter(Boolean).join('');
+  const subParts=[ex.muscle_group_name,ex.material].filter(Boolean);
+
+  const imgHtml=`<div class="xv-imgbox">
+    ${ex.image?`<img src="${esc(ex.image)}" alt="">`:_EX_PLACEHOLDER_SVG.replace('width="18" height="18"','width="46" height="46"')}
+    ${ex.video_url?`<button class="xv-play" onclick="playVideo('${String(ex.video_url).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Ver video</button>`:''}
+  </div>`;
+
+  const steps=String(ex.description||'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  const execHtml=steps.length
+    ?`<div class="xv-sec-label">Ejecución</div>${steps.map((s,i)=>`<div class="xv-step"><span class="xv-step-num">${i+1}.</span><span>${esc(s)}</span></div>`).join('')}`
+    :'';
+
+  const recHtml=(ex.rec_series||ex.rec_reps||ex.rec_rest)
+    ?`<div class="xv-sec-label" style="margin-top:18px;">Series recomendadas</div>
+      <div class="xv-cards">
+        <div class="xv-card"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><div class="xv-card-val">${esc(ex.rec_series||'—')}</div><div class="xv-card-lbl">Series</div></div>
+        <div class="xv-card"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><div class="xv-card-val">${esc(ex.rec_reps||'—')}</div><div class="xv-card-lbl">Reps</div></div>
+        <div class="xv-card"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div class="xv-card-val">${esc(ex.rec_rest||'—')}</div><div class="xv-card-lbl">Descanso</div></div>
+      </div>`
+    :'';
+
+  document.getElementById('xvBody').innerHTML=`
+    <div class="xv-chips">${chips}</div>
+    <div class="xv-title">${esc(ex.name||'Ejercicio')}</div>
+    ${subParts.length?`<div class="xv-sub">${subParts.map(esc).join(' · ')}</div>`:'<div style="margin-bottom:18px;"></div>'}
+    ${imgHtml}
+    ${execHtml}
+    ${recHtml}
+    <button class="xv-assign-btn" onclick="openAssignModal(${id},'${esc(ex.name||'').replace(/'/g,"\\'")}')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Asignar a un cliente
+    </button>
+    <div class="xv-actions">
+      <button class="xv-act-btn" onclick="duplicateExercise(${id});closeExerciseView();"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Duplicar</button>
+      <button class="xv-act-btn" onclick="closeExerciseView();openExerciseModal(${id});"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
+      <button class="xv-act-btn" onclick="archiveExercise(${id},${ex.state?0:1});closeExerciseView();"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>${ex.state?'Archivar':'Activar'}</button>
+    </div>`;
+}
+
+// ── Modal asignar ejercicio a clientes ────────────────────────────────────────
+let _assignExerciseId=null;
+let _assignAllClients=[];
+let _assignSelected=new Set();
+
+async function openAssignModal(exerciseId,exerciseName){
+  _assignExerciseId=exerciseId;
+  _assignSelected=new Set();
+  document.getElementById('assignModalTitle').textContent='Asignar: '+exerciseName;
+  document.getElementById('assignSearch').value='';
+  document.getElementById('assignList').innerHTML='<div class="assign-empty">Cargando clientes…</div>';
+  document.getElementById('assignOverlay').classList.add('open');
+  _updateAssignFooter();
+  if(!_assignAllClients.length){
+    try{
+      const r=await fetch(`${API}/users/client/findAll`,{headers:authHeaders()});
+      const d=await r.json();
+      _assignAllClients=(d.data||[]).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    }catch{
+      document.getElementById('assignList').innerHTML='<div class="assign-empty">Error al cargar clientes.</div>';
+      return;
+    }
+  }
+  _renderAssignList(_assignAllClients);
+}
+
+function closeAssignModal(){
+  document.getElementById('assignOverlay').classList.remove('open');
+}
+
+function _filterAssignClients(){
+  const q=document.getElementById('assignSearch').value.toLowerCase();
+  const filtered=q?_assignAllClients.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.last_name||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q)):_assignAllClients;
+  _renderAssignList(filtered);
+}
+
+function _renderAssignList(clients){
+  const el=document.getElementById('assignList');
+  if(!clients.length){el.innerHTML='<div class="assign-empty">Sin resultados.</div>';return;}
+  el.innerHTML=clients.map(c=>{
+    const sel=_assignSelected.has(c.id);
+    const initials=((c.name||'')[0]||(c.email||'U')[0]).toUpperCase();
+    const avatar=c.photo?`<img src="${esc(c.photo)}" alt="">`:`${initials}`;
+    const fullName=esc((c.name||'')+' '+(c.last_name||'')).trim()||esc(c.email||'—');
+    return`<div class="assign-client-row${sel?' selected':''}" onclick="toggleAssignClient('${c.id}')">
+      <div class="assign-avatar">${avatar}</div>
+      <div><div class="assign-client-name">${fullName}</div><div class="assign-client-email">${esc(c.email||'')}</div></div>
+      <div class="assign-check">${sel?'<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAssignClient(clientId){
+  if(_assignSelected.has(clientId))_assignSelected.delete(clientId);
+  else _assignSelected.add(clientId);
+  _updateAssignFooter();
+  _filterAssignClients();
+}
+
+function _updateAssignFooter(){
+  const n=_assignSelected.size;
+  document.getElementById('assignCount').textContent=n===0?'0 seleccionados':n===1?'1 cliente':n+' clientes';
+  document.getElementById('assignSaveBtn').disabled=n===0;
+}
+
+async function saveAssignment(){
+  if(!_assignExerciseId||!_assignSelected.size)return;
+  const btn=document.getElementById('assignSaveBtn');
+  btn.disabled=true;btn.textContent='Asignando…';
+  const ids=[..._assignSelected];
+  let ok=0,fail=0;
+  for(const clientId of ids){
+    try{
+      const r=await fetch(`${API}/trainings/assign`,{method:'POST',headers:authHeaders(),body:JSON.stringify({training_ids:[_assignExerciseId],user_id:parseInt(clientId)})});
+      if(r.ok)ok++;else fail++;
+    }catch{fail++;}
+  }
+  btn.textContent='Asignar';
+  closeAssignModal();
+  if(ok&&!fail)showToast(`Ejercicio asignado a ${ok} cliente${ok!==1?'s':''}`,'success');
+  else if(ok&&fail)showToast(`${ok} asignados, ${fail} fallaron`,'error');
+  else showToast('Error al asignar el ejercicio','error');
+}
+
 initUser();loadMuscleGroupsForFilters();loadExercises(1);loadPendingBadge();adaptSidebar();
+setExView(exView);
 </script>
 <script>
 var _flyoutMenus={

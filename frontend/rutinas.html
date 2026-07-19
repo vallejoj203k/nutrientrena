@@ -342,6 +342,45 @@
     .assign-btn-save{padding:8px 18px;border:none;border-radius:8px;background:#6366F1;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
     .assign-btn-save:hover{background:#4F46E5;}
     .assign-btn-save:disabled{opacity:.5;cursor:not-allowed;}
+    /* ── Panel lateral "Ver rutina" (prototipo) ── */
+    .rv-overlay{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:600;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .rv-overlay.open{opacity:1;pointer-events:all;}
+    .rv-panel{position:fixed;top:0;right:0;bottom:0;width:min(500px,100vw);background:#fff;z-index:601;transform:translateX(100%);transition:transform .38s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:-16px 0 48px rgba(0,0,0,.14);}
+    .rv-panel.open{transform:translateX(0);}
+    .rv-close{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;z-index:2;}
+    .rv-close:hover{background:#F3F4F6;color:#111827;}
+    .rv-body{flex:1;overflow-y:auto;padding:22px 26px 26px;}
+    .rv-chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding-right:44px;}
+    .rv-chip{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:700;}
+    .rv-chip.mine{background:#EEF2FF;color:#4F46E5;}
+    .rv-chip.tpl{background:#F3F4F6;color:#6B7280;}
+    .rv-chip.outline{background:#fff;color:#6B7280;border:1.5px solid #E5E7EB;font-weight:600;}
+    .rv-title{font-size:24px;font-weight:800;color:#111827;line-height:1.2;}
+    .rv-meta{font-size:14px;color:#6B7280;margin:7px 0 20px;}
+    .rv-day{border:1px solid #E5E7EB;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff;}
+    .rv-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid #F3F4F6;}
+    .rv-day-name{font-size:13.5px;font-weight:800;color:#111827;}
+    .rv-day-count{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+    .rv-ex{display:flex;align-items:center;gap:11px;padding:10px 14px;border-bottom:1px solid #F7F8FA;}
+    .rv-ex:last-child{border-bottom:none;}
+    .rv-ex-num{width:22px;height:22px;border-radius:50%;background:#F3F4F6;color:#6B7280;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .rv-ex-name{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .rv-ex-dose{font-size:13px;color:#9CA3AF;white-space:nowrap;flex-shrink:0;}
+    .rv-ex-dose b{color:#111827;font-weight:800;}
+    .rv-day-note{padding:10px 14px;font-size:12.5px;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #F3F4F6;white-space:pre-wrap;}
+    .rv-sec-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin:20px 0 10px;}
+    .rv-mat{display:flex;gap:8px;flex-wrap:wrap;}
+    .rv-mat-chip{padding:5px 12px;border-radius:8px;background:#F9FAFB;border:1px solid #F0F1F3;font-size:12.5px;color:#6B7280;font-weight:600;}
+    .rv-assign-btn{width:100%;margin-top:22px;padding:13px;border-radius:12px;border:none;background:#6366F1;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .rv-assign-btn:hover{background:#4F46E5;}
+    .rv-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .rv-actions.two{grid-template-columns:repeat(2,1fr);}
+    .rv-actions.one{grid-template-columns:1fr;}
+    .rv-act-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
+    .rv-act-btn:hover{background:#F9FAFB;border-color:#D1D5DB;}
+    .rv-act-btn.danger{color:#DC2626;}
+    .rv-act-btn.danger:hover{background:#FEF2F2;border-color:#FECACA;}
+    .rv-empty{padding:40px 16px;text-align:center;color:#9CA3AF;font-size:13px;}
       /* ── Mobile hamburger ── */
     .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;flex-shrink:0;}
     .menu-btn:hover{background:rgba(255,255,255,.1);}
@@ -755,7 +794,7 @@ function routineRow(r){
     ?`<span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#F3F4F6;color:#6B7280;margin-left:6px;">Plantilla</span>`
     :`<span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#EEF2FF;color:#4F46E5;margin-left:6px;">Mía</span>`;
   const subLine=esc(r.objective&&r.training?r.training:(r.training||'')); // línea de equipo/lugar si existe
-  return `<tr onclick="openForm(${r.id})">
+  return `<tr onclick="openRoutineView(${r.id})">
     <td><div style="display:flex;align-items:center;gap:12px;"><div style="width:38px;height:38px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></div><div><div style="font-weight:700;color:#111827;font-size:13px;">${esc(r.name)}${originBadge}</div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:3px;font-size:11px;color:#6B7280;">${sessionCount?`<span>${sessionCount} sesione${sessionCount!==1?'s':''}</span>`:''}${subLine?`${sessionCount?' · ':''}<span>${subLine}</span>`:''}</div></div></div></td>
     <td style="color:#374151;font-size:13px;">${esc(r.objective||r.training||'—')}</td>
     <td>${levelName?`<span class="lvl-pill ${levelCls}">${esc(levelName)}</span>`:'<span style="color:#9CA3AF;font-size:12px;">—</span>'}</td>
@@ -763,10 +802,10 @@ function routineRow(r){
     <td style="font-size:13px;white-space:nowrap;">${r.time?`<span style="font-weight:600;color:#111827;">${r.time}</span> <span style="color:#6B7280;">min</span>`:'<span style="color:#9CA3AF;">—</span>'}</td>
     <td onclick="event.stopPropagation()"><div class="row-actions" style="justify-content:flex-end;">
       <button class="btn-assign" onclick="openAssignModal(${r.id},'${esc(r.name)}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>
+      <button class="btn-row-icon" onclick="openRoutineView(${r.id})" title="Ver"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       ${canEdit
-        ? `<button class="btn-row-icon" onclick="openForm(${r.id})" title="Editar"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          <button class="btn-row-icon" onclick="showRowMenu(event,${r.id},'${esc(r.name)}')" title="Más opciones"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>`
-        : `<span style="color:#9CA3AF;font-size:11px;">Solo lectura</span>`}
+        ? `<button class="btn-row-icon" onclick="showRowMenu(event,${r.id},'${esc(r.name)}')" title="Más opciones"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>`
+        : ``}
     </div></td>
   </tr>`;
 }
@@ -1322,6 +1361,105 @@ async function saveAssignment(){
   else showToast('Error al asignar la rutina', 'error');
 }
 
+// ── Panel lateral "Ver rutina" ────────────────────────────────────────────────
+let _rvId=null,_rvName='';
+
+async function openRoutineView(id){
+  _rvId=id;
+  document.getElementById('rvOverlay').classList.add('open');
+  document.getElementById('rvPanel').classList.add('open');
+  document.getElementById('rvBody').innerHTML='<div class="rv-empty">Cargando rutina…</div>';
+  try{
+    const r=await fetch(`${API}/routines/${id}/edit`,{headers:authHeaders()});
+    if(!r.ok)throw new Error();
+    const d=await r.json();
+    renderRoutineView(d.data||d,id);
+  }catch{
+    document.getElementById('rvBody').innerHTML='<div class="rv-empty">Error al cargar la rutina.</div>';
+  }
+}
+
+function closeRoutineView(){
+  document.getElementById('rvOverlay').classList.remove('open');
+  document.getElementById('rvPanel').classList.remove('open');
+  _rvId=null;
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('rvPanel').classList.contains('open'))closeRoutineView();
+});
+
+function _rvDose(ex){
+  const s=ex.series,rep=(ex.repetitions||'').trim();
+  if(s&&rep)return`<b>${esc(s)}</b> × ${esc(rep)}`;
+  if(s)return`<b>${esc(s)}</b> series`;
+  if(rep)return esc(rep);
+  return'—';
+}
+
+function renderRoutineView(rt,id){
+  _rvName=rt.name||'';
+  const listRow=allRoutines.find(x=>x.id===id);
+  const orgId=rt.organization_id!==undefined?rt.organization_id:(listRow?listRow.organization_id:null);
+  const isPlatform=orgId==null;
+  const _rid=parseInt(localStorage.getItem('role_id')||'0');
+  const canEdit=(_rid===1||_rid===2)||!isPlatform;
+  const levelName=rt.training_level_id?(LEVELS[rt.training_level_id]||null):null;
+  const genderName=rt.gender_id?(GENDERS[rt.gender_id]||null):'Mixto';
+
+  const chips=[
+    isPlatform?'<span class="rv-chip tpl">Plantilla</span>':'<span class="rv-chip mine">Mía</span>',
+    levelName?`<span class="rv-chip lvl-pill lvl-${rt.training_level_id}">${esc(levelName)}</span>`:'',
+    genderName?`<span class="rv-chip outline">${esc(genderName)}</span>`:'',
+  ].filter(Boolean).join('');
+
+  const metaParts=[rt.time?`${rt.time} min`:'',rt.days?`${rt.days} día${rt.days!==1?'s':''} por semana`:''].filter(Boolean);
+
+  const daysHtml=(rt.days_list||[]).map((day,i)=>{
+    const dname=(day.day_name||'').trim();
+    const title=/^d[ií]a\s/i.test(dname)?dname:`Día ${i+1}${dname?' · '+dname:''}`;
+    let num=0;const rows=[];
+    (day.blocks||[]).forEach(blk=>{
+      if(blk.block_type==='text'){
+        if(blk.content)rows.push(`<div class="rv-day-note">${esc(blk.content)}</div>`);
+        return;
+      }
+      (blk.exercises||[]).forEach(ex=>{
+        num++;
+        rows.push(`<div class="rv-ex"><div class="rv-ex-num">${num}</div><div class="rv-ex-name">${esc(ex.training_name||'—')}</div><div class="rv-ex-dose">${_rvDose(ex)}</div></div>`);
+      });
+    });
+    return`<div class="rv-day">
+      <div class="rv-day-head"><span class="rv-day-name">${esc(title)}</span><span class="rv-day-count">${num} ejercicio${num!==1?'s':''}</span></div>
+      ${rows.join('')||'<div class="rv-empty" style="padding:18px;">Sin ejercicios</div>'}
+    </div>`;
+  }).join('');
+
+  const matTokens=String(rt.training||'').split(/[·,]/).map(s=>s.trim()).filter(Boolean);
+  const matHtml=matTokens.length
+    ?`<div class="rv-sec-label">Material</div><div class="rv-mat">${matTokens.map(t=>`<span class="rv-mat-chip">${esc(t)}</span>`).join('')}</div>`
+    :'';
+
+  const actionBtns=[
+    `<button class="rv-act-btn" onclick="cloneRoutine(${id});closeRoutineView();"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Duplicar</button>`,
+    canEdit?`<button class="rv-act-btn" onclick="closeRoutineView();openForm(${id});"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>`:'',
+    canEdit?`<button class="rv-act-btn danger" onclick="openConfirm('Eliminar rutina','¿Eliminar esta rutina? No se puede deshacer.',()=>{deleteRoutine(${id});closeRoutineView();});"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar</button>`:'',
+  ].filter(Boolean);
+
+  document.getElementById('rvBody').innerHTML=`
+    <div class="rv-chips">${chips}</div>
+    <div class="rv-title">${esc(rt.name||'Rutina')}</div>
+    ${metaParts.length?`<div class="rv-meta">${metaParts.join(' · ')}</div>`:'<div style="margin-bottom:20px;"></div>'}
+    ${rt.notes?`<div class="rv-day-note" style="border:1px solid #F3F4F6;border-radius:10px;margin-bottom:16px;">${esc(rt.notes)}</div>`:''}
+    ${daysHtml||'<div class="rv-empty">Esta rutina aún no tiene días definidos.</div>'}
+    ${matHtml}
+    <button class="rv-assign-btn" onclick="openAssignModal(${id},'${esc(rt.name||'')}')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Asignar a un cliente
+    </button>
+    <div class="rv-actions${actionBtns.length===2?' two':(actionBtns.length===1?' one':'')}">${actionBtns.join('')}</div>`;
+}
+
 initUser();loadParamSelects();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();adaptSidebar();
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
@@ -1415,6 +1553,15 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
       </button>
     </div>
   </div>
+</div>
+
+<!-- Panel lateral "Ver rutina" -->
+<div class="rv-overlay" id="rvOverlay" onclick="closeRoutineView()"></div>
+<div class="rv-panel" id="rvPanel">
+  <button class="rv-close" onclick="closeRoutineView()" title="Cerrar">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="rv-body" id="rvBody"></div>
 </div>
 
 <!-- Library flyout -->

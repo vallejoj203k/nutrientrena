@@ -13,6 +13,11 @@ class TrainingCreate(BaseModel):
     video_url: Optional[str] = None
     exercise_type: Optional[str] = None  # compound/isolation/cardio/mobility
     location: Optional[str] = None  # gym/home/outdoor/both
+    material: Optional[str] = None
+    difficulty: Optional[int] = None  # 1/2/3
+    rec_series: Optional[str] = None
+    rec_reps: Optional[str] = None
+    rec_rest: Optional[str] = None
 
 
 class TrainingUpdate(BaseModel):
@@ -25,6 +30,11 @@ class TrainingUpdate(BaseModel):
     video_url: Optional[str] = None
     exercise_type: Optional[str] = None
     location: Optional[str] = None
+    material: Optional[str] = None
+    difficulty: Optional[int] = None
+    rec_series: Optional[str] = None
+    rec_reps: Optional[str] = None
+    rec_rest: Optional[str] = None
     state: Optional[int] = None
 
 
@@ -46,6 +56,11 @@ class TrainingOut(BaseModel):
     video_url: Optional[str] = None
     exercise_type: Optional[str] = None
     location: Optional[str] = None
+    material: Optional[str] = None
+    difficulty: Optional[int] = None
+    rec_series: Optional[str] = None
+    rec_reps: Optional[str] = None
+    rec_rest: Optional[str] = None
     state: int
     created_at: Optional[datetime] = None
 
@@ -70,6 +85,11 @@ class TrainingOut(BaseModel):
             video_url=t.video_url,
             exercise_type=t.exercise_type,
             location=t.location,
+            material=t.material,
+            difficulty=t.difficulty,
+            rec_series=t.rec_series,
+            rec_reps=t.rec_reps,
+            rec_rest=t.rec_rest,
             state=t.state,
             created_at=t.created_at,
         )

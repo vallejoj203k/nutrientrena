@@ -25,6 +25,9 @@ def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMI
 def search(
     search: Optional[str] = Query(None),
     muscle_group_id: Optional[int] = Query(None),
+    difficulty: Optional[int] = Query(None),
+    material: Optional[str] = Query(None),
+    state: Optional[int] = Query(None),
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
@@ -35,6 +38,12 @@ def search(
         q = q.filter(Training.name.ilike(f"%{search}%"))
     if muscle_group_id:
         q = q.filter(Training.muscle_group_id == muscle_group_id)
+    if difficulty:
+        q = q.filter(Training.difficulty == difficulty)
+    if material:
+        q = q.filter(Training.material.ilike(f"%{material}%"))
+    if state is not None:
+        q = q.filter(Training.state == state)
     total = q.count()
     items = q.offset((page - 1) * per_page).limit(per_page).all()
     return send_response(

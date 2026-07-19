@@ -17,6 +17,11 @@ class Training(Base):
     video_url = Column(String(500), nullable=True)
     exercise_type = Column(String(20), nullable=True)  # compound/isolation/cardio/mobility
     location = Column(String(20), nullable=True)  # gym/home/outdoor/both
+    material = Column(String(120), nullable=True)  # Barra, Mancuernas, Sin equipo…
+    difficulty = Column(Integer, nullable=True)  # 1 Principiante / 2 Intermedio / 3 Avanzado
+    rec_series = Column(String(40), nullable=True)  # series recomendadas, ej. "3-4"
+    rec_reps = Column(String(40), nullable=True)    # reps recomendadas, ej. "8-12"
+    rec_rest = Column(String(40), nullable=True)    # descanso recomendado, ej. "60-90s"
     state = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

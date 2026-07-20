@@ -537,6 +537,12 @@
     .fsm-bar-lbl{font-size:13px;font-weight:700;color:#374151;display:flex;align-items:center;gap:7px;}
     .fsm-create-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;border:none;background:#111827;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
     .fsm-create-btn:hover{background:#374151;}
+    /* Pestañas Alimentos / Mis alimentos / Recientes (prototipo) */
+    .fsm-tabs{display:flex;align-items:center;gap:10px;padding:14px 28px 0;flex-shrink:0;flex-wrap:wrap;}
+    .fsm-tabgroup{display:inline-flex;gap:2px;border:1px solid #E5E7EB;border-radius:12px;padding:3px;background:#F9FAFB;}
+    .fsm-tab{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;border:1px solid transparent;background:transparent;color:#6B7280;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit;white-space:nowrap;}
+    .fsm-tab:hover{color:#111827;}
+    .fsm-tab.sel{background:#fff;color:#111827;border-color:#E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,.07);}
     .fsm-pills{display:flex;gap:8px;padding:14px 28px 0;flex-wrap:wrap;flex-shrink:0;}
     .fsm-pill{padding:7px 16px;border-radius:20px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;}
     .fsm-pill:hover{border-color:#111827;}
@@ -1103,9 +1109,22 @@
           <input type="text" id="fsmInput" placeholder="Buscar alimento, marca o código…" autocomplete="off" oninput="fsmSearchDebounced()"/>
         </div>
       </div>
-      <div class="fsm-bar">
-        <span class="fsm-bar-lbl"><svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg> Alimentos</span>
-        <button class="fsm-create-btn" onclick="fsmCreateAliment()">+ Crear alimento</button>
+      <div class="fsm-tabs">
+        <div class="fsm-tabgroup">
+          <button class="fsm-tab sel" id="fsmTab-all" onclick="fsmSetTab('all')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
+            Alimentos
+          </button>
+          <button class="fsm-tab" id="fsmTab-mine" onclick="fsmSetTab('mine')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>
+            Mis alimentos
+          </button>
+          <button class="fsm-tab" id="fsmTab-recent" onclick="fsmSetTab('recent')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Recientes
+          </button>
+        </div>
+        <button class="fsm-create-btn" onclick="fsmCreateAliment()" style="margin-left:auto;">+ Crear alimento</button>
       </div>
       <div class="fsm-pills" id="fsmPills"></div>
       <div class="fsm-list" id="fsmList">
@@ -2355,8 +2374,37 @@ function openFoodSearch(mid) {
   document.getElementById('fsmOverlay').classList.add('open');
   if (!_fsmGroupsLoaded) _fsmLoadGroups();
   else fsmRenderPills();
-  fsmFetch('');
+  fsmSetTab('all');
   setTimeout(function(){ inp.focus(); }, 50);
+}
+
+/* ── Pestañas: Alimentos / Mis alimentos / Recientes ── */
+var _fsmTab = 'all';
+
+function fsmSetTab(t) {
+  _fsmTab = t;
+  ['all','mine','recent'].forEach(function(k){
+    var b = document.getElementById('fsmTab-' + k);
+    if (b) b.classList.toggle('sel', k === t);
+  });
+  // Las píldoras de grupo solo aplican al catálogo general
+  var pills = document.getElementById('fsmPills');
+  if (pills) pills.style.display = (t === 'all') ? '' : 'none';
+  fsmFetch(document.getElementById('fsmInput').value || '');
+}
+
+/* Historial de alimentos usados recientemente (por usuario, en este navegador) */
+function _fsmRecentsKey() { return 'fsm_recents_' + (_meUserId || 'anon'); }
+function _fsmGetRecents() {
+  try { return JSON.parse(localStorage.getItem(_fsmRecentsKey())) || []; } catch(e) { return []; }
+}
+function _fsmPushRecent(a) {
+  if (!a || a.id == null) return;
+  try {
+    var list = _fsmGetRecents().filter(function(x){ return String(x.id) !== String(a.id); });
+    list.unshift(a);
+    localStorage.setItem(_fsmRecentsKey(), JSON.stringify(list.slice(0, 20)));
+  } catch(e) {}
 }
 
 function closeFoodSearch() {
@@ -2379,7 +2427,6 @@ function fsmRenderPills() {
   var el = document.getElementById('fsmPills');
   if (!el) return;
   el.innerHTML = '<button class="fsm-pill' + (_fsmGroupId === null ? ' sel' : '') + '" onclick="fsmSetGroup(null)">Todos</button>'
-    + '<button class="fsm-pill' + (_fsmGroupId === 'personal' ? ' sel' : '') + '" style="' + (_fsmGroupId === 'personal' ? '' : 'color:#059669;border-color:#A7F3D0;') + '" onclick="fsmSetGroup(\'personal\')">Personal</button>'
     + _fsmGroups.map(function(g){
         return '<button class="fsm-pill' + (_fsmGroupId === g.id ? ' sel' : '') + '" onclick="fsmSetGroup(' + g.id + ')">' + esc(g.name || '') + '</button>';
       }).join('');
@@ -2401,12 +2448,28 @@ function fsmSearchDebounced() {
 async function fsmFetch(q) {
   var list = document.getElementById('fsmList');
   if (!list) return;
+
+  // Recientes: se sirven del historial local, sin llamar a la API
+  if (_fsmTab === 'recent') {
+    var q2 = (q || '').toLowerCase();
+    var recents = _fsmGetRecents().filter(function(a){
+      return !q2 || String(a.name || '').toLowerCase().indexOf(q2) >= 0
+        || String(a.brand || '').toLowerCase().indexOf(q2) >= 0;
+    });
+    if (!recents.length) {
+      list.innerHTML = '<div class="fsm-msg">' + (q ? 'Sin resultados entre tus recientes.' : 'Aún no hay recientes. Los alimentos que añadas a una dieta aparecerán aquí.') + '</div>';
+      return;
+    }
+    fsmRenderList(recents);
+    return;
+  }
+
   list.innerHTML = '<div class="fsm-msg">Buscando…</div>';
   try {
     var params = new URLSearchParams({ search: q || '', per_page: 30, page: 1 });
     var url;
-    if (_fsmGroupId === 'personal') {
-      // Alimentos personales del usuario (solo los ve él y el superadmin)
+    if (_fsmTab === 'mine') {
+      // Mis alimentos: los personales del usuario (solo los ve él y el superadmin)
       params.set('client_id', _meUserId);
       url = API + '/client-aliments/search?' + params;
     } else {
@@ -2416,7 +2479,7 @@ async function fsmFetch(q) {
     var r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
     var d = await r.json();
     var items = (d.data && d.data.data) || [];
-    if (_fsmGroupId === 'personal') items.forEach(function(a){ a._personal = true; });
+    if (_fsmTab === 'mine') items.forEach(function(a){ a._personal = true; });
     fsmRenderList(items);
   } catch(e) {
     list.innerHTML = '<div class="fsm-msg">Error al buscar alimentos.</div>';
@@ -2555,6 +2618,7 @@ function fsmConfirmAdd() {
     quantity: String(_fsmQty),
     unit: _unitFromAliment(a),
   };
+  _fsmPushRecent(a);
   if (_fsmEditRid != null) {
     var found = _findMealRow(mid, _fsmEditRid);
     if (found) {

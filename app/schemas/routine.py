@@ -124,6 +124,8 @@ class RoutineOut(BaseModel):
     gender_id: Optional[int] = None
     training: Optional[str] = None
     training_level_id: Optional[int] = None
+    objective: Optional[str] = None
+    materials: Optional[str] = None
     time: Optional[int] = None
     days: Optional[int] = None
     organization_id: Optional[str] = None
@@ -167,6 +169,8 @@ class RoutineCreateV2(BaseModel):
     gender_id: Optional[int] = None
     training: Optional[str] = None
     training_level_id: Optional[int] = None
+    objective: Optional[str] = None
+    materials: Optional[str] = None
     time: Optional[int] = None
     days: Optional[int] = None
     notes: Optional[str] = None
@@ -178,6 +182,8 @@ class RoutineUpdateV2(BaseModel):
     gender_id: Optional[int] = None
     training: Optional[str] = None
     training_level_id: Optional[int] = None
+    objective: Optional[str] = None
+    materials: Optional[str] = None
     time: Optional[int] = None
     days: Optional[int] = None
     notes: Optional[str] = None

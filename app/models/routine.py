@@ -14,6 +14,8 @@ class Routine(Base):
     gender_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     training = Column(String(255), nullable=True)
     training_level_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
+    objective = Column(String(100), nullable=True)   # Hipertrofia, Fuerza, Pérdida de grasa…
+    materials = Column(String(500), nullable=True)   # lista separada por comas
     time = Column(Integer, nullable=True)
     days = Column(Integer, nullable=True)
     notes = Column(Text, nullable=True)

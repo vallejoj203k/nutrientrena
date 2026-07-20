@@ -543,10 +543,18 @@
     .fsm-tab{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;border:1px solid transparent;background:transparent;color:#6B7280;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit;white-space:nowrap;}
     .fsm-tab:hover{color:#111827;}
     .fsm-tab.sel{background:#fff;color:#111827;border-color:#E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,.07);}
-    .fsm-pills{display:flex;gap:8px;padding:14px 28px 0;flex-wrap:wrap;flex-shrink:0;}
-    .fsm-pill{padding:7px 16px;border-radius:20px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;}
-    .fsm-pill:hover{border-color:#111827;}
-    .fsm-pill.sel{background:#111827;color:#fff;border-color:#111827;}
+    /* Categoría como botón desplegable (antes fila de píldoras) */
+    .fsm-cat{position:relative;padding:14px 28px 0;flex-shrink:0;}
+    .fsm-catbtn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit;}
+    .fsm-catbtn:hover{border-color:#111827;}
+    .fsm-catbtn .fsm-cat-val{color:#111827;font-weight:700;}
+    .fsm-catbtn svg.chev{transition:transform .2s;color:#9CA3AF;margin-left:2px;}
+    .fsm-catbtn.open svg.chev{transform:rotate(180deg);}
+    .fsm-catmenu{position:absolute;top:calc(100% + 4px);left:28px;z-index:30;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.14);padding:6px;min-width:210px;max-height:300px;overflow-y:auto;display:none;}
+    .fsm-catmenu.open{display:block;}
+    .fsm-catopt{display:block;width:100%;padding:9px 12px;border:none;background:none;border-radius:8px;font-size:13px;color:#374151;cursor:pointer;text-align:left;font-family:inherit;transition:.12s;}
+    .fsm-catopt:hover{background:#F3F4F6;}
+    .fsm-catopt.sel{background:#EEF2FF;color:#4F46E5;font-weight:700;}
     .fsm-list{flex:1;overflow-y:auto;padding:16px 28px 24px;}
     .fsm-item{display:flex;align-items:center;gap:14px;padding:13px 6px;border-bottom:1px solid #F3F4F6;cursor:pointer;transition:.12s;border-radius:8px;}
     .fsm-item:hover{background:#F9FAFB;}
@@ -1126,7 +1134,7 @@
         </div>
         <button class="fsm-create-btn" onclick="fsmCreateAliment()" style="margin-left:auto;">+ Crear alimento</button>
       </div>
-      <div class="fsm-pills" id="fsmPills"></div>
+      <div class="fsm-cat" id="fsmPills"></div>
       <div class="fsm-list" id="fsmList">
         <div class="fsm-msg">Cargando alimentos…</div>
       </div>
@@ -2426,11 +2434,36 @@ async function _fsmLoadGroups() {
 function fsmRenderPills() {
   var el = document.getElementById('fsmPills');
   if (!el) return;
-  el.innerHTML = '<button class="fsm-pill' + (_fsmGroupId === null ? ' sel' : '') + '" onclick="fsmSetGroup(null)">Todos</button>'
+  var sel = _fsmGroups.find(function(g){ return g.id === _fsmGroupId; });
+  var selName = _fsmGroupId === null ? 'Todas' : ((sel && sel.name) || 'Todas');
+  var opts = '<button class="fsm-catopt' + (_fsmGroupId === null ? ' sel' : '') + '" onclick="fsmSetGroup(null)">Todas las categorías</button>'
     + _fsmGroups.map(function(g){
-        return '<button class="fsm-pill' + (_fsmGroupId === g.id ? ' sel' : '') + '" onclick="fsmSetGroup(' + g.id + ')">' + esc(g.name || '') + '</button>';
+        return '<button class="fsm-catopt' + (_fsmGroupId === g.id ? ' sel' : '') + '" onclick="fsmSetGroup(' + g.id + ')">' + esc(g.name || '') + '</button>';
       }).join('');
+  el.innerHTML =
+    '<button class="fsm-catbtn" id="fsmCatBtn" onclick="fsmToggleCatMenu(event)">'
+    +   '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>'
+    +   'Categoría: <span class="fsm-cat-val">' + esc(selName) + '</span>'
+    +   '<svg class="chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>'
+    + '</button>'
+    + '<div class="fsm-catmenu" id="fsmCatMenu">' + opts + '</div>';
 }
+
+function fsmToggleCatMenu(e) {
+  if (e) e.stopPropagation();
+  var menu = document.getElementById('fsmCatMenu');
+  var btn = document.getElementById('fsmCatBtn');
+  if (!menu) return;
+  var open = menu.classList.toggle('open');
+  if (btn) btn.classList.toggle('open', open);
+}
+
+document.addEventListener('click', function(e){
+  if (!e.target.closest('#fsmPills')) {
+    var menu = document.getElementById('fsmCatMenu'); if (menu) menu.classList.remove('open');
+    var btn = document.getElementById('fsmCatBtn'); if (btn) btn.classList.remove('open');
+  }
+});
 
 function fsmSetGroup(id) {
   _fsmGroupId = id;

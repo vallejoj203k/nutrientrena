@@ -219,6 +219,8 @@ def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user
         gender_id=source.gender_id,
         training=source.training,
         training_level_id=source.training_level_id,
+        objective=source.objective,
+        materials=source.materials,
         time=source.time,
         days=source.days,
         notes=source.notes,
@@ -361,6 +363,8 @@ def create(data: RoutineCreateV2, db: Session = Depends(get_db), current_user=De
         gender_id=data.gender_id,
         training=data.training,
         training_level_id=data.training_level_id,
+        objective=data.objective,
+        materials=data.materials,
         time=data.time,
         days=data.days,
         notes=data.notes,
@@ -379,7 +383,7 @@ def updated(id: int, data: RoutineUpdateV2, db: Session = Depends(get_db), _=Dep
     if not routine:
         return send_error("Rutina no encontrada")
 
-    for f in ("name", "gender_id", "training", "training_level_id", "time", "days", "notes"):
+    for f in ("name", "gender_id", "training", "training_level_id", "objective", "materials", "time", "days", "notes"):
         v = getattr(data, f, None)
         if v is not None:
             setattr(routine, f, v)

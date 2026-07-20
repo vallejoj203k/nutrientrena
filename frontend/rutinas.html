@@ -240,13 +240,49 @@
     .rp-bar{display:flex;align-items:center;gap:14px;padding:0 28px;height:64px;border-bottom:1px solid #E5E7EB;flex-shrink:0;background:#fff;}
     .rp-close{background:none;border:none;cursor:pointer;font-size:24px;color:#6B7280;padding:4px 6px;border-radius:6px;line-height:1;transition:.15s;flex-shrink:0;}
     .rp-close:hover{background:#F3F4F6;color:#111;}
-    .rp-title{font-size:17px;font-weight:800;color:#111827;flex:1;}
-    .rp-tabs{display:flex;gap:0;border:1.5px solid #E5E7EB;border-radius:8px;overflow:hidden;margin-left:auto;}
-    .rp-tab{padding:7px 18px;font-size:13px;font-weight:600;background:#F9FAFB;color:#6B7280;border:none;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
-    .rp-tab.active{background:var(--indigo);color:#fff;}
+    .rp-eyebrow{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;}
+    .rp-title{font-size:17px;font-weight:800;color:#111827;}
+    .rp-head-info{flex:1;min-width:0;}
+    .rp-tabs{display:flex;gap:4px;border:1.5px solid #E5E7EB;border-radius:12px;padding:3px;background:#fff;margin-left:auto;}
+    .rp-tab{padding:7px 16px;font-size:13px;font-weight:700;background:transparent;color:#6B7280;border:none;border-radius:9px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+    .rp-tab.active{background:#F59E0B;color:#fff;}
     .rp-tab:not(.active):hover{background:#F3F4F6;color:#374151;}
-    .rp-btn-create{padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:#22C55E;color:#fff;transition:.15s;white-space:nowrap;flex-shrink:0;}
-    .rp-btn-create:hover{background:#16A34A;}
+    .rp-btn-create{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--indigo);color:#fff;transition:.15s;white-space:nowrap;flex-shrink:0;}
+    .rp-btn-create:hover{background:var(--indigo-dark);}
+    /* Select de objetivo con icono */
+    .rp-selico{position:relative;}
+    .rp-selico>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#6B7280;pointer-events:none;z-index:1;}
+    .rp-selico select{padding-left:40px !important;}
+    /* Multi-selección de materiales (prototipo) */
+    .mm-wrap{position:relative;}
+    .mm-box{display:flex;align-items:center;gap:8px;min-height:46px;padding:7px 14px;background:#F3F4F6;border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:.15s;flex-wrap:wrap;}
+    .mm-box:hover{border-color:#D1D5DB;}
+    .mm-wrap.open .mm-box{background:#fff;border-color:var(--indigo);}
+    .mm-box>svg{color:#6B7280;flex-shrink:0;}
+    .mm-box .chev{margin-left:auto;color:#9CA3AF;transition:transform .2s;}
+    .mm-wrap.open .mm-box .chev{transform:rotate(180deg);}
+    .mm-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0;align-items:center;}
+    .mm-ph{color:#9CA3AF;font-size:14px;}
+    .mm-chip{display:inline-flex;align-items:center;gap:5px;background:#EEF2FF;color:var(--indigo);border:1px solid #E0E7FF;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:20px;}
+    .mm-chip button{background:none;border:none;cursor:pointer;color:var(--indigo);font-size:14px;line-height:1;padding:0 1px;opacity:.7;display:flex;}
+    .mm-chip button:hover{opacity:1;}
+    .mm-drop{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.14);z-index:60;display:none;overflow:hidden;}
+    .mm-wrap.open .mm-drop{display:block;}
+    .mm-search{display:flex;align-items:center;gap:9px;padding:12px 16px;border-bottom:1px solid #F3F4F6;}
+    .mm-search svg{color:#9CA3AF;flex-shrink:0;}
+    .mm-search input{flex:1;border:none;outline:none;font-size:14px;color:#111827;background:transparent;font-family:inherit;}
+    .mm-search input::placeholder{color:#9CA3AF;}
+    .mm-opts{max-height:280px;overflow-y:auto;padding:4px;}
+    .mm-opt{display:flex;align-items:center;gap:11px;width:100%;padding:10px 14px;border:none;background:none;border-radius:8px;font-size:14px;color:#111827;cursor:pointer;text-align:left;font-family:inherit;transition:.12s;}
+    .mm-opt:hover{background:#F5F7FB;}
+    .mm-check{width:17px;height:17px;border-radius:5px;border:1.5px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.12s;}
+    .mm-opt.sel .mm-check{background:var(--indigo);border-color:var(--indigo);}
+    .mm-add{color:var(--indigo);font-weight:700;}
+    .mm-empty{padding:14px 16px;font-size:13px;color:#9CA3AF;}
+    /* Tarjeta de estado + botón siguiente ámbar */
+    .rp-state-card{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#F9FAFB;border:1px solid #F0F1F3;border-radius:12px;padding:16px 18px;margin-top:8px;}
+    .rp-state-title{font-size:14px;font-weight:700;color:#111827;}
+    .rp-state-sub{font-size:12.5px;color:#9CA3AF;margin-top:2px;}
     .rp-body{flex:1;overflow-y:auto;padding:48px 24px 60px;display:flex;flex-direction:column;align-items:center;}
     .rp-content{width:100%;max-width:660px;}
     .rp-content .form-group label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;}
@@ -261,10 +297,10 @@
     .toggle-sw input{opacity:0;width:0;height:0;}
     .toggle-slider{position:absolute;inset:0;background:#D1D5DB;border-radius:34px;cursor:pointer;transition:.25s;}
     .toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-    .toggle-sw input:checked+.toggle-slider{background:#22C55E;}
+    .toggle-sw input:checked+.toggle-slider{background:var(--indigo);}
     .toggle-sw input:checked+.toggle-slider:before{transform:translateX(22px);}
-    .rp-next-btn{width:100%;padding:15px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:var(--indigo);color:#fff;margin-top:28px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.2px;}
-    .rp-next-btn:hover{background:var(--indigo-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,70,229,.3);}
+    .rp-next-btn{width:100%;padding:15px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:#F59E0B;color:#fff;margin-top:28px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.2px;}
+    .rp-next-btn:hover{background:#D97706;transform:translateY(-1px);box-shadow:0 4px 16px rgba(245,158,11,.3);}
     .rp-next-btn:active{transform:translateY(0);}
 
     /* ── Exercise drag & duplicate ── */
@@ -937,9 +973,89 @@ function toggleLibrary(el){
 
 <script>
 let editingRoutineId=null;let currentWizardStep=1;
-const routineData={name:'',days:0,time:0,gender_id:null,training_level_id:null,training:'',notes:'',days_list:[]};
+const routineData={name:'',days:0,time:0,gender_id:null,training_level_id:null,training:'',objective:'',materials:'',notes:'',days_list:[]};
 let selectedDayIdx=0;let pickerTargetBlockIdx=null;let pickerReplaceEi=null;
-function resetRoutineData(){routineData.name='';routineData.days=0;routineData.time=0;routineData.gender_id=null;routineData.training_level_id=null;routineData.training='';routineData.notes='';routineData.days_list=[];selectedDayIdx=0;}
+function resetRoutineData(){routineData.name='';routineData.days=0;routineData.time=0;routineData.gender_id=null;routineData.training_level_id=null;routineData.training='';routineData.objective='';routineData.materials='';routineData.notes='';routineData.days_list=[];selectedDayIdx=0;}
+
+// ── Multi-selección de materiales (prototipo) ─────────────────────────────────
+const RT_MATERIALS=['Sin equipamiento','Sin equipamiento (peso corporal)','Para casa / básico','Mancuernas','Barra y discos','Bandas elásticas / Gomas','TRX / Suspensión','Kettlebell','Banco','Balón medicinal','Comba','Cardio','Bicicleta estática','Cinta de correr','Remo ergométrico','Elíptica','Gimnasio','Máquinas de gimnasio','Poleas / Cable','Multipower / Smith','Jaula de sentadillas','Barra de dominadas'];
+let _rtMaterials=[];
+
+function mmToggle(e){
+  if(e)e.stopPropagation();
+  const wrap=document.getElementById('mmWrap');
+  const open=wrap.classList.toggle('open');
+  if(open){
+    const inp=document.getElementById('mmSearch');
+    inp.value='';mmRenderOpts();
+    setTimeout(()=>inp.focus(),40);
+  }
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('mmWrap');
+  if(wrap&&!wrap.contains(e.target))wrap.classList.remove('open');
+});
+
+function mmRenderChips(){
+  const el=document.getElementById('mmChips');
+  if(!el)return;
+  el.innerHTML=_rtMaterials.length
+    ? _rtMaterials.map(m=>`<span class="mm-chip">${esc(m)}<button onclick="event.stopPropagation();mmToggleItem('${esc(m).replace(/'/g,"\\'")}')" title="Quitar">×</button></span>`).join('')
+    : '<span class="mm-ph">Seleccionar materiales…</span>';
+}
+
+function mmRenderOpts(){
+  const el=document.getElementById('mmOpts');
+  if(!el)return;
+  const q=(document.getElementById('mmSearch')?.value||'').trim();
+  const ql=q.toLowerCase();
+  // Lista estándar + materiales personalizados ya seleccionados
+  const all=RT_MATERIALS.concat(_rtMaterials.filter(m=>!RT_MATERIALS.includes(m)));
+  const filtered=all.filter(m=>!ql||m.toLowerCase().includes(ql));
+  const CHECK='<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  let html=filtered.map(m=>{
+    const sel=_rtMaterials.includes(m);
+    return `<button class="mm-opt${sel?' sel':''}" onclick="event.stopPropagation();mmToggleItem('${esc(m).replace(/'/g,"\\'")}')"><span class="mm-check">${sel?CHECK:''}</span>${esc(m)}</button>`;
+  }).join('');
+  // Añadir material personalizado si lo escrito no coincide exactamente con ninguno
+  if(q&&!all.some(m=>m.toLowerCase()===ql)){
+    html+=`<button class="mm-opt mm-add" onclick="event.stopPropagation();mmAddCustom()"><span class="mm-check"></span>+ Añadir "${esc(q)}"</button>`;
+  }
+  el.innerHTML=html||'<div class="mm-empty">Sin resultados.</div>';
+}
+
+function mmToggleItem(name){
+  const i=_rtMaterials.indexOf(name);
+  if(i>=0)_rtMaterials.splice(i,1);else _rtMaterials.push(name);
+  mmRenderChips();mmRenderOpts();
+}
+
+function mmAddCustom(){
+  const inp=document.getElementById('mmSearch');
+  const v=(inp.value||'').trim();
+  if(!v)return;
+  if(!_rtMaterials.includes(v))_rtMaterials.push(v);
+  inp.value='';
+  mmRenderChips();mmRenderOpts();
+}
+
+function mmKeydown(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const q=(e.target.value||'').trim().toLowerCase();
+    if(!q)return;
+    // Enter selecciona la coincidencia exacta o añade el material nuevo
+    const exact=RT_MATERIALS.concat(_rtMaterials).find(m=>m.toLowerCase()===q);
+    if(exact){if(!_rtMaterials.includes(exact))_rtMaterials.push(exact);e.target.value='';mmRenderChips();mmRenderOpts();}
+    else mmAddCustom();
+  }
+  if(e.key==='Escape')document.getElementById('mmWrap').classList.remove('open');
+}
+
+function setRtMaterials(list){
+  _rtMaterials=(list||[]).filter(Boolean);
+  mmRenderChips();mmRenderOpts();
+}
 
 function openRutinaPanel(){
   document.getElementById('rpOverlay').classList.add('open');
@@ -953,6 +1069,7 @@ function closeRutinaPanel(){
 async function openForm(id=null){
   editingRoutineId=id;resetRoutineData();
   document.getElementById('rpTitle').textContent=id?'Editar rutina':'Nueva rutina';
+  const _lbl=document.getElementById('rpCreateLbl');if(_lbl)_lbl.textContent=id?'Guardar rutina':'Crear rutina';
   document.getElementById('formViewTitle').textContent=id?'Editar rutina':'Nueva rutina';
   clearRoutineForm();
   if(id){
@@ -965,11 +1082,14 @@ async function openForm(id=null){
       document.getElementById('f_gender').value=rt.gender_id||'';
       document.getElementById('f_level').value=rt.training_level_id||'';
       document.getElementById('f_place').value=rt.training||'';
+      document.getElementById('f_objective').value=rt.objective||'';
+      setRtMaterials(String(rt.materials||'').split(',').map(s=>s.trim()).filter(Boolean));
       document.getElementById('f_notes').value=rt.notes||'';
       const activeEl=document.getElementById('f_active');if(activeEl)activeEl.checked=rt.is_active!==false;
       routineData.name=rt.name||'';routineData.days=rt.days||0;routineData.time=rt.time||0;
       routineData.gender_id=rt.gender_id||null;routineData.training_level_id=rt.training_level_id||null;
-      routineData.training=rt.training||'';routineData.notes=rt.notes||'';
+      routineData.training=rt.training||'';routineData.objective=rt.objective||'';
+      routineData.materials=rt.materials||'';routineData.notes=rt.notes||'';
       routineData.days_list=(rt.days_list||[]).map(day=>({day_name:day.day_name||'',description:day.description||'',blocks:(day.blocks||[]).map(blk=>({block_type:blk.block_type||'normal',content:blk.content||'',order_index:blk.order_index||0,exercises:(blk.exercises||[]).map(ex=>({training_id:ex.training_id,training_name:ex.training_name||'',muscle_group_name:ex.muscle_group_name||'',series:ex.series||null,repetitions:ex.repetitions||'',break_time:ex.break_time||null,intensity_type:ex.intensity_type||'',intensity_value:ex.intensity_value||null,notes:ex.notes||'',order_index:ex.order_index||0}))}))})  );
     }catch{showToast('Error al cargar la rutina','error');return;}
   }
@@ -982,9 +1102,10 @@ function closeForm(){
 }
 function clearRoutineForm(){
   ['f_name','f_time','f_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const sel=['f_days','f_gender','f_level','f_place'];sel.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const sel=['f_days','f_gender','f_level','f_place','f_objective'];sel.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  setRtMaterials([]);
+  document.getElementById('mmWrap')?.classList.remove('open');
   const activeEl=document.getElementById('f_active');if(activeEl)activeEl.checked=true;
-  const sub=document.getElementById('rpToggleSub');if(sub)sub.textContent='Activa';
   document.getElementById('daysList').innerHTML='';
   document.getElementById('blocksList').innerHTML='';
   document.getElementById('selectedDayName').textContent='Selecciona un día';
@@ -1005,6 +1126,8 @@ function wizardNext(){
   routineData.gender_id=parseInt(document.getElementById('f_gender').value)||null;
   routineData.training_level_id=parseInt(document.getElementById('f_level').value)||null;
   routineData.training=document.getElementById('f_place').value||'';
+  routineData.objective=document.getElementById('f_objective').value||'';
+  routineData.materials=_rtMaterials.join(', ');
   routineData.notes=document.getElementById('f_notes').value.trim();
   closeRutinaPanel();
   document.getElementById('listView').style.display='none';
@@ -1227,6 +1350,8 @@ async function saveRoutine(){
     gender_id:routineData.gender_id||null,
     training_level_id:routineData.training_level_id||null,
     training:routineData.training||null,
+    objective:routineData.objective||null,
+    materials:routineData.materials||null,
     notes:routineData.notes||null,
     days_list:routineData.days_list.map((day,i)=>({day_name:day.day_name,description:day.description||null,blocks:day.blocks.map((blk,bi)=>({block_type:blk.block_type,content:blk.content||null,order_index:bi,exercises:blk.exercises.map((ex,ei)=>({training_id:ex.training_id||null,series:parseInt(ex.series)||null,repetitions:ex.repetitions||null,break_time:parseInt(ex.break_time)||null,intensity_type:ex.intensity_type||null,intensity_value:parseFloat(ex.intensity_value)||null,notes:ex.notes||null,order_index:ei}))}))})  )};
   const btn=document.getElementById('saveRoutineBtn');btn.disabled=true;btn.textContent='Guardando…';
@@ -1435,7 +1560,7 @@ function renderRoutineView(rt,id){
     </div>`;
   }).join('');
 
-  const matTokens=String(rt.training||'').split(/[·,]/).map(s=>s.trim()).filter(Boolean);
+  const matTokens=String(rt.materials||rt.training||'').split(/[·,]/).map(s=>s.trim()).filter(Boolean);
   const matHtml=matTokens.length
     ?`<div class="rv-sec-label">Material</div><div class="rv-mat">${matTokens.map(t=>`<span class="rv-mat-chip">${esc(t)}</span>`).join('')}</div>`
     :'';
@@ -1472,25 +1597,66 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 <div class="rp-overlay" id="rpOverlay" onclick="closeRutinaPanel()"></div>
 <div class="rp-panel" id="rutinaPanel">
   <div class="rp-bar">
-    <button class="rp-close" onclick="closeRutinaPanel()" title="Cerrar">×</button>
-    <span class="rp-title" id="rpTitle">Nueva rutina</span>
+    <button class="rp-close" onclick="closeRutinaPanel()" title="Cerrar">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="rp-head-info">
+      <div class="rp-eyebrow">Librería · Entrenamiento</div>
+      <div class="rp-title" id="rpTitle">Nueva rutina</div>
+    </div>
     <div class="rp-tabs">
       <button class="rp-tab active">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         Información
       </button>
       <button class="rp-tab" onclick="wizardNext()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         Constructor
       </button>
     </div>
-    <button class="rp-btn-create" onclick="wizardNext()">Crear rutina</button>
+    <button class="rp-btn-create" onclick="wizardNext()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="rpCreateLbl">Crear rutina</span>
+    </button>
   </div>
   <div class="rp-body">
     <div class="rp-content">
       <div class="form-group">
-        <label>Nombre de la rutina *</label>
+        <label>Nombre de la rutina</label>
         <input id="f_name" placeholder="Ej: Empuje A · Hipertrofia"/>
+      </div>
+      <div class="form-group">
+        <label>Objetivo principal</label>
+        <div class="rp-selico">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <select id="f_objective">
+            <option value="">Seleccionar</option>
+            <option value="Hipertrofia">Hipertrofia</option>
+            <option value="Fuerza">Fuerza</option>
+            <option value="Pérdida de grasa">Pérdida de grasa</option>
+            <option value="Recomposición">Recomposición</option>
+            <option value="Resistencia">Resistencia</option>
+            <option value="Movilidad">Movilidad</option>
+            <option value="Salud general">Salud general</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Materiales <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(opcional)</span></label>
+        <div class="mm-wrap" id="mmWrap">
+          <div class="mm-box" onclick="mmToggle(event)">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>
+            <div class="mm-chips" id="mmChips"><span class="mm-ph">Seleccionar materiales…</span></div>
+            <svg class="chev" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="mm-drop">
+            <div class="mm-search">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="mmSearch" placeholder="Buscar o añadir material…" autocomplete="off" oninput="mmRenderOpts()" onkeydown="mmKeydown(event)" onclick="event.stopPropagation()"/>
+            </div>
+            <div class="mm-opts" id="mmOpts"></div>
+          </div>
+        </div>
       </div>
       <div class="rp-grid">
         <div class="form-group">
@@ -1535,33 +1701,24 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
       </div>
       <div class="form-group">
         <label>Notas del entrenador <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(opcional)</span></label>
-        <textarea id="f_notes" rows="4" placeholder="Indicaciones generales, progresión, advertencias, contexto de la rutina…"></textarea>
+        <textarea id="f_notes" rows="4" placeholder="Indicaciones generales, progresión, advertencias…"></textarea>
       </div>
-      <div class="rp-toggle-row">
-        <span class="rp-toggle-label">Estado de la rutina</span>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span class="rp-toggle-status" id="rpToggleSub">Activa</span>
-          <label class="toggle-sw">
-            <input type="checkbox" id="f_active" checked onchange="var s=document.getElementById('rpToggleSub');s.textContent=this.checked?'Activa':'Inactiva';s.className='rp-toggle-status'+(this.checked?'':' off');">
-            <span class="toggle-slider"></span>
-          </label>
+      <div class="rp-state-card">
+        <div>
+          <div class="rp-state-title">Estado de la rutina</div>
+          <div class="rp-state-sub">Las rutinas activas se pueden asignar a clientes.</div>
         </div>
+        <label class="toggle-sw">
+          <input type="checkbox" id="f_active" checked>
+          <span class="toggle-slider"></span>
+        </label>
       </div>
       <button class="rp-next-btn" onclick="wizardNext()">
-        Siguiente → Construir rutina
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        Siguiente: Construir rutina
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       </button>
     </div>
   </div>
-</div>
-
-<!-- Panel lateral "Ver rutina" -->
-<div class="rv-overlay" id="rvOverlay" onclick="closeRoutineView()"></div>
-<div class="rv-panel" id="rvPanel">
-  <button class="rv-close" onclick="closeRoutineView()" title="Cerrar">
-    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <div class="rv-body" id="rvBody"></div>
 </div>
 
 <!-- Library flyout -->

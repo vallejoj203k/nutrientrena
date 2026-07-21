@@ -378,6 +378,131 @@
     .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;}
     .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
     .sl-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
+
+/* ── Food search modal ── */
+    .fsm-overlay{position:fixed;inset:0;background:rgba(17,17,17,.45);z-index:1200;display:none;align-items:flex-start;justify-content:center;padding:48px 16px;}
+    .fsm-overlay.open{display:flex;}
+    .fsm-panel{background:#fff;border-radius:20px;width:100%;max-width:1100px;max-height:calc(100vh - 96px);display:flex;flex-direction:row;box-shadow:0 24px 64px rgba(0,0,0,.25);overflow:hidden;}
+    .fsm-left{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+    .fsm-detail{width:360px;flex-shrink:0;border-left:1px solid #EEF0F3;background:#FAFBFC;display:flex;flex-direction:column;overflow-y:auto;}
+    .fsm-detail-body{flex:1;padding:26px 26px 16px;}
+    .fsm-detail-eyebrow{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+    .fsm-detail-name{font-size:22px;font-weight:800;color:#111827;margin-bottom:8px;line-height:1.2;}
+    .fsm-qty-row{display:flex;align-items:stretch;gap:10px;margin-top:4px;}
+    .fsm-qty-btn{width:48px;border:1px solid #E5E7EB;border-radius:12px;background:#fff;font-size:20px;font-weight:700;color:#374151;cursor:pointer;transition:.15s;flex-shrink:0;}
+    .fsm-qty-btn:hover{border-color:#7C3AED;color:#7C3AED;}
+    .fsm-qty-box{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid #E5E7EB;border-radius:12px;background:#fff;padding:12px 8px;}
+    .fsm-qty-box input{width:80px;border:none;outline:none;font-size:22px;font-weight:800;color:#111827;text-align:center;background:transparent;font-family:inherit;-moz-appearance:textfield;}
+    .fsm-qty-box input::-webkit-outer-spin-button,.fsm-qty-box input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+    .fsm-qty-unit{font-size:13px;color:#9CA3AF;font-weight:600;}
+    .fsm-qty-presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .fsm-qty-preset{padding:7px 14px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;}
+    .fsm-qty-preset:hover{border-color:#7C3AED;color:#7C3AED;}
+    .fsm-qty-preset.sel{background:#7C3AED;color:#fff;border-color:#7C3AED;}
+    .fsm-portion{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:16px 18px;margin-top:20px;}
+    .fsm-portion-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+    .fsm-portion-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F3F4F6;font-size:13.5px;color:#374151;}
+    .fsm-portion-row:last-child{border-bottom:none;}
+    .fsm-portion-lbl{display:inline-flex;align-items:center;gap:8px;}
+    .fsm-portion-val{color:#9CA3AF;font-size:12px;}
+    .fsm-portion-val b{font-size:16px;font-weight:800;color:#111827;margin-right:2px;}
+    .fsm-add-btn{margin:0 26px 22px;padding:16px;border:none;border-radius:14px;background:#7C3AED;color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;}
+    .fsm-add-btn:hover{background:#6D28D9;}
+    .fsm-item.sel{background:#F5F3FF;}
+    @media(max-width:860px){
+      .fsm-panel{flex-direction:column;overflow-y:auto;}
+      .fsm-left{overflow:visible;}
+      .fsm-list{max-height:280px;}
+      .fsm-detail{width:100%;border-left:none;border-top:1px solid #EEF0F3;}
+    }
+    .fsm-head{padding:24px 28px 0;position:relative;flex-shrink:0;}
+    .fsm-eyebrow{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+    .fsm-title{font-size:24px;font-weight:800;color:#111827;}
+    .fsm-close{position:absolute;top:22px;right:24px;background:none;border:none;cursor:pointer;color:#6B7280;padding:6px;border-radius:8px;display:flex;transition:.15s;}
+    .fsm-close:hover{background:#F3F4F6;color:#111;}
+    .fsm-search-wrap{padding:18px 28px 0;flex-shrink:0;}
+    .fsm-search{display:flex;align-items:center;gap:10px;background:#F3F4F6;border-radius:12px;padding:12px 16px;}
+    .fsm-search svg{flex-shrink:0;color:#9CA3AF;}
+    .fsm-search input{flex:1;border:none;outline:none;background:transparent;font-size:14px;color:#111;font-family:inherit;}
+    .fsm-search input::placeholder{color:#9CA3AF;}
+    .fsm-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 28px 0;flex-shrink:0;}
+    .fsm-bar-lbl{font-size:13px;font-weight:700;color:#374151;display:flex;align-items:center;gap:7px;}
+    .fsm-create-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;border:none;background:#111827;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
+    .fsm-create-btn:hover{background:#374151;}
+    /* Pestañas Alimentos / Mis alimentos / Recientes (prototipo) */
+    .fsm-tabs{display:flex;align-items:center;gap:10px;padding:14px 28px 0;flex-shrink:0;flex-wrap:wrap;}
+    .fsm-tabgroup{display:inline-flex;gap:2px;border:1px solid #E5E7EB;border-radius:12px;padding:3px;background:#F9FAFB;}
+    .fsm-tab{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;border:1px solid transparent;background:transparent;color:#6B7280;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit;white-space:nowrap;}
+    .fsm-tab:hover{color:#111827;}
+    .fsm-tab.sel{background:#fff;color:#111827;border-color:#E5E7EB;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+    /* Categoría como botón desplegable (antes fila de píldoras) */
+    .fsm-cat{position:relative;padding:14px 28px 0;flex-shrink:0;}
+    .fsm-catbtn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit;}
+    .fsm-catbtn:hover{border-color:#111827;}
+    .fsm-catbtn .fsm-cat-val{color:#111827;font-weight:700;}
+    .fsm-catbtn svg.chev{transition:transform .2s;color:#9CA3AF;margin-left:2px;}
+    .fsm-catbtn.open svg.chev{transform:rotate(180deg);}
+    .fsm-catmenu{position:absolute;top:calc(100% + 4px);left:28px;z-index:30;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.14);padding:6px;min-width:210px;max-height:300px;overflow-y:auto;display:none;}
+    .fsm-catmenu.open{display:block;}
+    .fsm-catopt{display:block;width:100%;padding:9px 12px;border:none;background:none;border-radius:8px;font-size:13px;color:#374151;cursor:pointer;text-align:left;font-family:inherit;transition:.12s;}
+    .fsm-catopt:hover{background:#F3F4F6;}
+    .fsm-catopt.sel{background:#EEF2FF;color:#4F46E5;font-weight:700;}
+    .fsm-list{flex:1;overflow-y:auto;padding:16px 28px 24px;}
+    .fsm-item{display:flex;align-items:center;gap:14px;padding:13px 6px;border-bottom:1px solid #F3F4F6;cursor:pointer;transition:.12s;border-radius:8px;}
+    .fsm-item:hover{background:#F9FAFB;}
+    .fsm-item:last-child{border-bottom:none;}
+    .fsm-item-ico{width:40px;height:40px;border-radius:11px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .fsm-item-info{flex:1;min-width:0;}
+    .fsm-item-name{font-size:14.5px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .fsm-item-desc{font-size:12.5px;color:#9CA3AF;margin-top:1px;}
+    .fsm-item-chip{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:#FEF3C7;color:#B45309;flex-shrink:0;white-space:nowrap;}
+    .fsm-msg{padding:32px;text-align:center;color:#9CA3AF;font-size:13px;}
+
+
+    /* ── Create Aliment Modal ── */
+    .ca-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .ca-overlay.open{opacity:1;pointer-events:all;}
+    .ca-modal{background:#fff;border-radius:16px;width:680px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;}
+    .ca-overlay.open .ca-modal{transform:translateY(0);}
+    .ca-modal-header{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 0;}
+    .ca-modal-title{font-size:20px;font-weight:800;color:#111;}
+    .ca-modal-close{width:32px;height:32px;border:none;background:#F3F4F6;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#6B7280;transition:.15s;}
+    .ca-modal-close:hover{background:#E5E7EB;color:#111;}
+    .ca-form{padding:20px 28px 28px;}
+    .ca-row{display:grid;gap:14px;margin-bottom:14px;}
+    .ca-row-3{grid-template-columns:2fr 1.5fr 1.5fr;}
+    .ca-row-2{grid-template-columns:2fr 1fr;}
+    .ca-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;}
+    .ca-input{width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;outline:none;transition:.15s;color:#111;font-family:inherit;background:#fff;}
+    .ca-input:focus{border-color:#4F46E5;box-shadow:0 0 0 3px #EEF2FF;}
+    .ca-section-label{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;}
+    .ca-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+    .ca-macro-grid-2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .ca-micro-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 22px;margin-top:6px;}
+    .ca-micro-col-head{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid #F3F4F6;}
+    .ca-micro-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:6px;}
+    .ca-micro-row label{font-size:12.5px;color:#374151;flex:1;min-width:0;}
+    .ca-micro-inp{display:flex;align-items:center;gap:4px;}
+    .ca-micro-inp input{width:68px;padding:5px 7px;border:1px solid #E5E7EB;border-radius:6px;font-size:12.5px;color:#111;outline:none;text-align:right;font-family:inherit;}
+    .ca-micro-inp input:focus{border-color:#4F46E5;}
+    .ca-micro-inp span{font-size:11px;color:#9CA3AF;width:20px;}
+    .ca-form-group{margin-top:14px;}
+    .ca-micro-toggle{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;color:#6B7280;font-size:12px;font-weight:600;border:none;background:none;user-select:none;}
+    .ca-micro-toggle:hover{color:#4F46E5;}
+    .ca-micro-body{display:none;}
+    .ca-micro-body.open{display:block;}
+    .ca-micro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .ca-actions{display:flex;gap:10px;margin-top:24px;}
+    .ca-btn-primary{flex:1;padding:14px;background:#4F46E5;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
+    .ca-btn-primary:hover{background:#4338CA;}
+    .ca-btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+    .ca-btn-cancel{padding:14px 22px;background:#F3F4F6;color:#374151;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+    .ca-btn-cancel:hover{background:#E5E7EB;}
+    .ca-error{color:#DC2626;font-size:12px;margin-top:8px;font-weight:600;}
+    .ca-create-link{display:block;width:100%;padding:9px 11px;text-align:left;font-size:12px;font-weight:600;color:#4F46E5;background:#EEF2FF;border:none;border-top:1px solid #E5E7EB;cursor:pointer;transition:.15s;}
+    .ca-create-link:hover{background:#E0E7FF;}
+    @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-macro-grid-2{grid-template-columns:1fr 1fr;}.ca-micro-grid{grid-template-columns:1fr 1fr;}.ca-micro-cols{grid-template-columns:1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
+
 </style>
 </head>
 <body>
@@ -622,17 +747,6 @@
         <div class="sec-card">
           <div class="sec-card-head">Alimentos de la receta</div>
           <div class="sec-card-body">
-            <div class="rcp-search">
-              <div class="rcp-search-box">
-                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input id="rcpSearchInp" placeholder="Buscar alimento para añadir…" autocomplete="off" oninput="rcpSearch(this.value)" onfocus="rcpSearch(this.value)"/>
-                <div class="rcp-src-toggle">
-                  <button type="button" id="rcpSrcPlat" class="active" onclick="rcpSetSource('platform')">Plataforma</button>
-                  <button type="button" id="rcpSrcPers" onclick="rcpSetSource('personal')">Personal</button>
-                </div>
-              </div>
-              <div class="rcp-acdrop" id="rcpAcDrop"></div>
-            </div>
             <div id="ingrTableWrap"></div>
           </div>
         </div>
@@ -1011,10 +1125,10 @@ function renderIngrTable(){
   var wrap=document.getElementById('ingrTableWrap');
   if(!wrap)return;
   var rows=_ingrRows.filter(function(r){return r.aliment_id;});
-  if(!rows.length){ wrap.innerHTML='<div class="rcp-empty">Aún no hay alimentos. Búscalos arriba y añádelos a la receta.</div>'; return; }
+  if(!rows.length){ wrap.innerHTML='<div class="rcp-empty" style="display:flex;flex-direction:column;align-items:center;gap:12px;">Aún no hay alimentos en la receta.<button type="button" class="rcp-addlink" onclick="openFoodSearch()"><span class="plus"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Añadir alimento</button></div>'; return; }
   wrap.innerHTML='<table class="rcp-tbl"><thead><tr><th class="l">Alimento</th><th>Cantidad</th><th>Kcal</th><th>P</th><th>C</th><th>G</th><th>Fibra</th><th>Acc.</th></tr></thead><tbody>'
     +rows.map(_ingrRowHTML).join('')
-    +'<tr class="rcp-addrow"><td class="l" colspan="8"><button type="button" class="rcp-addlink" onclick="rcpFocusSearch()"><span class="plus"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Añadir alimento</button></td></tr>'
+    +'<tr class="rcp-addrow"><td class="l" colspan="8"><button type="button" class="rcp-addlink" onclick="openFoodSearch()"><span class="plus"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Añadir alimento</button></td></tr>'
     +'</tbody><tfoot><tr class="rcp-total-row"><td class="l">Total receta</td><td></td><td id="rcpTotK">0</td><td id="rcpTotP">0g</td><td id="rcpTotC">0g</td><td id="rcpTotG">0g</td><td id="rcpTotF">0g</td><td></td></tr></tfoot></table>';
 }
 function rcpFocusSearch(){
@@ -1137,6 +1251,396 @@ async function uploadRecipeImage(input) {
     toast(e.message || 'Error al subir imagen', true);
   }
 }
+
+
+/* ===== Modal de alimentos portado ===== */
+
+// ── Modal de búsqueda de alimentos (portado del constructor de dietas) ──
+var _fsmMid=1,_fsmGroupId=null,_fsmGroups=[],_fsmGroupsLoaded=false,_fsmTimer=null,_fsmCache={},_fsmSelId=null,_fsmQty=0,_fsmEditRid=null,_fsmTab='all',_caTargetRid=null,_alimentGroups=[];
+
+function _groupNameById(id){ if(id==null)return ''; var g=_fsmGroups.find(function(x){return x.id===id;}); return g?g.name:''; }
+
+function openFoodSearch(){
+  _fsmEditRid=null; _fsmGroupId=null; _fsmSelId=null;
+  var det=document.getElementById('fsmDetail'); if(det)det.style.display='none';
+  var eb=document.getElementById('fsmEyebrow'); if(eb)eb.textContent='AÑADIR A LA RECETA';
+  var inp=document.getElementById('fsmInput'); inp.value='';
+  document.getElementById('fsmOverlay').classList.add('open');
+  if(!_fsmGroupsLoaded)_fsmLoadGroups(); else fsmRenderPills();
+  fsmSetTab('all');
+  setTimeout(function(){inp.focus();},50);
+}
+
+function fsmSelect(alimentId){
+  var a=_fsmCache[alimentId]; if(!a)return;
+  _fsmSelId=alimentId;
+  document.querySelectorAll('.fsm-item.sel').forEach(function(el){el.classList.remove('sel');});
+  var row=document.getElementById('fsmit-'+alimentId); if(row)row.classList.add('sel');
+  var unit=_unitFromAliment(a);
+  _fsmQty=a.quantity!=null?parseFloat(a.quantity):100;
+  document.getElementById('fsmDetName').textContent=a.name||'—';
+  var chip=document.getElementById('fsmDetChip');
+  var g=_fsmGroups.find(function(x){return x.id===a.group_food_id;});
+  if(g){chip.textContent=g.name;chip.style.display='inline-block';} else chip.style.display='none';
+  document.getElementById('fsmQtyInput').value=_fsmQty;
+  document.getElementById('fsmQtyUnit').textContent=unit==='unidad'?'ud':unit;
+  _fsmRenderPresets(unit);
+  document.getElementById('fsmAddBtn').textContent='+ Añadir a la receta';
+  fsmRecalcPortion();
+  document.getElementById('fsmDetail').style.display='flex';
+}
+
+function fsmConfirmAdd(){
+  var a=_fsmCache[_fsmSelId]; if(!a)return;
+  if(!(_fsmQty>0)){ toast('Indica una cantidad válida', true); return; }
+  _fsmPushRecent(a);
+  var grams=(_fsmQty)*getUnitMult(_unitFromAliment(a));
+  var rowId=++_rowSeq;
+  _ingrRows.push({ id:rowId, aliment_id:a.id, aliment_name:a.name||'',
+    group_food_id:a.group_food_id!=null?a.group_food_id:null,
+    group_food_name:_groupNameById(a.group_food_id),
+    proteins:a.proteins!=null?a.proteins:null, carbohydrates:a.carbohydrates!=null?a.carbohydrates:null,
+    fats:a.fats!=null?a.fats:null, calories:a.calories!=null?a.calories:null, fiber:a.fiber!=null?a.fiber:null,
+    quantity:String(grams), _source:(a._personal?'personal':'platform') });
+  renderIngrTable(); recalcMacros();
+  closeFoodSearch();
+  toast('Alimento añadido');
+}
+
+function fsmCreateAliment(){ closeFoodSearch(); openCreateAlimentModal(null); }
+
+async function submitCreateAliment(){
+  var name=(document.getElementById('ca_name').value||'').trim();
+  var errEl=document.getElementById('ca_error');
+  if(!name){ if(errEl)errEl.textContent='El nombre es obligatorio'; return; }
+  var btn=document.getElementById('ca_submit_btn'); btn.disabled=true; btn.textContent='Guardando...';
+  if(errEl)errEl.textContent='';
+  var toF=function(id){ var v=parseFloat((document.getElementById(id)||{}).value); return isNaN(v)?null:v; };
+  var body={
+    name:name,
+    brand:(document.getElementById('ca_brand').value||'').trim()||null,
+    group_food_id:parseInt(document.getElementById('ca_group').value)||null,
+    quantity:toF('ca_quantity')||100,
+    quantity_unit:document.getElementById('ca_unit').value||'g',
+    calories:toF('ca_calories'), proteins:toF('ca_proteins'), carbohydrates:toF('ca_carbs'),
+    fats:toF('ca_fats'), fiber:toF('ca_fiber'),
+    comments:((document.getElementById('ca_comments')||{}).value||'').trim()||null,
+    client_id:_meUserId
+  };
+  try{
+    var r=await fetch(API+'/client-aliments',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(!r.ok){ if(errEl)errEl.textContent=j.message||j.detail||'Error al guardar'; return; }
+    var newAl=j.data||j;
+    closeCreateAlimentModal();
+    toast('Alimento "'+esc(name)+'" creado');
+    if(newAl.id){
+      var rowId=++_rowSeq;
+      _ingrRows.push({ id:rowId, aliment_id:newAl.id, aliment_name:newAl.name||name,
+        group_food_id:newAl.group_food_id!=null?newAl.group_food_id:null,
+        group_food_name:_groupNameById(newAl.group_food_id),
+        proteins:newAl.proteins!=null?newAl.proteins:null, carbohydrates:newAl.carbohydrates!=null?newAl.carbohydrates:null,
+        fats:newAl.fats!=null?newAl.fats:null, calories:newAl.calories!=null?newAl.calories:null, fiber:newAl.fiber!=null?newAl.fiber:null,
+        quantity:String(newAl.quantity!=null?newAl.quantity:100), _source:'personal' });
+      renderIngrTable(); recalcMacros();
+    }
+  }catch(e){ if(errEl)errEl.textContent='Error de conexión'; }
+  finally{ btn.disabled=false; btn.textContent='Añadir alimento'; }
+}
+
+function getUnitMult(unit) {
+  return (unit === 'kg' || unit === 'l') ? 1000 : (unit === 'cucharada' ? 15 : (unit === 'taza' ? 240 : 1));
+}
+
+function _unitFromAliment(a) {
+  if (!a) return 'g';
+  var qt = a.quantity_type && (a.quantity_type.description || a.quantity_type.name);
+  if (qt) {
+    if (qt === 'ml') return 'ml';
+    if (qt === 'ud') return 'unidad';
+    if (qt === 'oz') return 'oz';
+    return 'g';
+  }
+  return a.quantity_unit || 'g';
+}
+
+function _foodGroupIcon(groupId, size) {
+  size = size || 18;
+  var name = '';
+  if (groupId != null) {
+    var g = _fsmGroups.find(function(x){ return x.id === groupId; });
+    name = ((g && g.name) || '').toLowerCase();
+  }
+  var ic = { p: _FG_PATHS.apple, color: '#EF4444', bg: '#FEF2F2' };
+  if (/prote|carne|pollo|res\b|cerdo|embutido/.test(name))        ic = { p: _FG_PATHS.drumstick, color: '#EF4444', bg: '#FEF2F2' };
+  else if (/pescado|marisco|atun|atún/.test(name))                ic = { p: _FG_PATHS.fish,      color: '#0891B2', bg: '#ECFEFF' };
+  else if (/cereal|grano|pan\b|arroz|pasta|harina|tuberc|tubérc|legumbre/.test(name)) ic = { p: _FG_PATHS.wheat, color: '#D97706', bg: '#FEF3C7' };
+  else if (/fruta/.test(name))                                    ic = { p: _FG_PATHS.apple,     color: '#EC4899', bg: '#FCE7F3' };
+  else if (/verdura|vegetal|hortaliza|ensalada/.test(name))       ic = { p: _FG_PATHS.carrot,    color: '#16A34A', bg: '#DCFCE7' };
+  else if (/grasa|aceite|fruto seco|nuez|semilla|aguacate/.test(name)) ic = { p: _FG_PATHS.droplet, color: '#3B82F6', bg: '#DBEAFE' };
+  else if (/lacteo|lácteo|leche|queso|yogur/.test(name))          ic = { p: _FG_PATHS.milk,      color: '#0EA5E9', bg: '#E0F2FE' };
+  else if (/huevo/.test(name))                                    ic = { p: _FG_PATHS.egg,       color: '#CA8A04', bg: '#FEF9C3' };
+  else if (/bebida|liquido|líquido|infusion|infusión/.test(name)) ic = { p: _FG_PATHS.cup,       color: '#8B5CF6', bg: '#EDE9FE' };
+  return {
+    bg: ic.bg,
+    svg: '<svg width="' + size + '" height="' + size + '" fill="none" stroke="' + ic.color + '" stroke-width="2" viewBox="0 0 24 24">' + ic.p + '</svg>',
+  };
+}
+
+function fsmSetTab(t) {
+  _fsmTab = t;
+  ['all','mine','recent'].forEach(function(k){
+    var b = document.getElementById('fsmTab-' + k);
+    if (b) b.classList.toggle('sel', k === t);
+  });
+  // Las píldoras de grupo solo aplican al catálogo general
+  var pills = document.getElementById('fsmPills');
+  if (pills) pills.style.display = (t === 'all') ? '' : 'none';
+  fsmFetch(document.getElementById('fsmInput').value || '');
+}
+
+function _fsmRecentsKey() { return 'fsm_recents_' + (_meUserId || 'anon'); }
+function _fsmGetRecents() {
+  try { return JSON.parse(localStorage.getItem(_fsmRecentsKey())) || []; } catch(e) { return []; }
+}
+
+function _fsmGetRecents() {
+  try { return JSON.parse(localStorage.getItem(_fsmRecentsKey())) || []; } catch(e) { return []; }
+}
+
+function _fsmPushRecent(a) {
+  if (!a || a.id == null) return;
+  try {
+    var list = _fsmGetRecents().filter(function(x){ return String(x.id) !== String(a.id); });
+    list.unshift(a);
+    localStorage.setItem(_fsmRecentsKey(), JSON.stringify(list.slice(0, 20)));
+  } catch(e) {}
+}
+
+function closeFoodSearch() {
+  document.getElementById('fsmOverlay').classList.remove('open');
+  _fsmMid = null;
+  _fsmEditRid = null;
+}
+
+async function _fsmLoadGroups() {
+  try {
+    var r = await fetch(API + '/groupFood/findAll', { headers: { Authorization: 'Bearer ' + token } });
+    var d = await r.json();
+    _fsmGroups = Array.isArray(d.data) ? d.data : [];
+    _fsmGroupsLoaded = true;
+    fsmRenderPills();
+  } catch(e) {}
+}
+
+function fsmRenderPills() {
+  var el = document.getElementById('fsmPills');
+  if (!el) return;
+  var sel = _fsmGroups.find(function(g){ return g.id === _fsmGroupId; });
+  var selName = _fsmGroupId === null ? 'Todas' : ((sel && sel.name) || 'Todas');
+  var opts = '<button class="fsm-catopt' + (_fsmGroupId === null ? ' sel' : '') + '" onclick="fsmSetGroup(null)">Todas las categorías</button>'
+    + _fsmGroups.map(function(g){
+        return '<button class="fsm-catopt' + (_fsmGroupId === g.id ? ' sel' : '') + '" onclick="fsmSetGroup(' + g.id + ')">' + esc(g.name || '') + '</button>';
+      }).join('');
+  el.innerHTML =
+    '<button class="fsm-catbtn" id="fsmCatBtn" onclick="fsmToggleCatMenu(event)">'
+    +   '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>'
+    +   'Categoría: <span class="fsm-cat-val">' + esc(selName) + '</span>'
+    +   '<svg class="chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>'
+    + '</button>'
+    + '<div class="fsm-catmenu" id="fsmCatMenu">' + opts + '</div>';
+}
+
+function fsmToggleCatMenu(e) {
+  if (e) e.stopPropagation();
+  var menu = document.getElementById('fsmCatMenu');
+  var btn = document.getElementById('fsmCatBtn');
+  if (!menu) return;
+  var open = menu.classList.toggle('open');
+  if (btn) btn.classList.toggle('open', open);
+}
+
+function fsmSetGroup(id) {
+  _fsmGroupId = id;
+  fsmRenderPills();
+  fsmFetch(document.getElementById('fsmInput').value || '');
+}
+
+function fsmSearchDebounced() {
+  clearTimeout(_fsmTimer);
+  _fsmTimer = setTimeout(function(){
+    fsmFetch(document.getElementById('fsmInput').value || '');
+  }, 250);
+}
+
+async function fsmFetch(q) {
+  var list = document.getElementById('fsmList');
+  if (!list) return;
+
+  // Recientes: se sirven del historial local, sin llamar a la API
+  if (_fsmTab === 'recent') {
+    var q2 = (q || '').toLowerCase();
+    var recents = _fsmGetRecents().filter(function(a){
+      return !q2 || String(a.name || '').toLowerCase().indexOf(q2) >= 0
+        || String(a.brand || '').toLowerCase().indexOf(q2) >= 0;
+    });
+    if (!recents.length) {
+      list.innerHTML = '<div class="fsm-msg">' + (q ? 'Sin resultados entre tus recientes.' : 'Aún no hay recientes. Los alimentos que añadas a una dieta aparecerán aquí.') + '</div>';
+      return;
+    }
+    fsmRenderList(recents);
+    return;
+  }
+
+  list.innerHTML = '<div class="fsm-msg">Buscando…</div>';
+  try {
+    var params = new URLSearchParams({ search: q || '', per_page: 30, page: 1 });
+    var url;
+    if (_fsmTab === 'mine') {
+      // Mis alimentos: los personales del usuario (solo los ve él y el superadmin)
+      params.set('client_id', _meUserId);
+      url = API + '/client-aliments/search?' + params;
+    } else {
+      if (_fsmGroupId) params.set('group_food_id', _fsmGroupId);
+      url = API + '/aliments/search?' + params;
+    }
+    var r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    var d = await r.json();
+    var items = (d.data && d.data.data) || [];
+    if (_fsmTab === 'mine') items.forEach(function(a){ a._personal = true; });
+    fsmRenderList(items);
+  } catch(e) {
+    list.innerHTML = '<div class="fsm-msg">Error al buscar alimentos.</div>';
+  }
+}
+
+function fsmRenderList(items) {
+  var list = document.getElementById('fsmList');
+  if (!list) return;
+  if (!items.length) {
+    list.innerHTML = '<div class="fsm-msg">Sin resultados. Prueba otra búsqueda o crea el alimento.</div>';
+    return;
+  }
+  var groupName = function(gid) {
+    var g = _fsmGroups.find(function(x){ return x.id === gid; });
+    return g ? g.name : null;
+  };
+  list.innerHTML = items.map(function(a) {
+    _fsmCache[a.id] = a;
+    var qty = a.quantity != null ? a.quantity : 100;
+    var unit = _unitFromAliment(a);
+    var unitTxt = unit === 'unidad' ? ' ud' : unit;
+    var k = Math.round(a.calories || 0);
+    var p = Math.round((a.proteins || 0) * 10) / 10;
+    var c = Math.round((a.carbohydrates || 0) * 10) / 10;
+    var f = Math.round((a.fats || 0) * 10) / 10;
+    var desc = qty + unitTxt + ' · ' + k + ' kcal · P' + p + 'g · C' + c + 'g · G' + f + 'g';
+    var gname = groupName(a.group_food_id);
+    return '<div class="fsm-item" id="fsmit-' + a.id + '" onclick="fsmSelect(\'' + a.id + '\')">'
+      + (function(){ var gi = _foodGroupIcon(a.group_food_id, 19); return '<div class="fsm-item-ico" style="background:' + gi.bg + ';">' + gi.svg + '</div>'; })()
+      + '<div class="fsm-item-info">'
+      + '<div class="fsm-item-name">' + esc(a.name || '') + (a.brand ? ' <span style="font-weight:500;color:#9CA3AF;">· ' + esc(a.brand) + '</span>' : '') + '</div>'
+      + '<div class="fsm-item-desc">' + desc + '</div>'
+      + '</div>'
+      + (a._personal ? '<span class="fsm-item-chip" style="background:#ECFDF5;color:#059669;">Personal</span>' : (gname ? '<span class="fsm-item-chip">' + esc(gname) + '</span>' : ''))
+      + '</div>';
+  }).join('');
+}
+
+function _fsmPresetsFor(unit) {
+  if (unit === 'unidad') return [1, 2, 3, 4, 5];
+  if (unit === 'kg' || unit === 'l') return [0.25, 0.5, 1, 1.5, 2];
+  if (unit === 'oz') return [1, 2, 4, 6, 8];
+  return [50, 100, 150, 200, 250]; // g / ml
+}
+
+function _fsmRenderPresets(unit) {
+  var el = document.getElementById('fsmQtyPresets');
+  var unitTxt = unit === 'unidad' ? ' ud' : unit;
+  el.innerHTML = _fsmPresetsFor(unit).map(function(v) {
+    return '<button class="fsm-qty-preset' + (v === _fsmQty ? ' sel' : '') + '" onclick="fsmSetQty(' + v + ')">' + v + unitTxt + '</button>';
+  }).join('');
+}
+
+function fsmSetQty(v) {
+  _fsmQty = v;
+  document.getElementById('fsmQtyInput').value = v;
+  var a = _fsmCache[_fsmSelId];
+  _fsmRenderPresets(_unitFromAliment(a));
+  fsmRecalcPortion();
+}
+
+function fsmQtyStep(dir) {
+  var a = _fsmCache[_fsmSelId];
+  if (!a) return;
+  var unit = _unitFromAliment(a);
+  var step = unit === 'unidad' ? 1 : ((unit === 'kg' || unit === 'l') ? 0.25 : 10);
+  var v = Math.max(0, Math.round(((_fsmQty || 0) + dir * step) * 100) / 100);
+  fsmSetQty(v);
+}
+
+function fsmQtyChanged(v) {
+  _fsmQty = parseFloat(v) || 0;
+  var a = _fsmCache[_fsmSelId];
+  if (a) _fsmRenderPresets(_unitFromAliment(a));
+  fsmRecalcPortion();
+}
+
+function fsmRecalcPortion() {
+  var a = _fsmCache[_fsmSelId];
+  if (!a) return;
+  var qtyG = (_fsmQty || 0) * getUnitMult(_unitFromAliment(a));
+  var fmt = function(v) { return Math.round(v * 10) / 10; };
+  document.getElementById('fsmPorK').textContent = Math.round(((a.calories || 0) / 100) * qtyG);
+  document.getElementById('fsmPorP').textContent = fmt(((a.proteins || 0) / 100) * qtyG);
+  document.getElementById('fsmPorC').textContent = fmt(((a.carbohydrates || 0) / 100) * qtyG);
+  document.getElementById('fsmPorF').textContent = fmt(((a.fats || 0) / 100) * qtyG);
+}
+
+function closeCreateAlimentModal() {
+  document.getElementById('createAlimentOverlay').classList.remove('open');
+  _caTargetRid = null;
+}
+
+async function loadAlimentGroups() {
+  if (_alimentGroups.length) return;
+  try {
+    var r = await fetch(API + '/groupFood/findAll', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) return;
+    var j = await r.json();
+    _alimentGroups = j.data || [];
+  } catch(e) {}
+}
+
+function openCreateAlimentModal(rid) {
+  _caTargetRid = rid || null;
+  loadAlimentGroups().then(function() {
+    var sel = document.getElementById('ca_group');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Seleccionar...</option>';
+    _alimentGroups.forEach(function(g) { sel.innerHTML += '<option value="' + g.id + '">' + esc(g.name) + '</option>'; });
+  });
+  ['ca_name','ca_brand','ca_calories','ca_proteins','ca_carbs','ca_fats','ca_fiber','ca_sugars','ca_satfats','ca_comments',
+   'ca_vita','ca_vitb1','ca_vitb2','ca_vitb3','ca_vitb5','ca_vitb6','ca_vitb9','ca_vitb12','ca_vitc','ca_vitd','ca_vite','ca_vitk',
+   'ca_calcium','ca_iron','ca_magnesium','ca_phosphorus','ca_potassium','ca_sodium','ca_zinc','ca_selenium','ca_copper','ca_manganese',
+   'ca_cholesterol','ca_monofats','ca_polifats','ca_water','ca_glycemic'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var qty = document.getElementById('ca_quantity'); if (qty) qty.value = '100';
+  var unit = document.getElementById('ca_unit'); if (unit) unit.value = 'g';
+  var err = document.getElementById('ca_error'); if (err) err.textContent = '';
+  var micro = document.querySelector('.ca-micro-body'); if (micro) micro.classList.remove('open');
+  document.getElementById('createAlimentOverlay').classList.add('open');
+  setTimeout(function(){ var n = document.getElementById('ca_name'); if(n) n.focus(); }, 100);
+}
+
+document.addEventListener('click', function(e){
+  if (!e.target.closest('#fsmPills')) {
+    var menu = document.getElementById('fsmCatMenu'); if (menu) menu.classList.remove('open');
+    var btn = document.getElementById('fsmCatBtn'); if (btn) btn.classList.remove('open');
+  }
+});
+
 
 async function save() {
   const name = document.getElementById('fName').value.trim();
@@ -1321,5 +1825,184 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
   </div>
   <div id="flyoutItems" style="padding:6px;"></div>
 </div>
+
+<!-- ── Modal Buscar alimentos ── -->
+<div class="fsm-overlay" id="fsmOverlay" onclick="if(event.target===this)closeFoodSearch()">
+  <div class="fsm-panel">
+    <div class="fsm-left">
+      <div class="fsm-head">
+        <div class="fsm-eyebrow" id="fsmEyebrow">AÑADIR A COMIDA</div>
+        <div class="fsm-title">Buscar alimentos</div>
+        <button class="fsm-close" onclick="closeFoodSearch()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="fsm-search-wrap">
+        <div class="fsm-search">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="fsmInput" placeholder="Buscar alimento, marca o código…" autocomplete="off" oninput="fsmSearchDebounced()"/>
+        </div>
+      </div>
+      <div class="fsm-tabs">
+        <div class="fsm-tabgroup">
+          <button class="fsm-tab sel" id="fsmTab-all" onclick="fsmSetTab('all')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
+            Alimentos
+          </button>
+          <button class="fsm-tab" id="fsmTab-mine" onclick="fsmSetTab('mine')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>
+            Mis alimentos
+          </button>
+          <button class="fsm-tab" id="fsmTab-recent" onclick="fsmSetTab('recent')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Recientes
+          </button>
+        </div>
+        <button class="fsm-create-btn" onclick="fsmCreateAliment()" style="margin-left:auto;">+ Crear alimento</button>
+      </div>
+      <div class="fsm-cat" id="fsmPills"></div>
+      <div class="fsm-list" id="fsmList">
+        <div class="fsm-msg">Cargando alimentos…</div>
+      </div>
+    </div>
+    <div class="fsm-detail" id="fsmDetail" style="display:none;">
+      <div class="fsm-detail-body">
+        <div class="fsm-detail-eyebrow">Detalle</div>
+        <div class="fsm-detail-name" id="fsmDetName">—</div>
+        <span class="fsm-item-chip" id="fsmDetChip" style="display:none;"></span>
+        <div class="fsm-detail-eyebrow" style="margin-top:22px;">Cantidad</div>
+        <div class="fsm-qty-row">
+          <button class="fsm-qty-btn" onclick="fsmQtyStep(-1)">−</button>
+          <div class="fsm-qty-box">
+            <input id="fsmQtyInput" type="number" min="0" step="any" oninput="fsmQtyChanged(this.value)">
+            <span class="fsm-qty-unit" id="fsmQtyUnit">g</span>
+          </div>
+          <button class="fsm-qty-btn" onclick="fsmQtyStep(1)">+</button>
+        </div>
+        <div class="fsm-qty-presets" id="fsmQtyPresets"></div>
+        <div class="fsm-portion">
+          <div class="fsm-portion-title">Aporte de esta ración</div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Calorías</span><span class="fsm-portion-val"><b id="fsmPorK">0</b> kcal</span></div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg> Proteínas</span><span class="fsm-portion-val"><b id="fsmPorP">0</b> g</span></div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/></svg> Carbohidratos</span><span class="fsm-portion-val"><b id="fsmPorC">0</b> g</span></div>
+          <div class="fsm-portion-row"><span class="fsm-portion-lbl"><svg width="14" height="14" fill="none" stroke="#3B82F6" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg> Grasas</span><span class="fsm-portion-val"><b id="fsmPorF">0</b> g</span></div>
+        </div>
+      </div>
+      <button class="fsm-add-btn" id="fsmAddBtn" onclick="fsmConfirmAdd()">+ Añadir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Crear alimento ── -->
+<div class="ca-overlay" id="createAlimentOverlay" onclick="if(event.target===this)closeCreateAlimentModal()">
+  <div class="ca-modal">
+    <div class="ca-modal-header">
+      <h2 class="ca-modal-title">Añadir alimento</h2>
+      <button class="ca-modal-close" onclick="closeCreateAlimentModal()">✕</button>
+    </div>
+    <div class="ca-form">
+      <div class="ca-row ca-row-3">
+        <div>
+          <label class="ca-label">Nombre del alimento *</label>
+          <input id="ca_name" class="ca-input" placeholder="Ej: Pechuga de pollo"/>
+        </div>
+        <div>
+          <label class="ca-label">Grupo</label>
+          <select id="ca_group" class="ca-input">
+            <option value="">Seleccionar...</option>
+          </select>
+        </div>
+        <div>
+          <label class="ca-label">Marca <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input id="ca_brand" class="ca-input" placeholder="Ej: Hacendado"/>
+        </div>
+      </div>
+      <div class="ca-row ca-row-2">
+        <div>
+          <label class="ca-label">Cantidad de referencia</label>
+          <input id="ca_quantity" class="ca-input" type="number" min="1" value="100" placeholder="100"/>
+        </div>
+        <div>
+          <label class="ca-label">Unidad</label>
+          <select id="ca_unit" class="ca-input">
+            <option value="g">g (gramos)</option>
+            <option value="ml">ml</option>
+            <option value="oz">oz</option>
+            <option value="unidad">Unidad</option>
+            <option value="taza">Taza</option>
+            <option value="cda">Cucharada</option>
+            <option value="cdta">Cucharadita</option>
+            <option value="porcion">Porción</option>
+          </select>
+        </div>
+      </div>
+      <div class="ca-section-label">Macronutrientes por 100g</div>
+      <div class="ca-macro-grid">
+        <div><label class="ca-label">Calorías (kcal)</label><input id="ca_calories" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Proteínas (g)</label><input id="ca_proteins" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Carbohidratos (g)</label><input id="ca_carbs" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Grasas (g)</label><input id="ca_fats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+      </div>
+      <div class="ca-macro-grid-2">
+        <div><label class="ca-label">Fibra (g)</label><input id="ca_fiber" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Azúcares (g)</label><input id="ca_sugars" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+        <div><label class="ca-label">Grasas saturadas (g)</label><input id="ca_satfats" class="ca-input" type="number" min="0" step="0.1" placeholder="0"/></div>
+      </div>
+      <button class="ca-micro-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.ca-arr').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5c0 2.1-1.3 3.9-3.1 4.7C16.1 12.9 18 15.3 18 18v1H6v-1c0-2.7 1.9-5.1 4.1-6.3A5 5 0 0 1 12 2z"/></svg>
+        Micronutrientes <span style="color:#9CA3AF;font-weight:400;">(opcional — útil para planes con patologías)</span>
+        <span class="ca-arr" style="margin-left:auto;">▼</span>
+      </button>
+      <div class="ca-micro-body">
+        <div class="ca-micro-cols">
+          <div>
+            <div class="ca-micro-col-head">Vitaminas</div>
+            <div class="ca-micro-row"><label>Vitamina A</label><div class="ca-micro-inp"><input id="ca_vita" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B1</label><div class="ca-micro-inp"><input id="ca_vitb1" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B2</label><div class="ca-micro-inp"><input id="ca_vitb2" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B3</label><div class="ca-micro-inp"><input id="ca_vitb3" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B5</label><div class="ca-micro-inp"><input id="ca_vitb5" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B6</label><div class="ca-micro-inp"><input id="ca_vitb6" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B9</label><div class="ca-micro-inp"><input id="ca_vitb9" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina B12</label><div class="ca-micro-inp"><input id="ca_vitb12" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina C</label><div class="ca-micro-inp"><input id="ca_vitc" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina D</label><div class="ca-micro-inp"><input id="ca_vitd" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina E</label><div class="ca-micro-inp"><input id="ca_vite" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Vitamina K</label><div class="ca-micro-inp"><input id="ca_vitk" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          </div>
+          <div>
+            <div class="ca-micro-col-head">Minerales</div>
+            <div class="ca-micro-row"><label>Calcio</label><div class="ca-micro-inp"><input id="ca_calcium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Hierro</label><div class="ca-micro-inp"><input id="ca_iron" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Magnesio</label><div class="ca-micro-inp"><input id="ca_magnesium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Fósforo</label><div class="ca-micro-inp"><input id="ca_phosphorus" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Potasio</label><div class="ca-micro-inp"><input id="ca_potassium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Sodio</label><div class="ca-micro-inp"><input id="ca_sodium" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Zinc</label><div class="ca-micro-inp"><input id="ca_zinc" type="number" step="0.01" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Selenio</label><div class="ca-micro-inp"><input id="ca_selenium" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Cobre</label><div class="ca-micro-inp"><input id="ca_copper" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>Manganeso</label><div class="ca-micro-inp"><input id="ca_manganese" type="number" step="0.001" min="0" placeholder="0"/><span>mg</span></div></div>
+          </div>
+          <div>
+            <div class="ca-micro-col-head">Otros</div>
+            <div class="ca-micro-row"><label>Colesterol</label><div class="ca-micro-inp"><input id="ca_cholesterol" type="number" step="0.1" min="0" placeholder="0"/><span>mg</span></div></div>
+            <div class="ca-micro-row"><label>G. monoinsaturadas</label><div class="ca-micro-inp"><input id="ca_monofats" type="number" step="0.01" min="0" placeholder="0"/><span>g</span></div></div>
+            <div class="ca-micro-row"><label>G. poliinsaturadas</label><div class="ca-micro-inp"><input id="ca_polifats" type="number" step="0.01" min="0" placeholder="0"/><span>g</span></div></div>
+            <div class="ca-micro-row"><label>Agua</label><div class="ca-micro-inp"><input id="ca_water" type="number" step="0.1" min="0" placeholder="0"/><span>g</span></div></div>
+            <div class="ca-micro-row"><label>Índice glucémico</label><div class="ca-micro-inp"><input id="ca_glycemic" type="number" step="1" min="0" placeholder="0"/><span></span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ca-form-group">
+        <label class="ca-label">Comentarios</label>
+        <textarea id="ca_comments" class="ca-input" placeholder="Notas adicionales…" maxlength="500" rows="2" style="resize:vertical;"></textarea>
+      </div>
+      <div class="ca-error" id="ca_error"></div>
+      <div class="ca-actions">
+        <button class="ca-btn-primary" id="ca_submit_btn" onclick="submitCreateAliment()">Añadir alimento</button>
+        <button class="ca-btn-cancel" onclick="closeCreateAlimentModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

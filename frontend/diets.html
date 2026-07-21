@@ -997,7 +997,7 @@
           <label class="dgi-lbl">Número de comidas</label>
           <div class="dp-stepper" style="margin-top:0;">
             <button class="dp-stepper-btn" onclick="changeMealCount(-1)">−</button>
-            <span class="dp-stepper-val" id="mealCountVal">3</span>
+            <span class="dp-stepper-val" id="mealCountVal">5</span>
             <button class="dp-stepper-btn" onclick="changeMealCount(1)">+</button>
             <span class="dp-stepper-unit">comidas/día</span>
           </div>
@@ -1111,13 +1111,7 @@
         Añadir comida
       </button>
     </div>
-    <div id="formError" style="color:#DC2626;font-size:13px;padding:4px 24px;display:none;"></div>
-    <div class="dp-footer">
-      <button class="dp-next-btn" id="saveBtn" onclick="saveDiet()">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-right:6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Guardar dieta
-      </button>
-    </div>
+    <div id="formError" style="color:#DC2626;font-size:13px;padding:4px 28px 16px;display:none;"></div>
   </div>
 
   </div><!-- /#dpStepsWrap -->
@@ -1828,7 +1822,7 @@ function clearForm() {
   var pathoArrow = document.getElementById('pathoArrow');
   if (pathoArrow) { pathoArrow.classList.remove('open'); }
   var mcv = document.getElementById('mealCountVal');
-  if (mcv) mcv.textContent = '3';
+  if (mcv) mcv.textContent = '5';
   var list = document.getElementById('pm2List');
   if (list) list.innerHTML = '';
   updateDistPanel();
@@ -2140,12 +2134,30 @@ function addNewMeal() {
 
 // --- Meal management ---
 
+// Nombres y horas por defecto de las comidas (estructura estándar del día)
+var MEAL_PRESETS = [
+  { name: 'Desayuno', time: '08:00' },
+  { name: 'Media mañana', time: '11:00' },
+  { name: 'Comida', time: '14:00' },
+  { name: 'Merienda', time: '17:30' },
+  { name: 'Cena', time: '21:00' },
+  { name: 'Recena', time: '23:00' },
+];
+
 function addMeal(prefill) {
   prefill = prefill || null;
   var mid = ++_mealSeq;
-  var defaultName = 'Comida ' + _meals.length;
+  var idx = _meals.length;
+  var preset = MEAL_PRESETS[idx] || null;
+  var defaultName = preset ? preset.name : ('Comida ' + (idx + 1));
+  var defaultTime = preset ? preset.time : null;
   var hasFoods = !!(prefill && prefill.detail && prefill.detail.length);
-  var meal = { id: mid, db_id: (prefill && prefill.id) || null, name: (prefill && prefill.name) || defaultName, time: (prefill && prefill.time) || null, rows: [], _collapsed: !hasFoods };
+  var meal = {
+    id: mid, db_id: (prefill && prefill.id) || null,
+    name: (prefill && prefill.name) || defaultName,
+    time: prefill ? (prefill.time || null) : defaultTime,
+    rows: [], _collapsed: !hasFoods
+  };
   _meals.push(meal);
   if (prefill && prefill.detail) {
     (prefill.detail || []).forEach(function(dfa) {
@@ -2949,9 +2961,12 @@ async function saveDiet() {
   saveAllMealDOMState();
   var title = document.getElementById('f_title').value.trim();
   var errEl = document.getElementById('formError');
-  if (!title) { if(errEl){errEl.textContent='El titulo es obligatorio';errEl.style.display='block';} return; }
-  var btn = document.getElementById('saveBtn');
-  btn.textContent = 'Guardando...'; btn.disabled = true;
+  if (!title) { if(errEl){errEl.textContent='Ponle un título a la dieta en la pestaña «Información».';errEl.style.display='block';} return; }
+  var lbl = document.getElementById('dpSaveLbl');
+  var prevLbl = lbl ? lbl.textContent : '';
+  var saveBtns = [document.getElementById('saveBtn'), document.querySelector('.dp-save-header')].filter(Boolean);
+  if (lbl) lbl.textContent = 'Guardando...';
+  saveBtns.forEach(function(b){ b.disabled = true; });
   if(errEl){errEl.textContent='';errEl.style.display='none';}
   var foods = _meals.map(function(meal) {
     var mealName = meal.name || 'Comida';
@@ -3002,7 +3017,7 @@ async function saveDiet() {
     }
     closeForm(); toast(editingId ? 'Dieta actualizada' : 'Dieta creada', 'success'); loadDiets();
   } catch(e) { var fe=document.getElementById('formError');if(fe){fe.textContent='Error de conexion';fe.style.display='block';} }
-  finally { btn.textContent = 'Guardar dieta'; btn.disabled = false; }
+  finally { if (lbl) lbl.textContent = prevLbl || 'Crear dieta'; saveBtns.forEach(function(b){ b.disabled = false; }); }
 }
 
 function openAssign(id, title) {

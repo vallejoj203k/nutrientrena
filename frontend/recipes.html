@@ -261,6 +261,50 @@
     .save-btn{width:100%;padding:13px;background:var(--indigo);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.5px;transition:.15s;}
     .save-btn:hover{background:var(--indigo-dark);}
     .save-btn:disabled{opacity:.6;cursor:default;}
+
+    /* ── Constructor estilo dietas: barra de stats + tabla de alimentos ── */
+    .rcp-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+    .rcp-stat{background:#fff;border:1px solid #D8DDE4;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+    .rcp-stat-ico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .rcp-stat-lbl{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;}
+    .rcp-stat-val{font-size:22px;font-weight:800;margin-top:2px;line-height:1.1;}
+    .rcp-stat-val small{font-size:11px;font-weight:700;color:#9CA3AF;}
+    @media(max-width:1100px){.rcp-stats{grid-template-columns:repeat(3,1fr);}}
+    /* buscador para añadir alimento */
+    .rcp-search{position:relative;margin-bottom:14px;}
+    .rcp-search-box{display:flex;align-items:center;gap:10px;border:1.5px solid #E5E7EB;border-radius:11px;padding:10px 14px;background:#fff;transition:.15s;}
+    .rcp-search-box:focus-within{border-color:var(--indigo);}
+    .rcp-search-box svg{color:#9CA3AF;flex-shrink:0;}
+    .rcp-search-box input{flex:1;border:none;outline:none;font-size:14px;color:#111;background:transparent;font-family:inherit;}
+    .rcp-src-toggle{display:flex;gap:2px;background:#F3F4F6;border-radius:8px;padding:2px;flex-shrink:0;}
+    .rcp-src-toggle button{padding:5px 11px;border:none;background:transparent;border-radius:6px;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;transition:.15s;}
+    .rcp-src-toggle button.active{background:#fff;color:#111827;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+    .rcp-acdrop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #E5E7EB;border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.14);z-index:60;max-height:280px;overflow-y:auto;display:none;padding:5px;}
+    .rcp-acdrop.open{display:block;}
+    .rcp-acitem{display:flex;align-items:center;gap:11px;width:100%;padding:9px 11px;border:none;background:none;border-radius:8px;cursor:pointer;text-align:left;font-family:inherit;transition:.12s;}
+    .rcp-acitem:hover{background:#F5F7FB;}
+    .rcp-acitem .nm{font-size:13.5px;font-weight:700;color:#111827;}
+    .rcp-acitem .ds{font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .rcp-acitem .chip{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;}
+    .rcp-acmsg{padding:14px 12px;font-size:13px;color:#9CA3AF;text-align:center;}
+    .rcp-tbl{width:100%;border-collapse:collapse;}
+    .rcp-tbl th{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;text-align:right;padding:9px 10px;border-bottom:1px solid #F0F1F3;white-space:nowrap;}
+    .rcp-tbl th.l{text-align:left;}
+    .rcp-tbl td{padding:11px 10px;font-size:13px;color:#374151;text-align:right;border-bottom:1px dashed #EEF0F3;vertical-align:middle;white-space:nowrap;}
+    .rcp-tbl td.l{text-align:left;}
+    .rcp-food-cell{display:flex;align-items:center;gap:11px;}
+    .rcp-food-ico{width:34px;height:34px;border-radius:9px;background:#EEF2FF;color:var(--indigo);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .rcp-food-nm{font-size:13.5px;font-weight:700;color:#111827;}
+    .rcp-food-sub{font-size:11.5px;color:#9CA3AF;margin-top:1px;}
+    .rcp-qty-inp{width:64px;padding:6px 8px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;color:#111827;text-align:right;outline:none;font-family:inherit;-moz-appearance:textfield;}
+    .rcp-qty-inp:focus{border-color:var(--indigo);}
+    .rcp-qty-unit{color:#9CA3AF;margin-left:5px;font-size:12px;}
+    .rcp-kcal-cell{font-weight:800;color:#111827;}
+    .rcp-rm{background:none;border:none;cursor:pointer;color:#D1D5DB;padding:5px;border-radius:6px;display:inline-flex;transition:.15s;}
+    .rcp-rm:hover{color:#DC2626;background:#FEF2F2;}
+    .rcp-total-row td{border-bottom:none;border-top:1px solid #EEF0F3;font-weight:800;color:#111827;background:#FAFBFC;padding-top:13px;padding-bottom:13px;}
+    .rcp-total-row td.l{color:#9CA3AF;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+    .rcp-empty{padding:26px 16px;text-align:center;color:#9CA3AF;font-size:13px;}
     .form-error{color:#DC2626;font-size:12px;margin-top:4px;}
     .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
@@ -547,57 +591,45 @@
     </div>
     <div class="fv-body">
       <div class="fv-main">
-        <div class="sec-card">
-          <div class="sec-card-head">Informacion Nutricional</div>
-          <div class="sec-card-body">
-            <div class="circles-row">
-              <div class="circle-wrap">
-                <svg viewBox="0 0 100 100">
-                  <circle class="circle-bg" cx="50" cy="50" r="38"/>
-                  <circle class="circle-prog" id="cp-kcal" cx="50" cy="50" r="38" stroke="var(--c-kcal)" stroke-dasharray="0 238.76"/>
-                  <text class="circle-val" x="50" y="47" fill="var(--c-kcal)" id="cv-kcal">0</text>
-                  <text class="circle-unit" x="50" y="62">kcal</text>
-                </svg>
-                <span class="circle-lbl">Calorias</span>
-              </div>
-              <div class="circle-wrap">
-                <svg viewBox="0 0 100 100">
-                  <circle class="circle-bg" cx="50" cy="50" r="38"/>
-                  <circle class="circle-prog" id="cp-prot" cx="50" cy="50" r="38" stroke="var(--c-prot)" stroke-dasharray="0 238.76"/>
-                  <text class="circle-val" x="50" y="47" fill="var(--c-prot)" id="cv-prot">0</text>
-                  <text class="circle-unit" x="50" y="62">g</text>
-                </svg>
-                <span class="circle-lbl">Proteinas</span>
-              </div>
-              <div class="circle-wrap">
-                <svg viewBox="0 0 100 100">
-                  <circle class="circle-bg" cx="50" cy="50" r="38"/>
-                  <circle class="circle-prog" id="cp-carb" cx="50" cy="50" r="38" stroke="var(--c-carb)" stroke-dasharray="0 238.76"/>
-                  <text class="circle-val" x="50" y="47" fill="var(--c-carb)" id="cv-carb">0</text>
-                  <text class="circle-unit" x="50" y="62">g</text>
-                </svg>
-                <span class="circle-lbl">Carbohidratos</span>
-              </div>
-              <div class="circle-wrap">
-                <svg viewBox="0 0 100 100">
-                  <circle class="circle-bg" cx="50" cy="50" r="38"/>
-                  <circle class="circle-prog" id="cp-fat" cx="50" cy="50" r="38" stroke="var(--c-fat)" stroke-dasharray="0 238.76"/>
-                  <text class="circle-val" x="50" y="47" fill="var(--c-fat)" id="cv-fat">0</text>
-                  <text class="circle-unit" x="50" y="62">g</text>
-                </svg>
-                <span class="circle-lbl">Grasas</span>
-              </div>
-            </div>
+        <!-- Barra de totales (estilo constructor de dietas) -->
+        <div class="rcp-stats">
+          <div class="rcp-stat">
+            <div class="rcp-stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
+            <div><div class="rcp-stat-lbl">Calorías</div><div class="rcp-stat-val" id="cv-kcal" style="color:#D97706;">0</div></div>
+          </div>
+          <div class="rcp-stat">
+            <div class="rcp-stat-ico" style="background:#D1FAE5;color:#059669;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg></div>
+            <div><div class="rcp-stat-lbl">Proteínas</div><div class="rcp-stat-val" id="cv-prot" style="color:#059669;">0<small>g</small></div></div>
+          </div>
+          <div class="rcp-stat">
+            <div class="rcp-stat-ico" style="background:#FFEDD5;color:#EA580C;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/></svg></div>
+            <div><div class="rcp-stat-lbl">Carbos</div><div class="rcp-stat-val" id="cv-carb" style="color:#EA580C;">0<small>g</small></div></div>
+          </div>
+          <div class="rcp-stat">
+            <div class="rcp-stat-ico" style="background:#FEE2E2;color:#DC2626;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
+            <div><div class="rcp-stat-lbl">Grasas</div><div class="rcp-stat-val" id="cv-fat" style="color:#DC2626;">0<small>g</small></div></div>
+          </div>
+          <div class="rcp-stat">
+            <div class="rcp-stat-ico" style="background:#ECFDF5;color:#10B981;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></div>
+            <div><div class="rcp-stat-lbl">Fibra</div><div class="rcp-stat-val" id="cv-fib" style="color:#10B981;">0<small>g</small></div></div>
           </div>
         </div>
+        <!-- Alimentos de la receta -->
         <div class="sec-card">
-          <div class="sec-card-head">Lista de Alimentos</div>
+          <div class="sec-card-head">Alimentos de la receta</div>
           <div class="sec-card-body">
-            <div class="ingr-list" id="ingrList"></div>
-            <button class="add-food-btn" onclick="addIngredientRow()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              AGREGAR ALIMENTO
-            </button>
+            <div class="rcp-search">
+              <div class="rcp-search-box">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input id="rcpSearchInp" placeholder="Buscar alimento para añadir…" autocomplete="off" oninput="rcpSearch(this.value)" onfocus="rcpSearch(this.value)"/>
+                <div class="rcp-src-toggle">
+                  <button type="button" id="rcpSrcPlat" class="active" onclick="rcpSetSource('platform')">Plataforma</button>
+                  <button type="button" id="rcpSrcPers" onclick="rcpSetSource('personal')">Personal</button>
+                </div>
+              </div>
+              <div class="rcp-acdrop" id="rcpAcDrop"></div>
+            </div>
+            <div id="ingrTableWrap"></div>
           </div>
         </div>
         <div class="sec-card">
@@ -660,6 +692,7 @@ let _page = 1, _perPage = 12, _total = 0, _lastPage = 1, _search = '';
 let _editId = null, _delId = null;
 let _ingrRows = [], _acTimers = {}, _rowSeq = 0, _macroCache = {};
 let _imageUrl = null;
+let _meUserId = null;
 
 let confirmDeleteFn = function() {};
 function openConfirm(title, text, fn) {
@@ -677,6 +710,7 @@ async function init() {
     if (!r.ok) throw new Error();
     const d = await r.json();
     const u = d.data || d;
+    _meUserId = u.id != null ? u.id : null;
     document.getElementById('sidebarName').textContent = u.name || u.email || '—';
     document.getElementById('sidebarRole').textContent = (u.role && u.role.name) || '';
     (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name||u.email||'U')[0].toUpperCase();}})();
@@ -907,15 +941,7 @@ function openForm(recipe) {
   document.getElementById('fImageFile').value = '';
   setImagePreview((recipe && recipe.image) || null);
 
-  document.getElementById('ingrList').innerHTML = '';
-  ((recipe && recipe.details) || []).forEach(function(d) { addIngredientRow(d); });
-
-  updateCircles(
-    (recipe && recipe.calories) || 0,
-    (recipe && recipe.proteins) || 0,
-    (recipe && recipe.carbs)    || 0,
-    (recipe && recipe.fats)     || 0
-  );
+  loadRecipeDetails((recipe && recipe.details) || []);
 
   document.getElementById('listView').style.display = 'none';
   document.getElementById('formView').classList.add('active');
@@ -930,206 +956,142 @@ async function openEdit(id) {
   } catch(e) { toast('Error al cargar receta', true); }
 }
 
-const CIRC = 2 * Math.PI * 38;
-const MAX_KCAL = 2000, MAX_PROT = 100, MAX_CARB = 300, MAX_FAT = 80;
+// ── Ingredientes de la receta (tabla estilo constructor de dietas) ──
+var _rcpTimer=null, _rcpCache={};
+var FOOD_ICO='<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>';
+var TRASH_ICO='<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>';
 
-function updateCircles(kcal, prot, carb, fat) {
-  setCircle('kcal', kcal, MAX_KCAL, Math.round(kcal));
-  setCircle('prot', prot, MAX_PROT, prot.toFixed(1));
-  setCircle('carb', carb, MAX_CARB, carb.toFixed(1));
-  setCircle('fat',  fat,  MAX_FAT,  fat.toFixed(1));
+function _ingMac(row){
+  var q=parseFloat(row.quantity)||0;
+  return {k:((row.calories||0)/100)*q, p:((row.proteins||0)/100)*q, c:((row.carbohydrates||0)/100)*q, f:((row.fats||0)/100)*q, fib:((row.fiber||0)/100)*q};
 }
+function _g1(v){return (Math.round(v*10)/10)+'g';}
 
-function setCircle(id, val, max, label) {
-  const pct = Math.min(val / max, 1);
-  const dash = pct * CIRC;
-  document.getElementById('cp-' + id).style.strokeDasharray = dash + ' ' + CIRC;
-  document.getElementById('cv-' + id).textContent = label;
-}
-
-function addIngredientRow(detail) {
-  if (!detail) detail = null;
-  const rowId = ++_rowSeq;
-  const row = { id: rowId, aliment_id: null, aliment_name: '', proteins: null, carbohydrates: null, fats: null, calories: null, _source: 'platform' };
-  _ingrRows.push(row);
-
-  const card = document.createElement('div');
-  card.className = 'ingr-card';
-  card.id = 'irow-' + rowId;
-  card.innerHTML =
-    '<div class="ingr-source-tabs">' +
-      '<button class="ingr-source-tab active" onclick="setIngrSource(\'' + rowId + '\',\'platform\',this)">🌐 Plataforma</button>' +
-      '<button class="ingr-source-tab" onclick="setIngrSource(\'' + rowId + '\',\'personal\',this)">👤 Personal</button>' +
-    '</div>' +
-    '<div class="ingr-card-top">' +
-      '<div class="ac-wrap">' +
-        '<input type="text" id="iac-' + rowId + '" placeholder="Buscar alimento..." autocomplete="off"' +
-          ' oninput="acSearch(\'' + rowId + '\',this.value)"' +
-          ' onfocus="acSearch(\'' + rowId + '\',this.value)"' +
-          ' onblur="setTimeout(function(){closeAc(\'' + rowId + '\')},200)"/>' +
-        '<div class="ac-dropdown" id="acdrop-' + rowId + '"></div>' +
-      '</div>' +
-      '<button class="btn-icon danger" onclick="removeIngredient(\'' + rowId + '\')" title="Quitar">' +
-        '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-      '</button>' +
-    '</div>' +
-    '<div class="ingr-card-bottom">' +
-      '<div class="ingr-qty-wrap">' +
-        '<input type="number" id="iqty-' + rowId + '" min="0" step="0.1" placeholder="0" oninput="onQtyChange(\'' + rowId + '\')"/>' +
-        '<select id="iunit-' + rowId + '">' +
-          '<option value="gr">gr</option><option value="kg">kg</option><option value="ml">ml</option>' +
-          '<option value="l">l</option><option value="unidad">unidad</option>' +
-          '<option value="cucharada">cucharada</option><option value="taza">taza</option>' +
-        '</select>' +
-      '</div>' +
-      '<div class="ingr-macros">' +
-        '<span class="ingr-macro-chip kcal" id="ikcal-' + rowId + '">— kcal</span>' +
-        '<span class="ingr-macro-chip prot" id="iprot-' + rowId + '">— P</span>' +
-        '<span class="ingr-macro-chip carb" id="icarb-' + rowId + '">— C</span>' +
-        '<span class="ingr-macro-chip fat"  id="ifat-' + rowId + '">— G</span>' +
-      '</div>' +
-    '</div>';
-
-  document.getElementById('ingrList').appendChild(card);
-
-  if (detail) {
-    const qty = detail.quantity || '';
-    document.getElementById('iqty-' + rowId).value = qty;
-    if (detail.aliment_id) {
-      row.aliment_id = detail.aliment_id;
-      resolveAlimentName(rowId, detail.aliment_id);
-    }
-  }
-}
-
-function removeIngredient(rowId) {
-  _ingrRows = _ingrRows.filter(function(r) { return r.id != rowId; });
-  const el = document.getElementById('irow-' + rowId);
-  if (el) el.remove();
-  recalcMacros();
-}
-
-function onQtyChange(rowId) {
-  const row = _ingrRows.find(function(r) { return r.id == rowId; });
-  if (row) updateRowMacros(row);
-  recalcMacros();
-}
-
-function updateRowMacros(row) {
-  const qty = parseFloat(document.getElementById('iqty-' + row.id) && document.getElementById('iqty-' + row.id).value) || 0;
-  const k = ((row.calories      || 0) / 100) * qty;
-  const p = ((row.proteins      || 0) / 100) * qty;
-  const c = ((row.carbohydrates || 0) / 100) * qty;
-  const f = ((row.fats          || 0) / 100) * qty;
-  const fmt = function(v) { return v >= 10 ? v.toFixed(1) : v.toFixed(2); };
-  const el = function(id) { return document.getElementById(id); };
-  if (el('ikcal-' + row.id)) el('ikcal-' + row.id).textContent = Math.round(k) + ' kcal';
-  if (el('iprot-' + row.id)) el('iprot-' + row.id).textContent = fmt(p) + 'g P';
-  if (el('icarb-' + row.id)) el('icarb-' + row.id).textContent = fmt(c) + 'g C';
-  if (el('ifat-'  + row.id)) el('ifat-'  + row.id).textContent = fmt(f) + 'g G';
-}
-
-function recalcMacros() {
-  let kcal = 0, prot = 0, carb = 0, fat = 0;
-  _ingrRows.forEach(function(row) {
-    const qtyEl = document.getElementById('iqty-' + row.id);
-    const qty = parseFloat(qtyEl && qtyEl.value) || 0;
-    if (!qty || !row.aliment_id) return;
-    kcal += ((row.calories      || 0) / 100) * qty;
-    prot += ((row.proteins      || 0) / 100) * qty;
-    carb += ((row.carbohydrates || 0) / 100) * qty;
-    fat  += ((row.fats          || 0) / 100) * qty;
+function recalcMacros(){
+  var k=0,p=0,c=0,f=0,fib=0;
+  _ingrRows.forEach(function(r){
+    if(!r.aliment_id)return;
+    var m=_ingMac(r); k+=m.k;p+=m.p;c+=m.c;f+=m.f;fib+=m.fib;
+    var e=document.getElementById('irk-'+r.id); if(e)e.textContent=Math.round(m.k);
+    e=document.getElementById('irp-'+r.id); if(e)e.textContent=_g1(m.p);
+    e=document.getElementById('irc-'+r.id); if(e)e.textContent=_g1(m.c);
+    e=document.getElementById('irg-'+r.id); if(e)e.textContent=_g1(m.f);
+    e=document.getElementById('irf-'+r.id); if(e)e.textContent=_g1(m.fib);
   });
-  updateCircles(kcal, prot, carb, fat);
-  document.getElementById('fFormError').textContent = '';
+  var S=function(id,v){var e=document.getElementById(id); if(e)e.innerHTML=v;};
+  S('cv-kcal', String(Math.round(k)));
+  S('cv-prot', Math.round(p)+'<small>g</small>');
+  S('cv-carb', Math.round(c)+'<small>g</small>');
+  S('cv-fat',  Math.round(f)+'<small>g</small>');
+  S('cv-fib',  Math.round(fib)+'<small>g</small>');
+  var T=function(id,v){var e=document.getElementById(id); if(e)e.textContent=v;};
+  T('rcpTotK',Math.round(k)); T('rcpTotP',_g1(p)); T('rcpTotC',_g1(c)); T('rcpTotG',_g1(f)); T('rcpTotF',_g1(fib));
+  var fe=document.getElementById('fFormError'); if(fe)fe.textContent='';
 }
 
-async function resolveAlimentName(rowId, alimentId) {
-  try {
-    const r = await fetch(API + '/aliments/' + alimentId + '/edit', { headers: headers() });
-    const d = await r.json();
-    if (d.data) {
-      const input = document.getElementById('iac-' + rowId);
-      if (input) input.value = d.data.name || alimentId;
-      const row = _ingrRows.find(function(x) { return x.id == rowId; });
-      if (row) {
-        row.aliment_name  = d.data.name || '';
-        row.proteins      = d.data.proteins      != null ? d.data.proteins      : null;
-        row.carbohydrates = d.data.carbohydrates != null ? d.data.carbohydrates : null;
-        row.fats          = d.data.fats          != null ? d.data.fats          : null;
-        row.calories      = d.data.calories      != null ? d.data.calories      : null;
-        updateRowMacros(row);
-        recalcMacros();
-      }
-    }
-  } catch(e) {}
+function _ingrRowHTML(r){
+  var m=_ingMac(r);
+  var sub = r._source==='personal' ? 'Personal' : (r.group_food_name||'');
+  return '<tr id="irow-'+r.id+'">'
+    +'<td class="l"><div class="rcp-food-cell"><div class="rcp-food-ico">'+FOOD_ICO+'</div><div><div class="rcp-food-nm">'+esc(r.aliment_name||'Alimento')+'</div>'+(sub?'<div class="rcp-food-sub">'+esc(sub)+'</div>':'')+'</div></div></td>'
+    +'<td><input type="number" min="0" class="rcp-qty-inp" id="iqty-'+r.id+'" value="'+(parseFloat(r.quantity)||'')+'" oninput="onIngrQty('+r.id+',this.value)"><span class="rcp-qty-unit">g</span></td>'
+    +'<td class="rcp-kcal-cell" id="irk-'+r.id+'">'+Math.round(m.k)+'</td>'
+    +'<td id="irp-'+r.id+'">'+_g1(m.p)+'</td>'
+    +'<td id="irc-'+r.id+'">'+_g1(m.c)+'</td>'
+    +'<td id="irg-'+r.id+'">'+_g1(m.f)+'</td>'
+    +'<td id="irf-'+r.id+'">'+_g1(m.fib)+'</td>'
+    +'<td><button class="rcp-rm" onclick="removeIngredient('+r.id+')" title="Quitar">'+TRASH_ICO+'</button></td>'
+    +'</tr>';
 }
-
-function setIngrSource(rowId, src, btn) {
-  const row = _ingrRows.find(function(r) { return r.id == rowId; });
-  if (row) row._source = src;
-  const card = document.getElementById('irow-' + rowId);
-  if (card) card.querySelectorAll('.ingr-source-tab').forEach(function(b) { b.classList.remove('active'); });
-  btn.classList.add('active');
-  const inp = document.getElementById('iac-' + rowId);
-  if (inp && inp.value.length >= 2) acSearch(rowId, inp.value);
+function renderIngrTable(){
+  var wrap=document.getElementById('ingrTableWrap');
+  if(!wrap)return;
+  var rows=_ingrRows.filter(function(r){return r.aliment_id;});
+  if(!rows.length){ wrap.innerHTML='<div class="rcp-empty">Aún no hay alimentos. Búscalos arriba y añádelos a la receta.</div>'; return; }
+  wrap.innerHTML='<table class="rcp-tbl"><thead><tr><th class="l">Alimento</th><th>Cantidad</th><th>Kcal</th><th>P</th><th>C</th><th>G</th><th>Fibra</th><th>Acc.</th></tr></thead><tbody>'
+    +rows.map(_ingrRowHTML).join('')
+    +'</tbody><tfoot><tr class="rcp-total-row"><td class="l">Total receta</td><td></td><td id="rcpTotK">0</td><td id="rcpTotP">0g</td><td id="rcpTotC">0g</td><td id="rcpTotG">0g</td><td id="rcpTotF">0g</td><td></td></tr></tfoot></table>';
 }
+function onIngrQty(rowId,val){ var r=_ingrRows.find(function(x){return x.id==rowId;}); if(r)r.quantity=val; recalcMacros(); }
+function removeIngredient(rowId){ _ingrRows=_ingrRows.filter(function(r){return r.id!=rowId;}); renderIngrTable(); recalcMacros(); }
 
-async function acSearch(rowId, val) {
-  clearTimeout(_acTimers[rowId]);
-  if (!val || val.length < 2) { closeAc(rowId); return; }
-  _acTimers[rowId] = setTimeout(async function() {
-    try {
-      const row = _ingrRows.find(function(r) { return r.id == rowId; });
-      const src = row ? row._source : 'platform';
-      const endpoint = src === 'personal' ? API + '/client-aliments/search' : API + '/aliments/search';
-      const p = new URLSearchParams({ search: val, per_page: 8, page: 1 });
-      const r = await fetch(endpoint + '?' + p, { headers: headers() });
-      const d = await r.json();
-      const items = ((d.data && d.data.data) || []).map(function(a) { return Object.assign({}, a, { _source: src }); });
-      showAcDropdown(rowId, items);
-    } catch(e) {}
-  }, 250);
+// ── Buscador de alimentos ──
+var rcpSrc='platform';
+function rcpSetSource(src){
+  rcpSrc=src;
+  document.getElementById('rcpSrcPlat').classList.toggle('active',src==='platform');
+  document.getElementById('rcpSrcPers').classList.toggle('active',src==='personal');
+  rcpSearch(document.getElementById('rcpSearchInp').value);
 }
-
-function showAcDropdown(rowId, items) {
-  const drop = document.getElementById('acdrop-' + rowId);
-  if (!drop) return;
-  if (!items.length) { drop.classList.remove('open'); return; }
-  items.forEach(function(a) {
-    _macroCache[a.id] = { proteins: a.proteins != null ? a.proteins : null, carbohydrates: a.carbohydrates != null ? a.carbohydrates : null, fats: a.fats != null ? a.fats : null, calories: a.calories != null ? a.calories : null };
-  });
-  drop.innerHTML = items.map(function(a) {
-    const srcBadge = '<span style="display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;'
-      + (a._source==='personal' ? 'background:#ECFDF5;color:#059669;">👤 Personal' : 'background:#EEF2FF;color:#4F46E5;">🌐 Plataforma')
-      + '</span>';
-    return '<div class="ac-item" onmousedown="selectAliment(\'' + rowId + '\',\'' + a.id + '\',\'' + esc(a.name).replace(/'/g,"\\'") + '\')">' +
-      '<div class="ac-name">' + esc(a.name) + srcBadge + '</div>' +
-      (a.brand ? '<div class="ac-brand">' + esc(a.brand) + '</div>' : '') +
-    '</div>';
+function rcpSearch(val){
+  clearTimeout(_rcpTimer);
+  if(!val || val.length<2){ var d0=document.getElementById('rcpAcDrop'); if(d0)d0.classList.remove('open'); return; }
+  _rcpTimer=setTimeout(async function(){
+    try{
+      var ep = rcpSrc==='personal' ? API+'/client-aliments/search' : API+'/aliments/search';
+      var p=new URLSearchParams({search:val,per_page:10,page:1});
+      if(rcpSrc==='personal' && _meUserId) p.set('client_id',_meUserId);
+      var r=await fetch(ep+'?'+p,{headers:headers()});
+      var d=await r.json();
+      rcpRenderResults((d.data && d.data.data)||[]);
+    }catch(e){}
+  },250);
+}
+function rcpRenderResults(items){
+  var drop=document.getElementById('rcpAcDrop'); if(!drop)return;
+  if(!items.length){ drop.innerHTML='<div class="rcp-acmsg">Sin resultados.</div>'; drop.classList.add('open'); return; }
+  drop.innerHTML=items.map(function(a){
+    _rcpCache[a.id]=a;
+    var k=Math.round(a.calories||0);
+    var chip = rcpSrc==='personal' ? '<span class="chip" style="background:#ECFDF5;color:#059669;">Personal</span>' : '';
+    return '<button type="button" class="rcp-acitem" onmousedown="event.preventDefault();rcpAddAliment(\''+a.id+'\')">'
+      +'<div class="rcp-food-ico">'+FOOD_ICO+'</div>'
+      +'<div><div class="nm">'+esc(a.name||'')+(a.brand?' <span style="font-weight:500;color:#9CA3AF;">· '+esc(a.brand)+'</span>':'')+'</div>'
+      +'<div class="ds">100 g · '+k+' kcal · P'+(Math.round((a.proteins||0)*10)/10)+' C'+(Math.round((a.carbohydrates||0)*10)/10)+' G'+(Math.round((a.fats||0)*10)/10)+'</div></div>'
+      +chip+'</button>';
   }).join('');
   drop.classList.add('open');
 }
-
-function selectAliment(rowId, alimentId, alimentName) {
-  const row = _ingrRows.find(function(r) { return r.id == rowId; });
-  if (row) {
-    row.aliment_id = alimentId; row.aliment_name = alimentName;
-    const m = _macroCache[alimentId] || {};
-    row.proteins      = m.proteins      != null ? m.proteins      : null;
-    row.carbohydrates = m.carbohydrates != null ? m.carbohydrates : null;
-    row.fats          = m.fats          != null ? m.fats          : null;
-    row.calories      = m.calories      != null ? m.calories      : null;
-    updateRowMacros(row);
-  }
-  const input = document.getElementById('iac-' + rowId);
-  if (input) input.value = alimentName;
-  closeAc(rowId);
-  recalcMacros();
+function rcpAddAliment(id){
+  var a=_rcpCache[id]; if(!a)return;
+  var rowId=++_rowSeq;
+  _ingrRows.push({ id:rowId, aliment_id:a.id, aliment_name:a.name||'',
+    group_food_id:a.group_food_id!=null?a.group_food_id:null,
+    group_food_name:(a.group_food&&a.group_food.name)||a.group_food_name||'',
+    proteins:a.proteins!=null?a.proteins:null, carbohydrates:a.carbohydrates!=null?a.carbohydrates:null,
+    fats:a.fats!=null?a.fats:null, calories:a.calories!=null?a.calories:null, fiber:a.fiber!=null?a.fiber:null,
+    quantity:(a.quantity!=null?String(a.quantity):'100'), _source:rcpSrc });
+  document.getElementById('rcpSearchInp').value='';
+  document.getElementById('rcpAcDrop').classList.remove('open');
+  renderIngrTable(); recalcMacros();
 }
+document.addEventListener('click',function(e){ if(!e.target.closest('.rcp-search')){ var d=document.getElementById('rcpAcDrop'); if(d)d.classList.remove('open'); } });
 
-function closeAc(rowId) { const el = document.getElementById('acdrop-' + rowId); if (el) el.classList.remove('open'); }
-function closeAllAc() { document.querySelectorAll('.ac-dropdown').forEach(function(d) { d.classList.remove('open'); }); }
+// Carga de los alimentos al editar una receta (resuelve macros/fibra de cada uno)
+async function loadRecipeDetails(details){
+  _ingrRows=[];
+  renderIngrTable();
+  for(var i=0;i<details.length;i++){
+    var d=details[i];
+    if(!d.aliment_id) continue;
+    var rowId=++_rowSeq;
+    var row={ id:rowId, aliment_id:d.aliment_id, aliment_name:'', group_food_id:null, group_food_name:'',
+      proteins:null,carbohydrates:null,fats:null,calories:null,fiber:null,
+      quantity:(d.quantity!=null?String(d.quantity):''), _source:'platform' };
+    _ingrRows.push(row);
+    try{
+      var r=await fetch(API+'/aliments/'+d.aliment_id+'/edit',{headers:headers()});
+      var jd=await r.json();
+      if(jd.data){ var a=jd.data;
+        row.aliment_name=a.name||''; row.group_food_id=a.group_food_id!=null?a.group_food_id:null;
+        row.group_food_name=(a.group_food&&a.group_food.name)||'';
+        row.proteins=a.proteins; row.carbohydrates=a.carbohydrates; row.fats=a.fats; row.calories=a.calories;
+        row.fiber=a.fiber!=null?a.fiber:null;
+      }
+    }catch(e){}
+  }
+  renderIngrTable(); recalcMacros();
+}
 
 function setImagePreview(url) {
   _imageUrl = url || null;

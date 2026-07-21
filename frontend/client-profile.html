@@ -1095,7 +1095,12 @@
     .nut-fmc.fat{background:#EDE9FE;color:#6366F1;}
     /* Food picker (legacy, kept hidden) */
     .nut-pk-ovl{display:none!important;}
-  </style>
+  
+    /* Logo de marca (icono ALZUM) junto al nombre */
+    .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;}
+    .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
+    .sl-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
+</style>
   <style>
 /* ── Screenshot redesign ── */
 .breadcrumb-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 24px;height:48px;display:flex;align-items:center;gap:8px;flex-shrink:0;font-size:13px;}
@@ -1324,10 +1329,7 @@
 
 <!-- Sidebar -->
 <nav class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <span>ALZUM<em>.io</em></span>
-    <small>Panel del Coach</small>
-  </div>
+  <div class="sidebar-logo"><div class="sl-mark" role="img" aria-label="ALZUM.io"></div><div class="sl-txt"><span>ALZUM<em>.io</em></span><small>Panel del Coach</small></div></div>
   <div class="sidebar-nav">
     <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>

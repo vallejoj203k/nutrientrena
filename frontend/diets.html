@@ -779,16 +779,18 @@
     .dc-dd-item.danger{color:#DC2626;}
     .dc-dd-item.danger:hover{background:#FEE2E2;color:#DC2626;}
     .dc-dd-sep{height:1px;background:#F3F4F6;margin:4px 0;}
-  </style>
+  
+    /* Logo de marca (icono ALZUM) junto al nombre */
+    .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;}
+    .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
+    .sl-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
+</style>
 </head>
 <body>
 
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <span>ALZUM<em>.io</em></span>
-    <small>Panel del Coach</small>
-  </div>
+  <div class="sidebar-logo"><div class="sl-mark" role="img" aria-label="ALZUM.io"></div><div class="sl-txt"><span>ALZUM<em>.io</em></span><small>Panel del Coach</small></div></div>
   <nav class="sidebar-nav">
     <div class="nav-section">Principal</div>
     <a class="nav-item" href="dashboard.html">

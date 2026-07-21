@@ -498,9 +498,10 @@
     .pm2-rm:hover{color:#DC2626;background:#FEF2F2;}
     .pm2-total-row td{border-bottom:none;border-top:1px solid #EEF0F3;font-weight:800;color:#111827;background:#FAFBFC;padding-top:13px;padding-bottom:13px;}
     .pm2-total-row td.l{color:#9CA3AF;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
-    .pm2-addlink{display:inline-flex;align-items:center;gap:9px;margin:13px 2px 2px;padding:9px 16px;border:1.5px dashed #C7D2FE;border-radius:10px;background:transparent;color:#4F46E5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+    .pm2-addlink{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border:1.5px dashed #C7D2FE;border-radius:10px;background:transparent;color:#4F46E5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
     .pm2-addlink:hover{background:#EEF2FF;border-color:#4F46E5;}
     .pm2-addlink .plus{width:22px;height:22px;border-radius:7px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .pm2-addrow td{border-bottom:none !important;padding:10px 10px 4px !important;}
     .pm2-add-meal{width:100%;padding:16px;border-radius:14px;border:2px dashed #D1D5DB;background:transparent;color:#6B7280;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
     .pm2-add-meal:hover{border-color:#4F46E5;color:#4F46E5;background:#EEF2FF;}
     @media(max-width:1000px){.pm2-stats{grid-template-columns:repeat(3,1fr);}}
@@ -1083,23 +1084,23 @@
       <div class="pm2-stats">
         <div class="pm2-stat">
           <div class="pm2-stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
-          <div><div class="pm2-stat-lbl">Calorías</div><div class="pm2-stat-val" id="tot_kcal">0 kcal</div></div>
+          <div><div class="pm2-stat-lbl">Calorías</div><div class="pm2-stat-val" id="tot_kcal" style="color:#D97706;">0</div></div>
         </div>
         <div class="pm2-stat">
           <div class="pm2-stat-ico" style="background:#D1FAE5;color:#059669;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg></div>
-          <div><div class="pm2-stat-lbl">Proteínas</div><div class="pm2-stat-val" id="tot_prot">0g</div></div>
+          <div><div class="pm2-stat-lbl">Proteínas</div><div class="pm2-stat-val" id="tot_prot" style="color:#059669;">0<small>g</small></div></div>
         </div>
         <div class="pm2-stat">
           <div class="pm2-stat-ico" style="background:#FFEDD5;color:#EA580C;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/></svg></div>
-          <div><div class="pm2-stat-lbl">Carbos</div><div class="pm2-stat-val" id="tot_carb">0g</div></div>
+          <div><div class="pm2-stat-lbl">Carbos</div><div class="pm2-stat-val" id="tot_carb" style="color:#EA580C;">0<small>g</small></div></div>
         </div>
         <div class="pm2-stat">
           <div class="pm2-stat-ico" style="background:#FEE2E2;color:#DC2626;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
-          <div><div class="pm2-stat-lbl">Grasas</div><div class="pm2-stat-val" id="tot_fat">0g</div></div>
+          <div><div class="pm2-stat-lbl">Grasas</div><div class="pm2-stat-val" id="tot_fat" style="color:#DC2626;">0<small>g</small></div></div>
         </div>
         <div class="pm2-stat">
           <div class="pm2-stat-ico" style="background:#ECFDF5;color:#10B981;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
-          <div><div class="pm2-stat-lbl">Fibra</div><div class="pm2-stat-val" id="tot_fib">0g</div></div>
+          <div><div class="pm2-stat-lbl">Fibra</div><div class="pm2-stat-val" id="tot_fib" style="color:#10B981;">0<small>g</small></div></div>
         </div>
       </div>
       <!-- Tarjetas de comidas -->
@@ -1957,12 +1958,15 @@ function _pm2MealBodyHTML(meal) {
   }
   return '<div class="pm2-tblwrap"><table class="pm2-tbl">'
     + '<thead><tr><th class="l">Alimento</th><th>Cantidad</th><th>Kcal</th><th>P</th><th>C</th><th>G</th><th>Fibra</th><th>Acc.</th></tr></thead>'
-    + '<tbody>' + rows.map(function(row){ return _pm2RowHTML(mid, row); }).join('') + '</tbody>'
+    + '<tbody>' + rows.map(function(row){ return _pm2RowHTML(mid, row); }).join('')
+    +   '<tr class="pm2-addrow"><td class="l" colspan="8">'
+    +     '<button class="pm2-addlink" onclick="openFoodSearch(' + mid + ')"><span class="plus"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Añadir alimento</button>'
+    +   '</td></tr>'
+    + '</tbody>'
     + '<tfoot><tr class="pm2-total-row"><td class="l">Total comida</td><td></td>'
     +   '<td id="mtk-' + mid + '">0</td><td id="mtp-' + mid + '">0g</td><td id="mtc-' + mid + '">0g</td><td id="mtg-' + mid + '">0g</td><td id="mtfib-' + mid + '">0g</td><td></td>'
     + '</tr></tfoot>'
-    + '</table></div>'
-    + '<button class="pm2-addlink" onclick="openFoodSearch(' + mid + ')"><span class="plus"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Añadir alimento</button>';
+    + '</table></div>';
 }
 
 function _renderMealBody(mid) {
@@ -2351,11 +2355,11 @@ function recalcTotalMacros() {
   var tC = document.getElementById('tot_carb');
   var tF = document.getElementById('tot_fat');
   var tFb = document.getElementById('tot_fib');
-  if (tK) tK.textContent = Math.round(k) + ' kcal';
-  if (tP) tP.textContent = Math.round(p) + 'g';
-  if (tC) tC.textContent = Math.round(c) + 'g';
-  if (tF) tF.textContent = Math.round(f) + 'g';
-  if (tFb) tFb.textContent = Math.round(fb) + 'g';
+  if (tK) tK.textContent = Math.round(k);
+  if (tP) tP.innerHTML = Math.round(p) + '<small>g</small>';
+  if (tC) tC.innerHTML = Math.round(c) + '<small>g</small>';
+  if (tF) tF.innerHTML = Math.round(f) + '<small>g</small>';
+  if (tFb) tFb.innerHTML = Math.round(fb) + '<small>g</small>';
 }
 
 // --- Autocomplete ---

@@ -189,13 +189,14 @@
     .dp-close:hover{background:#F3F4F6;}
     .dp-close svg{color:#6B7280;}
     .dp-title{font-size:16px;font-weight:800;color:#111;}
-    .dp-steps{display:flex;gap:4px;margin-left:auto;}
-    .dp-step{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;background:#F3F4F6;color:#6B7280;}
-    .dp-step:hover{background:#E5E7EB;}
+    .dp-steps{display:flex;align-items:center;gap:4px;margin-left:auto;border:1px solid #E5E7EB;background:#fff;border-radius:10px;padding:3px;}
+    .dp-step{display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:.15s;background:transparent;color:#6B7280;}
+    .dp-step:hover{color:#111827;}
     .dp-step.active{background:#4F46E5;color:#fff;}
+    .dp-step.active:hover{color:#fff;}
     .dp-eyebrow{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;line-height:1.2;}
     /* Paso Información (diseño prototipo) */
-    .dgi-card{background:#fff;border:1px solid #EEF0F3;border-radius:18px;padding:28px 30px;max-width:820px;margin:26px auto;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+    .dgi-card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:32px;max-width:768px;margin:40px auto;box-shadow:0 1px 3px rgba(0,0,0,.05);}
     .dgi-lbl{display:block;font-size:10.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.7px;margin:0 0 8px;}
     .dgi-inp,.dgi-sel,.dgi-ta{width:100%;padding:12px 14px;border:1px solid #E5E7EB;border-radius:11px;font-size:14.5px;color:#111;background:#fff;outline:none;transition:.15s;font-family:inherit;}
     .dgi-inp:focus,.dgi-sel:focus,.dgi-ta:focus{border-color:#4F46E5;}
@@ -990,22 +991,13 @@
         <input class="dgi-inp" id="f_title" placeholder="Ej: Recomposición · 2100 kcal" oninput="updatePreview()" style="font-weight:600;"/>
       </div>
 
-      <!-- TIPO DE DIETA + Nº COMIDAS -->
-      <div class="dgi-gap" style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;">
-        <div style="flex:1;min-width:220px;">
-          <label class="dgi-lbl">Tipo de dieta</label>
-          <select class="dgi-sel" id="f_type"><option value="">Seleccionar...</option></select>
-        </div>
-        <div style="flex:0 0 auto;">
-          <label class="dgi-lbl">Número de comidas</label>
-          <div class="dp-stepper" style="margin-top:0;">
-            <button class="dp-stepper-btn" onclick="changeMealCount(-1)">−</button>
-            <span class="dp-stepper-val" id="mealCountVal">5</span>
-            <button class="dp-stepper-btn" onclick="changeMealCount(1)">+</button>
-            <span class="dp-stepper-unit">comidas/día</span>
-          </div>
-        </div>
+      <!-- TIPO DE DIETA -->
+      <div class="dgi-gap">
+        <label class="dgi-lbl">Tipo de dieta</label>
+        <select class="dgi-sel" id="f_type"><option value="">Seleccionar...</option></select>
       </div>
+      <!-- Nº de comidas: se gestiona en el paso 2 (Plan de comidas) -->
+      <span id="mealCountVal" style="display:none;">5</span>
 
       <!-- OBJETIVO NUTRICIONAL DE ESTA PLANTILLA -->
       <div class="dgo-box">
@@ -1074,7 +1066,7 @@
 
       <button class="dp-next-btn" style="margin-top:26px;" onclick="goToStep(2)">
         Siguiente: Plan de comidas
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-left:6px;"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px;margin-left:6px;"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/></svg>
       </button>
 
     </div>

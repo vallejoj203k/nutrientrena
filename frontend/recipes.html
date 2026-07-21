@@ -305,6 +305,10 @@
     .rcp-total-row td{border-bottom:none;border-top:1px solid #EEF0F3;font-weight:800;color:#111827;background:#FAFBFC;padding-top:13px;padding-bottom:13px;}
     .rcp-total-row td.l{color:#9CA3AF;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
     .rcp-empty{padding:26px 16px;text-align:center;color:#9CA3AF;font-size:13px;}
+    .rcp-addrow td{border-bottom:none !important;padding:10px 10px 4px !important;}
+    .rcp-addlink{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border:1.5px dashed #C7D2FE;border-radius:10px;background:transparent;color:var(--indigo);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+    .rcp-addlink:hover{background:#EEF2FF;border-color:var(--indigo);}
+    .rcp-addlink .plus{width:22px;height:22px;border-radius:7px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .form-error{color:#DC2626;font-size:12px;margin-top:4px;}
     .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
@@ -1010,7 +1014,14 @@ function renderIngrTable(){
   if(!rows.length){ wrap.innerHTML='<div class="rcp-empty">Aún no hay alimentos. Búscalos arriba y añádelos a la receta.</div>'; return; }
   wrap.innerHTML='<table class="rcp-tbl"><thead><tr><th class="l">Alimento</th><th>Cantidad</th><th>Kcal</th><th>P</th><th>C</th><th>G</th><th>Fibra</th><th>Acc.</th></tr></thead><tbody>'
     +rows.map(_ingrRowHTML).join('')
+    +'<tr class="rcp-addrow"><td class="l" colspan="8"><button type="button" class="rcp-addlink" onclick="rcpFocusSearch()"><span class="plus"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Añadir alimento</button></td></tr>'
     +'</tbody><tfoot><tr class="rcp-total-row"><td class="l">Total receta</td><td></td><td id="rcpTotK">0</td><td id="rcpTotP">0g</td><td id="rcpTotC">0g</td><td id="rcpTotG">0g</td><td id="rcpTotF">0g</td><td></td></tr></tfoot></table>';
+}
+function rcpFocusSearch(){
+  var inp=document.getElementById('rcpSearchInp');
+  if(!inp)return;
+  if(inp.scrollIntoView) inp.scrollIntoView({behavior:'smooth',block:'center'});
+  inp.focus();
 }
 function onIngrQty(rowId,val){ var r=_ingrRows.find(function(x){return x.id==rowId;}); if(r)r.quantity=val; recalcMacros(); }
 function removeIngredient(rowId){ _ingrRows=_ingrRows.filter(function(r){return r.id!=rowId;}); renderIngrTable(); recalcMacros(); }

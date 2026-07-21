@@ -450,13 +450,14 @@
 
     /* ── Plan de comidas v2: barra de stats + tarjetas apiladas ── */
     .pm2-scroll{flex:1;overflow-y:auto;background:#F7F8FA;padding:22px 26px 30px;}
-    .pm2-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
-    .pm2-stat{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:15px 18px;display:flex;align-items:center;gap:13px;}
+    .pm2-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:0 auto 20px;max-width:1400px;}
+    .pm2-stat{background:#fff;border:1px solid #D8DDE4;border-radius:14px;padding:15px 18px;display:flex;align-items:center;gap:13px;}
+    #pm2List{max-width:1400px;margin:0 auto;}
     .pm2-stat-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .pm2-stat-lbl{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;}
     .pm2-stat-val{font-size:23px;font-weight:800;color:#111827;margin-top:2px;line-height:1.1;}
     .pm2-stat-val small{font-size:11px;font-weight:700;color:#9CA3AF;}
-    .pm2-card{background:#fff;border:1px solid #EEF0F3;border-radius:16px;margin-bottom:14px;overflow:hidden;transition:box-shadow .15s;}
+    .pm2-card{background:#fff;border:1px solid #D8DDE4;border-radius:16px;margin-bottom:14px;overflow:hidden;transition:box-shadow .15s;box-shadow:0 1px 2px rgba(16,24,40,.04);}
     .pm2-card.dragging{opacity:.5;}
     .pm2-card.dragover{box-shadow:0 0 0 2px #4F46E5;}
     .pm2-head{display:flex;align-items:center;gap:10px;padding:14px 16px;flex-wrap:wrap;}
@@ -507,7 +508,7 @@
     .pm2-addlink:hover{background:#EEF2FF;border-color:#4F46E5;}
     .pm2-addlink .plus{width:22px;height:22px;border-radius:7px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .pm2-addrow td{border-bottom:none !important;padding:10px 10px 4px !important;}
-    .pm2-add-meal{width:100%;padding:16px;border-radius:14px;border:2px dashed #D1D5DB;background:transparent;color:#6B7280;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
+    .pm2-add-meal{display:block;width:100%;max-width:1400px;margin:0 auto;padding:16px;border-radius:14px;border:2px dashed #CBD1D9;background:transparent;color:#6B7280;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
     .pm2-add-meal:hover{border-color:#4F46E5;color:#4F46E5;background:#EEF2FF;}
     @media(max-width:1000px){.pm2-stats{grid-template-columns:repeat(3,1fr);}}
     @media(max-width:640px){

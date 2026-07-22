@@ -1640,6 +1640,15 @@ function toggleSidebar(){const s=document.getElementById('sidebar');const o=docu
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 </script>
 
+<!-- Ver rutina — panel lateral -->
+<div class="rv-overlay" id="rvOverlay" onclick="closeRoutineView()"></div>
+<aside class="rv-panel" id="rvPanel" aria-label="Ver rutina">
+  <button class="rv-close" onclick="closeRoutineView()" title="Cerrar">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="rv-body" id="rvBody"><div class="rv-empty">Cargando rutina…</div></div>
+</aside>
+
 <!-- Nueva rutina slide panel -->
 <div class="rp-overlay" id="rpOverlay" onclick="closeRutinaPanel()"></div>
 <div class="rp-panel" id="rutinaPanel">

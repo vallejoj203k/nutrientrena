@@ -223,24 +223,31 @@
     .empty-day .ed-sub{font-size:13px;color:#9CA3AF;}
     .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .picker-overlay.open{opacity:1;pointer-events:all;}
-    .picker-modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;}
+    .picker-modal{background:#fff;border-radius:16px;width:760px;max-width:96vw;height:600px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;overflow:hidden;}
     .picker-overlay.open .picker-modal{transform:translateY(0);}
-    .picker-head{padding:18px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .picker-head h3{font-size:15px;font-weight:700;color:#111;}
-    .picker-filters{padding:12px 16px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}
-    .picker-search{width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;margin-bottom:10px;font-family:inherit;}
-    .picker-search:focus{border-color:var(--indigo);}
-    .picker-pills{display:flex;gap:6px;flex-wrap:wrap;}
-    .picker-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;transition:.15s;}
-    .picker-pill:hover{border-color:var(--indigo);color:var(--indigo);}
-    .picker-pill.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
-    .picker-results{flex:1;overflow-y:auto;padding:8px 0;}
-    .picker-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid #EBEBEB;}
-    .picker-item:hover{background:#EEF2FF;}
-    .picker-item-icon{width:36px;height:36px;border-radius:8px;background:var(--indigo-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-    .picker-item-name{font-size:13px;font-weight:600;color:#111;}
-    .picker-item-muscle{font-size:11px;color:#9CA3AF;}
-    .picker-empty{padding:32px;text-align:center;color:#9CA3AF;font-size:13px;}
+    .picker-head{padding:18px 22px 14px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+    .picker-head h3{font-size:18px;font-weight:800;color:#111;}
+    .picker-sub{font-size:13px;color:#9CA3AF;margin-top:3px;}
+    .picker-search-wrap{position:relative;padding:0 22px 14px;flex-shrink:0;}
+    .picker-search-wrap svg{position:absolute;left:36px;top:11px;color:#9CA3AF;}
+    .picker-search{width:100%;padding:11px 14px 11px 40px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;outline:none;font-family:inherit;}
+    .picker-search:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
+    .picker-body{flex:1;display:flex;min-height:0;border-top:1px solid #F3F4F6;}
+    .picker-mgs{width:190px;min-width:190px;border-right:1px solid #F3F4F6;overflow-y:auto;padding:12px 10px;}
+    .picker-mgs-lbl{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;padding:2px 8px 8px;}
+    .pk-mg{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;color:#374151;transition:.12s;margin-bottom:3px;}
+    .pk-mg:hover{background:#F9FAFB;}
+    .pk-mg.active{background:#F59E0B;color:#fff;}
+    .pk-mg .pk-count{font-size:12px;font-weight:700;color:#9CA3AF;}
+    .pk-mg.active .pk-count{color:#fff;opacity:.85;}
+    .picker-grid{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-content:start;}
+    .pk-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #E5E7EB;border-radius:12px;cursor:pointer;transition:.15s;background:#fff;}
+    .pk-card:hover{border-color:var(--indigo);background:#F9FAFF;box-shadow:0 2px 8px rgba(79,70,229,.08);}
+    .pk-ico{width:42px;height:42px;border-radius:10px;background:var(--indigo-pale);color:var(--indigo);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+    .pk-ico img{width:100%;height:100%;object-fit:cover;}
+    .pk-name{font-size:14px;font-weight:700;color:#111827;line-height:1.2;}
+    .pk-mg-name{font-size:12px;color:#9CA3AF;margin-top:3px;}
+    .picker-empty{grid-column:1/-1;padding:40px;text-align:center;color:#9CA3AF;font-size:13px;}
     .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
     .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
@@ -702,15 +709,19 @@
 <div class="picker-overlay" id="pickerOverlay" onclick="if(event.target===this)closePicker()">
   <div class="picker-modal">
     <div class="picker-head">
-      <h3>Seleccionar ejercicio</h3>
+      <div>
+        <h3>Elegir ejercicio</h3>
+        <div class="picker-sub">Filtra por grupo muscular y selecciona un ejercicio del catálogo.</div>
+      </div>
       <button class="modal-close" onclick="closePicker()">×</button>
     </div>
-    <div class="picker-filters">
+    <div class="picker-search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input class="picker-search" id="pickerSearch" placeholder="Buscar ejercicio…" oninput="searchPicker()"/>
-      <div class="picker-pills" id="pickerPills"></div>
     </div>
-    <div class="picker-results" id="pickerResults">
-      <div class="picker-empty">Busca un ejercicio para comenzar.</div>
+    <div class="picker-body">
+      <div class="picker-mgs" id="pickerMgs"><div class="picker-mgs-lbl">Grupos musculares</div></div>
+      <div class="picker-grid" id="pickerResults"><div class="picker-empty">Cargando ejercicios…</div></div>
     </div>
   </div>
 </div>
@@ -1412,25 +1423,59 @@ async function saveRoutine(){
   finally{btn.disabled=false;btn.textContent='Guardar rutina';}
 }
 
-let pickerMgFilter=null;let pickerSearchTimeout=null;let allMuscleGroups=[];
-function openPicker(blockIdx,replaceEi=null){pickerTargetBlockIdx=blockIdx;pickerReplaceEi=replaceEi;document.getElementById('pickerSearch').value='';pickerMgFilter=null;document.getElementById('pickerOverlay').classList.add('open');renderPickerPills();fetchPickerResults('');}
+let pickerMgFilter=null;let pickerSearchTimeout=null;
+let _pkTrainings=null,_pkGroups=[],_pkView=[],_pkLoading=false;
+const PK_ICO='<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>';
+
+function openPicker(blockIdx,replaceEi=null){
+  pickerTargetBlockIdx=blockIdx;pickerReplaceEi=replaceEi;
+  document.getElementById('pickerSearch').value='';
+  document.getElementById('pickerOverlay').classList.add('open');
+  loadPickerCatalog();
+  setTimeout(()=>document.getElementById('pickerSearch').focus(),50);
+}
 function closePicker(){document.getElementById('pickerOverlay').classList.remove('open');}
-function renderPickerPills(){
-  const container=document.getElementById('pickerPills');
-  container.innerHTML=`<button class="picker-pill${!pickerMgFilter?' active':''}" onclick="setPickerMg(null)">Todos</button>${allMuscleGroups.map(mg=>`<button class="picker-pill${pickerMgFilter===mg.id?' active':''}" onclick="setPickerMg(${mg.id})">${esc(mg.name)}</button>`).join('')}`;
+
+function buildPkGroups(){
+  const order=[],map={};
+  (_pkTrainings||[]).forEach(t=>{const nm=t.muscle_group_name||'Otros';if(!map[nm]){map[nm]={name:nm,count:0};order.push(nm);}map[nm].count++;});
+  _pkGroups=order.map(nm=>map[nm]);
 }
-function setPickerMg(id){pickerMgFilter=id;renderPickerPills();fetchPickerResults(document.getElementById('pickerSearch').value);}
-function searchPicker(){clearTimeout(pickerSearchTimeout);pickerSearchTimeout=setTimeout(()=>{fetchPickerResults(document.getElementById('pickerSearch').value);},300);}
-async function fetchPickerResults(search){
-  const params=new URLSearchParams({per_page:30});if(search)params.set('search',search);if(pickerMgFilter)params.set('muscle_group_id',pickerMgFilter);
-  try{const r=await fetch(`${API}/trainings/search?${params}`,{headers:authHeaders()});const d=await r.json();renderPickerResults(d.data?.data||d.data||[]);}
-  catch{document.getElementById('pickerResults').innerHTML='<div class="picker-empty">Error al buscar.</div>';}
+async function loadPickerCatalog(){
+  if(_pkTrainings){ if(pickerMgFilter==null&&_pkGroups.length)pickerMgFilter=_pkGroups[0].name; renderPicker(); return; }
+  if(_pkLoading)return;_pkLoading=true;
+  document.getElementById('pickerResults').innerHTML='<div class="picker-empty">Cargando ejercicios…</div>';
+  try{
+    const r=await fetch(`${API}/trainings/search?per_page=1000`,{headers:authHeaders()});
+    const d=await r.json();
+    _pkTrainings=(d.data&&d.data.data)||d.data||[];
+    buildPkGroups();
+    if(_pkGroups.length)pickerMgFilter=_pkGroups[0].name;
+    renderPicker();
+  }catch{document.getElementById('pickerResults').innerHTML='<div class="picker-empty">Error al cargar el catálogo.</div>';}
+  finally{_pkLoading=false;}
 }
-function renderPickerResults(items){
-  const container=document.getElementById('pickerResults');
-  if(!items.length){container.innerHTML='<div class="picker-empty">No se encontraron ejercicios.</div>';return;}
-  container.innerHTML=items.map(ex=>`<div class="picker-item" onclick="selectExercise(${ex.id},'${esc(ex.name)}','${esc(ex.muscle_group_name)}')"><div class="picker-item-icon">${ex.image?`<img src="${esc(ex.image)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`:(ex.muscle_group_name?ex.muscle_group_name[0]:'?')}</div><div><div class="picker-item-name">${esc(ex.name)}</div><div class="picker-item-muscle">${esc(ex.muscle_group_name||'—')}</div></div></div>`).join('');
+function renderPicker(){renderPkMgs();renderPkGrid();}
+function renderPkMgs(){
+  const box=document.getElementById('pickerMgs');
+  box.innerHTML='<div class="picker-mgs-lbl">Grupos musculares</div>'+_pkGroups.map((g,i)=>
+    `<div class="pk-mg${pickerMgFilter===g.name?' active':''}" onclick="pkSetMg(${i})"><span>${esc(g.name)}</span><span class="pk-count">${g.count}</span></div>`).join('');
 }
+function pkSetMg(i){pickerMgFilter=_pkGroups[i].name;document.getElementById('pickerSearch').value='';renderPicker();}
+function searchPicker(){clearTimeout(pickerSearchTimeout);pickerSearchTimeout=setTimeout(renderPkGrid,120);}
+function renderPkGrid(){
+  const box=document.getElementById('pickerResults');
+  const q=(document.getElementById('pickerSearch').value||'').trim().toLowerCase();
+  let items;
+  if(q){ items=(_pkTrainings||[]).filter(t=>(t.name||'').toLowerCase().includes(q)); renderPkMgs(); }
+  else { items=(_pkTrainings||[]).filter(t=>(t.muscle_group_name||'Otros')===pickerMgFilter); }
+  _pkView=items;
+  if(!items.length){box.innerHTML='<div class="picker-empty">No se encontraron ejercicios.</div>';return;}
+  box.innerHTML=items.map((ex,i)=>
+    `<div class="pk-card" onclick="pkPick(${i})"><div class="pk-ico">${ex.image?`<img src="${esc(ex.image)}" alt="">`:PK_ICO}</div><div><div class="pk-name">${esc(ex.name)}</div><div class="pk-mg-name">${esc(ex.muscle_group_name||'—')}</div></div></div>`).join('');
+}
+function pkPick(i){const ex=_pkView[i];if(ex)selectExercise(ex.id,ex.name,ex.muscle_group_name||'');}
+
 function selectExercise(trainingId,name,muscleName){
   if(pickerTargetBlockIdx===null)return;
   const day=routineData.days_list[selectedDayIdx];const blk=day.blocks[pickerTargetBlockIdx];
@@ -1445,8 +1490,14 @@ function selectExercise(trainingId,name,muscleName){
 }
 
 async function loadMuscleGroupsForFilters(){
-  if(allMuscleGroups.length){renderPickerPills();return;}
-  try{const r=await fetch(`${API}/muscle-groups/findAll`,{headers:authHeaders()});const d=await r.json();allMuscleGroups=d.data||[];renderPickerPills();}catch{}
+  // Precarga silenciosa del catálogo para que el picker abra al instante.
+  if(_pkTrainings)return;
+  try{
+    const r=await fetch(`${API}/trainings/search?per_page=1000`,{headers:authHeaders()});
+    const d=await r.json();
+    _pkTrainings=(d.data&&d.data.data)||d.data||[];
+    buildPkGroups();
+  }catch{}
 }
 
 // ── Assign modal ──────────────────────────────────────────────────────────────

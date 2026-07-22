@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <title>NutriEntrena — Mi espacio</title>
-  <!-- Guard: solo clientes (rol 6). Otros roles van al panel del coach. -->
+  <!-- Guard: esta zona es solo del cliente (rol 6). -->
   <script>
     (function(){
       var t = localStorage.getItem('token');
@@ -18,116 +18,141 @@
   </script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{
-      --indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;
-      --green:#059669;--green-pale:#D1FAE5;--amber:#F59E0B;--amber-pale:#FEF3C7;
-      --red:#DC2626;--ink:#111827;--muted:#6B7280;--line:#E5E7EB;--bg:#F4F5F8;
-    }
-    html,body{background:var(--bg);}
-    body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;color:var(--ink);
-      min-height:100vh;display:flex;justify-content:center;}
-    /* Contenedor tipo móvil, centrado en escritorio */
-    .app{width:100%;max-width:460px;background:var(--bg);min-height:100vh;
-      display:flex;flex-direction:column;position:relative;padding-bottom:78px;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--green:#059669;--amber:#F59E0B;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;border-bottom:1px solid #EBEBEB;}
+    .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
+    .sl-txt{display:flex;flex-direction:column;line-height:1.15;}
+    .sl-txt b{font-size:17px;font-weight:800;letter-spacing:.3px;}
+    .sl-txt b .n1{color:var(--indigo);}.sl-txt b .n2{color:var(--green);}
+    .sl-txt small{color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:12px 20px 4px;font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.75;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .nav-item.disabled{opacity:.6;cursor:default;}
+    .nav-item.disabled:hover{background:none;color:#374151;}
+    .nav-soon-tag{margin-left:auto;font-size:9px;font-weight:700;color:#9CA3AF;background:#F3F4F6;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;overflow:hidden;}
+    .s-avatar img{width:100%;height:100%;object-fit:cover;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
 
-    /* Cabecera */
-    .ch-top{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
-    .ch-brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:800;letter-spacing:.3px;}
-    .ch-brand .mark{width:30px;height:30px;border-radius:8px;background:url('logo.webp') no-repeat 50% 41%;background-size:158px;flex-shrink:0;}
-    .ch-brand b{font-weight:800;}
-    .ch-brand .n1{color:var(--indigo);}
-    .ch-brand .n2{color:var(--green);}
-    .ch-actions{display:flex;align-items:center;gap:10px;}
-    .ch-bell{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:#374151;cursor:pointer;}
-    .ch-bell .dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid #fff;display:none;}
-    .ch-bell.has-unread .dot{display:block;}
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:64px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;}
+    .menu-btn:hover{background:#F3F4F6;}
+    .topbar-title{font-size:17px;font-weight:800;color:#111827;flex:1;}
+    .bell{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid #E5E7EB;background:#fff;display:flex;align-items:center;justify-content:center;color:#374151;cursor:pointer;}
+    .bell .dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:#DC2626;border:2px solid #fff;display:none;}
+    .bell.has-unread .dot{display:block;}
 
-    /* Saludo */
-    .hero{padding:20px 18px 8px;}
-    .hero .hi{font-size:14px;color:var(--muted);}
-    .hero .name{font-size:26px;font-weight:800;margin-top:2px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-    .avatar{width:52px;height:52px;border-radius:50%;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;overflow:hidden;}
-    .avatar img{width:100%;height:100%;object-fit:cover;}
+    .content{flex:1;overflow-y:auto;padding:26px 28px 40px;}
+    .content-inner{max-width:1000px;margin:0 auto;}
+    .hero{margin-bottom:22px;}
+    .hero .hi{font-size:14px;color:#6B7280;}
+    .hero .name{font-size:28px;font-weight:800;color:#111827;margin-top:2px;}
 
-    /* Contenido / placeholder de Sprint 0 */
-    .content{padding:8px 18px 24px;display:flex;flex-direction:column;gap:14px;}
-    .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
-    .soon{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:34px 20px;}
+    .card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .soon{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:44px 22px;}
     .soon .ico{width:64px;height:64px;border-radius:18px;background:var(--indigo-pale);color:var(--indigo);display:flex;align-items:center;justify-content:center;}
-    .soon h2{font-size:17px;font-weight:800;}
-    .soon p{font-size:13.5px;color:var(--muted);line-height:1.55;max-width:300px;}
-    .logout{margin-top:6px;background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;font-family:inherit;}
+    .soon h2{font-size:18px;font-weight:800;color:#111827;}
+    .soon p{font-size:14px;color:#6B7280;line-height:1.55;max-width:420px;}
 
-    /* Navegación inferior */
-    .nav{position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-width:460px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:30;}
-    .nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#9CA3AF;text-decoration:none;font-size:10.5px;font-weight:600;padding:4px 0;transition:.15s;}
-    .nav a.active{color:var(--indigo);}
-    .nav a .lbl{letter-spacing:.2px;}
-    .nav a.disabled{opacity:.55;pointer-events:none;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
+    .sidebar-overlay.open{display:block;}
+    @media(max-width:768px){
+      body{overflow:auto;}
+      .sidebar{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);transition:transform .25s;z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .menu-btn{display:flex;align-items:center;justify-content:center;}
+      .content{padding:18px 14px 40px;}
+      .hero .name{font-size:23px;}
+    }
   </style>
 </head>
 <body>
-<div class="app">
-
-  <!-- Cabecera -->
-  <div class="ch-top">
-    <div class="ch-brand">
-      <span class="mark"></span>
-      <b><span class="n1">NUTRI</span><span class="n2">ENTRENA</span></b>
-    </div>
-    <div class="ch-actions">
-      <button class="ch-bell" id="bell" title="Notificaciones">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="dot"></span>
-      </button>
-    </div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sl-mark" role="img" aria-label="NutriEntrena"></div>
+    <div class="sl-txt"><b><span class="n1">NUTRI</span><span class="n2">ENTRENA</span></b><small>Mi espacio</small></div>
   </div>
-
-  <!-- Saludo -->
-  <div class="hero">
-    <div class="hi" id="greet">Hola 👋</div>
-    <div class="name">
-      <span id="clientName">…</span>
-      <span class="avatar" id="avatar">?</span>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item active" href="client-home.html">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/></svg>
+      Inicio
+    </a>
+    <div class="nav-section">Mi plan</div>
+    <div class="nav-item disabled">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>
+      Entrena <span class="nav-soon-tag">Pronto</span>
     </div>
-  </div>
-
-  <!-- Contenido (Sprint 0: entrada + placeholder; los datos llegan en el Sprint 2) -->
-  <div class="content">
-    <div class="card soon">
-      <div class="ico">
-        <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
-      </div>
-      <h2>Estamos preparando tu espacio</h2>
-      <p>Pronto verás aquí tu semana, tu entrenamiento y tu menú del día, y podrás hacer tu check-in cuando tu coach te lo pida.</p>
-      <button class="logout" onclick="logout()">Cerrar sesión</button>
+    <div class="nav-item disabled">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>
+      Nutrición <span class="nav-soon-tag">Pronto</span>
     </div>
-  </div>
-
-  <!-- Navegación inferior -->
-  <nav class="nav">
-    <a class="active" href="client-home.html">
-      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/></svg>
-      <span class="lbl">Inicio</span>
-    </a>
-    <a class="disabled" href="#">
-      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>
-      <span class="lbl">Entrena</span>
-    </a>
-    <a class="disabled" href="#">
-      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>
-      <span class="lbl">Nutrición</span>
-    </a>
-    <a class="disabled" href="#">
-      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>
-      <span class="lbl">Progreso</span>
-    </a>
-    <a class="disabled" href="#">
-      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="lbl">Chat</span>
-    </a>
+    <div class="nav-section">Seguimiento</div>
+    <div class="nav-item disabled">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>
+      Progreso <span class="nav-soon-tag">Pronto</span>
+    </div>
+    <div class="nav-section">Comunicación</div>
+    <div class="nav-item disabled">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chat <span class="nav-soon-tag">Pronto</span>
+    </div>
   </nav>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarAvatar">C</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Cargando…</div>
+      <div class="user-role">Cliente</div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
 
+<div class="main">
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="topbar-title">Inicio</div>
+    <button class="bell" id="bell" title="Notificaciones">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="dot"></span>
+    </button>
+  </div>
+
+  <div class="content">
+    <div class="content-inner">
+      <div class="hero">
+        <div class="hi" id="greet">Hola 👋</div>
+        <div class="name" id="clientName">…</div>
+      </div>
+
+      <!-- Sprint 0/entrada: placeholder; los datos del Inicio llegan en el Sprint 2 -->
+      <div class="card soon">
+        <div class="ico">
+          <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+        </div>
+        <h2>Estamos preparando tu espacio</h2>
+        <p>Pronto verás aquí tu semana, tu entrenamiento y tu menú del día, y podrás hacer tu check-in cuando tu coach te lo pida.</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -135,6 +160,8 @@
   const token = localStorage.getItem('token');
 
   function logout(){ localStorage.removeItem('token'); localStorage.removeItem('role_id'); localStorage.removeItem('refresh_token'); location.href = 'login.html'; }
+  function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+  function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
 
   function greetByHour(){
     const h = new Date().getHours();
@@ -152,10 +179,12 @@
       const d = await r.json(); const u = d.data || d;
       const name = u.name || u.email || 'Cliente';
       document.getElementById('clientName').textContent = name;
-      const av = document.getElementById('avatar');
-      if (u.photo) { av.innerHTML = '<img src="' + u.photo + '" alt="">'; av.style.background = 'transparent'; }
-      else { av.textContent = (name.trim()[0] || 'C').toUpperCase(); }
-    }catch(e){ /* si falla la sesión, el guard de arriba ya cubre el token */ }
+      document.getElementById('sidebarName').textContent = name;
+      const initials = (name.trim()[0] || 'C').toUpperCase();
+      const sav = document.getElementById('sidebarAvatar');
+      if (u.photo) { sav.innerHTML = '<img src="' + u.photo + '" alt="">'; sav.style.background = 'transparent'; }
+      else { sav.textContent = initials; }
+    }catch(e){}
   }
   init();
 </script>

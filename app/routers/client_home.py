@@ -136,7 +136,25 @@ _DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"]
 _DAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 
 
-@router.get("/nutrition", summary="Nutrición del cliente", description="Menú semanal asignado al cliente autenticado, por días, con totales y comidas.")
+def _diet_meals_macros(diet):
+    """Comidas (con kcal por comida) y macros de una dieta."""
+    kcal = diet.calories
+    prot = carb = fat = None
+    if diet.detail:
+        prot, carb, fat = diet.detail.proteins, diet.detail.carbs, diet.detail.fats
+    meals = []
+    for food in diet.foods:
+        mk = 0.0
+        for dfa in food.detail:
+            al = dfa.aliment
+            if al and al.calories and dfa.quantity:
+                mk += (al.calories / 100.0) * dfa.quantity
+        meals.append({"name": food.name, "time": food.time, "kcal": round(mk) if mk else None})
+    meals.sort(key=lambda m: m["time"] or "~")
+    return meals, kcal, prot, carb, fat
+
+
+@router.get("/nutrition", summary="Nutrición del cliente", description="Plan nutricional (dietas) asignado al cliente autenticado, con totales y comidas por día de la semana.")
 def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT))):
     from app.models.client_menu import ClientMenu
     from app.models.weekly_menu import WeeklyMenu
@@ -147,53 +165,55 @@ def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends
     if not detail:
         return send_response(empty, "Sin cliente")
 
-    cm = db.query(ClientMenu).filter(
-        ClientMenu.client_user_detail_id == detail.id
-    ).order_by(ClientMenu.assigned_at.desc(), ClientMenu.id.desc()).first()
-    if not cm:
-        return send_response(empty, "Sin menú asignado")
-
-    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == cm.menu_id).first()
-    if not menu:
-        return send_response(empty, "Menú no encontrado")
-
     today = date.today()
     today_idx = today.weekday()  # 0 = lunes
     week_start = today - timedelta(days=today_idx)
-    by_idx = {d.day_index: d for d in menu.days}
 
+    # 1) Menú semanal asignado (ClientMenu → WeeklyMenu), si existe: cada día
+    #    puede tener su propia dieta.
+    cm = db.query(ClientMenu).filter(
+        ClientMenu.client_user_detail_id == detail.id
+    ).order_by(ClientMenu.assigned_at.desc(), ClientMenu.id.desc()).first()
+    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == cm.menu_id).first() if cm else None
+
+    if menu:
+        by_idx = {d.day_index: d for d in menu.days}
+        days = []
+        for i in range(7):
+            md = by_idx.get(i)
+            diet = db.query(Diet).filter(Diet.id == md.diet_id).first() if (md and md.diet_id) else None
+            if diet:
+                meals, kcal, prot, carb, fat = _diet_meals_macros(diet)
+            else:
+                meals, kcal, prot, carb, fat = [], None, None, None, None
+            days.append({
+                "day_index": i, "label": _DAY_LABELS[i],
+                "name": (md.name if (md and md.name) else _DAY_NAMES[i]),
+                "date": (week_start + timedelta(days=i)).isoformat(),
+                "is_today": i == today_idx, "has_diet": diet is not None,
+                "kcal": kcal, "protein": prot, "carbs": carb, "fats": fat, "meals": meals,
+            })
+        return send_response({"menu": {"name": menu.name}, "week_start": week_start.isoformat(), "days": days}, "OK")
+
+    # 2) Sin menú semanal: usar las dietas que el coach asignó directamente al
+    #    cliente (Diet.user_id == cliente). Es el flujo real de client-profile.
+    #    La dieta más reciente es el plan activo, mostrado todos los días.
+    diet = db.query(Diet).filter(
+        Diet.user_id == current_user.id
+    ).order_by(Diet.created_at.desc()).first()
+    if not diet:
+        return send_response(empty, "Sin plan asignado")
+
+    meals, kcal, prot, carb, fat = _diet_meals_macros(diet)
     days = []
     for i in range(7):
-        md = by_idx.get(i)
-        diet = None
-        if md and md.diet_id:
-            diet = db.query(Diet).filter(Diet.id == md.diet_id).first()
-        kcal = prot = carb = fat = None
-        meals = []
-        if diet:
-            kcal = diet.calories
-            if diet.detail:
-                prot, carb, fat = diet.detail.proteins, diet.detail.carbs, diet.detail.fats
-            for food in diet.foods:
-                mk = 0.0
-                for dfa in food.detail:
-                    al = dfa.aliment
-                    if al and al.calories and dfa.quantity:
-                        mk += (al.calories / 100.0) * dfa.quantity
-                meals.append({"name": food.name, "time": food.time, "kcal": round(mk) if mk else None})
-            meals.sort(key=lambda m: m["time"] or "~")
         days.append({
-            "day_index": i,
-            "label": _DAY_LABELS[i],
-            "name": (md.name if (md and md.name) else _DAY_NAMES[i]),
+            "day_index": i, "label": _DAY_LABELS[i], "name": _DAY_NAMES[i],
             "date": (week_start + timedelta(days=i)).isoformat(),
-            "is_today": i == today_idx,
-            "has_diet": diet is not None,
-            "kcal": kcal, "protein": prot, "carbs": carb, "fats": fat,
-            "meals": meals,
+            "is_today": i == today_idx, "has_diet": True,
+            "kcal": kcal, "protein": prot, "carbs": carb, "fats": fat, "meals": meals,
         })
-
-    return send_response({"menu": {"name": menu.name}, "week_start": week_start.isoformat(), "days": days}, "OK")
+    return send_response({"menu": {"name": diet.title}, "week_start": week_start.isoformat(), "days": days}, "OK")
 
 
 @router.get("/progress", summary="Progreso del cliente", description="Evolución del cliente: estadísticas, serie de peso y fotos de progreso.")

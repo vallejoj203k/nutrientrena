@@ -311,3 +311,62 @@ def client_routines(db: Session = Depends(get_db), current_user: User = Depends(
         Routine.user_id == current_user.id
     ).order_by(Routine.id.desc()).all()
     return send_response([_serialize_routine(r) for r in rows], "OK")
+
+
+@router.get("/chat", summary="Conversación con el coach", description="Devuelve (creándola si no existe) la conversación individual entre el cliente y su coach.")
+def client_chat(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(CLIENT))):
+    """Localiza o crea el chat 1:1 del cliente con su coach.
+
+    El cliente no elige con quién habla: siempre es su coach asignado
+    (vía user_parents). Reutiliza el modelo de chat existente para que el
+    coach vea la misma conversación desde su panel.
+    """
+    import uuid
+    from datetime import datetime
+    from app.models.chat import ChatConversation, ChatParticipant
+
+    detail = _client_detail(db, current_user)
+    coach_detail = _coach_of(db, detail.id) if detail else None
+    if not coach_detail:
+        return send_response({"conversation_id": None, "coach": None}, "Sin coach asignado")
+
+    coach_user_id = coach_detail.user_id
+    coach_name = (f"{coach_detail.name or ''} {coach_detail.last_name or ''}").strip() or "Tu coach"
+    coach_info = {
+        "user_id": coach_user_id,
+        "name": coach_name,
+        "photo": coach_detail.photo,
+        "initials": (coach_name.strip()[:1] or "C").upper(),
+    }
+
+    # Conversación individual que contenga a ambos.
+    my_conv_ids = [
+        p.conversation_id for p in
+        db.query(ChatParticipant).filter(ChatParticipant.user_id == current_user.id).all()
+    ]
+    conv = None
+    if my_conv_ids:
+        candidates = db.query(ChatConversation).filter(
+            ChatConversation.id.in_(my_conv_ids),
+            ChatConversation.type == "individual",
+        ).all()
+        for c in candidates:
+            uids = {p.user_id for p in c.participants}
+            if coach_user_id in uids:
+                conv = c
+                break
+
+    if conv is None:
+        now = datetime.utcnow()
+        conv = ChatConversation(
+            id=str(uuid.uuid4()), type="individual", name=None,
+            created_by_user_id=current_user.id, created_at=now, updated_at=now,
+        )
+        db.add(conv)
+        db.flush()
+        db.add(ChatParticipant(conversation_id=conv.id, user_id=current_user.id, joined_at=now))
+        db.add(ChatParticipant(conversation_id=conv.id, user_id=coach_user_id, joined_at=now))
+        db.commit()
+        db.refresh(conv)
+
+    return send_response({"conversation_id": conv.id, "coach": coach_info}, "OK")

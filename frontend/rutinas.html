@@ -845,7 +845,9 @@ function routineRow(r){
   const _rid=parseInt(localStorage.getItem('role_id')||'0');
   const _isAdmin=_rid===1||_rid===2;
   const isPlatformAdmin=r.organization_id==null;
-  const canEdit=_isAdmin||!isPlatformAdmin;
+  // El listado (/routines/findAll) solo trae rutinas del propio usuario,
+  // así que siempre puede editarlas/eliminarlas (aunque figuren como "Plantilla").
+  const canEdit=true;
   const levelName=r.training_level_id?(LEVELS[r.training_level_id]||`Nivel ${r.training_level_id}`):null;
   const levelCls=r.training_level_id?`lvl-${r.training_level_id}`:'';
   const days=r.days_list||[];const sessionCount=days.length;const tags=[r.training].filter(Boolean);

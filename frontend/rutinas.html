@@ -113,6 +113,7 @@
     .btn-assign:hover{background:var(--indigo-dark);}
     .btn-row-icon{width:30px;height:30px;border:1.5px solid #E5E7EB;background:#fff;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#9CA3AF;transition:.15s;flex-shrink:0;}
     .btn-row-icon:hover{background:var(--indigo-pale);color:var(--indigo);border-color:var(--indigo);}
+    .btn-row-icon.danger:hover{background:#FEF2F2;color:#DC2626;border-color:#FCA5A5;}
     .row-actions{display:flex;align-items:center;gap:5px;}
     .empty{text-align:center;padding:60px 20px;color:#9CA3AF;}
     .empty svg{margin-bottom:16px;opacity:.3;}
@@ -862,7 +863,9 @@ function routineRow(r){
       <button class="btn-assign" onclick="openAssignModal(${r.id},'${esc(r.name)}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>
       <button class="btn-row-icon" onclick="openRoutineView(${r.id})" title="Ver"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       ${canEdit
-        ? `<button class="btn-row-icon" onclick="showRowMenu(event,${r.id},'${esc(r.name)}')" title="Más opciones"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>`
+        ? `<button class="btn-row-icon" onclick="openForm(${r.id})" title="Editar"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      <button class="btn-row-icon danger" onclick="openConfirm('Eliminar rutina','¿Eliminar «${esc(r.name)}»? No se puede deshacer.',()=>deleteRoutine(${r.id}))" title="Eliminar"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <button class="btn-row-icon" onclick="showRowMenu(event,${r.id},'${esc(r.name)}')" title="Más opciones"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>`
         : ``}
     </div></td>
   </tr>`;

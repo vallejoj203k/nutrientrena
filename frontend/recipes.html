@@ -194,7 +194,19 @@
     .fv-header select,.fv-header input[type=number]{padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#111;outline:none;background:#fff;transition:.15s;}
     .fv-header select:focus,.fv-header input[type=number]:focus{border-color:var(--indigo);}
     .fv-time-wrap{display:flex;align-items:center;gap:6px;font-size:13px;color:#6B7280;}
-    .fv-time-wrap input{width:70px;}
+    .fv-time-wrap input{width:64px;}
+    /* Multi-select tipo de dieta */
+    .fv-ms{position:relative;}
+    .fv-ms-btn{display:flex;align-items:center;gap:8px;min-width:160px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:14px;color:#111;cursor:pointer;font-family:inherit;transition:.15s;}
+    .fv-ms-btn:hover{border-color:#C7D2FE;}
+    .fv-ms-btn .lbl{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .fv-ms-btn.placeholder .lbl{color:#9CA3AF;}
+    .fv-ms-btn svg{color:#9CA3AF;flex-shrink:0;}
+    .fv-ms-menu{position:absolute;top:calc(100% + 4px);left:0;min-width:220px;max-height:280px;overflow-y:auto;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.14);z-index:60;padding:6px;display:none;}
+    .fv-ms.open .fv-ms-menu{display:block;}
+    .fv-ms-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:13.5px;color:#374151;cursor:pointer;}
+    .fv-ms-opt:hover{background:#F9FAFB;}
+    .fv-ms-opt input{width:16px;height:16px;accent-color:var(--indigo);cursor:pointer;}
     .fv-body{flex:1;display:flex;overflow:hidden;}
     .fv-main{flex:1;overflow-y:auto;padding:20px 20px 20px 24px;display:flex;flex-direction:column;gap:16px;}
     .fv-main::-webkit-scrollbar{width:6px;}
@@ -710,14 +722,21 @@
     </div>
     <div class="fv-header">
       <input class="fv-name" id="fName" placeholder="Nombre de la receta..."/>
-      <select id="fCategory" style="min-width:140px;">
-        <option value="">Categoria...</option>
-      </select>
+      <div class="fv-ms" id="fCatMs">
+        <button type="button" class="fv-ms-btn placeholder" id="fCatBtn" onclick="toggleCatMenu(event)">
+          <span class="lbl" id="fCatLabel">Tipo de dieta</span>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="fv-ms-menu" id="fCatMenu"></div>
+      </div>
       <div class="fv-time-wrap">
         <input type="number" id="fPrepTime" placeholder="0" min="0"/>
         <span>min</span>
       </div>
-      <input type="number" id="fServings" placeholder="Raciones" min="1" style="width:90px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#111;outline:none;background:#fff;transition:.15s;"/>
+      <div class="fv-time-wrap">
+        <input type="number" id="fServings" placeholder="0" min="1"/>
+        <span>raciones</span>
+      </div>
     </div>
     <div class="fv-body">
       <div class="fv-main">
@@ -852,6 +871,9 @@ async function loadFormsBadge() {
   } catch(e) { /* ignore */ }
 }
 
+var _catOptions = [];      // [{id, name}]
+var _catSelected = [];      // ids seleccionados (string)
+
 async function loadCategorySelect() {
   try {
     const r = await fetch(API + '/parameters/search', { headers: headers() });
@@ -863,12 +885,42 @@ async function loadCategorySelect() {
     const dr = await fetch(API + '/parameters-detail/search?parameter_id=' + catParam.id, { headers: headers() });
     if (!dr.ok) return;
     const dd = await dr.json();
-    const sel = document.getElementById('fCategory');
-    (dd.data || []).forEach(function(item) {
-      sel.innerHTML += '<option value="' + item.id + '">' + item.description + '</option>';
-    });
+    _catOptions = (dd.data || []).map(function(item){ return { id: String(item.id), name: item.description }; });
+    renderCatMenu();
   } catch(e) { /* silent */ }
 }
+
+function renderCatMenu() {
+  var menu = document.getElementById('fCatMenu'); if (!menu) return;
+  menu.innerHTML = _catOptions.map(function(o){
+    var checked = _catSelected.indexOf(o.id) >= 0 ? ' checked' : '';
+    return '<label class="fv-ms-opt"><input type="checkbox" value="' + o.id + '"' + checked + ' onchange="onCatToggle(this)"> ' + esc(o.name) + '</label>';
+  }).join('') || '<div style="padding:10px;color:#9CA3AF;font-size:13px;">Sin tipos disponibles</div>';
+  updateCatLabel();
+}
+function onCatToggle(cb) {
+  var id = cb.value;
+  var i = _catSelected.indexOf(id);
+  if (cb.checked && i < 0) _catSelected.push(id);
+  else if (!cb.checked && i >= 0) _catSelected.splice(i, 1);
+  updateCatLabel();
+}
+function updateCatLabel() {
+  var lbl = document.getElementById('fCatLabel'); var btn = document.getElementById('fCatBtn');
+  if (!lbl) return;
+  if (!_catSelected.length) { lbl.textContent = 'Tipo de dieta'; if (btn) btn.classList.add('placeholder'); return; }
+  if (btn) btn.classList.remove('placeholder');
+  if (_catSelected.length === 1) {
+    var o = _catOptions.find(function(x){ return x.id === _catSelected[0]; });
+    lbl.textContent = o ? o.name : '1 tipo';
+  } else { lbl.textContent = _catSelected.length + ' tipos'; }
+}
+function setSelectedCategories(ids) {
+  _catSelected = (ids || []).map(String).filter(Boolean);
+  renderCatMenu();
+}
+function toggleCatMenu(ev) { if (ev) ev.stopPropagation(); document.getElementById('fCatMs').classList.toggle('open'); }
+document.addEventListener('click', function(e){ if (!e.target.closest('#fCatMs')) { var ms = document.getElementById('fCatMs'); if (ms) ms.classList.remove('open'); } });
 
 function showListView() {
   document.getElementById('listView').style.display = 'flex';
@@ -1049,7 +1101,9 @@ function openForm(recipe) {
   document.getElementById('fInstr').value            = (recipe && recipe.instructions) || '';
   document.getElementById('fServings').value         = (recipe && recipe.servings)     || '';
   document.getElementById('fPrepTime').value         = (recipe && recipe.prep_time)    || '';
-  document.getElementById('fCategory').value         = (recipe && recipe.category_id)  || '';
+  var _catIds = (recipe && recipe.categories) ? String(recipe.categories).split(',').map(function(s){return s.trim();}).filter(Boolean)
+    : ((recipe && recipe.category_id) ? [String(recipe.category_id)] : []);
+  setSelectedCategories(_catIds);
   document.getElementById('fFormError').textContent  = '';
 
   const types = ((recipe && recipe.meal_type) || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
@@ -1233,13 +1287,47 @@ function removeRecipeImage() {
   document.getElementById('fImageFile').value = '';
 }
 
+// Comprime una imagen en el navegador: la reduce a un lado máximo y la
+// exporta como JPEG, de modo que fotos pesadas se suban ligeras.
+function _compressImage(file, maxDim, quality) {
+  return new Promise(function(resolve) {
+    if (!file.type || file.type.indexOf('image/') !== 0) { resolve(file); return; }
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() {
+      URL.revokeObjectURL(url);
+      var w = img.width, h = img.height;
+      var scale = Math.min(1, maxDim / Math.max(w, h));
+      var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+      var canvas = document.createElement('canvas'); canvas.width = cw; canvas.height = ch;
+      try {
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch); // fondo para PNG con transparencia
+        ctx.drawImage(img, 0, 0, cw, ch);
+        canvas.toBlob(function(blob) {
+          if (blob && blob.size < file.size) resolve(blob);
+          else resolve(file); // si no mejora, se queda el original
+        }, 'image/jpeg', quality);
+      } catch (e) { resolve(file); }
+    };
+    img.onerror = function() { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
 async function uploadRecipeImage(input) {
   const file = input.files[0];
   if (!file) return;
   const zone = document.getElementById('fImageZone');
+  zone.textContent = 'Optimizando...';
+  let toUpload = file, fname = file.name || 'imagen';
+  try {
+    toUpload = await _compressImage(file, 1600, 0.82);
+    if (toUpload !== file) fname = (fname.replace(/\.[^.]+$/, '') || 'imagen') + '.jpg';
+  } catch (e) { toUpload = file; }
   zone.textContent = 'Subiendo...';
   const fd = new FormData();
-  fd.append('file', file);
+  fd.append('file', toUpload, fname);
   fd.append('folder', 'recipes');
   try {
     const r = await fetch(API + '/files/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: fd });
@@ -1683,7 +1771,8 @@ async function save() {
     name: name,
     description:  document.getElementById('fDesc').value.trim()  || null,
     instructions: document.getElementById('fInstr').value.trim() || null,
-    category_id:  parseInt(document.getElementById('fCategory').value) || null,
+    category_id:  _catSelected.length ? (parseInt(_catSelected[0]) || null) : null,
+    categories:   _catSelected.length ? _catSelected.join(',') : null,
     servings:     parseInt(document.getElementById('fServings').value) || null,
     prep_time:    parseInt(document.getElementById('fPrepTime').value) || null,
     calories:     kcalVal,

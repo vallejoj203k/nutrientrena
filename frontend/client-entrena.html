@@ -284,5 +284,34 @@
   }
   loadProfile(); loadRoutines();
 </script>
+<script>
+/* CHAT_UNREAD_BADGE — badge rojo de mensajes de chat no leídos en el panel */
+(function(){
+  var API='https://nutrientrena-production.up.railway.app/api';
+  var token=localStorage.getItem('token'); if(!token) return;
+  function attach(){
+    var link=document.querySelector('a[href="chat.html"], a[href="client-chat.html"]');
+    if(!link){ return; }
+    var dot=document.createElement('span');
+    dot.setAttribute('data-chat-unread','');
+    dot.style.cssText='display:none;margin-left:auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#DC2626;color:#fff;font-size:10px;font-weight:700;line-height:18px;text-align:center;';
+    link.appendChild(dot);
+    function refresh(){
+      fetch(API+'/chat/unread-count',{headers:{Authorization:'Bearer '+token}})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var n=(d&&d.data&&d.data.total)||0;
+          if(n>0){ dot.style.display='inline-block'; dot.textContent=n>99?'99+':String(n); }
+          else { dot.style.display='none'; dot.textContent=''; }
+        }).catch(function(){});
+    }
+    window.refreshChatUnread=refresh;
+    refresh();
+    setInterval(refresh, 20000);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',attach);
+  else attach();
+})();
+</script>
 </body>
 </html>

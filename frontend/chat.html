@@ -523,6 +523,12 @@ async function selectConversation(id) {
 async function loadMessages(convId) {
   const r = await apiFetch(`/chat/conversations/${convId}/messages?per_page=100`);
   renderMessages(r.data?.messages || []);
+  markConvRead(convId);
+}
+
+async function markConvRead(convId) {
+  try { await apiFetch(`/chat/conversations/${convId}/read`, { method: 'POST' }); } catch (e) {}
+  if (window.refreshChatUnread) window.refreshChatUnread();
 }
 
 function renderMessages(msgs) {
@@ -572,6 +578,11 @@ function handleIncomingMessage(msg) {
     div.innerHTML = renderMessage(msg);
     body.appendChild(div.firstElementChild);
     body.scrollTop = body.scrollHeight;
+    // El coach lo está viendo → marcar leído para no acumular badge.
+    if (msg.sender_user_id !== _me?.user_id) markConvRead(msg.conversation_id);
+  } else if (window.refreshChatUnread) {
+    // Mensaje en otra conversación → refrescar el badge del panel.
+    window.refreshChatUnread();
   }
 }
 
@@ -797,5 +808,34 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
   </div>
   <div id="flyoutItems" style="padding:6px;"></div>
 </div>
+<script>
+/* CHAT_UNREAD_BADGE — badge rojo de mensajes de chat no leídos en el panel */
+(function(){
+  var API='https://nutrientrena-production.up.railway.app/api';
+  var token=localStorage.getItem('token'); if(!token) return;
+  function attach(){
+    var link=document.querySelector('a[href="chat.html"], a[href="client-chat.html"]');
+    if(!link){ return; }
+    var dot=document.createElement('span');
+    dot.setAttribute('data-chat-unread','');
+    dot.style.cssText='display:none;margin-left:auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#DC2626;color:#fff;font-size:10px;font-weight:700;line-height:18px;text-align:center;';
+    link.appendChild(dot);
+    function refresh(){
+      fetch(API+'/chat/unread-count',{headers:{Authorization:'Bearer '+token}})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var n=(d&&d.data&&d.data.total)||0;
+          if(n>0){ dot.style.display='inline-block'; dot.textContent=n>99?'99+':String(n); }
+          else { dot.style.display='none'; dot.textContent=''; }
+        }).catch(function(){});
+    }
+    window.refreshChatUnread=refresh;
+    refresh();
+    setInterval(refresh, 20000);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',attach);
+  else attach();
+})();
+</script>
 </body>
 </html>

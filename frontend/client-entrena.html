@@ -69,26 +69,46 @@
     .plan.sel .plan-nm{color:var(--indigo);}
     .plan-sub{font-size:12px;color:#6B7280;margin-top:1px;}
 
-    /* Tarjetas de día/rutina */
-    .day{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
-    .day-nm{font-size:18px;font-weight:800;color:#111827;}
-    .day-mg{font-size:13.5px;color:#6B7280;margin-top:3px;}
-    .day-meta{font-size:12.5px;color:#9CA3AF;margin-top:6px;}
-    .ex-icos{display:flex;gap:8px;margin:14px 0 4px;flex-wrap:wrap;}
-    .ex-ico{width:44px;height:44px;border-radius:11px;background:var(--indigo-pale);color:var(--indigo);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .ex-more{width:44px;height:44px;border-radius:11px;background:#F3F4F6;color:#6B7280;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
-    .day-btn{width:100%;margin-top:14px;padding:13px;border-radius:12px;border:none;background:var(--indigo);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
-    .day-btn:hover{background:var(--indigo-dark);}
-    .day-exlist{margin-top:14px;border-top:1px solid #F3F4F6;padding-top:6px;display:none;}
-    .day.open .day-exlist{display:block;}
-    .day.open .day-btn{background:#F3F4F6;color:#374151;}
-    .exrow{display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid #F7F8FA;}
-    .exrow:last-child{border-bottom:none;}
-    .exrow-num{width:24px;height:24px;border-radius:50%;background:#F3F4F6;color:#6B7280;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .exrow-nm{flex:1;min-width:0;font-size:14px;font-weight:600;color:#111827;}
-    .exrow-mg{font-size:11.5px;color:#9CA3AF;}
-    .exrow-dose{font-size:13px;color:#9CA3AF;white-space:nowrap;}
-    .exrow-dose b{color:#111827;font-weight:800;}
+    /* Selector de días de la semana */
+    .weekbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px;}
+    .wday{flex:1;min-width:46px;background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:9px 4px 8px;text-align:center;cursor:pointer;transition:.15s;}
+    .wday:hover{border-color:#C7D2FE;}
+    .wday.sel{background:var(--indigo);border-color:var(--indigo);}
+    .wday .wl{font-size:12px;font-weight:700;color:#6B7280;}
+    .wday .wn{font-size:13px;font-weight:800;color:#111827;margin-top:2px;}
+    .wday.sel .wl,.wday.sel .wn{color:#fff;}
+    .wday .wdot{width:5px;height:5px;border-radius:50%;background:var(--green);margin:5px auto 0;}
+    .wday .wdot.off{background:transparent;}
+    .wday.sel .wdot{background:#fff;}
+
+    /* Cabecera del día */
+    .day-head{margin-bottom:12px;}
+    .day-title{font-size:20px;font-weight:800;color:#111827;}
+    .today-pill{display:inline-block;font-size:10px;font-weight:800;color:#fff;background:var(--indigo);padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;vertical-align:middle;margin-left:8px;}
+    .day-sub{font-size:13px;color:#6B7280;margin-top:3px;}
+    .day-note{margin:12px 0 4px;background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:13px;border-radius:12px;padding:11px 14px;white-space:pre-wrap;}
+
+    /* Descanso */
+    .rest-card{padding:48px 22px;text-align:center;background:#fff;border:1px solid #E5E7EB;border-radius:16px;}
+    .rest-card .rest-ico{width:60px;height:60px;border-radius:16px;background:var(--indigo-pale);color:var(--indigo);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+    .rest-card h3{font-size:17px;font-weight:800;color:#111827;}
+    .rest-card p{font-size:13.5px;color:#6B7280;margin-top:4px;}
+
+    /* Tarjeta de ejercicio con imagen/video */
+    .exc{background:#fff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .ex-media{width:100%;aspect-ratio:16/9;max-height:300px;background:#EEF0F3;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .ex-media img,.ex-media video,.ex-media iframe{width:100%;height:100%;object-fit:cover;border:none;display:block;background:#000;}
+    .ex-media.placeholder{color:#C4C7CF;}
+    .exc-body{padding:14px 16px 16px;}
+    .exc-top{display:flex;align-items:center;gap:10px;}
+    .exc-num{width:26px;height:26px;border-radius:50%;background:var(--indigo-pale);color:var(--indigo);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .exc-nm{font-size:16px;font-weight:800;color:#111827;flex:1;min-width:0;}
+    .exc-dose{font-size:13px;color:#9CA3AF;white-space:nowrap;}
+    .exc-dose b{color:var(--indigo);font-weight:800;}
+    .exc-meta{font-size:12.5px;color:#9CA3AF;margin:5px 0 0 36px;}
+    .exc-notes{font-size:12.5px;color:#6B7280;margin:6px 0 0 36px;}
+    .blk-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF;margin:16px 0 8px;display:flex;align-items:center;gap:7px;}
+    .blk-lbl.warmup{color:#D97706;}.blk-lbl.superset{color:var(--indigo);}.blk-lbl.circuit{color:var(--green);}
 
     .empty{padding:44px 22px;text-align:center;color:#6B7280;font-size:14px;background:#fff;border:1px solid #E5E7EB;border-radius:16px;}
 
@@ -160,8 +180,8 @@
   <div class="content">
     <div class="content-inner">
       <div class="page-head">
-        <h1>Entrenamientos</h1>
-        <p>Elige tu rutina de hoy</p>
+        <h1>Tu entrenamiento</h1>
+        <p id="todayLabel">Cargando…</p>
       </div>
 
       <div id="plansWrap" style="display:none;">
@@ -169,8 +189,8 @@
         <div class="plans" id="plans"></div>
       </div>
 
-      <div class="sec-lbl" id="routinesLbl" style="display:none;">Rutinas</div>
-      <div id="days"><div class="empty" id="loadingBox">Cargando tus entrenamientos…</div></div>
+      <div class="weekbar" id="weekbar" style="display:none;"></div>
+      <div id="dayPanel"><div class="empty" id="loadingBox">Cargando tus entrenamientos…</div></div>
     </div>
   </div>
 </div>
@@ -186,19 +206,20 @@
   function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
 
   const DUMBBELL = '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>';
+  const DUMBBELL_LG = '<svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>';
+  const REST_ICO = '<svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>';
 
-  let _routines = [], _sel = 0;
+  const WD_LABELS = ['L','M','X','J','V','S','D'];
+  const WD_NAMES  = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  function todayIndex(){ return (new Date().getDay() + 6) % 7; } // Lunes = 0
+
+  let _routines = [], _sel = 0, _selWd = todayIndex();
 
   function dayExercises(day){
-    // Aplana los ejercicios de todos los bloques del día
     var out = [];
     (day.blocks || []).forEach(function(b){ (b.exercises || []).forEach(function(e){ out.push(e); }); });
     return out;
-  }
-  function uniqueMuscles(exs){
-    var seen = {}, list = [];
-    exs.forEach(function(e){ var m = e.muscle_group_name; if (m && !seen[m]) { seen[m] = 1; list.push(m); } });
-    return list;
   }
   function dose(e){
     var s = e.series, r = (e.repetitions || '').toString().trim();
@@ -207,6 +228,30 @@
     if (r) return esc(r);
     return '—';
   }
+
+  // Devuelve el día de la rutina que corresponde al índice de la semana
+  // (Lunes=0 → Día 1, Martes=1 → Día 2 … según el ejemplo del cliente).
+  function dayForWeekday(r, wd){
+    var days = (r && r.days_list) || [];
+    return wd < days.length ? days[wd] : null;
+  }
+
+  function ytId(url){ var m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/); return m ? m[1] : null; }
+  function vimeoId(url){ var m = String(url).match(/vimeo\.com\/(?:video\/)?(\d+)/); return m ? m[1] : null; }
+  function exMedia(e){
+    var v = e.video_url, img = e.image;
+    if (v){
+      var yt = ytId(v);
+      if (yt) return '<div class="ex-media"><iframe src="https://www.youtube.com/embed/' + esc(yt) + '" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+      var vm = vimeoId(v);
+      if (vm) return '<div class="ex-media"><iframe src="https://player.vimeo.com/video/' + esc(vm) + '" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+      return '<div class="ex-media"><video src="' + esc(v) + '"' + (img ? ' poster="' + esc(img) + '"' : '') + ' controls playsinline preload="metadata"></video></div>';
+    }
+    if (img) return '<div class="ex-media"><img src="' + esc(img) + '" alt="" loading="lazy"></div>';
+    return '<div class="ex-media placeholder">' + DUMBBELL_LG + '</div>';
+  }
+
+  const BLK_LABEL = { warmup:'Calentamiento', superset:'Superserie', circuit:'Circuito' };
 
   function renderPlans(){
     var wrap = document.getElementById('plansWrap');
@@ -221,40 +266,81 @@
     }).join('');
   }
 
-  function renderDays(){
+  function renderWeekbar(){
     var r = _routines[_sel];
-    var box = document.getElementById('days');
-    var lbl = document.getElementById('routinesLbl');
-    var days = (r && r.days_list) || [];
-    if (!days.length) { lbl.style.display = 'none'; box.innerHTML = '<div class="empty">Este plan aún no tiene días de entrenamiento.</div>'; return; }
-    lbl.style.display = ''; lbl.textContent = 'Rutinas · ' + (r.name || '');
-    box.innerHTML = days.map(function(day, di){
-      var exs = dayExercises(day);
-      var muscles = uniqueMuscles(exs);
-      var icos = exs.slice(0, 4).map(function(){ return '<div class="ex-ico">' + DUMBBELL + '</div>'; }).join('');
-      if (exs.length > 4) icos += '<div class="ex-more">+' + (exs.length - 4) + '</div>';
-      var exlist = exs.map(function(e, i){
-        return '<div class="exrow"><div class="exrow-num">' + (i + 1) + '</div>'
-          + '<div class="exrow-nm">' + esc(e.training_name || 'Ejercicio') + '<div class="exrow-mg">' + esc(e.muscle_group_name || '') + '</div></div>'
-          + '<div class="exrow-dose">' + dose(e) + '</div></div>';
-      }).join('') || '<div class="exrow" style="color:#9CA3AF;">Sin ejercicios.</div>';
-      return '<div class="day" id="day-' + di + '">'
-        + '<div class="day-nm">' + esc(day.day_name || ('Día ' + (di + 1))) + '</div>'
-        + '<div class="day-mg">' + (muscles.length ? esc(muscles.join(' · ')) : 'Entrenamiento') + '</div>'
-        + '<div class="day-meta">' + exs.length + ' ejercicio' + (exs.length !== 1 ? 's' : '') + (r.time ? ' · ' + r.time + ' min' : '') + '</div>'
-        + '<div class="ex-icos">' + icos + '</div>'
-        + '<button class="day-btn" onclick="toggleDay(' + di + ')"><span id="daybtn-' + di + '">Ver entrenamiento →</span></button>'
-        + '<div class="day-exlist">' + exlist + '</div>'
+    var bar = document.getElementById('weekbar');
+    bar.style.display = '';
+    var td = todayIndex();
+    bar.innerHTML = WD_LABELS.map(function(l, i){
+      var hasTraining = !!dayForWeekday(r, i);
+      return '<div class="wday' + (i === _selWd ? ' sel' : '') + '" onclick="selectWeekday(' + i + ')">'
+        + '<div class="wl">' + l + '</div>'
+        + '<div class="wn">' + (i === td ? 'Hoy' : (i + 1)) + '</div>'
+        + '<div class="wdot' + (hasTraining ? '' : ' off') + '"></div>'
         + '</div>';
     }).join('');
   }
 
-  function selectPlan(i){ _sel = i; renderPlans(); renderDays(); }
-  function toggleDay(di){
-    var el = document.getElementById('day-' + di);
-    var open = el.classList.toggle('open');
-    document.getElementById('daybtn-' + di).textContent = open ? 'Ocultar entrenamiento' : 'Ver entrenamiento →';
+  function renderDay(){
+    var r = _routines[_sel];
+    var box = document.getElementById('dayPanel');
+    var day = dayForWeekday(r, _selWd);
+    var isToday = _selWd === todayIndex();
+    var dayLabel = 'Día ' + (_selWd + 1) + ' · ' + WD_NAMES[_selWd];
+
+    if (!day){
+      box.innerHTML = '<div class="day-head"><div class="day-title">' + esc(WD_NAMES[_selWd])
+        + (isToday ? '<span class="today-pill">Hoy</span>' : '') + '</div></div>'
+        + '<div class="rest-card"><div class="rest-ico">' + REST_ICO + '</div>'
+        + '<h3>Día de descanso</h3><p>No tienes entrenamiento asignado para este día. Aprovecha para recuperar.</p></div>';
+      return;
+    }
+
+    var name = (day.day_name || '').trim();
+    var dname = /^d[ií]a\s/i.test(name) ? name : (name || dayLabel);
+    var exs = dayExercises(day);
+
+    var head = '<div class="day-head"><div class="day-title">' + esc(dname)
+      + (isToday ? '<span class="today-pill">Hoy</span>' : '') + '</div>'
+      + '<div class="day-sub">' + WD_NAMES[_selWd] + ' · ' + exs.length + ' ejercicio' + (exs.length !== 1 ? 's' : '')
+      + (r.time ? ' · ' + r.time + ' min' : '') + '</div></div>';
+
+    var note = day.description ? '<div class="day-note">' + esc(day.description) + '</div>' : '';
+
+    var body = '';
+    if (!exs.length){
+      body = '<div class="empty">Este día no tiene ejercicios cargados.</div>';
+    } else {
+      var num = 0;
+      (day.blocks || []).forEach(function(blk){
+        var bexs = (blk.exercises || []);
+        if (blk.block_type === 'text'){
+          if (blk.content) body += '<div class="day-note">' + esc(blk.content) + '</div>';
+          return;
+        }
+        if (!bexs.length) return;
+        if (blk.block_type && blk.block_type !== 'normal' && BLK_LABEL[blk.block_type]){
+          body += '<div class="blk-lbl ' + blk.block_type + '">' + BLK_LABEL[blk.block_type] + '</div>';
+        }
+        bexs.forEach(function(e){
+          num++;
+          body += '<div class="exc">' + exMedia(e)
+            + '<div class="exc-body"><div class="exc-top">'
+            + '<div class="exc-num">' + num + '</div>'
+            + '<div class="exc-nm">' + esc(e.training_name || 'Ejercicio') + '</div>'
+            + '<div class="exc-dose">' + dose(e) + '</div></div>'
+            + (e.muscle_group_name ? '<div class="exc-meta">' + esc(e.muscle_group_name) + '</div>' : '')
+            + (e.notes ? '<div class="exc-notes">' + esc(e.notes) + '</div>' : '')
+            + '</div></div>';
+        });
+      });
+    }
+    box.innerHTML = head + note + body;
   }
+
+  function renderAll(){ renderPlans(); renderWeekbar(); renderDay(); }
+  function selectPlan(i){ _sel = i; renderAll(); }
+  function selectWeekday(i){ _selWd = i; renderWeekbar(); renderDay(); }
 
   async function loadProfile(){
     try{
@@ -267,22 +353,29 @@
       else { sav.textContent = (name.trim()[0] || 'C').toUpperCase(); }
     }catch(e){}
   }
+  function setTodayLabel(){
+    var now = new Date();
+    document.getElementById('todayLabel').textContent =
+      WD_NAMES[todayIndex()] + ', ' + now.getDate() + ' de ' + MONTHS[now.getMonth()];
+  }
+
   async function loadRoutines(){
     try{
       const r = await fetch(API + '/client/routines', { headers: headers() });
       const d = await r.json();
       _routines = Array.isArray(d.data) ? d.data : [];
       if (!_routines.length){
-        document.getElementById('routinesLbl').style.display = 'none';
-        document.getElementById('days').innerHTML = '<div class="empty">Tu coach aún no te ha asignado ninguna rutina.</div>';
+        document.getElementById('weekbar').style.display = 'none';
+        document.getElementById('dayPanel').innerHTML = '<div class="empty">Tu coach aún no te ha asignado ninguna rutina.</div>';
         return;
       }
-      renderPlans(); renderDays();
+      _selWd = todayIndex();
+      renderAll();
     }catch(e){
-      document.getElementById('days').innerHTML = '<div class="empty">No se pudieron cargar tus entrenamientos.</div>';
+      document.getElementById('dayPanel').innerHTML = '<div class="empty">No se pudieron cargar tus entrenamientos.</div>';
     }
   }
-  loadProfile(); loadRoutines();
+  setTodayLabel(); loadProfile(); loadRoutines();
 </script>
 <script>
 /* CHAT_UNREAD_BADGE — badge rojo de mensajes de chat no leídos en el panel */

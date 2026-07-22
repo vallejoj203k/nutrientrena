@@ -238,7 +238,7 @@ def list_messages(
 
 
 @router.post("/conversations/{conv_id}/messages")
-def send_message_rest(
+async def send_message_rest(
     conv_id: str,
     body: MessageCreate,
     db: Session = Depends(get_db),
@@ -271,7 +271,22 @@ def send_message_rest(
 
     db.commit()
     db.refresh(msg)
-    return send_response(_serialize_message(msg, db), "Mensaje enviado")
+
+    data = _serialize_message(msg, db)
+
+    # Notificar en tiempo real a los demás participantes (p. ej. el coach)
+    # por WebSocket, igual que el endpoint WS. Sin esto, quien envía por
+    # REST (la zona del cliente) no notificaba al destinatario conectado.
+    recipient_ids = [
+        p.user_id for p in
+        db.query(ChatParticipant).filter(ChatParticipant.conversation_id == conv_id).all()
+    ]
+    await manager.broadcast_to_users(
+        recipient_ids,
+        {"type": "message", "conversation_id": conv_id, "message": data},
+    )
+
+    return send_response(data, "Mensaje enviado")
 
 
 @router.delete("/conversations/{conv_id}")

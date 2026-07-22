@@ -125,6 +125,16 @@
     .fv-back{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:#6B7280;font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;transition:.15s;}
     .fv-back:hover{background:#F3F4F6;color:#111;}
     .fv-title{font-size:18px;font-weight:700;color:#111;}
+    .fv-close{background:none;border:none;cursor:pointer;color:#6B7280;padding:6px;border-radius:8px;display:flex;flex-shrink:0;}
+    .fv-close:hover{background:#F3F4F6;color:#111;}
+    .fv-crumb{display:flex;flex-direction:column;line-height:1.2;}
+    .fv-crumb small{font-size:10px;font-weight:700;letter-spacing:.6px;color:#9CA3AF;text-transform:uppercase;}
+    .fv-seg{display:flex;gap:6px;margin-left:auto;}
+    .fv-seg-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#6B7280;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+    .fv-seg-btn:hover{background:#F9FAFB;color:#111;}
+    .fv-seg-btn.active{background:#F59E0B;border-color:#F59E0B;color:#fff;}
+    .fv-create-btn{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;border:none;background:var(--indigo);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;flex-shrink:0;}
+    .fv-create-btn:hover{background:var(--indigo-dark);}
     .fv-wizard-steps{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid #E5E7EB;margin-left:auto;}
     .fv-wstep{padding:8px 20px;font-size:13px;font-weight:600;color:#9CA3AF;background:#F9FAFB;transition:.15s;user-select:none;}
     .fv-wstep.active{background:var(--indigo);color:#fff;}
@@ -146,32 +156,44 @@
     #fvBuilderBody{display:none;flex:1;flex-direction:column;overflow:hidden;}
     #fvBuilderBody.active{display:flex;}
     .fv-builder-footer{background:#fff;border-top:1px solid #E5E7EB;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .builder-layout{display:flex;gap:0;min-height:400px;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;}
-    .days-panel{width:180px;min-width:180px;background:#F9FAFB;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;}
-    .days-panel-header{padding:12px 14px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB;}
-    .days-list{flex:1;overflow-y:auto;padding:8px;}
-    .day-chip{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#374151;cursor:pointer;transition:.15s;margin-bottom:4px;}
-    .day-chip:hover{background:#EDE9FE;}
-    .day-chip.active{background:var(--indigo);color:#fff;}
-    .day-chip .day-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .day-chip .day-chip-input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13px;font-weight:600;color:inherit;font-family:inherit;}
-    .day-chip .day-edit-btn{background:none;border:none;cursor:pointer;padding:2px 3px;border-radius:4px;display:flex;color:inherit;opacity:0;transition:.15s;flex-shrink:0;}
-    .day-chip:hover .day-edit-btn,.day-chip.active .day-edit-btn{opacity:.55;}
-    .day-chip .day-edit-btn:hover{opacity:1;}
-    .day-chip .day-rm{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;display:flex;color:inherit;opacity:.6;flex-shrink:0;}
-    .day-chip .day-rm:hover{opacity:1;}
-    .days-panel-footer{padding:10px 8px;border-top:1px solid #E5E7EB;}
-    .add-day-chip-btn{width:100%;padding:8px;border-radius:8px;border:1.5px dashed #818CF8;background:#EEF2FF;color:var(--indigo);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;}
-    .add-day-chip-btn:hover{background:#EDE9FE;}
-    .blocks-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-    .blocks-header{padding:12px 16px;background:#fff;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-    .blocks-header .day-title{font-size:14px;font-weight:700;color:#111;flex:1;}
-    .add-block-wrap{position:relative;}
-    .block-type-menu{position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:10;min-width:160px;display:none;overflow:hidden;}
-    .block-type-menu.open{display:block;}
-    .block-type-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;font-weight:500;color:#374151;background:none;border:none;cursor:pointer;text-align:left;transition:.15s;}
-    .block-type-menu button:hover{background:#EEF2FF;color:var(--indigo);}
-    .blocks-list{flex:1;overflow-y:auto;padding:12px 16px;}
+    .builder-layout{display:flex;gap:0;min-height:460px;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;background:#fff;}
+    .days-panel{width:220px;min-width:220px;background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;}
+    .days-panel-header{padding:16px 16px 10px;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;}
+    .days-list{flex:1;overflow-y:auto;padding:4px 12px;}
+    .day-chip{position:relative;display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1.5px solid #E5E7EB;border-radius:12px;background:#fff;cursor:pointer;transition:.15s;margin-bottom:9px;}
+    .day-chip:hover{border-color:#FCD9A6;background:#FFFCF6;}
+    .day-chip.active{border-color:#F59E0B;background:#FFF7ED;}
+    .day-grip{color:#C4C7CF;flex-shrink:0;margin-top:3px;display:flex;cursor:grab;}
+    .day-chip.active .day-grip{color:#F59E0B;}
+    .day-chip-main{flex:1;min-width:0;}
+    .day-chip-name{display:block;font-size:14px;font-weight:700;color:#1F2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .day-chip.active .day-chip-name{color:#B45309;}
+    .day-chip-sub{display:block;font-size:11.5px;color:#9CA3AF;margin-top:2px;white-space:nowrap;}
+    .day-chip-input{width:100%;border:none;outline:none;background:transparent;font-size:14px;font-weight:700;color:inherit;font-family:inherit;}
+    .day-actions{position:absolute;top:8px;right:8px;display:flex;gap:1px;opacity:0;transition:.15s;}
+    .day-chip:hover .day-actions,.day-chip.active .day-actions{opacity:1;}
+    .day-actions button{background:none;border:none;cursor:pointer;padding:3px;border-radius:5px;display:flex;color:#9CA3AF;}
+    .day-actions button:hover{background:#F3F4F6;color:#4B5563;}
+    .day-actions .day-rm:hover{color:#EF4444;background:#FEF2F2;}
+    .days-panel-footer{padding:6px 12px 14px;}
+    .add-day-chip-btn{width:100%;padding:11px;border-radius:11px;border:1px dashed #D1D5DB;background:#fff;color:#6B7280;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .add-day-chip-btn:hover{background:#F9FAFB;border-color:#9CA3AF;color:#374151;}
+    .blocks-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F8FAFC;}
+    .blocks-header{padding:20px 24px 6px;background:transparent;flex-shrink:0;}
+    .blocks-header .day-title{font-size:22px;font-weight:800;color:#111;}
+    .blocks-scroll{flex:1;overflow-y:auto;padding:12px 24px 24px;}
+    .blocks-list{}
+    .block-add-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;}
+    .block-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 10px;border-radius:12px;border:1.5px dashed transparent;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+    .block-add-btn.amber{background:#FDF2E0;border-color:#F6C877;color:#C77A0B;}
+    .block-add-btn.amber:hover{background:#FBE8CC;}
+    .block-add-btn.indigo{background:#EDEEFD;border-color:#BFC3F4;color:#4F46E5;}
+    .block-add-btn.indigo:hover{background:#E1E3FB;}
+    .day-notes-card{margin-top:18px;background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px 18px;}
+    .day-notes-card label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+    .day-notes-card textarea{width:100%;min-height:92px;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;font-size:13.5px;color:#374151;font-family:inherit;resize:vertical;outline:none;line-height:1.5;}
+    .day-notes-card textarea:focus{border-color:#F59E0B;}
+    @media(max-width:900px){.block-add-row{grid-template-columns:repeat(2,1fr);}}
     .block{background:#fff;border:1px solid #E5E7EB;border-radius:10px;margin-bottom:12px;overflow:hidden;}
     .block-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;}
     .block-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;}
@@ -194,9 +216,10 @@
     .ex-muscle{font-size:11px;color:#9CA3AF;display:block;}
     .add-exercise-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;color:var(--indigo);font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;border-top:1px solid #F3F4F6;width:100%;transition:.15s;}
     .add-exercise-btn:hover{background:#EEF2FF;}
-    .empty-day{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 16px;color:#9CA3AF;text-align:center;gap:10px;}
-    .empty-day svg{opacity:.3;}
-    .empty-day p{font-size:13px;}
+    .empty-day{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 20px;color:#9CA3AF;text-align:center;gap:12px;border:2px dashed #DDE1E7;border-radius:16px;background:#fff;}
+    .empty-day .ed-ico{width:56px;height:56px;border-radius:14px;background:#FEF3C7;color:#F59E0B;display:flex;align-items:center;justify-content:center;}
+    .empty-day .ed-title{font-size:15px;font-weight:800;color:#374151;}
+    .empty-day .ed-sub{font-size:13px;color:#9CA3AF;}
     .picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .picker-overlay.open{opacity:1;pointer-events:all;}
     .picker-modal{background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:.2s;}
@@ -619,63 +642,56 @@
 
 <div id="formView">
   <div class="fv-bar">
-    <button class="fv-back" onclick="closeForm()">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Volver a rutinas
+    <button class="fv-close" onclick="closeForm()" title="Cerrar">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <h2 class="fv-title" id="formViewTitle">Nueva rutina</h2>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-      <button class="btn btn-ghost btn-sm" onclick="openRutinaPanel()" style="display:flex;align-items:center;gap:5px;">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    <div class="fv-crumb">
+      <small>Librería · Entrenamiento</small>
+      <h2 class="fv-title" id="formViewTitle">Nueva rutina</h2>
+    </div>
+    <div class="fv-seg">
+      <button class="fv-seg-btn" onclick="openRutinaPanel()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         Información
       </button>
-      <button class="btn btn-primary btn-sm" id="saveRoutineBtn" onclick="saveRoutine()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Guardar rutina
+      <button class="fv-seg-btn active" type="button">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Constructor
       </button>
     </div>
+    <button class="fv-create-btn" id="saveRoutineBtn" onclick="saveRoutine()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="fvCreateLbl">Crear rutina</span>
+    </button>
   </div>
 
   <div id="fvBuilderBody">
     <div class="builder-layout" style="flex:1;min-height:0;">
       <div class="days-panel">
-        <div class="days-panel-header">Días</div>
+        <div class="days-panel-header">Días de entrenamiento</div>
         <div class="days-list" id="daysList"></div>
         <div class="days-panel-footer">
-          <button class="add-day-chip-btn" onclick="addDay()">+ Agregar día</button>
+          <button class="add-day-chip-btn" onclick="addDay()">+ Añadir día</button>
         </div>
       </div>
       <div class="blocks-area">
         <div class="blocks-header">
-          <span class="day-title" id="selectedDayName">Selecciona un día</span>
-          <div class="add-block-wrap">
-            <button class="btn btn-sm btn-purple" onclick="toggleBlockMenu()">+ Bloque</button>
-            <div class="block-type-menu" id="blockTypeMenu">
-              <button onclick="addBlock('warmup');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/><path d="M12 12c0 3-2 4-2 7a2 2 0 0 0 4 0c0-3-2-4-2-7z"/></svg> Calentamiento</button>
-              <button onclick="addBlock('normal');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h2a2 2 0 0 1 2 2v0a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Normal</button>
-              <button onclick="addBlock('superset');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Superserie</button>
-              <button onclick="addBlock('circuit');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Circuito</button>
-              <button onclick="addBlock('text');toggleBlockMenu()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg> Texto</button>
-            </div>
-          </div>
+          <span class="day-title" id="selectedDayName">Día 1</span>
         </div>
-        <div class="blocks-list" id="blocksList">
-          <div class="empty-day">
-            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
-            <p>Agrega un día y crea bloques de ejercicios.</p>
+        <div class="blocks-scroll">
+          <div class="blocks-list" id="blocksList"></div>
+          <div class="block-add-row" id="blockAddRow">
+            <button class="block-add-btn amber" onclick="addBlock('warmup')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/><path d="M12 12c0 3-2 4-2 7a2 2 0 0 0 4 0c0-3-2-4-2-7z"/></svg> + Calentamiento</button>
+            <button class="block-add-btn amber" onclick="addBlock('normal')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> + Bloque normal</button>
+            <button class="block-add-btn indigo" onclick="addBlock('superset')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> + Superserie</button>
+            <button class="block-add-btn indigo" onclick="addBlock('circuit')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> + Circuito</button>
+          </div>
+          <div class="day-notes-card" id="dayNotesCard">
+            <label><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Notas del día para el cliente</label>
+            <textarea id="dayNotes" placeholder="Ej: Hidrátate bien entre series, controla la técnica en el peso muerto, descansa 24h antes del próximo entrenamiento…" oninput="updateDayNote(this.value)"></textarea>
           </div>
         </div>
       </div>
-    </div>
-    <div class="fv-builder-footer">
-      <button class="btn btn-ghost" onclick="wizardGo(1)">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        Anterior
-      </button>
-      <button class="btn btn-primary" id="saveRoutineBtn" onclick="saveRoutine()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Guardar rutina
-      </button>
     </div>
   </div>
 </div><!-- #formView -->
@@ -1076,6 +1092,7 @@ async function openForm(id=null){
   editingRoutineId=id;resetRoutineData();
   document.getElementById('rpTitle').textContent=id?'Editar rutina':'Nueva rutina';
   const _lbl=document.getElementById('rpCreateLbl');if(_lbl)_lbl.textContent=id?'Guardar rutina':'Crear rutina';
+  const _lbl2=document.getElementById('fvCreateLbl');if(_lbl2)_lbl2.textContent=id?'Guardar rutina':'Crear rutina';
   document.getElementById('formViewTitle').textContent=id?'Editar rutina':'Nueva rutina';
   clearRoutineForm();
   if(id){
@@ -1135,6 +1152,13 @@ function wizardNext(){
   routineData.objective=document.getElementById('f_objective').value||'';
   routineData.materials=_rtMaterials.join(', ');
   routineData.notes=document.getElementById('f_notes').value.trim();
+  // Plantilla por defecto: si es una rutina nueva y aún no hay días,
+  // se crean 3 (o los que indique "Nº de días"). El usuario puede añadir o quitar.
+  if(!editingRoutineId && !routineData.days_list.length){
+    const n=Math.min(Math.max(routineData.days||3,1),7);
+    for(let i=0;i<n;i++)routineData.days_list.push({day_name:`Día ${i+1}`,description:'',blocks:[]});
+    selectedDayIdx=0;
+  }
   closeRutinaPanel();
   document.getElementById('listView').style.display='none';
   document.getElementById('formView').classList.add('active');
@@ -1162,9 +1186,12 @@ function duplicateDay(idx){
 function selectDay(idx){selectedDayIdx=idx;renderDaysList();renderBlocks();}
 function renderDaysList(){
   const container=document.getElementById('daysList');container.innerHTML='';
+  const GRIP='<svg width="12" height="16" fill="currentColor" viewBox="0 0 16 16"><circle cx="5" cy="3" r="1.4"/><circle cx="11" cy="3" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="13" r="1.4"/><circle cx="11" cy="13" r="1.4"/></svg>';
   routineData.days_list.forEach((day,i)=>{
+    const nBlocks=day.blocks.length;
+    const nEx=day.blocks.reduce((s,b)=>s+(b.exercises?b.exercises.length:0),0);
     const chip=document.createElement('div');chip.className=`day-chip${i===selectedDayIdx?' active':''}`;
-    chip.innerHTML=`<span class="day-chip-name" title="Doble clic para renombrar">${esc(day.day_name)}</span><button class="day-edit-btn" title="Renombrar día"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="day-dup-btn" title="Duplicar día"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="day-rm" title="Eliminar día"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    chip.innerHTML=`<span class="day-grip" title="Arrastrar">${GRIP}</span><div class="day-chip-main"><span class="day-chip-name" title="Doble clic para renombrar">${esc(day.day_name)}</span><span class="day-chip-sub">${nBlocks} ${nBlocks===1?'bloque':'bloques'} · ${nEx} ${nEx===1?'ejercicio':'ejercicios'}</span></div><div class="day-actions"><button class="day-edit-btn" title="Renombrar día"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="day-dup-btn" title="Duplicar día"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="day-rm" title="Eliminar día"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`;
     chip.querySelector('.day-chip-name').addEventListener('dblclick',(e)=>{e.stopPropagation();startRenameDay(i,chip);});
     chip.querySelector('.day-edit-btn').addEventListener('click',(e)=>{e.stopPropagation();startRenameDay(i,chip);});
     chip.querySelector('.day-dup-btn').addEventListener('click',(e)=>{e.stopPropagation();duplicateDay(i);});
@@ -1194,11 +1221,20 @@ document.addEventListener('click',(e)=>{if(!e.target.closest('.add-block-wrap'))
 function addBlock(type='normal'){if(!routineData.days_list.length){showToast('Agrega un día primero','error');return;}const day=routineData.days_list[selectedDayIdx];day.blocks.push({block_type:type,content:'',order_index:day.blocks.length,exercises:[]});renderBlocks();}
 function updateBlockContent(bi,value){routineData.days_list[selectedDayIdx].blocks[bi].content=value;}
 function removeBlock(blockIdx){const blk=routineData.days_list[selectedDayIdx].blocks[blockIdx];const msg=blk?.block_type==='text'?'¿Eliminar este bloque de texto?':'¿Eliminar este bloque y todos sus ejercicios?';if(!confirm(msg))return;routineData.days_list[selectedDayIdx].blocks.splice(blockIdx,1);renderBlocks();}
+function updateDayNote(value){if(routineData.days_list[selectedDayIdx])routineData.days_list[selectedDayIdx].description=value;}
 function renderBlocks(){
   const container=document.getElementById('blocksList');const titleEl=document.getElementById('selectedDayName');
-  if(!routineData.days_list.length){titleEl.textContent='Selecciona un día';container.innerHTML=`<div class="empty-day"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg><p>Agrega un día y crea bloques de ejercicios.</p></div>`;return;}
+  const addRow=document.getElementById('blockAddRow');const notesCard=document.getElementById('dayNotesCard');const notesTa=document.getElementById('dayNotes');
+  if(!routineData.days_list.length){
+    titleEl.textContent='Sin días';
+    container.innerHTML=`<div class="empty-day"><div class="ed-ico"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div class="ed-title">Añade un día para empezar</div><div class="ed-sub">Pulsa «+ Añadir día» en el panel de la izquierda.</div></div>`;
+    if(addRow)addRow.style.display='none';if(notesCard)notesCard.style.display='none';return;
+  }
   const day=routineData.days_list[selectedDayIdx];titleEl.textContent=day.day_name;
-  if(!day.blocks.length){container.innerHTML=`<div class="empty-day"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>Usa el botón "+ Bloque" para agregar bloques de ejercicios.</p></div>`;return;}
+  renderDaysList();  // refresca los contadores "X bloques · Y ejercicios"
+  if(addRow)addRow.style.display='';if(notesCard)notesCard.style.display='';
+  if(notesTa&&notesTa.value!==(day.description||''))notesTa.value=day.description||'';
+  if(!day.blocks.length){container.innerHTML=`<div class="empty-day"><div class="ed-ico"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div class="ed-title">Añade bloques para construir este día</div><div class="ed-sub">Un bloque puede ser calentamiento, normal, superserie o circuito.</div></div>`;return;}
   container.innerHTML=day.blocks.map((blk,bi)=>{
     const label=BLOCK_LABELS[blk.block_type]||blk.block_type;
     const GRIP='<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><circle cx="5" cy="3" r="1.4"/><circle cx="11" cy="3" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="13" r="1.4"/><circle cx="11" cy="13" r="1.4"/></svg>';

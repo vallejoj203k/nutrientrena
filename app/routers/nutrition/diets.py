@@ -30,8 +30,40 @@ def _get_or_404_with_pathologies(db: Session, diet_id: str):
     )
 
 
+def _diet_food_totals(diet: Diet):
+    """Suma kcal y macros reales a partir de los alimentos de la dieta."""
+    k = p = c = f = 0.0
+    for food in (diet.foods or []):
+        for dfa in (food.detail or []):
+            al = dfa.aliment
+            q = dfa.quantity or 0
+            if al and q:
+                k += (al.calories or 0) / 100.0 * q
+                p += (al.proteins or 0) / 100.0 * q
+                c += (al.carbohydrates or 0) / 100.0 * q
+                f += (al.fats or 0) / 100.0 * q
+    return k, p, c, f
+
+
 def _serialize(diet: Diet) -> dict:
-    return DietOut.model_validate(diet).model_dump()
+    data = DietOut.model_validate(diet).model_dump()
+    # Si la dieta no tiene kcal/macros objetivo guardados (modo "libre"),
+    # se muestran los totales reales calculados de sus alimentos.
+    if not data.get("calories"):
+        k, p, c, f = _diet_food_totals(diet)
+        if k > 0:
+            data["calories"] = round(k)
+            det = data.get("detail")
+            if not isinstance(det, dict):
+                det = {}
+            if not det.get("proteins"):
+                det["proteins"] = round(p, 1)
+            if not det.get("carbs"):
+                det["carbs"] = round(c, 1)
+            if not det.get("fats"):
+                det["fats"] = round(f, 1)
+            data["detail"] = det
+    return data
 
 
 def _clone_aliment(db: Session, source: Aliment) -> Aliment:

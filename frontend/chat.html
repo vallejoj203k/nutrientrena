@@ -465,8 +465,18 @@ async function loadConversations() {
   renderConvList(_convs);
 }
 
+// Nombre a mostrar de una conversación. Para individuales (p. ej. las que
+// crea el cliente sin 'name') se usa el nombre del otro participante.
+function convOther(c) { return (c.participants || []).find(p => p.user_id !== _me?.user_id); }
+function convName(c) {
+  if (c.type === 'group') return c.name || 'Grupo';
+  const o = convOther(c);
+  return (o && o.name && o.name.trim()) || c.name || 'Cliente';
+}
+function convInitial(c) { const n = convName(c); return ((n && n.trim()[0]) || '?').toUpperCase(); }
+
 function filterConvs(q) {
-  renderConvList(_convs.filter(c => (c.name || '').toLowerCase().includes(q.toLowerCase())));
+  renderConvList(_convs.filter(c => convName(c).toLowerCase().includes(q.toLowerCase())));
 }
 
 function renderConvList(convs) {
@@ -477,8 +487,8 @@ function renderConvList(convs) {
   }
   el.innerHTML = convs.map(c => {
     const isGroup = c.type === 'group';
-    const initials = (c.name || '?')[0].toUpperCase();
-    const photo = !isGroup && c.participants?.find(p => p.user_id !== _me?.user_id)?.photo;
+    const initials = convInitial(c);
+    const photo = !isGroup && convOther(c)?.photo;
     const avatarHtml = photo
       ? `<div class="conv-avatar"><img src="${photo}" alt=""></div>`
       : `<div class="conv-avatar ${isGroup ? 'group' : ''}">${isGroup ? '👥' : initials}</div>`;
@@ -487,7 +497,7 @@ function renderConvList(convs) {
     return `<div class="conv-item ${_activeConv?.id === c.id ? 'active' : ''}" onclick="selectConversation('${c.id}')">
       ${avatarHtml}
       <div class="conv-info">
-        <div class="conv-name">${escHtml(c.name || '—')}</div>
+        <div class="conv-name">${escHtml(convName(c))}</div>
         <div class="conv-last">${lastMsg}</div>
       </div>
       <div class="conv-time">${time}</div>
@@ -511,10 +521,10 @@ async function selectConversation(id) {
   if (photo) {
     av.innerHTML = `<img src="${photo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
   } else {
-    av.textContent = isGroup ? '👥' : (_activeConv.name || '?')[0].toUpperCase();
+    av.textContent = isGroup ? '👥' : convInitial(_activeConv);
   }
-  document.getElementById('msgHeaderName').textContent = _activeConv.name || '—';
-  document.getElementById('msgHeaderSub').textContent = isGroup ? `${(_activeConv.participants || []).length} participantes` : '';
+  document.getElementById('msgHeaderName').textContent = convName(_activeConv);
+  document.getElementById('msgHeaderSub').textContent = isGroup ? `${(_activeConv.participants || []).length} participantes` : 'Cliente';
 
   await loadMessages(id);
   document.getElementById('sendInput').focus();

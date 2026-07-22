@@ -178,3 +178,23 @@ def delete_menu(
     db.delete(menu)
     db.commit()
     return send_response(None, "Menú eliminado")
+
+
+# ── Asignar menú semanal a un cliente ──────────────────────────────────────────
+class _AssignMenuBody(BaseModel):
+    client_id: str  # UserDetail UUID del cliente
+
+
+@router.post("/{id}/assign", summary="Asignar menú a cliente", description="Asigna este menú semanal a un cliente; pasa a ser su menú vigente.")
+def assign_menu_to_client(id: str, body: _AssignMenuBody, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+    from app.models.user import UserDetail
+    from app.models.client_menu import ClientMenu
+    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
+    if not menu:
+        return send_error("Menú no encontrado")
+    client = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
+    if not client:
+        return send_error("Cliente no encontrado")
+    db.add(ClientMenu(client_user_detail_id=body.client_id, menu_id=id, assigned_by_user_id=current_user.id))
+    db.commit()
+    return send_response(None, "Menú asignado al cliente")

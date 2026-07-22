@@ -505,6 +505,20 @@
     .pm2-rm:hover{color:#DC2626;background:#FEF2F2;}
     .pm2-edit{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:5px;border-radius:6px;display:inline-flex;transition:.15s;margin-right:2px;}
     .pm2-edit:hover{color:var(--indigo);background:var(--indigo-pale);}
+    /* Ventana emergente de aviso */
+    .dlg-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:800;display:none;align-items:center;justify-content:center;padding:20px;}
+    .dlg-overlay.open{display:flex;}
+    .dlg{background:#fff;border-radius:16px;width:400px;max-width:100%;padding:26px 24px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.28);}
+    .dlg-ico{width:56px;height:56px;border-radius:50%;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+    .dlg-title{font-size:18px;font-weight:800;color:#111827;}
+    .dlg-text{font-size:14px;color:#6B7280;margin-top:8px;line-height:1.5;}
+    .dlg-actions{display:flex;gap:10px;margin-top:20px;}
+    .dlg-btn{flex:1;padding:11px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:.15s;}
+    .dlg-btn.ghost{background:#fff;border:1px solid #E5E7EB;color:#374151;}
+    .dlg-btn.ghost:hover{background:#F9FAFB;}
+    .dlg-btn.primary{background:var(--indigo);color:#fff;}
+    .dlg-btn.primary:hover{background:var(--indigo-dark);}
+    .dgi-inp-error{border-color:#DC2626 !important;box-shadow:0 0 0 3px rgba(220,38,38,.12) !important;}
     .pm2-total-row td{border-bottom:none;border-top:1px solid #EEF0F3;font-weight:800;color:#111827;background:#FAFBFC;padding-top:13px;padding-bottom:13px;}
     .pm2-total-row td.l{color:#9CA3AF;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
     .pm2-addlink{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border:1.5px dashed #C7D2FE;border-radius:10px;background:transparent;color:#4F46E5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
@@ -2962,7 +2976,7 @@ async function saveDiet() {
   saveAllMealDOMState();
   var title = document.getElementById('f_title').value.trim();
   var errEl = document.getElementById('formError');
-  if (!title) { if(errEl){errEl.textContent='Ponle un título a la dieta en la pestaña «Información».';errEl.style.display='block';} return; }
+  if (!title) { if(errEl){errEl.textContent='';errEl.style.display='none';} openTitleDlg(); return; }
   var lbl = document.getElementById('dpSaveLbl');
   var prevLbl = lbl ? lbl.textContent : '';
   var saveBtns = [document.getElementById('saveBtn'), document.querySelector('.dp-save-header')].filter(Boolean);
@@ -3476,6 +3490,29 @@ function toggleLibrary(el){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',attach);
   else attach();
 })();
+</script>
+
+<!-- Aviso: falta el título de la dieta -->
+<div class="dlg-overlay" id="titleDlg" onclick="if(event.target===this)closeTitleDlg()">
+  <div class="dlg">
+    <div class="dlg-ico"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <h3 class="dlg-title">Falta el título de la dieta</h3>
+    <p class="dlg-text">Antes de crear la dieta, ponle un título en la pestaña <b>«Información»</b>.</p>
+    <div class="dlg-actions">
+      <button class="dlg-btn ghost" onclick="closeTitleDlg()">Cancelar</button>
+      <button class="dlg-btn primary" onclick="goToInfoAndFocusTitle()">Ir a Información</button>
+    </div>
+  </div>
+</div>
+<script>
+  function closeTitleDlg(){ document.getElementById('titleDlg').classList.remove('open'); }
+  function openTitleDlg(){ document.getElementById('titleDlg').classList.add('open'); }
+  function goToInfoAndFocusTitle(){
+    closeTitleDlg();
+    if(typeof goToStep==='function') goToStep(1);
+    var t=document.getElementById('f_title');
+    if(t){ t.focus(); t.classList.add('dgi-inp-error'); t.addEventListener('input', function _clr(){ t.classList.remove('dgi-inp-error'); t.removeEventListener('input',_clr); }); }
+  }
 </script>
 </body>
 </html>

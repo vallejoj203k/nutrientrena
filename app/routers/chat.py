@@ -237,6 +237,61 @@ def list_messages(
     return send_response({"messages": data, "total": total, "page": page, "per_page": per_page}, "Mensajes obtenidos")
 
 
+@router.get("/unread-count")
+def unread_count(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Total de mensajes no leídos del usuario y desglose por conversación.
+
+    'No leído' = mensaje de otra persona con created_at posterior a la
+    última vez que el usuario abrió esa conversación (last_read_at); si
+    nunca la abrió, se usa joined_at como referencia.
+    """
+    parts = (
+        db.query(ChatParticipant)
+        .filter(ChatParticipant.user_id == current_user.id)
+        .all()
+    )
+    total = 0
+    per_conversation = []
+    for part in parts:
+        threshold = part.last_read_at or part.joined_at
+        q = db.query(ChatMessage).filter(
+            ChatMessage.conversation_id == part.conversation_id,
+            ChatMessage.sender_user_id != current_user.id,
+        )
+        if threshold is not None:
+            q = q.filter(ChatMessage.created_at > threshold)
+        n = q.count()
+        if n:
+            total += n
+            per_conversation.append({"conversation_id": part.conversation_id, "count": n})
+    return send_response({"total": total, "conversations": per_conversation}, "OK")
+
+
+@router.post("/conversations/{conv_id}/read")
+def mark_conversation_read(
+    conv_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Marca la conversación como leída para el usuario (limpia su badge)."""
+    part = (
+        db.query(ChatParticipant)
+        .filter(
+            ChatParticipant.conversation_id == conv_id,
+            ChatParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not part:
+        return send_error("Conversación no encontrada", code=404)
+    part.last_read_at = datetime.utcnow()
+    db.commit()
+    return send_response(None, "Conversación marcada como leída")
+
+
 @router.post("/conversations/{conv_id}/messages")
 async def send_message_rest(
     conv_id: str,

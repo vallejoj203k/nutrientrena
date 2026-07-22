@@ -29,6 +29,7 @@ class ChatParticipant(Base):
     conversation_id = Column(String(36), ForeignKey("chat_conversations.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     joined_at = Column(DateTime, default=datetime.utcnow)
+    last_read_at = Column(DateTime, nullable=True)  # última vez que el usuario abrió esta conversación
 
     conversation = relationship("ChatConversation", back_populates="participants")
     user = relationship("User", foreign_keys=[user_id])

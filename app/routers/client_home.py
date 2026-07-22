@@ -323,6 +323,32 @@ def client_checkin(body: _ClientCheckinBody, db: Session = Depends(get_db), curr
     return send_response({"id": ck.id, "checkin_date": ck.checkin_date.isoformat()}, "Check-in guardado")
 
 
+class _WorkoutSessionBody(BaseModel):
+    routine_id: Optional[int] = None
+    duration_min: Optional[int] = None
+    rpe: Optional[float] = None
+    notes: Optional[str] = None
+
+
+@router.post("/workout-session", summary="Registrar entrenamiento (cliente)", description="El cliente registra una sesión de entrenamiento completada hoy (duración, RPE, notas).")
+def client_workout_session(body: _WorkoutSessionBody, db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(CLIENT))):
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_error("Perfil de cliente no encontrado")
+    session = WorkoutSession(
+        client_user_detail_id=detail.id,
+        routine_id=body.routine_id,
+        session_date=date.today(),
+        duration_min=body.duration_min,
+        rpe=body.rpe,
+        notes=body.notes,
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return send_response({"id": session.id, "session_date": session.session_date.isoformat()}, "Entrenamiento registrado")
+
+
 @router.get("/routines", summary="Rutinas del cliente", description="Rutinas (planes) asignadas al cliente autenticado, con sus días y ejercicios.")
 def client_routines(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT))):
     # Reutiliza el serializador del panel del coach (mismo formato de días/bloques/ejercicios).

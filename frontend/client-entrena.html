@@ -114,6 +114,55 @@
 
     .empty{padding:44px 22px;text-align:center;color:#6B7280;font-size:14px;background:#fff;border:1px solid #E5E7EB;border-radius:16px;}
 
+    /* Botón Empezar entrenamiento (visible sin scroll) */
+    .start-bar{position:sticky;top:0;z-index:20;background:var(--gray-bg);padding:4px 0 12px;margin-bottom:4px;}
+    .start-btn{width:100%;padding:15px;border-radius:14px;border:none;background:var(--green);color:#fff;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 6px 16px rgba(5,150,105,.28);transition:.15s;}
+    .start-btn:hover{background:#047857;}
+
+    /* Sesión de entrenamiento en curso */
+    .ws-overlay{position:fixed;inset:0;background:#F1F2F5;z-index:500;display:none;flex-direction:column;}
+    .ws-overlay.open{display:flex;}
+    .ws-top{background:#fff;border-bottom:1px solid #E5E7EB;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+    .ws-exit{background:none;border:none;cursor:pointer;color:#6B7280;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;font-family:inherit;padding:6px 8px;border-radius:8px;}
+    .ws-exit:hover{background:#F3F4F6;color:#111827;}
+    .ws-timer{flex:1;text-align:center;font-size:20px;font-weight:800;color:#111827;font-variant-numeric:tabular-nums;letter-spacing:.5px;}
+    .ws-terminar{background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;}
+    .ws-terminar:hover{background:#047857;}
+    .ws-sub{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 22px 12px;font-size:13px;color:#6B7280;flex-shrink:0;}
+    .ws-body{flex:1;overflow-y:auto;padding:16px;}
+    .ws-inner{max-width:640px;margin:0 auto;}
+
+    .ws-ex{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .ws-ex-head{display:flex;align-items:center;gap:12px;}
+    .ws-thumb{width:52px;height:52px;border-radius:12px;background:#F3F4F6;border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative;text-decoration:none;color:#C4C7CF;}
+    .ws-thumb img{width:100%;height:100%;object-fit:contain;}
+    .ws-thumb .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+    .ws-ex-info{flex:1;min-width:0;}
+    .ws-ex-name{font-size:16px;font-weight:800;color:var(--indigo);}
+    .ws-ex-dose{font-size:12.5px;color:#9CA3AF;margin-top:2px;}
+    .ws-more{background:none;border:1px solid #E5E7EB;border-radius:8px;color:#9CA3AF;cursor:pointer;padding:4px 10px;font-weight:800;flex-shrink:0;}
+    .ws-note-btn{background:none;border:none;color:#6B7280;font-size:12.5px;font-weight:600;cursor:pointer;padding:8px 2px 2px;display:flex;align-items:center;gap:6px;font-family:inherit;}
+    .ws-note-ta{width:100%;margin-top:8px;border:1px solid #E5E7EB;border-radius:10px;padding:9px 11px;font-size:13px;font-family:inherit;resize:vertical;outline:none;min-height:52px;display:none;}
+    .ws-note-ta.show{display:block;}
+    .ws-rest{display:flex;align-items:center;justify-content:space-between;background:#F9FAFB;border-radius:10px;padding:9px 12px;margin:12px 0 4px;font-size:13px;color:#6B7280;font-weight:600;}
+    .ws-rest .rest-t{color:var(--green);font-weight:800;display:flex;align-items:center;gap:5px;}
+
+    .ws-tbl{width:100%;margin-top:8px;border-collapse:collapse;}
+    .ws-tbl th{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;padding:6px 4px;text-align:center;}
+    .ws-tbl th:nth-child(2){text-align:left;}
+    .ws-set td{padding:7px 4px;text-align:center;vertical-align:middle;border-top:1px solid #F3F4F6;}
+    .ws-set-num{font-size:15px;font-weight:800;color:#111827;width:34px;}
+    .ws-prev{font-size:11.5px;color:#C4C7CF;text-align:left;white-space:nowrap;}
+    .ws-in{width:56px;padding:9px 4px;border:1px solid #E5E7EB;border-radius:9px;font-size:14px;font-weight:700;text-align:center;color:#111;outline:none;font-family:inherit;background:#F9FAFB;}
+    .ws-in:focus{border-color:var(--indigo);background:#fff;}
+    .ws-set.done .ws-in{background:#ECFDF5;border-color:#A7F3D0;}
+    .ws-check{width:26px;height:26px;border-radius:50%;border:2px solid #D1D5DB;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:transparent;transition:.15s;padding:0;}
+    .ws-check:hover{border-color:var(--green);}
+    .ws-check.done{background:var(--green);border-color:var(--green);color:#fff;}
+    .ws-addset{width:100%;margin-top:10px;padding:11px;border:1.5px dashed #D1D5DB;border-radius:10px;background:#fff;color:#6B7280;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+    .ws-addset:hover{background:#F9FAFB;border-color:#9CA3AF;}
+    .ws-done-banner{background:#ECFDF5;border:1px solid #A7F3D0;color:var(--green);border-radius:12px;padding:12px;text-align:center;font-size:13.5px;font-weight:700;margin-bottom:14px;}
+
     .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
     .sidebar-overlay.open{display:block;}
     @media(max-width:768px){
@@ -195,6 +244,17 @@
       <div id="dayPanel"><div class="empty" id="loadingBox">Cargando tus entrenamientos…</div></div>
     </div>
   </div>
+</div>
+
+<!-- Sesión de entrenamiento en curso -->
+<div class="ws-overlay" id="wsOverlay">
+  <div class="ws-top">
+    <button class="ws-exit" onclick="exitWorkout()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Salir</button>
+    <div class="ws-timer" id="wsTimer">0:00</div>
+    <button class="ws-terminar" onclick="finishWorkout()">Terminar</button>
+  </div>
+  <div class="ws-sub" id="wsSub"></div>
+  <div class="ws-body"><div class="ws-inner" id="wsInner"></div></div>
 </div>
 
 <script>
@@ -317,6 +377,10 @@
 
     var note = day.description ? '<div class="day-note">' + esc(day.description) + '</div>' : '';
 
+    var startBar = exs.length ? '<div class="start-bar"><button class="start-btn" onclick="startWorkout()">'
+      + '<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
+      + 'Empezar entrenamiento</button></div>' : '';
+
     var body = '';
     if (!exs.length){
       body = '<div class="empty">Este día no tiene ejercicios cargados.</div>';
@@ -345,12 +409,125 @@
         });
       });
     }
-    box.innerHTML = head + note + body;
+    box.innerHTML = head + startBar + note + body;
   }
 
   function renderAll(){ renderPlans(); renderWeekbar(); renderDay(); }
   function selectPlan(i){ _sel = i; renderAll(); }
   function selectWeekday(i){ _selWd = i; renderWeekbar(); renderDay(); }
+
+  // ── Sesión de entrenamiento en curso ──────────────────────────────
+  let _ws = null, _wsTimer = null;
+
+  function _fmtTime(sec){
+    var m = Math.floor(sec / 60), s = sec % 60;
+    if (m >= 60){ var h = Math.floor(m / 60); m = m % 60; return h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'); }
+    return m + ':' + String(s).padStart(2,'0');
+  }
+  function _wsThumb(e){
+    var inner = e.image ? '<img src="' + esc(e.image) + '" alt="">' : DUMBBELL;
+    var open = e.video_url || e.image;
+    if (e.video_url){
+      var yt = ytId(e.video_url), vm = vimeoId(e.video_url);
+      var href = yt ? 'https://www.youtube.com/watch?v=' + yt : (vm ? 'https://vimeo.com/' + vm : e.video_url);
+      var th = e.image ? '<img src="' + esc(e.image) + '" alt="">' : (yt ? '<img src="https://img.youtube.com/vi/' + yt + '/mqdefault.jpg" alt="">' : DUMBBELL);
+      return '<a class="ws-thumb" href="' + esc(href) + '" target="_blank" rel="noopener" title="Ver ejecución">' + th + '<div class="play"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(17,24,39,.55)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg></div></a>';
+    }
+    return '<div class="ws-thumb">' + inner + '</div>';
+  }
+
+  function startWorkout(){
+    var r = _routines[_sel];
+    var day = dayForWeekday(r, _selWd);
+    if (!day) return;
+    var exs = [];
+    (day.blocks || []).forEach(function(blk){
+      if (blk.block_type === 'text') return;
+      (blk.exercises || []).forEach(function(e){
+        var n = parseInt(e.series) || 1;
+        var target = (e.repetitions || '').toString().trim();
+        var sets = [];
+        for (var i = 0; i < n; i++) sets.push({ reps:'', kg:'', rpe:'', done:false });
+        exs.push({
+          name: e.training_name || 'Ejercicio', image: e.image || null, video_url: e.video_url || null,
+          muscle: e.muscle_group_name || '', rest: e.break_time || null, target: target,
+          note: '', noteOpen:false, sets: sets
+        });
+      });
+    });
+    if (!exs.length) return;
+    _ws = { routineId: r.id, dayName: (day.day_name || dayForWeekday(r,_selWd) && ('Día '+(_selWd+1))), exercises: exs, startMs: Date.now() };
+    document.getElementById('wsSub').textContent = (day.day_name || ('Día ' + (_selWd + 1))) + ' · ' + exs.length + ' ejercicio' + (exs.length !== 1 ? 's' : '');
+    renderWorkout();
+    document.getElementById('wsOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    _wsTimer = setInterval(_wsTick, 1000);
+    _wsTick();
+  }
+  function _wsTick(){
+    if (!_ws) return;
+    document.getElementById('wsTimer').textContent = _fmtTime(Math.floor((Date.now() - _ws.startMs) / 1000));
+  }
+  function renderWorkout(){
+    var box = document.getElementById('wsInner');
+    box.innerHTML = _ws.exercises.map(function(e, ei){
+      var doseTxt = [(e.sets.length + ' × ' + (e.target || '—')), 'toca imagen para ver ejecución'].join(' · ');
+      var rows = e.sets.map(function(s, si){
+        return '<tr class="ws-set' + (s.done ? ' done' : '') + '">'
+          + '<td class="ws-set-num">' + (si + 1) + '</td>'
+          + '<td class="ws-prev">' + (e.target ? esc(e.target) + ' reps' : '—') + '</td>'
+          + '<td><input class="ws-in" inputmode="numeric" value="' + esc(s.reps) + '" placeholder="' + esc(e.target || '—') + '" onchange="wsSet(' + ei + ',' + si + ',\'reps\',this.value)"></td>'
+          + '<td><input class="ws-in" inputmode="decimal" value="' + esc(s.kg) + '" placeholder="kg" onchange="wsSet(' + ei + ',' + si + ',\'kg\',this.value)"></td>'
+          + '<td><input class="ws-in" inputmode="decimal" value="' + esc(s.rpe) + '" placeholder="—" onchange="wsSet(' + ei + ',' + si + ',\'rpe\',this.value)"></td>'
+          + '<td><button class="ws-check' + (s.done ? ' done' : '') + '" onclick="wsToggle(' + ei + ',' + si + ')" title="Marcar serie"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button></td>'
+          + '</tr>';
+      }).join('');
+      return '<div class="ws-ex">'
+        + '<div class="ws-ex-head">' + _wsThumb(e)
+        + '<div class="ws-ex-info"><div class="ws-ex-name">' + esc(e.name) + '</div><div class="ws-ex-dose">' + esc(doseTxt) + '</div></div></div>'
+        + '<button class="ws-note-btn" onclick="wsNote(' + ei + ')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Añadir nota</button>'
+        + '<textarea class="ws-note-ta' + (e.noteOpen ? ' show' : '') + '" id="wsNote-' + ei + '" placeholder="Escribe una nota para este ejercicio…" oninput="_ws.exercises[' + ei + '].note=this.value">' + esc(e.note) + '</textarea>'
+        + (e.rest ? '<div class="ws-rest"><span>✋ Descanso entre series</span><span class="rest-t"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M9 2h6"/></svg>' + esc(e.rest) + 's</span></div>' : '')
+        + '<table class="ws-tbl"><thead><tr><th>Serie</th><th>Anterior</th><th>Reps</th><th>Kg</th><th>RPE</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>'
+        + '<button class="ws-addset" onclick="wsAddSet(' + ei + ')">+ Añadir serie</button>'
+        + '</div>';
+    }).join('');
+  }
+  function wsSet(ei, si, field, val){ _ws.exercises[ei].sets[si][field] = val; }
+  function wsToggle(ei, si){ _ws.exercises[ei].sets[si].done = !_ws.exercises[ei].sets[si].done; renderWorkout(); }
+  function wsAddSet(ei){ _ws.exercises[ei].sets.push({ reps:'', kg:'', rpe:'', done:false }); renderWorkout(); }
+  function wsNote(ei){ _ws.exercises[ei].noteOpen = !_ws.exercises[ei].noteOpen; var ta = document.getElementById('wsNote-' + ei); if (ta) ta.classList.toggle('show'); if (ta && _ws.exercises[ei].noteOpen) ta.focus(); }
+
+  function _wsClose(){
+    if (_wsTimer){ clearInterval(_wsTimer); _wsTimer = null; }
+    document.getElementById('wsOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    _ws = null;
+  }
+  function exitWorkout(){
+    if (_ws){
+      var anyDone = _ws.exercises.some(function(e){ return e.sets.some(function(s){ return s.done; }); });
+      if (anyDone && !confirm('¿Salir sin terminar? Se perderá el progreso de esta sesión.')) return;
+    }
+    _wsClose();
+  }
+  async function finishWorkout(){
+    if (!_ws) return;
+    var elapsedSec = Math.floor((Date.now() - _ws.startMs) / 1000);
+    var durationMin = Math.max(1, Math.round(elapsedSec / 60));
+    // RPE medio de las series marcadas (si hay)
+    var rpes = [];
+    _ws.exercises.forEach(function(e){ e.sets.forEach(function(s){ if (s.done && s.rpe !== '' && !isNaN(parseFloat(s.rpe))) rpes.push(parseFloat(s.rpe)); }); });
+    var avgRpe = rpes.length ? Math.round((rpes.reduce(function(a,b){return a+b;},0) / rpes.length) * 10) / 10 : null;
+    var notes = _ws.exercises.filter(function(e){ return (e.note || '').trim(); }).map(function(e){ return e.name + ': ' + e.note.trim(); }).join(' | ') || null;
+    if (!confirm('¿Terminar el entrenamiento? Se registrará en tu progreso.')) return;
+    var body = { routine_id: _ws.routineId, duration_min: durationMin, rpe: avgRpe, notes: notes };
+    try{
+      await fetch(API + '/client/workout-session', { method:'POST', headers: headers(), body: JSON.stringify(body) });
+    }catch(e){}
+    _wsClose();
+    alert('¡Entrenamiento completado! Duración: ' + _fmtTime(elapsedSec));
+  }
 
   async function loadProfile(){
     try{

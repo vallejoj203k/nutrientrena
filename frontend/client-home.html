@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <title>NutriEntrena — Mi espacio</title>
+  <!-- Guard: solo clientes (rol 6). Otros roles van al panel del coach. -->
+  <script>
+    (function(){
+      var t = localStorage.getItem('token');
+      var r = localStorage.getItem('role_id') || '';
+      if (!t) { location.replace('login.html'); return; }
+      if (r && r !== '6') { location.replace('dashboard.html'); }
+    })();
+  </script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;
+      --green:#059669;--green-pale:#D1FAE5;--amber:#F59E0B;--amber-pale:#FEF3C7;
+      --red:#DC2626;--ink:#111827;--muted:#6B7280;--line:#E5E7EB;--bg:#F4F5F8;
+    }
+    html,body{background:var(--bg);}
+    body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;color:var(--ink);
+      min-height:100vh;display:flex;justify-content:center;}
+    /* Contenedor tipo móvil, centrado en escritorio */
+    .app{width:100%;max-width:460px;background:var(--bg);min-height:100vh;
+      display:flex;flex-direction:column;position:relative;padding-bottom:78px;}
+
+    /* Cabecera */
+    .ch-top{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+    .ch-brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:800;letter-spacing:.3px;}
+    .ch-brand .mark{width:30px;height:30px;border-radius:8px;background:url('logo.webp') no-repeat 50% 41%;background-size:158px;flex-shrink:0;}
+    .ch-brand b{font-weight:800;}
+    .ch-brand .n1{color:var(--indigo);}
+    .ch-brand .n2{color:var(--green);}
+    .ch-actions{display:flex;align-items:center;gap:10px;}
+    .ch-bell{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:#374151;cursor:pointer;}
+    .ch-bell .dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid #fff;display:none;}
+    .ch-bell.has-unread .dot{display:block;}
+
+    /* Saludo */
+    .hero{padding:20px 18px 8px;}
+    .hero .hi{font-size:14px;color:var(--muted);}
+    .hero .name{font-size:26px;font-weight:800;margin-top:2px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .avatar{width:52px;height:52px;border-radius:50%;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;overflow:hidden;}
+    .avatar img{width:100%;height:100%;object-fit:cover;}
+
+    /* Contenido / placeholder de Sprint 0 */
+    .content{padding:8px 18px 24px;display:flex;flex-direction:column;gap:14px;}
+    .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .soon{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:34px 20px;}
+    .soon .ico{width:64px;height:64px;border-radius:18px;background:var(--indigo-pale);color:var(--indigo);display:flex;align-items:center;justify-content:center;}
+    .soon h2{font-size:17px;font-weight:800;}
+    .soon p{font-size:13.5px;color:var(--muted);line-height:1.55;max-width:300px;}
+    .logout{margin-top:6px;background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;font-family:inherit;}
+
+    /* Navegación inferior */
+    .nav{position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-width:460px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:30;}
+    .nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#9CA3AF;text-decoration:none;font-size:10.5px;font-weight:600;padding:4px 0;transition:.15s;}
+    .nav a.active{color:var(--indigo);}
+    .nav a .lbl{letter-spacing:.2px;}
+    .nav a.disabled{opacity:.55;pointer-events:none;}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Cabecera -->
+  <div class="ch-top">
+    <div class="ch-brand">
+      <span class="mark"></span>
+      <b><span class="n1">NUTRI</span><span class="n2">ENTRENA</span></b>
+    </div>
+    <div class="ch-actions">
+      <button class="ch-bell" id="bell" title="Notificaciones">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Saludo -->
+  <div class="hero">
+    <div class="hi" id="greet">Hola 👋</div>
+    <div class="name">
+      <span id="clientName">…</span>
+      <span class="avatar" id="avatar">?</span>
+    </div>
+  </div>
+
+  <!-- Contenido (Sprint 0: entrada + placeholder; los datos llegan en el Sprint 2) -->
+  <div class="content">
+    <div class="card soon">
+      <div class="ico">
+        <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+      </div>
+      <h2>Estamos preparando tu espacio</h2>
+      <p>Pronto verás aquí tu semana, tu entrenamiento y tu menú del día, y podrás hacer tu check-in cuando tu coach te lo pida.</p>
+      <button class="logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- Navegación inferior -->
+  <nav class="nav">
+    <a class="active" href="client-home.html">
+      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/></svg>
+      <span class="lbl">Inicio</span>
+    </a>
+    <a class="disabled" href="#">
+      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>
+      <span class="lbl">Entrena</span>
+    </a>
+    <a class="disabled" href="#">
+      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>
+      <span class="lbl">Nutrición</span>
+    </a>
+    <a class="disabled" href="#">
+      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>
+      <span class="lbl">Progreso</span>
+    </a>
+    <a class="disabled" href="#">
+      <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="lbl">Chat</span>
+    </a>
+  </nav>
+
+</div>
+
+<script>
+  const API = 'https://nutrientrena-production.up.railway.app/api';
+  const token = localStorage.getItem('token');
+
+  function logout(){ localStorage.removeItem('token'); localStorage.removeItem('role_id'); localStorage.removeItem('refresh_token'); location.href = 'login.html'; }
+
+  function greetByHour(){
+    const h = new Date().getHours();
+    if (h < 6)  return 'Buenas noches 🌙';
+    if (h < 12) return 'Buenos días 👋';
+    if (h < 20) return 'Buenas tardes 👋';
+    return 'Buenas noches 🌙';
+  }
+
+  async function init(){
+    document.getElementById('greet').textContent = greetByHour();
+    try{
+      const r = await fetch(API + '/auth/me', { headers: { Authorization: 'Bearer ' + token } });
+      if (!r.ok) throw new Error();
+      const d = await r.json(); const u = d.data || d;
+      const name = u.name || u.email || 'Cliente';
+      document.getElementById('clientName').textContent = name;
+      const av = document.getElementById('avatar');
+      if (u.photo) { av.innerHTML = '<img src="' + u.photo + '" alt="">'; av.style.background = 'transparent'; }
+      else { av.textContent = (name.trim()[0] || 'C').toUpperCase(); }
+    }catch(e){ /* si falla la sesión, el guard de arriba ya cubre el token */ }
+  }
+  init();
+</script>
+</body>
+</html>

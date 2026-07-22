@@ -298,17 +298,20 @@
         localStorage.setItem('refresh_token', data.data.refresh_token);
 
         // Fetch role to adapt sidebar on all pages
+        let roleId = 0;
         try {
           const me = await fetch(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${data.data.token}` } });
           const mj = await me.json();
           const md = mj.data || mj;
-          const roleId = md.roles?.[0]?.id || 0;
+          roleId = md.roles?.[0]?.id || 0;
           localStorage.setItem('role_id', roleId);
         } catch {}
 
         showSuccess('¡Bienvenido! Redirigiendo...');
+        // El cliente (rol 6) va a su zona; el resto al panel del coach.
+        const dest = String(roleId) === '6' ? 'client-home.html' : 'dashboard.html';
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          window.location.href = dest;
         }, 800);
 
       } catch (e) {

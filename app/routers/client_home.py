@@ -8,13 +8,15 @@ Se calcula siempre para el usuario autenticado (ownership implícito: el
 cliente solo obtiene lo suyo).
 """
 from datetime import date, timedelta
+from typing import Optional
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH, CLIENT
-from app.core.responses import send_response
+from app.core.responses import send_response, send_error
 from app.models.user import User, UserDetail, UserParent
 from app.models.routine import Routine
 from app.models.session_log import WorkoutSession
@@ -192,6 +194,113 @@ def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends
         })
 
     return send_response({"menu": {"name": menu.name}, "week_start": week_start.isoformat(), "days": days}, "OK")
+
+
+@router.get("/progress", summary="Progreso del cliente", description="Evolución del cliente: estadísticas, serie de peso y fotos de progreso.")
+def client_progress(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT))):
+    from app.models.checkin import WeeklyCheckin
+
+    empty = {"stats": {"weeks": 0, "kg_lost": None, "workouts": 0},
+             "weight": {"series": [], "delta": None, "latest": None},
+             "photos": {"frontal": [], "lateral": [], "espalda": [], "total": 0}}
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_response(empty, "Sin cliente")
+
+    checks = db.query(WeeklyCheckin).filter(
+        WeeklyCheckin.client_user_detail_id == detail.id
+    ).order_by(WeeklyCheckin.checkin_date.asc()).all()
+
+    workouts = db.query(WorkoutSession).filter(
+        WorkoutSession.client_user_detail_id == detail.id
+    ).count()
+
+    # Serie de peso
+    with_w = [c for c in checks if c.weight is not None]
+    series = [{"date": c.checkin_date.isoformat(), "weight": c.weight} for c in with_w]
+    delta = latest = None
+    if with_w:
+        latest = with_w[-1].weight
+        if len(with_w) >= 2 and with_w[0].weight is not None:
+            delta = round(with_w[-1].weight - with_w[0].weight, 1)
+
+    # Semanas de seguimiento
+    weeks = 0
+    if checks:
+        span = (checks[-1].checkin_date - checks[0].checkin_date).days
+        weeks = span // 7 + 1
+
+    kg_lost = round(with_w[0].weight - with_w[-1].weight, 1) if len(with_w) >= 2 else None
+
+    def _photos(attr):
+        out = []
+        for c in checks:
+            url = getattr(c, attr, None)
+            if url:
+                out.append({"date": c.checkin_date.isoformat(), "url": url, "weight": c.weight})
+        return out
+    frontal, lateral, espalda = _photos("photo_url"), _photos("photo2"), _photos("photo3")
+
+    return send_response({
+        "stats": {"weeks": weeks, "kg_lost": kg_lost, "workouts": workouts},
+        "weight": {"series": series, "delta": delta, "latest": latest},
+        "photos": {
+            "frontal": frontal, "lateral": lateral, "espalda": espalda,
+            "total": len(frontal) + len(lateral) + len(espalda),
+        },
+    }, "OK")
+
+
+class _ClientCheckinBody(BaseModel):
+    weight: Optional[float] = None
+    photo_frontal: Optional[str] = None
+    photo_lateral: Optional[str] = None
+    photo_espalda: Optional[str] = None
+    body_fat: Optional[float] = None
+    muscle_mass: Optional[float] = None
+    waist: Optional[float] = None
+    chest: Optional[float] = None
+    hips: Optional[float] = None
+    arms: Optional[float] = None
+    legs: Optional[float] = None
+    notes: Optional[str] = None
+
+
+@router.post("/checkin", summary="Registrar check-in (cliente)", description="El cliente registra/actualiza su check-in de hoy (peso, medidas o fotos).")
+def client_checkin(body: _ClientCheckinBody, db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(CLIENT))):
+    from app.models.checkin import WeeklyCheckin
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_error("Perfil de cliente no encontrado")
+
+    today = date.today()
+    ck = db.query(WeeklyCheckin).filter(
+        WeeklyCheckin.client_user_detail_id == detail.id,
+        WeeklyCheckin.checkin_date == today,
+    ).first()
+    if not ck:
+        coach = _coach_of(db, detail.id)
+        ck = WeeklyCheckin(
+            client_user_detail_id=detail.id,
+            coach_user_detail_id=coach.id if coach else None,
+            checkin_date=today,
+        )
+        db.add(ck)
+
+    # Solo se actualizan los campos que llegan (peso, fotos o medidas)
+    mapping = {
+        "weight": body.weight, "photo_url": body.photo_frontal, "photo2": body.photo_lateral,
+        "photo3": body.photo_espalda, "body_fat": body.body_fat, "muscle_mass": body.muscle_mass,
+        "waist": body.waist, "chest": body.chest, "hips": body.hips, "arms": body.arms,
+        "legs": body.legs, "notes": body.notes,
+    }
+    for field, value in mapping.items():
+        if value is not None:
+            setattr(ck, field, value)
+
+    db.commit()
+    db.refresh(ck)
+    return send_response({"id": ck.id, "checkin_date": ck.checkin_date.isoformat()}, "Check-in guardado")
 
 
 @router.get("/routines", summary="Rutinas del cliente", description="Rutinas (planes) asignadas al cliente autenticado, con sus días y ejercicios.")

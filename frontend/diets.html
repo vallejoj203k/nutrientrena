@@ -503,6 +503,8 @@
     .pm2-kcal-cell{font-weight:800;color:#111827;}
     .pm2-rm{background:none;border:none;cursor:pointer;color:#D1D5DB;padding:5px;border-radius:6px;display:inline-flex;transition:.15s;}
     .pm2-rm:hover{color:#DC2626;background:#FEF2F2;}
+    .pm2-edit{background:none;border:none;cursor:pointer;color:#9CA3AF;padding:5px;border-radius:6px;display:inline-flex;transition:.15s;margin-right:2px;}
+    .pm2-edit:hover{color:var(--indigo);background:var(--indigo-pale);}
     .pm2-total-row td{border-bottom:none;border-top:1px solid #EEF0F3;font-weight:800;color:#111827;background:#FAFBFC;padding-top:13px;padding-bottom:13px;}
     .pm2-total-row td.l{color:#9CA3AF;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
     .pm2-addlink{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border:1.5px dashed #C7D2FE;border-radius:10px;background:transparent;color:#4F46E5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
@@ -1936,7 +1938,7 @@ function _pm2RowHTML(mid, row) {
     + '<td id="frc-' + rid + '">' + _g1(m.c) + '</td>'
     + '<td id="frg-' + rid + '">' + _g1(m.f) + '</td>'
     + '<td id="frfib-' + rid + '">' + _g1(m.fib) + '</td>'
-    + '<td><button class="pm2-rm" onclick="removeFoodRow(' + mid + ',' + rid + ')" title="Eliminar alimento"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>'
+    + '<td style="white-space:nowrap;"><button class="pm2-edit" onclick="editFoodRow(' + mid + ',' + rid + ')" title="Editar alimento"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="pm2-rm" onclick="removeFoodRow(' + mid + ',' + rid + ')" title="Eliminar alimento"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>'
     + '</tr>';
 }
 

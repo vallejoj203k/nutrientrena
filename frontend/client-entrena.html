@@ -94,19 +94,22 @@
     .rest-card h3{font-size:17px;font-weight:800;color:#111827;}
     .rest-card p{font-size:13.5px;color:#6B7280;margin-top:4px;}
 
-    /* Tarjeta de ejercicio con imagen/video */
-    .exc{background:#fff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
-    .ex-media{width:100%;aspect-ratio:16/9;max-height:300px;background:#EEF0F3;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-    .ex-media img,.ex-media video,.ex-media iframe{width:100%;height:100%;object-fit:cover;border:none;display:block;background:#000;}
+    /* Tarjeta de ejercicio con imagen/video (miniatura cuadrada) */
+    .exc{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:12px;margin-bottom:12px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .ex-media{width:104px;height:104px;flex-shrink:0;border-radius:12px;background:#F3F4F6;border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;text-decoration:none;}
+    .ex-media img,.ex-media video{width:100%;height:100%;object-fit:contain;display:block;}
     .ex-media.placeholder{color:#C4C7CF;}
-    .exc-body{padding:14px 16px 16px;}
-    .exc-top{display:flex;align-items:center;gap:10px;}
-    .exc-num{width:26px;height:26px;border-radius:50%;background:var(--indigo-pale);color:var(--indigo);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .exc-nm{font-size:16px;font-weight:800;color:#111827;flex:1;min-width:0;}
+    .ex-media .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+    .ex-media .play svg{filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));}
+    .exc-body{flex:1;min-width:0;}
+    .exc-top{display:flex;align-items:baseline;gap:8px;}
+    .exc-num{width:22px;height:22px;border-radius:50%;background:var(--indigo-pale);color:var(--indigo);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:center;}
+    .exc-nm{font-size:15px;font-weight:800;color:#111827;flex:1;min-width:0;}
     .exc-dose{font-size:13px;color:#9CA3AF;white-space:nowrap;}
     .exc-dose b{color:var(--indigo);font-weight:800;}
-    .exc-meta{font-size:12.5px;color:#9CA3AF;margin:5px 0 0 36px;}
-    .exc-notes{font-size:12.5px;color:#6B7280;margin:6px 0 0 36px;}
+    .exc-meta{font-size:12.5px;color:#9CA3AF;margin:5px 0 0 30px;}
+    .exc-notes{font-size:12.5px;color:#6B7280;margin:5px 0 0 30px;}
+    @media(max-width:480px){.ex-media{width:84px;height:84px;}}
     .blk-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF;margin:16px 0 8px;display:flex;align-items:center;gap:7px;}
     .blk-lbl.warmup{color:#D97706;}.blk-lbl.superset{color:var(--indigo);}.blk-lbl.circuit{color:var(--green);}
 
@@ -238,13 +241,21 @@
 
   function ytId(url){ var m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/); return m ? m[1] : null; }
   function vimeoId(url){ var m = String(url).match(/vimeo\.com\/(?:video\/)?(\d+)/); return m ? m[1] : null; }
+  var PLAY = '<div class="play"><svg width="34" height="34" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(17,24,39,.55)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg></div>';
   function exMedia(e){
     var v = e.video_url, img = e.image;
     if (v){
       var yt = ytId(v);
-      if (yt) return '<div class="ex-media"><iframe src="https://www.youtube.com/embed/' + esc(yt) + '" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+      if (yt){
+        var thumb = img || ('https://img.youtube.com/vi/' + yt + '/mqdefault.jpg');
+        return '<a class="ex-media" href="https://www.youtube.com/watch?v=' + esc(yt) + '" target="_blank" rel="noopener" title="Ver video"><img src="' + esc(thumb) + '" alt="" loading="lazy">' + PLAY + '</a>';
+      }
       var vm = vimeoId(v);
-      if (vm) return '<div class="ex-media"><iframe src="https://player.vimeo.com/video/' + esc(vm) + '" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+      if (vm){
+        var inner = img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : DUMBBELL_LG;
+        return '<a class="ex-media' + (img ? '' : ' placeholder') + '" href="https://vimeo.com/' + esc(vm) + '" target="_blank" rel="noopener" title="Ver video">' + inner + PLAY + '</a>';
+      }
+      // Archivo de video directo (mp4, etc.)
       return '<div class="ex-media"><video src="' + esc(v) + '"' + (img ? ' poster="' + esc(img) + '"' : '') + ' controls playsinline preload="metadata"></video></div>';
     }
     if (img) return '<div class="ex-media"><img src="' + esc(img) + '" alt="" loading="lazy"></div>';

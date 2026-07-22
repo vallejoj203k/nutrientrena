@@ -128,3 +128,13 @@ def client_home(db: Session = Depends(get_db), current_user: User = Depends(requ
         "checkin": checkin,
         "notifications_unread": 0,  # [pendiente] modelo de notificaciones
     }, "OK")
+
+
+@router.get("/routines", summary="Rutinas del cliente", description="Rutinas (planes) asignadas al cliente autenticado, con sus días y ejercicios.")
+def client_routines(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT))):
+    # Reutiliza el serializador del panel del coach (mismo formato de días/bloques/ejercicios).
+    from app.routers.routines import _serialize as _serialize_routine
+    rows = db.query(Routine).filter(
+        Routine.user_id == current_user.id
+    ).order_by(Routine.id.desc()).all()
+    return send_response([_serialize_routine(r) for r in rows], "OK")

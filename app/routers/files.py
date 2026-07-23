@@ -5,7 +5,7 @@ import uuid
 
 from app.config import settings
 from app.core.responses import send_response, send_error
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, CLIENT
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
@@ -34,7 +34,7 @@ def _public_url(key: str) -> str:
 async def upload_file(
     file: UploadFile = File(...),
     folder: Optional[str] = Form("uploads"),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, CLIENT)),
 ):
     """
     Sube una imagen a Cloudflare R2 y devuelve la URL pública.

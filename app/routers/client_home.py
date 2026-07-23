@@ -436,6 +436,89 @@ def client_workout_session(body: _WorkoutSessionBody, db: Session = Depends(get_
     return send_response({"id": session.id, "session_date": session.session_date.isoformat()}, "Entrenamiento registrado")
 
 
+@router.get("/calendar", summary="Calendario del cliente", description="Vista mensual con todo lo asignado por el coach: entrenamiento, nutrición y check-ins.")
+def client_calendar(
+    year: Optional[int] = Query(None),
+    month: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+):
+    import calendar as _cal
+    today = date.today()
+    y = year or today.year
+    m = month or today.month
+    if m < 1 or m > 12:
+        return send_error("Mes no válido", code=400)
+    ndays = _cal.monthrange(y, m)[1]
+    first = date(y, m, 1)
+    last = date(y, m, ndays)
+
+    detail = _client_detail(db, current_user)
+
+    # Plantillas por día de la semana (la rutina/nutrición se repiten semanalmente)
+    routine_tpl = {}   # weekday_idx -> {name, muscles, duration}
+    r = db.query(Routine).filter(Routine.user_id == current_user.id).order_by(Routine.id.desc()).first()
+    routine_name = r.name if r else None
+    if r:
+        for idx, rd in enumerate(r.days_list or []):
+            if idx > 6:
+                break
+            routine_tpl[idx] = {
+                "name": rd.day_name or f"Día {idx + 1}",
+                "muscles": _routine_day_muscles(rd),
+                "duration_min": r.time,
+            }
+
+    nutri_tpl = {}     # weekday_idx -> {kcal, meals_count} o None
+    if detail:
+        for idx in range(7):
+            nutri_tpl[idx] = _today_menu_summary(db, detail, current_user, idx)
+
+    # Fechas con entreno registrado / check-in dentro del mes
+    session_dates, checkin_dates = set(), set()
+    if detail:
+        session_dates = {s.session_date for s in db.query(WorkoutSession).filter(
+            WorkoutSession.client_user_detail_id == detail.id,
+            WorkoutSession.session_date >= first, WorkoutSession.session_date <= last,
+        ).all()}
+        checkin_dates = {c.checkin_date for c in db.query(WeeklyCheckin).filter(
+            WeeklyCheckin.client_user_detail_id == detail.id,
+            WeeklyCheckin.checkin_date >= first, WeeklyCheckin.checkin_date <= last,
+        ).all()}
+
+    days = []
+    for dnum in range(1, ndays + 1):
+        dt = date(y, m, dnum)
+        wd = dt.weekday()
+        days.append({
+            "date": dt.isoformat(),
+            "day": dnum,
+            "weekday": wd,
+            "is_today": dt == today,
+            "is_past": dt < today,
+            "training": routine_tpl.get(wd),
+            "nutrition": nutri_tpl.get(wd) if detail else None,
+            "workout_done": dt in session_dates,
+            "checkin_done": dt in checkin_dates,
+        })
+
+    prev_m = (m - 1) or 12
+    prev_y = y - 1 if m == 1 else y
+    next_m = 1 if m == 12 else m + 1
+    next_y = y + 1 if m == 12 else y
+
+    return send_response({
+        "year": y, "month": m,
+        "month_name": _MONTHS_ES[m - 1].capitalize(),
+        "first_weekday": first.weekday(),  # 0 = lunes
+        "days_in_month": ndays,
+        "routine_name": routine_name,
+        "prev": {"year": prev_y, "month": prev_m},
+        "next": {"year": next_y, "month": next_m},
+        "days": days,
+    }, "OK")
+
+
 def _profile_out(db: Session, detail, user: User):
     full = (f"{detail.name or ''} {detail.last_name or ''}").strip() if detail else None
     return {

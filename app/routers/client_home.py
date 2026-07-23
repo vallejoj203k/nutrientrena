@@ -476,6 +476,7 @@ def client_calendar(
 
     # Fechas con entreno registrado / check-in dentro del mes
     session_dates, checkin_dates = set(), set()
+    tasks_by_date = {}
     if detail:
         session_dates = {s.session_date for s in db.query(WorkoutSession).filter(
             WorkoutSession.client_user_detail_id == detail.id,
@@ -485,6 +486,21 @@ def client_calendar(
             WeeklyCheckin.client_user_detail_id == detail.id,
             WeeklyCheckin.checkin_date >= first, WeeklyCheckin.checkin_date <= last,
         ).all()}
+        # Tareas asignadas por el coach en el calendario del cliente
+        from app.models.calendar_task import CalendarTask, COLOR_MAP
+        ctasks = db.query(CalendarTask).filter(
+            CalendarTask.client_user_detail_id == detail.id,
+            CalendarTask.task_date >= first, CalendarTask.task_date <= last,
+        ).order_by(CalendarTask.task_date.asc(), CalendarTask.id.asc()).all()
+        for t in ctasks:
+            tasks_by_date.setdefault(t.task_date, []).append({
+                "id": t.id,
+                "title": t.title or (t.task_type or "Tarea").capitalize(),
+                "task_type": t.task_type,
+                "color": t.color or COLOR_MAP.get(t.task_type, "#9CA3AF"),
+                "notes": t.notes,
+                "done": bool(t.done),
+            })
 
     days = []
     for dnum in range(1, ndays + 1):
@@ -500,6 +516,7 @@ def client_calendar(
             "nutrition": nutri_tpl.get(wd) if detail else None,
             "workout_done": dt in session_dates,
             "checkin_done": dt in checkin_dates,
+            "tasks": tasks_by_date.get(dt, []),
         })
 
     prev_m = (m - 1) or 12

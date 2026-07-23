@@ -1178,7 +1178,7 @@ async function openForm(id=null){
       routineData.gender_id=rt.gender_id||null;routineData.training_level_id=rt.training_level_id||null;
       routineData.training=rt.training||'';routineData.objective=rt.objective||'';
       routineData.materials=rt.materials||'';routineData.notes=rt.notes||'';
-      routineData.days_list=(rt.days_list||[]).map(day=>({day_name:day.day_name||'',description:day.description||'',blocks:(day.blocks||[]).map(blk=>({block_type:blk.block_type||'normal',content:blk.content||'',order_index:blk.order_index||0,exercises:(blk.exercises||[]).map(ex=>({training_id:ex.training_id,training_name:ex.training_name||'',muscle_group_name:ex.muscle_group_name||'',series:ex.series||null,repetitions:ex.repetitions||'',break_time:ex.break_time||null,intensity_type:ex.intensity_type||'',intensity_value:ex.intensity_value||null,notes:ex.notes||'',order_index:ex.order_index||0}))}))})  );
+      routineData.days_list=(rt.days_list||[]).map(day=>({day_name:day.day_name||'',description:day.description||'',blocks:(day.blocks||[]).map(blk=>({block_type:blk.block_type||'normal',content:blk.content||'',order_index:blk.order_index||0,exercises:(blk.exercises||[]).map(ex=>({training_id:ex.training_id,training_name:ex.training_name||'',muscle_group_name:ex.muscle_group_name||'',image:ex.image||null,series:ex.series||null,repetitions:ex.repetitions||'',break_time:ex.break_time||null,intensity_type:ex.intensity_type||'',intensity_value:ex.intensity_value||null,notes:ex.notes||'',order_index:ex.order_index||0}))}))})  );
     }catch{showToast('Error al cargar la rutina','error');return;}
   }
   openRutinaPanel();
@@ -1556,17 +1556,17 @@ function renderPkGrid(){
   box.innerHTML=items.map((ex,i)=>
     `<div class="pk-card" onclick="pkPick(${i})"><div class="pk-ico">${ex.image?`<img src="${esc(ex.image)}" alt="">`:PK_ICO}</div><div><div class="pk-name">${esc(ex.name)}</div><div class="pk-mg-name">${esc(ex.muscle_group_name||'—')}</div></div></div>`).join('');
 }
-function pkPick(i){const ex=_pkView[i];if(ex)selectExercise(ex.id,ex.name,ex.muscle_group_name||'');}
+function pkPick(i){const ex=_pkView[i];if(ex)selectExercise(ex.id,ex.name,ex.muscle_group_name||'',ex.image||null);}
 
-function selectExercise(trainingId,name,muscleName){
+function selectExercise(trainingId,name,muscleName,image){
   if(pickerTargetBlockIdx===null)return;
   const day=routineData.days_list[selectedDayIdx];const blk=day.blocks[pickerTargetBlockIdx];
   if(pickerReplaceEi!==null){
     const ex=blk.exercises[pickerReplaceEi];
-    ex.training_id=trainingId;ex.training_name=name;ex.muscle_group_name=muscleName;
+    ex.training_id=trainingId;ex.training_name=name;ex.muscle_group_name=muscleName;ex.image=image||null;
     pickerReplaceEi=null;
   }else{
-    blk.exercises.push({training_id:trainingId,training_name:name,muscle_group_name:muscleName,series:null,repetitions:'',break_time:null,intensity_type:'',intensity_value:null,notes:'',order_index:blk.exercises.length});
+    blk.exercises.push({training_id:trainingId,training_name:name,muscle_group_name:muscleName,image:image||null,series:null,repetitions:'',break_time:null,intensity_type:'',intensity_value:null,notes:'',order_index:blk.exercises.length});
   }
   closePicker();renderBlocks();
 }

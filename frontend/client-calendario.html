@@ -65,6 +65,10 @@
     .cal-cell.today .cal-dnum{color:var(--indigo);}
     .cal-cell.past .cal-dnum{color:#9CA3AF;}
     .cal-done{position:absolute;top:5px;right:5px;width:15px;height:15px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;}
+    .cal-chips{display:flex;flex-direction:column;gap:2px;margin-top:3px;overflow:hidden;}
+    .cal-chip{font-size:8.5px;font-weight:800;padding:1px 4px;border-radius:4px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.2px;}
+    .cal-chip.done{opacity:.55;text-decoration:line-through;}
+    .cal-more{font-size:8.5px;font-weight:700;color:#9CA3AF;}
     .cal-dots{margin-top:auto;display:flex;gap:3px;flex-wrap:wrap;}
     .cal-dot{width:6px;height:6px;border-radius:50%;}
     .cal-dot.tr{background:var(--indigo);}
@@ -173,6 +177,7 @@
           <span><i style="background:var(--indigo)"></i> Entreno</span>
           <span><i style="background:var(--green)"></i> Nutrición</span>
           <span><i style="background:var(--amber)"></i> Check-in</span>
+          <span><i style="background:#8B5CF6"></i> Tareas del coach</span>
         </div>
       </div>
 
@@ -191,6 +196,8 @@
   function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
 
   const WD_NAMES=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const TASK_LABELS={rutina:'Rutina',cardio:'Cardio',descanso:'Descanso',nutricion:'Nutrición',checkin:'Check-in',foto:'Foto',mensaje:'Mensaje',video:'Video',sesion:'Sesión',formulario:'Form.',otro:'Tarea'};
+  function taskLabel(t){ return TASK_LABELS[t.task_type] || (t.title||t.task_type||'Tarea'); }
   var _y=null,_m=null,_data=null,_selKey=null;
 
   const I = {
@@ -212,10 +219,16 @@
       if (d.training) dots += '<span class="cal-dot tr"></span>';
       if (d.nutrition) dots += '<span class="cal-dot nu"></span>';
       if (d.checkin_done) dots += '<span class="cal-dot ci"></span>';
-      (d.tasks||[]).slice(0,4).forEach(function(t){ dots += '<span class="cal-dot task" style="background:'+esc(t.color||'#9CA3AF')+'"></span>'; });
+      var tasks = d.tasks || [];
+      var chips = tasks.slice(0,2).map(function(t){
+        var c = /^#[0-9a-fA-F]{6}$/.test(t.color||'') ? t.color : '#9CA3AF';
+        return '<div class="cal-chip'+(t.done?' done':'')+'" style="color:'+c+';background:'+c+'22;">'+esc(taskLabel(t))+'</div>';
+      }).join('');
+      if (tasks.length>2) chips += '<div class="cal-more">+'+(tasks.length-2)+'</div>';
       var done = d.workout_done ? '<span class="cal-done">'+I.check+'</span>' : '';
       html += '<div class="'+cls+'" onclick="selectDay(\''+d.date+'\')">'+done
         + '<div class="cal-dnum">'+d.day+'</div>'
+        + (chips?'<div class="cal-chips">'+chips+'</div>':'')
         + '<div class="cal-dots">'+dots+'</div></div>';
     });
     grid.innerHTML = html;

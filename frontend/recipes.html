@@ -254,7 +254,7 @@
     .ac-item .ac-brand{font-size:11px;color:#9CA3AF;}
     .add-food-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:var(--indigo);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;margin-top:12px;transition:.15s;}
     .add-food-btn:hover{background:var(--indigo-dark);}
-    #fInstr{width:100%;min-height:140px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical;color:#111;transition:.15s;}
+    #fInstr{width:100%;min-height:140px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:inherit;line-height:1.5;outline:none;resize:none;overflow:hidden;color:#111;transition:border-color .15s;box-sizing:border-box;}
     #fInstr:focus{border-color:var(--indigo);}
     .sb-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:16px;}
     .sb-title{font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
@@ -773,7 +773,7 @@
         <div class="sec-card">
           <div class="sec-card-head">Preparacion</div>
           <div class="sec-card-body">
-            <textarea id="fInstr" placeholder="Describe los pasos de preparacion..."></textarea>
+            <textarea id="fInstr" placeholder="Describe los pasos de preparacion..." oninput="autoGrow(this)"></textarea>
           </div>
         </div>
       </div>
@@ -1091,6 +1091,12 @@ function debouncedSearch() {
   _searchTimer = setTimeout(function() { _search = document.getElementById('searchInput').value.trim(); loadRecipes(1); }, 350);
 }
 
+function autoGrow(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
 function openForm(recipe) {
   if (!recipe) recipe = null;
   _editId = recipe ? recipe.id : null;
@@ -1099,6 +1105,7 @@ function openForm(recipe) {
   document.getElementById('fName').value             = (recipe && recipe.name)         || '';
   document.getElementById('fDesc').value             = (recipe && recipe.description)  || '';
   document.getElementById('fInstr').value            = (recipe && recipe.instructions) || '';
+  autoGrow(document.getElementById('fInstr'));
   document.getElementById('fServings').value         = (recipe && recipe.servings)     || '';
   document.getElementById('fPrepTime').value         = (recipe && recipe.prep_time)    || '';
   var _catIds = (recipe && recipe.categories) ? String(recipe.categories).split(',').map(function(s){return s.trim();}).filter(Boolean)

@@ -10,7 +10,7 @@ cliente solo obtiene lo suyo).
 from datetime import date, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -43,10 +43,32 @@ def _coach_of(db: Session, client_detail_id: str):
     ).first()
 
 
+_MONTHS_ES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+_WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+
+
+def _routine_day_muscles(day):
+    """Grupos musculares únicos de un día de rutina (por orden de aparición)."""
+    seen, out = set(), []
+    for blk in (day.blocks or []):
+        for ex in (blk.exercises or []):
+            mg = ex.training.muscle_group.name if (ex.training and ex.training.muscle_group) else None
+            if mg and mg not in seen:
+                seen.add(mg)
+                out.append(mg)
+    return out
+
+
 @router.get("/home", summary="Inicio del cliente", description="Datos agregados de la pantalla de inicio del cliente.")
-def client_home(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT))):
+def client_home(
+    week_offset: int = Query(0),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+):
     today = date.today()
-    week_start = today - timedelta(days=today.weekday())  # lunes
+    today_idx = today.weekday()  # 0 = lunes
+    monday = today - timedelta(days=today_idx)
+    week_start = monday + timedelta(days=week_offset * 7)
     week_end = week_start + timedelta(days=6)
 
     detail = _client_detail(db, current_user)
@@ -56,28 +78,29 @@ def client_home(db: Session = Depends(get_db), current_user: User = Depends(requ
     if detail:
         full_name = (f"{detail.name or ''} {detail.last_name or ''}").strip() or full_name
     full_name = full_name or getattr(current_user, "email", None) or "Cliente"
+    parts = full_name.strip().split()
+    initials = ((parts[0][:1] if parts else "C") + (parts[1][:1] if len(parts) > 1 else "")).upper()
     profile = {
         "name": full_name,
         "photo": getattr(current_user, "photo", None),
-        "initials": (full_name.strip()[:1] or "C").upper(),
+        "initials": initials or "C",
     }
 
     # ── Coach ──
     coach = None
-    if detail:
-        cd = _coach_of(db, detail.id)
-        if cd:
-            coach = {"name": (f"{cd.name or ''} {cd.last_name or ''}").strip() or "Coach"}
+    coach_detail = _coach_of(db, detail.id) if detail else None
+    if coach_detail:
+        cname = (f"{coach_detail.name or ''} {coach_detail.last_name or ''}").strip() or "Coach"
+        coach = {"name": cname, "first_name": (coach_detail.name or cname).split()[0] if cname else "Coach",
+                 "initials": (cname.strip()[:1] or "C").upper()}
 
-    # ── Adherencia de la semana (sesiones registradas por día) ──
-    done_dates = set()
+    # ── Semana visible (sesiones registradas por día) + racha ──
+    all_sessions = []
     if detail:
-        sessions = db.query(WorkoutSession).filter(
-            WorkoutSession.client_user_detail_id == detail.id,
-            WorkoutSession.session_date >= week_start,
-            WorkoutSession.session_date <= week_end,
+        all_sessions = db.query(WorkoutSession).filter(
+            WorkoutSession.client_user_detail_id == detail.id
         ).all()
-        done_dates = {s.session_date for s in sessions}
+    session_dates = {s.session_date for s in all_sessions}
     week = []
     for i in range(7):
         d = week_start + timedelta(days=i)
@@ -85,51 +108,107 @@ def client_home(db: Session = Depends(get_db), current_user: User = Depends(requ
             "date": d.isoformat(),
             "label": _WEEKDAY_ES[i],
             "day": d.day,
-            "done": d in done_dates,
+            "done": d in session_dates,
             "is_today": d == today,
+            "is_future": d > today,
         })
-    week_range = f"{week_start.day}–{week_end.day} {week_end.strftime('%b')}"
+    week_range = f"{week_start.day}–{week_end.day} {_MONTHS_ES[week_end.month - 1].capitalize()}"
 
-    # ── Rutina asignada (mejor esfuerzo: la activa más reciente del cliente) ──
+    # Racha: días consecutivos con entreno terminando en hoy (o ayer si hoy aún no)
+    streak = 0
+    cursor = today if today in session_dates else today - timedelta(days=1)
+    while cursor in session_dates:
+        streak += 1
+        cursor -= timedelta(days=1)
+
+    # ── Rutina de HOY (día de la rutina según el día de la semana) ──
     routine = None
-    r = db.query(Routine).filter(
-        Routine.user_id == current_user.id
-    ).order_by(Routine.id.desc()).first()
+    r = db.query(Routine).filter(Routine.user_id == current_user.id).order_by(Routine.id.desc()).first()
     if r:
-        # "Sesión de hoy": aún no hay agenda calendario → se ofrece la rutina.
-        first_day = r.days_list[0] if r.days_list else None
-        routine = {
-            "id": r.id,
-            "name": (first_day.day_name if first_day else None) or r.name,
-            "focus": r.objective or r.training or None,
-            "duration_min": r.time,
-            "scheduled_today": None,  # [pendiente] concepto de agenda "qué toca hoy"
-        }
+        days = r.days_list or []
+        rd = days[today_idx] if today_idx < len(days) else None
+        if rd:
+            muscles = _routine_day_muscles(rd)
+            routine = {
+                "id": r.id,
+                "name": rd.day_name or f"Día {today_idx + 1}",
+                "muscles": muscles,
+                "focus": " · ".join(muscles) if muscles else (r.objective or r.training or None),
+                "duration_min": r.time,
+                "is_rest": False,
+            }
+        else:
+            routine = {"id": r.id, "name": None, "muscles": [], "focus": None, "duration_min": None, "is_rest": True}
 
-    # ── Check-in de la semana ──
+    # ── Menú/dieta de HOY (kcal + nº de comidas) ──
+    menu = None
+    if detail:
+        menu = _today_menu_summary(db, detail, current_user, today_idx)
+
+    # ── Check-in solicitado por el coach (pendiente si no hay uno esta semana) ──
+    this_monday = monday
+    this_sunday = monday + timedelta(days=6)
     checkin_done = False
     if detail:
         checkin_done = db.query(WeeklyCheckin).filter(
             WeeklyCheckin.client_user_detail_id == detail.id,
-            WeeklyCheckin.checkin_date >= week_start,
-            WeeklyCheckin.checkin_date <= week_end,
+            WeeklyCheckin.checkin_date >= this_monday,
+            WeeklyCheckin.checkin_date <= this_sunday,
         ).first() is not None
     checkin = {
         "status": "done" if checkin_done else "pending",
         "coach_name": coach["name"] if coach else None,
-        # [pendiente] "solicitud de check-in" del coach con campos concretos:
+        "coach_initials": coach["initials"] if coach else None,
         "requested_fields": ["peso", "fotos", "medidas"],
     }
 
     return send_response({
         "profile": profile,
         "coach": coach,
-        "week": {"range": week_range, "days": week},
+        "today": {"weekday": _WEEKDAY_NAMES[today_idx], "day": today.day, "month": _MONTHS_ES[today.month - 1]},
+        "week": {"range": week_range, "days": week, "offset": week_offset},
+        "streak": streak,
         "routine": routine,
-        "menu": None,          # [pendiente] asignación menú↔cliente
+        "menu": menu,
         "checkin": checkin,
         "notifications_unread": 0,  # [pendiente] modelo de notificaciones
     }, "OK")
+
+
+def _today_menu_summary(db: Session, detail, current_user: User, today_idx: int):
+    """Resumen del menú/dieta de hoy: kcal y nº de comidas."""
+    from app.models.client_menu import ClientMenu
+    from app.models.weekly_menu import WeeklyMenu
+    from app.models.nutrition.diet import Diet
+
+    diet = None
+    cm = db.query(ClientMenu).filter(
+        ClientMenu.client_user_detail_id == detail.id
+    ).order_by(ClientMenu.assigned_at.desc(), ClientMenu.id.desc()).first()
+    menu_name = None
+    if cm:
+        wm = db.query(WeeklyMenu).filter(WeeklyMenu.id == cm.menu_id).first()
+        if wm:
+            menu_name = wm.name
+            by_idx = {d.day_index: d for d in wm.days}
+            md = by_idx.get(today_idx)
+            if md and md.diet_id:
+                diet = db.query(Diet).filter(Diet.id == md.diet_id).first()
+    if not diet:
+        diet = db.query(Diet).filter(
+            Diet.user_id == current_user.id
+        ).order_by(Diet.created_at.desc()).first()
+    if not diet:
+        return None
+
+    meals, kcal, prot, carb, fat = _diet_meals_macros(diet)
+    return {
+        "diet_id": diet.id,
+        "name": menu_name or diet.title,
+        "kcal": round(kcal) if kcal else None,
+        "meals_count": len(meals),
+        "weekday": _WEEKDAY_NAMES[today_idx],
+    }
 
 
 _DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"]

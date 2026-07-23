@@ -57,15 +57,78 @@
 
     .content{flex:1;overflow-y:auto;padding:26px 28px 40px;}
     .content-inner{max-width:1000px;margin:0 auto;}
-    .hero{margin-bottom:22px;}
+    .hero{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
     .hero .hi{font-size:14px;color:#6B7280;}
-    .hero .name{font-size:28px;font-weight:800;color:#111827;margin-top:2px;}
+    .hero .name{font-size:26px;font-weight:800;color:#111827;margin-top:2px;}
+    .hero-av{width:48px;height:48px;border-radius:50%;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;overflow:hidden;}
+    .hero-av img{width:100%;height:100%;object-fit:cover;}
 
     .card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
-    .soon{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:44px 22px;}
-    .soon .ico{width:64px;height:64px;border-radius:18px;background:var(--indigo-pale);color:var(--indigo);display:flex;align-items:center;justify-content:center;}
-    .soon h2{font-size:18px;font-weight:800;color:#111827;}
-    .soon p{font-size:14px;color:#6B7280;line-height:1.55;max-width:420px;}
+
+    /* Semana */
+    .wk-card{background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:18px 16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .wk-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .wk-nav{width:34px;height:34px;border-radius:50%;border:none;background:#F3F4F6;color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;}
+    .wk-nav:hover{background:#E5E7EB;color:#111827;}
+    .wk-title{text-align:center;}
+    .wk-title b{font-size:15px;font-weight:800;color:#111827;}
+    .wk-title span{display:block;font-size:12px;color:#9CA3AF;margin-top:1px;}
+    .wk-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+    .wk-day{text-align:center;}
+    .wk-dl{font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:6px;}
+    .wk-day.today .wk-dl{color:var(--indigo);}
+    .wk-circle{width:40px;height:40px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#6B7280;background:#F3F4F6;position:relative;}
+    .wk-circle.done{background:var(--green);color:#fff;}
+    .wk-circle.today{background:var(--indigo);color:#fff;}
+    .wk-circle.future{background:#F9FAFB;color:#C4C7CF;}
+    .wk-circle .b{position:absolute;top:-4px;right:-4px;width:17px;height:17px;border-radius:50%;background:var(--amber);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+    .wk-emoji{font-size:12px;margin-top:5px;height:15px;color:#D1D5DB;}
+
+    /* Sección de hoy */
+    .today-sec{background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .today-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .today-head .t{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;}
+    .today-pill{font-size:11px;font-weight:800;color:var(--green);background:#D1FAE5;padding:3px 10px;border-radius:20px;}
+
+    .ci-card{background:#FFF7ED;border:1px solid #FCE3BE;border-radius:14px;padding:15px;margin-bottom:12px;}
+    .ci-card.done{background:#ECFDF3;border-color:#C6F0D8;}
+    .ci-top{display:flex;gap:12px;}
+    .ci-ico{width:46px;height:46px;border-radius:12px;background:var(--amber);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .ci-card.done .ci-ico{background:var(--green);}
+    .ci-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .ci-h b{font-size:15px;font-weight:800;color:#111827;}
+    .ci-tag{font-size:10px;font-weight:800;color:#B45309;background:#FDE68A;padding:2px 8px;border-radius:20px;text-transform:uppercase;}
+    .ci-card.done .ci-tag{color:#047857;background:#A7F3D0;}
+    .ci-txt{font-size:13px;color:#6B7280;margin-top:4px;line-height:1.5;}
+    .ci-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+    .ci-chip{font-size:11.5px;font-weight:600;color:#6B7280;background:#fff;border:1px solid #E5E7EB;padding:4px 10px;border-radius:20px;}
+    .ci-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap;}
+    .ci-coach{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#6B7280;}
+    .ci-coach .av{width:26px;height:26px;border-radius:50%;background:var(--indigo);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .ci-btn{background:var(--amber);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;text-decoration:none;display:inline-block;}
+    .ci-btn:hover{background:#D97706;}
+
+    .hr-row{display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px;margin-bottom:12px;}
+    .hr-row.train{background:#F5F3FF;border:1px solid #E7E3FB;}
+    .hr-row.menu{background:#ECFDF3;border:1px solid #C6F0D8;text-decoration:none;}
+    .hr-row.rest{background:#F9FAFB;border:1px solid #EEF0F3;}
+    .hr-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;}
+    .hr-row.train .hr-ico{background:var(--indigo);}
+    .hr-row.menu .hr-ico{background:var(--green);}
+    .hr-row.rest .hr-ico{background:#D1D5DB;}
+    .hr-info{flex:1;min-width:0;}
+    .hr-info b{font-size:15px;font-weight:800;color:#111827;}
+    .hr-info div{font-size:12.5px;color:#6B7280;margin-top:2px;}
+    .hr-btn{background:var(--indigo);color:#fff;border:none;border-radius:10px;padding:10px 15px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+    .hr-btn:hover{background:var(--indigo-dark);}
+    .hr-arrow{color:#9CA3AF;flex-shrink:0;}
+
+    /* Racha */
+    .streak{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .streak b{font-size:15px;font-weight:800;color:#111827;}
+    .streak span{display:block;font-size:12.5px;color:#9CA3AF;margin-top:2px;}
+    .streak .val{display:flex;align-items:center;gap:7px;font-size:22px;font-weight:800;color:var(--amber);}
+    .streak .val small{font-size:12px;color:#9CA3AF;font-weight:600;}
 
     .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
     .sidebar-overlay.open{display:block;}
@@ -137,19 +200,16 @@
   </div>
 
   <div class="content">
-    <div class="content-inner">
+    <div class="content-inner" style="max-width:560px;">
       <div class="hero">
-        <div class="hi" id="greet">Hola 👋</div>
-        <div class="name" id="clientName">…</div>
-      </div>
-
-      <!-- Sprint 0/entrada: placeholder; los datos del Inicio llegan en el Sprint 2 -->
-      <div class="card soon">
-        <div class="ico">
-          <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+        <div>
+          <div class="hi" id="greet">Hola 👋</div>
+          <div class="name" id="clientName">…</div>
         </div>
-        <h2>Estamos preparando tu espacio</h2>
-        <p>Pronto verás aquí tu semana, tu entrenamiento y tu menú del día, y podrás hacer tu check-in cuando tu coach te lo pida.</p>
+        <div class="hero-av" id="heroAvatar">C</div>
+      </div>
+      <div id="homeBody">
+        <div class="card" style="text-align:center;color:#9CA3AF;padding:38px;">Cargando tu espacio…</div>
       </div>
     </div>
   </div>
@@ -163,6 +223,9 @@
   function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
   function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
 
+  const H = () => ({ Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' });
+  function esc(s){ if(s==null)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   function greetByHour(){
     const h = new Date().getHours();
     if (h < 6)  return 'Buenas noches 🌙';
@@ -171,22 +234,124 @@
     return 'Buenas noches 🌙';
   }
 
-  async function init(){
-    document.getElementById('greet').textContent = greetByHour();
-    try{
-      const r = await fetch(API + '/auth/me', { headers: { Authorization: 'Bearer ' + token } });
-      if (!r.ok) throw new Error();
-      const d = await r.json(); const u = d.data || d;
-      const name = u.name || u.email || 'Cliente';
-      document.getElementById('clientName').textContent = name;
-      document.getElementById('sidebarName').textContent = name;
-      const initials = (name.trim()[0] || 'C').toUpperCase();
-      const sav = document.getElementById('sidebarAvatar');
-      if (u.photo) { sav.innerHTML = '<img src="' + u.photo + '" alt="">'; sav.style.background = 'transparent'; }
-      else { sav.textContent = initials; }
-    }catch(e){}
+  let _weekOffset = 0;
+
+  const IC = {
+    check: '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+    dumbbell: '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>',
+    scale: '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M12 3v18"/><path d="M7 7h10l3 8a5 5 0 0 1-10 0"/><path d="M7 7 4 15a5 5 0 0 0 10 0"/></svg>',
+    fork: '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h1v11M8 2v20M13 2v20M18 2c-1.5 0-3 1.5-3 4v6h3z"/></svg>',
+    play: '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+    moon: '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
+  };
+
+  function renderWeek(w){
+    var days = (w && w.days) || [];
+    return '<div class="wk-card">'
+      + '<div class="wk-head">'
+      +   '<button class="wk-nav" onclick="shiftWeek(-1)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>'
+      +   '<div class="wk-title"><b>' + (_weekOffset===0?'Esta semana':(_weekOffset<0?'Semana anterior':'Próxima semana')) + '</b><span>' + esc(w.range||'') + '</span></div>'
+      +   '<button class="wk-nav" onclick="shiftWeek(1)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>'
+      + '</div>'
+      + '<div class="wk-days">' + days.map(function(d){
+          var cls = 'wk-circle' + (d.is_today?' today':(d.done?' done':(d.is_future?' future':'')));
+          var inner = (d.done || d.is_today && d.done) ? IC.check : d.day;
+          if (d.is_today && !d.done) inner = d.day;
+          var badge = d.is_today ? '<span class="b">'+IC.dumbbell.replace('width="20" height="20"','width="10" height="10"')+'</span>' : '';
+          var emoji = d.done ? '💪' : '·';
+          return '<div class="wk-day'+(d.is_today?' today':'')+'"><div class="wk-dl">'+esc(d.label)+'</div>'
+            + '<div class="'+cls+'">'+inner+badge+'</div>'
+            + '<div class="wk-emoji">'+emoji+'</div></div>';
+        }).join('')
+      + '</div></div>';
   }
-  init();
+
+  function renderCheckin(ci){
+    if (!ci) return '';
+    var done = ci.status === 'done';
+    var chips = (ci.requested_fields||[]).map(function(f){
+      var lbl = {peso:'⚖️ Peso', fotos:'📷 Fotos', medidas:'📏 Medidas'}[f] || f;
+      return '<span class="ci-chip">'+lbl+'</span>';
+    }).join('');
+    var coach = ci.coach_name
+      ? '<div class="ci-coach"><span class="av">'+esc(ci.coach_initials||(ci.coach_name[0]||'C'))+'</span>'+esc((ci.coach_name.split(' ')[0])||'Tu coach')+' · tu coach</div>'
+      : '<div class="ci-coach">Tu coach espera tu reporte</div>';
+    if (done){
+      return '<div class="ci-card done"><div class="ci-top"><div class="ci-ico">'+IC.check.replace('width="18" height="18"','width="22" height="22"')+'</div>'
+        + '<div style="flex:1;"><div class="ci-h"><b>Check-in semanal</b><span class="ci-tag">Hecho</span></div>'
+        + '<div class="ci-txt">Ya enviaste tu check-in de esta semana. ¡Bien hecho!</div></div></div>'
+        + '<div class="ci-foot">'+coach+'<a class="ci-btn" style="background:var(--green);" href="client-progreso.html">Ver progreso →</a></div></div>';
+    }
+    return '<div class="ci-card"><div class="ci-top"><div class="ci-ico">'+IC.scale+'</div>'
+      + '<div style="flex:1;"><div class="ci-h"><b>Check-in semanal</b><span class="ci-tag">Pendiente</span></div>'
+      + '<div class="ci-txt">Tu coach espera tu reporte. Comparte lo que puedas: peso, fotos, medidas o un comentario.</div>'
+      + '<div class="ci-chips">'+chips+'</div></div></div>'
+      + '<div class="ci-foot">'+coach+'<a class="ci-btn" href="client-progreso.html">Hacer check-in →</a></div></div>';
+  }
+
+  function renderRoutine(rt){
+    if (!rt) return '';
+    if (rt.is_rest){
+      return '<div class="hr-row rest"><div class="hr-ico">'+IC.moon+'</div>'
+        + '<div class="hr-info"><b>Día de descanso</b><div>Hoy no tienes entrenamiento. Recupera bien.</div></div></div>';
+    }
+    var sub = [rt.focus, rt.duration_min ? (rt.duration_min+' min') : null].filter(Boolean).join(' · ');
+    return '<div class="hr-row train"><div class="hr-ico">'+IC.dumbbell+'</div>'
+      + '<div class="hr-info"><b>'+esc(rt.name||'Entrenamiento')+'</b><div>'+esc(sub||'Entrenamiento de hoy')+'</div></div>'
+      + '<a class="hr-btn" href="client-entrena.html">'+IC.play+' Empezar</a></div>';
+  }
+
+  function renderMenu(mn){
+    if (!mn) return '';
+    var sub = [mn.kcal ? (mn.kcal+' kcal') : null, (mn.meals_count!=null?mn.meals_count+' comida'+(mn.meals_count!==1?'s':''):null)].filter(Boolean).join(' · ');
+    return '<a class="hr-row menu" href="client-nutricion.html"><div class="hr-ico">'+IC.fork+'</div>'
+      + '<div class="hr-info"><b>Menú · '+esc(mn.weekday||'Hoy')+'</b><div>'+esc(sub||'Tu plan de hoy')+'</div></div>'
+      + '<span class="hr-arrow"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span></a>';
+  }
+
+  function render(data){
+    var t = data.today || {};
+    var pin = '📌 ' + ((t.weekday||'').toUpperCase()) + ' ' + (t.day||'') + ' ' + ((t.month||'').toUpperCase());
+    var streak = data.streak || 0;
+    var html = renderWeek(data.week || {});
+    html += '<div class="today-sec"><div class="today-head"><div class="t">'+esc(pin)+'</div><span class="today-pill">Hoy</span></div>'
+      + renderCheckin(data.checkin)
+      + renderRoutine(data.routine)
+      + renderMenu(data.menu)
+      + '</div>';
+    html += '<div class="streak"><div><b>Tu racha</b><span>Sigue así, cada día cuenta</span></div>'
+      + '<div class="val">🔥 '+streak+' <small>día'+(streak!==1?'s':'')+'</small></div></div>';
+    document.getElementById('homeBody').innerHTML = html;
+    // Campana
+    var bell = document.getElementById('bell');
+    if (bell) bell.classList.toggle('has-unread', (data.notifications_unread||0) > 0);
+  }
+
+  function applyProfile(p){
+    if (!p) return;
+    var name = p.name || 'Cliente';
+    document.getElementById('clientName').textContent = name;
+    document.getElementById('sidebarName').textContent = name;
+    var av = document.getElementById('heroAvatar'), sav = document.getElementById('sidebarAvatar');
+    if (p.photo){ av.innerHTML = '<img src="'+p.photo+'" alt="">'; sav.innerHTML = '<img src="'+p.photo+'" alt="">'; sav.style.background='transparent'; }
+    else { av.textContent = p.initials || (name.trim()[0]||'C').toUpperCase(); sav.textContent = (name.trim()[0]||'C').toUpperCase(); }
+  }
+
+  function shiftWeek(dir){ _weekOffset += dir; load(); }
+
+  async function load(){
+    try{
+      const r = await fetch(API + '/client/home?week_offset=' + _weekOffset, { headers: H() });
+      const d = await r.json(); const data = d.data || {};
+      applyProfile(data.profile);
+      render(data);
+    }catch(e){
+      document.getElementById('homeBody').innerHTML = '<div class="card" style="text-align:center;color:#9CA3AF;padding:38px;">No se pudo cargar tu espacio.</div>';
+    }
+  }
+
+  document.getElementById('greet').textContent = greetByHour();
+  load();
 </script>
 <script>
 /* CHAT_UNREAD_BADGE — badge rojo de mensajes de chat no leídos en el panel */

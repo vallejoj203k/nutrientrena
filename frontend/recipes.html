@@ -147,6 +147,29 @@
     .search-wrap input:focus{border-color:var(--indigo);background:#fff;}
     .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;}
     .total-badge{margin-left:auto;font-size:13px;color:#6B7280;white-space:nowrap;}
+    .view-toggle{display:flex;gap:2px;background:#F3F4F6;border-radius:9px;padding:3px;margin-left:12px;flex-shrink:0;}
+    .vt-btn{width:34px;height:30px;border:none;background:transparent;border-radius:7px;cursor:pointer;color:#9CA3AF;display:flex;align-items:center;justify-content:center;transition:.15s;}
+    .vt-btn:hover{color:#4B5563;}
+    .vt-btn.active{background:#fff;color:var(--lib-primary,#4F46E5);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+    /* Galería de recetas */
+    .rcp-gallery{flex:1;overflow-y:auto;padding:20px 28px 32px;display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:18px;align-content:start;}
+    .rcp-card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(16,24,40,.04);display:flex;flex-direction:column;}
+    .rcp-card:hover{border-color:#C7D2FE;box-shadow:0 10px 26px rgba(16,24,40,.10);transform:translateY(-2px);}
+    .rcp-card-img{width:100%;aspect-ratio:16/10;background:#EEF0F3;display:flex;align-items:center;justify-content:center;color:#C4C7CF;overflow:hidden;position:relative;}
+    .rcp-card-img img{width:100%;height:100%;object-fit:cover;}
+    .rcp-card-badge{position:absolute;top:10px;left:10px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.94);color:#4F46E5;backdrop-filter:blur(2px);}
+    .rcp-card-kcal{position:absolute;top:10px;right:10px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;background:rgba(17,24,39,.72);color:#fff;display:flex;align-items:center;gap:4px;}
+    .rcp-card-body{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1;}
+    .rcp-card-title{font-size:16px;font-weight:800;color:#111827;line-height:1.25;}
+    .rcp-card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+    .rcp-card-meta{display:flex;align-items:center;gap:16px;margin-top:auto;padding-top:12px;font-size:12.5px;color:#6B7280;font-weight:600;}
+    .rcp-card-meta .mi{display:flex;align-items:center;gap:5px;}
+    .rcp-card-acts{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #F3F4F6;}
+    .rcp-card-view{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;color:#374151;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+    .rcp-card-view:hover{background:#F9FAFB;border-color:#C7D2FE;color:var(--lib-primary,#4F46E5);}
+    .rcp-card-ico{width:38px;height:38px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;color:#9CA3AF;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex-shrink:0;}
+    .rcp-card-ico:hover{color:var(--lib-primary,#4F46E5);border-color:#C7D2FE;background:#F5F6FE;}
+    .rcp-card-ico.del:hover{color:#DC2626;border-color:#FCA5A5;background:#FEF2F2;}
     #listContent{flex:1;overflow-y:auto;padding:24px 28px;}
     #listContent::-webkit-scrollbar{width:6px;}
     #listContent::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
@@ -654,8 +677,12 @@
         <input type="text" id="searchInput" placeholder="Buscar receta..." oninput="debouncedSearch()"/>
       </div>
       <span class="total-badge" id="totalBadge"></span>
+      <div class="view-toggle">
+        <button class="vt-btn" id="vtGallery" onclick="setRecipeView('gallery')" title="Galería"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+        <button class="vt-btn" id="vtList" onclick="setRecipeView('list')" title="Lista"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+      </div>
     </div>
-    <div class="lib-table-wrap" id="listContent">
+    <div class="lib-table-wrap" id="listContent" style="display:none;">
       <table class="lib-table">
         <thead><tr>
           <th>Receta</th><th>Momento</th><th class="num">Tiempo</th><th class="num">Kcal</th>
@@ -665,8 +692,9 @@
           <tr><td colspan="7" style="text-align:center;padding:40px;color:#9CA3AF;">Cargando recetas…</td></tr>
         </tbody>
       </table>
-      <div class="pagination" id="pagination" style="display:none;margin-top:16px;"></div>
     </div>
+    <div class="rcp-gallery" id="galleryContent"><div class="rcp-empty" style="grid-column:1/-1;text-align:center;padding:40px;color:#9CA3AF;">Cargando recetas…</div></div>
+    <div class="pagination" id="pagination" style="display:none;margin:16px 28px;flex-shrink:0;"></div>
   </div>
 
   <!-- ── Panel lateral: detalle de la receta ── -->
@@ -855,6 +883,11 @@ async function init() {
   } catch(e) { /* silent */ }
   loadFormsBadge();
   loadCategorySelect();
+  // Refleja la vista guardada (galería por defecto) en los botones y contenedores
+  var _vg=document.getElementById('vtGallery'), _vl=document.getElementById('vtList');
+  if(_vg)_vg.classList.toggle('active',_recipeView==='gallery');
+  if(_vl)_vl.classList.toggle('active',_recipeView!=='gallery');
+  if(_recipeView==='list'){ var _lc=document.getElementById('listContent'), _g=document.getElementById('galleryContent'); if(_lc)_lc.style.display=''; if(_g)_g.style.display='none'; }
   loadRecipes(1);
 }
 
@@ -946,21 +979,85 @@ async function loadRecipes(page) {
 }
 
 let _lastRecipes = [];
+var _recipeView = localStorage.getItem('recipeView') || 'gallery';
+
+function setRecipeView(v) {
+  _recipeView = (v === 'list') ? 'list' : 'gallery';
+  localStorage.setItem('recipeView', _recipeView);
+  applyRecipeView();
+}
+
+var FOOD_ICON_LG = '<svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>';
+
 function renderCards(items) {
   _lastRecipes = items || [];
-  const tb = document.getElementById('recipesTbody');
   const sc = document.getElementById('subcountRecetas');
-  if (sc) sc.textContent = _total || items.length;
-  if (!items.length) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:48px;color:#9CA3AF;">'
-      + '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="opacity:.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>'
-      + '<div style="margin-top:8px;font-weight:600;color:#6B7280;">No hay recetas todavía</div>'
-      + '<div style="font-size:12px;margin-top:2px;">Crea tu primera receta con el botón «Nueva receta».</div></td></tr>';
-    return;
-  }
+  if (sc) sc.textContent = _total || _lastRecipes.length;
+  applyRecipeView();
+}
+
+function applyRecipeView() {
+  var items = _lastRecipes || [];
   var _rid = parseInt(localStorage.getItem('role_id') || '0');
   var _isAdmin = _rid === 1 || _rid === 2;
-  tb.innerHTML = items.map(function(r) { return recipeRow(r, _isAdmin); }).join('');
+  var isGallery = _recipeView === 'gallery';
+  var listWrap = document.getElementById('listContent');
+  var gal = document.getElementById('galleryContent');
+  var tb = document.getElementById('recipesTbody');
+  var vg = document.getElementById('vtGallery'); var vl = document.getElementById('vtList');
+  if (vg) vg.classList.toggle('active', isGallery);
+  if (vl) vl.classList.toggle('active', !isGallery);
+  if (listWrap) listWrap.style.display = isGallery ? 'none' : '';
+  if (gal) gal.style.display = isGallery ? 'grid' : 'none';
+
+  if (!items.length) {
+    var emptyMsg = '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="opacity:.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>'
+      + '<div style="margin-top:8px;font-weight:600;color:#6B7280;">No hay recetas todavía</div>'
+      + '<div style="font-size:12px;margin-top:2px;">Crea tu primera receta con el botón «Nueva receta».</div>';
+    if (tb) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:48px;color:#9CA3AF;">' + emptyMsg + '</td></tr>';
+    if (gal) gal.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:#9CA3AF;">' + emptyMsg + '</div>';
+    return;
+  }
+  if (isGallery) { if (gal) gal.innerHTML = items.map(function(r){ return recipeCard(r, _isAdmin); }).join(''); }
+  else { if (tb) tb.innerHTML = items.map(function(r){ return recipeRow(r, _isAdmin); }).join(''); }
+}
+
+function recipeCard(r, isAdmin) {
+  var isPlatform = r.organization_id == null;
+  var canEdit = isAdmin || !isPlatform;
+  var id = r.id;
+  var name = esc(r.name);
+  var prot = r.proteins != null ? r.proteins.toFixed(1) + 'g' : '—';
+  var kcal = r.calories != null ? Math.round(r.calories) : null;
+  var tiempo = r.prep_time ? (r.prep_time + ' min') : '—';
+  var tags = r.meal_type ? r.meal_type.split(',').map(function(t){ return t.trim(); }).filter(Boolean) : [];
+  var img = r.image
+    ? '<img src="' + r.image + '" alt="' + name + '" loading="lazy">'
+    : FOOD_ICON_LG;
+  var origen = '<span class="rcp-card-badge">' + (isPlatform ? 'Plataforma' : 'Mi org') + '</span>';
+  var kcalBadge = kcal != null
+    ? '<span class="rcp-card-kcal"><svg width="12" height="12" fill="none" stroke="#F59E0B" stroke-width="2.2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>' + kcal + '</span>'
+    : '';
+  var tagsHtml = tags.length ? '<div class="rcp-card-tags">' + tags.slice(0,3).map(function(t){ return '<span class="lib-mtag">' + esc(t) + '</span>'; }).join('') + '</div>' : '';
+  var editBtns = canEdit
+    ? '<button class="rcp-card-ico" title="Editar" onclick="event.stopPropagation();openEdit(' + id + ')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+      + '<button class="rcp-card-ico del" title="Eliminar" onclick="event.stopPropagation();openDel(' + id + ',\'' + name.replace(/'/g, "\\'") + '\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'
+    : '';
+  return '<div class="rcp-card" onclick="openRecipePreview(' + id + ')">'
+    + '<div class="rcp-card-img">' + origen + kcalBadge + img + '</div>'
+    + '<div class="rcp-card-body">'
+    +   '<div class="rcp-card-title">' + name + '</div>'
+    +   tagsHtml
+    +   '<div class="rcp-card-meta">'
+    +     '<span class="mi"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2.5 2.5"/></svg>' + tiempo + '</span>'
+    +     '<span class="mi"><svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg>' + prot + ' prot</span>'
+    +   '</div>'
+    +   '<div class="rcp-card-acts">'
+    +     '<button class="rcp-card-view" onclick="event.stopPropagation();openRecipePreview(' + id + ')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Ver receta</button>'
+    +     editBtns
+    +   '</div>'
+    + '</div>'
+    + '</div>';
 }
 
 function recipeRow(r, isAdmin) {

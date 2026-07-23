@@ -14,6 +14,7 @@ class Recipe(Base):
     instructor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     category_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
+    categories = Column(String(255), nullable=True)  # ids de tipo de dieta separados por coma (multi)
     calories = Column(Float, nullable=True)
     proteins = Column(Float, nullable=True)
     carbs = Column(Float, nullable=True)

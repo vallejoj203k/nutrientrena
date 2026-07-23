@@ -15,6 +15,7 @@ class RecipeCreate(BaseModel):
     description: Optional[str] = None
     instructions: Optional[str] = None
     category_id: Optional[int] = None
+    categories: Optional[str] = None
     calories: Optional[float] = None
     proteins: Optional[float] = None
     carbs: Optional[float] = None
@@ -31,6 +32,7 @@ class RecipeUpdate(BaseModel):
     description: Optional[str] = None
     instructions: Optional[str] = None
     category_id: Optional[int] = None
+    categories: Optional[str] = None
     calories: Optional[float] = None
     proteins: Optional[float] = None
     carbs: Optional[float] = None
@@ -65,6 +67,7 @@ class RecipeOut(BaseModel):
     description: Optional[str] = None
     instructions: Optional[str] = None
     category_id: Optional[int] = None
+    categories: Optional[str] = None
     calories: Optional[float] = None
     proteins: Optional[float] = None
     carbs: Optional[float] = None

@@ -224,11 +224,19 @@ def _diet_meals_macros(diet):
     meals = []
     for food in diet.foods:
         mk = 0.0
+        foods = []
         for dfa in food.detail:
             al = dfa.aliment
-            if al and al.calories and dfa.quantity:
+            if not al:
+                continue
+            if al.calories and dfa.quantity:
                 mk += (al.calories / 100.0) * dfa.quantity
-        meals.append({"name": food.name, "time": food.time, "kcal": round(mk) if mk else None})
+            foods.append({
+                "name": al.name,
+                "quantity": dfa.quantity,
+                "unit": (al.quantity_unit or "g"),
+            })
+        meals.append({"name": food.name, "time": food.time, "kcal": round(mk) if mk else None, "foods": foods})
     meals.sort(key=lambda m: m["time"] or "~")
     return meals, kcal, prot, carb, fat
 

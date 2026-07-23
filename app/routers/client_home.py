@@ -428,6 +428,53 @@ def client_workout_session(body: _WorkoutSessionBody, db: Session = Depends(get_
     return send_response({"id": session.id, "session_date": session.session_date.isoformat()}, "Entrenamiento registrado")
 
 
+def _profile_out(db: Session, detail, user: User):
+    full = (f"{detail.name or ''} {detail.last_name or ''}").strip() if detail else None
+    return {
+        "name": detail.name if detail else None,
+        "last_name": detail.last_name if detail else None,
+        "full_name": full or (getattr(user, "email", None) or "Cliente"),
+        "phone": detail.phone if detail else None,
+        "email": getattr(user, "email", None),
+        "photo": detail.photo if detail else None,
+    }
+
+
+@router.get("/profile", summary="Perfil del cliente", description="Datos de perfil editables del cliente autenticado.")
+def client_profile(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(CLIENT))):
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_error("Perfil de cliente no encontrado")
+    return send_response(_profile_out(db, detail, current_user), "OK")
+
+
+class _ClientProfileBody(BaseModel):
+    name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone: Optional[str] = None
+    photo: Optional[str] = None
+
+
+@router.patch("/profile", summary="Actualizar perfil (cliente)", description="El cliente actualiza su propio nombre, apellidos, teléfono y foto de perfil.")
+def client_update_profile(body: _ClientProfileBody, db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(CLIENT))):
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_error("Perfil de cliente no encontrado")
+    if body.name is not None:
+        nm = body.name.strip()
+        if nm:
+            detail.name = nm  # name es obligatorio: no se permite vaciarlo
+    if body.last_name is not None:
+        detail.last_name = body.last_name.strip() or None
+    if body.phone is not None:
+        detail.phone = body.phone.strip() or None
+    if body.photo is not None:
+        detail.photo = body.photo or None
+    db.commit()
+    db.refresh(detail)
+    return send_response(_profile_out(db, detail, current_user), "Perfil actualizado")
+
+
 @router.get("/routines", summary="Rutinas del cliente", description="Rutinas (planes) asignadas al cliente autenticado, con sus días y ejercicios.")
 def client_routines(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT))):
     # Reutiliza el serializador del panel del coach (mismo formato de días/bloques/ejercicios).

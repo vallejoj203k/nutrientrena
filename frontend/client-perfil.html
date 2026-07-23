@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <title>NutriEntrena — Perfil</title>
+  <script>
+    (function(){ var t=localStorage.getItem('token'),r=localStorage.getItem('role_id')||'';
+      if(!t){location.replace('login.html');return;} if(r&&r!=='6'){location.replace('dashboard.html');} })();
+  </script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--green:#059669;--amber:#F59E0B;--red:#DC2626;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;border-bottom:1px solid #EBEBEB;}
+    .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
+    .sl-txt{display:flex;flex-direction:column;line-height:1.15;}
+    .sl-txt b{font-size:17px;font-weight:800;letter-spacing:.3px;}
+    .sl-txt b .n1{color:var(--indigo);}.sl-txt b .n2{color:var(--green);}
+    .sl-txt small{color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:12px 20px 4px;font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.75;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;overflow:hidden;}
+    .s-avatar img{width:100%;height:100%;object-fit:cover;}
+    .user-info{flex:1;min-width:0;}.user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
+
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:64px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;}
+    .menu-btn:hover{background:#F3F4F6;}
+    .topbar-title{font-size:17px;font-weight:800;color:#111827;flex:1;}
+
+    .content{flex:1;overflow-y:auto;padding:26px 28px 40px;}
+    .content-inner{max-width:600px;margin:0 auto;}
+    .page-head{margin-bottom:18px;}
+    .page-head h1{font-size:26px;font-weight:800;color:#111827;}
+    .page-head p{font-size:14px;color:#6B7280;margin-top:2px;}
+
+    .card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .avatar-row{display:flex;align-items:center;gap:18px;}
+    .big-av{width:88px;height:88px;border-radius:50%;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:30px;flex-shrink:0;overflow:hidden;}
+    .big-av img{width:100%;height:100%;object-fit:cover;}
+    .av-actions{display:flex;flex-direction:column;gap:8px;}
+    .btn-photo{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:10px;border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+    .btn-photo:hover{background:#F9FAFB;border-color:#C7D2FE;color:var(--indigo);}
+    .btn-photo.rm{color:#DC2626;}
+    .btn-photo.rm:hover{background:#FEF2F2;border-color:#FCA5A5;}
+    .av-hint{font-size:11.5px;color:#9CA3AF;}
+
+    .field{margin-top:16px;}
+    .field label{display:block;font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;}
+    .field input{width:100%;padding:12px 14px;border:1px solid #E5E7EB;border-radius:10px;font-size:14.5px;color:#111;outline:none;font-family:inherit;background:#fff;transition:.15s;}
+    .field input:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(79,70,229,.08);}
+    .field input:disabled{background:#F9FAFB;color:#9CA3AF;cursor:not-allowed;}
+    .field .sub{font-size:11.5px;color:#9CA3AF;margin-top:5px;}
+    .save-row{display:flex;justify-content:flex-end;margin-top:20px;}
+    .btn-save{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:11px;border:none;background:var(--indigo);color:#fff;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;}
+    .btn-save:hover{background:var(--indigo-dark);}
+    .btn-save:disabled{opacity:.6;cursor:default;}
+
+    .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#1F2937;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:400;}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    .toast.err{background:#DC2626;}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
+    .sidebar-overlay.open{display:block;}
+    @media(max-width:768px){
+      body{overflow:auto;}
+      .sidebar{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);transition:transform .25s;z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .menu-btn{display:flex;align-items:center;justify-content:center;}
+      .content{padding:18px 14px 40px;}
+      .page-head h1{font-size:22px;}
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sl-mark" role="img" aria-label="NutriEntrena"></div>
+    <div class="sl-txt"><b><span class="n1">NUTRI</span><span class="n2">ENTRENA</span></b><small>Mi espacio</small></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="client-home.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/></svg>Inicio</a>
+    <div class="nav-section">Mi plan</div>
+    <a class="nav-item" href="client-entrena.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>Entrena</a>
+    <a class="nav-item" href="client-nutricion.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>Nutrición</a>
+    <div class="nav-section">Seguimiento</div>
+    <a class="nav-item" href="client-progreso.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>Progreso</a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item" href="client-chat.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+    <div class="nav-section">Cuenta</div>
+    <a class="nav-item active" href="client-perfil.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarAvatar">C</div>
+    <div class="user-info"><div class="user-name" id="sidebarName">Cargando…</div><div class="user-role">Cliente</div></div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-title">Perfil</div>
+  </div>
+
+  <div class="content">
+    <div class="content-inner">
+      <div class="page-head"><h1>Mi perfil</h1><p>Actualiza tus datos y tu foto</p></div>
+
+      <div class="card">
+        <div class="avatar-row">
+          <div class="big-av" id="bigAvatar">C</div>
+          <div class="av-actions">
+            <button class="btn-photo" onclick="pickPhoto()"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Cambiar foto</button>
+            <button class="btn-photo rm" id="rmPhotoBtn" onclick="removePhoto()" style="display:none;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Quitar foto</button>
+            <div class="av-hint">JPG o PNG. Se optimiza automáticamente.</div>
+            <input type="file" id="photoFile" accept="image/*" style="display:none" onchange="uploadPhoto(this)"/>
+          </div>
+        </div>
+
+        <div class="field"><label>Nombre</label><input id="fName" type="text" placeholder="Tu nombre"/></div>
+        <div class="field"><label>Apellidos</label><input id="fLast" type="text" placeholder="Tus apellidos"/></div>
+        <div class="field"><label>Teléfono</label><input id="fPhone" type="tel" placeholder="Tu teléfono"/></div>
+        <div class="field"><label>Correo</label><input id="fEmail" type="email" disabled/><div class="sub">Para cambiar tu correo, escribe a tu coach.</div></div>
+
+        <div class="save-row">
+          <button class="btn-save" id="saveBtn" onclick="saveProfile()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://nutrientrena-production.up.railway.app/api';
+  const token = localStorage.getItem('token');
+  const headers = () => ({ Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' });
+  function logout(){ localStorage.clear(); location.href='login.html'; }
+  function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+  function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+  let _tt; function toast(msg,err){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2400); }
+
+  let _photo = null;
+
+  function initials(name){ var p=(name||'').trim().split(/\s+/); return ((p[0]||'C')[0]+(p[1]?p[1][0]:'')).toUpperCase(); }
+  function applyAvatar(){
+    var name=(document.getElementById('fName').value+' '+document.getElementById('fLast').value).trim();
+    var big=document.getElementById('bigAvatar'), sav=document.getElementById('sidebarAvatar');
+    if(_photo){ big.innerHTML='<img src="'+_photo+'" alt="">'; sav.innerHTML='<img src="'+_photo+'" alt="">'; sav.style.background='transparent'; document.getElementById('rmPhotoBtn').style.display=''; }
+    else { big.textContent=initials(name); sav.textContent=initials(name); sav.style.background='var(--indigo)'; document.getElementById('rmPhotoBtn').style.display='none'; }
+    document.getElementById('sidebarName').textContent=name||'Cliente';
+  }
+
+  // Compresión de imagen en el navegador (igual que en recetas)
+  function compressImage(file,maxDim,quality){
+    return new Promise(function(resolve){
+      if(!file.type||file.type.indexOf('image/')!==0){resolve(file);return;}
+      var url=URL.createObjectURL(file), img=new Image();
+      img.onload=function(){ URL.revokeObjectURL(url);
+        var w=img.width,h=img.height,scale=Math.min(1,maxDim/Math.max(w,h));
+        var cw=Math.max(1,Math.round(w*scale)),ch=Math.max(1,Math.round(h*scale));
+        var c=document.createElement('canvas');c.width=cw;c.height=ch;
+        try{ var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cw,ch);x.drawImage(img,0,0,cw,ch);
+          c.toBlob(function(b){ resolve(b&&b.size<file.size?b:file); },'image/jpeg',quality);
+        }catch(e){ resolve(file); }
+      };
+      img.onerror=function(){URL.revokeObjectURL(url);resolve(file);};
+      img.src=url;
+    });
+  }
+
+  function pickPhoto(){ document.getElementById('photoFile').click(); }
+  function removePhoto(){ _photo=null; applyAvatar(); }
+  async function uploadPhoto(input){
+    var file=input.files[0]; if(!file) return;
+    toast('Optimizando foto…');
+    try{
+      var blob=await compressImage(file,600,0.85);
+      var fd=new FormData(); fd.append('file',blob,'perfil.jpg'); fd.append('folder','profiles');
+      var up=await fetch(API+'/files/upload',{method:'POST',headers:{Authorization:'Bearer '+token},body:fd});
+      var ud=await up.json();
+      if(!up.ok||!(ud.data&&ud.data.url)) throw new Error();
+      _photo=ud.data.url; applyAvatar(); toast('Foto lista, recuerda guardar');
+    }catch(e){ toast('No se pudo subir la foto', true); }
+    finally{ input.value=''; }
+  }
+
+  async function load(){
+    try{
+      const r=await fetch(API+'/client/profile',{headers:headers()});
+      const d=await r.json(); const p=d.data||{};
+      document.getElementById('fName').value=p.name||'';
+      document.getElementById('fLast').value=p.last_name||'';
+      document.getElementById('fPhone').value=p.phone||'';
+      document.getElementById('fEmail').value=p.email||'';
+      _photo=p.photo||null;
+      applyAvatar();
+    }catch(e){ toast('No se pudo cargar tu perfil', true); }
+  }
+
+  async function saveProfile(){
+    var name=document.getElementById('fName').value.trim();
+    if(!name){ toast('El nombre es obligatorio', true); return; }
+    var btn=document.getElementById('saveBtn'); btn.disabled=true;
+    var body={ name:name, last_name:document.getElementById('fLast').value.trim(), phone:document.getElementById('fPhone').value.trim(), photo:_photo };
+    try{
+      const r=await fetch(API+'/client/profile',{method:'PATCH',headers:headers(),body:JSON.stringify(body)});
+      if(!r.ok) throw new Error();
+      toast('Perfil actualizado');
+      applyAvatar();
+    }catch(e){ toast('No se pudo guardar', true); }
+    finally{ btn.disabled=false; }
+  }
+
+  document.getElementById('fName').addEventListener('input',applyAvatar);
+  document.getElementById('fLast').addEventListener('input',applyAvatar);
+  load();
+</script>
+</body>
+</html>

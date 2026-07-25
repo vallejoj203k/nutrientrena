@@ -288,15 +288,18 @@
     var ws=series.map(function(p){ return p.weight; });
     var tNow=Date.now();
 
-    // Extremos de la línea de objetivo
+    // La línea de objetivo SIEMPRE arranca en el peso inicio, para poder ver
+    // si el peso real se acerca o se aleja del objetivo.
     var planT0=tOf(plan.start_date)||ts[0];
     var planW0=(plan.start_weight!=null?plan.start_weight:ws[0]);
     var planT1=tOf(plan.end_date);
-    var hasPlanLine=(targetW!=null && planT1!=null && planT1>planT0);
 
     var tMin=Math.min(ts[0], planT0);
-    var tMax=Math.max(ts[ts.length-1], tNow, hasPlanLine?planT1:0);
+    var tMax=Math.max(ts[ts.length-1], tNow, planT1||0);
     if(tMax<=tMin) tMax=tMin+7*MS;
+    // Sin fecha de fin, la línea llega al borde derecho (referencia sin plazo)
+    if(planT1==null){ tMax=tMax+Math.max(7*MS,(tMax-tMin)*0.15); planT1=tMax; }
+    var hasPlanLine=(targetW!=null && planT1>planT0);
     var tRange=tMax-tMin;
 
     var allW=ws.slice();
@@ -337,12 +340,8 @@
       var ax=toX(planT0).toFixed(1), ay=toY(planW0).toFixed(1);
       var bx=toX(planT1).toFixed(1), by=toY(targetW).toFixed(1);
       objSVG='<line x1="'+ax+'" y1="'+ay+'" x2="'+bx+'" y2="'+by+'" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round"/>'
+        +'<circle cx="'+ax+'" cy="'+ay+'" r="3" fill="#7C3AED" opacity=".5"/>'
         +'<circle cx="'+bx+'" cy="'+by+'" r="3.4" fill="#fff" stroke="#7C3AED" stroke-width="2"><title>Objetivo '+targetW+' kg</title></circle>';
-    } else if(targetW!=null){
-      // Sin fecha de fin no hay pendiente: se marca el objetivo como referencia
-      var oy=toY(targetW).toFixed(1);
-      objSVG='<line x1="'+PL+'" y1="'+oy+'" x2="'+(CW-PR)+'" y2="'+oy+'" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4"/>'
-        +'<text x="'+(CW-PR-2)+'" y="'+(parseFloat(oy)-5)+'" font-size="9" fill="#7C3AED" text-anchor="end">objetivo '+targetW+' kg</text>';
     }
 
     // ── Línea REAL (verde) con área ──

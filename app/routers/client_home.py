@@ -82,7 +82,8 @@ def client_home(
     initials = ((parts[0][:1] if parts else "C") + (parts[1][:1] if len(parts) > 1 else "")).upper()
     profile = {
         "name": full_name,
-        "photo": getattr(current_user, "photo", None),
+        # La foto vive en UserDetail, no en User.
+        "photo": (detail.photo if detail else None),
         "initials": initials or "C",
     }
 

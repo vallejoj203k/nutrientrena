@@ -192,10 +192,10 @@
       <!-- Métricas (mismas que ve tu coach) -->
       <div class="pg-stats" id="pgStats"></div>
 
-      <!-- Seguimiento de peso · Real vs Proyección -->
+      <!-- Seguimiento de peso · Real vs Objetivo -->
       <div class="card">
         <div class="card-head">
-          <div class="card-title">Seguimiento de peso · Real vs Proyección</div>
+          <div class="card-title">Seguimiento de peso · Real vs Objetivo</div>
           <div class="pg-legend">
             <span><i class="lg-real"></i>Real</span>
             <span><i class="lg-obj"></i>Objetivo</span>
@@ -273,63 +273,98 @@
       +'<div class="pg-stat"><div class="pg-stat-v">'+(s.ritmo_real!=null?Math.abs(s.ritmo_real).toFixed(2)+' kg/sem':'—')+'</div><div class="pg-stat-l">Ritmo real</div></div>';
   }
 
-  // ── Gráfica Real vs Proyección (mismo trazado que el panel del coach) ──
-  function buildWeightSVG(series, targetW){
+  // ── Gráfica con DOS líneas simultáneas: Real y Objetivo (plan) ──
+  // La línea de objetivo va desde el peso de partida hasta el peso objetivo en
+  // la fecha de fin del plan, así se puede comparar en cada momento dónde
+  // debería estar el peso frente a dónde está.
+  function buildWeightSVG(series, targetW, plan){
     if(!series.length) return '<div class="pg-empty">Sin datos de peso registrados.</div>';
-    var CW=480, CH=190, PL=44, PR=18, PT=16, PB=30;
+    plan = plan || {};
+    var MS=86400000, CW=480, CH=190, PL=44, PR=18, PT=18, PB=30;
     var plotW=CW-PL-PR, plotH=CH-PT-PB;
-    var ws=series.map(function(p){return p.weight;});
-    var allW=(targetW!=null)?ws.concat([targetW]):ws;
+    var tOf=function(s){ return s ? new Date(s+'T00:00:00').getTime() : null; };
+
+    var ts=series.map(function(p){ return tOf(p.date); });
+    var ws=series.map(function(p){ return p.weight; });
+    var tNow=Date.now();
+
+    // Extremos de la línea de objetivo
+    var planT0=tOf(plan.start_date)||ts[0];
+    var planW0=(plan.start_weight!=null?plan.start_weight:ws[0]);
+    var planT1=tOf(plan.end_date);
+    var hasPlanLine=(targetW!=null && planT1!=null && planT1>planT0);
+
+    var tMin=Math.min(ts[0], planT0);
+    var tMax=Math.max(ts[ts.length-1], tNow, hasPlanLine?planT1:0);
+    if(tMax<=tMin) tMax=tMin+7*MS;
+    var tRange=tMax-tMin;
+
+    var allW=ws.slice();
+    if(targetW!=null) allW.push(targetW);
+    if(hasPlanLine) allW.push(planW0);
     var minW=Math.floor(Math.min.apply(null,allW))-1, maxW=Math.ceil(Math.max.apply(null,allW))+1;
     var wRange=(maxW-minW)||1;
-    var ts=series.map(function(p){return new Date(p.date+'T00:00:00').getTime();});
-    var tMin=ts[0], tNow=Date.now();
-    var tMax=(targetW!=null)?Math.max(ts[ts.length-1],tNow)+21*86400000:ts[ts.length-1];
-    var tRange=(tMax-tMin)||1;
+
     var toX=function(t){ return PL+((t-tMin)/tRange)*plotW; };
     var toY=function(w){ return PT+(1-(w-minW)/wRange)*plotH; };
-    var pts=series.map(function(p,i){ return {x:toX(ts[i]), y:toY(p.weight), w:p.weight}; });
-    var last=pts[pts.length-1];
-    var realD=pts.map(function(p,i){ return (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1); }).join(' ');
-    var areaD=realD+' L'+last.x.toFixed(1)+','+(PT+plotH).toFixed(1)+' L'+PL+','+(PT+plotH).toFixed(1)+' Z';
-    var proj='';
-    if(targetW!=null){
-      var pX=toX(tMax).toFixed(1), pY=toY(targetW).toFixed(1);
-      proj='<line x1="'+last.x.toFixed(1)+'" y1="'+last.y.toFixed(1)+'" x2="'+pX+'" y2="'+pY+'" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round"/>'
-        +'<circle cx="'+pX+'" cy="'+pY+'" r="3" fill="#7C3AED" opacity=".55"/>';
+
+    // Rejilla y ejes
+    var grid='', yStep=Math.max(1,Math.ceil(wRange/4));
+    for(var v=minW; v<=maxW; v+=yStep){
+      var y=toY(v).toFixed(1);
+      grid+='<line x1="'+PL+'" y1="'+y+'" x2="'+(CW-PR)+'" y2="'+y+'" stroke="#F1F2F6" stroke-width="1"/>'
+        +'<text x="'+(PL-6)+'" y="'+(parseFloat(y)+3).toFixed(1)+'" font-size="9" fill="#9CA3AF" text-anchor="end">'+v+'</text>';
     }
+    var MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    var xTicks='';
+    for(var k=0;k<=3;k++){
+      var t=tMin+(tRange*k/3), d=new Date(t);
+      xTicks+='<text x="'+toX(t).toFixed(1)+'" y="'+(CH-9)+'" font-size="9" fill="#9CA3AF" text-anchor="middle">'
+        + d.getDate()+' '+MES[d.getMonth()]+'</text>';
+    }
+
+    // Línea de HOY
     var today='';
     if(tNow>tMin && tNow<tMax){
       var tx=toX(tNow).toFixed(1);
       today='<line x1="'+tx+'" y1="'+PT+'" x2="'+tx+'" y2="'+(PT+plotH).toFixed(1)+'" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="4,3"/>'
-        +'<text x="'+tx+'" y="'+(PT-4)+'" font-size="9" fill="#9CA3AF" text-anchor="middle">hoy</text>';
+        +'<text x="'+tx+'" y="'+(PT-5)+'" font-size="9" fill="#9CA3AF" text-anchor="middle">hoy</text>';
     }
-    var yTicks='', yStep=Math.max(1,Math.ceil(wRange/4));
-    for(var v=minW; v<=maxW; v+=yStep){
-      var y=toY(v).toFixed(1);
-      yTicks+='<line x1="'+PL+'" y1="'+y+'" x2="'+(CW-PR)+'" y2="'+y+'" stroke="#F1F2F6" stroke-width="1"/>'
-        +'<text x="'+(PL-6)+'" y="'+(parseFloat(y)+3).toFixed(1)+'" font-size="9" fill="#9CA3AF" text-anchor="end">'+v+'</text>';
+
+    // ── Línea OBJETIVO (morada) — dibujada a lo largo de todo el periodo ──
+    var objSVG='';
+    if(hasPlanLine){
+      var ax=toX(planT0).toFixed(1), ay=toY(planW0).toFixed(1);
+      var bx=toX(planT1).toFixed(1), by=toY(targetW).toFixed(1);
+      objSVG='<line x1="'+ax+'" y1="'+ay+'" x2="'+bx+'" y2="'+by+'" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round"/>'
+        +'<circle cx="'+bx+'" cy="'+by+'" r="3.4" fill="#fff" stroke="#7C3AED" stroke-width="2"><title>Objetivo '+targetW+' kg</title></circle>';
+    } else if(targetW!=null){
+      // Sin fecha de fin no hay pendiente: se marca el objetivo como referencia
+      var oy=toY(targetW).toFixed(1);
+      objSVG='<line x1="'+PL+'" y1="'+oy+'" x2="'+(CW-PR)+'" y2="'+oy+'" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4"/>'
+        +'<text x="'+(CW-PR-2)+'" y="'+(parseFloat(oy)-5)+'" font-size="9" fill="#7C3AED" text-anchor="end">objetivo '+targetW+' kg</text>';
     }
-    var xTicks='', step=Math.max(1,Math.ceil(series.length/4));
-    for(var i=0;i<series.length;i+=step){
-      var d=new Date(series[i].date+'T00:00:00');
-      xTicks+='<text x="'+pts[i].x.toFixed(1)+'" y="'+(CH-10)+'" font-size="9" fill="#9CA3AF" text-anchor="middle">'
-        + d.getDate()+' '+['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()]+'</text>';
-    }
+
+    // ── Línea REAL (verde) con área ──
+    var pts=series.map(function(p,i){ return {x:toX(ts[i]), y:toY(p.weight), w:p.weight}; });
+    var last=pts[pts.length-1];
+    var realD=pts.map(function(p,i){ return (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1); }).join(' ');
+    var areaD=realD+' L'+last.x.toFixed(1)+','+(PT+plotH).toFixed(1)+' L'+pts[0].x.toFixed(1)+','+(PT+plotH).toFixed(1)+' Z';
     var dots=pts.map(function(p){ return '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.2" fill="#fff" stroke="#22C55E" stroke-width="2"><title>'+p.w+' kg</title></circle>'; }).join('');
+
     return '<svg viewBox="0 0 '+CW+' '+CH+'" xmlns="http://www.w3.org/2000/svg">'
       +'<defs><linearGradient id="cpArea" x1="0" y1="0" x2="0" y2="1">'
       +'<stop offset="0%" stop-color="#22C55E" stop-opacity=".16"/><stop offset="100%" stop-color="#22C55E" stop-opacity="0"/></linearGradient></defs>'
-      +yTicks+xTicks+today
+      +grid+xTicks+today+objSVG
       +'<path d="'+areaD+'" fill="url(#cpArea)"/>'
       +'<path d="'+realD+'" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
-      +proj+dots+'</svg>';
+      +dots+'</svg>';
   }
 
   function renderWeightSection(){
     var w=_data.weight||{}, t=_data.target||{};
     var series=(w.series||[]).filter(function(p){return p.weight!=null;});
-    document.getElementById('pgChart').innerHTML = buildWeightSVG(series, t.target_weight!=null?t.target_weight:null);
+    document.getElementById('pgChart').innerHTML = buildWeightSVG(series, t.target_weight!=null?t.target_weight:null, t);
     document.getElementById('pgObj').innerHTML =
        '<div class="pg-obj-t">Objetivo</div>'
       +'<div class="pg-obj-w">'+(t.target_weight!=null?kg(t.target_weight):'—')+'</div>'

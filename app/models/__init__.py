@@ -21,7 +21,7 @@ from app.models.nutrition.recipe import Recipe, RecipeDetail
 from app.models.nutrition.client_aliment import ClientAliment
 from app.models.form import FormTemplate, FormTemplateField, FormAssignment, FormResponse
 from app.models.checkin import WeeklyCheckin
-from app.models.session_log import WorkoutSession
+from app.models.session_log import WorkoutSession, WorkoutSessionExercise, WorkoutSessionSet
 from app.models.client_task import ClientTask
 from app.models.app_setting import AppSetting
 from app.models.program import Program, ProgramPhase, ProgramClient

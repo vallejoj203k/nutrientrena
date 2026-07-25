@@ -410,15 +410,33 @@ def client_checkin(body: _ClientCheckinBody, db: Session = Depends(get_db), curr
     return send_response({"id": ck.id, "checkin_date": ck.checkin_date.isoformat()}, "Check-in guardado")
 
 
+class _SessionSetBody(BaseModel):
+    reps: Optional[str] = None
+    weight: Optional[float] = None
+    rpe: Optional[float] = None
+    done: Optional[bool] = False
+
+
+class _SessionExerciseBody(BaseModel):
+    training_id: Optional[int] = None
+    name: Optional[str] = None
+    muscle_group_name: Optional[str] = None
+    notes: Optional[str] = None
+    sets: Optional[list[_SessionSetBody]] = None
+
+
 class _WorkoutSessionBody(BaseModel):
     routine_id: Optional[int] = None
     duration_min: Optional[int] = None
     rpe: Optional[float] = None
     notes: Optional[str] = None
+    exercises: Optional[list[_SessionExerciseBody]] = None
 
 
-@router.post("/workout-session", summary="Registrar entrenamiento (cliente)", description="El cliente registra una sesión de entrenamiento completada hoy (duración, RPE, notas).")
+@router.post("/workout-session", summary="Registrar entrenamiento (cliente)", description="El cliente registra una sesión completada hoy: duración, RPE, notas y el detalle de ejercicios con sus series (reps, kg, RPE).")
 def client_workout_session(body: _WorkoutSessionBody, db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(CLIENT))):
+    from app.models.session_log import WorkoutSessionExercise, WorkoutSessionSet
+
     detail = _client_detail(db, current_user)
     if not detail:
         return send_error("Perfil de cliente no encontrado")
@@ -431,9 +449,89 @@ def client_workout_session(body: _WorkoutSessionBody, db: Session = Depends(get_
         notes=body.notes,
     )
     db.add(session)
+    db.flush()
+
+    # Detalle: un registro por ejercicio y una fila por serie
+    total_sets = 0
+    for i, ex in enumerate(body.exercises or []):
+        wse = WorkoutSessionExercise(
+            session_id=session.id,
+            training_id=ex.training_id,
+            name=ex.name,
+            muscle_group_name=ex.muscle_group_name,
+            order_index=i,
+            notes=(ex.notes or None),
+        )
+        db.add(wse)
+        db.flush()
+        for n, s in enumerate(ex.sets or [], start=1):
+            db.add(WorkoutSessionSet(
+                session_exercise_id=wse.id,
+                set_number=n,
+                reps=(s.reps or None),
+                weight=s.weight,
+                rpe=s.rpe,
+                done=bool(s.done),
+            ))
+            total_sets += 1
+
     db.commit()
     db.refresh(session)
-    return send_response({"id": session.id, "session_date": session.session_date.isoformat()}, "Entrenamiento registrado")
+    return send_response({
+        "id": session.id,
+        "session_date": session.session_date.isoformat(),
+        "exercises": len(body.exercises or []),
+        "sets": total_sets,
+    }, "Entrenamiento registrado")
+
+
+@router.get("/exercise-history", summary="Historial de ejercicios (cliente)", description="Última sesión registrada de cada ejercicio indicado, para mostrar la columna 'Anterior'.")
+def client_exercise_history(
+    training_ids: Optional[str] = Query(None, description="IDs de ejercicio separados por coma"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role_ids(CLIENT)),
+):
+    from app.models.session_log import WorkoutSessionExercise, WorkoutSessionSet
+
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_response({}, "Sin cliente")
+
+    ids = []
+    for part in (training_ids or "").split(","):
+        part = part.strip()
+        if part.isdigit():
+            ids.append(int(part))
+    if not ids:
+        return send_response({}, "OK")
+
+    # Última aparición de cada ejercicio en las sesiones del cliente
+    rows = (
+        db.query(WorkoutSessionExercise, WorkoutSession.session_date)
+        .join(WorkoutSession, WorkoutSession.id == WorkoutSessionExercise.session_id)
+        .filter(
+            WorkoutSession.client_user_detail_id == detail.id,
+            WorkoutSessionExercise.training_id.in_(ids),
+        )
+        .order_by(WorkoutSession.session_date.desc(), WorkoutSessionExercise.id.desc())
+        .all()
+    )
+
+    out = {}
+    for wse, sdate in rows:
+        key = str(wse.training_id)
+        if key in out:
+            continue  # ya tenemos la más reciente
+        sets = [{
+            "set_number": s.set_number,
+            "reps": s.reps,
+            "weight": s.weight,
+            "rpe": s.rpe,
+        } for s in wse.sets if s.done or s.reps or s.weight]
+        if not sets:
+            continue
+        out[key] = {"date": sdate.isoformat() if sdate else None, "sets": sets}
+    return send_response(out, "OK")
 
 
 @router.get("/calendar", summary="Calendario del cliente", description="Vista mensual con todo lo asignado por el coach: entrenamiento, nutrición y check-ins.")

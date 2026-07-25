@@ -30,6 +30,23 @@ class SessionUpdate(BaseModel):
 
 
 def _out(s: WorkoutSession) -> dict:
+    # Detalle registrado por el cliente (ejercicios con sus series)
+    exercises = []
+    for ex in (s.exercises or []):
+        exercises.append({
+            "id": ex.id,
+            "training_id": ex.training_id,
+            "name": ex.name,
+            "muscle_group_name": ex.muscle_group_name,
+            "notes": ex.notes,
+            "sets": [{
+                "set_number": st.set_number,
+                "reps": st.reps,
+                "weight": st.weight,
+                "rpe": st.rpe,
+                "done": bool(st.done),
+            } for st in (ex.sets or [])],
+        })
     return {
         "id": s.id,
         "client_user_detail_id": s.client_user_detail_id,
@@ -40,6 +57,9 @@ def _out(s: WorkoutSession) -> dict:
         "rpe": s.rpe,
         "notes": s.notes,
         "created_at": s.created_at.isoformat() if s.created_at else None,
+        "exercises": exercises,
+        "exercise_count": len(exercises),
+        "set_count": sum(len(e["sets"]) for e in exercises),
     }
 
 

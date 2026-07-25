@@ -1324,6 +1324,11 @@
 .pg-obj-card{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px;}
 .pg-obj-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
 .pg-obj-weight{font-size:28px;font-weight:900;color:#4F46E5;margin-bottom:10px;line-height:1;}
+.pg-obj-hint{font-size:11.5px;color:#9CA3AF;line-height:1.45;margin:-4px 0 10px;}
+.pg-obj-btn{width:100%;margin-top:12px;padding:9px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;color:#374151;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:.15s;}
+.pg-obj-btn:hover{background:#F9FAFB;border-color:#C7D2FE;color:#4F46E5;}
+.pg-obj-btn.primary{background:#4F46E5;border-color:#4F46E5;color:#fff;}
+.pg-obj-btn.primary:hover{background:#4338CA;color:#fff;}
 .pg-obj-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #E5E7EB;}
 .pg-obj-lbl{font-size:11px;color:#9CA3AF;}
 .pg-obj-val{font-size:13px;font-weight:700;color:#111827;}
@@ -3337,12 +3342,23 @@ function _renderPgResumen() {
 
   const chartSVG = _buildWeightChartSVG(ckData, targetW);
 
+  // Sin objetivo no hay línea de proyección: se ofrece definirlo aquí mismo
+  // (abre el modal de Metas, que es donde vive el peso objetivo).
+  const objBtn = targetW != null
+    ? `<button class="pg-obj-btn" onclick="openTargetModal()">Editar objetivo</button>`
+    : `<button class="pg-obj-btn primary" onclick="openTargetModal()">
+         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+         Definir objetivo
+       </button>`;
+
   const objetivoHTML = `<div class="pg-obj-card">
     <div class="pg-obj-title">Objetivo</div>
     <div class="pg-obj-weight">${targetW != null ? targetW.toFixed(1) + ' kg' : '—'}</div>
+    ${targetW == null ? '<div class="pg-obj-hint">Define el peso objetivo para ver la proyección y la estimación.</div>' : ''}
     <div class="pg-obj-row"><span class="pg-obj-lbl">A perder</span><span class="pg-obj-val">${aPerder != null ? aPerder.toFixed(1) + ' kg' : '—'}</span></div>
     <div class="pg-obj-row"><span class="pg-obj-lbl">Ritmo</span><span class="pg-obj-val">${ritmoReal != null ? Math.abs(ritmoReal).toFixed(2) + ' kg/sem' : '—'}</span></div>
     <div class="pg-obj-row"><span class="pg-obj-lbl">Estimacion</span><span class="pg-obj-val">${estimacion != null ? estimacion + ' sem' : '—'}</span></div>
+    ${objBtn}
   </div>`;
 
   const chartSection = `<div class="pg-chart-section">
@@ -4012,6 +4028,10 @@ async function saveTarget() {
     // Re-sembrar los macros manuales desde el target nuevo y refrescar el riel
     _nutCustomSeeded = false; _nutCustomMacros = null;
     if (document.getElementById('nutEditorOverlay')?.classList.contains('open')) _neRenderClientRail();
+    // Repintar Progreso y Resumen: el peso objetivo alimenta la proyección,
+    // la estimación y la mini-gráfica del resumen.
+    if (typeof renderProgresoTab === 'function' && document.getElementById('tab-progreso')?.classList.contains('active')) renderProgresoTab();
+    if (typeof renderResumenTab === 'function' && document.getElementById('tab-resumen')?.classList.contains('active')) renderResumenTab();
     showToast('Objetivos guardados');
   } catch { document.getElementById('tm_err').textContent = 'Error de conexión'; }
   finally { btn.textContent = 'Guardar'; btn.disabled = false; }

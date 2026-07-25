@@ -348,14 +348,126 @@ def client_progress(db: Session = Depends(get_db), current_user: User = Depends(
         return out
     frontal, lateral, espalda = _photos("photo_url"), _photos("photo2"), _photos("photo3")
 
+    # ── Métricas equivalentes a las del panel del coach ──
+    peso_inicio = with_w[0].weight if with_w else None
+    peso_actual = with_w[-1].weight if with_w else None
+    perdido = round(peso_inicio - peso_actual, 1) if (peso_inicio is not None and peso_actual is not None) else None
+
+    # Semanas: desde start_date del cliente si existe; si no, por el rango de check-ins
+    semanas = None
+    if getattr(detail, "start_date", None):
+        sd = detail.start_date.date() if hasattr(detail.start_date, "date") else detail.start_date
+        semanas = max(0, round((date.today() - sd).days / 7))
+    elif len(checks) >= 2:
+        semanas = max(1, round((checks[-1].checkin_date - checks[0].checkin_date).days / 7))
+
+    ritmo_real = round(perdido / semanas, 2) if (perdido is not None and semanas) else None
+
+    # Objetivo del cliente (ClientTarget) → proyección
+    from app.models.client_target import ClientTarget
+    tgt = db.query(ClientTarget).filter(ClientTarget.user_id == current_user.id).first()
+    target_weight = tgt.target_weight if tgt else None
+    a_perder = round(peso_actual - target_weight, 1) if (peso_actual is not None and target_weight is not None) else None
+    estimacion_sem = None
+    if a_perder is not None and ritmo_real and ritmo_real > 0:
+        import math
+        estimacion_sem = max(0, math.ceil(a_perder / ritmo_real))
+
+    # ── Fuerza: evolución real por ejercicio (de las series registradas) ──
+    strength = _strength_summary(db, detail, weeks_back=6)
+
+    # ── Medidas corporales (último check-in con datos + evolución) ──
+    _MEAS = [("body_fat", "% grasa"), ("muscle_mass", "Masa muscular"), ("waist", "Cintura"),
+             ("chest", "Pecho"), ("hips", "Cadera"), ("arms", "Brazos"), ("legs", "Piernas")]
+    measurements = []
+    for field, label in _MEAS:
+        vals = [(c.checkin_date, getattr(c, field, None)) for c in checks if getattr(c, field, None) is not None]
+        if not vals:
+            continue
+        first_v, last_v = vals[0][1], vals[-1][1]
+        measurements.append({
+            "key": field, "label": label,
+            "latest": last_v,
+            "delta": round(last_v - first_v, 1) if len(vals) >= 2 else None,
+            "series": [{"date": d.isoformat(), "value": v} for d, v in vals],
+        })
+
     return send_response({
         "stats": {"weeks": weeks, "kg_lost": kg_lost, "workouts": workouts},
+        "summary": {
+            "peso_inicio": peso_inicio,
+            "peso_actual": peso_actual,
+            "perdido": perdido,
+            "semanas": semanas,
+            "ritmo_real": ritmo_real,
+        },
+        "target": {
+            "target_weight": target_weight,
+            "a_perder": a_perder,
+            "ritmo_real": ritmo_real,
+            "estimacion_sem": estimacion_sem,
+        },
         "weight": {"series": series, "delta": delta, "latest": latest},
+        "strength": strength,
+        "measurements": measurements,
         "photos": {
             "frontal": frontal, "lateral": lateral, "espalda": espalda,
             "total": len(frontal) + len(lateral) + len(espalda),
         },
     }, "OK")
+
+
+def _strength_summary(db: Session, detail, weeks_back: int = 6):
+    """Evolución de carga por ejercicio a partir de las series registradas.
+
+    Para cada ejercicio devuelve la mejor serie (mayor peso) de cada sesión,
+    en orden cronológico — es lo que alimenta el sparkline real.
+    """
+    from app.models.session_log import WorkoutSessionExercise, WorkoutSessionSet
+
+    since = date.today() - timedelta(weeks=weeks_back)
+    rows = (
+        db.query(WorkoutSessionExercise, WorkoutSession.session_date)
+        .join(WorkoutSession, WorkoutSession.id == WorkoutSessionExercise.session_id)
+        .filter(
+            WorkoutSession.client_user_detail_id == detail.id,
+            WorkoutSession.session_date >= since,
+        )
+        .order_by(WorkoutSession.session_date.asc(), WorkoutSessionExercise.id.asc())
+        .all()
+    )
+
+    by_ex = {}
+    for wse, sdate in rows:
+        key = wse.training_id or (wse.name or "?")
+        best_w, best_reps = None, None
+        for st in (wse.sets or []):
+            if st.weight is None:
+                continue
+            if best_w is None or st.weight > best_w:
+                best_w, best_reps = st.weight, st.reps
+        if best_w is None:
+            continue
+        entry = by_ex.setdefault(str(key), {
+            "training_id": wse.training_id, "name": wse.name or "Ejercicio",
+            "muscle_group_name": wse.muscle_group_name, "points": [],
+        })
+        entry["points"].append({"date": sdate.isoformat() if sdate else None, "weight": best_w, "reps": best_reps})
+
+    out = []
+    for e in by_ex.values():
+        pts = e["points"]
+        first_w, last_w = pts[0]["weight"], pts[-1]["weight"]
+        out.append({
+            **e,
+            "latest_weight": last_w,
+            "latest_reps": pts[-1]["reps"],
+            "delta": round(last_w - first_w, 1) if len(pts) >= 2 else None,
+            "sessions": len(pts),
+        })
+    # Los que más han progresado primero, y con más sesiones registradas
+    out.sort(key=lambda x: (-(x["delta"] or 0), -x["sessions"]))
+    return out[:6]
 
 
 class _ClientCheckinBody(BaseModel):

@@ -452,6 +452,7 @@
         var sets = [];
         for (var i = 0; i < n; i++) sets.push({ reps:'', kg:'', rpe:'', done:false });
         exs.push({
+          training_id: e.training_id || null,
           name: e.training_name || 'Ejercicio', image: e.image || null, video_url: e.video_url || null,
           muscle: e.muscle_group_name || '', rest: e.break_time || null, target: target,
           note: '', noteOpen:false, sets: sets
@@ -466,6 +467,30 @@
     document.body.style.overflow = 'hidden';
     _wsTimer = setInterval(_wsTick, 1000);
     _wsTick();
+    loadHistory();   // rellena la columna "Anterior" con lo que hizo la última vez
+  }
+
+  // Historial: última sesión de cada ejercicio del día (columna "Anterior")
+  let _hist = {};
+  async function loadHistory(){
+    if (!_ws) return;
+    var ids = _ws.exercises.map(function(e){ return e.training_id; }).filter(Boolean);
+    if (!ids.length) return;
+    try{
+      const r = await fetch(API + '/client/exercise-history?training_ids=' + ids.join(','), { headers: headers() });
+      const d = await r.json();
+      _hist = d.data || {};
+      if (_ws) renderWorkout();
+    }catch(e){}
+  }
+  function prevText(e, si){
+    var h = e.training_id ? _hist[String(e.training_id)] : null;
+    if (!h || !h.sets || !h.sets.length) return e.target ? (esc(e.target) + ' reps') : '—';
+    var s = h.sets[si] || h.sets[h.sets.length - 1];
+    var parts = [];
+    if (s.weight != null) parts.push(s.weight + 'kg');
+    if (s.reps) parts.push('× ' + s.reps + 'r');
+    return parts.length ? esc(parts.join(' ')) : '—';
   }
   function _wsTick(){
     if (!_ws) return;
@@ -478,7 +503,7 @@
       var rows = e.sets.map(function(s, si){
         return '<tr class="ws-set' + (s.done ? ' done' : '') + '">'
           + '<td class="ws-set-num">' + (si + 1) + '</td>'
-          + '<td class="ws-prev">' + (e.target ? esc(e.target) + ' reps' : '—') + '</td>'
+          + '<td class="ws-prev">' + prevText(e, si) + '</td>'
           + '<td><input class="ws-in" inputmode="numeric" value="' + esc(s.reps) + '" placeholder="' + esc(e.target || '—') + '" onchange="wsSet(' + ei + ',' + si + ',\'reps\',this.value)"></td>'
           + '<td><input class="ws-in" inputmode="decimal" value="' + esc(s.kg) + '" placeholder="kg" onchange="wsSet(' + ei + ',' + si + ',\'kg\',this.value)"></td>'
           + '<td><input class="ws-in" inputmode="decimal" value="' + esc(s.rpe) + '" placeholder="—" onchange="wsSet(' + ei + ',' + si + ',\'rpe\',this.value)"></td>'
@@ -524,10 +549,28 @@
     var avgRpe = rpes.length ? Math.round((rpes.reduce(function(a,b){return a+b;},0) / rpes.length) * 10) / 10 : null;
     var notes = _ws.exercises.filter(function(e){ return (e.note || '').trim(); }).map(function(e){ return e.name + ': ' + e.note.trim(); }).join(' | ') || null;
     if (!confirm('¿Terminar el entrenamiento? Se registrará en tu progreso.')) return;
-    var body = { routine_id: _ws.routineId, duration_min: durationMin, rpe: avgRpe, notes: notes };
+    // Detalle: se guardan las series con algún dato (marcada, reps o kg)
+    var num = function(v){ var n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? null : n; };
+    var exercises = _ws.exercises.map(function(e){
+      return {
+        training_id: e.training_id || null,
+        name: e.name || null,
+        muscle_group_name: e.muscle || null,
+        notes: (e.note || '').trim() || null,
+        sets: e.sets
+          .filter(function(s){ return s.done || String(s.reps).trim() || String(s.kg).trim(); })
+          .map(function(s){ return { reps: String(s.reps || '').trim() || null, weight: num(s.kg), rpe: num(s.rpe), done: !!s.done }; })
+      };
+    }).filter(function(e){ return e.sets.length || e.notes; });
+    var body = { routine_id: _ws.routineId, duration_min: durationMin, rpe: avgRpe, notes: notes, exercises: exercises };
+    var btn = document.querySelector('.ws-terminar'); if (btn){ btn.disabled = true; btn.textContent = 'Guardando…'; }
+    var ok = false;
     try{
-      await fetch(API + '/client/workout-session', { method:'POST', headers: headers(), body: JSON.stringify(body) });
+      const r = await fetch(API + '/client/workout-session', { method:'POST', headers: headers(), body: JSON.stringify(body) });
+      ok = r.ok;
     }catch(e){}
+    if (btn){ btn.disabled = false; btn.textContent = 'Terminar'; }
+    if (!ok){ alert('No se pudo guardar el entrenamiento. Revisa tu conexión e inténtalo otra vez.'); return; }
     _wsClose();
     alert('¡Entrenamiento completado! Duración: ' + _fmtTime(elapsedSec));
   }

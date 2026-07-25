@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey, DateTime, Date
+from sqlalchemy import Column, Integer, String, Float, Text, Boolean, ForeignKey, DateTime, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -18,3 +18,45 @@ class WorkoutSession(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     routine = relationship("Routine")
+    exercises = relationship(
+        "WorkoutSessionExercise", back_populates="session",
+        cascade="all, delete-orphan", order_by="WorkoutSessionExercise.order_index",
+    )
+
+
+class WorkoutSessionExercise(Base):
+    """Ejercicio realizado dentro de una sesión (con sus series)."""
+    __tablename__ = "workout_session_exercises"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(Integer, ForeignKey("workout_sessions.id", ondelete="CASCADE"), nullable=False)
+    training_id = Column(Integer, ForeignKey("trainings.id"), nullable=True)
+    # Nombre/grupo guardados como copia: el historial se conserva aunque el
+    # ejercicio se renombre o se borre del catálogo.
+    name = Column(String(255), nullable=True)
+    muscle_group_name = Column(String(255), nullable=True)
+    order_index = Column(Integer, default=0)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    session = relationship("WorkoutSession", back_populates="exercises")
+    sets = relationship(
+        "WorkoutSessionSet", back_populates="exercise",
+        cascade="all, delete-orphan", order_by="WorkoutSessionSet.set_number",
+    )
+
+
+class WorkoutSessionSet(Base):
+    """Serie registrada por el cliente (reps, kg, RPE y si la completó)."""
+    __tablename__ = "workout_session_sets"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_exercise_id = Column(Integer, ForeignKey("workout_session_exercises.id", ondelete="CASCADE"), nullable=False)
+    set_number = Column(Integer, nullable=False)
+    reps = Column(String(20), nullable=True)   # texto: admite "8", "8-10", "40s"
+    weight = Column(Float, nullable=True)      # kg
+    rpe = Column(Float, nullable=True)
+    done = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    exercise = relationship("WorkoutSessionExercise", back_populates="sets")

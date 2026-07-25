@@ -375,6 +375,24 @@
     .session-date-box .s-mon{font-size:10px;color:#9CA3AF;font-weight:600;text-transform:uppercase;}
     .session-info{flex:1;}
     .session-routine{font-size:14px;font-weight:600;color:#111;}
+    /* Detalle de la sesión (series registradas por el cliente) */
+    .session-wrap{margin-bottom:8px;}
+    .session-wrap .session-card{margin-bottom:0;}
+    .btn-icon.rot svg{transform:rotate(180deg);}
+    .btn-icon svg{transition:transform .18s;}
+    .sess-detail{display:none;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 10px 10px;background:#FAFBFF;padding:12px 16px 6px;}
+    .sess-detail.open{display:block;}
+    .sd-ex{margin-bottom:12px;}
+    .sd-ex-head{display:flex;align-items:baseline;gap:8px;margin-bottom:5px;}
+    .sd-ex-head b{font-size:13px;color:#111827;}
+    .sd-ex-head span{font-size:11px;color:#9CA3AF;}
+    .sd-tbl{width:100%;border-collapse:collapse;}
+    .sd-tbl th{font-size:9.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.3px;text-align:left;padding:3px 8px 3px 0;}
+    .sd-tbl td{font-size:12.5px;color:#374151;padding:4px 8px 4px 0;border-top:1px solid #F1F2F6;}
+    .sd-tbl td:first-child{font-weight:700;color:#111827;width:44px;}
+    .sd-ok{color:#059669;font-weight:800;}
+    .sd-no{color:#D1D5DB;}
+    .sd-note{font-size:12px;color:#6B7280;margin-top:4px;font-style:italic;}
     .session-chips{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
     .s-chip{background:#F3F4F6;border-radius:12px;padding:2px 8px;font-size:11px;color:#6B7280;}
 
@@ -5563,7 +5581,32 @@ async function loadSessions() {
       if (s.duration_min) chips.push(`${s.duration_min} min`);
       if (s.rpe) chips.push(`RPE ${s.rpe}`);
       if (s.routine_name) chips.push(esc(s.routine_name));
-      return `<div class="session-card">
+      const exs = s.exercises || [];
+      if (exs.length) chips.push(`${exs.length} ejercicio${exs.length !== 1 ? 's' : ''}`);
+      if (s.set_count) chips.push(`${s.set_count} serie${s.set_count !== 1 ? 's' : ''}`);
+      const detail = exs.length ? `
+        <div class="sess-detail" id="sessdet-${s.id}">
+          ${exs.map(ex => `
+            <div class="sd-ex">
+              <div class="sd-ex-head">
+                <b>${esc(ex.name || 'Ejercicio')}</b>
+                ${ex.muscle_group_name ? `<span>${esc(ex.muscle_group_name)}</span>` : ''}
+              </div>
+              <table class="sd-tbl">
+                <thead><tr><th>Serie</th><th>Reps</th><th>Kg</th><th>RPE</th><th></th></tr></thead>
+                <tbody>${(ex.sets || []).map(st => `<tr>
+                  <td>${st.set_number}</td>
+                  <td>${st.reps ? esc(st.reps) : '—'}</td>
+                  <td>${st.weight != null ? esc(st.weight) : '—'}</td>
+                  <td>${st.rpe != null ? esc(st.rpe) : '—'}</td>
+                  <td>${st.done ? '<span class="sd-ok">✓</span>' : '<span class="sd-no">·</span>'}</td>
+                </tr>`).join('')}</tbody>
+              </table>
+              ${ex.notes ? `<div class="sd-note">${esc(ex.notes)}</div>` : ''}
+            </div>`).join('')}
+        </div>` : '';
+      return `<div class="session-wrap">
+        <div class="session-card">
         <div class="session-date-box">
           <div class="s-day">${d.getDate()}</div>
           <div class="s-mon">${MONTHS[d.getMonth()]}</div>
@@ -5573,7 +5616,10 @@ async function loadSessions() {
           <div class="session-chips">${chips.map(c => `<span class="s-chip">${c}</span>`).join('')}</div>
           ${s.notes ? `<div style="font-size:12px;color:#6B7280;margin-top:4px;">${esc(s.notes)}</div>` : ''}
         </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;">
+        <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">
+          ${exs.length ? `<button class="btn-icon" id="sessbtn-${s.id}" onclick="toggleSessionDetail(${s.id})" title="Ver series">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>` : ''}
           <button class="btn-icon" onclick="openSessionModal(${s.id})" title="Editar">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
@@ -5581,9 +5627,18 @@ async function loadSessions() {
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           </button>
         </div>
+        </div>${detail}
       </div>`;
     }).join('');
   } catch { el.innerHTML = '<p style="color:#DC2626;font-size:13px;">Error al cargar sesiones.</p>'; }
+}
+
+function toggleSessionDetail(id) {
+  const det = document.getElementById('sessdet-' + id);
+  const btn = document.getElementById('sessbtn-' + id);
+  if (!det) return;
+  const open = det.classList.toggle('open');
+  if (btn) btn.classList.toggle('rot', open);
 }
 
 function openSessionModal(id = null) {

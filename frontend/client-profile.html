@@ -536,6 +536,31 @@
     .res-wtask.done{text-decoration:line-through;color:#D1D5DB;}
     .res-wtask.empty{color:#D1D5DB;font-style:italic;}
     .res-wbadge{font-size:9px;font-weight:700;background:#FFF3CD;color:#D97706;padding:2px 6px;border-radius:4px;flex-shrink:0;}
+    /* ── Actividad reciente del cliente ── */
+    .act-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;}
+    .act-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+    .act-title{font-size:14px;font-weight:800;color:#111;}
+    .act-kpis{display:flex;gap:8px;flex-wrap:wrap;}
+    .act-kpi{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#F3F4F6;color:#6B7280;}
+    .act-kpi.ok{background:#D1FAE5;color:#047857;}
+    .act-kpi.warn{background:#FEF3C7;color:#B45309;}
+    .act-kpi.cold{background:#FEE2E2;color:#B91C1C;}
+    .act-list{display:flex;flex-direction:column;}
+    .act-item{display:flex;gap:11px;padding:9px 0;border-top:1px solid #F3F4F6;}
+    .act-item:first-child{border-top:none;}
+    .act-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+    .act-ico.entreno{background:#EEF2FF;color:#4F46E5;}
+    .act-ico.peso{background:#ECFDF5;color:#059669;}
+    .act-ico.fotos{background:#F5F3FF;color:#7C3AED;}
+    .act-ico.medidas{background:#EFF6FF;color:#2563EB;}
+    .act-ico.checkin{background:#FEF3C7;color:#D97706;}
+    .act-ico.tarea{background:#FFF7ED;color:#EA580C;}
+    .act-body{flex:1;min-width:0;}
+    .act-t{font-size:13px;font-weight:600;color:#111827;}
+    .act-d{font-size:11.5px;color:#6B7280;margin-top:1px;}
+    .act-best{font-size:11.5px;color:#4F46E5;font-weight:700;margin-top:1px;}
+    .act-when{font-size:11px;color:#9CA3AF;white-space:nowrap;flex-shrink:0;}
+    .act-empty{text-align:center;color:#9CA3AF;font-size:13px;padding:18px 0;}
     .res-see-btn{display:inline-flex;align-items:center;padding:4px 10px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:11px;font-weight:600;color:#6B7280;cursor:pointer;text-align:center;transition:.12s;text-decoration:none;}
     .res-see-btn:hover{background:#F9FAFB;color:#374151;}
     .res-ci-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F9FAFB;}
@@ -1574,6 +1599,7 @@
             <div id="resStatsCard" class="res-stats-card"></div>
           </div>
         </div>
+        <div id="resActivityCard" style="margin-top:16px;"></div>
         <div id="resRestrCard" style="margin-top:16px;"></div>
         <!-- Hidden legacy IDs used by other code paths -->
         <div style="display:none;" id="resActionsCard"></div>
@@ -2682,7 +2708,78 @@ function _renderResCi() {
     <div style="padding:12px 0 0;"><button class="res-see-btn" onclick="showTab('progreso')">+ Pedir check-in</button></div>`;
 }
 
+// ── Actividad reciente del cliente (para tener al coach al día) ──
+const ACT_ICONS = { entreno:'🏋️', peso:'⚖️', fotos:'📷', medidas:'📏', checkin:'📝', tarea:'✅' };
+
+function _actWhen(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((today - d) / 86400000);
+  if (diff === 0) return 'Hoy';
+  if (diff === 1) return 'Ayer';
+  if (diff < 7) return `Hace ${diff} días`;
+  return d.toLocaleDateString('es-ES', { day:'2-digit', month:'short' });
+}
+
+async function _loadActivityCard() {
+  const el = document.getElementById('resActivityCard');
+  if (!el || !clientId) return;
+  el.innerHTML = '<div class="act-card"><div class="act-title">Actividad reciente</div><div class="act-empty">Cargando…</div></div>';
+  try {
+    const r = await fetch(`${API}/client-activity/${clientId}?days=30&limit=12`, { headers: h() });
+    const j = await r.json();
+    const data = j.data || {};
+    const s = data.summary || {};
+    const items = data.items || [];
+
+    // Titular: cuánto hace que no hay señales de vida
+    let pulse = '<span class="act-kpi">Sin actividad aún</span>';
+    if (s.days_since_activity != null) {
+      const d = s.days_since_activity;
+      const cls = d <= 2 ? 'ok' : (d <= 6 ? 'warn' : 'cold');
+      const txt = d === 0 ? 'Activo hoy' : (d === 1 ? 'Activo ayer' : `Sin actividad ${d} días`);
+      pulse = `<span class="act-kpi ${cls}">${txt}</span>`;
+    }
+    const kpis = pulse
+      + `<span class="act-kpi">${s.entrenos_7d || 0} entrenos · 7d</span>`
+      + `<span class="act-kpi">${s.pesos_7d || 0} pesos · 7d</span>`
+      + `<span class="act-kpi">${s.tareas_7d || 0} tareas · 7d</span>`;
+
+    const list = items.length ? items.map(it => {
+      const ico = ACT_ICONS[it.type] || '•';
+      const best = it.best
+        ? `<div class="act-best">Mejor serie: ${esc(it.best.name)} ${it.best.weight} kg${it.best.reps ? ' × ' + esc(it.best.reps) : ''}</div>`
+        : '';
+      return `<div class="act-item">
+        <div class="act-ico ${it.type}">${ico}</div>
+        <div class="act-body">
+          <div class="act-t">${esc(it.title || '')}</div>
+          ${it.detail ? `<div class="act-d">${esc(it.detail)}</div>` : ''}
+          ${best}
+        </div>
+        <div class="act-when">${_actWhen(it.date)}</div>
+      </div>`;
+    }).join('') : '<div class="act-empty">Este cliente todavía no ha registrado actividad.</div>';
+
+    el.innerHTML = `<div class="act-card">
+      <div class="act-head">
+        <span class="act-title">Actividad reciente</span>
+        <div class="act-kpis">${kpis}</div>
+      </div>
+      <div class="act-list">${list}</div>
+      <div style="padding-top:12px;display:flex;gap:8px;">
+        <button class="res-see-btn" onclick="showTab('progreso');renderProgresoTab&&renderProgresoTab();">Ver progreso →</button>
+        <button class="res-see-btn" onclick="showTab('entrenamiento')">Ver sesiones →</button>
+      </div>
+    </div>`;
+  } catch {
+    el.innerHTML = '<div class="act-card"><div class="act-title">Actividad reciente</div><div class="act-empty">No se pudo cargar la actividad.</div></div>';
+  }
+}
+
 async function _loadResumenExtras() {
+  _loadActivityCard();
   const weekEl = document.getElementById('resWeekCard');
   const notesEl = document.getElementById('resNotesCard');
 
@@ -2693,7 +2790,7 @@ async function _loadResumenExtras() {
       const monday = new Date(today);
       monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
       const weekStr = monday.toISOString().slice(0, 10);
-      const r = await fetch(`${API}/calendar-tasks/week/${clientId}?week=${weekStr}`, { headers: authHeaders() });
+      const r = await fetch(`${API}/calendar-tasks/week/${clientId}?week=${weekStr}`, { headers: h() });
       const d = await r.json();
       _renderResWeek(weekEl, d?.days || []);
 
@@ -2736,7 +2833,7 @@ async function _loadResumenExtras() {
   // Load notes
   if (notesEl && clientData?.user_id) {
     try {
-      const r = await fetch(`${API}/note-users/search?user_id=${clientData.user_id}`, { headers: authHeaders() });
+      const r = await fetch(`${API}/note-users/search?user_id=${clientData.user_id}`, { headers: h() });
       const d = await r.json();
       const notes = (d.data || d || []).slice(0, 3);
       _renderResNotes(notesEl, notes);

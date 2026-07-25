@@ -4927,13 +4927,14 @@ async function saveCalTask() {
   const dateVal = document.getElementById('calTaskDate')?.value;
   if (!dateVal) { showToast('Selecciona una fecha', 'error'); return; }
 
-  let title = null, notes = null;
+  let title = null, notes = null, requirements = null;
   switch (_calNewType) {
     case 'rutina': {
       const sel = document.getElementById('ex-rutina-id');
       const name = sel?.options[sel.selectedIndex]?.text;
       if (!name || name === 'Seleccionar...') { showToast('Selecciona una rutina', 'error'); return; }
       title = name;
+      if (sel?.value) requirements = { routine_id: sel.value, routine_name: name };
       break;
     }
     case 'cardio': {
@@ -4945,12 +4946,17 @@ async function saveCalTask() {
       break;
     }
     case 'checkin': {
-      const parts = [];
-      if (document.getElementById('ex-ci-peso')?.checked)    parts.push('Peso');
-      if (document.getElementById('ex-ci-medidas')?.checked) parts.push('Medidas');
-      if (document.getElementById('ex-ci-fotos')?.checked)   parts.push('Fotos');
+      // Se guardan los items marcados de forma estructurada, para que la zona
+      // del cliente sepa exactamente qué se le pide y pueda cumplirlo.
+      const items = [];
+      if (document.getElementById('ex-ci-peso')?.checked)    items.push('peso');
+      if (document.getElementById('ex-ci-medidas')?.checked) items.push('medidas');
+      if (document.getElementById('ex-ci-fotos')?.checked)   items.push('fotos');
+      if (!items.length) { showToast('Marca al menos qué debe registrar', 'error'); return; }
+      const LBL = { peso:'Peso', medidas:'Medidas', fotos:'Fotos' };
       title = 'Registrar evolución';
-      notes = parts.length ? parts.join(', ') : null;
+      notes = items.map(k => LBL[k]).join(', ');
+      requirements = { items };
       break;
     }
     case 'sesion': {
@@ -4966,6 +4972,7 @@ async function saveCalTask() {
       const name = sel?.options[sel.selectedIndex]?.text;
       if (!name || name === 'Seleccionar...') { showToast('Selecciona una dieta', 'error'); return; }
       title = name;
+      if (sel?.value) requirements = { diet_id: sel.value, diet_name: name };
       break;
     }
     case 'otro':
@@ -4984,6 +4991,7 @@ async function saveCalTask() {
       const name = sel?.options[sel.selectedIndex]?.text;
       if (!name || name === 'Seleccionar...') { showToast('Selecciona un formulario', 'error'); return; }
       title = name;
+      if (sel?.value) requirements = { form_template_id: sel.value, form_name: name };
       break;
     }
   }
@@ -5000,6 +5008,7 @@ async function saveCalTask() {
     notes: notes || null,
     recurrence: rec,
     recurrence_end_date: (rec !== 'none' && recEnd) ? recEnd : null,
+    requirements: requirements,
   };
 
   try {

@@ -524,7 +524,42 @@ def client_checkin(body: _ClientCheckinBody, db: Session = Depends(get_db), curr
 
     db.commit()
     db.refresh(ck)
-    return send_response({"id": ck.id, "checkin_date": ck.checkin_date.isoformat()}, "Check-in guardado")
+    completed = _autocomplete_checkin_tasks(db, detail, ck)
+    return send_response({
+        "id": ck.id,
+        "checkin_date": ck.checkin_date.isoformat(),
+        "tasks_completed": completed,
+    }, "Check-in guardado")
+
+
+def _autocomplete_checkin_tasks(db: Session, detail, checkin) -> list:
+    """Marca hechas las tareas de check-in cuyos items pedidos ya están todos
+    registrados, y las vincula al check-in. Así la alerta desaparece sola."""
+    from datetime import datetime
+    from app.models.calendar_task import CalendarTask
+
+    wk_start = checkin.checkin_date - timedelta(days=checkin.checkin_date.weekday())
+    wk_end = wk_start + timedelta(days=6)
+    tasks = db.query(CalendarTask).filter(
+        CalendarTask.client_user_detail_id == detail.id,
+        CalendarTask.task_type == "checkin",
+        CalendarTask.done == False,  # noqa: E712
+        CalendarTask.task_date >= wk_start,
+        CalendarTask.task_date <= wk_end,
+    ).all()
+
+    done_ids = []
+    for t in tasks:
+        items = (_task_requirements(t).get("items")) or ["peso"]
+        if all(_item_done(checkin, it) for it in items):
+            t.done = True
+            t.done_at = datetime.utcnow()
+            if not t.checkin_id:
+                t.checkin_id = checkin.id
+            done_ids.append(t.id)
+    if done_ids:
+        db.commit()
+    return done_ids
 
 
 class _SessionSetBody(BaseModel):
@@ -649,6 +684,113 @@ def client_exercise_history(
             continue
         out[key] = {"date": sdate.isoformat() if sdate else None, "sets": sets}
     return send_response(out, "OK")
+
+
+_REQ_LABELS = {"peso": "Peso", "medidas": "Medidas corporales", "fotos": "Fotos de progreso"}
+# Campos del check-in que satisfacen cada item pedido
+_REQ_FIELDS = {
+    "peso": ["weight"],
+    "medidas": ["body_fat", "muscle_mass", "waist", "chest", "hips", "arms", "legs"],
+    "fotos": ["photo_url", "photo2", "photo3"],
+}
+
+
+def _task_requirements(t):
+    """requirements de la tarea (JSON en texto) como dict."""
+    import json
+    if not getattr(t, "requirements", None):
+        return {}
+    try:
+        val = json.loads(t.requirements)
+        return val if isinstance(val, dict) else {}
+    except Exception:
+        return {}
+
+
+def _checkin_for(db: Session, detail, ref_date: date):
+    """Check-in de la semana de ref_date (los datos se acumulan por semana)."""
+    wk_start = ref_date - timedelta(days=ref_date.weekday())
+    wk_end = wk_start + timedelta(days=6)
+    return db.query(WeeklyCheckin).filter(
+        WeeklyCheckin.client_user_detail_id == detail.id,
+        WeeklyCheckin.checkin_date >= wk_start,
+        WeeklyCheckin.checkin_date <= wk_end,
+    ).order_by(WeeklyCheckin.checkin_date.desc()).first()
+
+
+def _item_done(checkin, item: str) -> bool:
+    if not checkin:
+        return False
+    return any(getattr(checkin, f, None) is not None for f in _REQ_FIELDS.get(item, []))
+
+
+@router.get("/requests", summary="Lo que te pide tu coach", description="Tareas asignadas por el coach pendientes de cumplir, con el estado de cada cosa que pide (peso, medidas, fotos, formulario, rutina…).")
+def client_requests(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role_ids(CLIENT)),
+):
+    from app.models.calendar_task import CalendarTask, COLOR_MAP
+
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_response({"pending": 0, "items": []}, "Sin cliente")
+
+    today = date.today()
+    # Ventana: desde hace 14 días (para no perder lo atrasado) hasta hoy
+    since = today - timedelta(days=14)
+    tasks = db.query(CalendarTask).filter(
+        CalendarTask.client_user_detail_id == detail.id,
+        CalendarTask.task_date >= since,
+        CalendarTask.task_date <= today,
+    ).order_by(CalendarTask.task_date.desc(), CalendarTask.id.desc()).all()
+
+    out = []
+    for t in tasks:
+        req = _task_requirements(t)
+        entry = {
+            "id": t.id,
+            "date": t.task_date.isoformat() if t.task_date else None,
+            "task_type": t.task_type,
+            "title": t.title or (t.task_type or "Tarea").capitalize(),
+            "notes": t.notes,
+            "color": t.color or COLOR_MAP.get(t.task_type, "#9CA3AF"),
+            "done": bool(t.done),
+            "is_today": t.task_date == today,
+            "overdue": bool(t.task_date and t.task_date < today and not t.done),
+            "requirements": req or None,
+            "checklist": [],
+            "action": None,
+        }
+
+        if t.task_type == "checkin":
+            ck = _checkin_for(db, detail, t.task_date or today)
+            items = req.get("items") or ["peso"]
+            for it in items:
+                entry["checklist"].append({
+                    "key": it,
+                    "label": _REQ_LABELS.get(it, it.capitalize()),
+                    "done": _item_done(ck, it),
+                })
+            entry["action"] = "checkin"
+            # La tarea se considera cumplida cuando todo lo pedido está registrado
+            if entry["checklist"] and all(c["done"] for c in entry["checklist"]):
+                entry["done"] = True
+        elif t.task_type in ("rutina", "cardio"):
+            entry["action"] = "entrena"
+        elif t.task_type == "nutricion":
+            entry["action"] = "nutricion"
+        elif t.task_type == "formulario":
+            entry["action"] = "formulario"
+        elif t.task_type == "mensaje":
+            entry["action"] = "mensaje"
+
+        out.append(entry)
+
+    pending = [e for e in out if not e["done"]]
+    return send_response({
+        "pending": len(pending),
+        "items": out,
+    }, "OK")
 
 
 @router.get("/calendar", summary="Calendario del cliente", description="Vista mensual con todo lo asignado por el coach: entrenamiento, nutrición y check-ins.")

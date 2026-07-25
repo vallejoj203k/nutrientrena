@@ -406,6 +406,11 @@ def client_progress(db: Session = Depends(get_db), current_user: User = Depends(
             "a_perder": a_perder,
             "ritmo_real": ritmo_real,
             "estimacion_sem": estimacion_sem,
+            # Fechas del plan: permiten dibujar la línea de objetivo en paralelo
+            # a la real (dónde debería estar vs dónde está).
+            "start_date": (detail.start_date.date().isoformat() if getattr(detail, "start_date", None) else None),
+            "end_date": (detail.end_date.date().isoformat() if getattr(detail, "end_date", None) else None),
+            "start_weight": peso_inicio,
         },
         "weight": {"series": series, "delta": delta, "latest": latest},
         "strength": strength,

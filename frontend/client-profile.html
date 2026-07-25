@@ -3363,7 +3363,7 @@ function _renderPgResumen() {
 
   const chartSection = `<div class="pg-chart-section">
     <div class="pg-chart-header">
-      <span class="pg-chart-title">Seguimiento de peso · Real vs Proyeccion</span>
+      <span class="pg-chart-title">Seguimiento de peso · Real vs Objetivo</span>
       <div class="pg-chart-legend">
         <span class="pg-leg-item"><span class="pg-leg-dot-green"></span>Real</span>
         <span class="pg-leg-item"><span class="pg-leg-dot-purple"></span>Objetivo</span>
@@ -3400,10 +3400,21 @@ function _buildWeightChartSVG(ckData, targetW) {
   const wRange = maxW - minW || 1;
 
   const ts = sorted.map(c => new Date(c.checkin_date || c.created_at).getTime());
-  const tMin = ts[0];
   const tNow = Date.now();
-  // Extend to show projection if target exists
-  const tMax = targetW != null ? Math.max(ts[ts.length - 1], tNow) + 21 * 86400000 : ts[ts.length - 1];
+
+  // ── Línea de OBJETIVO: del peso de partida al objetivo en la fecha de fin ──
+  // Se dibuja a lo largo de todo el periodo, en paralelo a la real, para poder
+  // comparar en cada momento dónde debería estar el peso frente a dónde está.
+  const _c = clientData || {};
+  const _pt = t => { const d = t ? new Date(t) : null; return (d && !isNaN(d)) ? d.getTime() : null; };
+  const planT0 = _pt(_c.start_date || _c.fecha_inicio) || ts[0];
+  const planW0 = ws[0];
+  const planT1 = _pt(_c.end_date || _c.fecha_fin);
+  const hasPlanLine = (targetW != null && planT1 != null && planT1 > planT0);
+
+  const tMin = Math.min(ts[0], planT0);
+  let tMax = Math.max(ts[ts.length - 1], tNow, hasPlanLine ? planT1 : 0);
+  if (tMax <= tMin) tMax = tMin + 7 * 86400000;
   const tRange = tMax - tMin || 1;
 
   const toX = t => PL + ((t - tMin) / tRange) * plotW;
@@ -3413,14 +3424,19 @@ function _buildWeightChartSVG(ckData, targetW) {
   const lastPt = pts[pts.length - 1];
 
   const realD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
-  const areaD = realD + ' L' + lastPt.x.toFixed(1) + ',' + (PT + plotH).toFixed(1) + ' L' + PL + ',' + (PT + plotH).toFixed(1) + ' Z';
+  const areaD = realD + ' L' + lastPt.x.toFixed(1) + ',' + (PT + plotH).toFixed(1) + ' L' + pts[0].x.toFixed(1) + ',' + (PT + plotH).toFixed(1) + ' Z';
 
   let projSVG = '';
-  if (targetW != null) {
-    const pX = toX(tMax).toFixed(1);
-    const pY = toY(targetW).toFixed(1);
-    projSVG = `<line x1="${lastPt.x.toFixed(1)}" y1="${lastPt.y.toFixed(1)}" x2="${pX}" y2="${pY}" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round"/>
-    <circle cx="${pX}" cy="${pY}" r="3" fill="#7C3AED" opacity=".55"/>`;
+  if (hasPlanLine) {
+    const ax = toX(planT0).toFixed(1), ay = toY(planW0).toFixed(1);
+    const bx = toX(planT1).toFixed(1), by = toY(targetW).toFixed(1);
+    projSVG = `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round"/>
+    <circle cx="${bx}" cy="${by}" r="3.4" fill="#fff" stroke="#7C3AED" stroke-width="2"><title>Objetivo ${targetW} kg</title></circle>`;
+  } else if (targetW != null) {
+    // Sin fecha de fin no hay pendiente: el objetivo se marca como referencia
+    const oy = toY(targetW).toFixed(1);
+    projSVG = `<line x1="${PL}" y1="${oy}" x2="${(PL + plotW).toFixed(1)}" y2="${oy}" stroke="#7C3AED" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="${(PL + plotW - 2).toFixed(1)}" y="${(parseFloat(oy) - 5).toFixed(1)}" font-size="9" fill="#7C3AED" text-anchor="end">objetivo ${targetW} kg</text>`;
   }
 
   let todaySVG = '';
@@ -3438,15 +3454,14 @@ function _buildWeightChartSVG(ckData, targetW) {
     <text x="${PL - 6}" y="${(parseFloat(y) + 4).toFixed(1)}" font-size="10" fill="#9CA3AF" text-anchor="end">${w}</text>`);
   }
 
+  // Marcas de tiempo repartidas por todo el periodo (el rango puede llegar
+  // hasta la fecha de fin del plan, más allá del último check-in).
   const xTicks = [];
-  const step = Math.max(1, Math.floor(pts.length / 5));
-  const shown = new Set();
-  for (let i = 0; i < pts.length; i += step) {
-    const p = pts[i];
-    if (!shown.has(p.lbl)) { shown.add(p.lbl); xTicks.push(`<text x="${p.x.toFixed(1)}" y="${(PT + plotH + 16).toFixed(1)}" font-size="9" fill="#9CA3AF" text-anchor="middle">${p.lbl}</text>`); }
+  for (let k = 0; k <= 3; k++) {
+    const t = tMin + (tRange * k / 3);
+    const lbl = new Date(t).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+    xTicks.push(`<text x="${toX(t).toFixed(1)}" y="${(PT + plotH + 16).toFixed(1)}" font-size="9" fill="#9CA3AF" text-anchor="middle">${lbl}</text>`);
   }
-  // Always show last real date
-  if (!shown.has(lastPt.lbl)) xTicks.push(`<text x="${lastPt.x.toFixed(1)}" y="${(PT + plotH + 16).toFixed(1)}" font-size="9" fill="#9CA3AF" text-anchor="middle">${lastPt.lbl}</text>`);
 
   const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#22C55E" stroke="#fff" stroke-width="1.5"/>`).join('');
 

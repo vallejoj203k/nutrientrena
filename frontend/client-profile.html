@@ -1981,7 +1981,7 @@ async function loadClient() {
   try {
     const [profileRes, checkinsRes, formRes, deliveriesRes, clientPlansRes] = await Promise.all([
       fetch(`${API}/users/${clientId}/edit`,             { headers: h() }),
-      fetch(`${API}/checkins/client/${clientId}`,         { headers: h() }),
+      fetch(`${API}/checkins/client/${clientId}?limit=100`, { headers: h() }),
       fetch(`${API}/form-assignments/client/${clientId}`, { headers: h() }),
       fetch(`${API}/plans/history/${clientId}`,           { headers: h() }),
       Promise.all([
@@ -1995,7 +1995,9 @@ async function loadClient() {
     checkins = [];
     if (checkinsRes.ok) {
       const d = (await checkinsRes.json()).data;
-      checkins = Array.isArray(d) ? d : [];
+      // El endpoint devuelve {checkins:[...], weight_progress}; se admite
+      // también un array plano por compatibilidad.
+      checkins = Array.isArray(d) ? d : (Array.isArray(d?.checkins) ? d.checkins : []);
     }
 
     formAssignment = null;

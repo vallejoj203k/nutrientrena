@@ -97,6 +97,10 @@
     .pg-meas-v{font-size:17px;font-weight:800;color:#111827;margin-top:2px;}
     .pg-meas-d{font-size:11.5px;font-weight:700;margin-top:1px;}
     .pg-empty{color:#9CA3AF;font-size:13px;padding:18px 0;text-align:center;}
+    .meas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid #F3F4F6;}
+    .meas-grid label{display:block;font-size:11.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.3px;}
+    .meas-grid input{width:100%;margin-top:5px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:10px;font-size:14px;color:#111;outline:none;font-family:inherit;background:#F9FAFB;}
+    .meas-grid input:focus{border-color:var(--indigo);background:#fff;}
 
     .card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
     .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
@@ -218,9 +222,26 @@
       </div>
 
       <!-- Medidas -->
-      <div class="card" id="measCard" style="display:none;">
-        <div class="card-head"><div class="card-title">Medidas</div></div>
+      <div class="card" id="measCard">
+        <div class="card-head">
+          <div class="card-title">Medidas</div>
+          <button class="btn-indigo" id="measToggle" onclick="toggleMeasForm()">+ Registrar</button>
+        </div>
         <div id="pgMeas"></div>
+        <div id="measForm" style="display:none;">
+          <div class="meas-grid">
+            <label>% Grasa<input id="m_body_fat" type="number" step="0.1" min="0" placeholder="—"></label>
+            <label>Masa muscular<input id="m_muscle_mass" type="number" step="0.1" min="0" placeholder="kg"></label>
+            <label>Cintura<input id="m_waist" type="number" step="0.1" min="0" placeholder="cm"></label>
+            <label>Pecho<input id="m_chest" type="number" step="0.1" min="0" placeholder="cm"></label>
+            <label>Cadera<input id="m_hips" type="number" step="0.1" min="0" placeholder="cm"></label>
+            <label>Brazos<input id="m_arms" type="number" step="0.1" min="0" placeholder="cm"></label>
+            <label>Piernas<input id="m_legs" type="number" step="0.1" min="0" placeholder="cm"></label>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+            <button class="btn-green" id="measBtn" onclick="guardarMedidas()">Guardar medidas</button>
+          </div>
+        </div>
       </div>
 
 
@@ -406,8 +427,7 @@
   function renderMeasurements(){
     var list=_data.measurements||[];
     var card=document.getElementById('measCard');
-    if(!list.length){ card.style.display='none'; return; }
-    card.style.display='';
+    if(!list.length){ document.getElementById('pgMeas').innerHTML='<div class="pg-empty">Aún no has registrado medidas. Pulsa «+ Registrar».</div>'; return; }
     // En estas medidas subir es lo deseable; en el resto (cintura, % grasa…) bajar.
     var HIGHER_BETTER = ['muscle_mass','arms','chest','legs'];
     document.getElementById('pgMeas').innerHTML='<div class="pg-meas">'+list.map(function(m){
@@ -444,6 +464,32 @@
   }
   function render(){
     renderSummary(); renderWeightSection(); renderStrength(); renderMeasurements(); renderPhotos();
+  }
+
+  function toggleMeasForm(){
+    var f=document.getElementById('measForm'), b=document.getElementById('measToggle');
+    var open = f.style.display==='none';
+    f.style.display = open ? '' : 'none';
+    b.textContent = open ? 'Cancelar' : '+ Registrar';
+  }
+  const MEAS_KEYS=['body_fat','muscle_mass','waist','chest','hips','arms','legs'];
+  async function guardarMedidas(){
+    var body={}, any=false;
+    MEAS_KEYS.forEach(function(k){
+      var v=parseFloat(document.getElementById('m_'+k).value);
+      if(!isNaN(v) && v>0){ body[k]=v; any=true; }
+    });
+    if(!any){ toast('Introduce al menos una medida', true); return; }
+    var btn=document.getElementById('measBtn'); btn.disabled=true; btn.textContent='Guardando…';
+    try{
+      const r=await fetch(API+'/client/checkin',{method:'POST',headers:headers(),body:JSON.stringify(body)});
+      if(!r.ok) throw new Error();
+      MEAS_KEYS.forEach(function(k){ document.getElementById('m_'+k).value=''; });
+      toggleMeasForm();
+      toast('Medidas guardadas');
+      await loadProgress();
+    }catch(e){ toast('No se pudieron guardar', true); }
+    finally{ btn.disabled=false; btn.textContent='Guardar medidas'; }
   }
 
   async function registrarPeso(){

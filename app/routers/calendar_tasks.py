@@ -25,6 +25,8 @@ import uuid
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 
+import json
+
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -77,6 +79,26 @@ def _next_date(d: date, recurrence: str) -> date:
     return d
 
 
+def _req_load(raw):
+    """requirements se guarda como JSON en texto; se devuelve como dict."""
+    if not raw:
+        return None
+    try:
+        val = json.loads(raw)
+        return val if isinstance(val, dict) else None
+    except Exception:
+        return None
+
+
+def _req_dump(val):
+    if not val:
+        return None
+    try:
+        return json.dumps(val, ensure_ascii=False)
+    except Exception:
+        return None
+
+
 def _out(t: CalendarTask) -> dict:
     return {
         "id": t.id,
@@ -93,6 +115,7 @@ def _out(t: CalendarTask) -> dict:
         "recurrence_end_date": t.recurrence_end_date.isoformat() if t.recurrence_end_date else None,
         "recurrence_group_id": t.recurrence_group_id,
         "checkin_id": t.checkin_id,
+        "requirements": _req_load(t.requirements),
         "created_at": t.created_at.isoformat() if t.created_at else None,
     }
 
@@ -133,6 +156,7 @@ def _build_series(data, coach_user_id: int) -> list:
             recurrence=data.recurrence,
             recurrence_end_date=data.recurrence_end_date,
             recurrence_group_id=group_id,
+            requirements=_req_dump(data.requirements),
         ))
         current = _next_date(current, data.recurrence)
     return tasks
@@ -141,6 +165,7 @@ def _build_series(data, coach_user_id: int) -> list:
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
 class TaskCreate(BaseModel):
+    requirements: Optional[dict] = None
     client_user_detail_id: str
     task_date: date
     task_type: str
@@ -152,6 +177,7 @@ class TaskCreate(BaseModel):
 
 
 class TaskItem(BaseModel):
+    requirements: Optional[dict] = None
     """Single item inside a bulk-create request."""
     task_date: date
     task_type: str
@@ -173,6 +199,7 @@ class CopyWeek(BaseModel):
 
 
 class TaskUpdate(BaseModel):
+    requirements: Optional[dict] = None
     task_date: Optional[date] = None
     task_type: Optional[str] = None
     title: Optional[str] = None
@@ -481,6 +508,7 @@ def bulk_create(
             color=item.color or COLOR_MAP.get(item.task_type, "#9CA3AF"),
             done=False,
             recurrence="none",
+            requirements=_req_dump(item.requirements),
         )
         db.add(t)
         created.append(t)
@@ -603,6 +631,7 @@ def create_task(
         color=data.color or COLOR_MAP.get(data.task_type, "#9CA3AF"),
         done=False,
         recurrence="none",
+        requirements=_req_dump(data.requirements),
     )
     db.add(t)
     db.commit()
@@ -695,6 +724,8 @@ def update_task(
     if data.task_type and data.task_type not in VALID_TASK_TYPES:
         return send_error("Tipo inválido")
     for field, val in data.model_dump(exclude_unset=True).items():
+        if field == "requirements":
+            val = _req_dump(val)
         setattr(t, field, val)
     db.commit()
     db.refresh(t)

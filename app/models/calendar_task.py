@@ -49,6 +49,13 @@ class CalendarTask(Base):
     # Link to actual check-in when task_type = 'checkin'
     checkin_id = Column(String(36), ForeignKey("weekly_checkins.id"), nullable=True)
 
+    # Qué se le pide exactamente al cliente, en JSON, para que su zona pueda
+    # mostrarlo y marcarlo como cumplido. Ej.:
+    #   {"items": ["peso", "medidas", "fotos"]}   → registrar evolución
+    #   {"form_assignment_id": "uuid"}            → formulario a rellenar
+    #   {"routine_id": 5} / {"diet_id": "uuid"} / {"document_id": 3}
+    requirements = Column(Text, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

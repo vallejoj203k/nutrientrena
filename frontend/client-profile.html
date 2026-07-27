@@ -685,7 +685,13 @@
     .nut-day-abv{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;}
     .nut-day-item.sel .nut-day-abv{color:#4F46E5;}
     .nut-day-name{font-size:13px;font-weight:600;color:#111827;}
-    .nut-day-meta{font-size:11px;color:#9CA3AF;}
+    .nut-day-meta{font-size:11px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .nut-day-item.empty .nut-day-name,.nut-day-item.empty .nut-day-abv{color:#9CA3AF;}
+    .nut-day-item.empty .nut-day-meta{color:#C4C7CF;font-style:italic;}
+    .nut-empty-day{display:flex;flex-direction:column;align-items:center;gap:8px;padding:44px 20px;text-align:center;color:#9CA3AF;font-size:13px;}
+    .nut-empty-day svg{color:#D8DBE2;}
+    .nut-empty-link{font-size:12.5px;font-weight:700;color:#4F46E5;text-decoration:none;}
+    .nut-empty-link:hover{text-decoration:underline;}
     .nut-meal-panel{flex:1;display:flex;flex-direction:column;min-width:0;}
     .nut-meal-ph{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #F3F4F6;flex-shrink:0;}
     .nut-meal-day-title{font-size:16px;font-weight:700;color:#111;}
@@ -5843,6 +5849,11 @@ async function deleteSession(id) {
 let _nutDayIdx = 0;
 let _nutDetail = null;
 let _nutDetailLoaded = false;
+// Menú semanal vigente del cliente: es lo único que define qué toca cada día
+// (y qué días se quedan sin dieta). Sin menú sólo hay un plan diario.
+let _nutMenu = null;
+let _nutMenuLoaded = false;
+const _nutDietCache = {};
 let _nutActiveDietIdx = 0;
 let _nutEditorMealIdx = 0;
 let _nutWorking = null;
@@ -6053,9 +6064,53 @@ function _npUpdateOutputs(){
   if(fSl&&m.autoMacro==='fat'&&document.activeElement!==fSl) fSl.value=m.fRatio;
 }
 
+// Días del menú semanal indexados por día (0 = lunes). null = sin menú asignado.
+function _nutMenuDays() {
+  if (!_nutMenu || !Array.isArray(_nutMenu.days)) return null;
+  const byIdx = {};
+  _nutMenu.days.forEach(d => { byIdx[d.day_index] = d; });
+  return byIdx;
+}
+
+async function _nutLoadMenu() {
+  if (_nutMenuLoaded) return;
+  _nutMenuLoaded = true;
+  try {
+    const r = await fetch(`${API}/weekly-menus/client/${clientId}`, { headers: h() });
+    if (!r.ok) return;
+    const j = await r.json();
+    _nutMenu = j.data || null;
+  } catch {}
+}
+
+// Detalle de una dieta concreta (cacheado), para poder pintar el día elegido.
+async function _nutLoadDiet(dietId) {
+  if (!dietId) return null;
+  if (_nutDietCache[dietId] !== undefined) return _nutDietCache[dietId];
+  try {
+    const r = await fetch(`${API}/diets/${dietId}/edit`, { headers: h() });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const j = await r.json();
+    _nutDietCache[dietId] = j.data ? _nutNormalize(j.data) : null;
+  } catch {
+    _nutDietCache[dietId] = null;
+  }
+  return _nutDietCache[dietId];
+}
+
 async function renderNutricionTab() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
+
+  await _nutLoadMenu();
+  const menuDays = _nutMenuDays();
+  if (menuDays) {
+    // Con menú semanal el plan lo marca el día seleccionado, no la lista de dietas.
+    const md = menuDays[_nutDayIdx];
+    _nutDetail = md && md.diet_id ? await _nutLoadDiet(md.diet_id) : null;
+    _renderNutUI();
+    return;
+  }
 
   console.log('[NUT] clientDiets:', clientDiets.length, clientDiets.map(d => d.id + ' ' + d.title));
 
@@ -6135,21 +6190,23 @@ function _renderNutUI() {
   const det = _nutDetail || {};
   const macros = _nutEffMacros();
   const totalKcal = Math.round(_nutTotalKcal(det)) || Math.round(det.calories || 0);
-  // Una dieta asignada es UN plan diario que se repite todos los días: no hay
-  // comidas distintas por día. Antes se derivaban días "Libre" de det.quantity,
-  // que es otro dato (el constructor de dietas no lo usa), así que marcaba días
-  // de descanso arbitrarios y hacía parecer que cada día era un plan distinto.
+  // Con menú semanal cada día tiene su propia dieta (y puede no tener ninguna).
+  // Sin menú, una dieta asignada es UN plan diario que se repite todos los días:
+  // antes se derivaban días "Libre" de det.quantity, que es otro dato, y marcaba
+  // días de descanso arbitrarios.
+  const menuDays = _nutMenuDays();
   const dayName = _NUT_DAY_FULL[_nutDayIdx];
+  const dayHasDiet = !menuDays || !!(menuDays[_nutDayIdx] && menuDays[_nutDayIdx].diet_id);
 
-  const foods = det.foods || [];
+  const foods = dayHasDiet ? (det.foods || []) : [];
   const mealCount = foods.length;
 
   el.innerHTML = `
     <div class="nut-banner">
       <div class="nut-banner-left">
         <div class="nut-banner-badge">Plan Activo</div>
-        <div class="nut-banner-title">${esc(det.title || 'Plan nutricional')}</div>
-        <div class="nut-banner-sub">Plan diario · ${esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
+        <div class="nut-banner-title">${esc(menuDays ? (_nutMenu.name || 'Menú semanal') : (det.title || 'Plan nutricional'))}</div>
+        <div class="nut-banner-sub">${menuDays ? 'Menú semanal · un plan por día' : 'Plan diario · ' + esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
         <div class="plan-btn-row">
           <button class="nut-banner-btn" onclick="_downloadNutPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
           <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
@@ -6164,25 +6221,34 @@ function _renderNutUI() {
     </div>
     <div class="nut-layout">
       <div class="nut-day-side">${_NUT_DAY_ABV.map((abv,i)=>{
-        return`<div class="nut-day-item${_nutDayIdx===i?' sel':''}" onclick="selectNutDay(${i})">
+        const md = menuDays ? menuDays[i] : null;
+        const empty = menuDays && !(md && md.diet_id);
+        const meta = menuDays
+          ? (empty ? 'Sin dieta' : esc(md.diet_title || 'Dieta asignada'))
+          : mealCount+' comida'+(mealCount!==1?'s':'');
+        return`<div class="nut-day-item${_nutDayIdx===i?' sel':''}${empty?' empty':''}" onclick="selectNutDay(${i})">
           <span class="nut-day-abv">${abv}</span>
           <span class="nut-day-name">${_NUT_DAY_FULL[i]}</span>
-          <span class="nut-day-meta">${mealCount+' comida'+(mealCount!==1?'s':'')}</span>
+          <span class="nut-day-meta">${meta}</span>
         </div>`;
       }).join('')}</div>
       <div class="nut-meal-panel">
         <div class="nut-meal-ph">
           <div>
             <div class="nut-meal-day-title">${dayName}</div>
-            <div class="nut-meal-day-sub">${mealCount+' comidas · '+totalKcal+' kcal'}</div>
+            <div class="nut-meal-day-sub">${dayHasDiet ? (mealCount+' comidas · '+totalKcal+' kcal') : 'Sin dieta asignada este día'}</div>
           </div>
           <button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar plan</button>
         </div>
-        <div class="nut-same-note">
+        ${menuDays ? '' : `<div class="nut-same-note">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           Este plan es diario: se repite igual todos los días. Para comidas distintas por día, asígnale un <b>menú semanal</b>.
-        </div>
-        <div class="nut-meals-area">${foods.map(meal=>{
+        </div>`}
+        <div class="nut-meals-area">${!dayHasDiet ? `<div class="nut-empty-day">
+          <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+          <div>El ${dayName.toLowerCase()} no tiene dieta en este menú.</div>
+          <a class="nut-empty-link" href="menus.html" target="_blank" rel="noopener">Editar el menú semanal</a>
+        </div>` : foods.map(meal=>{
           const mKcal=Math.round(_nutMealKcal(meal));
           const mTime=_nutMealTime(meal.name);
           return`<div class="nut-meal-card">
@@ -6332,8 +6398,14 @@ function _npPlannerHTML(macros) {
   `;
 }
 
-function selectNutDay(idx) {
+async function selectNutDay(idx) {
   _nutDayIdx = idx;
+  const menuDays = _nutMenuDays();
+  if (menuDays) {
+    // Cada día del menú tiene su propia dieta: hay que cargar la del día elegido.
+    const md = menuDays[idx];
+    _nutDetail = md && md.diet_id ? await _nutLoadDiet(md.diet_id) : null;
+  }
   _renderNutUI();
 }
 

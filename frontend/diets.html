@@ -453,7 +453,16 @@
     /* ── Plan de comidas v2: barra de stats + tarjetas apiladas ── */
     .pm2-scroll{flex:1;overflow-y:auto;background:#F7F8FA;padding:22px 26px 30px;}
     .pm2-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:0 auto 20px;max-width:1400px;}
-    .pm2-stat{background:#fff;border:1px solid #D8DDE4;border-radius:14px;padding:15px 18px;display:flex;align-items:center;gap:13px;}
+    .pm2-stat{background:#fff;border:1px solid #D8DDE4;border-radius:14px;padding:15px 18px;display:flex;flex-direction:column;gap:9px;}
+    .pm2-stat-main{display:flex;align-items:center;gap:13px;}
+    .pm2-valrow{display:flex;align-items:baseline;gap:3px;}
+    .pm2-goal{font-size:15px;font-weight:700;color:#9CA3AF;}
+    .pm2-bar{height:5px;border-radius:20px;background:#F1F3F7;overflow:hidden;}
+    .pm2-bar span{display:block;height:100%;width:0;border-radius:20px;background:#4F46E5;transition:width .2s;}
+    .pm2-bar.over span{background:#DC2626;}
+    .pm2-left{font-size:11.5px;font-weight:700;color:#6B7280;}
+    .pm2-left.over{color:#DC2626;}
+    .pm2-left.done{color:#059669;}
     #pm2List{max-width:1400px;margin:0 auto;}
     .pm2-stat-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .pm2-stat-lbl{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;}
@@ -1037,7 +1046,7 @@
             <div class="dgo-desc">Fija un total kcal. Ideal para plantillas orientativas.</div>
             <div class="dgo-fields" id="dgoKcalFields" style="display:none;" onclick="event.stopPropagation()">
               <label class="dgi-lbl">Calorías objetivo (kcal/día)</label>
-              <input class="dgi-inp" id="f_calories" type="number" placeholder="Ej: 2100" oninput="updatePreview()" style="max-width:220px;font-weight:600;"/>
+              <input class="dgi-inp" id="f_calories" type="number" placeholder="Ej: 2100" oninput="updatePreview();recalcTotalMacros();" style="max-width:220px;font-weight:600;"/>
             </div>
           </div>
         </div>
@@ -1048,9 +1057,9 @@
             <div class="dgo-desc">Fija kcal y macros exactos. Recomendado para planes cerrados.</div>
             <div class="dgo-fields" id="dgoMacroFields" style="display:none;" onclick="event.stopPropagation()">
               <div class="dgo-fields-grid">
-                <div><label class="dgi-lbl">Proteínas (g)</label><input class="dgi-inp" id="f_proteins" type="number" placeholder="0"/></div>
-                <div><label class="dgi-lbl">Carbos (g)</label><input class="dgi-inp" id="f_carbs" type="number" placeholder="0"/></div>
-                <div><label class="dgi-lbl">Grasas (g)</label><input class="dgi-inp" id="f_fats" type="number" placeholder="0"/></div>
+                <div><label class="dgi-lbl">Proteínas (g)</label><input class="dgi-inp" id="f_proteins" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
+                <div><label class="dgi-lbl">Carbos (g)</label><input class="dgi-inp" id="f_carbs" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
+                <div><label class="dgi-lbl">Grasas (g)</label><input class="dgi-inp" id="f_fats" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
               </div>
             </div>
           </div>
@@ -1100,24 +1109,54 @@
       <!-- Totales del día -->
       <div class="pm2-stats">
         <div class="pm2-stat">
-          <div class="pm2-stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
-          <div><div class="pm2-stat-lbl">Calorías</div><div class="pm2-stat-val" id="tot_kcal" style="color:#D97706;">0</div></div>
+          <div class="pm2-stat-main">
+            <div class="pm2-stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
+            <div><div class="pm2-stat-lbl">Calorías</div>
+              <div class="pm2-valrow"><div class="pm2-stat-val" id="tot_kcal" style="color:#D97706;">0</div><span class="pm2-goal" id="goal_kcal"></span></div>
+            </div>
+          </div>
+          <div class="pm2-bar" id="bar_kcal" style="display:none;"><span></span></div>
+          <div class="pm2-left" id="left_kcal" style="display:none;"></div>
         </div>
         <div class="pm2-stat">
-          <div class="pm2-stat-ico" style="background:#D1FAE5;color:#059669;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg></div>
-          <div><div class="pm2-stat-lbl">Proteínas</div><div class="pm2-stat-val" id="tot_prot" style="color:#059669;">0<small>g</small></div></div>
+          <div class="pm2-stat-main">
+            <div class="pm2-stat-ico" style="background:#D1FAE5;color:#059669;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg></div>
+            <div><div class="pm2-stat-lbl">Proteínas</div>
+              <div class="pm2-valrow"><div class="pm2-stat-val" id="tot_prot" style="color:#059669;">0<small>g</small></div><span class="pm2-goal" id="goal_prot"></span></div>
+            </div>
+          </div>
+          <div class="pm2-bar" id="bar_prot" style="display:none;"><span></span></div>
+          <div class="pm2-left" id="left_prot" style="display:none;"></div>
         </div>
         <div class="pm2-stat">
-          <div class="pm2-stat-ico" style="background:#FFEDD5;color:#EA580C;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/></svg></div>
-          <div><div class="pm2-stat-lbl">Carbos</div><div class="pm2-stat-val" id="tot_carb" style="color:#EA580C;">0<small>g</small></div></div>
+          <div class="pm2-stat-main">
+            <div class="pm2-stat-ico" style="background:#FFEDD5;color:#EA580C;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/></svg></div>
+            <div><div class="pm2-stat-lbl">Carbos</div>
+              <div class="pm2-valrow"><div class="pm2-stat-val" id="tot_carb" style="color:#EA580C;">0<small>g</small></div><span class="pm2-goal" id="goal_carb"></span></div>
+            </div>
+          </div>
+          <div class="pm2-bar" id="bar_carb" style="display:none;"><span></span></div>
+          <div class="pm2-left" id="left_carb" style="display:none;"></div>
         </div>
         <div class="pm2-stat">
-          <div class="pm2-stat-ico" style="background:#FEE2E2;color:#DC2626;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
-          <div><div class="pm2-stat-lbl">Grasas</div><div class="pm2-stat-val" id="tot_fat" style="color:#DC2626;">0<small>g</small></div></div>
+          <div class="pm2-stat-main">
+            <div class="pm2-stat-ico" style="background:#FEE2E2;color:#DC2626;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
+            <div><div class="pm2-stat-lbl">Grasas</div>
+              <div class="pm2-valrow"><div class="pm2-stat-val" id="tot_fat" style="color:#DC2626;">0<small>g</small></div><span class="pm2-goal" id="goal_fat"></span></div>
+            </div>
+          </div>
+          <div class="pm2-bar" id="bar_fat" style="display:none;"><span></span></div>
+          <div class="pm2-left" id="left_fat" style="display:none;"></div>
         </div>
         <div class="pm2-stat">
-          <div class="pm2-stat-ico" style="background:#ECFDF5;color:#10B981;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
-          <div><div class="pm2-stat-lbl">Fibra</div><div class="pm2-stat-val" id="tot_fib" style="color:#10B981;">0<small>g</small></div></div>
+          <div class="pm2-stat-main">
+            <div class="pm2-stat-ico" style="background:#ECFDF5;color:#10B981;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
+            <div><div class="pm2-stat-lbl">Fibra</div>
+              <div class="pm2-valrow"><div class="pm2-stat-val" id="tot_fib" style="color:#10B981;">0<small>g</small></div><span class="pm2-goal" id="goal_fib"></span></div>
+            </div>
+          </div>
+          <div class="pm2-bar" id="bar_fib" style="display:none;"><span></span></div>
+          <div class="pm2-left" id="left_fib" style="display:none;"></div>
         </div>
       </div>
       <!-- Tarjetas de comidas -->
@@ -1822,6 +1861,7 @@ function setGoalMode(mode) {
   // kcal se muestra en modo kcal; en modo macros la kcal va junto a los macros
   if (kf) kf.style.display = (mode === 'kcal' || mode === 'macros') ? 'block' : 'none';
   if (mf) mf.style.display = mode === 'macros' ? 'block' : 'none';
+  recalcTotalMacros();
 }
 
 function clearForm() {
@@ -2377,7 +2417,10 @@ function recalcTotalMacros() {
       fb += ((row.fiber||0)/100)*qtyG;
     });
   });
-  if (k||p||c||f) {
+  // Sólo en modo "libre" los campos reflejan lo construido. Con un objetivo
+  // fijado eran su propio destino: al añadir alimentos se sobrescribía la meta
+  // que había escrito el coach y se guardaba el total en su lugar.
+  if ((k||p||c||f) && _goalMode === 'libre') {
     document.getElementById('f_calories').value = Math.round(k)||'';
     document.getElementById('f_proteins').value = p.toFixed(1);
     document.getElementById('f_carbs').value    = c.toFixed(1);
@@ -2394,6 +2437,51 @@ function recalcTotalMacros() {
   if (tC) tC.innerHTML = Math.round(c) + '<small>g</small>';
   if (tF) tF.innerHTML = Math.round(f) + '<small>g</small>';
   if (tFb) tFb.innerHTML = Math.round(fb) + '<small>g</small>';
+  _renderGoalProgress({ kcal:k, prot:p, carb:c, fat:f });
+}
+
+/* ── Límite del objetivo en el constructor ────────────────────────────────────
+   Si la plantilla fija un objetivo (sólo kcal, o kcal + macros), el plan de
+   comidas muestra cuánto llevas sobre esa meta y cuánto falta. */
+function _goalTargets() {
+  if (_goalMode === 'libre') return {};
+  var num = function(id){ var v = parseFloat((document.getElementById(id)||{}).value); return v > 0 ? v : 0; };
+  var t = { kcal: num('f_calories') };
+  if (_goalMode === 'macros') { t.prot = num('f_proteins'); t.carb = num('f_carbs'); t.fat = num('f_fats'); }
+  return t;
+}
+
+function _renderGoalProgress(totals) {
+  var targets = _goalTargets();
+  var units = { kcal:' kcal', prot:'g', carb:'g', fat:'g' };
+  ['kcal','prot','carb','fat'].forEach(function(key){
+    var goalEl = document.getElementById('goal_' + key);
+    var barEl  = document.getElementById('bar_' + key);
+    var leftEl = document.getElementById('left_' + key);
+    if (!goalEl || !barEl || !leftEl) return;
+    var target = targets[key] || 0;
+    if (!target) {
+      goalEl.textContent = '';
+      barEl.style.display = 'none';
+      leftEl.style.display = 'none';
+      leftEl.textContent = '';
+      return;
+    }
+    var val  = Math.round(totals[key] || 0);
+    var goal = Math.round(target);
+    var diff = goal - val;
+    goalEl.textContent = '/' + goal;
+    barEl.style.display = '';
+    leftEl.style.display = '';
+    var pct = Math.min(100, Math.round(val / goal * 100));
+    barEl.querySelector('span').style.width = pct + '%';
+    barEl.classList.toggle('over', val > goal);
+    leftEl.classList.toggle('over', diff < 0);
+    leftEl.classList.toggle('done', diff === 0);
+    leftEl.textContent = diff > 0 ? '+' + diff + units[key] + ' restantes'
+                       : diff < 0 ? Math.abs(diff) + units[key] + ' de más'
+                       : 'Objetivo alcanzado';
+  });
 }
 
 // --- Autocomplete ---

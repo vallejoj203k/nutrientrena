@@ -15,6 +15,7 @@ class TrainingCreate(BaseModel):
     location: Optional[str] = None  # gym/home/outdoor/both
     material: Optional[str] = None
     difficulty: Optional[int] = None  # 1/2/3
+    difficulty_levels: Optional[List[int]] = None
     movement_pattern: Optional[str] = None
     rec_series: Optional[str] = None
     rec_reps: Optional[str] = None
@@ -33,6 +34,7 @@ class TrainingUpdate(BaseModel):
     location: Optional[str] = None
     material: Optional[str] = None
     difficulty: Optional[int] = None
+    difficulty_levels: Optional[List[int]] = None
     movement_pattern: Optional[str] = None
     rec_series: Optional[str] = None
     rec_reps: Optional[str] = None
@@ -60,6 +62,7 @@ class TrainingOut(BaseModel):
     location: Optional[str] = None
     material: Optional[str] = None
     difficulty: Optional[int] = None
+    difficulty_levels: List[int] = []
     movement_pattern: Optional[str] = None
     rec_series: Optional[str] = None
     rec_reps: Optional[str] = None
@@ -75,6 +78,10 @@ class TrainingOut(BaseModel):
         sec_ids = [int(x) for x in str(raw).split(",") if str(x).strip().isdigit()] if raw else []
         if not sec_ids and t.secondary_muscle_group_id:
             sec_ids = [t.secondary_muscle_group_id]
+        raw_lv = getattr(t, "difficulty_levels", None)
+        levels = sorted({int(x) for x in str(raw_lv).split(",") if str(x).strip().isdigit()}) if raw_lv else []
+        if not levels and t.difficulty:
+            levels = [t.difficulty]
         return cls(
             id=t.id,
             name=t.name,
@@ -90,6 +97,7 @@ class TrainingOut(BaseModel):
             location=t.location,
             material=t.material,
             difficulty=t.difficulty,
+            difficulty_levels=levels,
             movement_pattern=t.movement_pattern,
             rec_series=t.rec_series,
             rec_reps=t.rec_reps,

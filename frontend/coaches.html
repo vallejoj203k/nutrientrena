@@ -476,6 +476,32 @@
           </div>
         </div>
         <div id="matchHint" style="font-size:11px;margin-top:-8px;display:none;"></div>
+
+        <!-- Cuenta de acceso para alguien que aún no está en el sistema -->
+        <div id="newAccountBox" style="margin-top:14px;padding:14px;border:1px dashed #C7D2FE;border-radius:10px;background:#F8F9FF;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:#374151;cursor:pointer;">
+            <input type="checkbox" id="mCreateAccount" checked onchange="toggleNewAccount()" style="width:15px;height:15px;accent-color:#4F46E5;cursor:pointer;"/>
+            Crear también su cuenta de acceso
+          </label>
+          <div id="newAccountFields" style="margin-top:12px;">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label>Contraseña</label>
+                <input type="text" id="mNewPassword" placeholder="Mínimo 6 caracteres"/>
+              </div>
+              <div class="form-group">
+                <label>Tipo de acceso</label>
+                <select id="mNewRoleId">
+                  <option value="5">Coach</option>
+                  <option value="2">Administrador</option>
+                  <option value="3">Setter</option>
+                  <option value="4">Closer</option>
+                </select>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#9CA3AF;">Entrará con este correo y esta contraseña. Puedes cambiarlos luego editando el miembro.</div>
+          </div>
+        </div>
       </div>
 
       <!-- Cuenta de acceso: solo si el miembro está enlazado a un usuario -->
@@ -966,6 +992,17 @@ function onNameInput(val){
     hint.style.display='none';
     if(!_photoValue) _setPhotoPreview(null, val);
   }
+  _syncNewAccountBox();
+}
+
+// Si la persona ya tiene cuenta no hay nada que crear.
+function _syncNewAccountBox(){
+  const box=document.getElementById('newAccountBox');
+  if(box) box.style.display=_selectedUserId?'none':'block';
+}
+function toggleNewAccount(){
+  const on=document.getElementById('mCreateAccount').checked;
+  document.getElementById('newAccountFields').style.display=on?'block':'none';
 }
 
 function onEmailInput(val){
@@ -978,6 +1015,7 @@ function onEmailInput(val){
   } else {
     _selectedUserId=null;
   }
+  _syncNewAccountBox();
 }
 
 /* ── Tab navigation ──────────────────────────────────────────── */
@@ -1094,6 +1132,10 @@ function _showAddMode(){
   document.getElementById('mNameInput').value='';
   document.getElementById('mEmailInput').value='';
   document.getElementById('matchHint').style.display='none';
+  const pw=document.getElementById('mNewPassword'); if(pw) pw.value='';
+  const ca=document.getElementById('mCreateAccount'); if(ca) ca.checked=true;
+  const naf=document.getElementById('newAccountFields'); if(naf) naf.style.display='block';
+  _syncNewAccountBox();
   _resetPhoto('', null);
   // Populate datalist with available staff
   const dl=document.getElementById('staffDatalist');
@@ -1268,8 +1310,27 @@ async function saveMember(){
       const nameVal=document.getElementById('mNameInput').value.trim();
       if(!nameVal){ showTabError(1,'Escribe el nombre del miembro.'); setTab(1); return; }
       body.member_name=nameVal;
-      body.member_email=document.getElementById('mEmailInput').value.trim()||null;
+      const emailVal=document.getElementById('mEmailInput').value.trim();
+      body.member_email=emailVal||null;
       if(_selectedUserId) body.user_detail_id=_selectedUserId;
+
+      // Persona nueva: se le crea la cuenta para que pueda entrar. Sin esto
+      // el miembro se quedaba en una ficha sin usuario ni contraseña.
+      const wantsAccount=!_selectedUserId&&document.getElementById('mCreateAccount')?.checked;
+      if(wantsAccount){
+        const pass=(document.getElementById('mNewPassword').value||'').trim();
+        if(!emailVal||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailVal)){ showTabError(1,'Para crear la cuenta necesitas un correo válido.'); setTab(1); return; }
+        if(pass.length<6){ showTabError(1,'La contraseña debe tener al menos 6 caracteres.'); setTab(1); return; }
+        const parts=nameVal.split(' ');
+        try{
+          const ru=await fetch(`${API}/users`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
+            body:JSON.stringify({ name:parts[0], last_name:parts.slice(1).join(' ')||null, email:emailVal, password:pass,
+              role_id:parseInt(document.getElementById('mNewRoleId').value)||5 })});
+          const ju=await ru.json().catch(()=>({}));
+          if(!ru.ok||!ju.data?.id){ showTabError(1, ju.detail||ju.message||'No se pudo crear la cuenta'); setTab(1); return; }
+          body.user_detail_id=ju.data.id;
+        }catch{ showTabError(1,'Error de conexión al crear la cuenta'); setTab(1); return; }
+      }
     }
   }
 

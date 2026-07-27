@@ -478,6 +478,31 @@
         <div id="matchHint" style="font-size:11px;margin-top:-8px;display:none;"></div>
       </div>
 
+      <!-- Cuenta de acceso: solo si el miembro está enlazado a un usuario -->
+      <div id="accountFields" style="display:none;">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="mAccName" placeholder="Nombre"/>
+          </div>
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input type="text" id="mAccLastName" placeholder="Apellidos"/>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Correo (usuario de acceso)</label>
+            <input type="email" id="mAccEmail" placeholder="email@ejemplo.com"/>
+          </div>
+          <div class="form-group">
+            <label>Nueva contraseña</label>
+            <input type="text" id="mAccPassword" placeholder="Dejar vacío para no cambiarla"/>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Estos datos son los de su cuenta: con el correo inicia sesión.</div>
+      </div>
+
       <div class="form-group">
         <label>Rol</label>
         <select id="mRoleLabel">
@@ -571,6 +596,9 @@
         <div style="display:flex;gap:8px;">
           <button class="btn btn-primary btn-sm" id="btnNext" onclick="goTab(1)">
             Siguiente → Permisos
+          </button>
+          <button class="btn btn-sm" id="btnAccountOff" style="display:none;background:#fff;border:1px solid #FECACA;color:#DC2626;" onclick="deactivateAccount()">
+            Dar de baja la cuenta
           </button>
           <button class="btn btn-green btn-sm" id="btnSave" style="display:none" onclick="saveMember()">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -988,6 +1016,8 @@ function setTab(n){
     f23.style.display='flex';
     document.getElementById('btnNext').style.display = n===2?'inline-flex':'none';
     document.getElementById('btnSave').style.display = n===3?'inline-flex':'none';
+    const bOff=document.getElementById('btnAccountOff');
+    if(bOff) bOff.style.display=(n===3&&_editingUserDetailId)?'inline-flex':'none';
     document.getElementById('btnSave').textContent = _editingId?'Guardar cambios':'Añadir al equipo';
   }
 }
@@ -1088,6 +1118,8 @@ function _showEditMode(name, email, photo){
   _resetPhoto(name, photo);
 }
 
+let _editingUserDetailId=null;
+
 function openModal(editData=null){
   _editingId=null;
   _pendingUserDetailId=null;
@@ -1106,9 +1138,22 @@ function openModal(editData=null){
   // Always show wizard steps
   document.getElementById('wizardSteps').style.display='flex';
 
+  // Cuenta enlazada: se puede corregir nombre, correo y contraseña
+  _editingUserDetailId=null;
+  const accBox=document.getElementById('accountFields');
+  if(accBox) accBox.style.display='none';
+  ['mAccName','mAccLastName','mAccEmail','mAccPassword'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+
   if(editData && editData.id !== null){
     _editingId=editData.id;
     document.getElementById('modalTitle').textContent='Editar miembro';
+    if(editData.user_detail_id){
+      _editingUserDetailId=editData.user_detail_id;
+      if(accBox) accBox.style.display='block';
+      document.getElementById('mAccName').value=editData.name||'';
+      document.getElementById('mAccLastName').value=editData.last_name||'';
+      document.getElementById('mAccEmail').value=editData.email||'';
+    }
     // Tab 1: show readonly name input, hide select
     _showEditMode(`${editData.name||''} ${editData.last_name||''}`.trim(), editData.email, editData.photo);
     document.getElementById('mRoleLabel').value=editData.role_label||'';
@@ -1160,6 +1205,19 @@ function editMember(id, userDetailId){
   }
 }
 
+async function deactivateAccount(){
+  if(!_editingUserDetailId) return;
+  const nm=(document.getElementById('mAccName').value||'esta persona').trim();
+  if(!confirm(`¿Dar de baja la cuenta de ${nm}?\n\nDejará de aparecer en los listados y no podrá iniciar sesión. Su historial se conserva y puede restaurarse.`)) return;
+  try{
+    const r=await fetch(`${API}/users/${_editingUserDetailId}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok){ toast(j.detail||j.message||'No se pudo dar de baja','error'); return; }
+    toast('Cuenta dada de baja');
+    closeModal(); loadTeam();
+  }catch{ toast('Error de conexión','error'); }
+}
+
 async function deleteMember(id,name){
   const numId=(id===null||id==='null')?null:Number(id);
   if(numId===null){ toast('Este miembro no tiene datos guardados aún','error'); return; }
@@ -1174,6 +1232,22 @@ async function deleteMember(id,name){
 async function saveMember(){
   const btn=document.getElementById('btnSave');
   clearTabErrors();
+
+  // Cuenta enlazada: se guarda aparte, en /users/{id}/update
+  if(_editingUserDetailId){
+    const accName=(document.getElementById('mAccName').value||'').trim();
+    const accEmail=(document.getElementById('mAccEmail').value||'').trim();
+    const accPass=(document.getElementById('mAccPassword').value||'').trim();
+    if(!accName){ showTabError(1,'El nombre no puede quedar vacío.'); setTab(1); return; }
+    if(!accEmail||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(accEmail)){ showTabError(1,'Escribe un correo válido.'); setTab(1); return; }
+    if(accPass&&accPass.length<6){ showTabError(1,'La contraseña debe tener al menos 6 caracteres.'); setTab(1); return; }
+    const accBody={ name:accName, last_name:(document.getElementById('mAccLastName').value||'').trim()||null, email:accEmail };
+    if(accPass) accBody.password=accPass;
+    try{
+      const ra=await fetch(`${API}/users/${_editingUserDetailId}/update`,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(accBody)});
+      if(!ra.ok){ const ja=await ra.json().catch(()=>({})); showTabError(1, ja.detail||ja.message||'No se pudo actualizar la cuenta'); setTab(1); return; }
+    }catch{ showTabError(1,'Error de conexión al guardar la cuenta'); setTab(1); return; }
+  }
 
   const body={
     role_label: document.getElementById('mRoleLabel').value.trim()||null,

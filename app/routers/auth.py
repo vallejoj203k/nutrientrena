@@ -37,6 +37,8 @@ def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
         return send_error("Usuario y contraseña incorrectos.", {"error": "Unauthorised"}, code=401)
 
     user_detail = db.query(UserDetail).filter(UserDetail.user_id == user.id).first()
+    if user_detail and user_detail.deleted_at is not None:
+        return send_error("Esta cuenta ha sido dada de baja", {"error": "Unauthorised"}, code=401)
     if user_detail and user_detail.status_id == STATUS_INACTIVE:
         return send_error("Usuario esta deshabilitado", {"error": "Unauthorised"}, code=401)
 

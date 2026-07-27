@@ -65,6 +65,9 @@ class UserDetail(Base):
     # Estado del ciclo de vida del cliente (independiente del estado CRM/status_id):
     # activo / pendiente / pausado / finalizado. Controla las pestañas de "Clientes".
     lifecycle_status = Column(String(20), nullable=False, default="activo", server_default="activo")
+    # Baja reversible: el usuario desaparece de los listados y no puede entrar,
+    # pero se conserva su historial (dietas, rutinas, check-ins, chat…).
+    deleted_at = Column(DateTime, nullable=True)
     # Chat habilitado para este cliente (el coach puede activarlo/desactivarlo).
     chat_enabled = Column(Boolean, nullable=False, default=True, server_default="1")
     start_date = Column(DateTime, nullable=True)

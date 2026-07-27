@@ -155,11 +155,12 @@
     .ms-dropdown.open{display:block;}
     /* .ms-option es un <label> dentro de .form-group: se neutraliza la regla
        de las etiquetas para que la letra sea igual a la del select. */
-    .form-group .ms-option{display:flex;align-items:center;gap:12px;padding:9px 12px;cursor:pointer;font-size:14px;font-weight:400;color:#111;text-transform:none;letter-spacing:normal;margin-bottom:0;transition:.1s;}
+    /* Alto de fila 31px, el mismo que las opciones del select nativo. */
+    .form-group .ms-option{display:flex;align-items:center;gap:9px;padding:5px 12px;cursor:pointer;font-size:14px;line-height:21px;font-weight:400;color:#111;text-transform:none;letter-spacing:normal;margin-bottom:0;transition:.1s;}
     .ms-option:hover{background:var(--indigo-pale);}
-    .ms-option input[type=checkbox]{accent-color:var(--indigo);width:15px;height:15px;cursor:pointer;flex-shrink:0;margin:0;}
-    .ms-opt-name{flex:1;padding-left:4px;}
-    .ms-search-wrap{position:sticky;top:0;background:#fff;display:flex;align-items:center;gap:7px;padding:9px 12px;border-bottom:1px solid #F3F4F6;z-index:1;}
+    .ms-option input[type=checkbox]{accent-color:var(--indigo);width:14px;height:14px;cursor:pointer;flex-shrink:0;margin:0;}
+    .ms-opt-name{flex:1;}
+    .ms-search-wrap{position:sticky;top:0;background:#fff;display:flex;align-items:center;gap:7px;padding:6px 12px;border-bottom:1px solid #F3F4F6;z-index:1;}
     .ms-search{flex:1;border:none;outline:none;font-size:14px;color:#111;background:transparent;font-family:inherit;}
     .ms-search::placeholder{color:#9CA3AF;}
     .ms-empty{padding:14px 12px;text-align:center;font-size:12px;color:#9CA3AF;}

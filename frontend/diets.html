@@ -101,6 +101,7 @@
     .lib-table tbody td{padding:13px 16px;font-size:13.5px;color:#374151;border-bottom:1px solid #F3F4F6;vertical-align:middle;}
     .lib-table tbody tr:last-child td{border-bottom:none;}
     .lib-table tbody tr:hover td{background:#FAFBFC;}
+    .lib-row-click{cursor:pointer;}
     .lib-td-name{display:flex;align-items:center;gap:12px;}
     .lib-td-ico{width:36px;height:36px;border-radius:10px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .lib-td-title{font-size:14px;font-weight:700;color:var(--lib-text);display:flex;align-items:center;gap:7px;}
@@ -1482,7 +1483,9 @@ function dietRow(d) {
       + '<div class="dc-dd-item danger" onclick="event.stopPropagation();closeRowMenus();openConfirm(\'Eliminar dieta\',\'Esta acción no se puede deshacer.\',function(){deleteDiet(\'' + id + '\')})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar</div>'
     : '<div class="dc-dd-item" style="color:#9CA3AF;cursor:default;">Solo lectura</div>';
 
-  return '<tr>'
+  // La fila entera abre el detalle: hacer clic en una dieta y que no pase nada
+  // no es lo que espera el coach.
+  return '<tr class="lib-row-click" onclick="openDietPreview(\'' + id + '\')" title="Ver detalle">'
     + '<td><div class="lib-td-name"><div class="lib-td-ico">' + _dietFoodIcon() + '</div>'
     +   '<div><div class="lib-td-title">' + title + ' ' + tag + '</div>'
     +   '<div class="lib-td-subtype">' + esc(tipo) + '</div></div></div></td>'
@@ -1492,7 +1495,7 @@ function dietRow(d) {
     + '<td class="lib-td-num">' + num(carb, 'g') + '</td>'
     + '<td class="lib-td-num">' + num(fat, 'g') + '</td>'
     + '<td class="lib-td-comidas">' + comidas + '</td>'
-    + '<td><div class="lib-actions">'
+    + '<td onclick="event.stopPropagation()"><div class="lib-actions">'
     +   '<button class="lib-btn-assign" onclick="openAssign(\'' + id + '\',\'' + title + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Asignar</button>'
     +   '<button class="lib-icon-btn" onclick="openDietPreview(\'' + id + '\')" title="Ver detalle"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>'
     +   '<div class="lib-menu-wrap"><button class="lib-icon-btn" onclick="toggleRowMenu(event,this)" title="Más"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>'

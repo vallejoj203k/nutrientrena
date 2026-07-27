@@ -317,6 +317,7 @@ def _save_detail(db: Session, diet_id: str, data: DietCreate):
         "proteins": data.proteins,
         "carbs": data.carbs,
         "fats": data.fats,
+        "fiber": data.fiber,
         "deficit": data.deficit,
         "surplus": data.surplus,
     }
@@ -416,7 +417,7 @@ def copy_diet_to_user(db: Session, source: Diet, target_user_id: int, created_us
         d = source.detail
         db.add(DietDetail(
             diet_id=new_diet.id,
-            proteins=d.proteins, carbs=d.carbs, fats=d.fats,
+            proteins=d.proteins, carbs=d.carbs, fats=d.fats, fiber=d.fiber,
             deficit=d.deficit, surplus=d.surplus,
             height=d.height, weight=d.weight, body_fat=d.body_fat,
             level_activity_id=d.level_activity_id, objective_id=d.objective_id,

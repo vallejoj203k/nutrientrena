@@ -215,7 +215,8 @@
     .dgo-name{font-size:14.5px;font-weight:700;color:#111827;}
     .dgo-desc{font-size:12.5px;color:#8B93A7;margin-top:2px;line-height:1.45;}
     .dgo-fields{margin-top:12px;padding:14px 15px;background:#fff;border:1px dashed #C7CBF5;border-radius:12px;}
-    .dgo-fields-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .dgo-fields-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+    @media(max-width:760px){.dgo-fields-grid{grid-template-columns:repeat(2,1fr);}}
     .dp-step-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:rgba(0,0,0,.08);flex-shrink:0;}
     .dp-step.active .dp-step-num{background:#4F46E5;color:#fff;}
     .dp-save-header{padding:8px 20px;border-radius:8px;background:#4F46E5;color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
@@ -1044,10 +1045,7 @@
           <div style="flex:1;">
             <div class="dgo-name">Sólo calorías objetivo</div>
             <div class="dgo-desc">Fija un total kcal. Ideal para plantillas orientativas.</div>
-            <div class="dgo-fields" id="dgoKcalFields" style="display:none;" onclick="event.stopPropagation()">
-              <label class="dgi-lbl">Calorías objetivo (kcal/día)</label>
-              <input class="dgi-inp" id="f_calories" type="number" placeholder="Ej: 2100" oninput="updatePreview();recalcTotalMacros();" style="max-width:220px;font-weight:600;"/>
-            </div>
+            <div class="dgo-fields" id="dgoKcalFields" style="display:none;" onclick="event.stopPropagation()"><div id="kcalSlotA"></div></div>
           </div>
         </div>
         <div class="dgo-opt" id="dgoMacros" onclick="setGoalMode('macros')">
@@ -1057,10 +1055,17 @@
             <div class="dgo-desc">Fija kcal y macros exactos. Recomendado para planes cerrados.</div>
             <div class="dgo-fields" id="dgoMacroFields" style="display:none;" onclick="event.stopPropagation()">
               <div class="dgo-fields-grid">
-                <div><label class="dgi-lbl">Proteínas (g)</label><input class="dgi-inp" id="f_proteins" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
-                <div><label class="dgi-lbl">Carbos (g)</label><input class="dgi-inp" id="f_carbs" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
+                <div id="kcalSlotB"></div>
+                <div><label class="dgi-lbl">Prot. (g)</label><input class="dgi-inp" id="f_proteins" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
+                <div><label class="dgi-lbl">Carbo (g)</label><input class="dgi-inp" id="f_carbs" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
                 <div><label class="dgi-lbl">Grasas (g)</label><input class="dgi-inp" id="f_fats" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
+                <div><label class="dgi-lbl">Fibra (g)</label><input class="dgi-inp" id="f_fiber" type="number" placeholder="0" oninput="recalcTotalMacros()"/></div>
               </div>
+            </div>
+            <!-- El campo de kcal es el mismo en ambos modos: se mueve de sitio. -->
+            <div id="kcalField" style="display:none;">
+              <label class="dgi-lbl" id="kcalLbl">Calorías objetivo (kcal/día)</label>
+              <input class="dgi-inp" id="f_calories" type="number" placeholder="Ej: 2100" oninput="updatePreview();recalcTotalMacros();" style="font-weight:600;"/>
             </div>
           </div>
         </div>
@@ -1701,6 +1706,7 @@ async function openForm(id) {
       document.getElementById('f_proteins').value = det.proteins || '';
       document.getElementById('f_carbs').value    = det.carbs    || '';
       document.getElementById('f_fats').value     = det.fats     || '';
+      document.getElementById('f_fiber').value    = det.fiber    || '';
       // Inferir el objetivo nutricional de la plantilla desde los datos guardados
       setGoalMode((det.proteins || det.carbs || det.fats) ? 'macros' : (d.calories ? 'kcal' : 'libre'));
       document.getElementById('f_deficit').value  = det.deficit  || '';
@@ -1859,13 +1865,22 @@ function setGoalMode(mode) {
   var kf = document.getElementById('dgoKcalFields');
   var mf = document.getElementById('dgoMacroFields');
   // kcal se muestra en modo kcal; en modo macros la kcal va junto a los macros
-  if (kf) kf.style.display = (mode === 'kcal' || mode === 'macros') ? 'block' : 'none';
+  if (kf) kf.style.display = mode === 'kcal' ? 'block' : 'none';
   if (mf) mf.style.display = mode === 'macros' ? 'block' : 'none';
+  var kfield = document.getElementById('kcalField');
+  var klbl = document.getElementById('kcalLbl');
+  if (kfield) {
+    kfield.style.display = (mode === 'kcal' || mode === 'macros') ? 'block' : 'none';
+    var slot = document.getElementById(mode === 'macros' ? 'kcalSlotB' : 'kcalSlotA');
+    if (slot && kfield.parentNode !== slot) slot.appendChild(kfield);
+    if (klbl) klbl.textContent = mode === 'macros' ? 'Kcal' : 'Calorías objetivo (kcal/día)';
+    if (mode === 'kcal') kfield.style.maxWidth = '220px'; else kfield.style.maxWidth = '';
+  }
   recalcTotalMacros();
 }
 
 function clearForm() {
-  ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_deficit','f_surplus'].forEach(function(id){
+  ['f_title','f_calories','f_proteins','f_carbs','f_fats','f_fiber','f_deficit','f_surplus'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   var ftype = document.getElementById('f_type'); if (ftype) ftype.value = '';
@@ -2425,6 +2440,7 @@ function recalcTotalMacros() {
     document.getElementById('f_proteins').value = p.toFixed(1);
     document.getElementById('f_carbs').value    = c.toFixed(1);
     document.getElementById('f_fats').value     = f.toFixed(1);
+    document.getElementById('f_fiber').value    = fb.toFixed(1);
     updatePreview();
   }
   var tK = document.getElementById('tot_kcal');
@@ -2437,7 +2453,7 @@ function recalcTotalMacros() {
   if (tC) tC.innerHTML = Math.round(c) + '<small>g</small>';
   if (tF) tF.innerHTML = Math.round(f) + '<small>g</small>';
   if (tFb) tFb.innerHTML = Math.round(fb) + '<small>g</small>';
-  _renderGoalProgress({ kcal:k, prot:p, carb:c, fat:f });
+  _renderGoalProgress({ kcal:k, prot:p, carb:c, fat:f, fib:fb });
 }
 
 /* ── Límite del objetivo en el constructor ────────────────────────────────────
@@ -2447,14 +2463,14 @@ function _goalTargets() {
   if (_goalMode === 'libre') return {};
   var num = function(id){ var v = parseFloat((document.getElementById(id)||{}).value); return v > 0 ? v : 0; };
   var t = { kcal: num('f_calories') };
-  if (_goalMode === 'macros') { t.prot = num('f_proteins'); t.carb = num('f_carbs'); t.fat = num('f_fats'); }
+  if (_goalMode === 'macros') { t.prot = num('f_proteins'); t.carb = num('f_carbs'); t.fat = num('f_fats'); t.fib = num('f_fiber'); }
   return t;
 }
 
 function _renderGoalProgress(totals) {
   var targets = _goalTargets();
-  var units = { kcal:' kcal', prot:'g', carb:'g', fat:'g' };
-  ['kcal','prot','carb','fat'].forEach(function(key){
+  var units = { kcal:' kcal', prot:'g', carb:'g', fat:'g', fib:'g' };
+  ['kcal','prot','carb','fat','fib'].forEach(function(key){
     var goalEl = document.getElementById('goal_' + key);
     var barEl  = document.getElementById('bar_' + key);
     var leftEl = document.getElementById('left_' + key);
@@ -3094,15 +3110,15 @@ async function saveDiet() {
     type_id:   parseInt(document.getElementById('f_type').value) || null,
     style:     (document.getElementById('f_style') || {}).value || null,
     calories:  pNum('f_calories'), proteins: pNum('f_proteins'),
-    carbs: pNum('f_carbs'), fats: pNum('f_fats'),
+    carbs: pNum('f_carbs'), fats: pNum('f_fats'), fiber: pNum('f_fiber'),
     deficit: pNum('f_deficit'), surplus: pNum('f_surplus'),
     notes: notesEl ? notesEl.value.trim() || null : null,
     pathology_ids: _getSelectedPathologyIds(),
     foods: foods,
   };
   // El modo de objetivo decide qué metas guarda la plantilla
-  if (_goalMode === 'libre') { body.calories = null; body.proteins = null; body.carbs = null; body.fats = null; }
-  else if (_goalMode === 'kcal') { body.proteins = null; body.carbs = null; body.fats = null; }
+  if (_goalMode === 'libre') { body.calories = null; body.proteins = null; body.carbs = null; body.fats = null; body.fiber = null; }
+  else if (_goalMode === 'kcal') { body.proteins = null; body.carbs = null; body.fats = null; body.fiber = null; }
   if (editingId) body.id = editingId;
   try {
     var url    = editingId ? API + '/diets/' + editingId + '/update' : API + '/diets';

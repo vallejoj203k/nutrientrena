@@ -33,6 +33,7 @@ class DietCreate(BaseModel):
     proteins: Optional[float] = None
     carbs: Optional[float] = None
     fats: Optional[float] = None
+    fiber: Optional[float] = None
     deficit: Optional[float] = None
     surplus: Optional[float] = None
     foods: Optional[List[DietFoodCreate]] = []
@@ -86,6 +87,7 @@ class DietDetailOut(BaseModel):
     proteins: Optional[float] = None
     carbs: Optional[float] = None
     fats: Optional[float] = None
+    fiber: Optional[float] = None
     deficit: Optional[float] = None
     surplus: Optional[float] = None
     model_config = {"from_attributes": True}

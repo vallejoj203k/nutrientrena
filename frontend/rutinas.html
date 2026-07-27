@@ -1765,7 +1765,10 @@ function renderRoutineView(rt,id){
     <div class="rv-actions${actionBtns.length===2?' two':(actionBtns.length===1?' one':'')}">${actionBtns.join('')}</div>`;
 }
 
-initUser();loadParamSelects();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();adaptSidebar();
+initUser();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();adaptSidebar();
+// Los nombres de nivel son parámetros: llegan aparte, así que al cargarlos
+// se repinta la tabla (si no, la columna Nivel muestra el id numérico).
+loadParamSelects().then(()=>{if(allRoutines.length)applyRoutineFilter();});
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 

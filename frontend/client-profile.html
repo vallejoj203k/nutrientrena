@@ -456,6 +456,7 @@
     .assign-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
     .assign-filter{padding:6px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;color:#374151;background:#fff;font-family:inherit;cursor:pointer;outline:none;transition:.15s;max-width:150px;}
     .assign-filter:hover{border-color:#C7D2FE;}
+    .assign-filter:disabled{background:#F9FAFB;color:#C4C7CF;cursor:not-allowed;}
     .assign-filter.active{border-color:var(--indigo,#4F46E5);color:var(--indigo,#4F46E5);background:#EEF2FF;font-weight:600;}
     .assign-filter-clear{padding:6px 10px;border:none;background:none;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
     .assign-filter-clear:hover{text-decoration:underline;}
@@ -8003,11 +8004,7 @@ function _arGenderName(id) {
 function _arOptions(list, key, label) {
   let vals;
   if (key === 'level') vals = [...new Set(list.map(r => r.training_level_id).filter(Boolean))].sort();
-  else if (key === 'gender') {
-    vals = [...new Set(list.map(r => r.gender_id || 0))].sort();
-    // Sólo tiene sentido ofrecerlo si hay más de un público en la biblioteca.
-    if (vals.length < 2) vals = [];
-  }
+  else if (key === 'gender') vals = [...new Set(list.map(r => r.gender_id || 0))].sort();
   else vals = [...new Set(list.map(r => (r[key === 'objective' ? 'objective' : 'training'] || '').trim()).filter(Boolean))].sort();
   const text = v => key === 'level'  ? (_AR_LEVELS[v] || 'Nivel ' + v)
                  : key === 'gender' ? _arGenderName(v)
@@ -8024,8 +8021,11 @@ function _renderRoutineFilters() {
     const el = document.getElementById(id);
     if (!el) return;
     el.innerHTML = _arOptions(all, key, label);
-    // Una categoría sin valores en la biblioteca no aporta nada.
-    el.style.display = el.options.length > 1 ? '' : 'none';
+    // Los cuatro filtros están siempre a la vista; si la biblioteca no tiene
+    // ese dato en ninguna rutina, el filtro se ve deshabilitado en vez de
+    // desaparecer (antes se ocultaban todos y parecía que no existían).
+    el.disabled = el.options.length <= 1;
+    el.title = el.disabled ? 'Ninguna rutina de tu biblioteca tiene este dato' : '';
     el.classList.toggle('active', !!_arFilters[key]);
     if (_arFilters[key]) any = true;
   });

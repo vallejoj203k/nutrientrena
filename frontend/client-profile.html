@@ -453,6 +453,13 @@
     @media(max-width:900px){.active-plan-grid{grid-template-columns:1fr;}}
 
     /* ── Assign modals ── */
+    .assign-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+    .assign-filter{padding:6px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;color:#374151;background:#fff;font-family:inherit;cursor:pointer;outline:none;transition:.15s;max-width:150px;}
+    .assign-filter:hover{border-color:#C7D2FE;}
+    .assign-filter.active{border-color:var(--indigo,#4F46E5);color:var(--indigo,#4F46E5);background:#EEF2FF;font-weight:600;}
+    .assign-filter-clear{padding:6px 10px;border:none;background:none;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
+    .assign-filter-clear:hover{text-decoration:underline;}
+    .assign-filter-count{font-size:11.5px;color:#9CA3AF;margin-bottom:6px;}
     .assign-list{max-height:280px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:10px;}
     .assign-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:.12s;border-left:3px solid transparent;}
     .assign-item:last-child{border-bottom:none;}
@@ -1848,6 +1855,14 @@
       <div class="form-group" style="margin-bottom:10px;">
         <input type="text" id="assignRoutineSearch" placeholder="Buscar rutina..." style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;" oninput="filterAssignList('routine',this.value)"/>
       </div>
+      <div class="assign-filters" id="assignRoutineFilters">
+        <select class="assign-filter" id="arfObjective" onchange="setRoutineFilter('objective',this.value)"></select>
+        <select class="assign-filter" id="arfLevel" onchange="setRoutineFilter('level',this.value)"></select>
+        <select class="assign-filter" id="arfPlace" onchange="setRoutineFilter('place',this.value)"></select>
+        <select class="assign-filter" id="arfDays" onchange="setRoutineFilter('days',this.value)"></select>
+        <button class="assign-filter-clear" id="arfClear" onclick="clearRoutineFilters()" style="display:none;">Limpiar</button>
+      </div>
+      <div class="assign-filter-count" id="arfCount"></div>
       <div class="assign-list" id="assignRoutineList">
         <div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando rutinas…</div>
       </div>
@@ -7859,7 +7874,8 @@ async function openAssignRoutineModal() {
     const r = await fetch(`${API}/routines/findAll`, { headers: h() });
     const j = await r.json();
     _assignRoutines = Array.isArray(j.data) ? j.data : [];
-    renderAssignRoutineList(_assignRoutines);
+    _arFilters = { objective:'', level:'', place:'', days:'' };
+    _applyRoutineFilters();
   } catch {
     document.getElementById('assignRoutineList').innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar las rutinas.</div>';
   }
@@ -7873,9 +7889,15 @@ function closeAssignRoutineModal() {
 
 function renderAssignRoutineList(routines) {
   const el = document.getElementById('assignRoutineList');
-  if (!routines.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">No hay rutinas en tu biblioteca.</div>'; return; }
+  if (!routines.length) {
+    const filtered = _assignRoutines.length > 0;
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">${filtered ? 'Ninguna rutina coincide con estos filtros.' : 'No hay rutinas en tu biblioteca.'}</div>`;
+    return;
+  }
   el.innerHTML = routines.map(r => {
     const parts = [
+      r.objective || '',
+      r.training_level_id ? (_AR_LEVELS[r.training_level_id] || '') : '',
       r.days ? r.days + ' días/sem' : '',
       r.time ? r.time + ' min/sesión' : '',
       r.training || '',
@@ -7959,7 +7981,73 @@ async function confirmAssignRoutine() {
 function filterAssignList(type, q) {
   q = (q || '').toLowerCase();
   if (type === 'diet') renderAssignDietList(_assignDiets.filter(d => (d.title || '').toLowerCase().includes(q)));
-  else renderAssignRoutineList(_assignRoutines.filter(r => (r.name || '').toLowerCase().includes(q)));
+  else _applyRoutineFilters();
+}
+
+/* ── Filtros de la biblioteca de rutinas al asignar ── */
+const _AR_LEVELS = { 1:'Principiante', 2:'Intermedio', 3:'Avanzado' };
+let _arFilters = { objective:'', level:'', place:'', days:'' };
+
+// Las opciones salen de las rutinas reales: no se ofrecen categorías vacías.
+function _arOptions(list, key, label) {
+  let vals;
+  if (key === 'level') vals = [...new Set(list.map(r => r.training_level_id).filter(Boolean))].sort();
+  else if (key === 'days') vals = [...new Set(list.map(r => r.days).filter(Boolean))].sort((a,b)=>a-b);
+  else vals = [...new Set(list.map(r => (r[key === 'objective' ? 'objective' : 'training'] || '').trim()).filter(Boolean))].sort();
+  const text = v => key === 'level' ? (_AR_LEVELS[v] || 'Nivel ' + v)
+                 : key === 'days'  ? v + ' días/sem'
+                 : v;
+  return `<option value="">${label}</option>` +
+    vals.map(v => `<option value="${esc(String(v))}"${String(_arFilters[key]) === String(v) ? ' selected' : ''}>${esc(text(v))}</option>`).join('');
+}
+
+function _renderRoutineFilters() {
+  const all = _assignRoutines;
+  const defs = [['arfObjective','objective','Objetivo'],['arfLevel','level','Nivel'],['arfPlace','place','Lugar'],['arfDays','days','Días/sem']];
+  let any = false;
+  defs.forEach(([id, key, label]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = _arOptions(all, key, label);
+    // Una categoría sin valores en la biblioteca no aporta nada.
+    el.style.display = el.options.length > 1 ? '' : 'none';
+    el.classList.toggle('active', !!_arFilters[key]);
+    if (_arFilters[key]) any = true;
+  });
+  const clr = document.getElementById('arfClear');
+  if (clr) clr.style.display = any ? '' : 'none';
+}
+
+function _routineMatches(r) {
+  const q = (document.getElementById('assignRoutineSearch')?.value || '').toLowerCase();
+  if (q && !(r.name || '').toLowerCase().includes(q)) return false;
+  if (_arFilters.objective && (r.objective || '').trim() !== _arFilters.objective) return false;
+  if (_arFilters.place && (r.training || '').trim() !== _arFilters.place) return false;
+  if (_arFilters.level && String(r.training_level_id || '') !== String(_arFilters.level)) return false;
+  if (_arFilters.days && String(r.days || '') !== String(_arFilters.days)) return false;
+  return true;
+}
+
+function _applyRoutineFilters() {
+  const list = _assignRoutines.filter(_routineMatches);
+  _renderRoutineFilters();
+  const c = document.getElementById('arfCount');
+  if (c) c.textContent = list.length === _assignRoutines.length
+    ? `${_assignRoutines.length} rutina${_assignRoutines.length !== 1 ? 's' : ''} en tu biblioteca`
+    : `${list.length} de ${_assignRoutines.length} rutinas`;
+  renderAssignRoutineList(list);
+}
+
+function setRoutineFilter(key, val) {
+  _arFilters[key] = val || '';
+  _applyRoutineFilters();
+}
+
+function clearRoutineFilters() {
+  _arFilters = { objective:'', level:'', place:'', days:'' };
+  const sb = document.getElementById('assignRoutineSearch');
+  if (sb) sb.value = '';
+  _applyRoutineFilters();
 }
 (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 </script>

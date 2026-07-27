@@ -1214,6 +1214,8 @@
 .cp-id-head{background:linear-gradient(135deg,#7C3AED 0%,#9333EA 100%);padding:22px 20px;text-align:center;color:#fff;}
 .cp-avatar{width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;margin:0 auto 10px;cursor:pointer;overflow:hidden;border:2px solid rgba(255,255,255,.4);}
 .cp-avatar img{width:100%;height:100%;object-fit:cover;}
+.cp-edit-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;margin:0 0 12px;padding:10px;border:none;border-radius:10px;background:var(--indigo,#4F46E5);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.cp-edit-btn:hover{background:#4338CA;}
 .cp-id-name{font-size:18px;font-weight:800;line-height:1.2;}
 .cp-id-obj{font-size:12px;opacity:.85;margin-top:2px;}
 .cp-id-body{padding:6px 18px 14px;}
@@ -1272,8 +1274,8 @@
 @media(max-width:900px){.res-new-grid{grid-template-columns:1fr;}}
 .res-datos-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:0;overflow:hidden;}
 .res-datos-head{padding:14px 16px;border-bottom:1px solid #F3F4F6;font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.res-datos-edit{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #E5E7EB;border-radius:7px;background:#fff;font-size:11px;font-weight:700;color:#4F46E5;cursor:pointer;font-family:inherit;text-transform:none;letter-spacing:0;transition:.15s;}
-.res-datos-edit:hover{border-color:#C7D2FE;background:#EEF2FF;}
+.res-datos-edit{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border:none;border-radius:8px;background:var(--indigo,#4F46E5);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-transform:none;letter-spacing:0;transition:.15s;}
+.res-datos-edit:hover{background:#4338CA;}
 .ec-sec{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin:4px 0 12px;}
 .ec-sec:not(:first-child){margin-top:20px;padding-top:16px;border-top:1px solid #F3F4F6;}
 .res-datos-row{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #F9FAFB;font-size:13px;}
@@ -2264,6 +2266,10 @@ function _renderClientPanel() {
         <div class="cp-id-obj">${esc(obj)}</div>
       </div>
       <div class="cp-id-body">
+        <button class="cp-edit-btn" onclick="openEditClient()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Editar cliente
+        </button>
         <div class="cp-id-row"><span class="cp-id-k">Correo</span><span class="cp-id-v">${esc(c.email || '—')}</span></div>
         <div class="cp-id-row"><span class="cp-id-k">Género</span><span class="cp-id-v">${esc(c.gender?.name || c.gender?.description || '—')}</span></div>
         <div class="cp-id-row"><span class="cp-id-k">Peso inicial</span><span class="cp-id-v">${pesoIni}</span></div>

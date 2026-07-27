@@ -83,6 +83,9 @@ def list_team(
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
 ):
     members = db.query(TeamMember).all()
+    # Si la cuenta enlazada esta dada de baja, su ficha tampoco debe aparecer:
+    # si no, quedaria una tarjeta fantasma imposible de gestionar.
+    members = [m for m in members if not (m.user_detail and m.user_detail.deleted_at)]
     return send_response(
         data=[_serialize(m, db) for m in members],
         message="Equipo obtenido correctamente",

@@ -489,11 +489,22 @@
     const r = await fetch(`${API}/organizations/mine`, { headers: h() });
     const j = await r.json();
     if (!r.ok || !j.data) {
+      // Sin organización: un admin de plataforma puede crear la primera; el
+      // resto depende de que el dueño le añada como miembro.
+      const rid = parseInt(localStorage.getItem('role_id') || '0');
+      const isPlatformAdmin = rid === 1 || rid === 2;
       document.getElementById('mainContent').innerHTML = `
         <div class="access-denied">
           <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <h3>No perteneces a ninguna organizacion</h3>
-          <p style="font-size:13px;max-width:300px;">Tu cuenta aun no esta vinculada a una organizacion. Contacta con el administrador de la plataforma.</p>
+          <h3>Aun no hay ninguna organizacion</h3>
+          ${isPlatformAdmin
+            ? `<p style="font-size:13px;max-width:360px;">Crea la organizacion para poder dar de alta a tus coaches y gestionar sus permisos desde aqui.</p>
+               <div style="display:flex;gap:8px;margin-top:6px;">
+                 <input id="newOrgName" placeholder="Nombre de la organizacion" style="padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;min-width:240px;outline:none;"/>
+                 <button class="btn btn-primary btn-sm" id="createOrgBtn" onclick="createOrg()">Crear organizacion</button>
+               </div>
+               <div id="createOrgError" style="color:#DC2626;font-size:12px;"></div>`
+            : `<p style="font-size:13px;max-width:360px;">Tu cuenta aun no esta vinculada a una organizacion. Pide al administrador que te añada como miembro para verla aqui.</p>`}
         </div>`;
       return;
     }
@@ -749,6 +760,24 @@
       btn.disabled = false;
       btn.textContent = 'Guardar';
     }
+  }
+
+  // ── Crear la organizacion (solo admin de plataforma) ──────────────────────
+  async function createOrg() {
+    const name = (document.getElementById('newOrgName').value || '').trim();
+    const err = document.getElementById('createOrgError');
+    err.textContent = '';
+    if (!name) { err.textContent = 'Escribe un nombre.'; return; }
+    const btn = document.getElementById('createOrgBtn');
+    btn.disabled = true; btn.textContent = 'Creando…';
+    try {
+      const r = await fetch(`${API}/organizations`, { method: 'POST', headers: h(), body: JSON.stringify({ name }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { err.textContent = j.detail || j.message || 'No se pudo crear'; return; }
+      showToast('Organizacion creada');
+      await loadOrg();
+    } catch { err.textContent = 'Error de conexion'; }
+    finally { btn.disabled = false; btn.textContent = 'Crear organizacion'; }
   }
 
   // ── Remove member ─────────────────────────────────────────────────────────

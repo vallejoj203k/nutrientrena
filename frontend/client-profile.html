@@ -690,7 +690,11 @@
     .nut-day-item.empty .nut-day-meta{color:#C4C7CF;font-style:italic;}
     .nut-empty-day{display:flex;flex-direction:column;align-items:center;gap:8px;padding:44px 20px;text-align:center;color:#9CA3AF;font-size:13px;}
     .nut-empty-day svg{color:#D8DBE2;}
-    .nut-empty-link{font-size:12.5px;font-weight:700;color:#4F46E5;text-decoration:none;}
+    .nut-empty-link{font-size:12.5px;font-weight:700;color:#4F46E5;text-decoration:none;background:none;border:none;cursor:pointer;font-family:inherit;}
+    .nut-day-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px;}
+    .nut-day-act{padding:6px 12px;border-radius:8px;border:1px solid #E5E7EB;background:#fff;font-size:12px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;transition:.15s;}
+    .nut-day-act:hover{border-color:#C7D2FE;color:#4F46E5;}
+    .nut-day-act.danger:hover{border-color:#FECACA;color:#DC2626;}
     .nut-empty-link:hover{text-decoration:underline;}
     .nut-meal-panel{flex:1;display:flex;flex-direction:column;min-width:0;}
     .nut-meal-ph{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #F3F4F6;flex-shrink:0;}
@@ -6238,8 +6242,14 @@ function _renderNutUI() {
             <div class="nut-meal-day-title">${dayName}</div>
             <div class="nut-meal-day-sub">${dayHasDiet ? (mealCount+' comidas · '+totalKcal+' kcal') : 'Sin dieta asignada este día'}</div>
           </div>
-          <button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar plan</button>
+          ${dayHasDiet
+            ? `<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>${menuDays ? 'Editar este día' : 'Editar plan'}</button>`
+            : `<button class="nut-edit-btn" onclick="assignDietToDay(${_nutDayIdx})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Asignar dieta a este día</button>`}
         </div>
+        ${menuDays && dayHasDiet ? `<div class="nut-day-actions">
+          <button class="nut-day-act" onclick="assignDietToDay(${_nutDayIdx})">Cambiar la dieta de este día</button>
+          <button class="nut-day-act danger" onclick="clearMenuDay(${_nutDayIdx})">Dejar el día sin dieta</button>
+        </div>` : ''}
         ${menuDays ? '' : `<div class="nut-same-note">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           Este plan es diario: se repite igual todos los días. Para comidas distintas por día, asígnale un <b>menú semanal</b>.
@@ -6247,7 +6257,7 @@ function _renderNutUI() {
         <div class="nut-meals-area">${!dayHasDiet ? `<div class="nut-empty-day">
           <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
           <div>El ${dayName.toLowerCase()} no tiene dieta en este menú.</div>
-          <a class="nut-empty-link" href="menus.html" target="_blank" rel="noopener">Editar el menú semanal</a>
+          <button class="nut-empty-link" onclick="assignDietToDay(${_nutDayIdx})">Asignar una dieta a este día</button>
         </div>` : foods.map(meal=>{
           const mKcal=Math.round(_nutMealKcal(meal));
           const mTime=_nutMealTime(meal.name);
@@ -6481,9 +6491,13 @@ function _nutCalcMacros(a, qty, unit) {
   };
 }
 
-async function openNutEditor() {
-  if (!clientDiets[0]) return;
-  const targetId = String(clientDiets[0].id);
+async function openNutEditor(dietId) {
+  // Con menú semanal se edita la dieta del día elegido; sin menú, el plan único.
+  const menuDays = _nutMenuDays();
+  const fromDay = menuDays ? (menuDays[_nutDayIdx] || {}).diet_id : null;
+  const target = dietId || fromDay || clientDiets[0]?.id;
+  if (!target) return;
+  const targetId = String(target);
   const ovl = document.getElementById('nutEditorOverlay');
   const cname = ((clientData?.first_name || '') + ' ' + (clientData?.last_name || '')).trim();
   document.getElementById('neSub').textContent = 'Editor de nutrición' + (cname ? ' · ' + cname : '') + ' — los cambios solo afectan a este cliente';
@@ -7233,7 +7247,13 @@ async function saveNutChanges() {
     showToast('Cambios guardados', 'success');
     try {
       const refr = await fetch(`${API}/diets/${_neDietId}/edit`, { headers: h() });
-      if (refr.ok) { const rj = await refr.json(); _nutDetail = _nutNormalize(rj.data || rj); _nutDetailLoaded = true; }
+      if (refr.ok) {
+        const rj = await refr.json();
+        _nutDetail = _nutNormalize(rj.data || rj);
+        _nutDetailLoaded = true;
+        // La caché por dieta alimenta el menú semanal: hay que refrescarla.
+        _nutDietCache[_neDietId] = _nutDetail;
+      }
     } catch {}
     closeNutEditor();
     _renderNutUI();
@@ -7603,10 +7623,48 @@ let _assignRoutines = [], _selectedRoutineId = null;
 
 let _assignReplaceDietId = null;
 let _assignReplaceRoutineId = null;
+// Día del menú semanal al que se está asignando dieta (null = plan general).
+let _assignMenuDayIdx = null;
 
 function changeNutPlan() {
+  const menuDays = _nutMenuDays();
+  if (menuDays) { assignDietToDay(_nutDayIdx); return; }
   _assignReplaceDietId = clientDiets[0]?.id || null;
   openAssignDietModal();
+}
+
+/* ── Días del menú semanal: asignar o quitar la dieta de un día ── */
+function assignDietToDay(idx) {
+  _assignMenuDayIdx = idx;
+  _assignReplaceDietId = null;
+  openAssignDietModal();
+}
+
+async function _setMenuDayDiet(idx, dietId) {
+  if (!_nutMenu) return false;
+  try {
+    const r = await fetch(`${API}/weekly-menus/${_nutMenu.id}/days/${idx}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ diet_id: dietId }),
+    });
+    if (!r.ok) throw new Error();
+    const j = await r.json();
+    if (j.data) _nutMenu = j.data;
+    return true;
+  } catch {
+    showToast('No se pudo actualizar el día', 'error');
+    return false;
+  }
+}
+
+async function clearMenuDay(idx) {
+  if (!confirm(`¿Dejar el ${_NUT_DAY_FULL[idx].toLowerCase()} sin dieta?`)) return;
+  if (!await _setMenuDayDiet(idx, null)) return;
+  _nutDayIdx = idx;
+  _nutDetail = null;
+  _renderNutUI();
+  showToast('Día sin dieta', 'success');
 }
 
 async function removeNutPlan() {
@@ -7683,6 +7741,7 @@ function closeAssignDietModal() {
   document.getElementById('assignDietOverlay').classList.remove('open');
   _selectedDietId = null;
   _assignReplaceDietId = null;
+  _assignMenuDayIdx = null;
 }
 
 function renderAssignDietList(diets) {
@@ -7735,6 +7794,21 @@ async function confirmAssignDiet() {
     });
     const j = await r.json();
     if (!r.ok) { document.getElementById('assignDietError').textContent = j.detail || j.message || 'Error al asignar'; return; }
+    // Asignación a un día concreto del menú semanal: el día apunta a la copia
+    // recién creada para este cliente, sin tocar el resto de días.
+    if (_assignMenuDayIdx != null) {
+      const idx = _assignMenuDayIdx;
+      _assignMenuDayIdx = null;
+      closeAssignDietModal();
+      if (await _setMenuDayDiet(idx, j.data?.id || null)) {
+        _nutDayIdx = idx;
+        _nutDetail = await _nutLoadDiet(j.data?.id);
+        _renderNutUI();
+        showToast('Dieta asignada a ' + _NUT_DAY_FULL[idx], 'success');
+      }
+      btn.disabled = false;
+      return;
+    }
     // "Cambiar plan": remove the plan being replaced once the new one is assigned
     if (_assignReplaceDietId && String(_assignReplaceDietId) !== String(j.data?.id || '')) {
       try { await fetch(`${API}/diets/${_assignReplaceDietId}`, { method: 'DELETE', headers: h() }); } catch {}

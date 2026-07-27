@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import Union
+from typing import Optional, Union
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -40,7 +40,15 @@ def list_menus(
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
 ):
-    menus = db.query(WeeklyMenu).filter(WeeklyMenu.coach_id == current_user.id).order_by(WeeklyMenu.created_at.desc()).all()
+    from app.models.client_menu import ClientMenu
+    # Las copias por cliente no son plantillas: no aparecen en la biblioteca.
+    assigned = db.query(ClientMenu.menu_id)
+    menus = (
+        db.query(WeeklyMenu)
+        .filter(WeeklyMenu.coach_id == current_user.id, ~WeeklyMenu.id.in_(assigned))
+        .order_by(WeeklyMenu.created_at.desc())
+        .all()
+    )
     return send_response([_serialize(m) for m in menus], "OK")
 
 
@@ -172,25 +180,71 @@ def assign_menu(
         return send_error("Cliente no encontrado", code=404)
 
     # Copiar cada dieta distinta del menú una sola vez
-    seen: set = set()
-    copied = 0
+    mapping: dict = {}
     for day in menu.days:
-        if day.diet and day.diet_id not in seen:
-            seen.add(day.diet_id)
-            copy_diet_to_user(db, day.diet, client.id, current_user.id)
-            copied += 1
-    if not copied:
+        if day.diet and day.diet_id not in mapping:
+            copy = copy_diet_to_user(db, day.diet, client.id, current_user.id)
+            mapping[day.diet_id] = copy.id
+    if not mapping:
         return send_error("El menú no tiene dietas para asignar", code=422)
-    # Además se registra como menú vigente, que es lo que da el reparto por
-    # días (sin esto un día sin dieta no se puede distinguir de los demás).
+
+    # El menú vigente del cliente es una copia propia que apunta a SUS dietas:
+    # así el coach puede editar cada día desde la ficha del cliente sin tocar
+    # la plantilla de la biblioteca ni a los demás clientes.
     if detail:
+        client_menu = WeeklyMenu(
+            name=menu.name,
+            description=menu.description,
+            coach_id=current_user.id,
+            organization_id=menu.organization_id,
+        )
+        db.add(client_menu)
+        db.flush()
+        for day in menu.days:
+            db.add(WeeklyMenuDay(
+                menu_id=client_menu.id,
+                day_index=day.day_index,
+                name=day.name,
+                diet_id=mapping.get(day.diet_id),
+            ))
         db.add(ClientMenu(
             client_user_detail_id=detail.id,
-            menu_id=menu.id,
+            menu_id=client_menu.id,
             assigned_by_user_id=current_user.id,
         ))
     db.commit()
-    return send_response({"copied_diets": copied}, "Menú asignado")
+    return send_response({"copied_diets": len(mapping)}, "Menú asignado")
+
+
+class _MenuDayBody(BaseModel):
+    diet_id: Optional[str] = None
+
+
+@router.put("/{id}/days/{day_index}", summary="Fijar la dieta de un día del menú")
+def set_menu_day(
+    id: str,
+    day_index: int,
+    body: _MenuDayBody,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
+    if not menu:
+        return send_error("Menú no encontrado", code=404)
+    if day_index < 0 or day_index > 6:
+        return send_error("Día no válido", code=422)
+    day = (
+        db.query(WeeklyMenuDay)
+        .filter(WeeklyMenuDay.menu_id == id, WeeklyMenuDay.day_index == day_index)
+        .first()
+    )
+    if day:
+        day.diet_id = body.diet_id
+    else:
+        db.add(WeeklyMenuDay(menu_id=id, day_index=day_index, diet_id=body.diet_id))
+    db.commit()
+    db.refresh(menu)
+    return send_response(_serialize(menu), "Día actualizado")
 
 
 @router.get("/client/{client_id}", summary="Menú semanal vigente de un cliente")

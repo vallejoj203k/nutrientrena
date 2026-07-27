@@ -180,7 +180,9 @@ def find_all(
 
     role_users = db.query(RoleUser).filter(RoleUser.role_id == role.id).all()
     user_ids = [ru.user_id for ru in role_users]
-    details = db.query(UserDetail).filter(UserDetail.user_id.in_(user_ids)).all()
+    details = db.query(UserDetail).filter(
+        UserDetail.user_id.in_(user_ids), UserDetail.deleted_at.is_(None)
+    ).all()
 
     # Coaches only see their assigned clients when slug=client
     if slug == "client":
@@ -214,7 +216,9 @@ def clients_portfolio(
         return send_error("Rol no encontrado")
 
     role_user_ids = [ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == role.id).all()]
-    details = db.query(UserDetail).filter(UserDetail.user_id.in_(role_user_ids)).all()
+    details = db.query(UserDetail).filter(
+        UserDetail.user_id.in_(role_user_ids), UserDetail.deleted_at.is_(None)
+    ).all()
     details = filter_clients_by_role(details, current_user, db)
 
     detail_ids = [d.id for d in details]
@@ -374,7 +378,7 @@ def search(
         return send_error("Rol no encontrado")
 
     role_user_ids = [ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == role.id).all()]
-    q = db.query(UserDetail).filter(UserDetail.user_id.in_(role_user_ids))
+    q = db.query(UserDetail).filter(UserDetail.user_id.in_(role_user_ids), UserDetail.deleted_at.is_(None))
 
     if search:
         q = q.filter(
@@ -414,7 +418,7 @@ def kanban(
     client_user_ids = [
         ru.user_id for ru in db.query(RoleUser).filter(RoleUser.role_id == CLIENT).all()
     ]
-    q = db.query(UserDetail).filter(UserDetail.user_id.in_(client_user_ids))
+    q = db.query(UserDetail).filter(UserDetail.user_id.in_(client_user_ids), UserDetail.deleted_at.is_(None))
 
     if coach_id:
         assigned_ids = [
@@ -555,6 +559,41 @@ def update_photo(
     db.commit()
     db.refresh(detail)
     return send_response(_serialize(detail, db), "Foto actualizada")
+
+
+# ── Baja / restauración de un usuario ─────────────────────────────────────────
+@router.delete("/{id}", summary="Dar de baja a un usuario", description="Baja reversible: deja de aparecer en los listados y no puede iniciar sesión, pero se conserva su historial.")
+def soft_delete(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    detail = _get_detail_or_404(db, id)
+    if not detail:
+        return send_error("Usuario no encontrado", code=404)
+    verify_client_access(id, current_user, db)
+    if detail.user_id == current_user.id:
+        return send_error("No puedes darte de baja a ti mismo", code=422)
+    # No se borra en duro: users.id cuelga de decenas de tablas (dietas,
+    # rutinas, check-ins, chat, contratos…) y perderíamos ese historial.
+    detail.deleted_at = datetime.utcnow()
+    db.commit()
+    return send_response({"id": id}, "Usuario dado de baja")
+
+
+@router.post("/{id}/restore", summary="Restaurar un usuario dado de baja")
+def restore(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    detail = _get_detail_or_404(db, id)
+    if not detail:
+        return send_error("Usuario no encontrado", code=404)
+    verify_client_access(id, current_user, db)
+    detail.deleted_at = None
+    db.commit()
+    return send_response(_serialize(detail, db), "Usuario restaurado")
 
 
 # ── Change state: admin, setter, closer ───────────────────────────────────────

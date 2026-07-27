@@ -1271,7 +1271,11 @@
 .res-new-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:stretch;}
 @media(max-width:900px){.res-new-grid{grid-template-columns:1fr;}}
 .res-datos-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:0;overflow:hidden;}
-.res-datos-head{padding:14px 16px;border-bottom:1px solid #F3F4F6;font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;}
+.res-datos-head{padding:14px 16px;border-bottom:1px solid #F3F4F6;font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.res-datos-edit{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #E5E7EB;border-radius:7px;background:#fff;font-size:11px;font-weight:700;color:#4F46E5;cursor:pointer;font-family:inherit;text-transform:none;letter-spacing:0;transition:.15s;}
+.res-datos-edit:hover{border-color:#C7D2FE;background:#EEF2FF;}
+.ec-sec{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin:4px 0 12px;}
+.ec-sec:not(:first-child){margin-top:20px;padding-top:16px;border-top:1px solid #F3F4F6;}
 .res-datos-row{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #F9FAFB;font-size:13px;}
 .res-datos-row:last-child{border-bottom:none;}
 .res-datos-key{color:#6B7280;font-weight:500;}
@@ -1789,6 +1793,58 @@
 </div>
 
 <!-- ── Fechas del programa Modal ── -->
+<!-- ── Editar datos del cliente (perfil + acceso) ── -->
+<div class="modal-overlay" id="editClientOverlay" onclick="if(event.target===this)closeEditClient()">
+  <div class="modal" style="width:620px;max-width:96vw;">
+    <div class="modal-head">
+      <h2>Editar cliente</h2>
+      <button class="modal-close" onclick="closeEditClient()">×</button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+      <div class="ec-sec">Datos personales</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre</label><input id="ec_name"/></div>
+        <div class="form-group"><label>Apellidos</label><input id="ec_last_name"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Teléfono</label><input id="ec_phone"/></div>
+        <div class="form-group"><label>Ocupación</label><input id="ec_occupation"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Género</label><select id="ec_gender_id"></select></div>
+        <div class="form-group"><label>Edad</label><input id="ec_age" type="number" min="10" max="100"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Altura (cm)</label><input id="ec_height" type="number" step="0.1"/></div>
+        <div class="form-group"><label>Peso inicial (kg)</label><input id="ec_weight" type="number" step="0.1"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Objetivo</label><select id="ec_objective_id"></select></div>
+        <div class="form-group"><label>Nivel de actividad</label><select id="ec_activity_id"></select></div>
+      </div>
+
+      <div class="ec-sec">Acceso a la plataforma</div>
+      <div class="form-row">
+        <div class="form-group"><label>Correo</label><input id="ec_email" type="email"/></div>
+        <div class="form-group">
+          <label>Nueva contraseña</label>
+          <input id="ec_password" type="text" placeholder="Dejar vacío para no cambiarla"/>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#9CA3AF;">El correo es el usuario con el que entra el cliente. Si escribes una contraseña, se sustituye la actual.</div>
+
+      <div class="form-error" id="ecError" style="margin-top:10px;color:#DC2626;font-size:13px;"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="btn btn-ghost" style="color:#DC2626;" onclick="confirmDeleteClient()">Dar de baja</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeEditClient()">Cancelar</button>
+        <button class="btn btn-primary" id="ecSaveBtn" onclick="saveEditClient()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="datesOverlay" onclick="if(event.target===this)closeDatesModal()">
   <div class="modal" style="width:420px;">
     <div class="modal-head">
@@ -2311,7 +2367,11 @@ function _renderResDatos() {
   const sesiones=deliveries.length||checkins.length||0;
   const objOpts=(_nutParamOpts?.objective||[]).map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join('');
   el.innerHTML=`<div class="res-datos-card">
-    <div class="res-datos-head">Datos del cliente</div>
+    <div class="res-datos-head">Datos del cliente
+      <button class="res-datos-edit" onclick="openEditClient()" title="Editar datos y acceso">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar
+      </button>
+    </div>
     <div class="res-datos-row"><span class="res-datos-key">Correo</span><span class="res-datos-val">${esc(c.email||'—')}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Teléfono</span><span class="res-datos-val">${esc(c.phone||'—')}</span></div>
     <div class="res-datos-row"><span class="res-datos-key">Género</span><span class="res-datos-val">${esc(genero)}</span></div>
@@ -2329,6 +2389,92 @@ function _renderResDatos() {
       </select>
     </div>
   </div>`;
+}
+
+/* ── Editar datos y acceso del cliente ────────────────────────────────────────
+   Un solo sitio para corregir nombre, teléfono, medidas, correo y contraseña:
+   antes no había forma de arreglar un correo mal escrito desde la ficha. */
+const _EC_FIELDS = ['name','last_name','phone','occupation','age','height','weight'];
+
+async function openEditClient() {
+  await _nutLoadParamOpts();
+  const c = clientData || {};
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+  set('ec_name', c.first_name || c.name || '');
+  set('ec_last_name', c.last_name || '');
+  set('ec_phone', c.phone || '');
+  set('ec_occupation', c.occupation || '');
+  set('ec_age', c.age);
+  set('ec_height', c.height);
+  set('ec_weight', c.weight);
+  set('ec_email', c.email || '');
+  set('ec_password', '');
+  const opts = (list, sel) => '<option value="">—</option>' + (list || []).map(o =>
+    `<option value="${o.id}"${String(o.id) === String(sel || '') ? ' selected' : ''}>${esc(o.name)}</option>`).join('');
+  document.getElementById('ec_gender_id').innerHTML    = opts(_nutParamOpts?.gender,    c.gender?.id || c.gender_id);
+  document.getElementById('ec_objective_id').innerHTML = opts(_nutParamOpts?.objective, c.objective?.id || c.objective_id);
+  document.getElementById('ec_activity_id').innerHTML  = opts(_nutParamOpts?.activity,  c.activity?.id || c.activity_id);
+  document.getElementById('ecError').textContent = '';
+  document.getElementById('editClientOverlay').classList.add('open');
+}
+
+function closeEditClient() { document.getElementById('editClientOverlay').classList.remove('open'); }
+
+async function saveEditClient() {
+  const val = id => (document.getElementById(id)?.value || '').trim();
+  const num = id => { const v = parseFloat(val(id)); return isNaN(v) ? null : v; };
+  const err = document.getElementById('ecError');
+  err.textContent = '';
+  if (!val('ec_name')) { err.textContent = 'El nombre es obligatorio.'; return; }
+  const email = val('ec_email');
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = 'Escribe un correo válido.'; return; }
+  const pass = val('ec_password');
+  if (pass && pass.length < 6) { err.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+
+  const body = {
+    name: val('ec_name'),
+    last_name: val('ec_last_name') || null,
+    phone: val('ec_phone') || null,
+    occupation: val('ec_occupation') || null,
+    age: num('ec_age'), height: num('ec_height'), weight: num('ec_weight'),
+    email: email,
+    gender_id: parseInt(val('ec_gender_id')) || null,
+    objective_id: parseInt(val('ec_objective_id')) || null,
+    activity_id: parseInt(val('ec_activity_id')) || null,
+  };
+  if (pass) body.password = pass;
+
+  const btn = document.getElementById('ecSaveBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const r = await fetch(`${API}/users/${clientId}/update`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', ...h() }, body: JSON.stringify(body),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { err.textContent = j.detail || j.message || 'No se pudo guardar'; return; }
+    // El endpoint devuelve el perfil actualizado: se refresca la ficha entera.
+    if (j.data) clientData = { ...clientData, ...j.data, first_name: j.data.name };
+    closeEditClient();
+    showToast(pass ? 'Datos y contraseña actualizados' : 'Datos actualizados', 'success');
+    _renderClientPanel(); _renderResDatos(); _renderResStatsNew();
+  } catch { err.textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
+}
+
+function confirmDeleteClient() {
+  const name = `${clientData?.first_name || clientData?.name || ''} ${clientData?.last_name || ''}`.trim() || 'este cliente';
+  if (!confirm(`¿Dar de baja a ${name}?\n\nDejará de aparecer en tus listados y no podrá iniciar sesión. Su historial (dietas, rutinas, check-ins) se conserva y puedes restaurarlo desde Clientes.`)) return;
+  deleteClient();
+}
+
+async function deleteClient() {
+  try {
+    const r = await fetch(`${API}/users/${clientId}`, { method: 'DELETE', headers: h() });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { showToast(j.detail || j.message || 'No se pudo dar de baja', 'error'); return; }
+    showToast('Cliente dado de baja', 'success');
+    setTimeout(() => { location.href = 'clients.html'; }, 900);
+  } catch { showToast('Error de conexión', 'error'); }
 }
 
 /* ── Editar fechas del programa (inicio / fin) ── */

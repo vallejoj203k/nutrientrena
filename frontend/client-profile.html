@@ -7877,8 +7877,10 @@ async function openAssignRoutineModal() {
     _assignRoutines = Array.isArray(j.data) ? j.data : [];
     _arFilters = { objective:'', level:'', gender:'', place:'' };
     _applyRoutineFilters();
-    // Los nombres de "Dirigido a" son parámetros: al llegar se repintan.
-    _nutLoadParamOpts().then(() => { if (document.getElementById('assignRoutineOverlay').classList.contains('open')) _renderRoutineFilters(); });
+    // "Dirigido a" y "Nivel" son parámetros: al llegar se repinta el listado.
+    Promise.all([_nutLoadParamOpts(), _arLoadLevels()]).then(() => {
+      if (document.getElementById('assignRoutineOverlay').classList.contains('open')) _applyRoutineFilters();
+    });
   } catch {
     document.getElementById('assignRoutineList').innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar las rutinas.</div>';
   }
@@ -7900,7 +7902,7 @@ function renderAssignRoutineList(routines) {
   el.innerHTML = routines.map(r => {
     const parts = [
       r.objective || '',
-      r.training_level_id ? (_AR_LEVELS[r.training_level_id] || '') : '',
+      r.training_level_id ? _arLevelName(r.training_level_id) : '',
       _arGenderName(r.gender_id),
       r.training || '',
       r.days ? r.days + ' días/sem' : '',
@@ -7988,9 +7990,35 @@ function filterAssignList(type, q) {
 }
 
 /* ── Filtros de la biblioteca de rutinas al asignar ── */
-const _AR_LEVELS = { 1:'Principiante', 2:'Intermedio', 3:'Avanzado' };
+// Los niveles de una rutina son parameter_details: sus ids NO son 1/2/3, así
+// que hay que traer los nombres reales o la columna muestra números.
+let _AR_LEVELS = { 1:'Principiante', 2:'Intermedio', 3:'Avanzado' };
+let _arLevelsLoaded = false;
 const _AR_GENDERS_FB = { 1:'Masculino', 2:'Femenino' };
 let _arFilters = { objective:'', level:'', gender:'', place:'' };
+
+async function _arLoadLevels() {
+  if (_arLevelsLoaded) return;
+  _arLevelsLoaded = true;
+  try {
+    const r = await fetch(`${API}/parameters/search`, { headers: h() });
+    const j = await r.json();
+    const params = j.data || j;
+    const lv = Array.isArray(params) ? params.find(p => /nivel|level/i.test(p.description || '')) : null;
+    if (!lv) return;
+    const r2 = await fetch(`${API}/parameters-detail/search?parameter_id=${lv.id}`, { headers: h() });
+    const j2 = await r2.json();
+    const items = j2.data || j2;
+    if (Array.isArray(items) && items.length) {
+      _AR_LEVELS = {};
+      items.forEach(it => { _AR_LEVELS[it.id] = it.description || it.name; });
+    }
+  } catch {}
+}
+
+function _arLevelName(id) {
+  return _AR_LEVELS[id] || 'Nivel ' + id;
+}
 
 // Etiqueta de "Dirigido a": los géneros vienen de parámetros; sin gender_id la
 // rutina es mixta.
@@ -8006,7 +8034,7 @@ function _arOptions(list, key, label) {
   if (key === 'level') vals = [...new Set(list.map(r => r.training_level_id).filter(Boolean))].sort();
   else if (key === 'gender') vals = [...new Set(list.map(r => r.gender_id || 0))].sort();
   else vals = [...new Set(list.map(r => (r[key === 'objective' ? 'objective' : 'training'] || '').trim()).filter(Boolean))].sort();
-  const text = v => key === 'level'  ? (_AR_LEVELS[v] || 'Nivel ' + v)
+  const text = v => key === 'level'  ? _arLevelName(v)
                  : key === 'gender' ? _arGenderName(v)
                  : v;
   return `<option value="">${label}</option>` +

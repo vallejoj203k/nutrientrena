@@ -1858,8 +1858,8 @@
       <div class="assign-filters" id="assignRoutineFilters">
         <select class="assign-filter" id="arfObjective" onchange="setRoutineFilter('objective',this.value)"></select>
         <select class="assign-filter" id="arfLevel" onchange="setRoutineFilter('level',this.value)"></select>
+        <select class="assign-filter" id="arfGender" onchange="setRoutineFilter('gender',this.value)"></select>
         <select class="assign-filter" id="arfPlace" onchange="setRoutineFilter('place',this.value)"></select>
-        <select class="assign-filter" id="arfDays" onchange="setRoutineFilter('days',this.value)"></select>
         <button class="assign-filter-clear" id="arfClear" onclick="clearRoutineFilters()" style="display:none;">Limpiar</button>
       </div>
       <div class="assign-filter-count" id="arfCount"></div>
@@ -7874,8 +7874,10 @@ async function openAssignRoutineModal() {
     const r = await fetch(`${API}/routines/findAll`, { headers: h() });
     const j = await r.json();
     _assignRoutines = Array.isArray(j.data) ? j.data : [];
-    _arFilters = { objective:'', level:'', place:'', days:'' };
+    _arFilters = { objective:'', level:'', gender:'', place:'' };
     _applyRoutineFilters();
+    // Los nombres de "Dirigido a" son parámetros: al llegar se repintan.
+    _nutLoadParamOpts().then(() => { if (document.getElementById('assignRoutineOverlay').classList.contains('open')) _renderRoutineFilters(); });
   } catch {
     document.getElementById('assignRoutineList').innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar las rutinas.</div>';
   }
@@ -7898,9 +7900,9 @@ function renderAssignRoutineList(routines) {
     const parts = [
       r.objective || '',
       r.training_level_id ? (_AR_LEVELS[r.training_level_id] || '') : '',
-      r.days ? r.days + ' días/sem' : '',
-      r.time ? r.time + ' min/sesión' : '',
+      _arGenderName(r.gender_id),
       r.training || '',
+      r.days ? r.days + ' días/sem' : '',
     ].filter(Boolean);
     return `<div class="assign-item" id="aritem-${r.id}" onclick="selectAssignRoutine(${r.id},this)">
       <div class="assign-item-name">${esc(r.name || 'Sin nombre')}</div>
@@ -7986,16 +7988,29 @@ function filterAssignList(type, q) {
 
 /* ── Filtros de la biblioteca de rutinas al asignar ── */
 const _AR_LEVELS = { 1:'Principiante', 2:'Intermedio', 3:'Avanzado' };
-let _arFilters = { objective:'', level:'', place:'', days:'' };
+const _AR_GENDERS_FB = { 1:'Masculino', 2:'Femenino' };
+let _arFilters = { objective:'', level:'', gender:'', place:'' };
+
+// Etiqueta de "Dirigido a": los géneros vienen de parámetros; sin gender_id la
+// rutina es mixta.
+function _arGenderName(id) {
+  if (!id) return 'Mixto';
+  const opt = (_nutParamOpts?.gender || []).find(g => String(g.id) === String(id));
+  return opt ? opt.name : (_AR_GENDERS_FB[id] || 'Dirigido a ' + id);
+}
 
 // Las opciones salen de las rutinas reales: no se ofrecen categorías vacías.
 function _arOptions(list, key, label) {
   let vals;
   if (key === 'level') vals = [...new Set(list.map(r => r.training_level_id).filter(Boolean))].sort();
-  else if (key === 'days') vals = [...new Set(list.map(r => r.days).filter(Boolean))].sort((a,b)=>a-b);
+  else if (key === 'gender') {
+    vals = [...new Set(list.map(r => r.gender_id || 0))].sort();
+    // Sólo tiene sentido ofrecerlo si hay más de un público en la biblioteca.
+    if (vals.length < 2) vals = [];
+  }
   else vals = [...new Set(list.map(r => (r[key === 'objective' ? 'objective' : 'training'] || '').trim()).filter(Boolean))].sort();
-  const text = v => key === 'level' ? (_AR_LEVELS[v] || 'Nivel ' + v)
-                 : key === 'days'  ? v + ' días/sem'
+  const text = v => key === 'level'  ? (_AR_LEVELS[v] || 'Nivel ' + v)
+                 : key === 'gender' ? _arGenderName(v)
                  : v;
   return `<option value="">${label}</option>` +
     vals.map(v => `<option value="${esc(String(v))}"${String(_arFilters[key]) === String(v) ? ' selected' : ''}>${esc(text(v))}</option>`).join('');
@@ -8003,7 +8018,7 @@ function _arOptions(list, key, label) {
 
 function _renderRoutineFilters() {
   const all = _assignRoutines;
-  const defs = [['arfObjective','objective','Objetivo'],['arfLevel','level','Nivel'],['arfPlace','place','Lugar'],['arfDays','days','Días/sem']];
+  const defs = [['arfObjective','objective','Objetivo principal'],['arfLevel','level','Nivel'],['arfGender','gender','Dirigido a'],['arfPlace','place','Lugar']];
   let any = false;
   defs.forEach(([id, key, label]) => {
     const el = document.getElementById(id);
@@ -8024,7 +8039,7 @@ function _routineMatches(r) {
   if (_arFilters.objective && (r.objective || '').trim() !== _arFilters.objective) return false;
   if (_arFilters.place && (r.training || '').trim() !== _arFilters.place) return false;
   if (_arFilters.level && String(r.training_level_id || '') !== String(_arFilters.level)) return false;
-  if (_arFilters.days && String(r.days || '') !== String(_arFilters.days)) return false;
+  if (_arFilters.gender && String(r.gender_id || 0) !== String(_arFilters.gender)) return false;
   return true;
 }
 
@@ -8044,7 +8059,7 @@ function setRoutineFilter(key, val) {
 }
 
 function clearRoutineFilters() {
-  _arFilters = { objective:'', level:'', place:'', days:'' };
+  _arFilters = { objective:'', level:'', gender:'', place:'' };
   const sb = document.getElementById('assignRoutineSearch');
   if (sb) sb.value = '';
   _applyRoutineFilters();

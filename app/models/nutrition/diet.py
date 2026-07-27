@@ -61,6 +61,7 @@ class DietDetail(Base):
     proteins = Column(Float, nullable=True)
     carbs = Column(Float, nullable=True)
     fats = Column(Float, nullable=True)
+    fiber = Column(Float, nullable=True)  # objetivo de fibra (g/día)
     deficit = Column(Float, nullable=True)
     surplus = Column(Float, nullable=True)
 

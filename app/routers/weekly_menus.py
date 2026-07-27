@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from typing import Union
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -132,10 +133,28 @@ def patch_menu(
 
 
 class _MenuAssignBody(BaseModel):
-    client_id: int  # users.id del cliente
+    # Admite el id de usuario (users.id) o el UUID del UserDetail del cliente.
+    client_id: Union[int, str]
 
 
-@router.post("/{id}/assign", summary="Asignar menú semanal a un cliente", description="Copia al cliente las dietas de cada día del menú (una copia por dieta distinta).")
+def _resolve_client(db: Session, client_id):
+    """Devuelve (User, UserDetail) a partir de users.id o del UUID de UserDetail."""
+    from app.models.user import User, UserDetail
+
+    detail = None
+    user = None
+    if isinstance(client_id, int) or str(client_id).isdigit():
+        user = db.query(User).filter(User.id == int(client_id)).first()
+        if user:
+            detail = db.query(UserDetail).filter(UserDetail.user_id == user.id).first()
+    else:
+        detail = db.query(UserDetail).filter(UserDetail.id == str(client_id)).first()
+        if detail:
+            user = db.query(User).filter(User.id == detail.user_id).first()
+    return user, detail
+
+
+@router.post("/{id}/assign", summary="Asignar menú semanal a un cliente", description="Deja el menú como vigente del cliente y copia las dietas de cada día (una copia por dieta distinta).")
 def assign_menu(
     id: str,
     body: _MenuAssignBody,
@@ -143,12 +162,12 @@ def assign_menu(
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
     from app.routers.nutrition.diets import copy_diet_to_user
-    from app.models.user import User
+    from app.models.client_menu import ClientMenu
 
     menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
     if not menu:
         return send_error("Menú no encontrado", code=404)
-    client = db.query(User).filter(User.id == body.client_id).first()
+    client, detail = _resolve_client(db, body.client_id)
     if not client:
         return send_error("Cliente no encontrado", code=404)
 
@@ -162,8 +181,42 @@ def assign_menu(
             copied += 1
     if not copied:
         return send_error("El menú no tiene dietas para asignar", code=422)
+    # Además se registra como menú vigente, que es lo que da el reparto por
+    # días (sin esto un día sin dieta no se puede distinguir de los demás).
+    if detail:
+        db.add(ClientMenu(
+            client_user_detail_id=detail.id,
+            menu_id=menu.id,
+            assigned_by_user_id=current_user.id,
+        ))
     db.commit()
     return send_response({"copied_diets": copied}, "Menú asignado")
+
+
+@router.get("/client/{client_id}", summary="Menú semanal vigente de un cliente")
+def client_menu(
+    client_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    from app.core.dependencies import verify_client_access
+    from app.models.client_menu import ClientMenu
+
+    verify_client_access(client_id, current_user, db)
+    cm = (
+        db.query(ClientMenu)
+        .filter(ClientMenu.client_user_detail_id == client_id)
+        .order_by(ClientMenu.assigned_at.desc(), ClientMenu.id.desc())
+        .first()
+    )
+    if not cm:
+        return send_response(None, "Sin menú asignado")
+    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == cm.menu_id).first()
+    if not menu:
+        return send_response(None, "Sin menú asignado")
+    data = _serialize(menu)
+    data["assigned_at"] = cm.assigned_at
+    return send_response(data, "OK")
 
 
 @router.delete("/{id}", summary="Eliminar menú semanal")
@@ -178,23 +231,3 @@ def delete_menu(
     db.delete(menu)
     db.commit()
     return send_response(None, "Menú eliminado")
-
-
-# ── Asignar menú semanal a un cliente ──────────────────────────────────────────
-class _AssignMenuBody(BaseModel):
-    client_id: str  # UserDetail UUID del cliente
-
-
-@router.post("/{id}/assign", summary="Asignar menú a cliente", description="Asigna este menú semanal a un cliente; pasa a ser su menú vigente.")
-def assign_menu_to_client(id: str, body: _AssignMenuBody, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
-    from app.models.user import UserDetail
-    from app.models.client_menu import ClientMenu
-    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
-    if not menu:
-        return send_error("Menú no encontrado")
-    client = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
-    if not client:
-        return send_error("Cliente no encontrado")
-    db.add(ClientMenu(client_user_detail_id=body.client_id, menu_id=id, assigned_by_user_id=current_user.id))
-    db.commit()
-    return send_response(None, "Menú asignado al cliente")

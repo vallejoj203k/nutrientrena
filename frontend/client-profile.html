@@ -1826,6 +1826,13 @@
       <div class="form-group" style="margin-bottom:10px;">
         <input type="text" id="assignDietSearch" placeholder="Buscar dieta..." style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;transition:.15s;" oninput="filterAssignList('diet',this.value)"/>
       </div>
+      <div class="assign-filters" id="assignDietFilters">
+        <select class="assign-filter" id="adfType" onchange="setDietFilter('type',this.value)"></select>
+        <select class="assign-filter" id="adfGoal" onchange="setDietFilter('goal',this.value)"></select>
+        <select class="assign-filter" id="adfPatho" onchange="setDietFilter('patho',this.value)"></select>
+        <button class="assign-filter-clear" id="adfClear" onclick="clearDietFilters()" style="display:none;">Limpiar</button>
+      </div>
+      <div class="assign-filter-count" id="adfCount"></div>
       <div class="assign-list" id="assignDietList">
         <div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando dietas…</div>
       </div>
@@ -7747,7 +7754,12 @@ async function openAssignDietModal() {
     const r = await fetch(`${API}/diets/findAll`, { headers: h() });
     const j = await r.json();
     _assignDiets = Array.isArray(j.data) ? j.data : [];
-    renderAssignDietList(_assignDiets);
+    _adFilters = { type:'', goal:'', patho:'' };
+    _applyDietFilters();
+    // Los nombres de los tipos vienen del catálogo: al llegar se repinta.
+    _adLoadTypes().then(() => {
+      if (document.getElementById('assignDietOverlay').classList.contains('open')) _applyDietFilters();
+    });
   } catch {
     document.getElementById('assignDietList').innerHTML = '<div style="padding:20px;text-align:center;color:#DC2626;font-size:13px;">Error al cargar las dietas.</div>';
   }
@@ -7762,13 +7774,20 @@ function closeAssignDietModal() {
 
 function renderAssignDietList(diets) {
   const el = document.getElementById('assignDietList');
-  if (!diets.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">No hay dietas en tu biblioteca.</div>'; return; }
+  if (!diets.length) {
+    const filtered = _assignDiets.length > 0;
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">${filtered ? 'Ninguna dieta coincide con estos filtros.' : 'No hay dietas en tu biblioteca.'}</div>`;
+    return;
+  }
   el.innerHTML = diets.map(d => {
     const det = d.detail || {};
+    const patho = _adPathoNames(d);
     const parts = [
       d.calories ? Math.round(d.calories) + ' kcal' : '',
-      d.diet_type || '',
+      d.diet_type || (d.type_id != null ? _adTypeName(d.type_id) : ''),
+      _AD_GOALS[_adGoal(d)] || '',
       det.proteins ? Math.round(det.proteins) + 'P · ' + Math.round(det.carbs||0) + 'C · ' + Math.round(det.fats||0) + 'G' : '',
+      patho.length ? patho.join(', ') : '',
     ].filter(Boolean);
     return `<div class="assign-item" id="aditem-${esc(d.id)}" onclick="selectAssignDiet('${esc(d.id)}',this)">
       <div class="assign-item-name">${esc(d.title || d.name || 'Sin nombre')}</div>
@@ -7985,8 +8004,101 @@ async function confirmAssignRoutine() {
 
 function filterAssignList(type, q) {
   q = (q || '').toLowerCase();
-  if (type === 'diet') renderAssignDietList(_assignDiets.filter(d => (d.title || '').toLowerCase().includes(q)));
+  if (type === 'diet') _applyDietFilters();
   else _applyRoutineFilters();
+}
+
+/* ── Filtros de la biblioteca de dietas al asignar ── */
+const _AD_GOALS = { libre:'Sin objetivo (libre)', kcal:'Sólo calorías', macros:'Calorías + macros' };
+let _adFilters = { type:'', goal:'', patho:'' };
+let _adTypes = [];      // catálogo de tipos de dieta (id → nombre)
+let _adTypesLoaded = false;
+
+async function _adLoadTypes() {
+  if (_adTypesLoaded) return;
+  _adTypesLoaded = true;
+  try {
+    const r = await fetch(`${API}/typeFood/findAll`, { headers: h() });
+    const j = await r.json();
+    _adTypes = Array.isArray(j.data) ? j.data : [];
+  } catch {}
+}
+
+function _adTypeName(id) {
+  const t = _adTypes.find(x => String(x.id) === String(id));
+  return t ? (t.name || t.description) : 'Tipo ' + id;
+}
+
+// El objetivo lo marca el backend (libre / kcal / macros); las dietas antiguas
+// se deducen de sus propios datos.
+function _adGoal(d) {
+  if (d.goal_mode) return d.goal_mode;
+  const det = d.detail || {};
+  if (det.proteins || det.carbs || det.fats) return 'macros';
+  return d.calories ? 'kcal' : 'libre';
+}
+
+function _adPathoNames(d) {
+  return (d.pathologies || []).map(p => p.name).filter(Boolean);
+}
+
+function _adOptions(list, key, label) {
+  let vals;
+  if (key === 'type') vals = [...new Set(list.map(d => d.type_id).filter(v => v != null))];
+  else if (key === 'goal') vals = ['libre','kcal','macros'].filter(g => list.some(d => _adGoal(d) === g));
+  else vals = [...new Set(list.flatMap(_adPathoNames))].sort();
+  const text = v => key === 'type' ? _adTypeName(v) : (key === 'goal' ? _AD_GOALS[v] : v);
+  if (key === 'type') vals.sort((a, b) => _adTypeName(a).localeCompare(_adTypeName(b)));
+  return `<option value="">${label}</option>` +
+    vals.map(v => `<option value="${esc(String(v))}"${String(_adFilters[key]) === String(v) ? ' selected' : ''}>${esc(text(v))}</option>`).join('');
+}
+
+function _renderDietFilters() {
+  const all = _assignDiets;
+  const defs = [['adfType','type','Tipo de dieta'],['adfGoal','goal','Objetivo nutricional'],['adfPatho','patho','Patologías']];
+  let any = false;
+  defs.forEach(([id, key, label]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = _adOptions(all, key, label);
+    el.disabled = el.options.length <= 1;
+    el.title = el.disabled ? 'Ninguna dieta de tu biblioteca tiene este dato' : '';
+    el.classList.toggle('active', !!_adFilters[key]);
+    if (_adFilters[key]) any = true;
+  });
+  const clr = document.getElementById('adfClear');
+  if (clr) clr.style.display = any ? '' : 'none';
+}
+
+function _dietMatches(d) {
+  const q = (document.getElementById('assignDietSearch')?.value || '').toLowerCase();
+  if (q && !(d.title || '').toLowerCase().includes(q)) return false;
+  if (_adFilters.type && String(d.type_id || '') !== String(_adFilters.type)) return false;
+  if (_adFilters.goal && _adGoal(d) !== _adFilters.goal) return false;
+  if (_adFilters.patho && !_adPathoNames(d).includes(_adFilters.patho)) return false;
+  return true;
+}
+
+function _applyDietFilters() {
+  const list = _assignDiets.filter(_dietMatches);
+  _renderDietFilters();
+  const c = document.getElementById('adfCount');
+  if (c) c.textContent = list.length === _assignDiets.length
+    ? `${_assignDiets.length} dieta${_assignDiets.length !== 1 ? 's' : ''} en tu biblioteca`
+    : `${list.length} de ${_assignDiets.length} dietas`;
+  renderAssignDietList(list);
+}
+
+function setDietFilter(key, val) {
+  _adFilters[key] = val || '';
+  _applyDietFilters();
+}
+
+function clearDietFilters() {
+  _adFilters = { type:'', goal:'', patho:'' };
+  const sb = document.getElementById('assignDietSearch');
+  if (sb) sb.value = '';
+  _applyDietFilters();
 }
 
 /* ── Filtros de la biblioteca de rutinas al asignar ── */

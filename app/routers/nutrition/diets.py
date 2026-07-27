@@ -47,6 +47,15 @@ def _diet_food_totals(diet: Diet):
 
 def _serialize(diet: Diet) -> dict:
     data = DietOut.model_validate(diet).model_dump()
+    # Objetivo nutricional de la plantilla, leído ANTES del relleno de abajo:
+    # una dieta "libre" acaba con kcal/macros calculados y ya no se distinguiría.
+    det0 = diet.detail
+    if det0 and (det0.proteins or det0.carbs or det0.fats):
+        data["goal_mode"] = "macros"
+    elif diet.calories:
+        data["goal_mode"] = "kcal"
+    else:
+        data["goal_mode"] = "libre"
     # Si la dieta no tiene kcal/macros objetivo guardados (modo "libre"),
     # se muestran los totales reales calculados de sus alimentos.
     if not data.get("calories"):
@@ -207,7 +216,8 @@ def find_all(
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
     org: OrgContext = Depends(get_org_context),
 ):
-    q = db.query(Diet).filter(Diet.user_id == current_user.id)
+    # selectinload: Diet.pathologies es lazy="noload" y sin esto llegaría vacío.
+    q = db.query(Diet).options(selectinload(Diet.pathologies)).filter(Diet.user_id == current_user.id)
     if org.org_id:
         q = q.filter(or_(Diet.organization_id.is_(None), Diet.organization_id == org.org_id))
     return send_response([_serialize(i) for i in q.all()], "OK")

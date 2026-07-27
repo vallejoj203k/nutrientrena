@@ -111,15 +111,14 @@ def create_team_member(
         if existing:
             return send_error("Este usuario ya es miembro del equipo", code=400)
     else:
-        # Try to auto-link by email
-        linked_id = None
+        # Enlazar por email con una cuenta existente. Antes se calculaba pero se
+        # guardaba en un dict que no se usaba, así que el enlace se perdía y el
+        # miembro quedaba sin cuenta asociada.
         if data.member_email:
             from app.models.user import User
             user = db.query(User).filter(User.email == data.member_email).first()
-            if user and user.user_detail:
-                linked_id = user.user_detail.id
-        data_dict = data.dict()
-        data_dict['user_detail_id'] = linked_id
+            if user and user.detail:
+                data.user_detail_id = user.detail.id
 
     member = TeamMember(
         user_detail_id=data.user_detail_id,

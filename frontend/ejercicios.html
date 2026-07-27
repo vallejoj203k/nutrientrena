@@ -215,6 +215,8 @@
     .lvl-1{background:#DCFCE7;color:#166534;}
     .lvl-2{background:#FEF3C7;color:#92400E;}
     .lvl-3{background:#FEE2E2;color:#991B1B;}
+    .lvl-all{background:#EEF2FF;color:#4338CA;}
+    .lvl-pill+.lvl-pill{margin-left:4px;}
     /* ── Fila de ejercicio ── */
     .exi{width:38px;height:38px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);overflow:hidden;}
     .exi img{width:100%;height:100%;object-fit:cover;}
@@ -293,6 +295,7 @@
     .xf-col{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:18px;}
     .xf-card{background:#fff;border:1px solid #EEF0F3;border-radius:16px;padding:24px 26px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
     .xf-sec-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:18px;}
+    .xf-sec-hint{font-weight:500;text-transform:none;letter-spacing:normal;color:#C3C7CF;}
     .xf-req{color:#EF4444;}
     .xf-img-row{display:flex;align-items:flex-start;gap:14px;}
     .xf-img-zone{width:104px;height:104px;border:2px dashed #E5E7EB;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#C7CBD4;cursor:pointer;background:#FAFAFA;overflow:hidden;flex-shrink:0;transition:.15s;}
@@ -662,11 +665,11 @@
         <div class="xf-adv-body" id="xfAdvBody">
           <div class="xf-sec-title">Equipamiento</div>
           <div class="xf-chips" id="xfEquipChips" style="margin-bottom:20px;"></div>
-          <div class="xf-sec-title">Nivel</div>
+          <div class="xf-sec-title">Nivel <span class="xf-sec-hint">(puedes marcar varios)</span></div>
           <div class="xf-lvls" style="margin-bottom:20px;">
-            <button type="button" class="xf-lvl" id="xfLvl-1" onclick="setXfLevel(1)">Principiante</button>
-            <button type="button" class="xf-lvl" id="xfLvl-2" onclick="setXfLevel(2)">Intermedio</button>
-            <button type="button" class="xf-lvl" id="xfLvl-3" onclick="setXfLevel(3)">Avanzado</button>
+            <button type="button" class="xf-lvl" id="xfLvl-1" onclick="toggleXfLevel(1)">Principiante</button>
+            <button type="button" class="xf-lvl" id="xfLvl-2" onclick="toggleXfLevel(2)">Intermedio</button>
+            <button type="button" class="xf-lvl" id="xfLvl-3" onclick="toggleXfLevel(3)">Avanzado</button>
           </div>
           <div class="xf-sec-title">Patrón de movimiento</div>
           <div class="xf-chips" id="xfPatChips" style="margin-bottom:20px;"></div>
@@ -821,6 +824,18 @@ let editingExerciseId=null;
 let _exItems=[];
 
 const DIFF_LABELS={1:'Principiante',2:'Intermedio',3:'Avanzado'};
+// Un ejercicio puede valer para varios niveles: se pintan todos (o un solo
+// distintivo cuando sirve para los tres).
+function exLevels(ex){
+  const l=ex.difficulty_levels?.length?ex.difficulty_levels:(ex.difficulty?[ex.difficulty]:[]);
+  return [...new Set(l.map(Number).filter(k=>k>=1&&k<=3))].sort();
+}
+function lvlPills(ex){
+  const l=exLevels(ex);
+  if(!l.length)return '';
+  if(l.length===3)return '<span class="lvl-pill lvl-all">Todos los niveles</span>';
+  return l.map(k=>`<span class="lvl-pill lvl-${k}">${DIFF_LABELS[k]}</span>`).join('');
+}
 const MATERIAL_OPTIONS=['Peso corporal','Mancuernas','Barra','Banco','Polea','Máquina','Banda elástica','Kettlebell','Multipower','TRX','Disco','Cajón / step','Balón medicinal','Fitball','Rack','Cable','Landmine'];
 
 async function loadMuscleGroupsForFilters(){
@@ -934,7 +949,7 @@ function renderExercisesTable(items){
           <div class="exg-sub">${[ex.muscle_group_name,ex.material].filter(Boolean).map(esc).join(' · ')||'—'}</div>
           <div class="exg-chips">
             ${ex.exercise_type?`<span class="badge badge-gray">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:''}
-            ${ex.difficulty?`<span class="lvl-pill lvl-${ex.difficulty}">${DIFF_LABELS[ex.difficulty]}</span>`:''}
+            ${lvlPills(ex)}
           </div>
           <div class="exg-foot" onclick="event.stopPropagation()">${_exActionsHtml(ex)}</div>
         </div>
@@ -948,7 +963,7 @@ function renderExercisesTable(items){
       <td style="color:#374151;">${esc(ex.muscle_group_name||'—')}</td>
       <td style="color:#6B7280;">${esc(ex.material||'—')}</td>
       <td>${ex.exercise_type?`<span class="badge badge-gray">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
-      <td>${ex.difficulty?`<span class="lvl-pill lvl-${ex.difficulty}">${DIFF_LABELS[ex.difficulty]}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
+      <td>${lvlPills(ex)||'<span style="color:#9CA3AF">—</span>'}</td>
       <td onclick="event.stopPropagation()">${_exActionsHtml(ex)}</td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -983,7 +998,7 @@ async function duplicateExercise(id){
       secondary_muscle_group_ids:ex.secondary_muscle_group_ids?.length?ex.secondary_muscle_group_ids:null,
       image:ex.image||null,video_url:ex.video_url||null,
       exercise_type:ex.exercise_type||null,location:ex.location||null,
-      material:ex.material||null,difficulty:ex.difficulty||null,
+      material:ex.material||null,difficulty_levels:exLevels(ex).length?exLevels(ex):null,
       movement_pattern:ex.movement_pattern||null,
       rec_series:ex.rec_series||null,rec_reps:ex.rec_reps||null,rec_rest:ex.rec_rest||null,
     };
@@ -1166,7 +1181,8 @@ const EQUIP_OPTIONS=['Peso corporal','Mancuernas','Barra','Banco','Polea','Máqu
 const PATTERN_OPTIONS=['Empuje horizontal','Empuje vertical','Tirón horizontal','Tirón vertical','Bisagra de cadera','Dominante de rodilla','Flexión de rodilla','Zancada / unilateral','Extensión de cadera','Flexión de codo','Extensión de codo','Flexión de muñeca','Abducción de hombro','Aducción / abducción de cadera','Rotación externa','Rotación interna','Anti-extensión','Anti-rotación','Flexión de tronco','Extensión lumbar','Flexión plantar','Dorsiflexión','Carga / transporte','Metabólico / cuerpo completo','Movilidad / control motor'];
 let _xfEquip=new Set();
 let _xfPattern=new Set();
-let _xfLevel=null;
+// Un ejercicio puede servir para varios niveles a la vez.
+let _xfLevels=new Set();
 
 function _renderXfChips(containerId,options,selectedSet,toggleFnName){
   const el=document.getElementById(containerId);
@@ -1184,9 +1200,15 @@ function renderXfPattern(){
 }
 function toggleXfEquip(v){if(_xfEquip.has(v))_xfEquip.delete(v);else _xfEquip.add(v);renderXfEquip();}
 function toggleXfPattern(v){if(_xfPattern.has(v))_xfPattern.delete(v);else _xfPattern.add(v);renderXfPattern();}
-function setXfLevel(k){
-  _xfLevel=_xfLevel===k?null:k;
-  [1,2,3].forEach(i=>{const b=document.getElementById('xfLvl-'+i);if(b)b.classList.toggle('sel',_xfLevel===i);});
+function renderXfLevels(){
+  [1,2,3].forEach(i=>{
+    const b=document.getElementById('xfLvl-'+i);
+    if(b){b.classList.toggle('sel',_xfLevels.has(i));b.setAttribute('aria-pressed',_xfLevels.has(i)?'true':'false');}
+  });
+}
+function toggleXfLevel(k){
+  if(_xfLevels.has(k))_xfLevels.delete(k);else _xfLevels.add(k);
+  renderXfLevels();
 }
 function toggleXfAdv(force){
   const head=document.getElementById('xfAdvHead');
@@ -1208,8 +1230,8 @@ async function openExerciseModal(id=null){
   document.getElementById('ex_location').value='';
   document.getElementById('ex_imageFile').value='';
   setExImagePreview(null);
-  _xfEquip=new Set();_xfPattern=new Set();_xfLevel=null;
-  setXfLevel(null);renderXfEquip();renderXfPattern();
+  _xfEquip=new Set();_xfPattern=new Set();_xfLevels=new Set();
+  renderXfLevels();renderXfEquip();renderXfPattern();
   toggleXfAdv(false);
   await loadMuscleGroupsForFilters();
   const mgSelect=document.getElementById('ex_mg');
@@ -1229,13 +1251,13 @@ async function openExerciseModal(id=null){
       document.getElementById('ex_location').value=ex.location||'';
       _xfEquip=new Set(String(ex.material||'').split(',').map(s=>s.trim()).filter(Boolean));
       _xfPattern=new Set(String(ex.movement_pattern||'').split(',').map(s=>s.trim()).filter(Boolean));
-      _xfLevel=ex.difficulty||null;
-      renderXfEquip();renderXfPattern();
-      [1,2,3].forEach(i=>{const b=document.getElementById('xfLvl-'+i);if(b)b.classList.toggle('sel',_xfLevel===i);});
+      const lvls=ex.difficulty_levels?.length?ex.difficulty_levels:(ex.difficulty?[ex.difficulty]:[]);
+      _xfLevels=new Set(lvls.map(Number).filter(Boolean));
+      renderXfEquip();renderXfPattern();renderXfLevels();
       document.getElementById('ex_rec_series').value=ex.rec_series||'';
       document.getElementById('ex_rec_reps').value=ex.rec_reps||'';
       document.getElementById('ex_rec_rest').value=ex.rec_rest||'';
-      if(_xfEquip.size||_xfPattern.size||_xfLevel||ex.rec_series||ex.rec_reps||ex.rec_rest)toggleXfAdv(true);
+      if(_xfEquip.size||_xfPattern.size||_xfLevels.size||ex.rec_series||ex.rec_reps||ex.rec_rest)toggleXfAdv(true);
       setExImagePreview(ex.image||null);
       _setExVideoPreview(ex.video_url||null);
     }catch{showToast('Error al cargar ejercicio','error');return;}
@@ -1257,7 +1279,7 @@ async function saveExercise(){
     exercise_type:document.getElementById('ex_type').value||null,
     location:document.getElementById('ex_location').value||null,
     material:[..._xfEquip].join(', ')||null,
-    difficulty:_xfLevel||null,
+    difficulty_levels:_xfLevels.size?[..._xfLevels].sort():null,
     movement_pattern:[..._xfPattern].join(', ')||null,
     rec_series:document.getElementById('ex_rec_series').value.trim()||null,
     rec_reps:document.getElementById('ex_rec_reps').value.trim()||null,
@@ -1306,7 +1328,7 @@ document.addEventListener('keydown',e=>{
 
 function renderExerciseView(ex,id){
   const chips=[
-    ex.difficulty?`<span class="lvl-pill lvl-${ex.difficulty}">${DIFF_LABELS[ex.difficulty]}</span>`:'',
+    lvlPills(ex),
     ex.exercise_type?`<span class="xv-chip-outline">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:'',
     ex.state?'':'<span class="badge badge-gray">Archivado</span>',
   ].filter(Boolean).join('');

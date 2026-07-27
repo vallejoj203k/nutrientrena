@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -39,7 +40,16 @@ def search(
     if muscle_group_id:
         q = q.filter(Training.muscle_group_id == muscle_group_id)
     if difficulty:
-        q = q.filter(Training.difficulty == difficulty)
+        # El ejercicio puede tener varios niveles; basta con que incluya el buscado.
+        q = q.filter(
+            or_(
+                Training.difficulty == difficulty,
+                Training.difficulty_levels == str(difficulty),
+                Training.difficulty_levels.like(f"{difficulty},%"),
+                Training.difficulty_levels.like(f"%,{difficulty},%"),
+                Training.difficulty_levels.like(f"%,{difficulty}"),
+            )
+        )
     if material:
         q = q.filter(Training.material.ilike(f"%{material}%"))
     if state is not None:
@@ -82,6 +92,16 @@ def _apply_secondary_ids(payload: dict):
         ids = payload.pop("secondary_muscle_group_ids") or []
         payload["secondary_muscle_group_ids"] = ",".join(str(i) for i in ids) if ids else None
         payload["secondary_muscle_group_id"] = ids[0] if ids else None
+    # Un ejercicio puede valer para varios niveles: se guardan en CSV y se deja
+    # el más bajo en `difficulty` para no romper filtros/lecturas antiguas.
+    if "difficulty_levels" in payload:
+        levels = sorted({int(x) for x in (payload.pop("difficulty_levels") or [])})
+        if levels:
+            payload["difficulty_levels"] = ",".join(str(i) for i in levels)
+            payload["difficulty"] = levels[0]
+        else:
+            # Sin lista: se respeta el `difficulty` suelto que llegue (clientes antiguos).
+            payload["difficulty_levels"] = str(payload["difficulty"]) if payload.get("difficulty") else None
     return payload
 
 

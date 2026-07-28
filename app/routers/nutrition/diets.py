@@ -1,5 +1,8 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
+from pydantic import BaseModel
 from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
@@ -247,6 +250,131 @@ def client_diets(client_id: str, db: Session = Depends(get_db), current_user=Dep
         grouped.append({"type": None, "diets": untyped})
 
     return send_response(grouped, "OK")
+
+
+# ── Generación con IA ─────────────────────────────────────────────────────────
+class _AIGenerateBody(BaseModel):
+    client_id: Optional[str] = None       # UserDetail UUID; opcional
+    kcal: float
+    proteins: Optional[float] = None
+    carbs: Optional[float] = None
+    fats: Optional[float] = None
+    fiber: Optional[float] = None
+    meal_count: int = 4
+    notes: Optional[str] = None           # indicaciones libres del coach
+    max_aliments: int = 220
+
+
+def _client_context(db: Session, client_id: str) -> dict:
+    """Datos del cliente que condicionan el plan."""
+    from app.models.user import UserDetail
+
+    detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
+    if not detail:
+        return {}
+    return {
+        "Edad": detail.age,
+        "Sexo": detail.gender.description if detail.gender else None,
+        "Peso (kg)": detail.weight,
+        "Altura (cm)": detail.height,
+        "Objetivo": detail.objective.description if detail.objective else None,
+        "Nivel de actividad": detail.activity.description if detail.activity else None,
+        "Alergias": detail.allergies,
+        "Intolerancias": detail.intolerances,
+        "No le gusta": detail.dislikes,
+        "Preferencias alimentarias": detail.food_preferences,
+        "Ocupación": detail.occupation,
+    }
+
+
+def _macros_for(aliment, grams: float) -> tuple:
+    f = (grams or 0) / 100.0
+    return (
+        (aliment.calories or 0) * f,
+        (aliment.proteins or 0) * f,
+        (aliment.carbohydrates or 0) * f,
+        (aliment.fats or 0) * f,
+    )
+
+
+@router.post("/ai-generate", summary="Generar una dieta con IA", description="Propone un plan diario con los alimentos del catálogo, ajustado a los objetivos calculados en Nutrición y a los datos del cliente.")
+def ai_generate(
+    data: _AIGenerateBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
+    from app.core import ai_diet
+
+    if not ai_diet.ai_enabled():
+        return send_error(
+            "La generación con IA no está configurada. Añade ANTHROPIC_API_KEY en las variables de entorno del servidor.",
+            code=503,
+        )
+    if not data.kcal or data.kcal <= 0:
+        return send_error("Hace falta un objetivo de calorías para generar el plan", code=422)
+
+    # Catálogo del coach: solo alimentos con calorías, que son los que sirven.
+    q = db.query(Aliment).filter(Aliment.calories.isnot(None))
+    if org.org_id:
+        q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
+    aliments = q.limit(max(20, min(data.max_aliments, 400))).all()
+    if not aliments:
+        return send_error("No hay alimentos en el catálogo para construir la dieta", code=422)
+
+    client_ctx = _client_context(db, data.client_id) if data.client_id else {}
+    target = {
+        "kcal": data.kcal, "proteins": data.proteins, "carbs": data.carbs,
+        "fats": data.fats, "fiber": data.fiber, "meal_count": data.meal_count,
+    }
+
+    try:
+        plan = ai_diet.generate_diet(
+            client=client_ctx, target=target, aliments=aliments, extra=data.notes
+        )
+    except Exception as e:
+        return send_error(f"No se pudo generar la dieta: {e}", code=502)
+
+    # Los totales NO se toman del modelo: se recalculan con la base de datos,
+    # que es la misma fuente que usa el resto de la aplicación.
+    by_id = {str(a.id): a for a in aliments}
+    meals, totals = [], [0.0, 0.0, 0.0, 0.0]
+    for m in plan.get("meals", []):
+        detail = []
+        for f in m.get("foods", []):
+            al = by_id.get(str(f.get("aliment_id")))
+            if not al:
+                continue  # id inventado: se descarta en vez de romper el plan
+            grams = round(float(f.get("grams") or 0))
+            if grams <= 0:
+                continue
+            k, p, c, g = _macros_for(al, grams)
+            totals = [totals[0] + k, totals[1] + p, totals[2] + c, totals[3] + g]
+            detail.append({
+                "aliment_id": str(al.id), "name": al.name, "quantity_calc": grams,
+                "calories": round(k), "proteins": round(p, 1),
+                "carbohydrates": round(c, 1), "fats": round(g, 1),
+            })
+        if detail:
+            meals.append({"name": m.get("name") or "Comida", "time": m.get("time"), "detail": detail})
+
+    if not meals:
+        return send_error("La IA no propuso alimentos válidos del catálogo. Inténtalo de nuevo.", code=502)
+
+    desvio = round((totals[0] - data.kcal) / data.kcal * 100) if data.kcal else 0
+    return send_response(
+        {
+            "title": plan.get("title") or "Plan generado con IA",
+            "notes": plan.get("notes"),
+            "foods": meals,
+            "totals": {
+                "calories": round(totals[0]), "proteins": round(totals[1], 1),
+                "carbs": round(totals[2], 1), "fats": round(totals[3], 1),
+            },
+            "target": {"calories": round(data.kcal), "deviation_pct": desvio},
+        },
+        "Dieta generada",
+    )
 
 
 @router.get("/{id}/pdf", summary="Exportar dieta a PDF", description="Genera y descarga la dieta en formato PDF.")

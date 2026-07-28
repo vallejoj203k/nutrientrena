@@ -70,6 +70,11 @@ class Settings(BaseSettings):
 
     USDA_API_KEY: Optional[str] = None
 
+    # Generación de dietas con IA (Claude). Sin clave, la función se desactiva
+    # y el endpoint responde explicando cómo habilitarla.
+    ANTHROPIC_API_KEY: Optional[str] = None
+    ANTHROPIC_MODEL: str = "claude-opus-5"
+
     @property
     def cors_origins(self) -> list[str]:
         """Return the effective CORS origin list.

@@ -48,6 +48,26 @@ PATHOLOGY_EXCLUSIONS = {
              "mejillon", "sardina", "anchoa", "boqueron", "caballa", "arenque"],
 }
 
+# Aviso para las patologías que NO se resuelven quitando alimentos: el plan
+# cuadra los macros, pero el ajuste fino es criterio del coach.
+PATHOLOGY_ADVICE = {
+    "diabetes": "reparte los carbohidratos entre las comidas y prioriza los de bajo índice glucémico.",
+    "insulina": "reparte los carbohidratos y evita concentrarlos en una sola comida.",
+    "sop": "prioriza carbohidratos de bajo índice glucémico y suficiente proteína.",
+    "hipertension": "vigila la sal y los alimentos procesados; el plan no controla el sodio.",
+    "hipercolesterolemia": "limita las grasas saturadas y prioriza las insaturadas.",
+    "renal": "revisa el objetivo de proteína: puede ser demasiado alto para su función renal.",
+    "higado graso": "reduce azúcares simples y alcohol.",
+    "hipotiroidismo": "vigila el yodo y el consumo de crucíferas crudas.",
+    "anemia": "acompaña el hierro con vitamina C y sepáralo del café y los lácteos.",
+    "osteoporosis": "asegura calcio y vitamina D suficientes.",
+    "crohn": "ajusta la fibra a su tolerancia en cada fase.",
+    "colitis": "ajusta la fibra a su tolerancia en cada fase.",
+    "sibo": "revisa los fermentables (FODMAP) según su fase de tratamiento.",
+    "reflujo": "evita comidas copiosas y muy grasas por la noche.",
+    "gota": "mantén buena hidratación y limita el alcohol.",
+}
+
 # Cantidades a las que se redondea: las que un cliente puede pesar sin volverse loco.
 STEPS = [10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 100, 125, 150, 175, 200, 225, 250, 300]
 
@@ -82,6 +102,35 @@ def exclusions_for(pathologies) -> list:
             if clave in n:
                 fuera.extend(alimentos)
     return fuera
+
+
+def warnings_for(pathologies) -> list:
+    """Avisos a mostrar al principio de la dieta, uno por patología.
+
+    `applied` distingue lo que el generador ya ha hecho (excluir alimentos) de
+    lo que queda en manos del coach (ajustar macros, sodio, fibra…).
+    """
+    avisos = []
+    for nombre in pathologies or []:
+        n = _norm(str(nombre))
+        excluidos = []
+        for clave, alimentos in PATHOLOGY_EXCLUSIONS.items():
+            if clave in n:
+                excluidos.extend(alimentos)
+        consejo = next((c for clave, c in PATHOLOGY_ADVICE.items() if clave in n), None)
+        if excluidos:
+            muestra = ", ".join(sorted(set(excluidos))[:6])
+            texto = f"Se han excluido del plan alimentos con {muestra}…"
+            if consejo:
+                texto += f" Además, {consejo}"
+            avisos.append({"pathology": str(nombre), "applied": True, "text": texto})
+        elif consejo:
+            avisos.append({"pathology": str(nombre), "applied": False,
+                           "text": f"El plan no lo ajusta solo: {consejo}"})
+        else:
+            avisos.append({"pathology": str(nombre), "applied": False,
+                           "text": "Revisa el plan teniendo en cuenta esta condición."})
+    return avisos
 
 
 def is_allowed(aliment, restrictions: list) -> bool:

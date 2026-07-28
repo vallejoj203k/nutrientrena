@@ -326,7 +326,7 @@ def auto_generate(
     if not aliments:
         return send_error("No hay alimentos en el catálogo para construir la dieta", code=422)
 
-    restricciones = []
+    restricciones, avisos, patologias = [], [], []
     if data.client_id:
         from app.models.user import UserDetail
         detail = db.query(UserDetail).filter(UserDetail.id == data.client_id).first()
@@ -334,11 +334,11 @@ def auto_generate(
             restricciones = diet_builder.parse_restrictions(
                 detail.allergies, detail.intolerances, detail.dislikes
             )
+            patologias = [p.name for p in (detail.pathologies or [])]
             # Las patologías excluyen familias enteras de alimentos (celiaquía →
             # trigo, pan, pasta…), no solo lo que aparezca escrito en su nombre.
-            restricciones += diet_builder.exclusions_for(
-                [p.name for p in (detail.pathologies or [])]
-            )
+            restricciones += diet_builder.exclusions_for(patologias)
+            avisos = diet_builder.warnings_for(patologias)
 
     try:
         plan = diet_builder.build_diet(
@@ -354,10 +354,21 @@ def auto_generate(
 
     total = plan["totals"]["calories"]
     desvio = round((total - data.kcal) / data.kcal * 100) if data.kcal else 0
+
+    notas = "Plan generado automáticamente a partir de tus objetivos. Revísalo y ajústalo antes de asignarlo."
+    if avisos:
+        # Los avisos van también en las notas para que viajen con la dieta y
+        # salgan en el PDF, no solo en la pantalla de propuesta.
+        notas += "\n\nAvisos por patologías:\n" + "\n".join(
+            f"· {a['pathology']}: {a['text']}" for a in avisos
+        )
+
     return send_response(
         {
             "title": f"Plan {round(data.kcal)} kcal",
-            "notes": "Plan generado automáticamente a partir de tus objetivos. Revísalo y ajústalo antes de asignarlo.",
+            "notes": notas,
+            "warnings": avisos,
+            "pathologies": patologias,
             "foods": plan["meals"],
             "totals": plan["totals"],
             "target": {"calories": round(data.kcal), "deviation_pct": desvio},

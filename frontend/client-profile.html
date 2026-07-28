@@ -456,6 +456,12 @@
     .ai-btn{background:#fff;border:1px solid #C7D2FE;color:var(--indigo,#4F46E5);display:inline-flex;align-items:center;gap:6px;font-weight:700;}
     .ai-btn:hover{background:#EEF2FF;}
     .ai-target{display:flex;gap:8px;flex-wrap:wrap;}
+    .ai-warn{margin-top:14px;border:1px solid #FDE68A;background:#FFFBEB;border-radius:11px;padding:11px 13px;}
+    .ai-warn-head{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:#92400E;margin-bottom:8px;}
+    .ai-warn-row{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#78350F;line-height:1.45;padding:3px 0;}
+    .ai-warn-tag{flex-shrink:0;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:20px;margin-top:1px;}
+    .ai-warn-row.done .ai-warn-tag{background:#D1FAE5;color:#065F46;}
+    .ai-warn-row.todo .ai-warn-tag{background:#FEE2E2;color:#991B1B;}
     .ai-tchip{flex:1;min-width:88px;padding:9px 11px;border:1px solid #E9EBF2;border-radius:10px;background:#FAFBFF;}
     .ai-tchip b{display:block;font-size:16px;font-weight:800;color:#111827;}
     .ai-tchip span{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
@@ -779,6 +785,9 @@
     .nut-food-name{color:#374151;flex:1;}
     .nut-food-qty{font-weight:700;color:#6B7280;min-width:44px;text-align:right;}
     .nut-libre-msg{color:#9CA3AF;font-size:13px;padding:40px 20px;text-align:center;}
+    .nut-patho-note{display:flex;align-items:flex-start;gap:8px;margin:10px 0 4px;padding:10px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#78350F;line-height:1.45;}
+    .nut-patho-note svg{color:#D97706;flex-shrink:0;margin-top:1px;}
+    .nut-patho-note b{color:#92400E;}
     .nut-same-note{display:flex;align-items:flex-start;gap:8px;margin:10px 0 4px;padding:10px 12px;background:#F5F6FE;border:1px solid #E3E5FA;border-radius:10px;font-size:12px;color:#4B5563;line-height:1.45;}
     .nut-same-note svg{color:#4F46E5;flex-shrink:0;margin-top:1px;}
     .nut-same-note b{color:#4F46E5;}
@@ -2583,6 +2592,17 @@ async function runAiDiet() {
 
 function _renderAiPlan(p) {
   const t = p.totals || {}, tg = p.target || {};
+  // Avisos por patología, lo primero que debe leer el coach.
+  const avisos = (p.warnings || []).length ? `<div class="ai-warn">
+      <div class="ai-warn-head">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Este cliente tiene patologías registradas
+      </div>
+      ${p.warnings.map(w => `<div class="ai-warn-row ${w.applied ? 'done' : 'todo'}">
+        <span class="ai-warn-tag">${w.applied ? 'Aplicado' : 'Revisa tú'}</span>
+        <span><b>${esc(w.pathology)}</b> — ${esc(w.text)}</span>
+      </div>`).join('')}
+    </div>` : '';
   const dev = Math.abs(tg.deviation_pct || 0);
   // Los totales los recalcula el servidor con la base de datos, no la IA.
   const sum = `<div class="ai-sum ${dev <= 5 ? 'ok' : 'off'}">
@@ -2595,7 +2615,7 @@ function _renderAiPlan(p) {
         <small>${meal.detail.reduce((a, f) => a + (f.calories || 0), 0)} kcal</small></div>
       ${meal.detail.map(f => `<div class="ai-food"><span style="color:#111827;">${esc(f.name)}</span><span>${f.quantity_calc} g · ${f.calories} kcal</span></div>`).join('')}
     </div>`).join('');
-  document.getElementById('aiResult').innerHTML =
+  document.getElementById('aiResult').innerHTML = avisos +
     `<div style="margin-top:14px;font-size:14px;font-weight:800;color:#111827;">${esc(p.title || 'Plan generado')}</div>` +
     (p.notes ? `<div style="font-size:12.5px;color:#6B7280;margin-top:3px;">${esc(p.notes)}</div>` : '') +
     sum + meals;
@@ -6735,6 +6755,10 @@ function _renderNutUI() {
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           Este plan es diario: se repite igual todos los días. Para comidas distintas por día, asígnale un <b>menú semanal</b>.
         </div>`}
+        ${(clientData?.pathologies || []).length ? `<div class="nut-patho-note">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span><b>Patologías:</b> ${clientData.pathologies.map(p => esc(p.name)).join(' · ')}. Comprueba que el plan las respeta.</span>
+        </div>` : ''}
         <div class="nut-meals-area">${!dayHasDiet ? `<div class="nut-empty-day">
           <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
           <div>El ${dayName.toLowerCase()} no tiene dieta en este menú.</div>

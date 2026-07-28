@@ -76,3 +76,8 @@ def test_la_dieta_generada_excluye_lo_que_prohibe_la_patologia(client, seed, adm
     nombres = [f["name"] for m in r2.json()["data"]["foods"] for f in m["detail"]]
     assert not any("Pan" in n for n in nombres), nombres
     assert nombres, "debería seguir construyendo un plan"
+
+    # El aviso viaja en la respuesta y en las notas de la dieta
+    d = r2.json()["data"]
+    assert d["warnings"] and d["warnings"][0]["applied"] is True
+    assert "Enfermedad celíaca" in d["notes"]

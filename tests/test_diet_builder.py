@@ -127,3 +127,26 @@ def test_lactosa_respeta_los_productos_sin_lactosa():
 def test_patologia_sin_exclusiones_no_filtra_nada():
     """La diabetes se maneja ajustando macros, no quitando alimentos."""
     assert diet_builder.exclusions_for(["Diabetes tipo 2"]) == []
+
+
+def test_avisos_distinguen_lo_aplicado_de_lo_que_revisa_el_coach():
+    avisos = diet_builder.warnings_for(["Enfermedad celíaca", "Diabetes tipo 2"])
+    por_nombre = {a["pathology"]: a for a in avisos}
+
+    cel = por_nombre["Enfermedad celíaca"]
+    assert cel["applied"] is True
+    assert "excluido" in cel["text"]
+
+    dia = por_nombre["Diabetes tipo 2"]
+    assert dia["applied"] is False
+    assert "carbohidratos" in dia["text"]
+
+
+def test_patologia_desconocida_avisa_igualmente():
+    a = diet_builder.warnings_for(["Condición rara"])[0]
+    assert a["applied"] is False and a["text"]
+
+
+def test_sin_patologias_no_hay_avisos():
+    assert diet_builder.warnings_for([]) == []
+    assert diet_builder.warnings_for(None) == []

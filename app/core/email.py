@@ -94,6 +94,7 @@ def send_plan_email(
     coach_message: str = "",
     loom_link: str = "",
     attachments: list[tuple[bytes, str]] | None = None,
+    extra_diet_titles: list[str] | None = None,
 ) -> tuple[bool, str]:
     diet_section = ""
     if diet:
@@ -149,6 +150,25 @@ def send_plan_email(
               </td>
             </tr>"""
 
+        # Varias dietas en un mismo envío: el cuerpo detalla la primera y se
+        # listan las demás, que van adjuntas en PDF.
+        extras_html = ""
+        if extra_diet_titles:
+            items = "".join(
+                f'<li style="margin:2px 0;color:#374151;font-size:13px;">{t}</li>'
+                for t in extra_diet_titles
+            )
+            extras_html = f"""
+            <div style="margin-top:14px;padding:12px 14px;background:#F5F6FE;border-radius:8px;">
+              <div style="color:#5B2D8E;font-size:13px;font-weight:600;margin-bottom:4px;">
+                Se incluyen {len(extra_diet_titles) + 1} planes en este envío
+              </div>
+              <ul style="margin:0;padding-left:18px;">{items}</ul>
+              <div style="margin-top:6px;color:#6B7280;font-size:12px;">
+                Tienes el detalle completo de cada uno en los PDF adjuntos.
+              </div>
+            </div>"""
+
         diet_section = f"""
         <tr>
           <td style="padding:24px 0 8px;">
@@ -156,6 +176,7 @@ def send_plan_email(
             <p style="margin:0 0 8px;color:#111827;font-weight:600;font-size:15px;">{diet.get('title', '')}</p>
             <table width="100%" cellpadding="0" cellspacing="0">{macros}</table>
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">{foods_rows}</table>
+            {extras_html}
           </td>
         </tr>"""
 

@@ -6471,7 +6471,7 @@ function _renderNutUI() {
             <div class="nut-meal-day-sub">${dayHasDiet ? (mealCount+' comidas · '+totalKcal+' kcal') : 'Sin dieta asignada este día'}</div>
           </div>
           ${dayHasDiet
-            ? `<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>${menuDays ? 'Editar este día' : 'Editar plan'}</button>`
+            ? `<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>${menuDays ? 'Editar este día' : 'Editar dieta'}</button>`
             : `<button class="nut-edit-btn" onclick="assignDietToDay(${_nutDayIdx})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Asignar dieta a este día</button>`}
         </div>
         ${menuDays && dayHasDiet ? `<div class="nut-day-actions">
@@ -6730,10 +6730,13 @@ function _nutCalcMacros(a, qty, unit) {
 }
 
 async function openNutEditor(dietId) {
-  // Con menú semanal se edita la dieta del día elegido; sin menú, el plan único.
+  // Siempre la dieta que está seleccionada: la del día con menú semanal, o la
+  // elegida en el carril. Antes caía siempre en clientDiets[0], así que con
+  // varias dietas asignadas se editaba la primera en vez de la que se veía.
   const menuDays = _nutMenuDays();
-  const fromDay = menuDays ? (menuDays[_nutDayIdx] || {}).diet_id : null;
-  const target = dietId || fromDay || clientDiets[0]?.id;
+  const target = dietId
+    || (menuDays ? (menuDays[_nutDayIdx] || {}).diet_id
+                 : (clientDiets[_nutActiveDietIdx] || clientDiets[0] || {}).id);
   if (!target) return;
   const targetId = String(target);
   const ovl = document.getElementById('nutEditorOverlay');

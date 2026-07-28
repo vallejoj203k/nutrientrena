@@ -723,6 +723,15 @@
     .nut-day-item.sel .nut-day-abv{color:#4F46E5;}
     .nut-day-name{font-size:13px;font-weight:600;color:#111827;}
     .nut-day-meta{font-size:11px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .nut-side-head{padding:12px 14px 8px;font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;}
+    .nut-diet-item{display:flex;flex-direction:column;gap:2px;margin:0 10px 8px;padding:11px 13px;border:1.5px solid #E9EBF2;border-radius:11px;cursor:pointer;background:#fff;transition:.15s;}
+    .nut-diet-item:hover{border-color:#C7D2FE;}
+    .nut-diet-item.sel{border-color:var(--indigo,#4F46E5);background:#F5F6FE;}
+    .nut-diet-name{font-size:13px;font-weight:700;color:#111827;}
+    .nut-diet-item.sel .nut-diet-name{color:var(--indigo,#4F46E5);}
+    .nut-diet-meta{font-size:11px;color:#9CA3AF;}
+    .nut-diet-add{display:block;width:calc(100% - 20px);margin:0 10px 12px;padding:11px;border:1.5px dashed #D7DAE6;border-radius:11px;background:transparent;font-size:12.5px;font-weight:700;color:#9CA3AF;cursor:pointer;font-family:inherit;transition:.15s;}
+    .nut-diet-add:hover{border-color:#C7D2FE;color:var(--indigo,#4F46E5);}
     .nut-day-item.empty .nut-day-name,.nut-day-item.empty .nut-day-abv{color:#9CA3AF;}
     .nut-day-item.empty .nut-day-meta{color:#C4C7CF;font-style:italic;}
     .nut-empty-day{display:flex;flex-direction:column;align-items:center;gap:8px;padding:44px 20px;text-align:center;color:#9CA3AF;font-size:13px;}
@@ -6354,6 +6363,7 @@ async function renderNutricionTab() {
 
   if (!_nutDetailLoaded) {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando plan nutricional…</div>';
+    if (_nutActiveDietIdx >= clientDiets.length) _nutActiveDietIdx = 0;
     const diet = clientDiets[_nutActiveDietIdx] || clientDiets[0];
     console.log('[NUT] fetching detail for diet:', diet.id, diet.title);
     try {
@@ -6416,7 +6426,9 @@ function _renderNutUI() {
       <div class="nut-banner-left">
         <div class="nut-banner-badge">Plan Activo</div>
         <div class="nut-banner-title">${esc(menuDays ? (_nutMenu.name || 'Menú semanal') : (det.title || 'Plan nutricional'))}</div>
-        <div class="nut-banner-sub">${menuDays ? 'Menú semanal · un plan por día' : 'Plan diario · ' + esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
+        <div class="nut-banner-sub">${menuDays
+          ? 'Menú semanal · un plan por día'
+          : (clientDiets.length > 1 ? `${clientDiets.length} dietas asignadas · ` : 'Plan diario · ') + esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
         <div class="plan-btn-row">
           <button class="nut-banner-btn" onclick="_downloadNutPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
           <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
@@ -6430,22 +6442,32 @@ function _renderNutUI() {
       </div>
     </div>
     <div class="nut-layout">
-      <div class="nut-day-side">${_NUT_DAY_ABV.map((abv,i)=>{
-        const md = menuDays ? menuDays[i] : null;
-        const empty = menuDays && !(md && md.diet_id);
-        const meta = menuDays
-          ? (empty ? 'Sin dieta' : esc(md.diet_title || 'Dieta asignada'))
-          : mealCount+' comida'+(mealCount!==1?'s':'');
-        return`<div class="nut-day-item${_nutDayIdx===i?' sel':''}${empty?' empty':''}" onclick="selectNutDay(${i})">
-          <span class="nut-day-abv">${abv}</span>
-          <span class="nut-day-name">${_NUT_DAY_FULL[i]}</span>
-          <span class="nut-day-meta">${meta}</span>
-        </div>`;
-      }).join('')}</div>
+      <div class="nut-day-side">${menuDays
+        ? _NUT_DAY_ABV.map((abv,i)=>{
+            const md = menuDays[i];
+            const empty = !(md && md.diet_id);
+            return`<div class="nut-day-item${_nutDayIdx===i?' sel':''}${empty?' empty':''}" onclick="selectNutDay(${i})">
+              <span class="nut-day-abv">${abv}</span>
+              <span class="nut-day-name">${_NUT_DAY_FULL[i]}</span>
+              <span class="nut-day-meta">${empty ? 'Sin dieta' : esc(md.diet_title || 'Dieta asignada')}</span>
+            </div>`;
+          }).join('')
+        // Sin menú semanal el carril lista las dietas asignadas por su nombre:
+        // los días no aportaban nada porque el plan se repetía igual en todos.
+        : `<div class="nut-side-head">Plan activo</div>` + clientDiets.map((d,i)=>{
+            const n = (d.foods || []).length;
+            const k = d.calories ? Math.round(d.calories) : null;
+            const meta = [n ? n + ' comida' + (n!==1?'s':'') : '', k ? k + ' kcal' : ''].filter(Boolean).join(' · ');
+            return`<div class="nut-diet-item${_nutActiveDietIdx===i?' sel':''}" onclick="selectNutDiet(${i})">
+              <span class="nut-diet-name">${esc(d.title || 'Dieta sin nombre')}</span>
+              ${meta ? `<span class="nut-diet-meta">${meta}</span>` : ''}
+            </div>`;
+          }).join('') + `<button class="nut-diet-add" onclick="openAssignDietModal()">+ Añadir dieta</button>`
+      }</div>
       <div class="nut-meal-panel">
         <div class="nut-meal-ph">
           <div>
-            <div class="nut-meal-day-title">${dayName}</div>
+            <div class="nut-meal-day-title">${esc(menuDays ? dayName : (det.title || 'Plan nutricional'))}</div>
             <div class="nut-meal-day-sub">${dayHasDiet ? (mealCount+' comidas · '+totalKcal+' kcal') : 'Sin dieta asignada este día'}</div>
           </div>
           ${dayHasDiet
@@ -6456,7 +6478,7 @@ function _renderNutUI() {
           <button class="nut-day-act" onclick="assignDietToDay(${_nutDayIdx})">Cambiar la dieta de este día</button>
           <button class="nut-day-act danger" onclick="clearMenuDay(${_nutDayIdx})">Dejar el día sin dieta</button>
         </div>` : ''}
-        ${menuDays ? '' : `<div class="nut-same-note">
+        ${(menuDays || clientDiets.length > 1) ? '' : `<div class="nut-same-note">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           Este plan es diario: se repite igual todos los días. Para comidas distintas por día, asígnale un <b>menú semanal</b>.
         </div>`}
@@ -6612,6 +6634,16 @@ function _npPlannerHTML(macros) {
       </div>
     </div>`:''}
   `;
+}
+
+// Selecciona una de las dietas asignadas (carril sin menú semanal).
+async function selectNutDiet(i) {
+  if (!clientDiets[i]) return;
+  _nutActiveDietIdx = i;
+  _nutDetail = await _nutLoadDiet(clientDiets[i].id);
+  if (_nutDetail && !_nutDetail.diet_type) _nutDetail.diet_type = clientDiets[i].diet_type || null;
+  _nutDetailLoaded = true;
+  _renderNutUI();
 }
 
 async function selectNutDay(idx) {
@@ -8087,23 +8119,22 @@ async function confirmAssignDiet() {
     _nutActiveDietIdx = 0;
     closeAssignDietModal();
 
-    // El PDF por email sólo se envía con una dieta: con varias serían varios
-    // correos seguidos al cliente.
+    // Un único correo con todas las dietas asignadas y sus PDF adjuntos.
     let emailSent = false;
-    if (copies.length === 1) {
+    if (copies.length) {
       try {
         const ep = await fetch(`${API}/plans/deliver`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...h() },
-          body: JSON.stringify({ client_user_detail_id: clientId, diet_id: copies[0], send_email: true }),
+          body: JSON.stringify({ client_user_detail_id: clientId, diet_ids: copies, send_email: true }),
         });
         const ej = await ep.json();
         emailSent = ej.data?.email_sent === true;
       } catch {}
-      showToast(emailSent ? 'Dieta asignada y PDF enviado por email' : 'Dieta asignada (no se pudo enviar el email)', emailSent ? 'success' : 'warning');
-    } else {
-      showToast(`${copies.length} dietas asignadas`, 'success');
     }
+    const n = copies.length;
+    const what = n > 1 ? `${n} dietas asignadas` : 'Dieta asignada';
+    showToast(emailSent ? `${what} y enviadas por email` : `${what} (no se pudo enviar el email)`, emailSent ? 'success' : 'warning');
 
     const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
     if (rd.ok) {

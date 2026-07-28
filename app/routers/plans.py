@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -104,6 +104,9 @@ def _build_routine_payload(routine_id: Optional[int], db: Session) -> dict | Non
 class PlanDeliverRequest(BaseModel):
     client_user_detail_id: str
     diet_id: Optional[str] = None
+    # Varias dietas en un unico envio (el cuerpo detalla la primera y todas van
+    # adjuntas en PDF).
+    diet_ids: Optional[List[str]] = None
     routine_id: Optional[int] = None
     message: Optional[str] = None
     loom_link: Optional[str] = None
@@ -146,18 +149,26 @@ def deliver_plan(
     if not client_user:
         return send_error("Usuario del cliente no encontrado")
 
-    diet_payload    = _build_diet_payload(data.diet_id, db)
+    diet_ids = [d for d in (data.diet_ids or ([data.diet_id] if data.diet_id else [])) if d]
+    main_diet_id = diet_ids[0] if diet_ids else None
+    diet_payload    = _build_diet_payload(main_diet_id, db)
     routine_payload = _build_routine_payload(data.routine_id, db)
 
     # ── Build PDF attachments ─────────────────────────────────────────────────
     attachments: list[tuple[bytes, str]] = []
-    if data.diet_id:
-        diet_obj = db.query(Diet).filter(Diet.id == data.diet_id).first()
-        if diet_obj:
-            try:
-                attachments.append((generate_diet_pdf(diet_obj), "dieta.pdf"))
-            except Exception as e:
-                print(f"PDF diet error: {e}")
+    extra_titles: list[str] = []
+    for pos, did in enumerate(diet_ids):
+        diet_obj = db.query(Diet).filter(Diet.id == did).first()
+        if not diet_obj:
+            continue
+        if pos > 0:
+            extra_titles.append(diet_obj.title or "Plan sin nombre")
+        safe = "".join(c for c in (diet_obj.title or "dieta") if c.isalnum() or c in " -_").strip().replace(" ", "_").lower()
+        name = f"{safe or 'dieta'}.pdf" if len(diet_ids) > 1 else "dieta.pdf"
+        try:
+            attachments.append((generate_diet_pdf(diet_obj), name))
+        except Exception as e:
+            print(f"PDF diet error: {e}")
     if data.routine_id:
         routine_obj = db.query(Routine).filter(Routine.id == data.routine_id).first()
         if routine_obj:
@@ -178,6 +189,7 @@ def deliver_plan(
             coach_message=data.message or "",
             loom_link=data.loom_link or "",
             attachments=attachments or None,
+            extra_diet_titles=extra_titles or None,
         )
 
     # ── Save delivery record ──────────────────────────────────────────────────
@@ -185,7 +197,7 @@ def deliver_plan(
     delivery = PlanDelivery(
         client_user_detail_id=data.client_user_detail_id,
         coach_user_detail_id=coach_detail.id if coach_detail else None,
-        diet_id=data.diet_id,
+        diet_id=main_diet_id,
         routine_id=data.routine_id,
         message=data.message,
         loom_link=data.loom_link,

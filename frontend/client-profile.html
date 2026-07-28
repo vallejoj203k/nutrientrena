@@ -453,6 +453,20 @@
     @media(max-width:900px){.active-plan-grid{grid-template-columns:1fr;}}
 
     /* ── Assign modals ── */
+    .ai-btn{background:#fff;border:1px solid #C7D2FE;color:var(--indigo,#4F46E5);display:inline-flex;align-items:center;gap:6px;font-weight:700;}
+    .ai-btn:hover{background:#EEF2FF;}
+    .ai-target{display:flex;gap:8px;flex-wrap:wrap;}
+    .ai-tchip{flex:1;min-width:88px;padding:9px 11px;border:1px solid #E9EBF2;border-radius:10px;background:#FAFBFF;}
+    .ai-tchip b{display:block;font-size:16px;font-weight:800;color:#111827;}
+    .ai-tchip span{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
+    .ai-meal{border:1px solid #EEF0F5;border-radius:11px;margin-top:10px;overflow:hidden;}
+    .ai-meal-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#F7F8FC;font-size:12.5px;font-weight:700;color:#111827;}
+    .ai-meal-head small{color:#9CA3AF;font-weight:600;}
+    .ai-food{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-top:1px solid #F3F4F6;font-size:12.5px;color:#374151;}
+    .ai-food span{color:#6B7280;}
+    .ai-sum{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12.5px;font-weight:700;}
+    .ai-sum.ok{background:#ECFDF5;color:#065F46;}
+    .ai-sum.off{background:#FFFBEB;color:#92400E;}
     .assign-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
     .assign-filter{padding:6px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;color:#374151;background:#fff;font-family:inherit;cursor:pointer;outline:none;transition:.15s;max-width:150px;}
     .assign-filter:hover{border-color:#C7D2FE;}
@@ -1833,6 +1847,37 @@
 </div>
 
 <!-- ── Fechas del programa Modal ── -->
+<!-- ── Generar dieta con IA ── -->
+<div class="modal-overlay" id="aiDietOverlay" onclick="if(event.target===this)closeAiDiet()">
+  <div class="modal" style="width:680px;max-width:96vw;">
+    <div class="modal-head">
+      <div>
+        <h2>Generar dieta</h2>
+        <div class="assign-sub">Se construye con tu catálogo de alimentos y los objetivos calculados en Nutrición.</div>
+      </div>
+      <button class="modal-close" onclick="closeAiDiet()">×</button>
+    </div>
+    <div class="modal-body" style="max-height:66vh;overflow-y:auto;">
+      <div class="ai-target" id="aiTarget"></div>
+      <div id="aiNoteBox" style="font-size:12px;color:#9CA3AF;margin-top:12px;">
+        Se respetan las alergias, intolerancias y alimentos que no le gustan que tengas registrados en su ficha.
+      </div>
+      <textarea id="aiNotes" style="display:none;"></textarea>
+      <div id="aiResult"></div>
+      <div id="aiError" style="color:#DC2626;font-size:13px;margin-top:10px;"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <div class="assign-selcount" id="aiStatus"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeAiDiet()">Cancelar</button>
+        <button class="btn btn-ghost" id="aiRetryBtn" style="display:none;" onclick="runAutoDiet(true)">Otra variante</button>
+        <button class="btn btn-primary" id="aiGoBtn" onclick="runAutoDiet()">Generar propuesta</button>
+        <button class="btn btn-primary" id="aiSaveBtn" style="display:none;" onclick="saveAiDiet()">Asignar al cliente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Editar datos del cliente (perfil + acceso) ── -->
 <div class="modal-overlay" id="editClientOverlay" onclick="if(event.target===this)closeEditClient()">
   <div class="modal" style="width:620px;max-width:96vw;">
@@ -2435,6 +2480,161 @@ function _renderResDatos() {
       </select>
     </div>
   </div>`;
+}
+
+/* ── Generar dieta con IA ─────────────────────────────────────────────────────
+   Los objetivos son los que ya calcula el planificador de Nutrición, así que
+   la propuesta cuadra con lo que ve el coach en pantalla. */
+let _aiPlan = null;
+
+function openAutoDiet() { _aiSeed = 0; openAiDiet(); }
+
+function openAiDiet() {
+  const m = _nutEffMacros();
+  if (!m || !m.kcal) {
+    showToast('Faltan datos del cliente (peso, altura, edad) para calcular su meta diaria', 'warning');
+    return;
+  }
+  _aiPlan = null;
+  document.getElementById('aiNotes').value = '';
+  document.getElementById('aiResult').innerHTML = '';
+  document.getElementById('aiError').textContent = '';
+  document.getElementById('aiStatus').textContent = '';
+  document.getElementById('aiGoBtn').style.display = '';
+  document.getElementById('aiSaveBtn').style.display = 'none';
+  document.getElementById('aiRetryBtn').style.display = 'none';
+  const chip = (v, u, l) => `<div class="ai-tchip"><b>${Math.round(v)}${u}</b><span>${l}</span></div>`;
+  document.getElementById('aiTarget').innerHTML =
+    chip(m.kcal, '', 'kcal/día') + chip(m.proteins, 'g', 'proteínas') +
+    chip(m.carbs, 'g', 'carbos') + chip(m.fats, 'g', 'grasas') +
+    `<div class="ai-tchip"><b>${m.mealCount}</b><span>comidas</span></div>`;
+  document.getElementById('aiDietOverlay').classList.add('open');
+}
+
+function closeAiDiet() { document.getElementById('aiDietOverlay').classList.remove('open'); }
+
+let _aiSeed = 0;
+
+// Generador por algoritmo: sin IA, sin coste y con respuesta inmediata.
+async function runAutoDiet(variante) {
+  const m = _nutEffMacros();
+  const err = document.getElementById('aiError');
+  const status = document.getElementById('aiStatus');
+  const go = document.getElementById('aiGoBtn');
+  const retry = document.getElementById('aiRetryBtn');
+  err.textContent = '';
+  go.disabled = true; retry.disabled = true;
+  status.textContent = 'Construyendo el plan…';
+  if (variante) _aiSeed += 1;
+  try {
+    const r = await fetch(`${API}/diets/auto-generate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({
+        client_id: clientId, kcal: m.kcal, proteins: m.proteins,
+        carbs: m.carbs, fats: m.fats, meal_count: m.mealCount, seed: _aiSeed,
+      }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { err.textContent = j.message || j.detail || 'No se pudo generar la dieta'; status.textContent = ''; return; }
+    _aiPlan = j.data;
+    _renderAiPlan(_aiPlan);
+    status.textContent = 'Revisa la propuesta antes de asignarla.';
+    go.style.display = 'none';
+    retry.style.display = '';
+    document.getElementById('aiSaveBtn').style.display = '';
+  } catch { err.textContent = 'Error de conexión'; status.textContent = ''; }
+  finally { go.disabled = false; retry.disabled = false; }
+}
+
+async function runAiDiet() {
+  const m = _nutEffMacros();
+  const err = document.getElementById('aiError');
+  const status = document.getElementById('aiStatus');
+  const go = document.getElementById('aiGoBtn');
+  const retry = document.getElementById('aiRetryBtn');
+  err.textContent = '';
+  go.disabled = true; retry.disabled = true;
+  status.textContent = 'Generando la propuesta… puede tardar hasta un minuto.';
+  document.getElementById('aiResult').innerHTML = '';
+  try {
+    const r = await fetch(`${API}/diets/ai-generate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({
+        client_id: clientId, kcal: m.kcal, proteins: m.proteins, carbs: m.carbs,
+        fats: m.fats, fiber: m.fiber, meal_count: m.mealCount,
+        notes: (document.getElementById('aiNotes').value || '').trim() || null,
+      }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { err.textContent = j.message || j.detail || 'No se pudo generar la dieta'; status.textContent = ''; return; }
+    _aiPlan = j.data;
+    _renderAiPlan(_aiPlan);
+    status.textContent = 'Revisa la propuesta antes de asignarla.';
+    go.style.display = 'none';
+    retry.style.display = '';
+    document.getElementById('aiSaveBtn').style.display = '';
+  } catch { err.textContent = 'Error de conexión'; status.textContent = ''; }
+  finally { go.disabled = false; retry.disabled = false; }
+}
+
+function _renderAiPlan(p) {
+  const t = p.totals || {}, tg = p.target || {};
+  const dev = Math.abs(tg.deviation_pct || 0);
+  // Los totales los recalcula el servidor con la base de datos, no la IA.
+  const sum = `<div class="ai-sum ${dev <= 5 ? 'ok' : 'off'}">
+      ${Math.round(t.calories)} kcal · ${Math.round(t.proteins)}P · ${Math.round(t.carbs)}C · ${Math.round(t.fats)}G
+      — ${dev <= 5 ? 'cuadra con el objetivo' : `${tg.deviation_pct > 0 ? '+' : ''}${tg.deviation_pct}% frente al objetivo de ${tg.calories} kcal`}
+    </div>`;
+  const meals = (p.foods || []).map(meal => `
+    <div class="ai-meal">
+      <div class="ai-meal-head"><span>${esc(meal.name)}${meal.time ? ` <small>· ${esc(meal.time)}</small>` : ''}</span>
+        <small>${meal.detail.reduce((a, f) => a + (f.calories || 0), 0)} kcal</small></div>
+      ${meal.detail.map(f => `<div class="ai-food"><span style="color:#111827;">${esc(f.name)}</span><span>${f.quantity_calc} g · ${f.calories} kcal</span></div>`).join('')}
+    </div>`).join('');
+  document.getElementById('aiResult').innerHTML =
+    `<div style="margin-top:14px;font-size:14px;font-weight:800;color:#111827;">${esc(p.title || 'Plan generado')}</div>` +
+    (p.notes ? `<div style="font-size:12.5px;color:#6B7280;margin-top:3px;">${esc(p.notes)}</div>` : '') +
+    sum + meals;
+}
+
+async function saveAiDiet() {
+  if (!_aiPlan) return;
+  const btn = document.getElementById('aiSaveBtn');
+  const err = document.getElementById('aiError');
+  err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Asignando…';
+  try {
+    // Se crea directamente como dieta del cliente, con los totales calculados.
+    const body = {
+      title: _aiPlan.title || 'Plan generado con IA',
+      notes: _aiPlan.notes || null,
+      calories: _aiPlan.totals?.calories ?? null,
+      proteins: _aiPlan.totals?.proteins ?? null,
+      carbs: _aiPlan.totals?.carbs ?? null,
+      fats: _aiPlan.totals?.fats ?? null,
+      foods: (_aiPlan.foods || []).map(m => ({
+        name: m.name, time: m.time || null,
+        detail: m.detail.map((f, i) => ({ aliment_id: f.aliment_id, quantity_calc: f.quantity_calc, order: i })),
+      })),
+    };
+    const r = await fetch(`${API}/diets/${clientId}/assigned`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...h() }, body: JSON.stringify(body),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { err.textContent = j.message || j.detail || 'No se pudo asignar la dieta'; return; }
+    closeAiDiet();
+    showToast('Dieta generada y asignada', 'success');
+    _nutDetail = null; _nutDetailLoaded = false; _nutActiveDietIdx = 0;
+    const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
+    if (rd.ok) {
+      const jd = await rd.json();
+      const arr = jd.data || [];
+      clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
+    }
+    await renderNutricionTab();
+    renderActivePlan();
+  } catch { err.textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; btn.textContent = 'Asignar al cliente'; }
 }
 
 /* ── Editar datos y acceso del cliente ────────────────────────────────────────
@@ -6355,7 +6555,13 @@ async function renderNutricionTab() {
     el.innerHTML = `<div style="padding:32px 20px 4px;text-align:center;color:#9CA3AF;">
       <div style="margin-bottom:12px;color:#D1D5DB;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div>
       <p style="margin-bottom:16px;">Sin dieta asignada.</p>
-      <button class="btn btn-primary btn-sm" onclick="openAssignDietModal()">+ Asignar dieta</button>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="openAssignDietModal()">+ Asignar dieta</button>
+        <button class="btn btn-sm ai-btn" onclick="openAutoDiet()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
+          Generar dieta
+        </button>
+      </div>
     </div>
     <div id="npPlannerZone">${_npPlannerHTML(_nutEffMacros())}</div>`;
     return;
@@ -6431,6 +6637,7 @@ function _renderNutUI() {
           : (clientDiets.length > 1 ? `${clientDiets.length} dietas asignadas · ` : 'Plan diario · ') + esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
         <div class="plan-btn-row">
           <button class="nut-banner-btn" onclick="_downloadNutPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
+          <button class="nut-banner-btn" onclick="openAutoDiet()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Generar dieta</button>
           <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
           <button class="nut-banner-btn danger" onclick="removeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
         </div>
@@ -6471,7 +6678,7 @@ function _renderNutUI() {
             <div class="nut-meal-day-sub">${dayHasDiet ? (mealCount+' comidas · '+totalKcal+' kcal') : 'Sin dieta asignada este día'}</div>
           </div>
           ${dayHasDiet
-            ? `<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>${menuDays ? 'Editar este día' : 'Editar plan'}</button>`
+            ? `<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>${menuDays ? 'Editar este día' : 'Editar dieta'}</button>`
             : `<button class="nut-edit-btn" onclick="assignDietToDay(${_nutDayIdx})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Asignar dieta a este día</button>`}
         </div>
         ${menuDays && dayHasDiet ? `<div class="nut-day-actions">
@@ -6730,10 +6937,13 @@ function _nutCalcMacros(a, qty, unit) {
 }
 
 async function openNutEditor(dietId) {
-  // Con menú semanal se edita la dieta del día elegido; sin menú, el plan único.
+  // Siempre la dieta que está seleccionada: la del día con menú semanal, o la
+  // elegida en el carril. Antes caía siempre en clientDiets[0], así que con
+  // varias dietas asignadas se editaba la primera en vez de la que se veía.
   const menuDays = _nutMenuDays();
-  const fromDay = menuDays ? (menuDays[_nutDayIdx] || {}).diet_id : null;
-  const target = dietId || fromDay || clientDiets[0]?.id;
+  const target = dietId
+    || (menuDays ? (menuDays[_nutDayIdx] || {}).diet_id
+                 : (clientDiets[_nutActiveDietIdx] || clientDiets[0] || {}).id);
   if (!target) return;
   const targetId = String(target);
   const ovl = document.getElementById('nutEditorOverlay');

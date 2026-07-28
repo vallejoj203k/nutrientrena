@@ -461,7 +461,36 @@
     .assign-filter-clear{padding:6px 10px;border:none;background:none;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
     .assign-filter-clear:hover{text-decoration:underline;}
     .assign-filter-count{font-size:11.5px;color:#9CA3AF;margin-bottom:6px;}
-    .assign-list{max-height:280px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:10px;}
+    .assign-list{max-height:300px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:10px;}
+    .assign-sub{font-size:12px;color:#9CA3AF;margin-top:2px;font-weight:400;}
+    .assign-selcount{font-size:12px;color:#9CA3AF;white-space:nowrap;}
+    .assign-selcount b{color:#111827;font-weight:700;}
+    /* Filas seleccionables con casilla, macros y previsualizacion */
+    .ad-row{position:relative;border-bottom:1px solid #F3F4F6;transition:.12s;}
+    .ad-row:last-child{border-bottom:none;}
+    .ad-row.sel{background:#F5F6FE;}
+    .ad-main{display:flex;align-items:center;gap:11px;padding:11px 44px 11px 13px;cursor:pointer;}
+    .ad-row:hover .ad-main{background:rgba(79,70,229,.04);}
+    .ad-check{width:18px;height:18px;border-radius:50%;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.12s;}
+    .ad-check.on{background:var(--indigo,#4F46E5);border-color:var(--indigo,#4F46E5);}
+    .ad-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    .ad-name{font-size:13.5px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ad-sub{font-size:11.5px;color:#9CA3AF;}
+    .ad-chips{display:flex;gap:5px;flex-shrink:0;}
+    .ad-chip{display:flex;flex-direction:column;align-items:center;min-width:40px;padding:4px 7px;border-radius:8px;line-height:1.15;}
+    .ad-chip b{font-size:11.5px;font-weight:800;}
+    .ad-chip i{font-size:9px;font-style:normal;font-weight:700;opacity:.8;}
+    .ad-chip.kcal{background:#EEF2FF;color:#4338CA;}
+    .ad-chip.p{background:#EFF6FF;color:#1D4ED8;}
+    .ad-chip.c{background:#FFF7ED;color:#C2410C;}
+    .ad-chip.g{background:#FEF3C7;color:#92400E;}
+    .ad-exp{position:absolute;top:10px;right:10px;width:26px;height:26px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:#9CA3AF;cursor:pointer;transition:.15s;}
+    .ad-exp:hover{border-color:#C7D2FE;color:#4F46E5;}
+    .ad-exp.open{transform:rotate(180deg);border-color:#C7D2FE;color:#4F46E5;}
+    .ad-detail{padding:2px 13px 12px 42px;font-size:12px;color:#4B5563;display:flex;flex-direction:column;gap:3px;}
+    .ad-detail-line b{color:#111827;}
+    .ad-meal{display:flex;justify-content:space-between;gap:8px;padding:4px 8px;background:#fff;border:1px solid #F1F3F7;border-radius:7px;}
+    .ad-meal span{color:#9CA3AF;}
     .assign-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:.12s;border-left:3px solid transparent;}
     .assign-item:last-child{border-bottom:none;}
     .assign-item:hover{background:#F9FAFB;}
@@ -1875,9 +1904,12 @@
 </div>
 
 <div class="modal-overlay" id="assignDietOverlay" onclick="if(event.target===this)closeAssignDietModal()">
-  <div class="modal" style="width:520px;">
+  <div class="modal" style="width:640px;max-width:96vw;">
     <div class="modal-head">
-      <h2>Asignar dieta al cliente</h2>
+      <div>
+        <h2>Asignar dietas al cliente</h2>
+        <div class="assign-sub">Selecciona una o varias dietas. Usa el desplegable para previsualizar.</div>
+      </div>
       <button class="modal-close" onclick="closeAssignDietModal()">×</button>
     </div>
     <div class="modal-body">
@@ -1894,18 +1926,17 @@
       <div class="assign-list" id="assignDietList">
         <div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando dietas…</div>
       </div>
-      <div id="assignDietPreview" class="assign-preview" style="display:none;">
-        <div id="assignDietPreviewName" style="font-size:13px;font-weight:700;color:#4F46E5;"></div>
-        <div class="assign-preview-chips" id="assignDietPreviewChips"></div>
-      </div>
       <div id="assignDietError" style="color:#DC2626;font-size:12px;margin-top:8px;"></div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" style="justify-content:space-between;">
+      <div class="assign-selcount" id="assignDietSelCount"><b>0 seleccionadas</b></div>
+      <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost" onclick="closeAssignDietModal()">Cancelar</button>
       <button class="btn btn-primary" id="assignDietBtn" onclick="confirmAssignDiet()" disabled>
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Asignar dieta
+        <span id="assignDietBtnLbl">Asignar dietas</span>
       </button>
+      </div>
     </div>
   </div>
 </div>
@@ -7898,7 +7929,6 @@ async function openAssignDietModal() {
   _selectedDietId = null;
   document.getElementById('assignDietError').textContent = '';
   document.getElementById('assignDietSearch').value = '';
-  document.getElementById('assignDietPreview').style.display = 'none';
   document.getElementById('assignDietBtn').disabled = true;
   document.getElementById('assignDietList').innerHTML = '<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">Cargando…</div>';
   document.getElementById('assignDietOverlay').classList.add('open');
@@ -7906,6 +7936,8 @@ async function openAssignDietModal() {
     const r = await fetch(`${API}/diets/findAll`, { headers: h() });
     const j = await r.json();
     _assignDiets = Array.isArray(j.data) ? j.data : [];
+    _selectedDietIds = new Set();
+    _adExpanded = new Set();
     _adFilters = { type:'', goal:'', patho:'' };
     _applyDietFilters();
     // Los nombres de los tipos vienen del catálogo: al llegar se repinta.
@@ -7920,84 +7952,133 @@ async function openAssignDietModal() {
 function closeAssignDietModal() {
   document.getElementById('assignDietOverlay').classList.remove('open');
   _selectedDietId = null;
+  _selectedDietIds = new Set();
+  _adExpanded = new Set();
   _assignReplaceDietId = null;
   _assignMenuDayIdx = null;
 }
+
+// Se pueden asignar varias dietas de una vez (p. ej. una por día del menú).
+let _selectedDietIds = new Set();
+let _adExpanded = new Set();
 
 function renderAssignDietList(diets) {
   const el = document.getElementById('assignDietList');
   if (!diets.length) {
     const filtered = _assignDiets.length > 0;
     el.innerHTML = `<div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">${filtered ? 'Ninguna dieta coincide con estos filtros.' : 'No hay dietas en tu biblioteca.'}</div>`;
+    _updateAssignDietFooter();
     return;
   }
   el.innerHTML = diets.map(d => {
     const det = d.detail || {};
-    const patho = _adPathoNames(d);
-    const parts = [
-      d.calories ? Math.round(d.calories) + ' kcal' : '',
+    const id = String(d.id);
+    const sel = _selectedDietIds.has(id);
+    const open = _adExpanded.has(id);
+    const sub = [
       d.diet_type || (d.type_id != null ? _adTypeName(d.type_id) : ''),
-      _AD_GOALS[_adGoal(d)] || '',
-      det.proteins ? Math.round(det.proteins) + 'P · ' + Math.round(det.carbs||0) + 'C · ' + Math.round(det.fats||0) + 'G' : '',
-      patho.length ? patho.join(', ') : '',
-    ].filter(Boolean);
-    return `<div class="assign-item" id="aditem-${esc(d.id)}" onclick="selectAssignDiet('${esc(d.id)}',this)">
-      <div class="assign-item-name">${esc(d.title || d.name || 'Sin nombre')}</div>
-      ${parts.length ? `<div class="assign-item-sub">${parts.join(' · ')}</div>` : ''}
+      (d.foods || []).length ? (d.foods || []).length + ' comidas/día' : '',
+    ].filter(Boolean).join(' · ');
+    const chip = (v, u, lbl, cls) => v ? `<span class="ad-chip ${cls}"><b>${Math.round(v)}${u}</b><i>${lbl}</i></span>` : '';
+    const patho = _adPathoNames(d);
+    return `<div class="ad-row${sel ? ' sel' : ''}" id="aditem-${esc(id)}">
+      <div class="ad-main" onclick="toggleAssignDiet('${esc(id)}')">
+        <span class="ad-check${sel ? ' on' : ''}">${sel ? '<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</span>
+        <span class="ad-txt">
+          <span class="ad-name">${esc(d.title || d.name || 'Sin nombre')}</span>
+          ${sub ? `<span class="ad-sub">${esc(sub)}</span>` : ''}
+        </span>
+        <span class="ad-chips">
+          ${chip(d.calories, '', 'kcal', 'kcal')}
+          ${chip(det.proteins, 'g', 'P', 'p')}
+          ${chip(det.carbs, 'g', 'C', 'c')}
+          ${chip(det.fats, 'g', 'G', 'g')}
+        </span>
+      </div>
+      <button class="ad-exp${open ? ' open' : ''}" onclick="event.stopPropagation();toggleDietPreview('${esc(id)}')" title="Previsualizar">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      ${open ? `<div class="ad-detail">
+        <div class="ad-detail-line"><b>Objetivo:</b> ${esc(_AD_GOALS[_adGoal(d)] || '—')}</div>
+        ${patho.length ? `<div class="ad-detail-line"><b>Patologías:</b> ${esc(patho.join(', '))}</div>` : ''}
+        ${(d.foods || []).length
+          ? (d.foods || []).map(m => `<div class="ad-meal">${esc(m.name || 'Comida')}${m.time ? ` · ${esc(m.time)}` : ''} <span>${(m.detail || []).length} alimentos</span></div>`).join('')
+          : '<div class="ad-detail-line" style="color:#9CA3AF;">Sin comidas cargadas.</div>'}
+      </div>` : ''}
     </div>`;
   }).join('');
+  _updateAssignDietFooter();
 }
 
-function selectAssignDiet(id, el) {
-  _selectedDietId = id;
-  document.querySelectorAll('#assignDietList .assign-item').forEach(x => x.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('assignDietBtn').disabled = false;
-  const diet = _assignDiets.find(d => d.id === id);
-  if (diet) {
-    const det = diet.detail || {};
-    document.getElementById('assignDietPreviewName').textContent = diet.title || diet.name || '';
-    const chips = [
-      diet.calories ? `<span class="assign-chip">${Math.round(diet.calories)} kcal</span>` : '',
-      det.proteins ? `<span class="assign-chip">${Math.round(det.proteins)}g prot</span>` : '',
-      det.carbs ? `<span class="assign-chip">${Math.round(det.carbs)}g carbs</span>` : '',
-      det.fats ? `<span class="assign-chip">${Math.round(det.fats)}g grasas</span>` : '',
-    ].filter(Boolean);
-    document.getElementById('assignDietPreviewChips').innerHTML = chips.join('');
-    document.getElementById('assignDietPreview').style.display = 'block';
+function toggleAssignDiet(id) {
+  id = String(id);
+  if (_selectedDietIds.has(id)) _selectedDietIds.delete(id);
+  else {
+    // Asignar la dieta de un día del menú admite una sola.
+    if (_assignMenuDayIdx != null) _selectedDietIds.clear();
+    _selectedDietIds.add(id);
   }
+  _selectedDietId = [..._selectedDietIds][0] || null;
+  _applyDietFilters();
+}
+
+function toggleDietPreview(id) {
+  id = String(id);
+  if (_adExpanded.has(id)) _adExpanded.delete(id); else _adExpanded.add(id);
+  _applyDietFilters();
+}
+
+function _updateAssignDietFooter() {
+  const n = _selectedDietIds.size;
+  const c = document.getElementById('assignDietSelCount');
+  if (c) c.innerHTML = `<b>${n} seleccionada${n !== 1 ? 's' : ''}</b> · Haz clic en ⌄ para previsualizar`;
+  const btn = document.getElementById('assignDietBtn');
+  if (btn) btn.disabled = n === 0;
+  const lbl = document.getElementById('assignDietBtnLbl');
+  if (lbl) lbl.textContent = n > 1 ? `Asignar ${n} dietas` : 'Asignar dieta';
 }
 
 async function confirmAssignDiet() {
-  if (!_selectedDietId) return;
+  const ids = [..._selectedDietIds];
+  if (!ids.length) return;
   const btn = document.getElementById('assignDietBtn');
-  btn.disabled = true; btn.querySelector('span') ? btn.querySelector('span').textContent = 'Asignando…' : (btn.lastChild.textContent = 'Asignando…');
+  const lbl = document.getElementById('assignDietBtnLbl');
+  const prev = lbl ? lbl.textContent : '';
+  btn.disabled = true; if (lbl) lbl.textContent = 'Asignando…';
   document.getElementById('assignDietError').textContent = '';
   try {
-    const r = await fetch(`${API}/diets/${_selectedDietId}/assign`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...h() },
-      body: JSON.stringify({ client_id: clientId }),
-    });
-    const j = await r.json();
-    if (!r.ok) { document.getElementById('assignDietError').textContent = j.detail || j.message || 'Error al asignar'; return; }
-    // Asignación a un día concreto del menú semanal: el día apunta a la copia
-    // recién creada para este cliente, sin tocar el resto de días.
+    // Cada dieta se copia al cliente; se guarda el id de cada copia.
+    const copies = [];
+    for (const id of ids) {
+      const r = await fetch(`${API}/diets/${id}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...h() },
+        body: JSON.stringify({ client_id: clientId }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        document.getElementById('assignDietError').textContent = j.detail || j.message || 'Error al asignar';
+        return;
+      }
+      if (j.data?.id) copies.push(j.data.id);
+    }
+
+    // Asignación a un día concreto del menú semanal: sólo se admite una.
     if (_assignMenuDayIdx != null) {
       const idx = _assignMenuDayIdx;
       _assignMenuDayIdx = null;
       closeAssignDietModal();
-      if (await _setMenuDayDiet(idx, j.data?.id || null)) {
+      if (await _setMenuDayDiet(idx, copies[0] || null)) {
         _nutDayIdx = idx;
-        _nutDetail = await _nutLoadDiet(j.data?.id);
+        _nutDetail = await _nutLoadDiet(copies[0]);
         _renderNutUI();
         showToast('Dieta asignada a ' + _NUT_DAY_FULL[idx], 'success');
       }
-      btn.disabled = false;
       return;
     }
-    // "Cambiar plan": remove the plan being replaced once the new one is assigned
-    if (_assignReplaceDietId && String(_assignReplaceDietId) !== String(j.data?.id || '')) {
+
+    // "Cambiar plan": se elimina el plan sustituido una vez asignado el nuevo
+    if (_assignReplaceDietId && !copies.includes(String(_assignReplaceDietId))) {
       try { await fetch(`${API}/diets/${_assignReplaceDietId}`, { method: 'DELETE', headers: h() }); } catch {}
     }
     _assignReplaceDietId = null;
@@ -8006,21 +8087,23 @@ async function confirmAssignDiet() {
     _nutActiveDietIdx = 0;
     closeAssignDietModal();
 
-    // Send PDF to client email automatically
-    const newDietId = j.data?.id;
+    // El PDF por email sólo se envía con una dieta: con varias serían varios
+    // correos seguidos al cliente.
     let emailSent = false;
-    if (newDietId) {
+    if (copies.length === 1) {
       try {
         const ep = await fetch(`${API}/plans/deliver`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...h() },
-          body: JSON.stringify({ client_user_detail_id: clientId, diet_id: newDietId, send_email: true }),
+          body: JSON.stringify({ client_user_detail_id: clientId, diet_id: copies[0], send_email: true }),
         });
         const ej = await ep.json();
         emailSent = ej.data?.email_sent === true;
       } catch {}
+      showToast(emailSent ? 'Dieta asignada y PDF enviado por email' : 'Dieta asignada (no se pudo enviar el email)', emailSent ? 'success' : 'warning');
+    } else {
+      showToast(`${copies.length} dietas asignadas`, 'success');
     }
-    showToast(emailSent ? 'Dieta asignada y PDF enviado por email' : 'Dieta asignada (no se pudo enviar el email)', emailSent ? 'success' : 'warning');
 
     const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
     if (rd.ok) {
@@ -8031,7 +8114,7 @@ async function confirmAssignDiet() {
     }
     await renderNutricionTab();
   } catch { document.getElementById('assignDietError').textContent = 'Error de conexión'; }
-  finally { btn.disabled = false; }
+  finally { btn.disabled = false; if (lbl) lbl.textContent = prev; }
 }
 
 async function openAssignRoutineModal() {

@@ -1,10 +1,11 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime, date
 
 
 class UserCreateRequest(BaseModel):
     name: str
+    pathology_ids: Optional[List[int]] = None
     last_name: Optional[str] = None
     email: EmailStr
     password: str
@@ -48,6 +49,7 @@ class UserCreateRequest(BaseModel):
 
 class UserUpdateRequest(BaseModel):
     name: Optional[str] = None
+    pathology_ids: Optional[List[int]] = None
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None

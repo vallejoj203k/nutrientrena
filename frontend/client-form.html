@@ -189,6 +189,11 @@
     .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;}
     .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
     .sl-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
+    .patho-grid{display:flex;flex-wrap:wrap;gap:7px;}
+    .patho-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid #E5E7EB;border-radius:20px;background:#fff;font-size:12.5px;color:#374151;cursor:pointer;transition:.15s;user-select:none;}
+    .patho-chip:hover{border-color:#C7D2FE;}
+    .patho-chip.sel{border-color:#4F46E5;background:#EEF2FF;color:#4F46E5;font-weight:700;}
+    .patho-chip input{display:none;}
 </style>
   <style>
     /* ALZUM.io — theme overrides */
@@ -387,6 +392,12 @@
               <div class="form-group">
                 <label>Ocupación</label>
                 <input type="text" id="fOccupation" placeholder="Ej: Ingeniero, Estudiante, Deportista…"/>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Patologías <span style="font-weight:400;color:#9CA3AF;">(condicionan sus dietas)</span></label>
+                <div class="patho-grid" id="pathoGrid"><span style="font-size:12px;color:#9CA3AF;">Cargando…</span></div>
               </div>
             </div>
           </div>
@@ -596,7 +607,8 @@ async function loadUser(){
 
 function _isCoachOnly(){
   // True if the user has coach role but NOT admin/superadmin
-  const roleNames = _currentUserRoles.map(r => (r.name||r||'').toLowerCase());
+  // Un rol sin nombre no debe romper el guardado del cliente.
+  const roleNames = _currentUserRoles.map(r => String(r?.name ?? (typeof r === 'string' ? r : '')).toLowerCase());
   const hasAdmin = roleNames.some(n => n.includes('admin') || n.includes('superadmin'));
   const hasCoach = roleNames.some(n => n.includes('coach'));
   return hasCoach && !hasAdmin;
@@ -665,6 +677,38 @@ async function loadCountries(){
 }
 
 // ── Load client for edit ───────────────────────────────────────────────────────
+// ── Patologías del cliente ───────────────────────────────────────────────────
+let _pathologies = [], _pathoSel = new Set();
+
+async function loadPathologies(){
+  const el = document.getElementById('pathoGrid');
+  try{
+    const r = await fetch(`${API}/pathologies/findAll`, {headers:{Authorization:`Bearer ${token}`}});
+    const j = await r.json();
+    _pathologies = Array.isArray(j.data) ? j.data : [];
+  }catch{ _pathologies = []; }
+  if(!_pathologies.length){
+    el.innerHTML = '<span style="font-size:12px;color:#9CA3AF;">No hay patologías en el catálogo.</span>';
+    return;
+  }
+  renderPathologies();
+}
+
+function renderPathologies(){
+  const el = document.getElementById('pathoGrid');
+  if(!el) return;
+  el.innerHTML = _pathologies.map(p =>
+    `<label class="patho-chip${_pathoSel.has(p.id)?' sel':''}" onclick="togglePathology(${p.id})">${escapeHtml(p.name)}</label>`
+  ).join('');
+}
+
+function togglePathology(id){
+  if(_pathoSel.has(id)) _pathoSel.delete(id); else _pathoSel.add(id);
+  renderPathologies();
+}
+
+function escapeHtml(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
 async function loadClient(){
   if(!isEdit) return;
   try{
@@ -687,6 +731,8 @@ async function loadClient(){
     document.getElementById('fDeficit').value    =d.defecit||c.defecit||'';
     document.getElementById('fExcedente').value  =d.excedente||c.excedente||'';
     document.getElementById('fStatus').value     =c.status_id||'';
+    _pathoSel = new Set((c.pathologies||[]).map(p=>p.id));
+    renderPathologies();
     document.getElementById('fCoach').value      =c.instructor||'';
     if (d.photo || c.photo) {
       _photoUrl = d.photo || c.photo;
@@ -827,6 +873,8 @@ async function saveClient(){
       else body[key]=v;
     });
 
+    body.pathology_ids = [..._pathoSel];
+
     const url=isEdit?`${API}/users/${editingId}/update`:`${API}/users`;
     const r=await fetch(url,{
       method:isEdit?'PUT':'POST',
@@ -895,6 +943,7 @@ document.head.appendChild(style);
     loadParamSelect('Nivel de actividad', 'fActivity'),
     loadParamSelect('Objetivo Usuario', 'fObjective'),
     loadParamSelect('Estado del Cliente', 'fStatus'),
+    loadPathologies(),
   ]);
 
   await loadClient();

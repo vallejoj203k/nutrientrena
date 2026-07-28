@@ -31,6 +31,23 @@ MEAL_NAMES = {
         ("Merienda", "17:30"), ("Cena", "21:00"), ("Recena", "23:00")],
 }
 
+# Alimentos que excluye cada patología. Solo se listan las que se resuelven
+# quitando alimentos; las que se manejan ajustando macros o sodio (diabetes,
+# hipertensión, insuficiencia renal…) no entran aquí y las decide el coach.
+# La coincidencia es por trozo de nombre, sin acentos ni mayúsculas.
+PATHOLOGY_EXCLUSIONS = {
+    "celiaca": ["trigo", "harina", "pan", "pasta", "cebada", "centeno", "espelta",
+                "cuscus", "semola", "avena", "galleta", "cerveza", "bulgur", "seitan"],
+    "gluten": ["trigo", "harina", "pan", "pasta", "cebada", "centeno", "espelta",
+               "cuscus", "semola", "avena", "galleta", "cerveza", "bulgur", "seitan"],
+    "lactosa": ["leche", "queso", "yogur", "nata", "mantequilla", "cuajada",
+                "requeson", "helado", "bechamel"],
+    "frutos secos": ["almendra", "nuez", "avellana", "anacardo", "pistacho",
+                     "cacahuete", "mani", "pinon", "macadamia"],
+    "gota": ["higado", "riñon", "molleja", "viscera", "marisco", "gamba", "langostino",
+             "mejillon", "sardina", "anchoa", "boqueron", "caballa", "arenque"],
+}
+
 # Cantidades a las que se redondea: las que un cliente puede pesar sin volverse loco.
 STEPS = [10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 100, 125, 150, 175, 200, 225, 250, 300]
 
@@ -52,8 +69,26 @@ def parse_restrictions(*fields) -> list:
     return out
 
 
+def exclusions_for(pathologies) -> list:
+    """Términos a excluir según las patologías del cliente.
+
+    `pathologies` son los nombres del catálogo ("Enfermedad celíaca",
+    "Intolerancia a la lactosa"…); se busca la clave dentro del nombre.
+    """
+    fuera = []
+    for nombre in pathologies or []:
+        n = _norm(str(nombre))
+        for clave, alimentos in PATHOLOGY_EXCLUSIONS.items():
+            if clave in n:
+                fuera.extend(alimentos)
+    return fuera
+
+
 def is_allowed(aliment, restrictions: list) -> bool:
     nombre = _norm(f"{aliment.name} {getattr(aliment, 'brand', '') or ''}")
+    # Un producto que se anuncia "sin gluten" o "sin lactosa" sigue valiendo.
+    if "sin gluten" in nombre or "sin lactosa" in nombre:
+        return True
     return not any(r in nombre for r in restrictions)
 
 

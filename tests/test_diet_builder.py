@@ -100,3 +100,30 @@ def test_ia_desactivada_por_defecto(client, seed, admin_headers):
     r = client.post("/api/diets/ai-generate", headers=admin_headers, json={"kcal": 2000})
     assert r.status_code == 503
     assert "AI_DIET_ENABLED" in r.json()["message"]
+
+
+def test_patologias_excluyen_familias_de_alimentos():
+    """La celiaquía no aparece en el nombre de ningún alimento: hace falta el mapa."""
+    fuera = diet_builder.exclusions_for(["Enfermedad celíaca"])
+    assert "pan" in fuera and "trigo" in fuera
+
+    restr = diet_builder.parse_restrictions("") + fuera
+    plan = diet_builder.build_diet(
+        aliments=CATALOGO, kcal=2000, proteins=150, carbs=200, fats=60,
+        meal_count=4, restrictions=restr)
+    nombres = [f["name"].lower() for m in plan["meals"] for f in m["detail"]]
+    assert not any("pan" in n or "avena" in n for n in nombres), nombres
+    # Sigue construyendo un plan válido con lo que queda
+    assert abs(plan["totals"]["calories"] - 2000) / 2000 <= 0.10
+
+
+def test_lactosa_respeta_los_productos_sin_lactosa():
+    catalogo = CATALOGO + [A("s1", "Yogur sin lactosa", 60, 10, 4, 0.5)]
+    restr = diet_builder.exclusions_for(["Intolerancia a la lactosa"])
+    assert not diet_builder.is_allowed(A("y", "Yogur griego 0%", 59, 10, 4, 0.4), restr)
+    assert diet_builder.is_allowed(catalogo[-1], restr)
+
+
+def test_patologia_sin_exclusiones_no_filtra_nada():
+    """La diabetes se maneja ajustando macros, no quitando alimentos."""
+    assert diet_builder.exclusions_for(["Diabetes tipo 2"]) == []

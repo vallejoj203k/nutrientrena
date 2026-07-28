@@ -1852,17 +1852,17 @@
   <div class="modal" style="width:680px;max-width:96vw;">
     <div class="modal-head">
       <div>
-        <h2>Generar dieta con IA</h2>
-        <div class="assign-sub">Usa los objetivos calculados en Nutrición y los datos del cliente.</div>
+        <h2>Generar dieta</h2>
+        <div class="assign-sub">Se construye con tu catálogo de alimentos y los objetivos calculados en Nutrición.</div>
       </div>
       <button class="modal-close" onclick="closeAiDiet()">×</button>
     </div>
     <div class="modal-body" style="max-height:66vh;overflow-y:auto;">
       <div class="ai-target" id="aiTarget"></div>
-      <div class="form-group" style="margin-top:14px;">
-        <label>Indicaciones para la IA <span class="xf-sec-hint">(opcional)</span></label>
-        <textarea id="aiNotes" rows="2" placeholder="Ej: sin lácteos por la mañana, cena ligera, incluir pescado dos veces" style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+      <div id="aiNoteBox" style="font-size:12px;color:#9CA3AF;margin-top:12px;">
+        Se respetan las alergias, intolerancias y alimentos que no le gustan que tengas registrados en su ficha.
       </div>
+      <textarea id="aiNotes" style="display:none;"></textarea>
       <div id="aiResult"></div>
       <div id="aiError" style="color:#DC2626;font-size:13px;margin-top:10px;"></div>
     </div>
@@ -1870,8 +1870,8 @@
       <div class="assign-selcount" id="aiStatus"></div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="closeAiDiet()">Cancelar</button>
-        <button class="btn btn-ghost" id="aiRetryBtn" style="display:none;" onclick="runAiDiet()">Volver a generar</button>
-        <button class="btn btn-primary" id="aiGoBtn" onclick="runAiDiet()">Generar propuesta</button>
+        <button class="btn btn-ghost" id="aiRetryBtn" style="display:none;" onclick="runAutoDiet(true)">Otra variante</button>
+        <button class="btn btn-primary" id="aiGoBtn" onclick="runAutoDiet()">Generar propuesta</button>
         <button class="btn btn-primary" id="aiSaveBtn" style="display:none;" onclick="saveAiDiet()">Asignar al cliente</button>
       </div>
     </div>
@@ -2487,6 +2487,8 @@ function _renderResDatos() {
    la propuesta cuadra con lo que ve el coach en pantalla. */
 let _aiPlan = null;
 
+function openAutoDiet() { _aiSeed = 0; openAiDiet(); }
+
 function openAiDiet() {
   const m = _nutEffMacros();
   if (!m || !m.kcal) {
@@ -2510,6 +2512,39 @@ function openAiDiet() {
 }
 
 function closeAiDiet() { document.getElementById('aiDietOverlay').classList.remove('open'); }
+
+let _aiSeed = 0;
+
+// Generador por algoritmo: sin IA, sin coste y con respuesta inmediata.
+async function runAutoDiet(variante) {
+  const m = _nutEffMacros();
+  const err = document.getElementById('aiError');
+  const status = document.getElementById('aiStatus');
+  const go = document.getElementById('aiGoBtn');
+  const retry = document.getElementById('aiRetryBtn');
+  err.textContent = '';
+  go.disabled = true; retry.disabled = true;
+  status.textContent = 'Construyendo el plan…';
+  if (variante) _aiSeed += 1;
+  try {
+    const r = await fetch(`${API}/diets/auto-generate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({
+        client_id: clientId, kcal: m.kcal, proteins: m.proteins,
+        carbs: m.carbs, fats: m.fats, meal_count: m.mealCount, seed: _aiSeed,
+      }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { err.textContent = j.message || j.detail || 'No se pudo generar la dieta'; status.textContent = ''; return; }
+    _aiPlan = j.data;
+    _renderAiPlan(_aiPlan);
+    status.textContent = 'Revisa la propuesta antes de asignarla.';
+    go.style.display = 'none';
+    retry.style.display = '';
+    document.getElementById('aiSaveBtn').style.display = '';
+  } catch { err.textContent = 'Error de conexión'; status.textContent = ''; }
+  finally { go.disabled = false; retry.disabled = false; }
+}
 
 async function runAiDiet() {
   const m = _nutEffMacros();
@@ -6522,9 +6557,9 @@ async function renderNutricionTab() {
       <p style="margin-bottom:16px;">Sin dieta asignada.</p>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
         <button class="btn btn-primary btn-sm" onclick="openAssignDietModal()">+ Asignar dieta</button>
-        <button class="btn btn-sm ai-btn" onclick="openAiDiet()">
+        <button class="btn btn-sm ai-btn" onclick="openAutoDiet()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
-          Generar con IA
+          Generar dieta
         </button>
       </div>
     </div>
@@ -6602,7 +6637,7 @@ function _renderNutUI() {
           : (clientDiets.length > 1 ? `${clientDiets.length} dietas asignadas · ` : 'Plan diario · ') + esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
         <div class="plan-btn-row">
           <button class="nut-banner-btn" onclick="_downloadNutPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
-          <button class="nut-banner-btn" onclick="openAiDiet()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Generar con IA</button>
+          <button class="nut-banner-btn" onclick="openAutoDiet()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Generar dieta</button>
           <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
           <button class="nut-banner-btn danger" onclick="removeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
         </div>

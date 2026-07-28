@@ -1,0 +1,102 @@
+"""El generador por algoritmo debe cuadrar con el objetivo y respetar restricciones."""
+from app.core import diet_builder
+
+
+class A:
+    """Alimento mínimo, con macros por 100 g."""
+    def __init__(self, id, name, kcal, p, c, f, brand=None):
+        self.id, self.name = id, name
+        self.calories, self.proteins, self.carbohydrates, self.fats = kcal, p, c, f
+        self.brand = brand
+
+
+CATALOGO = [
+    A("p1", "Pechuga de pollo", 110, 23, 0, 2),
+    A("p2", "Salmón", 208, 20, 0, 13),
+    A("p3", "Huevo", 155, 13, 1, 11),
+    A("p4", "Yogur griego 0%", 59, 10, 4, 0.4),
+    A("c1", "Arroz integral", 355, 7, 74, 3),
+    A("c2", "Avena", 380, 13, 60, 7),
+    A("c3", "Patata", 77, 2, 17, 0.1),
+    A("c4", "Pan integral", 247, 9, 41, 3),
+    A("f1", "Aceite de oliva", 884, 0, 0, 100),
+    A("f2", "Almendras", 579, 21, 22, 50),
+    A("v1", "Brócoli", 34, 3, 7, 0.4),
+    A("v2", "Espinacas", 23, 3, 4, 0.4),
+]
+
+
+def _totales(plan):
+    return plan["totals"]
+
+
+def test_clasifica_por_macros():
+    c = diet_builder.classify
+    assert c(A("x", "Pollo", 110, 23, 0, 2)) == "protein"
+    assert c(A("x", "Arroz", 355, 7, 74, 3)) == "carb"
+    assert c(A("x", "Aceite", 884, 0, 0, 100)) == "fat"
+    assert c(A("x", "Brócoli", 34, 3, 7, 0.4)) == "veg"
+    assert c(A("x", "Sin datos", 0, 0, 0, 0)) is None
+
+
+def test_cuadra_con_el_objetivo():
+    plan = diet_builder.build_diet(
+        aliments=CATALOGO, kcal=2100, proteins=160, carbs=200, fats=70, meal_count=4)
+    kcal = _totales(plan)["calories"]
+    desvio = abs(kcal - 2100) / 2100
+    assert desvio <= 0.10, f"{kcal} kcal se aleja demasiado de 2100"
+    assert len(plan["meals"]) == 4
+    # Cantidades redondeadas y utilizables
+    for m in plan["meals"]:
+        for f in m["detail"]:
+            assert f["quantity_calc"] in diet_builder.STEPS, f
+
+
+def test_respeta_alergias_y_disgustos():
+    restr = diet_builder.parse_restrictions("Frutos secos, almendras", "lactosa", "salmón")
+    plan = diet_builder.build_diet(
+        aliments=CATALOGO, kcal=2000, proteins=150, carbs=200, fats=60,
+        meal_count=4, restrictions=restr)
+    nombres = [f["name"].lower() for m in plan["meals"] for f in m["detail"]]
+    assert not any("almendra" in n for n in nombres), nombres
+    assert not any("salmon" in n or "salmón" in n for n in nombres), nombres
+
+
+def test_es_reproducible_y_la_semilla_cambia_la_variante():
+    kw = dict(aliments=CATALOGO, kcal=2000, proteins=150, carbs=200, fats=60, meal_count=4)
+    a = diet_builder.build_diet(**kw, seed=1)
+    b = diet_builder.build_diet(**kw, seed=1)
+    c = diet_builder.build_diet(**kw, seed=7)
+    plano = lambda p: [(f["name"], f["quantity_calc"]) for m in p["meals"] for f in m["detail"]]
+    assert plano(a) == plano(b), "mismos datos deberían dar el mismo plan"
+    assert plano(a) != plano(c), "otra semilla debería dar otra variante"
+
+
+def test_sin_catalogo_util_avisa():
+    try:
+        diet_builder.build_diet(aliments=[A("v", "Lechuga", 15, 1, 3, 0.2)],
+                                kcal=2000, proteins=150, carbs=200, fats=60)
+    except ValueError as e:
+        assert "proteína" in str(e)
+    else:
+        raise AssertionError("debería avisar de que falta catálogo")
+
+
+def test_endpoint_auto_generate(client, seed, admin_headers):
+    h = admin_headers
+    for a in CATALOGO:
+        client.post("/api/aliments", headers=h, json={
+            "name": a.name, "calories": a.calories, "proteins": a.proteins,
+            "carbohydrates": a.carbohydrates, "fats": a.fats})
+    r = client.post("/api/diets/auto-generate", headers=h, json={
+        "kcal": 2100, "proteins": 160, "carbs": 200, "fats": 70, "meal_count": 4})
+    assert r.status_code == 200, r.text
+    d = r.json()["data"]
+    assert abs(d["target"]["deviation_pct"]) <= 10
+    assert len(d["foods"]) == 4
+
+
+def test_ia_desactivada_por_defecto(client, seed, admin_headers):
+    r = client.post("/api/diets/ai-generate", headers=admin_headers, json={"kcal": 2000})
+    assert r.status_code == 503
+    assert "AI_DIET_ENABLED" in r.json()["message"]

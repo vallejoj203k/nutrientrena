@@ -74,6 +74,9 @@ class Settings(BaseSettings):
     # y el endpoint responde explicando cómo habilitarla.
     ANTHROPIC_API_KEY: Optional[str] = None
     ANTHROPIC_MODEL: str = "claude-opus-5"
+    # Interruptor aparte de la clave: aunque haya clave, la generación con IA
+    # queda apagada hasta activarla a propósito, para no generar gasto.
+    AI_DIET_ENABLED: bool = False
 
     @property
     def cors_origins(self) -> list[str]:

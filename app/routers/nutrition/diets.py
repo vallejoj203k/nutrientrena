@@ -297,6 +297,70 @@ def _macros_for(aliment, grams: float) -> tuple:
     )
 
 
+class _AutoGenerateBody(BaseModel):
+    client_id: Optional[str] = None
+    kcal: float
+    proteins: float = 0
+    carbs: float = 0
+    fats: float = 0
+    meal_count: int = 4
+    seed: Optional[int] = None            # cambia la variante sin cambiar los datos
+
+
+@router.post("/auto-generate", summary="Generar una dieta automáticamente", description="Construye un plan diario con los alimentos del catálogo ajustado a los objetivos de Nutrición. Sin IA ni servicios externos.")
+def auto_generate(
+    data: _AutoGenerateBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
+    from app.core import diet_builder
+
+    if not data.kcal or data.kcal <= 0:
+        return send_error("Hace falta un objetivo de calorías para generar el plan", code=422)
+
+    q = db.query(Aliment).filter(Aliment.calories.isnot(None))
+    if org.org_id:
+        q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
+    aliments = q.all()
+    if not aliments:
+        return send_error("No hay alimentos en el catálogo para construir la dieta", code=422)
+
+    restricciones = []
+    if data.client_id:
+        from app.models.user import UserDetail
+        detail = db.query(UserDetail).filter(UserDetail.id == data.client_id).first()
+        if detail:
+            restricciones = diet_builder.parse_restrictions(
+                detail.allergies, detail.intolerances, detail.dislikes
+            )
+
+    try:
+        plan = diet_builder.build_diet(
+            aliments=aliments, kcal=data.kcal, proteins=data.proteins,
+            carbs=data.carbs, fats=data.fats, meal_count=data.meal_count,
+            restrictions=restricciones, seed=data.seed,
+        )
+    except ValueError as e:
+        return send_error(str(e), code=422)
+
+    if not plan["meals"]:
+        return send_error("No se pudo construir el plan con los alimentos disponibles", code=422)
+
+    total = plan["totals"]["calories"]
+    desvio = round((total - data.kcal) / data.kcal * 100) if data.kcal else 0
+    return send_response(
+        {
+            "title": f"Plan {round(data.kcal)} kcal",
+            "notes": "Plan generado automáticamente a partir de tus objetivos. Revísalo y ajústalo antes de asignarlo.",
+            "foods": plan["meals"],
+            "totals": plan["totals"],
+            "target": {"calories": round(data.kcal), "deviation_pct": desvio},
+        },
+        "Dieta generada",
+    )
+
+
 @router.post("/ai-generate", summary="Generar una dieta con IA", description="Propone un plan diario con los alimentos del catálogo, ajustado a los objetivos calculados en Nutrición y a los datos del cliente.")
 def ai_generate(
     data: _AIGenerateBody,
@@ -308,7 +372,8 @@ def ai_generate(
 
     if not ai_diet.ai_enabled():
         return send_error(
-            "La generación con IA no está configurada. Añade ANTHROPIC_API_KEY en las variables de entorno del servidor.",
+            "La generación con IA está desactivada. Actívala con AI_DIET_ENABLED=true y una ANTHROPIC_API_KEY "
+            "en las variables de entorno del servidor; genera coste por uso.",
             code=503,
         )
     if not data.kcal or data.kcal <= 0:

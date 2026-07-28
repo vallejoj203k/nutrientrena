@@ -60,7 +60,8 @@ Las notas van dirigidas al cliente, en español, en un tono claro y cercano. No 
 
 
 def ai_enabled() -> bool:
-    return bool(settings.ANTHROPIC_API_KEY)
+    """Requiere clave Y el interruptor: la clave sola no basta para gastar."""
+    return bool(settings.ANTHROPIC_API_KEY) and bool(settings.AI_DIET_ENABLED)
 
 
 def _fmt_aliment(a) -> str:

@@ -334,6 +334,11 @@ def auto_generate(
             restricciones = diet_builder.parse_restrictions(
                 detail.allergies, detail.intolerances, detail.dislikes
             )
+            # Las patologías excluyen familias enteras de alimentos (celiaquía →
+            # trigo, pan, pasta…), no solo lo que aparezca escrito en su nombre.
+            restricciones += diet_builder.exclusions_for(
+                [p.name for p in (detail.pathologies or [])]
+            )
 
     try:
         plan = diet_builder.build_diet(

@@ -1,8 +1,18 @@
 import uuid
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Date, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Date, Text, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
+
+
+# Patologías del cliente. Condicionan qué puede comer, así que las consulta
+# tanto el coach como el generador de dietas.
+user_pathologies_table = Table(
+    "user_pathologies", Base.metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_detail_id", String(36), ForeignKey("user_details.id", ondelete="CASCADE"), nullable=False),
+    Column("pathology_id", Integer, ForeignKey("pathologies.id", ondelete="CASCADE"), nullable=False),
+)
 
 
 class User(Base):
@@ -99,6 +109,7 @@ class UserDetail(Base):
     gender = relationship("ParameterDetail", foreign_keys=[gender_id])
     activity = relationship("ParameterDetail", foreign_keys=[activity_id])
     status = relationship("ParameterDetail", foreign_keys=[status_id])
+    pathologies = relationship("Pathology", secondary=user_pathologies_table, lazy="selectin")
     objective = relationship("ParameterDetail", foreign_keys=[objective_id])
 
     # instructor relationship via user_parents (parent of this user)

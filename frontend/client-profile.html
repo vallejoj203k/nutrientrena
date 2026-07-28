@@ -467,6 +467,10 @@
     .ai-sum{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12.5px;font-weight:700;}
     .ai-sum.ok{background:#ECFDF5;color:#065F46;}
     .ai-sum.off{background:#FFFBEB;color:#92400E;}
+.patho-grid{display:flex;flex-wrap:wrap;gap:7px;}
+    .patho-chip{display:inline-flex;align-items:center;padding:7px 12px;border:1.5px solid #E5E7EB;border-radius:20px;background:#fff;font-size:12.5px;color:#374151;cursor:pointer;transition:.15s;user-select:none;}
+    .patho-chip:hover{border-color:#C7D2FE;}
+    .patho-chip.sel{border-color:var(--indigo,#4F46E5);background:#EEF2FF;color:var(--indigo,#4F46E5);font-weight:700;}
     .assign-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
     .assign-filter{padding:6px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;color:#374151;background:#fff;font-family:inherit;cursor:pointer;outline:none;transition:.15s;max-width:150px;}
     .assign-filter:hover{border-color:#C7D2FE;}
@@ -2870,7 +2874,15 @@ function _renderResRestr() {
   const el = document.getElementById('resRestrCard');
   if (!el) return;
   const c = clientData;
-  const cols = _RESTR_DEFS.map(d => {
+  // Las patologías no son texto libre: vienen del catálogo y condicionan la dieta.
+  const patos = (c.pathologies || []);
+  const patoCol = `<div class="restr-col">
+      <div class="restr-col-head">🩺 PATOLOGÍAS</div>
+      <div class="restr-chips">${patos.length
+        ? patos.map(p => `<span class="restr-chip red">${esc(p.name)}</span>`).join('')
+        : '<span class="restr-empty">—</span>'}</div>
+    </div>`;
+  const cols = patoCol + _RESTR_DEFS.map(d => {
     const tags = _restrTags(c[d.key]);
     const chips = tags.length
       ? tags.map(t => `<span class="restr-chip ${d.cls}">${esc(t)}</span>`).join('')
@@ -2884,7 +2896,7 @@ function _renderResRestr() {
     <div class="restr-head">
       <div>
         <div class="restr-title">Restricciones y preferencias</div>
-        <div class="restr-sub">Las reglas que tú (y la IA en el futuro) debéis respetar al crear sus planes.</div>
+        <div class="restr-sub">Las reglas que se respetan al crear sus planes, también al generar dietas automáticamente.</div>
       </div>
       <button class="restr-edit-btn" onclick="openRestrModal()">Editar</button>
     </div>
@@ -2892,15 +2904,45 @@ function _renderResRestr() {
   </div>`;
 }
 
-function openRestrModal() {
+let _profPathologies = [], _profPathoSel = new Set();
+
+async function _loadProfPathologies() {
+  if (_profPathologies.length) return;
+  try {
+    const r = await fetch(`${API}/pathologies/findAll`, { headers: h() });
+    const j = await r.json();
+    _profPathologies = Array.isArray(j.data) ? j.data : [];
+  } catch { _profPathologies = []; }
+}
+
+function _renderProfPathologies() {
+  const el = document.getElementById('restrPathoGrid');
+  if (!el) return;
+  el.innerHTML = _profPathologies.length
+    ? _profPathologies.map(p => `<span class="patho-chip${_profPathoSel.has(p.id) ? ' sel' : ''}" onclick="_toggleProfPathology(${p.id})">${esc(p.name)}</span>`).join('')
+    : '<span style="font-size:12px;color:#9CA3AF;">No hay patologías en el catálogo.</span>';
+}
+
+function _toggleProfPathology(id) {
+  if (_profPathoSel.has(id)) _profPathoSel.delete(id); else _profPathoSel.add(id);
+  _renderProfPathologies();
+}
+
+async function openRestrModal() {
   const c = clientData;
-  const rows = _RESTR_DEFS.map(d => `
+  _profPathoSel = new Set((c.pathologies || []).map(p => p.id));
+  const rows = `<div class="form-group" style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:5px;">🩺 Patologías <span style="font-weight:400;color:#9CA3AF;">(condicionan qué alimentos puede comer)</span></label>
+      <div class="patho-grid" id="restrPathoGrid"><span style="font-size:12px;color:#9CA3AF;">Cargando…</span></div>
+    </div>` + _RESTR_DEFS.map(d => `
     <div class="form-group" style="margin-bottom:12px;">
       <label style="display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:5px;">${d.icon} ${d.label} <span style="font-weight:400;color:#9CA3AF;">(separa con comas)</span></label>
       <input id="restr-${d.key}" value="${esc(c[d.key] || '')}" style="width:100%;padding:9px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;" placeholder="Ej: Frutos secos, Marisco"/>
     </div>`).join('');
   document.getElementById('restrModalBody').innerHTML = rows;
   document.getElementById('restrModalOverlay').classList.add('open');
+  await _loadProfPathologies();
+  _renderProfPathologies();
 }
 
 function closeRestrModal() {
@@ -2910,7 +2952,7 @@ function closeRestrModal() {
 async function saveRestrModal() {
   const btn = document.getElementById('restrSaveBtn');
   btn.disabled = true; btn.textContent = 'Guardando…';
-  const body = {};
+  const body = { pathology_ids: [..._profPathoSel] };
   _RESTR_DEFS.forEach(d => { body[d.key] = (document.getElementById('restr-' + d.key)?.value || '').trim() || null; });
   try {
     const r = await fetch(`${API}/users/${clientId}/update`, {
@@ -2918,7 +2960,11 @@ async function saveRestrModal() {
       body: JSON.stringify(body),
     });
     if (!r.ok) { showToast('No se pudo guardar', 'error'); return; }
+    const j = await r.json().catch(() => ({}));
     Object.assign(clientData, body);
+    // El servidor devuelve las patologías con su nombre, que es lo que se pinta.
+    clientData.pathologies = j.data?.pathologies
+      || _profPathologies.filter(p => _profPathoSel.has(p.id));
     closeRestrModal();
     _renderResRestr();
     showToast('Restricciones guardadas', 'success');

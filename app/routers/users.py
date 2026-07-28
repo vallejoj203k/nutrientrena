@@ -34,6 +34,14 @@ def _get_detail_or_404(db: Session, detail_id: str):
     return db.query(UserDetail).filter(UserDetail.id == detail_id).first()
 
 
+def _save_pathologies(db: Session, detail: UserDetail, ids):
+    """Reemplaza las patologías del cliente por la lista recibida."""
+    if ids is None:
+        return
+    from app.models.nutrition.diet import Pathology
+    detail.pathologies = db.query(Pathology).filter(Pathology.id.in_(ids)).all() if ids else []
+
+
 def _serialize(detail: UserDetail, db: Session) -> dict:
     out = UserDetailOut.model_validate(detail).model_dump()
     role_users = db.query(RoleUser).filter(RoleUser.user_id == detail.user_id).all()
@@ -43,6 +51,7 @@ def _serialize(detail: UserDetail, db: Session) -> dict:
     out["gender"] = {"id": detail.gender.id, "name": detail.gender.description} if detail.gender else None
     out["activity"] = {"id": detail.activity.id, "name": detail.activity.description} if detail.activity else None
     out["objective"] = {"id": detail.objective.id, "name": detail.objective.description} if detail.objective else None
+    out["pathologies"] = [{"id": p.id, "name": p.name} for p in (detail.pathologies or [])]
     return out
 
 
@@ -99,6 +108,7 @@ def create(
     )
     db.add(detail)
     db.flush()
+    _save_pathologies(db, detail, data.pathology_ids)
 
     # If the creator is a coach, auto-assign themselves; otherwise use the supplied instructor
     from app.core.dependencies import _user_role_ids
@@ -522,9 +532,10 @@ def updated(
     for field, value in user_fields.items():
         setattr(detail.user, field, value)
 
-    detail_fields = data.model_dump(exclude_unset=True, exclude={"email", "password", "role_id"})
+    detail_fields = data.model_dump(exclude_unset=True, exclude={"email", "password", "role_id", "pathology_ids"})
     for field, value in detail_fields.items():
         setattr(detail, field, value)
+    _save_pathologies(db, detail, data.pathology_ids)
 
     if data.role_id is not None:
         from app.core.dependencies import _user_role_ids

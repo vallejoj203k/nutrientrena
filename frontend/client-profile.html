@@ -7906,15 +7906,40 @@ async function clearMenuDay(idx) {
 }
 
 async function removeNutPlan() {
-  if (!clientDiets.length) return;
-  const extra = clientDiets.length > 1 ? ` (y ${clientDiets.length - 1} plan${clientDiets.length > 2 ? 'es' : ''} anterior${clientDiets.length > 2 ? 'es' : ''} acumulado${clientDiets.length > 2 ? 's' : ''})` : '';
-  if (!confirm(`¿Eliminar el plan nutricional "${clientDiets[0].title || ''}"${extra} de este cliente? Esta acción no se puede deshacer.`)) return;
+  // Con menú semanal el plan no son sólo las dietas: hay que retirar también la
+  // asignación del menú. Sin esto el botón no hacía nada cuando el cliente
+  // tenía menú y ninguna dieta suelta.
+  const hasMenu = !!_nutMenu;
+  if (!clientDiets.length && !hasMenu) {
+    showToast('Este cliente no tiene plan nutricional asignado', 'warning');
+    return;
+  }
+  const partes = [];
+  if (hasMenu) partes.push(`el menú semanal "${_nutMenu.name || 'sin nombre'}"`);
+  if (clientDiets.length) partes.push(`${clientDiets.length} dieta${clientDiets.length !== 1 ? 's' : ''}`);
+  if (!confirm(`¿Eliminar ${partes.join(' y ')} de este cliente? Esta acción no se puede deshacer.`)) return;
+
   let failed = 0;
+  const errores = [];
+  if (hasMenu) {
+    try {
+      const rm = await fetch(`${API}/weekly-menus/client/${clientId}`, { method: 'DELETE', headers: h() });
+      if (!rm.ok) {
+        const jm = await rm.json().catch(() => ({}));
+        failed++; errores.push(jm.message || jm.detail || `menú (HTTP ${rm.status})`);
+      } else {
+        _nutMenu = null; _nutMenuLoaded = false;
+      }
+    } catch { failed++; errores.push('menú (sin conexión)'); }
+  }
   for (const d of clientDiets) {
     try {
       const r = await fetch(`${API}/diets/${d.id}`, { method: 'DELETE', headers: h() });
-      if (!r.ok) failed++;
-    } catch { failed++; }
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        failed++; errores.push(`${d.title || 'dieta'}: ${j.message || j.detail || 'HTTP ' + r.status}`);
+      }
+    } catch { failed++; errores.push(`${d.title || 'dieta'}: sin conexión`); }
   }
   _nutDetail = null; _nutDetailLoaded = false; _nutActiveDietIdx = 0;
   try {
@@ -7923,8 +7948,10 @@ async function removeNutPlan() {
     const arr = jd.data || [];
     clientDiets = Array.isArray(arr) ? arr.flatMap(g => (g.diets || [g]).map(d => ({...d, diet_type: g.type?.name || null}))).filter(d => d && d.id) : [];
   } catch { clientDiets = []; }
-  if (failed) showToast(`No se pudieron eliminar ${failed} plan(es)`, 'error');
+  // El motivo real del servidor, en vez de un contador sin información.
+  if (failed) showToast(`No se pudo eliminar: ${errores.join(' · ')}`, 'error');
   else showToast('Plan nutricional eliminado', 'success');
+  _nutDietCache && Object.keys(_nutDietCache).forEach(k => delete _nutDietCache[k]);
   renderNutricionTab();
   renderActivePlan();
 }

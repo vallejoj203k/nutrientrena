@@ -466,31 +466,31 @@
     .assign-selcount{font-size:12px;color:#9CA3AF;white-space:nowrap;}
     .assign-selcount b{color:#111827;font-weight:700;}
     /* Filas seleccionables con casilla, macros y previsualizacion */
-    .ad-row{position:relative;border-bottom:1px solid #F3F4F6;transition:.12s;}
-    .ad-row:last-child{border-bottom:none;}
-    .ad-row.sel{background:#F5F6FE;}
-    .ad-main{display:flex;align-items:center;gap:11px;padding:11px 44px 11px 13px;cursor:pointer;}
-    .ad-row:hover .ad-main{background:rgba(79,70,229,.04);}
-    .ad-check{width:18px;height:18px;border-radius:50%;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.12s;}
-    .ad-check.on{background:var(--indigo,#4F46E5);border-color:var(--indigo,#4F46E5);}
-    .ad-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-    .ad-name{font-size:13.5px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .ad-sub{font-size:11.5px;color:#9CA3AF;}
-    .ad-chips{display:flex;gap:5px;flex-shrink:0;}
-    .ad-chip{display:flex;flex-direction:column;align-items:center;min-width:40px;padding:4px 7px;border-radius:8px;line-height:1.15;}
-    .ad-chip b{font-size:11.5px;font-weight:800;}
-    .ad-chip i{font-size:9px;font-style:normal;font-weight:700;opacity:.8;}
-    .ad-chip.kcal{background:#EEF2FF;color:#4338CA;}
-    .ad-chip.p{background:#EFF6FF;color:#1D4ED8;}
-    .ad-chip.c{background:#FFF7ED;color:#C2410C;}
-    .ad-chip.g{background:#FEF3C7;color:#92400E;}
-    .ad-exp{position:absolute;top:10px;right:10px;width:26px;height:26px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:#9CA3AF;cursor:pointer;transition:.15s;}
-    .ad-exp:hover{border-color:#C7D2FE;color:#4F46E5;}
-    .ad-exp.open{transform:rotate(180deg);border-color:#C7D2FE;color:#4F46E5;}
-    .ad-detail{padding:2px 13px 12px 42px;font-size:12px;color:#4B5563;display:flex;flex-direction:column;gap:3px;}
-    .ad-detail-line b{color:#111827;}
-    .ad-meal{display:flex;justify-content:space-between;gap:8px;padding:4px 8px;background:#fff;border:1px solid #F1F3F7;border-radius:7px;}
-    .ad-meal span{color:#9CA3AF;}
+    .dietpick-row{position:relative;border-bottom:1px solid #F3F4F6;transition:.12s;}
+    .dietpick-row:last-child{border-bottom:none;}
+    .dietpick-row.sel{background:#F5F6FE;}
+    .dietpick-main{display:flex;align-items:center;gap:11px;padding:11px 44px 11px 13px;cursor:pointer;}
+    .dietpick-row:hover .dietpick-main{background:rgba(79,70,229,.04);}
+    .dietpick-check{width:18px;height:18px;border-radius:50%;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.12s;}
+    .dietpick-check.on{background:var(--indigo,#4F46E5);border-color:var(--indigo,#4F46E5);}
+    .dietpick-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    .dietpick-name{font-size:13.5px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .dietpick-sub{font-size:11.5px;color:#9CA3AF;}
+    .dietpick-chips{display:flex;gap:5px;flex-shrink:0;}
+    .dietpick-chip{display:flex;flex-direction:column;align-items:center;min-width:40px;padding:4px 7px;border-radius:8px;line-height:1.15;}
+    .dietpick-chip b{font-size:11.5px;font-weight:800;}
+    .dietpick-chip i{font-size:9px;font-style:normal;font-weight:700;opacity:.8;}
+    .dietpick-chip.kcal{background:#EEF2FF;color:#4338CA;}
+    .dietpick-chip.p{background:#EFF6FF;color:#1D4ED8;}
+    .dietpick-chip.c{background:#FFF7ED;color:#C2410C;}
+    .dietpick-chip.g{background:#FEF3C7;color:#92400E;}
+    .dietpick-exp{position:absolute;top:10px;right:10px;width:26px;height:26px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:#9CA3AF;cursor:pointer;transition:.15s;}
+    .dietpick-exp:hover{border-color:#C7D2FE;color:#4F46E5;}
+    .dietpick-exp.open{transform:rotate(180deg);border-color:#C7D2FE;color:#4F46E5;}
+    .dietpick-detail{padding:2px 13px 12px 42px;font-size:12px;color:#4B5563;display:flex;flex-direction:column;gap:3px;}
+    .dietpick-detail-line b{color:#111827;}
+    .dietpick-meal{display:flex;justify-content:space-between;gap:8px;padding:4px 8px;background:#fff;border:1px solid #F1F3F7;border-radius:7px;}
+    .dietpick-meal span{color:#9CA3AF;}
     .assign-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:.12s;border-left:3px solid transparent;}
     .assign-item:last-child{border-bottom:none;}
     .assign-item:hover{background:#F9FAFB;}
@@ -8038,31 +8038,31 @@ function renderAssignDietList(diets) {
       d.diet_type || (d.type_id != null ? _adTypeName(d.type_id) : ''),
       (d.foods || []).length ? (d.foods || []).length + ' comidas/día' : '',
     ].filter(Boolean).join(' · ');
-    const chip = (v, u, lbl, cls) => v ? `<span class="ad-chip ${cls}"><b>${Math.round(v)}${u}</b><i>${lbl}</i></span>` : '';
+    const chip = (v, u, lbl, cls) => v ? `<span class="dietpick-chip ${cls}"><b>${Math.round(v)}${u}</b><i>${lbl}</i></span>` : '';
     const patho = _adPathoNames(d);
-    return `<div class="ad-row${sel ? ' sel' : ''}" id="aditem-${esc(id)}">
-      <div class="ad-main" onclick="toggleAssignDiet('${esc(id)}')">
-        <span class="ad-check${sel ? ' on' : ''}">${sel ? '<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</span>
-        <span class="ad-txt">
-          <span class="ad-name">${esc(d.title || d.name || 'Sin nombre')}</span>
-          ${sub ? `<span class="ad-sub">${esc(sub)}</span>` : ''}
+    return `<div class="dietpick-row${sel ? ' sel' : ''}" id="dietpick-${esc(id)}">
+      <div class="dietpick-main" onclick="toggleAssignDiet('${esc(id)}')">
+        <span class="dietpick-check${sel ? ' on' : ''}">${sel ? '<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</span>
+        <span class="dietpick-txt">
+          <span class="dietpick-name">${esc(d.title || d.name || 'Sin nombre')}</span>
+          ${sub ? `<span class="dietpick-sub">${esc(sub)}</span>` : ''}
         </span>
-        <span class="ad-chips">
+        <span class="dietpick-chips">
           ${chip(d.calories, '', 'kcal', 'kcal')}
           ${chip(det.proteins, 'g', 'P', 'p')}
           ${chip(det.carbs, 'g', 'C', 'c')}
           ${chip(det.fats, 'g', 'G', 'g')}
         </span>
       </div>
-      <button class="ad-exp${open ? ' open' : ''}" onclick="event.stopPropagation();toggleDietPreview('${esc(id)}')" title="Previsualizar">
+      <button class="dietpick-exp${open ? ' open' : ''}" onclick="event.stopPropagation();toggleDietPreview('${esc(id)}')" title="Previsualizar">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      ${open ? `<div class="ad-detail">
-        <div class="ad-detail-line"><b>Objetivo:</b> ${esc(_AD_GOALS[_adGoal(d)] || '—')}</div>
-        ${patho.length ? `<div class="ad-detail-line"><b>Patologías:</b> ${esc(patho.join(', '))}</div>` : ''}
+      ${open ? `<div class="dietpick-detail">
+        <div class="dietpick-detail-line"><b>Objetivo:</b> ${esc(_AD_GOALS[_adGoal(d)] || '—')}</div>
+        ${patho.length ? `<div class="dietpick-detail-line"><b>Patologías:</b> ${esc(patho.join(', '))}</div>` : ''}
         ${(d.foods || []).length
-          ? (d.foods || []).map(m => `<div class="ad-meal">${esc(m.name || 'Comida')}${m.time ? ` · ${esc(m.time)}` : ''} <span>${(m.detail || []).length} alimentos</span></div>`).join('')
-          : '<div class="ad-detail-line" style="color:#9CA3AF;">Sin comidas cargadas.</div>'}
+          ? (d.foods || []).map(m => `<div class="dietpick-meal">${esc(m.name || 'Comida')}${m.time ? ` · ${esc(m.time)}` : ''} <span>${(m.detail || []).length} alimentos</span></div>`).join('')
+          : '<div class="dietpick-detail-line" style="color:#9CA3AF;">Sin comidas cargadas.</div>'}
       </div>` : ''}
     </div>`;
   }).join('');

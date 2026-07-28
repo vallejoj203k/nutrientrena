@@ -143,7 +143,9 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
             if g:
                 detail.append((pa, g))
                 _, p, c, f = _macros(pa, g)
-                rest_p -= p; rest_c -= c; rest_f -= f
+                rest_p -= p
+                rest_c -= c
+                rest_f -= f
 
         # 2) Carbohidrato: cubre lo que queda de carbos.
         ca = take("carb")
@@ -152,7 +154,9 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
             if g:
                 detail.append((ca, g))
                 _, p, c, f = _macros(ca, g)
-                rest_p -= p; rest_c -= c; rest_f -= f
+                rest_p -= p
+                rest_c -= c
+                rest_f -= f
 
         # 3) Grasa: solo si falta bastante y no es un snack.
         if rest_f > 4 and not pequena:

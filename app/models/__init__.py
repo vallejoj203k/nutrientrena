@@ -29,3 +29,10 @@ from app.models.weekly_menu import WeeklyMenu, WeeklyMenuDay
 from app.models.client_menu import ClientMenu
 from app.models.client_exercise import ClientExercise
 from app.models.calendar_task import CalendarTask
+# Modelos que faltaban en el registro: sin ellos Base.metadata queda incompleta
+# (en las pruebas no se creaban sus tablas y el borrado de una dieta fallaba).
+from app.models.plan import PlanDelivery
+from app.models.chat import ChatConversation, ChatParticipant, ChatMessage
+from app.models.contract import Contract, ContractTemplate
+from app.models.document import Document
+from app.models.team_member import TeamMember

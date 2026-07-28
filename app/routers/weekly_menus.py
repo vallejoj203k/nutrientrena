@@ -273,6 +273,25 @@ def client_menu(
     return send_response(data, "OK")
 
 
+@router.delete("/client/{client_id}", summary="Quitar el menú semanal asignado a un cliente")
+def unassign_client_menu(
+    client_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    from app.core.dependencies import verify_client_access
+    from app.models.client_menu import ClientMenu
+
+    verify_client_access(client_id, current_user, db)
+    rows = db.query(ClientMenu).filter(ClientMenu.client_user_detail_id == client_id).all()
+    if not rows:
+        return send_error("Este cliente no tiene menú asignado", code=404)
+    for r in rows:
+        db.delete(r)
+    db.commit()
+    return send_response({"removed": len(rows)}, "Menú retirado del cliente")
+
+
 @router.delete("/{id}", summary="Eliminar menú semanal")
 def delete_menu(
     id: str,

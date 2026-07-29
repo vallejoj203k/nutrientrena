@@ -399,7 +399,7 @@ def classify_moments(
     if not ai_classifier.classify_enabled():
         return send_error(
             "La clasificación con IA está desactivada. Actívala en el servidor con "
-            "ANTHROPIC_API_KEY y AI_CLASSIFY_ENABLED=true."
+            f"{ai_classifier.key_var_name()} y AI_CLASSIFY_ENABLED=true."
         )
 
     q = db.query(Aliment).filter(Aliment.parent_id.is_(None))

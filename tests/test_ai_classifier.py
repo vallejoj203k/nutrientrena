@@ -162,3 +162,102 @@ def test_classify_descarta_respuestas_invalidas(monkeypatch):
 
     out = ai_classifier.classify(aliments)
     assert out == {"a1": "desayuno"}, out
+
+
+# ── Proveedor Groq ───────────────────────────────────────────────────────────
+# El prompt, el esquema y el parseo son los mismos; lo que cambia es la llamada.
+
+class _Al:
+    """Alimento mínimo: lo que el clasificador lee de cada uno."""
+    def __init__(self, id, name, kcal=100, p=5, c=10, f=2):
+        self.id, self.name, self.brand = id, name, None
+        self.calories, self.proteins = kcal, p
+        self.carbohydrates, self.fats = c, f
+
+
+def _resp(status, payload):
+    class _R:
+        status_code = status
+        text = str(payload)
+        @staticmethod
+        def json():
+            return payload
+    return _R()
+
+
+def _groq_ok(contenido):
+    return _resp(200, {"choices": [{"message": {"content": contenido}}]})
+
+
+def test_groq_clasifica(monkeypatch):
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
+    monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
+    enviado = {}
+
+    def fake_post(url, **kw):
+        enviado.update(kw["json"])
+        enviado["url"] = url
+        return _groq_ok('{"alimentos": [{"n": 0, "momentos": ["principal"]},'
+                        ' {"n": 1, "momentos": ["desayuno", "snack"]}]}')
+
+    monkeypatch.setattr(ai_classifier.httpx, "post", fake_post)
+    out = ai_classifier.classify([_Al("a", "Gazpacho"), _Al("b", "Avena")])
+
+    assert out == {"a": "principal", "b": "desayuno,snack"}
+    assert enviado["url"] == ai_classifier.GROQ_URL
+    assert enviado["temperature"] == 0                       # determinista
+    assert enviado["response_format"] == {"type": "json_object"}
+    # La forma del JSON va en el prompt, que es como se pide en esta API
+    assert '"alimentos"' in enviado["messages"][0]["content"]
+
+
+def test_groq_descarta_lo_invalido_igual_que_anthropic(monkeypatch):
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
+    monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
+    monkeypatch.setattr(ai_classifier.httpx, "post", lambda url, **kw: _groq_ok(
+        '{"alimentos": [{"n": 0, "momentos": ["principal", "postre"]},'
+        ' {"n": 99, "momentos": ["desayuno"]},'
+        ' {"n": 1, "momentos": []}]}'))
+
+    out = ai_classifier.classify([_Al("a", "Gazpacho"), _Al("b", "Avena")])
+    assert out == {"a": "principal"}      # "postre", n=99 y lista vacía fuera
+
+
+def test_groq_error_http_se_reporta(monkeypatch):
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
+    monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
+    monkeypatch.setattr(ai_classifier.httpx, "post",
+                        lambda url, **kw: _resp(429, {"error": "rate limit"}))
+
+    try:
+        ai_classifier.classify([_Al("a", "Gazpacho")])
+        assert False, "debería haber lanzado"
+    except RuntimeError as e:
+        assert "429" in str(e)
+
+
+def test_groq_json_roto_no_rompe_el_lote(monkeypatch):
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
+    monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
+    monkeypatch.setattr(ai_classifier.httpx, "post", lambda url, **kw: _groq_ok("no soy json"))
+
+    try:
+        ai_classifier.classify([_Al("a", "Gazpacho")])
+        assert False, "debería haber lanzado"
+    except RuntimeError as e:
+        assert "JSON" in str(e)
+
+
+def test_la_clave_que_pide_depende_del_proveedor(monkeypatch):
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_ENABLED", True)
+    monkeypatch.setattr(ai_classifier.settings, "ANTHROPIC_API_KEY", None)
+    monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
+
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
+    assert ai_classifier.classify_enabled() is True
+    assert ai_classifier.key_var_name() == "GROQ_API_KEY"
+
+    # Con Anthropic seleccionado, la clave de Groq no sirve
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "anthropic")
+    assert ai_classifier.classify_enabled() is False
+    assert ai_classifier.key_var_name() == "ANTHROPIC_API_KEY"

@@ -10,12 +10,20 @@ Esto lo resuelve pidiéndole la clasificación a un modelo UNA VEZ por alimento,
 no una vez por dieta. Las dietas se siguen construyendo con el algoritmo: gratis,
 instantáneas y explicables. Y en el prompt solo viajan nombres de alimentos y
 macros — ningún dato del cliente sale de aquí.
+
+Por eso mismo admite dos proveedores: como no se manda nada personal, vale un
+servicio gratuito para probar que la idea funciona antes de pagar nada. El
+prompt, el esquema y el parseo son los mismos en ambos; solo cambia la llamada.
 """
 from typing import Optional
+
+import httpx
 
 from app.config import settings
 
 MOMENTOS = ("desayuno", "snack", "principal")
+
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # Se responde por índice dentro del lote, no por id: los ids son UUID de 36
 # caracteres que multiplicarían el coste y que el modelo puede transcribir mal.
@@ -59,15 +67,34 @@ Reglas:
 
 Devuelve una entrada por cada alimento de la lista, con su mismo número."""
 
+# Anthropic acepta el esquema como parámetro; en la API de Groq (compatible con
+# OpenAI) se pide JSON y la forma se describe en el propio prompt.
+FORMATO_JSON = """
+Responde ÚNICAMENTE con un objeto JSON con esta forma exacta, sin texto alrededor:
+{"alimentos": [{"n": 0, "momentos": ["desayuno", "snack"]}, {"n": 1, "momentos": ["principal"]}]}"""
+
+
+def _proveedor() -> str:
+    return (settings.AI_CLASSIFY_PROVIDER or "anthropic").strip().lower()
+
+
+def _api_key() -> Optional[str]:
+    return settings.GROQ_API_KEY if _proveedor() == "groq" else settings.ANTHROPIC_API_KEY
+
+
+def key_var_name() -> str:
+    """Nombre de la variable que falta, para poder decírselo a quien configura."""
+    return "GROQ_API_KEY" if _proveedor() == "groq" else "ANTHROPIC_API_KEY"
+
 
 def classify_enabled() -> bool:
-    """Requiere clave Y su propio interruptor.
+    """Requiere la clave del proveedor elegido Y su propio interruptor.
 
     Es un interruptor distinto al de generar dietas con IA a propósito: esto se
     paga una vez por alimento y no manda datos de ningún cliente, así que puede
     estar encendido sin que lo esté el generador completo.
     """
-    return bool(settings.ANTHROPIC_API_KEY) and bool(settings.AI_CLASSIFY_ENABLED)
+    return bool(_api_key()) and bool(settings.AI_CLASSIFY_ENABLED)
 
 
 def _fmt(n: int, a) -> str:
@@ -86,18 +113,7 @@ def build_prompt(aliments: list) -> str:
     return f"Clasifica estos {len(aliments)} alimentos:\n\n{lineas}"
 
 
-def classify(aliments: list) -> dict:
-    """Devuelve {id_alimento: "desayuno,snack"} para el lote recibido.
-
-    Los alimentos que el modelo no devuelva, o devuelva sin momentos válidos,
-    quedan fuera del diccionario: el que llama los deja como estaban en vez de
-    escribirles un valor inventado.
-    """
-    if not aliments:
-        return {}
-
-    import json
-
+def _preguntar_anthropic(prompt: str) -> str:
     import anthropic
 
     api = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
@@ -106,17 +122,62 @@ def classify(aliments: list) -> dict:
         max_tokens=4096,
         system=SYSTEM_PROMPT,
         output_config={"format": {"type": "json_schema", "schema": MOMENTS_SCHEMA}},
-        messages=[{"role": "user", "content": build_prompt(aliments)}],
+        messages=[{"role": "user", "content": prompt}],
     )
-
     if message.stop_reason == "refusal":
         raise RuntimeError("La IA no pudo clasificar este lote de alimentos.")
+    return next((b.text for b in message.content if b.type == "text"), "")
 
-    texto = next((b.text for b in message.content if b.type == "text"), "")
+
+def _preguntar_groq(prompt: str) -> str:
+    """API de Groq, compatible con OpenAI. Sin SDK: es una única petición."""
+    r = httpx.post(
+        GROQ_URL,
+        headers={"Authorization": f"Bearer {settings.GROQ_API_KEY}"},
+        json={
+            "model": settings.GROQ_CLASSIFY_MODEL,
+            # Clasificar no es creativo: se quiere el mismo resultado siempre.
+            "temperature": 0,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT + "\n" + FORMATO_JSON},
+                {"role": "user", "content": prompt},
+            ],
+        },
+        timeout=120,
+    )
+    if r.status_code != 200:
+        raise RuntimeError(f"Groq respondió {r.status_code}: {r.text[:200]}")
+    try:
+        return r.json()["choices"][0]["message"]["content"] or ""
+    except (KeyError, IndexError, ValueError) as e:
+        raise RuntimeError(f"Respuesta inesperada de Groq: {e}")
+
+
+def classify(aliments: list) -> dict:
+    """Devuelve {id_alimento: "desayuno,snack"} para el lote recibido.
+
+    Los alimentos que el modelo no devuelva, o devuelva sin momentos válidos,
+    quedan fuera del diccionario: el que llama los deja como estaban en vez de
+    escribirles un valor inventado. Vale igual para los dos proveedores, porque
+    de ninguno de los dos hay que fiarse más que del otro.
+    """
+    if not aliments:
+        return {}
+
+    import json
+
+    prompt = build_prompt(aliments)
+    texto = _preguntar_groq(prompt) if _proveedor() == "groq" else _preguntar_anthropic(prompt)
     if not texto:
         raise RuntimeError("La IA no devolvió ninguna clasificación.")
 
-    datos = json.loads(texto)
+    try:
+        datos = json.loads(texto)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"La IA no devolvió JSON válido: {e}")
+    if not isinstance(datos, dict):
+        raise RuntimeError("La IA no devolvió un objeto JSON.")
     salida: dict = {}
     for fila in datos.get("alimentos", []):
         n = fila.get("n")

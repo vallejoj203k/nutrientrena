@@ -395,3 +395,34 @@ def test_el_catalogo_base_cubre_los_cuatro_roles_en_cada_momento():
     for momento in ("desayuno", "snack", "principal"):
         for rol in ("protein", "carb", "fat"):
             assert rol in cobertura.get(momento, set()), (momento, rol, cobertura.get(momento))
+
+
+def test_las_bebidas_no_son_ladrillos_de_un_plan():
+    """El café salía como fuente de proteína y el té como guarnición."""
+    class A:
+        def __init__(s, kcal, p, c, f):
+            s.name = "x"
+            s.calories, s.proteins, s.carbohydrates, s.fats = kcal, p, c, f
+
+    assert diet_builder.classify(A(2, 0.1, 0, 0)) is None      # café solo
+    assert diet_builder.classify(A(1, 0, 0.2, 0)) is None      # té
+    assert diet_builder.classify(A(8, 0.5, 1, 0.2)) is None    # caldo
+    assert diet_builder.classify(A(22, 0, 0.9, 0)) is None     # vinagre
+
+    # Pero una verdura de pocas calorías sigue siendo verdura: se distinguen
+    # por gramos de macro, no por calorías (lechuga 4,5 g contra té 0,2 g).
+    assert diet_builder.classify(A(15, 1.4, 2.9, 0.2)) == "veg"   # lechuga
+    assert diet_builder.classify(A(15, 0.7, 3.6, 0.1)) == "veg"   # pepino
+
+
+def test_las_conservas_no_se_desayunan():
+    from app.core.base_catalog import CATALOGO
+
+    momentos = {c[0]: c[6] for c in CATALOGO}
+    for nombre in ("Sardinas en lata al natural", "Caballa en aceite",
+                   "Atún al natural en conserva", "Chorizo", "Salchichón"):
+        assert "desayuno" not in momentos[nombre], (nombre, momentos[nombre])
+
+    # El jamón y el salmón ahumado sí: en tostada son desayuno normal aquí
+    for nombre in ("Jamón serrano", "Salmón ahumado", "Pavo en lonchas"):
+        assert "desayuno" in momentos[nombre], nombre

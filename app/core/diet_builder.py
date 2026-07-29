@@ -286,6 +286,13 @@ def classify(a) -> Optional[str]:
     p, c, f = a.proteins or 0, a.carbohydrates or 0, a.fats or 0
     if k <= 0 or (p + c + f) <= 0:
         return None
+    # Café, té, refrescos, caldos y vinagre no son ladrillos de un plan: apenas
+    # aportan macros y el reparto los usaba igual. El café salía como fuente de
+    # proteína (sus 0,1 g son el 100 % de sus 2 kcal) y el té como guarnición.
+    # Se separan de la lechuga por gramos de macro, no por calorías: ambos
+    # rondan las 15 kcal, pero la lechuga tiene 4,5 g de macros y el té 0,2.
+    if k < 15 or (p + c + f) < 2:
+        return None
     kp, kc, kf = p * 4, c * 4, f * 9
     total = kp + kc + kf
     if total <= 0:

@@ -59,3 +59,89 @@ def test_ai_generate_disabled_without_key(client, seed, admin_headers, monkeypat
     r = client.post("/api/diets/ai-generate", headers=admin_headers, json={"kcal": 2000})
     assert r.status_code == 503
     assert "ANTHROPIC_API_KEY" in r.json()["message"]
+
+
+# ── Proveedor y datos que salen del servidor ─────────────────────────────────
+
+def _resp(status, payload):
+    class _R:
+        status_code = status
+        text = str(payload)
+        @staticmethod
+        def json():
+            return payload
+    return _R()
+
+
+def test_groq_genera_el_plan(monkeypatch):
+    monkeypatch.setattr(ai_diet.settings, "AI_DIET_PROVIDER", "groq")
+    monkeypatch.setattr(ai_diet.settings, "GROQ_API_KEY", "gsk-test")
+    enviado = {}
+
+    def fake_post(url, **kw):
+        enviado.update(kw["json"])
+        enviado["url"] = url
+        return _resp(200, {"choices": [{"message": {"content":
+            '{"title": "Plan", "notes": "n", "meals": []}'}}]})
+
+    monkeypatch.setattr(ai_diet.httpx, "post", fake_post)
+    plan = ai_diet.generate_diet(client={}, target={"kcal": 2000}, aliments=[])
+
+    assert plan["title"] == "Plan"
+    assert enviado["url"] == ai_diet.GROQ_URL
+    assert enviado["response_format"] == {"type": "json_object"}
+
+
+def test_groq_json_roto_no_pasa_por_bueno(monkeypatch):
+    monkeypatch.setattr(ai_diet.settings, "AI_DIET_PROVIDER", "groq")
+    monkeypatch.setattr(ai_diet.settings, "GROQ_API_KEY", "gsk-test")
+    monkeypatch.setattr(ai_diet.httpx, "post", lambda url, **kw: _resp(
+        200, {"choices": [{"message": {"content": "no soy json"}}]}))
+
+    try:
+        ai_diet.generate_diet(client={}, target={"kcal": 2000}, aliments=[])
+        assert False, "debería haber lanzado"
+    except RuntimeError as e:
+        assert "JSON" in str(e)
+
+
+def test_la_clave_depende_del_proveedor(monkeypatch):
+    monkeypatch.setattr(ai_diet.settings, "AI_DIET_ENABLED", True)
+    monkeypatch.setattr(ai_diet.settings, "ANTHROPIC_API_KEY", None)
+    monkeypatch.setattr(ai_diet.settings, "GROQ_API_KEY", "gsk-test")
+
+    monkeypatch.setattr(ai_diet.settings, "AI_DIET_PROVIDER", "groq")
+    assert ai_diet.ai_enabled() is True
+    assert ai_diet.key_var_name() == "GROQ_API_KEY"
+
+    monkeypatch.setattr(ai_diet.settings, "AI_DIET_PROVIDER", "anthropic")
+    assert ai_diet.ai_enabled() is False
+
+
+def test_el_prompt_no_lleva_identificadores(client, seed, admin_headers, monkeypatch):
+    """Lo que sale del servidor no permite saber de quién es la ficha."""
+    from app.routers.nutrition import diets as diets_router
+
+    h = admin_headers
+    r = client.post("/api/users", headers=h, json={
+        "name": "Lucía", "last_name": "Fernández", "email": "lucia@ejemplo.com",
+        "password": "Secreta123", "role_id": 6, "age": 34, "weight": 62, "height": 168,
+        "allergies": "frutos secos"})
+    assert r.status_code == 200, r.text
+    cid = r.json()["data"]["id"]
+
+    from app.database import SessionLocal
+    db = SessionLocal()
+    try:
+        ctx = diets_router._client_context(db, cid)
+    finally:
+        db.close()
+
+    plano = " ".join(f"{k} {v}" for k, v in ctx.items()).lower()
+    assert "lucía" not in plano and "lucia" not in plano
+    assert "fernández" not in plano and "ejemplo.com" not in plano
+    assert cid.lower() not in plano
+    assert "ocupación" not in [k.lower() for k in ctx]   # se quitó: no aporta
+    # Lo que sí necesita el modelo para proponer un plan:
+    assert ctx["Edad"] == 34 and ctx["Peso (kg)"] == 62
+    assert ctx["Alergias"] == "frutos secos"

@@ -77,6 +77,12 @@ class Settings(BaseSettings):
     # Interruptor aparte de la clave: aunque haya clave, la generación con IA
     # queda apagada hasta activarla a propósito, para no generar gasto.
     AI_DIET_ENABLED: bool = False
+    # Igual que en el clasificador: "anthropic" o "groq". Aquí el prompt SÍ
+    # lleva datos del cliente (edad, peso, alergias, restricciones), aunque va
+    # sin nombre ni identificadores y sin diagnósticos. Tenlo en cuenta al
+    # elegir proveedor.
+    AI_DIET_PROVIDER: str = "anthropic"
+    GROQ_DIET_MODEL: str = "llama-3.3-70b-versatile"
 
     # Clasificar alimentos por momento del día (desayuno / snack / principal).
     # Interruptor propio porque no tiene nada que ver con el anterior: esto se

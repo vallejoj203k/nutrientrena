@@ -266,13 +266,25 @@ class _AIGenerateBody(BaseModel):
 
 
 def _client_context(db: Session, client_id: str) -> dict:
-    """Datos del cliente que condicionan el plan."""
+    """Lo que necesita saber el modelo para proponer un plan, y nada más.
+
+    Va sin nombre, sin correo y sin identificadores: quien lo recibe no puede
+    saber de quién es la ficha. Tampoco viajan los diagnósticos — de una
+    patología solo sale la restricción que implica ("evitar gluten"), que es lo
+    único que cambia la dieta. El aviso clínico para el coach se calcula aparte,
+    aquí en el servidor, y no se le pide a la IA.
+    """
+    from app.core.diet_builder import exclusions_for
     from app.models.user import UserDetail
 
     detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
     if not detail:
         return {}
-    return {
+
+    patologias = [p.name for p in (detail.pathologies or [])]
+    evitar = sorted(exclusions_for(patologias))
+
+    ctx = {
         "Edad": detail.age,
         "Sexo": detail.gender.description if detail.gender else None,
         "Peso (kg)": detail.weight,
@@ -283,8 +295,10 @@ def _client_context(db: Session, client_id: str) -> dict:
         "Intolerancias": detail.intolerances,
         "No le gusta": detail.dislikes,
         "Preferencias alimentarias": detail.food_preferences,
-        "Ocupación": detail.occupation,
     }
+    if evitar:
+        ctx["Alimentos a evitar"] = ", ".join(evitar)
+    return ctx
 
 
 def _macros_for(aliment, grams: float) -> tuple:
@@ -395,8 +409,8 @@ def ai_generate(
 
     if not ai_diet.ai_enabled():
         return send_error(
-            "La generación con IA está desactivada. Actívala con AI_DIET_ENABLED=true y una ANTHROPIC_API_KEY "
-            "en las variables de entorno del servidor; genera coste por uso.",
+            f"La generación con IA está desactivada. Actívala con AI_DIET_ENABLED=true y una "
+            f"{ai_diet.key_var_name()} en las variables de entorno del servidor.",
             code=503,
         )
     if not data.kcal or data.kcal <= 0:

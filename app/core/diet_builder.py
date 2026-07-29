@@ -188,6 +188,54 @@ def warnings_for(pathologies) -> list:
     return avisos
 
 
+# Momento del día según el grupo de alimento. Es la señal más fiable y la más
+# barata: cada alimento ya trae su categoría de la importación, así que no hace
+# falta ni IA ni adivinar por el nombre. Se empareja por palabras clave porque
+# los nombres de grupo varían entre instalaciones ("Pescados y mariscos",
+# "Mariscos, crustáceos y moluscos"...).
+GROUP_MOMENTS = [
+    # (palabras que deben aparecer en el nombre del grupo, momentos)
+    (("cereal", "desayuno"), ["desayuno", "snack"]),
+    (("panaderia", "reposteria", "pan "), ["desayuno", "snack"]),
+    (("fruta", "zumo"), ["desayuno", "snack"]),
+    (("fruto seco", "semilla"), ["desayuno", "snack"]),
+    (("dulce", "azucar", "chocolate"), ["desayuno", "snack"]),
+    (("snack", "aperitivo"), ["snack"]),
+    (("lacteo", "huevo", "leche", "queso", "yogur"), ["desayuno", "snack", "principal"]),
+    (("embutido", "fiambre"), ["desayuno", "snack", "principal"]),
+    (("grasa", "aceite"), ["desayuno", "snack", "principal"]),
+    (("especia", "hierba", "condimento"), ["desayuno", "snack", "principal"]),
+    (("bebida",), ["desayuno", "snack", "principal"]),
+    (("infantil", "bebe"), ["desayuno", "snack", "principal"]),
+    (("ave", "pollo", "pavo"), ["principal"]),
+    (("cerdo", "porcino"), ["principal"]),
+    (("res", "vacuno", "ternera", "carne"), ["principal"]),
+    (("cordero", "caza"), ["principal"]),
+    (("pescado", "marisco", "crustaceo", "molusco"), ["principal"]),
+    (("legumbre",), ["principal"]),
+    (("verdura", "vegetal", "hortaliza"), ["principal"]),
+    (("grano", "pasta", "arroz"), ["principal"]),
+    (("salsa", "sopa"), ["principal"]),
+    (("plato preparado", "comida rapida", "restaurante", "etnica"), ["principal"]),
+]
+
+
+def moments_from_group(aliment) -> Optional[list]:
+    """Momentos deducidos del grupo del alimento, o None si no se reconoce.
+
+    Los cereales de desayuno son su propio grupo, así que "grano/pasta" puede
+    ir a principal sin llevarse la avena por delante.
+    """
+    grupo = getattr(aliment, "group_food", None)
+    nombre = _norm(getattr(grupo, "name", "") or "")
+    if not nombre:
+        return None
+    for claves, momentos in GROUP_MOMENTS:
+        if any(c in nombre for c in claves):
+            return list(momentos)
+    return None
+
+
 def moments_for(aliment) -> list:
     """Momentos del día en los que encaja un alimento.
 
@@ -201,6 +249,12 @@ def moments_for(aliment) -> list:
         elegidos = [m for m in elegidos if m in MOMENTS]
         if elegidos:
             return elegidos
+
+    # El grupo manda sobre la deducción por nombre: "Aceite de cártamo" no
+    # casa con ningún término pero su grupo dice que es una grasa.
+    por_grupo = moments_from_group(aliment)
+    if por_grupo:
+        return por_grupo
 
     nombre = _norm(f"{aliment.name} {getattr(aliment, 'brand', '') or ''}")
     desayuno = any(t in nombre for t in BREAKFAST_TERMS)

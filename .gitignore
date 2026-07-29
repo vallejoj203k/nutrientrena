@@ -31,6 +31,12 @@ Thumbs.db
 # Logs
 *.log
 
+# Bases de datos locales. Los tests crean test.db al ejecutarse y aparecía sin
+# trackear cada vez; una base de datos no tiene por qué acabar en el repositorio.
+*.db
+*.sqlite
+*.sqlite3
+
 # Distribution / packaging
 dist/
 build/

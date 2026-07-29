@@ -78,6 +78,16 @@ class Settings(BaseSettings):
     # queda apagada hasta activarla a propósito, para no generar gasto.
     AI_DIET_ENABLED: bool = False
 
+    # Clasificar alimentos por momento del día (desayuno / snack / principal).
+    # Interruptor propio porque no tiene nada que ver con el anterior: esto se
+    # paga una vez por alimento en lugar de una vez por dieta, y en el prompt
+    # solo viajan nombres de alimentos, ningún dato de ningún cliente.
+    AI_CLASSIFY_ENABLED: bool = False
+    # Modelo aparte del de dietas: clasificar es una tarea cerrada y de mucho
+    # volumen, así que va con el modelo rápido. Súbelo a claude-opus-5 si
+    # prefieres precisión sobre coste.
+    ANTHROPIC_CLASSIFY_MODEL: str = "claude-haiku-4-5"
+
     @property
     def cors_origins(self) -> list[str]:
         """Return the effective CORS origin list.

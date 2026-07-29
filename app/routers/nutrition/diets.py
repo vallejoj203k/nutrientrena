@@ -313,6 +313,26 @@ def _stable_seed(*partes) -> int:
     return zlib.crc32("|".join(str(p) for p in partes).encode()) & 0x7FFFFFFF
 
 
+def _catalogo_generador(db: Session, org):
+    """Alimentos con los que se construye una dieta.
+
+    Se usa el catálogo marcado como utilizable, no la tabla entera: los 7.348
+    del USDA son referencia nutricional con nombres de laboratorio ("Abadejo de
+    Alaska, crudo") y no valen para un plan que lee una persona. Si no hay
+    ninguno marcado se cae a todo el catálogo, para que una instalación sin el
+    catálogo base siga generando dietas.
+    """
+    base = db.query(Aliment).filter(Aliment.calories.isnot(None))
+    if org.org_id:
+        base = base.filter(or_(Aliment.organization_id.is_(None),
+                               Aliment.organization_id == org.org_id))
+
+    marcados = base.filter(Aliment.use_in_generator.is_(True))
+    if marcados.limit(1).first() is not None:
+        return marcados
+    return base
+
+
 def _pick_catalog(aliments: list, limit: int, seed: Optional[int] = None) -> list:
     """Recorta el catálogo a un subconjunto que siga siendo utilizable.
 
@@ -410,10 +430,7 @@ def auto_generate(
     if not data.kcal or data.kcal <= 0:
         return send_error("Hace falta un objetivo de calorías para generar el plan", code=422)
 
-    q = db.query(Aliment).filter(Aliment.calories.isnot(None))
-    if org.org_id:
-        q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
-    aliments = q.all()
+    aliments = _catalogo_generador(db, org).all()
     if not aliments:
         return send_error("No hay alimentos en el catálogo para construir la dieta", code=422)
 
@@ -496,10 +513,7 @@ def ai_generate(
         return send_error("Hace falta un objetivo de calorías para generar el plan", code=422)
 
     # Catálogo del coach: solo alimentos con calorías, que son los que sirven.
-    q = db.query(Aliment).filter(Aliment.calories.isnot(None))
-    if org.org_id:
-        q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
-    aliments = q.limit(1000).all()
+    aliments = _catalogo_generador(db, org).limit(1000).all()
 
     # Cuántos caben en el prompt. El tier gratuito de Groq son 12.000 tokens por
     # minuto y cada alimento ronda los 20, así que el catálogo entero no entra:

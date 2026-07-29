@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Float, Integer, ForeignKey, DateTime, Text
+from sqlalchemy import Column, String, Float, Integer, ForeignKey, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -63,6 +63,10 @@ class Aliment(Base):
     # Momentos del día en los que encaja: "desayuno,snack,principal" separados
     # por coma. Vacío = lo deduce el generador por el nombre del alimento.
     meal_moments = Column(String(60), nullable=True)
+    # Si el generador de dietas puede usarlo. El catálogo del USDA sirve para
+    # consultar macros, pero sus nombres ("Abadejo de Alaska, crudo") no valen
+    # para un plan que lee una persona, así que queda fuera por defecto.
+    use_in_generator = Column(Boolean, nullable=False, default=False, server_default="0")
     parent_id = Column(String(36), ForeignKey("aliments.id"), nullable=True)
     organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     created_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)

@@ -14,6 +14,7 @@ from app.core.responses import send_response, send_error
 from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
 from app.config import settings
+from app.core import ai_classifier
 from app.services import usda as usda_svc
 
 router = APIRouter(prefix="/aliments", tags=["Nutrition - Aliments"])
@@ -127,6 +128,14 @@ def create(
         desc_data = data.description.model_dump(exclude_none=True)
         if desc_data:
             _upsert_description(db, obj.id, desc_data)
+
+    # Si el coach no marcó los momentos, se los pone la IA. Es "si sale, sale":
+    # que falle la clasificación no puede impedir que se guarde el alimento.
+    if not obj.meal_moments and ai_classifier.classify_enabled():
+        try:
+            obj.meal_moments = ai_classifier.classify_one(obj)
+        except Exception:
+            pass
 
     db.commit()
     db.refresh(obj)
@@ -362,4 +371,75 @@ async def usda_sync(
             "remaining": remaining,
         },
         f"{len(synced)} alimentos sincronizados con USDA",
+    )
+
+
+class ClassifyMomentsRequest(BaseModel):
+    ids: Optional[List[str]] = None
+    batch: int = 200          # alimentos por petición
+    chunk: int = 50           # alimentos por llamada al modelo
+    force: bool = False       # recalcular también los que ya tienen momentos
+
+
+def _sin_momentos():
+    """Alimentos a los que todavía no se les ha puesto momento del día."""
+    return or_(Aliment.meal_moments.is_(None), Aliment.meal_moments == "")
+
+
+@router.post(
+    "/classify-moments",
+    summary="Clasificar alimentos por momento del día",
+    description="Etiqueta cada alimento como desayuno / snack / principal con IA, para que el generador de dietas no proponga ternera para desayunar.",
+)
+def classify_moments(
+    body: ClassifyMomentsRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    if not ai_classifier.classify_enabled():
+        return send_error(
+            "La clasificación con IA está desactivada. Actívala en el servidor con "
+            f"{ai_classifier.key_var_name()} y AI_CLASSIFY_ENABLED=true."
+        )
+
+    q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
+    if body.ids:
+        q = q.filter(Aliment.id.in_(body.ids))
+    elif not body.force:
+        # Por defecto no se toca lo que el coach ya etiquetó a mano.
+        q = q.filter(_sin_momentos())
+    aliments = q.limit(max(1, body.batch)).all()
+
+    pendientes = 0
+    if not body.ids and not body.force:
+        pendientes = db.query(Aliment).filter(
+            Aliment.parent_id.is_(None), _sin_momentos()
+        ).count()
+
+    clasificados = 0
+    errores: List[str] = []
+    tam = max(1, min(body.chunk, 100))
+
+    for i in range(0, len(aliments), tam):
+        lote = aliments[i:i + tam]
+        try:
+            momentos = ai_classifier.classify(lote)
+        except Exception as e:
+            errores.append(f"lote {i // tam + 1}: {str(e)[:120]}")
+            continue
+        for a in lote:
+            valor = momentos.get(a.id)
+            if valor:
+                a.meal_moments = valor
+                clasificados += 1
+
+    db.commit()
+    return send_response(
+        {
+            "classified": clasificados,
+            "processed": len(aliments),
+            "errors": errores,
+            "remaining": max(0, pendientes - len(aliments)),
+        },
+        f"{clasificados} alimentos clasificados",
     )

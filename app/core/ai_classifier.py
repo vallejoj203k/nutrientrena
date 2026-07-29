@@ -129,6 +129,25 @@ def _preguntar_anthropic(prompt: str) -> str:
     return next((b.text for b in message.content if b.type == "text"), "")
 
 
+class RateLimited(RuntimeError):
+    """El proveedor pide esperar. `seconds` es cuánto, para poder reanudar."""
+
+    def __init__(self, seconds: int):
+        self.seconds = seconds
+        super().__init__(
+            f"Se ha alcanzado el límite por minuto del plan gratuito. "
+            f"Reanudando en {seconds} s."
+        )
+
+
+def _segundos_de_espera(r) -> int:
+    """Lee retry-after; si no viene o es raro, un minuto, que es la ventana."""
+    try:
+        return max(1, min(int(float(r.headers.get("retry-after", 60))), 300))
+    except (TypeError, ValueError):
+        return 60
+
+
 def _preguntar_groq(prompt: str) -> str:
     """API de Groq, compatible con OpenAI. Sin SDK: es una única petición."""
     r = httpx.post(
@@ -146,6 +165,11 @@ def _preguntar_groq(prompt: str) -> str:
         },
         timeout=120,
     )
+    if r.status_code == 429:
+        # El límite del plan gratuito es por minuto. Se levanta un error que
+        # lleva la espera dentro, para que quien llama pueda reanudar solo en
+        # vez de dejar el catálogo a medias.
+        raise RateLimited(_segundos_de_espera(r))
     if r.status_code != 200:
         raise RuntimeError(f"Groq respondió {r.status_code}: {r.text[:200]}")
     try:

@@ -224,16 +224,17 @@ def test_groq_descarta_lo_invalido_igual_que_anthropic(monkeypatch):
 
 
 def test_groq_error_http_se_reporta(monkeypatch):
+    """Un error que no sea el límite sí se reporta con su código."""
     monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
     monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
     monkeypatch.setattr(ai_classifier.httpx, "post",
-                        lambda url, **kw: _resp(429, {"error": "rate limit"}))
+                        lambda url, **kw: _resp(500, {"error": "boom"}))
 
     try:
         ai_classifier.classify([_Al("a", "Gazpacho")])
         assert False, "debería haber lanzado"
     except RuntimeError as e:
-        assert "429" in str(e)
+        assert "500" in str(e)
 
 
 def test_groq_json_roto_no_rompe_el_lote(monkeypatch):
@@ -261,3 +262,68 @@ def test_la_clave_que_pide_depende_del_proveedor(monkeypatch):
     monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "anthropic")
     assert ai_classifier.classify_enabled() is False
     assert ai_classifier.key_var_name() == "ANTHROPIC_API_KEY"
+
+
+# ── Límite por minuto ────────────────────────────────────────────────────────
+
+def test_el_429_lleva_la_espera_dentro(monkeypatch):
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
+    monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
+
+    class _R:
+        status_code = 429
+        text = "rate limit"
+        headers = {"retry-after": "37"}
+
+    monkeypatch.setattr(ai_classifier.httpx, "post", lambda url, **kw: _R())
+    try:
+        ai_classifier.classify([_Al("a", "Gazpacho")])
+        assert False, "debería haber lanzado"
+    except ai_classifier.RateLimited as e:
+        assert e.seconds == 37
+        assert "37 s" in str(e)
+
+
+def test_sin_cabecera_espera_la_ventana(monkeypatch):
+    monkeypatch.setattr(ai_classifier.settings, "AI_CLASSIFY_PROVIDER", "groq")
+    monkeypatch.setattr(ai_classifier.settings, "GROQ_API_KEY", "gsk-test")
+
+    class _R:
+        status_code = 429
+        text = "rate limit"
+        headers = {}
+
+    monkeypatch.setattr(ai_classifier.httpx, "post", lambda url, **kw: _R())
+    try:
+        ai_classifier.classify([_Al("a", "Gazpacho")])
+        assert False
+    except ai_classifier.RateLimited as e:
+        assert e.seconds == 60
+
+
+def test_al_topar_el_limite_para_y_dice_cuanto_esperar(client, seed, admin_headers, monkeypatch):
+    """No debe seguir gastando llamadas que van a fallar."""
+    h = admin_headers
+    monkeypatch.setattr(ai_classifier, "classify_enabled", lambda: False)
+    ids = [_aliment(client, h, f"Alimento {i}") for i in range(5)]
+
+    monkeypatch.setattr(ai_classifier, "classify_enabled", lambda: True)
+    llamadas = []
+
+    def falla_a_la_segunda(lote):
+        llamadas.append(len(lote))
+        if len(llamadas) == 1:
+            return {a.id: "principal" for a in lote}
+        raise ai_classifier.RateLimited(25)
+
+    monkeypatch.setattr(ai_classifier, "classify", falla_a_la_segunda)
+
+    r = client.post("/api/aliments/classify-moments", headers=h,
+                    json={"ids": ids, "chunk": 2})
+    assert r.status_code == 200, r.text
+    d = r.json()["data"]
+
+    assert d["retry_after"] == 25
+    assert d["classified"] == 2          # lo del primer lote sí se guardó
+    assert len(llamadas) == 2            # y no siguió intentando los demás
+    assert "25 s" in r.json()["message"]

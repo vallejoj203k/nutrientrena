@@ -308,6 +308,10 @@
     .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;}
     .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
     .sl-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
+    .moment-row{display:flex;gap:6px;flex-wrap:wrap;}
+    .moment-chip{padding:7px 12px;border:1.5px solid #E5E7EB;border-radius:20px;background:#fff;font-size:12.5px;color:#374151;cursor:pointer;font-family:inherit;transition:.15s;}
+    .moment-chip:hover{border-color:#C7D2FE;}
+    .moment-chip.sel{border-color:#4F46E5;background:#EEF2FF;color:#4F46E5;font-weight:700;}
 </style>
 </head>
 <body>
@@ -549,6 +553,17 @@
           <label>Calorías</label>
           <input id="fCalories" type="number" step="1" min="0" placeholder="0"/>
         </div>
+      </div>
+      <!-- Los momentos ocupan toda la fila: en una columna del grid los chips
+           se apilan y no se leen. -->
+      <div class="form-group" style="margin-bottom:14px;">
+        <label>Momentos del día <span style="font-weight:400;color:#9CA3AF;">(cuándo encaja al generar dietas)</span></label>
+        <div class="moment-row" id="fMomentRow">
+          <button type="button" class="moment-chip" data-m="desayuno" onclick="toggleMoment('desayuno')">Desayuno</button>
+          <button type="button" class="moment-chip" data-m="snack" onclick="toggleMoment('snack')">Media mañana / merienda</button>
+          <button type="button" class="moment-chip" data-m="principal" onclick="toggleMoment('principal')">Comida / cena</button>
+        </div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:6px;">Sin marcar nada, se deduce del nombre del alimento. Marcarlos es la forma de corregir esa deducción.</div>
       </div>
       <!-- Micronutrients accordion -->
       <button type="button" class="micro-toggle" id="microToggle" onclick="toggleMicro()">
@@ -948,6 +963,8 @@ function openModal(item = null, source = null) {
   document.getElementById('fFats').value        = item?.fats ?? '';
   document.getElementById('fCalories').value    = item?.calories ?? '';
   document.getElementById('fComments').value    = item?.comments ?? '';
+  _moments = new Set(String(item?.meal_moments || '').split(',').map(x => x.trim()).filter(Boolean));
+  renderMoments();
   document.getElementById('modalError').textContent = '';
   document.getElementById('saveBtn').disabled   = false;
   document.getElementById('saveBtnLabel').textContent = 'Guardar';
@@ -1117,6 +1134,19 @@ async function openEdit(id, source) {
 
 function closeModal() { document.getElementById('alimentOverlay').classList.remove('open'); }
 
+// Momentos del día en los que encaja el alimento (vacío = automático).
+let _moments = new Set();
+
+function toggleMoment(m) {
+  if (_moments.has(m)) _moments.delete(m); else _moments.add(m);
+  renderMoments();
+}
+
+function renderMoments() {
+  document.querySelectorAll('#fMomentRow .moment-chip').forEach(b =>
+    b.classList.toggle('sel', _moments.has(b.dataset.m)));
+}
+
 async function saveAliment() {
   const id   = document.getElementById('editId').value;
   const name = document.getElementById('fName').value.trim();
@@ -1174,6 +1204,7 @@ async function saveAliment() {
     fats:           toF(gv('fFats')),
     calories:       toF(gv('fCalories')),
     comments:       document.getElementById('fComments').value.trim() || null,
+    meal_moments:   _moments.size ? [..._moments].join(',') : null,
   };
   if (!isPersonal) body.description = desc;
   if (isPersonal && !id) body.client_id = _myUserId;

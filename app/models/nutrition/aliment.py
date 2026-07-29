@@ -60,6 +60,9 @@ class Aliment(Base):
     fats = Column(Float, nullable=True)
     calories = Column(Float, nullable=True)
     comments = Column(Text, nullable=True)
+    # Momentos del día en los que encaja: "desayuno,snack,principal" separados
+    # por coma. Vacío = lo deduce el generador por el nombre del alimento.
+    meal_moments = Column(String(60), nullable=True)
     parent_id = Column(String(36), ForeignKey("aliments.id"), nullable=True)
     organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     created_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)

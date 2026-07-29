@@ -305,6 +305,9 @@ class _AutoGenerateBody(BaseModel):
     fats: float = 0
     meal_count: int = 4
     seed: Optional[int] = None            # cambia la variante sin cambiar los datos
+    # Directrices del coach: hacia dónde cargar las calorías y qué evitar.
+    distribution: Optional[str] = None    # balanced | big_breakfast | big_lunch | light_dinner
+    avoid: Optional[str] = None           # términos libres separados por coma
 
 
 @router.post("/auto-generate", summary="Generar una dieta automáticamente", description="Construye un plan diario con los alimentos del catálogo ajustado a los objetivos de Nutrición. Sin IA ni servicios externos.")
@@ -339,12 +342,16 @@ def auto_generate(
             # trigo, pan, pasta…), no solo lo que aparezca escrito en su nombre.
             restricciones += diet_builder.exclusions_for(patologias)
             avisos = diet_builder.warnings_for(patologias)
+    # Lo que el coach quiera evitar solo en esta dieta, sin tocar la ficha.
+    if data.avoid:
+        restricciones += diet_builder.parse_restrictions(data.avoid)
 
     try:
         plan = diet_builder.build_diet(
             aliments=aliments, kcal=data.kcal, proteins=data.proteins,
             carbs=data.carbs, fats=data.fats, meal_count=data.meal_count,
             restrictions=restricciones, seed=data.seed,
+            distribution=data.distribution,
         )
     except ValueError as e:
         return send_error(str(e), code=422)

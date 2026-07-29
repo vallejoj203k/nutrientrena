@@ -35,8 +35,9 @@ DIET_SCHEMA = {
                             "properties": {
                                 "n": {"type": "integer", "description": "Número del alimento en el catálogo"},
                                 "grams": {"type": "number", "description": "Cantidad en gramos"},
+                                "label": {"type": "string", "description": "Nombre del plato con su preparación, ej. 'Merluza al horno'"},
                             },
-                            "required": ["n", "grams"],
+                            "required": ["n", "grams", "label"],
                             "additionalProperties": False,
                         },
                     },
@@ -59,6 +60,9 @@ Reglas que no puedes saltarte:
 - No incluyas ningún alimento que choque con las alergias, intolerancias, patologías o preferencias del cliente.
 - Usa cantidades realistas y redondeadas (30, 50, 75, 100, 125, 150, 200 g), no cifras como 87,3 g.
 - Varía los alimentos entre comidas: no repitas el mismo en todas.
+- Cada alimento lleva entre corchetes los momentos del día en los que encaja. RESPÉTALOS: no pongas en el desayuno un alimento marcado solo como comida/cena.
+- Monta comidas que alguien se comería de verdad en España, no combinaciones que solo cuadran de macros. Un desayuno es pan con huevo o tomate, avena con fruta, yogur con fruta. Una comida o cena lleva una fuente de proteína, una guarnición y verdura.
+- Da a cada alimento un nombre de plato en `label`, con su preparación: "Huevos revueltos", "Merluza al horno", "Pimiento y cebolla asados", "Pan integral tostado". Es lo que leerá el cliente. No cambies el alimento, solo cómo se llama en el plan.
 
 Las notas van dirigidas al cliente, en español, en un tono claro y cercano. No expliques tus cálculos: el sistema recalcula los totales por su cuenta."""
 
@@ -80,16 +84,41 @@ def ai_enabled() -> bool:
     return bool(_api_key()) and bool(settings.AI_DIET_ENABLED)
 
 
+# Cómo se lee cada momento en el prompt. El modelo no tiene por qué conocer
+# nuestras etiquetas internas.
+_MOMENTO_ETIQUETA = {"desayuno": "desayuno", "snack": "media mañana/merienda",
+                     "principal": "comida/cena"}
+
+
+def _momentos_de(a) -> str:
+    """Los momentos del alimento, ya clasificados, en texto para el prompt.
+
+    Si vale para todo se abrevia: enumerar los tres ocupaba media línea por
+    alimento y no decía nada que "cualquiera" no diga.
+    """
+    from app.core.diet_builder import MOMENTS, moments_for
+
+    momentos = moments_for(a)
+    if len(momentos) >= len(MOMENTS):
+        return "cualquiera"
+    return "/".join(_MOMENTO_ETIQUETA.get(m, m) for m in momentos)
+
+
 def _fmt_aliment(n: int, a) -> str:
-    """Una línea por alimento, con sus macros por 100 g.
+    """Una línea por alimento, con sus macros por 100 g y cuándo se come.
 
     Se numera en vez de mandar el id: un UUID son 36 caracteres que ocupaban
     casi un tercio del prompt y que el modelo puede transcribir mal. Quien
     llama traduce el número de vuelta al alimento.
+
+    El momento del día es lo que evita que proponga cena para desayunar. Ya
+    estaba calculado —lo pone el clasificador o se deduce del nombre— pero no
+    se le estaba pasando al modelo, que es de poco que sirva tenerlo.
     """
     return (
         f"{n}. {a.name}"
         + (f" ({a.brand})" if getattr(a, "brand", None) else "")
+        + f" [{_momentos_de(a)}]"
         + f" — {round(a.calories or 0)} kcal,"
         f" P {round(a.proteins or 0, 1)},"
         f" C {round(a.carbohydrates or 0, 1)},"
@@ -126,7 +155,7 @@ def build_prompt(*, client: dict, target: dict, aliments: list) -> str:
 FORMATO_JSON = """
 Responde ÚNICAMENTE con un objeto JSON con esta forma, sin texto alrededor:
 {"title": "...", "notes": "...", "meals": [{"name": "Desayuno", "time": "08:00",
- "foods": [{"n": 12, "grams": 60}]}]}"""
+ "foods": [{"n": 12, "grams": 60, "label": "Merluza al horno"}]}]}"""
 
 
 def _preguntar_anthropic(prompt: str) -> str:

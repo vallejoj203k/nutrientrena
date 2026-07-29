@@ -244,3 +244,73 @@ def test_429_de_groq_se_explica(monkeypatch):
     except RuntimeError as e:
         assert "límite" in str(e) and "42 s" in str(e)
         assert "org_" not in str(e)      # sin volcar el error crudo
+
+
+def test_el_prompt_lleva_los_momentos():
+    """Sin esto el modelo no sabía qué alimento es de desayuno."""
+    from app.core.ai_diet import build_prompt
+
+    class A:
+        def __init__(s, n, mm):
+            s.id, s.name, s.brand, s.meal_moments = "x", n, None, mm
+            s.calories, s.proteins, s.carbohydrates, s.fats = 100, 5, 10, 2
+
+    msg = build_prompt(client={}, target={"kcal": 1800, "meal_count": 4}, aliments=[
+        A("Ternera", "principal"),
+        A("Pan integral", "desayuno"),
+        A("Huevo", "desayuno,snack,principal"),
+    ])
+    assert "Ternera [comida/cena]" in msg
+    assert "Pan integral [desayuno]" in msg
+    # Cuando vale para todo se abrevia en vez de enumerar los tres
+    assert "Huevo [cualquiera]" in msg
+    # Y la regla que le dice que los respete
+    from app.core.ai_diet import SYSTEM_PROMPT
+    assert "RESPÉTALOS" in SYSTEM_PROMPT
+
+
+def test_el_nombre_de_plato_no_cambia_el_alimento(client, seed, admin_headers, monkeypatch):
+    """`label` es solo la etiqueta que lee el cliente; el alimento es el real."""
+    h = admin_headers
+    merluza = _aliment(client, h, "Merluza", 90, 17, 0, 2)
+
+    monkeypatch.setattr(ai_diet, "ai_enabled", lambda: True)
+    monkeypatch.setattr(ai_diet, "generate_diet", lambda **kw: {
+        "title": "Plan", "notes": "n",
+        "meals": [{"name": "Cena", "time": "21:00", "foods": [
+            {"n": {a.id: i for i, a in enumerate(kw["aliments"])}[merluza],
+             "grams": 200, "label": "Merluza al horno"},
+        ]}],
+    })
+
+    r = client.post("/api/diets/ai-generate", headers=h, json={
+        "client_id": None, "kcal": 600, "meal_count": 2})
+    assert r.status_code == 200, r.text
+    f = r.json()["data"]["foods"][0]["detail"][0]
+
+    assert f["name"] == "Merluza al horno"     # lo que lee el cliente
+    assert f["aliment_id"] == merluza          # el alimento real del catálogo
+    assert f["calories"] == 180                # macros de la base de datos: 90 * 2
+
+
+def test_una_etiqueta_absurda_no_se_cuela(client, seed, admin_headers, monkeypatch):
+    h = admin_headers
+    merluza = _aliment(client, h, "Merluza", 90, 17, 0, 2)
+
+    monkeypatch.setattr(ai_diet, "ai_enabled", lambda: True)
+
+    def fake(**kw):
+        # El índice se busca; dar por hecho el 0 hacía que el test dependiera
+        # de qué alimentos hubieran creado los demás.
+        i = {a.id: n for n, a in enumerate(kw["aliments"])}[merluza]
+        return {"title": "Plan", "notes": "n",
+                "meals": [{"name": "Cena", "time": "21:00", "foods": [
+                    {"n": i, "grams": 200, "label": "X" * 500},   # etiqueta desmedida
+                    {"n": i, "grams": 100, "label": "   "},        # etiqueta vacía
+                ]}]}
+
+    monkeypatch.setattr(ai_diet, "generate_diet", fake)
+
+    r = client.post("/api/diets/ai-generate", headers=h, json={"kcal": 600, "meal_count": 2})
+    nombres = [f["name"] for f in r.json()["data"]["foods"][0]["detail"]]
+    assert nombres == ["Merluza", "Merluza"]   # cae al nombre del catálogo

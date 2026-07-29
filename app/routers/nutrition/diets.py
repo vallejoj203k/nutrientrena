@@ -301,6 +301,57 @@ def _client_context(db: Session, client_id: str) -> dict:
     return ctx
 
 
+def _pick_catalog(aliments: list, limit: int) -> list:
+    """Recorta el catálogo a un subconjunto que siga siendo utilizable.
+
+    Mandar los primeros N alimentos podía dejar al modelo sin proteínas o sin
+    nada de desayuno, según cómo estuviera ordenada la tabla. Se reparte el
+    cupo entre los cuatro roles (proteína, carbohidrato, grasa, verdura) y,
+    dentro de cada uno, entre los momentos del día, cogiendo por turnos hasta
+    llenar. Así el recorte no deja fuera una categoría entera.
+    """
+    from app.core.diet_builder import MOMENTS, classify, moments_for
+
+    if len(aliments) <= limit:
+        return aliments
+
+    # (rol, momento) -> alimentos
+    cajones: dict = {}
+    for a in aliments:
+        rol = classify(a)
+        if not rol:
+            continue
+        for momento in moments_for(a):
+            cajones.setdefault((rol, momento), []).append(a)
+
+    claves = [(r, m) for r in ("protein", "carb", "fat", "veg") for m in MOMENTS]
+    elegidos, vistos = [], set()
+    # Ronda a ronda: uno de cada cajón, hasta llenar el cupo.
+    for vuelta in range(limit):
+        if len(elegidos) >= limit:
+            break
+        for clave in claves:
+            grupo = cajones.get(clave) or []
+            if vuelta >= len(grupo):
+                continue
+            a = grupo[vuelta]
+            if a.id in vistos:
+                continue
+            vistos.add(a.id)
+            elegidos.append(a)
+            if len(elegidos) >= limit:
+                break
+    # Si algo quedó suelto (sin rol reconocible), se completa con el resto.
+    if len(elegidos) < limit:
+        for a in aliments:
+            if a.id not in vistos:
+                elegidos.append(a)
+                vistos.add(a.id)
+                if len(elegidos) >= limit:
+                    break
+    return elegidos
+
+
 def _macros_for(aliment, grams: float) -> tuple:
     f = (grams or 0) / 100.0
     return (
@@ -420,7 +471,15 @@ def ai_generate(
     q = db.query(Aliment).filter(Aliment.calories.isnot(None))
     if org.org_id:
         q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
-    aliments = q.limit(max(20, min(data.max_aliments, 400))).all()
+    aliments = q.limit(1000).all()
+
+    # Cuántos caben en el prompt. El tier gratuito de Groq son 12.000 tokens por
+    # minuto y cada alimento ronda los 20, así que el catálogo entero no entra:
+    # se recorta a un subconjunto equilibrado en vez de fallar con un 413.
+    from app.config import settings
+
+    tope = settings.GROQ_DIET_MAX_ALIMENTS if ai_diet._proveedor() == "groq" else data.max_aliments
+    aliments = _pick_catalog(aliments, max(20, min(tope, 400)))
     if not aliments:
         return send_error("No hay alimentos en el catálogo para construir la dieta", code=422)
 
@@ -439,14 +498,16 @@ def ai_generate(
 
     # Los totales NO se toman del modelo: se recalculan con la base de datos,
     # que es la misma fuente que usa el resto de la aplicación.
-    by_id = {str(a.id): a for a in aliments}
     meals, totals = [], [0.0, 0.0, 0.0, 0.0]
     for m in plan.get("meals", []):
         detail = []
         for f in m.get("foods", []):
-            al = by_id.get(str(f.get("aliment_id")))
-            if not al:
-                continue  # id inventado: se descarta en vez de romper el plan
+            # El modelo responde por número de catálogo; fuera de rango se
+            # descarta en vez de romper el plan.
+            n = f.get("n")
+            if not isinstance(n, int) or not (0 <= n < len(aliments)):
+                continue
+            al = aliments[n]
             grams = round(float(f.get("grams") or 0))
             if grams <= 0:
                 continue

@@ -83,6 +83,10 @@ class Settings(BaseSettings):
     # elegir proveedor.
     AI_DIET_PROVIDER: str = "anthropic"
     GROQ_DIET_MODEL: str = "llama-3.3-70b-versatile"
+    # El tier gratuito de Groq son 12.000 tokens por minuto y cada alimento
+    # del catálogo ronda los 20, así que no cabe entero: se manda un
+    # subconjunto equilibrado. Súbelo si tu plan admite más.
+    GROQ_DIET_MAX_ALIMENTS: int = 90
 
     # Clasificar alimentos por momento del día (desayuno / snack / principal).
     # Interruptor propio porque no tiene nada que ver con el anterior: esto se

@@ -417,29 +417,48 @@ def classify_moments(
         ).count()
 
     clasificados = 0
+    procesados = 0
     errores: List[str] = []
+    esperar = 0
     tam = max(1, min(body.chunk, 100))
 
     for i in range(0, len(aliments), tam):
         lote = aliments[i:i + tam]
         try:
             momentos = ai_classifier.classify(lote)
+        except ai_classifier.RateLimited as e:
+            # Se ha agotado el cupo del minuto. Se corta aquí y se dice cuánto
+            # esperar: seguir intentando solo gasta llamadas que van a fallar.
+            esperar = e.seconds
+            break
         except Exception as e:
             errores.append(f"lote {i // tam + 1}: {str(e)[:120]}")
+            procesados += len(lote)
             continue
         for a in lote:
             valor = momentos.get(a.id)
             if valor:
                 a.meal_moments = valor
                 clasificados += 1
+        procesados += len(lote)
 
     db.commit()
+
+    if esperar:
+        mensaje = (f"{clasificados} clasificados. Límite por minuto alcanzado, "
+                   f"continuando en {esperar} s")
+    else:
+        mensaje = f"{clasificados} alimentos clasificados"
+
     return send_response(
         {
             "classified": clasificados,
-            "processed": len(aliments),
+            "processed": procesados,
             "errors": errores,
-            "remaining": max(0, pendientes - len(aliments)),
+            # Lo pendiente se recalcula con lo realmente procesado: al cortar
+            # por el límite quedan más de los que se habían pedido.
+            "remaining": max(0, pendientes - procesados),
+            "retry_after": esperar,
         },
-        f"{clasificados} alimentos clasificados",
+        mensaje,
     )

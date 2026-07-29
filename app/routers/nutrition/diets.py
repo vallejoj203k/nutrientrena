@@ -544,8 +544,15 @@ def ai_generate(
                 continue
             k, p, c, g = _macros_for(al, grams)
             totals = [totals[0] + k, totals[1] + p, totals[2] + c, totals[3] + g]
+            # El modelo puede darle nombre de plato ("Merluza al horno"). Es solo
+            # la etiqueta que lee el cliente: el alimento, sus macros y el id
+            # siguen siendo los del catálogo, así que la dieta se puede editar y
+            # los totales se recalculan igual.
+            etiqueta = (f.get("label") or "").strip()
+            nombre = etiqueta if 0 < len(etiqueta) <= 80 else al.name
+
             detail.append({
-                "aliment_id": str(al.id), "name": al.name, "quantity_calc": grams,
+                "aliment_id": str(al.id), "name": nombre, "quantity_calc": grams,
                 "calories": round(k), "proteins": round(p, 1),
                 "carbohydrates": round(c, 1), "fats": round(g, 1),
             })

@@ -262,6 +262,7 @@ class _AIGenerateBody(BaseModel):
     fiber: Optional[float] = None
     meal_count: int = 4
     notes: Optional[str] = None           # indicaciones libres del coach
+    seed: Optional[int] = None            # otra variante: cambia el subconjunto del catálogo
     max_aliments: int = 220
 
 
@@ -301,7 +302,18 @@ def _client_context(db: Session, client_id: str) -> dict:
     return ctx
 
 
-def _pick_catalog(aliments: list, limit: int) -> list:
+def _stable_seed(*partes) -> int:
+    """Semilla estable entre reinicios.
+
+    `hash()` de Python lleva sal por proceso, así que con él la misma dieta
+    dejaría de ser reproducible en cuanto se reiniciara el servidor.
+    """
+    import zlib
+
+    return zlib.crc32("|".join(str(p) for p in partes).encode()) & 0x7FFFFFFF
+
+
+def _pick_catalog(aliments: list, limit: int, seed: Optional[int] = None) -> list:
     """Recorta el catálogo a un subconjunto que siga siendo utilizable.
 
     Mandar los primeros N alimentos podía dejar al modelo sin proteínas o sin
@@ -309,11 +321,19 @@ def _pick_catalog(aliments: list, limit: int) -> list:
     cupo entre los cuatro roles (proteína, carbohidrato, grasa, verdura) y,
     dentro de cada uno, entre los momentos del día, cogiendo por turnos hasta
     llenar. Así el recorte no deja fuera una categoría entera.
+
+    Dentro de cada cajón se baraja con la semilla: sin esto salían siempre los
+    mismos alimentos por muy grande que fuera el catálogo, que es justo lo que
+    hace que todas las dietas se parezcan.
     """
+    import random
+
     from app.core.diet_builder import MOMENTS, classify, moments_for
 
     if len(aliments) <= limit:
         return aliments
+
+    rnd = random.Random(seed or 0)
 
     # (rol, momento) -> alimentos
     cajones: dict = {}
@@ -323,6 +343,9 @@ def _pick_catalog(aliments: list, limit: int) -> list:
             continue
         for momento in moments_for(a):
             cajones.setdefault((rol, momento), []).append(a)
+
+    for grupo in cajones.values():
+        rnd.shuffle(grupo)
 
     claves = [(r, m) for r in ("protein", "carb", "fat", "veg") for m in MOMENTS]
     elegidos, vistos = [], set()
@@ -415,7 +438,12 @@ def auto_generate(
         plan = diet_builder.build_diet(
             aliments=aliments, kcal=data.kcal, proteins=data.proteins,
             carbs=data.carbs, fats=data.fats, meal_count=data.meal_count,
-            restrictions=restricciones, seed=data.seed,
+            restrictions=restricciones,
+            # La semilla sale del cliente, no de un 0 fijo: si no, la primera
+            # dieta de todos los clientes salía con los mismos alimentos.
+            # Sigue siendo reproducible — mismo cliente y misma variante, mismo
+            # plan — pero deja de ser la misma para todo el mundo.
+            seed=_stable_seed(data.client_id or "", data.seed or 0),
             distribution=data.distribution,
         )
     except ValueError as e:
@@ -479,7 +507,10 @@ def ai_generate(
     from app.config import settings
 
     tope = settings.GROQ_DIET_MAX_ALIMENTS if ai_diet._proveedor() == "groq" else data.max_aliments
-    aliments = _pick_catalog(aliments, max(20, min(tope, 400)))
+    aliments = _pick_catalog(
+        aliments, max(20, min(tope, 400)),
+        seed=_stable_seed(data.client_id or "", data.seed or 0),
+    )
     if not aliments:
         return send_error("No hay alimentos en el catálogo para construir la dieta", code=422)
 

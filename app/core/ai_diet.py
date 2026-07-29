@@ -8,7 +8,11 @@ el coach siempre cuadra con los cálculos de la aplicación.
 """
 from typing import Optional
 
+import httpx
+
 from app.config import settings
+
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # Esquema de la respuesta: se fuerza con structured outputs para que siempre
 # llegue en esta forma y no haya que interpretar texto libre.
@@ -59,9 +63,21 @@ Reglas que no puedes saltarte:
 Las notas van dirigidas al cliente, en español, en un tono claro y cercano. No expliques tus cálculos: el sistema recalcula los totales por su cuenta."""
 
 
+def _proveedor() -> str:
+    return (settings.AI_DIET_PROVIDER or "anthropic").strip().lower()
+
+
+def _api_key() -> Optional[str]:
+    return settings.GROQ_API_KEY if _proveedor() == "groq" else settings.ANTHROPIC_API_KEY
+
+
+def key_var_name() -> str:
+    return "GROQ_API_KEY" if _proveedor() == "groq" else "ANTHROPIC_API_KEY"
+
+
 def ai_enabled() -> bool:
     """Requiere clave Y el interruptor: la clave sola no basta para gastar."""
-    return bool(settings.ANTHROPIC_API_KEY) and bool(settings.AI_DIET_ENABLED)
+    return bool(_api_key()) and bool(settings.AI_DIET_ENABLED)
 
 
 def _fmt_aliment(a) -> str:
@@ -100,15 +116,18 @@ def build_prompt(*, client: dict, target: dict, aliments: list) -> str:
     return "\n\n".join(partes)
 
 
-def generate_diet(*, client: dict, target: dict, aliments: list, extra: Optional[str] = None) -> dict:
-    """Pide el plan a Claude y devuelve el objeto ya validado contra el esquema."""
+# En la API de Groq (compatible con OpenAI) el esquema no es un parámetro:
+# se pide JSON y la forma se describe en el propio prompt.
+FORMATO_JSON = """
+Responde ÚNICAMENTE con un objeto JSON con esta forma, sin texto alrededor:
+{"title": "...", "notes": "...", "meals": [{"name": "Desayuno", "time": "08:00",
+ "foods": [{"aliment_id": "<id exacto del catálogo>", "grams": 60}]}]}"""
+
+
+def _preguntar_anthropic(prompt: str) -> str:
     import anthropic
 
     api = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    prompt = build_prompt(client=client, target=target, aliments=aliments)
-    if extra:
-        prompt += f"\n\n## Indicaciones del coach\n{extra}"
-
     # Streaming: el plan puede tardar y una petición normal se arriesga a que
     # expire la conexión.
     with api.messages.stream(
@@ -122,10 +141,51 @@ def generate_diet(*, client: dict, target: dict, aliments: list, extra: Optional
 
     if message.stop_reason == "refusal":
         raise RuntimeError("La IA no pudo generar este plan. Revisa los datos del cliente e inténtalo de nuevo.")
+    return next((b.text for b in message.content if b.type == "text"), "")
 
+
+def _preguntar_groq(prompt: str) -> str:
+    r = httpx.post(
+        GROQ_URL,
+        headers={"Authorization": f"Bearer {settings.GROQ_API_KEY}"},
+        json={
+            "model": settings.GROQ_DIET_MODEL,
+            "temperature": 0.3,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT + "\n" + FORMATO_JSON},
+                {"role": "user", "content": prompt},
+            ],
+        },
+        timeout=180,
+    )
+    if r.status_code != 200:
+        raise RuntimeError(f"Groq respondió {r.status_code}: {r.text[:200]}")
+    try:
+        return r.json()["choices"][0]["message"]["content"] or ""
+    except (KeyError, IndexError, ValueError) as e:
+        raise RuntimeError(f"Respuesta inesperada de Groq: {e}")
+
+
+def generate_diet(*, client: dict, target: dict, aliments: list, extra: Optional[str] = None) -> dict:
+    """Pide el plan al proveedor configurado y devuelve el objeto ya parseado.
+
+    Los totales no se toman de aquí: quien llama los recalcula con la base de
+    datos, así que un plan con cantidades raras se detecta después.
+    """
     import json
 
-    texto = next((b.text for b in message.content if b.type == "text"), "")
+    prompt = build_prompt(client=client, target=target, aliments=aliments)
+    if extra:
+        prompt += f"\n\n## Indicaciones del coach\n{extra}"
+
+    texto = _preguntar_groq(prompt) if _proveedor() == "groq" else _preguntar_anthropic(prompt)
     if not texto:
         raise RuntimeError("La IA no devolvió ningún plan.")
-    return json.loads(texto)
+    try:
+        datos = json.loads(texto)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"La IA no devolvió JSON válido: {e}")
+    if not isinstance(datos, dict):
+        raise RuntimeError("La IA no devolvió un objeto JSON.")
+    return datos

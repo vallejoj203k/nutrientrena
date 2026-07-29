@@ -1899,8 +1899,12 @@
       <div class="assign-selcount" id="aiStatus"></div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="closeAiDiet()">Cancelar</button>
-        <button class="btn btn-ghost" id="aiRetryBtn" style="display:none;" onclick="runAutoDiet(true)">Otra variante</button>
-        <button class="btn btn-primary" id="aiGoBtn" onclick="runAutoDiet()">Generar propuesta</button>
+        <button class="btn btn-ghost" id="aiRetryBtn" style="display:none;" onclick="_aiRetry()">Otra variante</button>
+        <button class="btn btn-ghost" id="aiGoIaBtn" onclick="runAiDiet()" title="La escribe un modelo de lenguaje a partir de tu catálogo. Más variada, pero se paga por dieta y manda los datos de la ficha (sin nombre) al proveedor.">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:5px;"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
+          Generar con IA
+        </button>
+        <button class="btn btn-primary" id="aiGoBtn" onclick="runAutoDiet()" title="La construye el algoritmo con tu catálogo. Gratis, instantánea y siempre el mismo resultado.">Generar propuesta</button>
         <button class="btn btn-primary" id="aiSaveBtn" style="display:none;" onclick="saveAiDiet()">Asignar al cliente</button>
       </div>
     </div>
@@ -2536,8 +2540,10 @@ function openAiDiet() {
   document.getElementById('aiError').textContent = '';
   document.getElementById('aiStatus').textContent = '';
   document.getElementById('aiGoBtn').style.display = '';
+  document.getElementById('aiGoIaBtn').style.display = '';
   document.getElementById('aiSaveBtn').style.display = 'none';
   document.getElementById('aiRetryBtn').style.display = 'none';
+  _aiBusy(false);
   const chip = (v, u, l) => `<div class="ai-tchip"><b>${Math.round(v)}${u}</b><span>${l}</span></div>`;
   document.getElementById('aiTarget').innerHTML =
     chip(m.kcal, '', 'kcal/día') + chip(m.proteins, 'g', 'proteínas') +
@@ -2549,6 +2555,50 @@ function openAiDiet() {
 function closeAiDiet() { document.getElementById('aiDietOverlay').classList.remove('open'); }
 
 let _aiSeed = 0, _aiDist = 'balanced';
+// Qué generador produjo la propuesta que hay en pantalla, para que "Otra
+// variante" repita con el mismo y no salte de uno a otro sin avisar.
+let _aiLastRunner = 'algo';
+
+function _aiRetry() {
+  return _aiLastRunner === 'ia' ? runAiDiet() : runAutoDiet(true);
+}
+
+/* Botones del pie: los dos generadores comparten pie, así que se encienden y
+   apagan juntos en vez de que cada función toque solo el suyo. */
+function _aiBusy(on, mensaje) {
+  ['aiGoBtn', 'aiGoIaBtn', 'aiRetryBtn'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = on;
+  });
+  document.getElementById('aiStatus').textContent = mensaje || '';
+}
+
+function _aiDone(runner) {
+  _aiLastRunner = runner;
+  document.getElementById('aiGoBtn').style.display = 'none';
+  document.getElementById('aiGoIaBtn').style.display = 'none';
+  document.getElementById('aiRetryBtn').style.display = '';
+  document.getElementById('aiSaveBtn').style.display = '';
+  document.getElementById('aiStatus').textContent = 'Revisa la propuesta antes de asignarla.';
+}
+
+/* Las directrices del modal valen para los dos generadores: el algoritmo las
+   recibe como parámetros y la IA como instrucción en texto. */
+function _aiDirectivesText() {
+  const etiquetas = {
+    balanced: null,
+    big_breakfast: 'Carga más calorías en el desayuno.',
+    big_lunch: 'Carga más calorías en la comida.',
+    light_dinner: 'Deja la cena ligera.',
+  };
+  const partes = [];
+  if (etiquetas[_aiDist]) partes.push(etiquetas[_aiDist]);
+  const evitar = (document.getElementById('aiAvoid')?.value || '').trim();
+  if (evitar) partes.push(`No incluyas: ${evitar}.`);
+  const notas = (document.getElementById('aiNotes')?.value || '').trim();
+  if (notas) partes.push(notas);
+  return partes.join(' ') || null;
+}
 
 function setAiDist(v) {
   _aiDist = v;
@@ -2560,12 +2610,8 @@ function setAiDist(v) {
 async function runAutoDiet(variante) {
   const m = _nutEffMacros();
   const err = document.getElementById('aiError');
-  const status = document.getElementById('aiStatus');
-  const go = document.getElementById('aiGoBtn');
-  const retry = document.getElementById('aiRetryBtn');
   err.textContent = '';
-  go.disabled = true; retry.disabled = true;
-  status.textContent = 'Construyendo el plan…';
+  _aiBusy(true, 'Construyendo el plan…');
   if (variante) _aiSeed += 1;
   try {
     const r = await fetch(`${API}/diets/auto-generate`, {
@@ -2578,26 +2624,22 @@ async function runAutoDiet(variante) {
       }),
     });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) { err.textContent = j.message || j.detail || 'No se pudo generar la dieta'; status.textContent = ''; return; }
+    if (!r.ok) {
+      err.textContent = j.message || j.detail || 'No se pudo generar la dieta';
+      _aiBusy(false); return;
+    }
     _aiPlan = j.data;
     _renderAiPlan(_aiPlan);
-    status.textContent = 'Revisa la propuesta antes de asignarla.';
-    go.style.display = 'none';
-    retry.style.display = '';
-    document.getElementById('aiSaveBtn').style.display = '';
-  } catch { err.textContent = 'Error de conexión'; status.textContent = ''; }
-  finally { go.disabled = false; retry.disabled = false; }
+    _aiDone('algo');
+  } catch { err.textContent = 'Error de conexión'; _aiBusy(false); }
+  finally { _aiBusy(false, document.getElementById('aiStatus').textContent); }
 }
 
 async function runAiDiet() {
   const m = _nutEffMacros();
   const err = document.getElementById('aiError');
-  const status = document.getElementById('aiStatus');
-  const go = document.getElementById('aiGoBtn');
-  const retry = document.getElementById('aiRetryBtn');
   err.textContent = '';
-  go.disabled = true; retry.disabled = true;
-  status.textContent = 'Generando la propuesta… puede tardar hasta un minuto.';
+  _aiBusy(true, 'Generando la propuesta con IA… puede tardar hasta un minuto.');
   document.getElementById('aiResult').innerHTML = '';
   try {
     const r = await fetch(`${API}/diets/ai-generate`, {
@@ -2605,19 +2647,19 @@ async function runAiDiet() {
       body: JSON.stringify({
         client_id: clientId, kcal: m.kcal, proteins: m.proteins, carbs: m.carbs,
         fats: m.fats, fiber: m.fiber, meal_count: m.mealCount,
-        notes: (document.getElementById('aiNotes').value || '').trim() || null,
+        notes: _aiDirectivesText(),
       }),
     });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) { err.textContent = j.message || j.detail || 'No se pudo generar la dieta'; status.textContent = ''; return; }
+    if (!r.ok) {
+      err.textContent = j.message || j.detail || 'No se pudo generar la dieta';
+      _aiBusy(false); return;
+    }
     _aiPlan = j.data;
     _renderAiPlan(_aiPlan);
-    status.textContent = 'Revisa la propuesta antes de asignarla.';
-    go.style.display = 'none';
-    retry.style.display = '';
-    document.getElementById('aiSaveBtn').style.display = '';
-  } catch { err.textContent = 'Error de conexión'; status.textContent = ''; }
-  finally { go.disabled = false; retry.disabled = false; }
+    _aiDone('ia');
+  } catch { err.textContent = 'Error de conexión'; _aiBusy(false); }
+  finally { _aiBusy(false, document.getElementById('aiStatus').textContent); }
 }
 
 function _renderAiPlan(p) {

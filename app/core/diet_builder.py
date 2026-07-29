@@ -55,6 +55,9 @@ DISTRIBUTIONS = {
 # cuadra las calorías pero no es un desayuno. Cada alimento encaja en unos
 # momentos concretos, y el coach puede fijarlo por alimento (`meal_moments`);
 # cuando no lo ha hecho, se deduce del nombre con estas listas.
+MEAL_MOMENT_LABEL = {"desayuno": "Desayuno", "snack": "Media mañana / merienda",
+                     "principal": "Comida / cena"}
+
 MOMENTS = ("desayuno", "snack", "principal")
 
 # Típicos de desayuno y de media mañana/merienda.
@@ -290,6 +293,16 @@ def classify(a) -> Optional[str]:
     # Muy pocas calorías por 100 g: es guarnición/verdura, aporta volumen y fibra.
     if k < 60 and c * 4 / total > 0.4:
         return "veg"
+    # Con proteína suficiente por 100 g es una fuente de proteína, aunque las
+    # calorías vengan sobre todo de la grasa. Por reparto calórico el huevo
+    # salía "grasa" (11 g de grasa pesan más que 13 g de proteína) y el
+    # generador se quedaba sin proteína para el desayuno, que es donde más
+    # falta hace.
+    # El 22 % deja fuera los frutos secos: las almendras tienen 21 g de proteína
+    # pero solo un 13 % de sus calorías vienen de ahí, y no son la proteína de
+    # una comida.
+    if p >= 10 and kp / total >= 0.22:
+        return "protein"
     if kp / total >= 0.40:
         return "protein"
     if kf / total >= 0.50:
@@ -356,23 +369,31 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
     nombres = MEAL_NAMES[meal_count]
     # Se reparten los macros con el mismo peso que las calorías.
     usados = {"protein": 0, "carb": 0, "fat": 0, "veg": 0}
+    # (momento, rol) que el catálogo no cubre: se devuelven para poder
+    # decírselo al coach en vez de rellenar con algo impropio.
+    faltantes = set()
 
     def take(rol, momento, obligatorio=True):
         """Siguiente alimento del rol que encaje en ese momento del día.
 
-        Rota el catálogo para no repetir. Si ninguno encaja: en los alimentos
-        obligatorios (los que aportan los macros) se acepta cualquiera antes que
-        dejar la comida coja; en los opcionales, como la guarnición, se prefiere
-        omitirla a colar espinacas en el desayuno.
+        Rota el catálogo para no repetir. Cuando ninguno encaja se recurre a los
+        que valen para cualquier momento; lo que está marcado como impropio de
+        ese momento no se usa aunque la comida quede coja. Antes se aceptaba
+        cualquiera y salía pescado crudo en el desayuno, que es exactamente lo
+        que la clasificación venía a evitar; con `faltantes` se avisa al coach
+        de que su catálogo no da para ese momento.
         """
         pool = pools[rol]
         if not pool:
             return None
         aptos = [a for a, momentos in pool if momento in momentos]
         if not aptos:
-            if not obligatorio:
-                return None
-            aptos = [a for a, _ in pool]
+            # Los que sirven para todo son un mal menor razonable.
+            aptos = [a for a, momentos in pool if len(momentos) >= len(MOMENTS)]
+        if not aptos:
+            if obligatorio:
+                faltantes.add((momento, rol))
+            return None
         a = aptos[usados[rol] % len(aptos)]
         usados[rol] += 1
         return a
@@ -451,8 +472,15 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
         if detail:
             out_meals.append({"name": m["name"], "time": m["time"], "detail": detail})
 
+    nombre_rol = {"protein": "proteínas", "carb": "hidratos", "fat": "grasas", "veg": "verduras"}
+    huecos = sorted(
+        f"{MEAL_MOMENT_LABEL.get(mom, mom)}: sin {nombre_rol.get(rol, rol)}"
+        for mom, rol in faltantes
+    )
+
     return {
         "meals": out_meals,
         "totals": {"calories": round(tot[0]), "proteins": round(tot[1], 1),
                    "carbs": round(tot[2], 1), "fats": round(tot[3], 1)},
+        "gaps": huecos,
     }

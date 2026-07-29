@@ -20,15 +20,18 @@ def test_ai_generate_recalculates_and_filters(client, seed, admin_headers, monke
 
     def fake_generate(**kw):
         captured.update(kw)
+        # El modelo responde por número de catálogo, no por id: se traducen
+        # aquí igual que lo hará el endpoint.
+        pos = {a.id: i for i, a in enumerate(kw["aliments"])}
         return {
             "title": "Plan de prueba", "notes": "Bebe agua.",
             "meals": [
                 {"name": "Desayuno", "time": "08:00", "foods": [
-                    {"aliment_id": avena, "grams": 100},
-                    {"aliment_id": "id-inventado", "grams": 50},   # se descarta
+                    {"n": pos[avena], "grams": 100},
+                    {"n": 9999, "grams": 50},        # fuera de rango: se descarta
                 ]},
                 {"name": "Comida", "time": "14:00", "foods": [
-                    {"aliment_id": pollo, "grams": 200},
+                    {"n": pos[pollo], "grams": 200},
                 ]},
             ],
         }
@@ -145,3 +148,39 @@ def test_el_prompt_no_lleva_identificadores(client, seed, admin_headers, monkeyp
     # Lo que sí necesita el modelo para proponer un plan:
     assert ctx["Edad"] == 34 and ctx["Peso (kg)"] == 62
     assert ctx["Alergias"] == "frutos secos"
+
+
+def test_el_catalogo_se_recorta_equilibrado():
+    """El recorte no puede dejar al modelo sin una categoría entera."""
+    from app.routers.nutrition.diets import _pick_catalog
+
+    class A:
+        def __init__(s, i, n, kcal, p, c, f):
+            s.id, s.name, s.brand, s.meal_moments = i, n, None, None
+            s.calories, s.proteins, s.carbohydrates, s.fats = kcal, p, c, f
+
+    # Tabla ordenada a propósito: primero 60 proteínas, luego los carbos.
+    # Con un `.limit(20)` a secas no entraría ni un carbohidrato.
+    catalogo = ([A(f"p{i}", f"Pollo {i}", 110, 23, 0, 2) for i in range(60)]
+                + [A(f"c{i}", f"Arroz {i}", 350, 7, 78, 1) for i in range(60)]
+                + [A(f"g{i}", f"Aceite {i}", 880, 0, 0, 100) for i in range(20)]
+                + [A(f"v{i}", f"Brocoli {i}", 30, 3, 4, 0) for i in range(20)])
+
+    elegidos = _pick_catalog(catalogo, 40)
+    assert len(elegidos) == 40
+    assert len({a.id for a in elegidos}) == 40          # sin repetidos
+
+    prefijos = {a.id[0] for a in elegidos}
+    assert prefijos == {"p", "c", "g", "v"}, prefijos   # las cuatro categorías
+
+
+def test_si_cabe_entero_no_se_toca():
+    from app.routers.nutrition.diets import _pick_catalog
+
+    class A:
+        def __init__(s, i):
+            s.id, s.name, s.brand, s.meal_moments = i, f"X{i}", None, None
+            s.calories, s.proteins, s.carbohydrates, s.fats = 100, 5, 10, 2
+
+    catalogo = [A(str(i)) for i in range(10)]
+    assert _pick_catalog(catalogo, 90) is catalogo

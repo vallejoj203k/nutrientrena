@@ -33,10 +33,10 @@ DIET_SCHEMA = {
                         "items": {
                             "type": "object",
                             "properties": {
-                                "aliment_id": {"type": "string", "description": "id exacto del catálogo"},
+                                "n": {"type": "integer", "description": "Número del alimento en el catálogo"},
                                 "grams": {"type": "number", "description": "Cantidad en gramos"},
                             },
-                            "required": ["aliment_id", "grams"],
+                            "required": ["n", "grams"],
                             "additionalProperties": False,
                         },
                     },
@@ -53,7 +53,7 @@ DIET_SCHEMA = {
 SYSTEM_PROMPT = """Eres un nutricionista que prepara planes de alimentación diarios para los clientes de un coach.
 
 Reglas que no puedes saltarte:
-- Usa únicamente alimentos del catálogo que se te entrega, referenciados por su `id` exacto. No inventes alimentos ni ids.
+- Usa únicamente alimentos del catálogo que se te entrega, referenciados por su número. No inventes alimentos ni números que no estén en la lista.
 - Respeta el objetivo de calorías y macros indicado. Un margen del 5 % es aceptable; por encima de eso el plan no sirve.
 - Respeta el número de comidas pedido y reparte las calorías de forma razonable entre ellas (el desayuno y la comida suelen llevar más carga que un snack).
 - No incluyas ningún alimento que choque con las alergias, intolerancias, patologías o preferencias del cliente.
@@ -80,15 +80,20 @@ def ai_enabled() -> bool:
     return bool(_api_key()) and bool(settings.AI_DIET_ENABLED)
 
 
-def _fmt_aliment(a) -> str:
-    """Una línea por alimento, con sus macros por 100 g."""
+def _fmt_aliment(n: int, a) -> str:
+    """Una línea por alimento, con sus macros por 100 g.
+
+    Se numera en vez de mandar el id: un UUID son 36 caracteres que ocupaban
+    casi un tercio del prompt y que el modelo puede transcribir mal. Quien
+    llama traduce el número de vuelta al alimento.
+    """
     return (
-        f"- id={a.id} | {a.name}"
+        f"{n}. {a.name}"
         + (f" ({a.brand})" if getattr(a, "brand", None) else "")
-        + f" | {round(a.calories or 0)} kcal"
-        f" | P {round(a.proteins or 0, 1)}"
-        f" | C {round(a.carbohydrates or 0, 1)}"
-        f" | G {round(a.fats or 0, 1)}"
+        + f" — {round(a.calories or 0)} kcal,"
+        f" P {round(a.proteins or 0, 1)},"
+        f" C {round(a.carbohydrates or 0, 1)},"
+        f" G {round(a.fats or 0, 1)}"
     )
 
 
@@ -108,7 +113,7 @@ def build_prompt(*, client: dict, target: dict, aliments: list) -> str:
 
     partes.append(
         "## Catálogo de alimentos disponibles (valores por 100 g)\n"
-        + "\n".join(_fmt_aliment(a) for a in aliments)
+        + "\n".join(_fmt_aliment(i, a) for i, a in enumerate(aliments))
     )
     partes.append(
         "Construye el plan del día usando solo estos alimentos. Devuelve el resultado en el formato indicado."
@@ -121,7 +126,7 @@ def build_prompt(*, client: dict, target: dict, aliments: list) -> str:
 FORMATO_JSON = """
 Responde ÚNICAMENTE con un objeto JSON con esta forma, sin texto alrededor:
 {"title": "...", "notes": "...", "meals": [{"name": "Desayuno", "time": "08:00",
- "foods": [{"aliment_id": "<id exacto del catálogo>", "grams": 60}]}]}"""
+ "foods": [{"n": 12, "grams": 60}]}]}"""
 
 
 def _preguntar_anthropic(prompt: str) -> str:

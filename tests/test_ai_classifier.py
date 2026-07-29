@@ -327,3 +327,84 @@ def test_al_topar_el_limite_para_y_dice_cuanto_esperar(client, seed, admin_heade
     assert d["classified"] == 2          # lo del primer lote sí se guardó
     assert len(llamadas) == 2            # y no siguió intentando los demás
     assert "25 s" in r.json()["message"]
+
+
+# ── Clasificación por grupo de alimento (sin IA) ─────────────────────────────
+# Es la vía barata: cada alimento importado ya trae su categoría, y con 7.000
+# alimentos la IA no es viable ni en tiempo ni en cupo.
+
+class _G:
+    def __init__(self, name):
+        self.name = name
+
+
+class _AlGrupo:
+    def __init__(self, name, grupo=None, mm=None):
+        self.name, self.meal_moments, self.brand = name, mm, None
+        self.group_food = _G(grupo) if grupo else None
+
+
+def test_el_grupo_resuelve_lo_que_el_nombre_no():
+    from app.core.diet_builder import moments_for
+
+    # Los dos casos que motivaron todo esto
+    assert moments_for(_AlGrupo("Gazpacho", "Salsas y sopas")) == ["principal"]
+    assert moments_for(_AlGrupo("Crema de calabaza", "Salsas y sopas")) == ["principal"]
+    # Y un nombre que no casa con ningún término
+    assert moments_for(_AlGrupo("Abadejo de Alaska, crudo",
+                                "Mariscos, crustáceos y moluscos")) == ["principal"]
+
+
+def test_los_nombres_de_grupo_no_tienen_que_ser_exactos():
+    """Varían entre instalaciones: se empareja por palabras clave."""
+    from app.core.diet_builder import moments_from_group
+
+    for grupo in ("Pescados y mariscos", "Mariscos, crustáceos y moluscos", "PESCADO"):
+        assert moments_from_group(_AlGrupo("X", grupo)) == ["principal"], grupo
+    for grupo in ("Grasas y aceites", "Aceites y grasas"):
+        assert moments_from_group(_AlGrupo("X", grupo)) == ["desayuno", "snack", "principal"]
+
+
+def test_los_cereales_de_desayuno_no_caen_en_granos():
+    from app.core.diet_builder import moments_from_group
+
+    assert moments_from_group(_AlGrupo("Copos de maíz", "Cereales de desayuno")) == ["desayuno", "snack"]
+    assert moments_from_group(_AlGrupo("Arroz", "Granos y pastas")) == ["principal"]
+
+
+def test_un_grupo_desconocido_cae_en_la_heuristica():
+    from app.core.diet_builder import moments_from_group, moments_for
+
+    assert moments_from_group(_AlGrupo("Avena", "Categoría rarísima")) is None
+    assert moments_for(_AlGrupo("Avena", "Categoría rarísima")) == ["desayuno", "snack"]
+
+
+def test_lo_que_marco_el_coach_manda_sobre_el_grupo():
+    from app.core.diet_builder import moments_for
+
+    a = _AlGrupo("Gazpacho", "Salsas y sopas", mm="desayuno")
+    assert moments_for(a) == ["desayuno"]
+
+
+def test_el_endpoint_usa_el_grupo_antes_que_la_ia(client, seed, admin_headers, monkeypatch):
+    """Con categoría no se gasta ni una llamada al modelo."""
+    h = admin_headers
+    r = client.post("/api/groupFood", headers=h, json={"name": "Aceites y grasas"})
+    assert r.status_code == 200, r.text
+    gid = r.json()["data"]["id"]
+
+    monkeypatch.setattr(ai_classifier, "classify_enabled", lambda: False)
+    aceite = client.post("/api/aliments", headers=h, json={
+        "name": "Aceite de cártamo", "calories": 884, "proteins": 0,
+        "carbohydrates": 0, "fats": 100, "group_food_id": gid}).json()["data"]["id"]
+
+    monkeypatch.setattr(ai_classifier, "classify_enabled", lambda: True)
+    llamadas = []
+    monkeypatch.setattr(ai_classifier, "classify",
+                        lambda lote: llamadas.append(len(lote)) or {})
+
+    r = client.post("/api/aliments/classify-moments", headers=h, json={"ids": [aceite]})
+    assert r.status_code == 200, r.text
+    assert r.json()["data"]["classified"] == 1
+    assert not llamadas, "con categoría no debería llamar al modelo"
+    assert _get(client, h, aceite)["meal_moments"] == "desayuno,snack,principal"

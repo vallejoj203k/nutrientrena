@@ -775,6 +775,11 @@
         <strong>Solo se etiquetan los alimentos que aún no tienen momentos.</strong><br>
         Lo que hayas marcado a mano en la ficha del alimento no se toca.
       </div>
+      <div style="margin-top:10px;padding:12px 14px;background:#F0FDF4;border-radius:10px;font-size:12px;color:#166534;">
+        La mayoría se resuelve con la <strong>categoría</strong> del alimento (Frutas, Legumbres,
+        Aceites y grasas…), que es inmediata y no consume IA. Solo se consulta al modelo
+        para los que no tienen categoría reconocible.
+      </div>
       <div id="classifyProgress" style="display:none;margin-top:18px;">
         <div style="display:flex;align-items:center;gap:10px;color:#6B7280;font-size:13px;">
           <svg width="18" height="18" fill="none" stroke="var(--indigo)" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;flex-shrink:0;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
@@ -1556,7 +1561,7 @@ async function runClassify() {
     '<button class="btn btn-primary" id="clfStopBtn" onclick="_clfStop=true">Detener</button>';
 
   _clfStop = false;
-  let total = 0, quedan = null;
+  let total = 0, quedan = null, porGrupo = 0;
   const errores = [];
 
   // El catálogo se recorre entero desde aquí: antes había que volver a pulsar
@@ -1573,7 +1578,10 @@ async function runClassify() {
       if (!r.ok) { _clfError(d.message || 'Error al clasificar'); return; }
 
       total += res.classified || 0;
+      porGrupo += res.by_group || 0;
       quedan = res.remaining || 0;
+      // Sin clave solo se puede llegar hasta donde llegue la categoría.
+      if (res.needs_ai) { _clfFin(total, quedan, errores, porGrupo, d.message); return; }
       if (res.errors?.length) errores.push(...res.errors);
       _clfProgreso(total, quedan);
 
@@ -1585,7 +1593,7 @@ async function runClassify() {
         if (!seguir) break;
       }
     }
-    _clfFin(total, quedan, errores);
+    _clfFin(total, quedan, errores, porGrupo);
   } catch (e) {
     _clfError('Error de conexión: ' + e.message);
   } finally {
@@ -1632,7 +1640,7 @@ function _clfError(msg) {
     '<button class="btn btn-primary" onclick="runClassify()">Reintentar</button>';
 }
 
-function _clfFin(total, quedan, errores) {
+function _clfFin(total, quedan, errores, porGrupo, aviso) {
   document.getElementById('classifyProgress').style.display = 'none';
   const resultEl = document.getElementById('classifyResult');
   resultEl.style.display = 'block';
@@ -1646,9 +1654,10 @@ function _clfFin(total, quedan, errores) {
   resultEl.innerHTML = `<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px;">
     <div style="font-weight:700;color:#059669;font-size:14px;margin-bottom:6px;">${quedan ? '⏸ Detenido' : '✅ Catálogo clasificado'}</div>
     <div style="font-size:13px;color:#374151;">
-      <b>${total}</b> alimentos etiquetados.
+      <b>${total}</b> alimentos etiquetados${porGrupo ? ` (${porGrupo} por su categoría, sin gastar IA)` : ''}.
       ${quedan ? `<span style="color:#6366F1;font-weight:600;"> Quedan ${quedan} sin momentos.</span>` : '<span style="color:#059669;"> Todo el catálogo está etiquetado.</span>'}
     </div>
+    ${aviso ? `<div style="margin-top:8px;font-size:12px;color:#B45309;">${esc(aviso)}</div>` : ''}
     ${errBlock}
   </div>`;
   toast(`${total} alimentos etiquetados`, 'success');

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, UploadFile, File
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 from typing import Optional, List
 import asyncio
@@ -376,7 +376,7 @@ async def usda_sync(
 
 class ClassifyMomentsRequest(BaseModel):
     ids: Optional[List[str]] = None
-    batch: int = 200          # alimentos por petición
+    batch: int = 1000         # alimentos por petición (el grupo no gasta llamadas)
     chunk: int = 50           # alimentos por llamada al modelo
     force: bool = False       # recalcular también los que ya tienen momentos
 
@@ -396,13 +396,11 @@ def classify_moments(
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
 ):
-    if not ai_classifier.classify_enabled():
-        return send_error(
-            "La clasificación con IA está desactivada. Actívala en el servidor con "
-            f"{ai_classifier.key_var_name()} y AI_CLASSIFY_ENABLED=true."
-        )
-
-    q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
+    # joinedload: se lee el grupo de cada alimento, y sin esto serían tantas
+    # consultas como alimentos.
+    q = (db.query(Aliment)
+         .options(joinedload(Aliment.group_food))
+         .filter(Aliment.parent_id.is_(None)))
     if body.ids:
         q = q.filter(Aliment.id.in_(body.ids))
     elif not body.force:
@@ -416,11 +414,48 @@ def classify_moments(
             Aliment.parent_id.is_(None), _sin_momentos()
         ).count()
 
-    clasificados = 0
-    procesados = 0
+    # Primero, gratis: el grupo del alimento (Frutas, Aceites y grasas,
+    # Mariscos…) ya dice el momento y viene con cada alimento importado. Es más
+    # fiable que deducirlo del nombre y no gasta ni una llamada, así que la IA
+    # solo se queda con lo que el grupo no resuelve.
+    from app.core.diet_builder import moments_from_group
+
+    por_grupo = 0
+    pendientes_ia = []
+    for a in aliments:
+        momentos = moments_from_group(a)
+        if momentos:
+            a.meal_moments = ",".join(momentos)
+            por_grupo += 1
+        else:
+            pendientes_ia.append(a)
+    if por_grupo:
+        db.commit()
+    aliments = pendientes_ia
+
+    clasificados = por_grupo
+    procesados = por_grupo
     errores: List[str] = []
     esperar = 0
     tam = max(1, min(body.chunk, 100))
+
+    # Lo que el grupo no resuelve necesita al modelo. Si no está configurado se
+    # dice, pero lo clasificado por categoría ya está guardado: no tener clave
+    # no puede impedir que se aproveche lo que sale gratis.
+    if aliments and not ai_classifier.classify_enabled():
+        return send_response(
+            {
+                "classified": clasificados,
+                "processed": procesados,
+                "errors": [],
+                "remaining": max(0, pendientes - procesados),
+                "retry_after": 0,
+                "needs_ai": len(aliments),
+            },
+            f"{clasificados} clasificados por categoría. Quedan {len(aliments)} "
+            f"que necesitan IA: configura {ai_classifier.key_var_name()} y "
+            f"AI_CLASSIFY_ENABLED=true.",
+        )
 
     for i in range(0, len(aliments), tam):
         lote = aliments[i:i + tam]
@@ -459,6 +494,7 @@ def classify_moments(
             # por el límite quedan más de los que se habían pedido.
             "remaining": max(0, pendientes - procesados),
             "retry_after": esperar,
+            "by_group": por_grupo,
         },
         mensaje,
     )

@@ -456,6 +456,12 @@
     .ai-btn{background:#fff;border:1px solid #C7D2FE;color:var(--indigo,#4F46E5);display:inline-flex;align-items:center;gap:6px;font-weight:700;}
     .ai-btn:hover{background:#EEF2FF;}
     .ai-target{display:flex;gap:8px;flex-wrap:wrap;}
+    .ai-dir{margin-top:14px;padding:12px 13px;border:1px solid #EEF0F5;border-radius:11px;background:#FAFBFF;}
+    .ai-dir-title{font-size:11px;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;}
+    .ai-dir-row{display:flex;gap:6px;flex-wrap:wrap;}
+    .ai-dir-chip{padding:7px 13px;border:1.5px solid #E5E7EB;border-radius:20px;background:#fff;font-size:12.5px;color:#374151;cursor:pointer;font-family:inherit;transition:.15s;}
+    .ai-dir-chip:hover{border-color:#C7D2FE;}
+    .ai-dir-chip.sel{border-color:var(--indigo,#4F46E5);background:#EEF2FF;color:var(--indigo,#4F46E5);font-weight:700;}
     .ai-warn{margin-top:14px;border:1px solid #FDE68A;background:#FFFBEB;border-radius:11px;padding:11px 13px;}
     .ai-warn-head{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:#92400E;margin-bottom:8px;}
     .ai-warn-row{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#78350F;line-height:1.45;padding:3px 0;}
@@ -1872,8 +1878,18 @@
     </div>
     <div class="modal-body" style="max-height:66vh;overflow-y:auto;">
       <div class="ai-target" id="aiTarget"></div>
-      <div id="aiNoteBox" style="font-size:12px;color:#9CA3AF;margin-top:12px;">
-        Se respetan las alergias, intolerancias y alimentos que no le gustan que tengas registrados en su ficha.
+      <div class="ai-dir">
+        <div class="ai-dir-title">¿Cómo la quieres?</div>
+        <div class="ai-dir-row" id="aiDistRow">
+          <button type="button" class="ai-dir-chip sel" data-dist="balanced" onclick="setAiDist('balanced')">Equilibrada</button>
+          <button type="button" class="ai-dir-chip" data-dist="big_breakfast" onclick="setAiDist('big_breakfast')">Desayuno fuerte</button>
+          <button type="button" class="ai-dir-chip" data-dist="big_lunch" onclick="setAiDist('big_lunch')">Comida fuerte</button>
+          <button type="button" class="ai-dir-chip" data-dist="light_dinner" onclick="setAiDist('light_dinner')">Cena ligera</button>
+        </div>
+        <input id="aiAvoid" placeholder="Evitar en esta dieta (ej: cerdo, picante, marisco)" style="width:100%;margin-top:9px;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;font-family:inherit;"/>
+      </div>
+      <div id="aiNoteBox" style="font-size:12px;color:#9CA3AF;margin-top:10px;">
+        Se respetan además las alergias, intolerancias, patologías y alimentos que no le gustan de su ficha.
       </div>
       <textarea id="aiNotes" style="display:none;"></textarea>
       <div id="aiResult"></div>
@@ -2500,7 +2516,13 @@ function _renderResDatos() {
    la propuesta cuadra con lo que ve el coach en pantalla. */
 let _aiPlan = null;
 
-function openAutoDiet() { _aiSeed = 0; openAiDiet(); }
+function openAutoDiet() {
+  _aiSeed = 0;
+  openAiDiet();
+  setAiDist('balanced');
+  const av = document.getElementById('aiAvoid');
+  if (av) av.value = '';
+}
 
 function openAiDiet() {
   const m = _nutEffMacros();
@@ -2526,7 +2548,13 @@ function openAiDiet() {
 
 function closeAiDiet() { document.getElementById('aiDietOverlay').classList.remove('open'); }
 
-let _aiSeed = 0;
+let _aiSeed = 0, _aiDist = 'balanced';
+
+function setAiDist(v) {
+  _aiDist = v;
+  document.querySelectorAll('#aiDistRow .ai-dir-chip').forEach(b =>
+    b.classList.toggle('sel', b.dataset.dist === v));
+}
 
 // Generador por algoritmo: sin IA, sin coste y con respuesta inmediata.
 async function runAutoDiet(variante) {
@@ -2545,6 +2573,8 @@ async function runAutoDiet(variante) {
       body: JSON.stringify({
         client_id: clientId, kcal: m.kcal, proteins: m.proteins,
         carbs: m.carbs, fats: m.fats, meal_count: m.mealCount, seed: _aiSeed,
+        distribution: _aiDist,
+        avoid: (document.getElementById('aiAvoid').value || '').trim() || null,
       }),
     });
     const j = await r.json().catch(() => ({}));

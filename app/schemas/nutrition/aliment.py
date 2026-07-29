@@ -53,6 +53,7 @@ class AlimentCreate(BaseModel):
     fats: Optional[float] = None
     calories: Optional[float] = None
     comments: Optional[str] = None
+    meal_moments: Optional[str] = None
     description: Optional[AlimentDescriptionIn] = None
 
 
@@ -68,6 +69,7 @@ class AlimentUpdate(BaseModel):
     fats: Optional[float] = None
     calories: Optional[float] = None
     comments: Optional[str] = None
+    meal_moments: Optional[str] = None
     status: Optional[int] = None
     description: Optional[AlimentDescriptionIn] = None
 
@@ -92,6 +94,7 @@ class AlimentOut(BaseModel):
     fats: Optional[float] = None
     calories: Optional[float] = None
     comments: Optional[str] = None
+    meal_moments: Optional[str] = None
     parent_id: Optional[str] = None
     organization_id: Optional[str] = None
     description: Optional[AlimentDescriptionOut] = None

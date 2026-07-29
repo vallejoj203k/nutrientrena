@@ -21,6 +21,16 @@ MEAL_SPLITS = {
     5: [0.22, 0.12, 0.33, 0.11, 0.22],
     6: [0.20, 0.10, 0.30, 0.10, 0.20, 0.10],
 }
+# Qué momento corresponde a cada comida.
+MEAL_MOMENT_BY_NAME = {
+    "Desayuno": "desayuno",
+    "Media mañana": "snack",
+    "Merienda": "snack",
+    "Recena": "snack",
+    "Comida": "principal",
+    "Cena": "principal",
+}
+
 MEAL_NAMES = {
     2: [("Comida", "14:00"), ("Cena", "21:00")],
     3: [("Desayuno", "08:00"), ("Comida", "14:00"), ("Cena", "21:00")],
@@ -30,6 +40,51 @@ MEAL_NAMES = {
     6: [("Desayuno", "08:00"), ("Media mañana", "11:00"), ("Comida", "14:00"),
         ("Merienda", "17:30"), ("Cena", "21:00"), ("Recena", "23:00")],
 }
+
+# Hacia dónde cargar las calorías. El coach lo elige al generar; "equilibrado"
+# es el reparto de MEAL_SPLITS, y el resto lo desplaza sin cambiar el total.
+DISTRIBUTIONS = {
+    "balanced": None,
+    "big_breakfast": {"desayuno": 1.55, "principal": 0.85},
+    "big_lunch": {"desayuno": 0.75, "principal": 1.15},
+    "light_dinner": {"cena": 0.6, "desayuno": 1.2},
+}
+
+# ── Momentos del día ─────────────────────────────────────────────────────────
+# El reparto de macros por sí solo propone carne de vacuno para desayunar:
+# cuadra las calorías pero no es un desayuno. Cada alimento encaja en unos
+# momentos concretos, y el coach puede fijarlo por alimento (`meal_moments`);
+# cuando no lo ha hecho, se deduce del nombre con estas listas.
+MOMENTS = ("desayuno", "snack", "principal")
+
+# Típicos de desayuno y de media mañana/merienda.
+BREAKFAST_TERMS = [
+    "avena", "cereal", "muesli", "granola", "pan", "tostada", "biscote", "galleta",
+    "leche", "yogur", "kefir", "queso fresco", "requeson", "cuajada", "huevo",
+    "tortilla", "clara", "fruta", "manzana", "platano", "banana", "naranja", "pera",
+    "fresa", "arandano", "kiwi", "mandarina", "melocoton", "uva", "mango", "piña",
+    "sandia", "melon", "zumo", "cafe", "te ", "cacao", "chocolate", "miel",
+    "mermelada", "mantequilla", "aguacate", "almendra", "nuez", "avellana",
+    "anacardo", "pistacho", "cacahuete", "crema de", "batido", "proteina",
+    "tortita", "crepe", "pavo", "jamon", "salmon ahumado", "aceite de oliva",
+    "semilla", "chia", "lino", "datil", "pasa", "higo", "arroz inflado", "espelta",
+]
+
+# Platos principales: comida y cena. Nadie desayuna lentejas.
+MAIN_TERMS = [
+    "arroz", "pasta", "espagueti", "macarron", "fideo", "quinoa", "cuscus", "bulgur",
+    "patata", "boniato", "yuca", "platano macho", "lenteja", "garbanzo", "alubia",
+    "judia", "frijol", "soja", "tofu", "seitan", "tempeh",
+    "pollo", "pavo entero", "ternera", "vacuno", "res", "cerdo", "lomo", "solomillo",
+    "chuleta", "costilla", "cordero", "conejo", "higado", "carne", "hamburguesa",
+    "albondiga", "merluza", "bacalao", "atun", "salmon", "dorada", "lubina", "sardina",
+    "caballa", "gamba", "langostino", "mejillon", "calamar", "pulpo", "marisco",
+    "brocoli", "espinaca", "acelga", "judia verde", "coliflor", "calabacin",
+    "berenjena", "pimiento", "tomate", "lechuga", "zanahoria", "cebolla", "champiñon",
+    "esparrago", "alcachofa", "col ", "repollo", "guisante", "haba", "puerro",
+    # También aparecen en desayunos: al estar en las dos listas valen para todo.
+    "huevo", "tortilla", "clara", "aceite", "aguacate", "queso", "jamon", "pavo",
+]
 
 # Alimentos que excluye cada patología. Solo se listan las que se resuelven
 # quitando alimentos; las que se manejan ajustando macros o sodio (diabetes,
@@ -133,6 +188,33 @@ def warnings_for(pathologies) -> list:
     return avisos
 
 
+def moments_for(aliment) -> list:
+    """Momentos del día en los que encaja un alimento.
+
+    Manda lo que haya fijado el coach en `meal_moments`; si está vacío se
+    deduce del nombre. Un alimento que no encaje en ninguna lista vale para
+    todo, que es la opción prudente: mejor proponerlo que descartarlo.
+    """
+    fijado = getattr(aliment, "meal_moments", None)
+    if fijado:
+        elegidos = [m.strip().lower() for m in str(fijado).split(",")]
+        elegidos = [m for m in elegidos if m in MOMENTS]
+        if elegidos:
+            return elegidos
+
+    nombre = _norm(f"{aliment.name} {getattr(aliment, 'brand', '') or ''}")
+    desayuno = any(t in nombre for t in BREAKFAST_TERMS)
+    principal = any(t in nombre for t in MAIN_TERMS)
+    if desayuno and not principal:
+        return ["desayuno", "snack"]
+    if principal and not desayuno:
+        return ["principal"]
+    if desayuno and principal:
+        # Ambiguo (huevo, jamón, aguacate, frutos secos): sirve para todo.
+        return list(MOMENTS)
+    return list(MOMENTS)
+
+
 def is_allowed(aliment, restrictions: list) -> bool:
     nombre = _norm(f"{aliment.name} {getattr(aliment, 'brand', '') or ''}")
     # Un producto que se anuncia "sin gluten" o "sin lactosa" sigue valiendo.
@@ -175,21 +257,39 @@ def _macros(a, grams: float) -> tuple:
             (a.carbohydrates or 0) * f, (a.fats or 0) * f)
 
 
+def _splits_for(meal_count: int, distribution: Optional[str]) -> list:
+    """Reparto de calorías, desplazado según la directriz del coach."""
+    base = list(MEAL_SPLITS[meal_count])
+    factores = DISTRIBUTIONS.get(distribution or "balanced")
+    if not factores:
+        return base
+    nombres = MEAL_NAMES[meal_count]
+    ajustado = []
+    for (nombre, _), peso in zip(nombres, base):
+        momento = MEAL_MOMENT_BY_NAME.get(nombre, "principal")
+        factor = factores.get(nombre.lower(), factores.get(momento, 1.0))
+        ajustado.append(peso * factor)
+    total = sum(ajustado) or 1
+    return [p / total for p in ajustado]   # se renormaliza: el total no cambia
+
+
 def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
                fats: float, meal_count: int = 4, restrictions: Optional[list] = None,
-               seed: Optional[int] = None) -> dict:
+               seed: Optional[int] = None, distribution: Optional[str] = None) -> dict:
     """Devuelve {meals:[...], totals:{...}} o lanza ValueError si falta catálogo."""
     restrictions = restrictions or []
     meal_count = max(2, min(int(meal_count or 4), 6))
     rnd = random.Random(seed if seed is not None else 0)
 
+    # Cada alimento se guarda con los momentos del día en los que encaja, para
+    # no proponer ternera en el desayuno ni cereales de desayuno en la cena.
     pools = {"protein": [], "carb": [], "fat": [], "veg": []}
     for a in aliments:
         if not is_allowed(a, restrictions):
             continue
         rol = classify(a)
         if rol:
-            pools[rol].append(a)
+            pools[rol].append((a, moments_for(a)))
     if not pools["protein"] or not pools["carb"]:
         raise ValueError(
             "El catálogo no tiene suficientes alimentos con macros para construir la dieta "
@@ -198,17 +298,28 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
     for v in pools.values():
         rnd.shuffle(v)
 
-    splits = MEAL_SPLITS[meal_count]
+    splits = _splits_for(meal_count, distribution)
     nombres = MEAL_NAMES[meal_count]
     # Se reparten los macros con el mismo peso que las calorías.
     usados = {"protein": 0, "carb": 0, "fat": 0, "veg": 0}
 
-    def take(rol):
-        """Va rotando el catálogo para no repetir el mismo alimento cada comida."""
+    def take(rol, momento, obligatorio=True):
+        """Siguiente alimento del rol que encaje en ese momento del día.
+
+        Rota el catálogo para no repetir. Si ninguno encaja: en los alimentos
+        obligatorios (los que aportan los macros) se acepta cualquiera antes que
+        dejar la comida coja; en los opcionales, como la guarnición, se prefiere
+        omitirla a colar espinacas en el desayuno.
+        """
         pool = pools[rol]
         if not pool:
             return None
-        a = pool[usados[rol] % len(pool)]
+        aptos = [a for a, momentos in pool if momento in momentos]
+        if not aptos:
+            if not obligatorio:
+                return None
+            aptos = [a for a, _ in pool]
+        a = aptos[usados[rol] % len(aptos)]
         usados[rol] += 1
         return a
 
@@ -216,12 +327,13 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
     for i, share in enumerate(splits):
         obj_p, obj_c, obj_f = proteins * share, carbs * share, fats * share
         nombre, hora = nombres[i]
+        momento = MEAL_MOMENT_BY_NAME.get(nombre, "principal")
         pequena = share < 0.2  # snacks: dos alimentos bastan
         detail = []
         rest_p, rest_c, rest_f = obj_p, obj_c, obj_f
 
         # 1) Proteína: fija los gramos para cubrir la proteína de la comida.
-        pa = take("protein")
+        pa = take("protein", momento)
         if pa and (pa.proteins or 0) > 0:
             g = _round_step(rest_p / (pa.proteins / 100.0))
             if g:
@@ -232,7 +344,7 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
                 rest_f -= f
 
         # 2) Carbohidrato: cubre lo que queda de carbos.
-        ca = take("carb")
+        ca = take("carb", momento)
         if ca and (ca.carbohydrates or 0) > 0 and rest_c > 3:
             g = _round_step(rest_c / (ca.carbohydrates / 100.0))
             if g:
@@ -244,7 +356,7 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
 
         # 3) Grasa: solo si falta bastante y no es un snack.
         if rest_f > 4 and not pequena:
-            fa = take("fat")
+            fa = take("fat", momento, obligatorio=False)
             if fa and (fa.fats or 0) > 0:
                 g = _round_step(rest_f / (fa.fats / 100.0))
                 if g:
@@ -252,7 +364,7 @@ def build_diet(*, aliments: list, kcal: float, proteins: float, carbs: float,
 
         # 4) Verdura de acompañamiento en las comidas principales.
         if not pequena and pools["veg"]:
-            va = take("veg")
+            va = take("veg", momento, obligatorio=False)
             if va:
                 detail.append((va, 150))
 

@@ -282,3 +282,116 @@ def test_el_huevo_cuenta_como_proteina():
     # Pero un fruto seco no es la proteína de una comida por tener 21 g
     assert diet_builder.classify(A(579, 21, 22, 50)) == "fat"         # almendras
     assert diet_builder.classify(A(654, 15, 14, 65)) == "fat"         # nueces
+
+
+# ── Catálogo del generador ───────────────────────────────────────────────────
+
+def _al(client, h, name, kcal=100, p=10, c=10, f=2, usar=None):
+    r = client.post("/api/aliments", headers=h, json={
+        "name": name, "calories": kcal, "proteins": p, "carbohydrates": c,
+        "fats": f, "use_in_generator": usar})
+    assert r.status_code == 200, r.text
+    return r.json()["data"]["id"]
+
+
+def test_el_generador_solo_usa_el_catalogo_marcado(client, seed, admin_headers, monkeypatch):
+    """Los 7.348 del USDA son referencia, no ingredientes de una dieta."""
+    import app.core.ai_diet as ai_diet
+    h = admin_headers
+
+    _al(client, h, "Abadejo de Alaska, crudo", 72, 17, 0, 1)          # sin marcar
+    _al(client, h, "Abiyuch, sin procesar", 69, 1.5, 17.6, 0.1)       # sin marcar
+    _al(client, h, "Pechuga de pollo", 110, 23, 0, 2, usar=True)
+    _al(client, h, "Arroz blanco cocido", 130, 2.7, 28, 0.3, usar=True)
+    _al(client, h, "Aceite de oliva virgen extra", 884, 0, 0, 100, usar=True)
+    _al(client, h, "Brócoli", 34, 2.8, 7, 0.4, usar=True)
+
+    visto = {}
+    monkeypatch.setattr(ai_diet, "ai_enabled", lambda: True)
+
+    def fake(**kw):
+        visto.update(kw)
+        return {"title": "x", "notes": "", "meals": [
+            {"name": "Comida", "time": "14:00",
+             "foods": [{"n": 0, "grams": 100, "label": "Plato"}]}]}
+
+    monkeypatch.setattr(ai_diet, "generate_diet", fake)
+
+    r = client.post("/api/diets/ai-generate", headers=h, json={"kcal": 1800, "meal_count": 4})
+    assert r.status_code == 200, r.text
+
+    nombres = {a.name for a in visto["aliments"]}
+    assert "Pechuga de pollo" in nombres
+    assert "Abadejo de Alaska, crudo" not in nombres, nombres
+    assert "Abiyuch, sin procesar" not in nombres, nombres
+
+
+def test_sin_nada_marcado_sigue_generando(client, seed, admin_headers, monkeypatch):
+    """Una instalación sin catálogo base no puede quedarse sin generador."""
+    import app.core.ai_diet as ai_diet
+    from app.database import SessionLocal
+    from app.models.nutrition.aliment import Aliment
+
+    h = admin_headers
+    _al(client, h, "Pollo suelto", 110, 23, 0, 2)
+
+    # La precondición se fija aquí: otros tests dejan alimentos marcados y el
+    # test no puede depender de en qué orden se ejecuten.
+    db = SessionLocal()
+    try:
+        db.query(Aliment).update({Aliment.use_in_generator: False})
+        db.commit()
+    finally:
+        db.close()
+
+    visto = {}
+    monkeypatch.setattr(ai_diet, "ai_enabled", lambda: True)
+
+    def fake(**kw):
+        visto.update(kw)
+        return {"title": "x", "notes": "", "meals": [
+            {"name": "Comida", "time": "14:00",
+             "foods": [{"n": 0, "grams": 100, "label": "Plato"}]}]}
+
+    monkeypatch.setattr(ai_diet, "generate_diet", fake)
+
+    r = client.post("/api/diets/ai-generate", headers=h, json={"kcal": 1800, "meal_count": 4})
+    assert r.status_code == 200, r.text
+    assert any(a.name == "Pollo suelto" for a in visto["aliments"])
+
+
+def test_el_catalogo_base_esta_completo_y_es_coherente():
+    """Cada entrada tiene momentos válidos y macros que cuadran con sus kcal."""
+    from app.core.base_catalog import CATALOGO
+    from app.core.diet_builder import MOMENTS
+
+    assert len(CATALOGO) >= 100, len(CATALOGO)
+    nombres = [c[0] for c in CATALOGO]
+    assert len(nombres) == len(set(nombres)), "hay nombres repetidos"
+
+    for nombre, grupo, kcal, prot, carb, grasa, momentos in CATALOGO:
+        ms = momentos.split(",")
+        assert ms and all(m in MOMENTS for m in ms), (nombre, momentos)
+        # Las kcal declaradas no pueden alejarse de las de sus macros
+        calculadas = prot * 4 + carb * 4 + grasa * 9
+        assert abs(calculadas - kcal) <= max(35, kcal * 0.22), (nombre, kcal, calculadas)
+
+
+def test_el_catalogo_base_cubre_los_cuatro_roles_en_cada_momento():
+    """Si no, el generador deja huecos en alguna comida."""
+    from app.core.base_catalog import CATALOGO
+    from app.core.diet_builder import classify
+
+    class A:
+        def __init__(s, n, kcal, p, c, f):
+            s.name, s.calories, s.proteins, s.carbohydrates, s.fats = n, kcal, p, c, f
+
+    cobertura = {}
+    for nombre, _g, kcal, p, c, f, momentos in CATALOGO:
+        rol = classify(A(nombre, kcal, p, c, f))
+        for m in momentos.split(","):
+            cobertura.setdefault(m, set()).add(rol)
+
+    for momento in ("desayuno", "snack", "principal"):
+        for rol in ("protein", "carb", "fat"):
+            assert rol in cobertura.get(momento, set()), (momento, rol, cobertura.get(momento))

@@ -2560,7 +2560,7 @@ let _aiSeed = 0, _aiDist = 'balanced';
 let _aiLastRunner = 'algo';
 
 function _aiRetry() {
-  return _aiLastRunner === 'ia' ? runAiDiet() : runAutoDiet(true);
+  return _aiLastRunner === 'ia' ? runAiDiet(true) : runAutoDiet(true);
 }
 
 /* Botones del pie: los dos generadores comparten pie, así que se encienden y
@@ -2635,18 +2635,21 @@ async function runAutoDiet(variante) {
   finally { _aiBusy(false, document.getElementById('aiStatus').textContent); }
 }
 
-async function runAiDiet() {
+async function runAiDiet(variante) {
   const m = _nutEffMacros();
   const err = document.getElementById('aiError');
   err.textContent = '';
   _aiBusy(true, 'Generando la propuesta con IA… puede tardar hasta un minuto.');
   document.getElementById('aiResult').innerHTML = '';
+  // La semilla cambia el subconjunto del catálogo que ve el modelo, que es lo
+  // que hace que otra variante traiga alimentos distintos y no los mismos.
+  if (variante) _aiSeed += 1;
   try {
     const r = await fetch(`${API}/diets/ai-generate`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', ...h() },
       body: JSON.stringify({
         client_id: clientId, kcal: m.kcal, proteins: m.proteins, carbs: m.carbs,
-        fats: m.fats, fiber: m.fiber, meal_count: m.mealCount,
+        fats: m.fats, fiber: m.fiber, meal_count: m.mealCount, seed: _aiSeed,
         notes: _aiDirectivesText(),
       }),
     });

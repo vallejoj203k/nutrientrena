@@ -184,3 +184,63 @@ def test_si_cabe_entero_no_se_toca():
 
     catalogo = [A(str(i)) for i in range(10)]
     assert _pick_catalog(catalogo, 90) is catalogo
+
+
+def test_clientes_distintos_reciben_alimentos_distintos():
+    """Sin esto todas las dietas salían con los mismos alimentos."""
+    from app.routers.nutrition.diets import _pick_catalog, _stable_seed
+
+    class A:
+        def __init__(s, i, n, kcal, p, c, f):
+            s.id, s.name, s.brand, s.meal_moments = i, n, None, None
+            s.calories, s.proteins, s.carbohydrates, s.fats = kcal, p, c, f
+
+    catalogo = ([A(f"p{i}", f"Proteína {i}", 110, 23, 0, 2) for i in range(80)]
+                + [A(f"c{i}", f"Carbo {i}", 350, 7, 78, 1) for i in range(80)]
+                + [A(f"g{i}", f"Grasa {i}", 880, 0, 0, 100) for i in range(30)]
+                + [A(f"v{i}", f"Verdura {i}", 30, 3, 4, 0) for i in range(30)])
+
+    def sel(cid, seed=0):
+        return {a.id for a in _pick_catalog(catalogo, 90, seed=_stable_seed(cid, seed))}
+
+    a, b = sel("cliente-A"), sel("cliente-B")
+    assert a != b, "dos clientes no deberían recibir el mismo subconjunto"
+    assert len(a & b) < 80, "se parecen demasiado"
+
+    # Reproducible: el mismo cliente y la misma variante dan lo mismo
+    assert sel("cliente-A") == a
+
+    # "Otra variante" cambia el subconjunto
+    assert sel("cliente-A", 1) != a
+
+    # Y sigue habiendo de las cuatro categorías
+    assert {i[0] for i in a} == {"p", "c", "g", "v"}
+
+
+def test_la_semilla_es_estable_entre_reinicios():
+    """hash() lleva sal por proceso; esto tiene que sobrevivir a un reinicio."""
+    from app.routers.nutrition.diets import _stable_seed
+
+    assert _stable_seed("cliente-A", 0) == _stable_seed("cliente-A", 0)
+    assert _stable_seed("cliente-A", 0) != _stable_seed("cliente-B", 0)
+    assert _stable_seed("cliente-A", 0) != _stable_seed("cliente-A", 1)
+    # Valor fijo: si cambia, las dietas ya guardadas dejan de ser reproducibles
+    assert _stable_seed("cliente-A", 0) == 488253979
+
+
+def test_429_de_groq_se_explica(monkeypatch):
+    monkeypatch.setattr(ai_diet.settings, "AI_DIET_PROVIDER", "groq")
+    monkeypatch.setattr(ai_diet.settings, "GROQ_API_KEY", "gsk-test")
+
+    class _R429:
+        status_code = 429
+        text = '{"error": {"message": "Rate limit reached..."}}'
+        headers = {"retry-after": "42"}
+
+    monkeypatch.setattr(ai_diet.httpx, "post", lambda url, **kw: _R429())
+    try:
+        ai_diet.generate_diet(client={}, target={"kcal": 2000}, aliments=[])
+        assert False, "debería haber lanzado"
+    except RuntimeError as e:
+        assert "límite" in str(e) and "42 s" in str(e)
+        assert "org_" not in str(e)      # sin volcar el error crudo

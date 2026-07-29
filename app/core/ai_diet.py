@@ -164,6 +164,15 @@ def _preguntar_groq(prompt: str) -> str:
         },
         timeout=180,
     )
+    if r.status_code == 429:
+        # El límite del tier gratuito es por minuto, así que casi siempre se
+        # arregla esperando. Se traduce a algo accionable en vez de volcar el
+        # error crudo del proveedor.
+        espera = r.headers.get("retry-after")
+        cuanto = f" Inténtalo en {espera} s." if espera else " Espera un minuto e inténtalo de nuevo."
+        raise RuntimeError(
+            "Se ha alcanzado el límite de peticiones por minuto del plan gratuito." + cuanto
+        )
     if r.status_code != 200:
         raise RuntimeError(f"Groq respondió {r.status_code}: {r.text[:200]}")
     try:

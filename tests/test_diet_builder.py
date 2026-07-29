@@ -213,3 +213,72 @@ def test_splits_siempre_suman_uno():
     for n in (2, 3, 4, 5, 6):
         for dist in diet_builder.DISTRIBUTIONS:
             assert abs(sum(diet_builder._splits_for(n, dist)) - 1) < 1e-9, (n, dist)
+
+
+def test_no_cuela_impropios_cuando_el_catalogo_no_da():
+    """Antes metía pescado crudo en el desayuno si no había proteína apta."""
+    class G:
+        def __init__(s, n): s.name = n
+
+    class A:
+        def __init__(s, i, n, g, kcal, p, c, f):
+            s.id, s.name, s.brand, s.meal_moments = i, n, None, None
+            s.group_food = G(g)
+            s.calories, s.proteins, s.carbohydrates, s.fats = kcal, p, c, f
+
+    # Catálogo sin ninguna proteína de desayuno
+    catalogo = [
+        A("1", "Abadejo de Alaska, crudo", "Mariscos, crustáceos y moluscos", 72, 17.3, 0.1, 1.0),
+        A("2", "Manzana", "Frutas", 52, 0.3, 14, 0.2),
+        A("3", "Aceite de oliva", "Aceites y grasas", 884, 0, 0, 100),
+        A("4", "Arroz", "Granos y pastas", 350, 7, 78, 1),
+        A("5", "Acelgas", "Verduras y vegetales", 19, 1.8, 3.7, 0.2),
+    ]
+    plan = diet_builder.build_diet(aliments=catalogo, kcal=1800, proteins=140,
+                                   carbs=160, fats=60, meal_count=4, seed=7)
+
+    desayuno = next(m for m in plan["meals"] if m["name"] == "Desayuno")
+    nombres = [f["name"] for f in desayuno["detail"]]
+    assert "Abadejo de Alaska, crudo" not in nombres, nombres
+
+    # Y se avisa de lo que falta, en vez de rellenar con cualquier cosa
+    assert any("Desayuno" in g and "proteínas" in g for g in plan["gaps"]), plan["gaps"]
+
+
+def test_sin_huecos_no_hay_aviso():
+    class G:
+        def __init__(s, n): s.name = n
+
+    class A:
+        def __init__(s, i, n, g, kcal, p, c, f):
+            s.id, s.name, s.brand, s.meal_moments = i, n, None, None
+            s.group_food = G(g)
+            s.calories, s.proteins, s.carbohydrates, s.fats = kcal, p, c, f
+
+    catalogo = [
+        A("1", "Huevo", "Lácteos y huevos", 155, 13, 1, 11),
+        A("8", "Yogur griego 0%", "Lácteos y huevos", 59, 10, 4, 0),
+        A("2", "Pan integral", "Panadería y repostería", 250, 9, 45, 3),
+        A("3", "Pollo", "Aves", 110, 23, 0, 2),
+        A("4", "Arroz", "Granos y pastas", 350, 7, 78, 1),
+        A("5", "Aceite de oliva", "Aceites y grasas", 884, 0, 0, 100),
+        A("6", "Manzana", "Frutas", 52, 0.3, 14, 0.2),
+        A("7", "Acelgas", "Verduras y vegetales", 19, 1.8, 3.7, 0.2),
+    ]
+    plan = diet_builder.build_diet(aliments=catalogo, kcal=1800, proteins=140,
+                                   carbs=160, fats=60, meal_count=4, seed=3)
+    assert plan["gaps"] == [], plan["gaps"]
+
+
+def test_el_huevo_cuenta_como_proteina():
+    """Por reparto calórico salía 'grasa' y el desayuno se quedaba sin proteína."""
+    class A:
+        def __init__(s, kcal, p, c, f):
+            s.name = "x"
+            s.calories, s.proteins, s.carbohydrates, s.fats = kcal, p, c, f
+
+    assert diet_builder.classify(A(155, 13, 1, 11)) == "protein"      # huevo
+    assert diet_builder.classify(A(402, 25, 1.3, 33)) == "protein"    # queso curado
+    # Pero un fruto seco no es la proteína de una comida por tener 21 g
+    assert diet_builder.classify(A(579, 21, 22, 50)) == "fat"         # almendras
+    assert diet_builder.classify(A(654, 15, 14, 65)) == "fat"         # nueces

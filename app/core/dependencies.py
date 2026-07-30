@@ -215,6 +215,56 @@ def get_org_context(
     return OrgContext(org_id=None, is_owner=False, permissions={})
 
 
+def org_member_detail_ids(org_id: str, db: Session) -> set[str]:
+    """UserDetail ids del equipo de una organización.
+
+    Hay tres formas de pertenecer a una organización en este backend, y las
+    tres cuentan: ser su dueño (Organization.owner_id), estar dado de alta en
+    la pantalla "Coaches" (TeamMember) o en "Mi Organización"
+    (OrganizationMember).
+    """
+    from app.models.organization import Organization, OrganizationMember
+    from app.models.team_member import TeamMember
+
+    ids: set[str] = set()
+
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if org and org.owner_id:
+        ids.add(org.owner_id)
+
+    for row in db.query(TeamMember).filter(
+        TeamMember.organization_id == org_id,
+        TeamMember.user_detail_id.isnot(None),
+    ).all():
+        ids.add(row.user_detail_id)
+
+    for row in db.query(OrganizationMember).filter(
+        OrganizationMember.organization_id == org_id
+    ).all():
+        ids.add(row.user_detail_id)
+
+    return ids
+
+
+def org_client_detail_ids(org_id: str, db: Session) -> set[str]:
+    """UserDetail ids de los clientes de una organización.
+
+    Los clientes no cuelgan de la organización directamente: cuelgan de un
+    coach (UserParent). Así que los de la organización son los asignados a
+    cualquiera de su equipo.
+    """
+    from app.models.user import UserParent
+
+    coach_ids = org_member_detail_ids(org_id, db)
+    if not coach_ids:
+        return set()
+
+    rows = db.query(UserParent).filter(
+        UserParent.parent_user_detail_id.in_(coach_ids)
+    ).all()
+    return {r.user_detail_id for r in rows}
+
+
 def filter_clients_by_role(all_clients: list, current_user, db: Session) -> list:
     """
     If the current user is a coach, return only their assigned clients.

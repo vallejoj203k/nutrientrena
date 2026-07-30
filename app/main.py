@@ -15,6 +15,7 @@ from app.routers import (
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
     analytics, public, session_logs, client_tasks, programs, weekly_menus, client_exercises,
     calendar_tasks, team, organizations, contracts, documents, client_home, client_activity,
+    billing,
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes, client_aliments, pathologies
@@ -125,6 +126,7 @@ app.include_router(forms.router_assignments, prefix=API_PREFIX)
 app.include_router(checkins.router, prefix=API_PREFIX)
 app.include_router(plans.router, prefix=API_PREFIX)
 app.include_router(analytics.router, prefix=API_PREFIX)
+app.include_router(billing.router, prefix=API_PREFIX)
 app.include_router(type_food.router, prefix=API_PREFIX)
 app.include_router(group_food.router, prefix=API_PREFIX)
 app.include_router(aliments.router, prefix=API_PREFIX)

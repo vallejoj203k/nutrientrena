@@ -184,6 +184,47 @@ def test_vaciar_la_dieta_entera(client, seed, admin_headers):
     assert _contar_en_bd(diet_id) == (0, 0)
 
 
+def test_las_comidas_nuevas_se_crean_en_orden_con_ids_ascendentes(client, seed, admin_headers):
+    """Contrato del que depende el autoguardado de diets.html.
+
+    Tras guardar, el editor tiene que asignar a cada comida y alimento nuevo su
+    id de base de datos; si no, el siguiente autoguardado los mandaría otra vez
+    sin id y se crearían duplicados. El emparejamiento se apoya en que lo nuevo
+    se crea en el orden en que se envía y los ids son ascendentes. Si esto
+    cambiara, el autoguardado empezaría a duplicar en silencio.
+    """
+    db = SessionLocal()
+    try:
+        a1, a2, a3 = _alimento(db, "Kéfir"), _alimento(db, "Nueces"), _alimento(db, "Manzana")
+    finally:
+        db.close()
+
+    diet_id = _dieta_con_comidas(client, admin_headers, "Dieta que crece", [("Desayuno", [a1])])
+    datos = _leer(client, admin_headers, diet_id)
+    desayuno = datos["foods"][0]
+
+    # Se añaden dos comidas nuevas (sin id) en un orden concreto
+    r = client.put(f"/api/diets/{diet_id}/update", headers=admin_headers, json={
+        "id": diet_id, "title": datos["title"],
+        "foods": [
+            {"id": desayuno["id"], "name": "Desayuno", "time": "08:00",
+             "detail": [{"id": d["id"], "aliment_id": d["aliment"]["id"],
+                         "quantity_calc": d["quantity"], "order": 0} for d in desayuno["detail"]]},
+            {"name": "Merienda", "time": "17:00",
+             "detail": [{"aliment_id": a2, "quantity_calc": 30, "order": 0}]},
+            {"name": "Cena", "time": "21:00",
+             "detail": [{"aliment_id": a3, "quantity_calc": 150, "order": 0}]},
+        ],
+    })
+    assert r.status_code == 200, r.text
+
+    foods = _leer(client, admin_headers, diet_id)["foods"]
+    nuevas = [f for f in foods if f["id"] != desayuno["id"]]
+    # Ordenadas por id ascendente, salen en el orden en que se enviaron
+    nuevas.sort(key=lambda f: f["id"])
+    assert [f["name"] for f in nuevas] == ["Merienda", "Cena"], nuevas
+
+
 def test_no_mandar_foods_no_borra_nada(client, seed, admin_headers):
     """Regresión importante: si el cliente no manda `foods` en absoluto (una
     edición parcial, por ejemplo solo el título), las comidas se quedan como

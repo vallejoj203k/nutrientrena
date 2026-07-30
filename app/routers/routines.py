@@ -6,7 +6,7 @@ from app.database import get_db
 from sqlalchemy import or_
 from app.core.dependencies import (
     require_role_ids, get_org_context, OrgContext,
-    verify_client_access, SUPERADMIN, ADMIN, COACH,
+    verify_client_access, SUPERADMIN, ADMIN, COACH, CLIENT,
 )
 from app.core.responses import send_response, send_error
 from app.models.routine import Routine, RoutineBlock, RoutineDay, RoutineDayDetail
@@ -22,6 +22,17 @@ router = APIRouter(prefix="/routines", tags=["Routines"])
 
 def _get_or_404(db: Session, routine_id: int):
     return db.query(Routine).filter(Routine.id == routine_id).first()
+
+
+def _visible_to(obj, org: OrgContext) -> bool:
+    """Si quien llama puede ver esta rutina: es de plataforma (organization_id
+    NULL), es de su propia organización, o quien llama es superadmin/admin sin
+    organización (bypass total, igual que en aliments.py)."""
+    if org.org_id is None and org.is_owner:
+        return True
+    if obj.organization_id is None:
+        return True
+    return obj.organization_id == org.org_id
 
 
 def _serialize_day(day: RoutineDay) -> dict:
@@ -206,20 +217,54 @@ def _clone_days(db: Session, source: Routine, new_routine_id: int):
                 ))
 
 
-@router.get("/findAll", summary="Listar rutinas", description="Retorna todas las rutinas del coach autenticado.")
-def find_all(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
-    items = db.query(Routine).filter(Routine.user_id == current_user.id).all()
+@router.get("/findAll", summary="Listar rutinas", description="Retorna la biblioteca de rutinas: las de la organización del coach y las plantillas de plataforma.")
+def find_all(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
+    from app.models.user import RoleUser
+
+    # Antes filtraba solo por Routine.user_id == current_user.id: ni Oswal
+    # (SUPERADMIN) veía sus propias rutinas reflejadas a los coaches, ni Sergio
+    # y Andrés compartían nada entre sí dentro de la misma organización, porque
+    # el endpoint de creación nunca rellenaba organization_id.
+    #
+    # Una rutina asignada a un cliente reutiliza esta misma tabla con
+    # Routine.user_id apuntando al cliente, no al coach: se excluye
+    # comprobando el rol ACTUAL del dueño de la fila (no una convención de
+    # datos que podría no cumplirse en filas antiguas).
+    client_ids = db.query(RoleUser.user_id).filter(RoleUser.role_id == CLIENT).scalar_subquery()
+    q = db.query(Routine).filter(or_(Routine.user_id.is_(None), ~Routine.user_id.in_(client_ids)))
+
+    if org.org_id:
+        q = q.filter(or_(Routine.organization_id.is_(None), Routine.organization_id == org.org_id))
+    elif not org.is_owner:
+        # Sin organización y sin ser superadmin/admin: solo lo propio, como antes.
+        q = q.filter(Routine.user_id == current_user.id)
+    # org.is_owner sin org_id (superadmin/admin) -> ve la biblioteca entera,
+    # igual que ya hace aliments.py.
+
+    items = q.all()
     return send_response([_serialize(i) for i in items], "OK")
 
 
 @router.post("/clone", summary="Clonar rutina", description="Crea una copia de una rutina existente con todos sus días y ejercicios.")
-def clone(data: RoutineCloneRequest, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def clone(
+    data: RoutineCloneRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     source = _get_or_404(db, data.id)
     if not source:
         return send_error("Rutina no encontrada")
+    if not _visible_to(source, org):
+        return send_error("No tienes acceso a esta rutina", code=403)
     new_routine = Routine(
         name=f"{source.name} (copia)",
         user_id=current_user.id,
+        organization_id=org.org_id,
         gender_id=source.gender_id,
         training=source.training,
         training_level_id=source.training_level_id,
@@ -360,10 +405,16 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
 
 
 @router.post("", summary="Crear rutina", description="Crea una nueva rutina con días y bloques de ejercicios (formato V2).")
-def create(data: RoutineCreateV2, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def create(
+    data: RoutineCreateV2,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     routine = Routine(
         name=data.name,
         user_id=current_user.id,
+        organization_id=org.org_id,
         gender_id=data.gender_id,
         training=data.training,
         training_level_id=data.training_level_id,
@@ -431,11 +482,16 @@ def clone_to_client(
     body: _CloneBody,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     from app.models.user import UserDetail
     source = _get_or_404(db, id)
     if not source:
         return send_error("Rutina no encontrada")
+    # Sin esto, un coach podía asignarle a su cliente la rutina privada de otra
+    # organización con solo acertar el id.
+    if not _visible_to(source, org):
+        return send_error("No tienes acceso a esta rutina", code=403)
     client_detail = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
     if not client_detail:
         return send_error("Cliente no encontrado")

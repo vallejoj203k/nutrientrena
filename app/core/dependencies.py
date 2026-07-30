@@ -149,8 +149,13 @@ def get_org_context(
     - ADMIN dueño de una organización real (Nivel 2, "con su segundo
       sombrero") → org_id=<su organización>, is_owner=True. Actúa DENTRO de
       esa organización, no por encima de todas.
-    - ADMIN miembro de la organización de otro (Nivel 3, delegado)
+    - ADMIN o coach miembro de la organización de otro (Nivel 3, delegado)
       → org_id=<esa organización>, is_owner=False, permissions=<delegadas>.
+      La membresía se busca en dos sitios porque hay dos pantallas distintas
+      para añadir gente al equipo, que hasta ahora no se hablaban entre sí:
+      "Coaches" (TeamMember, sin ninguna noción de organización hasta este
+      cambio) y "Mi Organización" (OrganizationMember). Se mira primero
+      TeamMember por ser la que de verdad se usa a diario.
     - ADMIN sin organización propia ni membresía: conserva el bypass total de
       antes (no hay organización en la que "meterlo"), para no romper cuentas
       de administración de plataforma que nunca pasaron por el modelo de
@@ -168,6 +173,7 @@ def get_org_context(
     pide el documento de jerarquía.
     """
     from app.models.organization import Organization, OrganizationMember
+    from app.models.team_member import TeamMember
     from app.models.user import UserDetail
 
     roles = _user_role_ids(current_user.id, db)
@@ -180,6 +186,13 @@ def get_org_context(
         org = db.query(Organization).filter(Organization.owner_id == detail.id).first()
         if org:
             return OrgContext(org_id=org.id, is_owner=True, permissions={})
+
+        team_row = db.query(TeamMember).filter(
+            TeamMember.user_detail_id == detail.id,
+            TeamMember.organization_id.isnot(None),
+        ).first()
+        if team_row:
+            return OrgContext(org_id=team_row.organization_id, is_owner=False, permissions={})
 
         membership = db.query(OrganizationMember).filter(
             OrganizationMember.user_detail_id == detail.id

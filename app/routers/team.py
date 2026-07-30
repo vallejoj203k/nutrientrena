@@ -1,15 +1,32 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from typing import Optional
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN
+from app.core.dependencies import require_role_ids, get_org_context, OrgContext, SUPERADMIN, ADMIN
 from app.core.responses import send_response, send_error
 from app.models.user import UserDetail, UserParent
 from app.models.team_member import TeamMember
 
 router = APIRouter(prefix="/team", tags=["Team"])
+
+
+def _bloqueado_para_editar(member: TeamMember, org: OrgContext) -> Optional[str]:
+    """Si hay que impedir ver/editar/eliminar este miembro del equipo, el
+    motivo; si no, None.
+
+    A diferencia de rutinas y dietas, aquí no basta con ser de la misma
+    organización: solo puede tocar la ficha de un miembro el dueño de esa
+    organización (o superadmin/admin en bypass) — datos de nómina y permisos,
+    no biblioteca compartida.
+    """
+    if org.org_id is None and org.is_owner:
+        return None  # superadmin, o admin sin organización propia
+    if member.organization_id is not None and member.organization_id == org.org_id and org.is_owner:
+        return None
+    return "No tienes acceso a este miembro del equipo"
 
 
 class TeamMemberCreateRequest(BaseModel):
@@ -81,8 +98,19 @@ def _serialize(member: TeamMember, db: Session) -> dict:
 def list_team(
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    org: OrgContext = Depends(get_org_context),
 ):
-    members = db.query(TeamMember).all()
+    # Antes era una lista plana de toda la plataforma: cualquier ADMIN veía y
+    # podía tocar el equipo de cualquier otra organización. Ahora, quien tiene
+    # una organización (sea su dueño o un delegado) ve solo la suya + los
+    # miembros aún sin organización asignada (altas antiguas, o hechas en
+    # modo bypass); solo quien está en bypass total (superadmin, o admin sin
+    # organización) ve todo. Editar/eliminar exige además ser el dueño —
+    # ver la lista no.
+    q = db.query(TeamMember)
+    if org.org_id:
+        q = q.filter(or_(TeamMember.organization_id.is_(None), TeamMember.organization_id == org.org_id))
+    members = q.all()
     # Si la cuenta enlazada esta dada de baja, su ficha tampoco debe aparecer:
     # si no, quedaria una tarjeta fantasma imposible de gestionar.
     members = [m for m in members if not (m.user_detail and m.user_detail.deleted_at)]
@@ -98,6 +126,7 @@ def create_team_member(
     data: TeamMemberCreateRequest,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    org: OrgContext = Depends(get_org_context),
 ):
     if not data.user_detail_id and not data.member_name:
         return send_error("Se requiere user_detail_id o member_name", code=400)
@@ -125,6 +154,7 @@ def create_team_member(
 
     member = TeamMember(
         user_detail_id=data.user_detail_id,
+        organization_id=org.org_id,
         member_name=data.member_name,
         member_email=data.member_email,
         role_label=data.role_label,
@@ -154,10 +184,14 @@ def update_team_member(
     data: TeamMemberUpdateRequest,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    org: OrgContext = Depends(get_org_context),
 ):
     member = db.query(TeamMember).filter(TeamMember.id == id).first()
     if not member:
         return send_error("Miembro del equipo no encontrado", code=404)
+    motivo = _bloqueado_para_editar(member, org)
+    if motivo:
+        return send_error(motivo, code=403)
 
     if data.member_name is not None:
         member.member_name = data.member_name
@@ -197,10 +231,14 @@ def delete_team_member(
     id: int,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    org: OrgContext = Depends(get_org_context),
 ):
     member = db.query(TeamMember).filter(TeamMember.id == id).first()
     if not member:
         return send_error("Miembro del equipo no encontrado", code=404)
+    motivo = _bloqueado_para_editar(member, org)
+    if motivo:
+        return send_error(motivo, code=403)
 
     db.delete(member)
     db.commit()

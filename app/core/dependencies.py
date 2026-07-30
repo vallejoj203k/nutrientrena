@@ -144,36 +144,55 @@ def get_org_context(
 ) -> OrgContext:
     """
     Resolves the current user's organization context.
-    - Platform SUPERADMIN/ADMIN → org_id=None, is_owner=True (bypass org restrictions)
-    - Org owner (Nivel 2)       → org_id=<org>, is_owner=True
-    - Org member (Nivel 3)      → org_id=<org>, is_owner=False, permissions=<delegated>
-    - Client / other            → org_id=None, is_owner=False
+    - SUPERADMIN (Nivel 1, plataforma) → org_id=None, is_owner=True. Ve y
+      controla todo, siempre: es el único bypass incondicional.
+    - ADMIN dueño de una organización real (Nivel 2, "con su segundo
+      sombrero") → org_id=<su organización>, is_owner=True. Actúa DENTRO de
+      esa organización, no por encima de todas.
+    - ADMIN miembro de la organización de otro (Nivel 3, delegado)
+      → org_id=<esa organización>, is_owner=False, permissions=<delegadas>.
+    - ADMIN sin organización propia ni membresía: conserva el bypass total de
+      antes (no hay organización en la que "meterlo"), para no romper cuentas
+      de administración de plataforma que nunca pasaron por el modelo de
+      organizaciones.
+    - Coach: se resuelve exactamente igual (dueño / miembro / ninguno), salvo
+      que sin organización ni membresía se queda SIN acceso especial en vez
+      de con bypass — así era ya antes de este cambio.
+    - Cliente / sin ficha: org_id=None, is_owner=False.
+
+    Antes, cualquier ADMIN tenía bypass total sin mirar si en realidad era
+    dueño de una organización (la migración que creó `organizations` le creó
+    una a cada ADMIN/COACH existente). Eso hacía indistinguibles "Oswal como
+    Alzum" y "Oswal como NutriEntrena": un ADMIN nunca actuaba dentro de su
+    propia organización, siempre por encima de todas — lo contrario de lo que
+    pide el documento de jerarquía.
     """
     from app.models.organization import Organization, OrganizationMember
     from app.models.user import UserDetail
 
     roles = _user_role_ids(current_user.id, db)
-    if SUPERADMIN in roles or ADMIN in roles:
+
+    if SUPERADMIN in roles:
         return OrgContext(org_id=None, is_owner=True, permissions={})
 
     detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
-    if not detail:
-        return OrgContext(org_id=None, is_owner=False, permissions={})
+    if detail:
+        org = db.query(Organization).filter(Organization.owner_id == detail.id).first()
+        if org:
+            return OrgContext(org_id=org.id, is_owner=True, permissions={})
 
-    org = db.query(Organization).filter(Organization.owner_id == detail.id).first()
-    if org:
-        return OrgContext(org_id=org.id, is_owner=True, permissions={})
+        membership = db.query(OrganizationMember).filter(
+            OrganizationMember.user_detail_id == detail.id
+        ).first()
+        if membership:
+            return OrgContext(
+                org_id=membership.organization_id,
+                is_owner=False,
+                permissions=membership.permissions or {},
+            )
 
-    membership = db.query(OrganizationMember).filter(
-        OrganizationMember.user_detail_id == detail.id
-    ).first()
-    if membership:
-        return OrgContext(
-            org_id=membership.organization_id,
-            is_owner=False,
-            permissions=membership.permissions or {},
-        )
-
+    if ADMIN in roles:
+        return OrgContext(org_id=None, is_owner=True, permissions={})
     return OrgContext(org_id=None, is_owner=False, permissions={})
 
 

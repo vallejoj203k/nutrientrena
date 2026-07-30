@@ -35,6 +35,47 @@ def _visible_to(obj, org: OrgContext) -> bool:
     return obj.organization_id == org.org_id
 
 
+def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session) -> Optional[str]:
+    """Si hay que impedir ver/editar/eliminar esta dieta, el motivo; si no, None.
+
+    Antes esto no comprobaba nada: cualquier coach podía tocar cualquier dieta
+    por id, de cualquier organización. Tres reglas, en este orden:
+
+    1. Quien la creó siempre puede tocar la suya. Esto es lo que evita romper
+       el caso más común: un coach sin organización (organization_id queda
+       NULL al crearla) editando su propia dieta — sin esta regla primero,
+       "solo el dueño de la organización edita lo NULL" le habría bloqueado
+       su propio contenido.
+    2. Si ya está asignada a un cliente concreto (su `user_id` es hoy una
+       cuenta con rol CLIENT), el acceso es por relación coach-cliente, NO
+       por organización — cada coach gestiona solo sus propios clientes,
+       aunque compartan organización con otros coaches.
+    3. Si no, es contenido de biblioteca de OTRO coach: solo puede tocarlo
+       alguien de su misma organización, o superadmin/admin.
+    """
+    if obj.user_id == current_user.id:
+        return None
+
+    if obj.user_id is not None:
+        from app.models.user import RoleUser, UserDetail
+
+        es_cliente = db.query(RoleUser).filter(
+            RoleUser.user_id == obj.user_id, RoleUser.role_id == CLIENT
+        ).first() is not None
+        if es_cliente:
+            client_detail = db.query(UserDetail).filter(UserDetail.user_id == obj.user_id).first()
+            if not client_detail:
+                return "No tienes acceso a esta dieta"
+            verify_client_access(client_detail.id, current_user, db)  # lanza 403 si no toca
+            return None
+
+    if org.org_id is None and org.is_owner:
+        return None  # superadmin/admin: bypass total
+    if obj.organization_id is not None and obj.organization_id == org.org_id:
+        return None  # de tu misma organización
+    return "No tienes acceso a esta dieta"
+
+
 def _get_or_404_with_pathologies(db: Session, diet_id: str):
     return (
         db.query(Diet)
@@ -673,10 +714,18 @@ def assigned(
 
 
 @router.get("/{id}/edit", summary="Ver dieta", description="Retorna el detalle completo de una dieta con alimentos y macros.")
-def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def edit(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     diet = _get_or_404_with_pathologies(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
+    motivo = _bloqueado_para_editar(diet, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
     return send_response(_serialize(diet), "OK")
 
 
@@ -731,10 +780,19 @@ def create(
 
 
 @router.put("/{id}/update", summary="Actualizar dieta", description="Modifica una dieta existente, incluyendo sus comidas y alimentos.")
-def updated(id: str, data: DietUpdate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def updated(
+    id: str,
+    data: DietUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     diet = _get_or_404(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
+    motivo = _bloqueado_para_editar(diet, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
 
     if data.title is not None:
         diet.title = data.title
@@ -757,10 +815,18 @@ def updated(id: str, data: DietUpdate, db: Session = Depends(get_db), current_us
 
 
 @router.delete("/{id}", summary="Eliminar dieta", description="Elimina una dieta y todas sus comidas y alimentos asociados.")
-def delete(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def delete(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     diet = _get_or_404(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
+    motivo = _bloqueado_para_editar(diet, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
     # Detach delivery records so the FK doesn't block the delete (history is kept)
     from app.models.plan import PlanDelivery
     db.query(PlanDelivery).filter(PlanDelivery.diet_id == id).update({"diet_id": None})

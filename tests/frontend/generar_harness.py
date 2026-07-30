@@ -134,7 +134,7 @@ print('harness generado en', destino4)
 
 
 # ── Harness del previo de dietas al asignar ────────────────────────────────
-i = perfil.index('function _dietpickComida(m) {')
+i = perfil.index('/* Cantidad de una fila y su unidad')
 j = perfil.index('function toggleDietPreview(', i)
 
 prev = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>

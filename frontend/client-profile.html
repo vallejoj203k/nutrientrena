@@ -522,6 +522,10 @@
     .dietpick-detail-line b{color:#111827;}
     .dietpick-meal{display:flex;justify-content:space-between;gap:8px;padding:4px 8px;background:#fff;border:1px solid #F1F3F7;border-radius:7px;}
     .dietpick-meal span{color:#9CA3AF;}
+    .dietpick-meal-box{display:flex;flex-direction:column;gap:2px;}
+    .dietpick-food{display:flex;justify-content:space-between;gap:8px;padding:2px 8px 2px 18px;font-size:11.5px;color:#4B5563;}
+    .dietpick-food-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .dietpick-food-kcal{color:#9CA3AF;flex-shrink:0;}
     .assign-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:.12s;border-left:3px solid transparent;}
     .assign-item:last-child{border-bottom:none;}
     .assign-item:hover{background:#F9FAFB;}
@@ -8906,7 +8910,7 @@ function renderAssignDietList(diets) {
         <div class="dietpick-detail-line"><b>Objetivo:</b> ${esc(_AD_GOALS[_adGoal(d)] || '—')}</div>
         ${patho.length ? `<div class="dietpick-detail-line"><b>Patologías:</b> ${esc(patho.join(', '))}</div>` : ''}
         ${(d.foods || []).length
-          ? (d.foods || []).map(m => `<div class="dietpick-meal">${esc(m.name || 'Comida')}${m.time ? ` · ${esc(m.time)}` : ''} <span>${(m.detail || []).length} alimentos</span></div>`).join('')
+          ? (d.foods || []).map(m => _dietpickComida(m)).join('')
           : '<div class="dietpick-detail-line" style="color:#9CA3AF;">Sin comidas cargadas.</div>'}
       </div>` : ''}
     </div>`;
@@ -8924,6 +8928,36 @@ function toggleAssignDiet(id) {
   }
   _selectedDietId = [..._selectedDietIds][0] || null;
   _applyDietFilters();
+}
+
+/* Una comida del previo, con sus alimentos.
+
+   Antes esto solo pintaba la cabecera con "N alimentos": el previo decía que
+   había alimentos pero no enseñaba ninguno. Los datos ya venían en la
+   respuesta (foods[].detail[].aliment), solo faltaba dibujarlos. */
+function _dietpickComida(m) {
+  const filas = (m.detail || []).map(dfa => {
+    const al = dfa.aliment || {};
+    const nombre = al.name || 'Alimento';
+    const cant = dfa.quantity != null ? dfa.quantity : al.quantity;
+    const unidad = (al.quantity_type && (al.quantity_type.description || al.quantity_type.name)) || al.quantity_unit || 'g';
+    // Macros por 100, reescalados a la cantidad de la fila. Misma fórmula que
+    // usa el backend en _diet_food_totals y el editor de diets.html: si aquí
+    // se calculara distinto, el previo no cuadraría con las kcal de la dieta.
+    const kcal = al.calories != null && cant != null
+      ? Math.round(al.calories / 100 * cant)
+      : null;
+    return `<div class="dietpick-food">
+      <span class="dietpick-food-nm">${esc(nombre)}${cant != null ? ` · ${cant}${esc(unidad)}` : ''}</span>
+      ${kcal != null ? `<span class="dietpick-food-kcal">${kcal} kcal</span>` : ''}
+    </div>`;
+  }).join('');
+
+  const n = (m.detail || []).length;
+  return `<div class="dietpick-meal-box">
+    <div class="dietpick-meal">${esc(m.name || 'Comida')}${m.time ? ` · ${esc(m.time)}` : ''} <span>${n} alimento${n !== 1 ? 's' : ''}</span></div>
+    ${filas || '<div class="dietpick-food" style="color:#9CA3AF;">Sin alimentos en esta comida.</div>'}
+  </div>`;
 }
 
 function toggleDietPreview(id) {

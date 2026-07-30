@@ -9,7 +9,7 @@ from app.database import get_db
 from sqlalchemy import or_
 from app.core.dependencies import (
     require_role_ids, get_org_context, OrgContext,
-    verify_client_access, SUPERADMIN, ADMIN, COACH,
+    verify_client_access, SUPERADMIN, ADMIN, COACH, CLIENT,
 )
 from app.core.responses import send_response, send_error
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment, Pathology, diet_pathologies_table
@@ -22,6 +22,17 @@ router = APIRouter(prefix="/diets", tags=["Nutrition - Diets"])
 
 def _get_or_404(db: Session, diet_id: str):
     return db.query(Diet).filter(Diet.id == diet_id).first()
+
+
+def _visible_to(obj, org: OrgContext) -> bool:
+    """Si quien llama puede ver esta dieta: es de plataforma (organization_id
+    NULL), es de su propia organización, o quien llama es superadmin/admin sin
+    organización (bypass total, igual que en aliments.py)."""
+    if org.org_id is None and org.is_owner:
+        return True
+    if obj.organization_id is None:
+        return True
+    return obj.organization_id == org.org_id
 
 
 def _get_or_404_with_pathologies(db: Session, diet_id: str):
@@ -213,16 +224,36 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
                 db.delete(orphan)
 
 
-@router.get("/findAll", summary="Listar dietas", description="Retorna todas las dietas del coach autenticado.")
+@router.get("/findAll", summary="Listar dietas", description="Retorna la biblioteca de dietas: las de la organización del coach y las plantillas de plataforma.")
 def find_all(
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
     org: OrgContext = Depends(get_org_context),
 ):
+    from app.models.user import RoleUser
+
+    # Antes filtraba solo por Diet.user_id == current_user.id: aunque el
+    # organization_id ya se guardaba bien al crear, este filtro obligatorio lo
+    # dejaba sin efecto, así que ni Oswal (SUPERADMIN) veía sus propias dietas
+    # reflejadas a los coaches, ni Sergio y Andrés compartían nada entre sí.
+    #
+    # Una dieta asignada a un cliente reutiliza esta misma tabla con
+    # Diet.user_id apuntando al cliente, no al coach: se excluye comprobando
+    # el rol ACTUAL del dueño de la fila, no una convención de datos.
     # selectinload: Diet.pathologies es lazy="noload" y sin esto llegaría vacío.
-    q = db.query(Diet).options(selectinload(Diet.pathologies)).filter(Diet.user_id == current_user.id)
+    client_ids = db.query(RoleUser.user_id).filter(RoleUser.role_id == CLIENT).scalar_subquery()
+    q = (
+        db.query(Diet)
+        .options(selectinload(Diet.pathologies))
+        .filter(or_(Diet.user_id.is_(None), ~Diet.user_id.in_(client_ids)))
+    )
+
     if org.org_id:
         q = q.filter(or_(Diet.organization_id.is_(None), Diet.organization_id == org.org_id))
+    elif not org.is_owner:
+        q = q.filter(Diet.user_id == current_user.id)
+    # org.is_owner sin org_id (superadmin/admin) -> ve la biblioteca entera.
+
     return send_response([_serialize(i) for i in q.all()], "OK")
 
 
@@ -791,11 +822,16 @@ def assign_to_client(
     body: _AssignBody,
     db: Session = Depends(get_db),
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     from app.models.user import UserDetail
     source = _get_or_404(db, id)
     if not source:
         return send_error("Dieta no encontrada")
+    # Sin esto, un coach podía asignarle a su cliente la dieta privada de otra
+    # organización con solo acertar el id.
+    if not _visible_to(source, org):
+        return send_error("No tienes acceso a esta dieta", code=403)
     client_detail = db.query(UserDetail).filter(UserDetail.id == body.client_id).first()
     if not client_detail:
         return send_error("Cliente no encontrado")

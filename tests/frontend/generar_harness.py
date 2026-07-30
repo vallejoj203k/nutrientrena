@@ -131,3 +131,20 @@ renderDaysList(); renderBlocks();
 destino4 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'builder.html')
 open(destino4, 'w').write(builder)
 print('harness generado en', destino4)
+
+
+# ── Harness del previo de dietas al asignar ────────────────────────────────
+i = perfil.index('function _dietpickComida(m) {')
+j = perfil.index('function toggleDietPreview(', i)
+
+prev = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body><div class="dietpick-detail" id="out"></div>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+%s
+window.__pinta=(m)=>{document.getElementById('out').innerHTML=_dietpickComida(m);};
+</script></body></html>""" % (cssp, perfil[i:j])
+
+destino5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'preview.html')
+open(destino5, 'w').write(prev)
+print('harness generado en', destino5)

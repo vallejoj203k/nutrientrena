@@ -4,7 +4,10 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL
+from app.core.dependencies import (
+    require_role_ids, get_org_context, OrgContext, _user_role_ids,
+    SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL,
+)
 from app.core.responses import send_response, send_error
 from app.models.training import Training, TrainingClient
 from app.schemas.training import TrainingCreate, TrainingUpdate, TrainingAssignRequest, TrainingOut
@@ -16,9 +19,56 @@ def _get_or_404(db: Session, training_id: int):
     return db.query(Training).filter(Training.id == training_id).first()
 
 
+def _visible_para(obj: Training, org: OrgContext) -> bool:
+    """Un ejercicio se ve si es del catálogo maestro o de tu organización."""
+    if org.org_id is None and org.is_owner:
+        return True  # superadmin, o admin sin organización propia
+    if obj.organization_id is None:
+        return True  # catálogo maestro: compartido por toda la plataforma
+    return obj.organization_id == org.org_id
+
+
+def _bloqueado_para_editar(obj: Training, org: OrgContext, current_user, db: Session):
+    """Motivo por el que no puede editar/borrar este ejercicio, o None.
+
+    Mismo orden de reglas que en rutinas y dietas:
+
+    1. Quien lo creó siempre puede tocar lo suyo. Va primero porque un coach
+       sin organización crea con organization_id NULL, y sin esta regla la
+       de abajo ("lo NULL es de plataforma") le bloquearía su propio
+       ejercicio.
+    2. Contenido del catálogo maestro (NULL): solo superadmin, admin sin
+       organización, o el editor de contenido global — para el que esto es
+       justamente su único trabajo.
+    3. Si es de una organización, tiene que ser la tuya.
+    """
+    if obj.created_user_id is not None and obj.created_user_id == current_user.id:
+        return None
+
+    if org.org_id is None and org.is_owner:
+        return None  # bypass total
+
+    if obj.organization_id is None:
+        roles = _user_role_ids(current_user.id, db)
+        if EDITOR_CONTENIDO_GLOBAL in roles:
+            return None
+        return "No puedes editar ejercicios del catálogo de la plataforma"
+
+    if obj.organization_id != org.org_id:
+        return "No tienes acceso a este ejercicio"
+    return None
+
+
 @router.get("/findAll", summary="Listar ejercicios", description="Retorna todos los ejercicios activos del catálogo.")
-def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
-    items = db.query(Training).filter(Training.state == 1).all()
+def find_all(
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    org: OrgContext = Depends(get_org_context),
+):
+    q = db.query(Training).filter(Training.state == 1)
+    if org.org_id:
+        q = q.filter(or_(Training.organization_id.is_(None), Training.organization_id == org.org_id))
+    items = q.all()
     return send_response([TrainingOut.from_orm_training(i).model_dump() for i in items], "OK")
 
 
@@ -33,8 +83,11 @@ def search(
     per_page: int = Query(15),
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Training)
+    if org.org_id:
+        q = q.filter(or_(Training.organization_id.is_(None), Training.organization_id == org.org_id))
     if search:
         q = q.filter(Training.name.ilike(f"%{search}%"))
     if muscle_group_id:
@@ -69,7 +122,22 @@ def search(
 
 
 @router.post("/assign", summary="Asignar ejercicios a usuario", description="Asigna múltiples ejercicios a un usuario específico.")
-def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def assigned(
+    data: TrainingAssignRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
+    # Solo se puede asignar lo que se puede ver: sin esto, un coach podía
+    # colar en la rutina de su cliente el ejercicio privado de otra
+    # organización con solo saber el id.
+    for training_id in data.training_ids:
+        obj = _get_or_404(db, training_id)
+        if not obj:
+            return send_error(f"Ejercicio {training_id} no encontrado")
+        if not _visible_para(obj, org):
+            return send_error("No tienes acceso a alguno de los ejercicios", code=403)
+
     for training_id in data.training_ids:
         exists = db.query(TrainingClient).filter_by(training_id=training_id, user_id=data.user_id).first()
         if not exists:
@@ -79,10 +147,17 @@ def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depen
 
 
 @router.get("/{id}/edit", summary="Ver ejercicio", description="Retorna el detalle de un ejercicio por su ID.")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
+def edit(
+    id: int,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    org: OrgContext = Depends(get_org_context),
+):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
+    if not _visible_para(obj, org):
+        return send_error("No tienes acceso a este ejercicio", code=403)
     return send_response(TrainingOut.from_orm_training(obj).model_dump(), "OK")
 
 
@@ -106,8 +181,17 @@ def _apply_secondary_ids(payload: dict):
 
 
 @router.post("", summary="Crear ejercicio", description="Agrega un nuevo ejercicio al catálogo.")
-def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
-    obj = Training(**_apply_secondary_ids(data.model_dump()))
+def create(
+    data: TrainingCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    org: OrgContext = Depends(get_org_context),
+):
+    obj = Training(
+        **_apply_secondary_ids(data.model_dump()),
+        organization_id=org.org_id,
+        created_user_id=current_user.id,
+    )
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -115,10 +199,19 @@ def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(requir
 
 
 @router.put("/{id}/update", summary="Actualizar ejercicio", description="Modifica los datos de un ejercicio existente.")
-def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
+def updated(
+    id: int,
+    data: TrainingUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    org: OrgContext = Depends(get_org_context),
+):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
+    motivo = _bloqueado_para_editar(obj, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
     for f, v in _apply_secondary_ids(data.model_dump(exclude_unset=True)).items():
         setattr(obj, f, v)
     db.commit()
@@ -127,10 +220,20 @@ def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depe
 
 
 @router.delete("/{id}", summary="Eliminar ejercicio", description="Elimina un ejercicio del catálogo.")
-def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
+def delete(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    org: OrgContext = Depends(get_org_context),
+):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
+    # Borrar desengancha el ejercicio de las rutinas que lo usan, así que aquí
+    # el control de organización importa aún más que al editar.
+    motivo = _bloqueado_para_editar(obj, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
     # Detach references so FKs don't block the delete (routine history is kept)
     from app.models.routine import RoutineDayDetail
     db.query(RoutineDayDetail).filter(RoutineDayDetail.training_id == id).update({"training_id": None})

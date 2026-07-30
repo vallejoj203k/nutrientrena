@@ -68,6 +68,8 @@ class TrainingOut(BaseModel):
     rec_reps: Optional[str] = None
     rec_rest: Optional[str] = None
     state: int
+    # NULL = catálogo maestro de la plataforma; con valor = privado de esa organización.
+    organization_id: Optional[str] = None
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
@@ -103,5 +105,6 @@ class TrainingOut(BaseModel):
             rec_reps=t.rec_reps,
             rec_rest=t.rec_rest,
             state=t.state,
+            organization_id=t.organization_id,
             created_at=t.created_at,
         )

@@ -16,8 +16,8 @@ from app.models.organization import Organization, OrganizationMember
 from app.models.user import User, UserDetail
 
 
-def _crear_coach(client, admin_headers, email):
-    """Da de alta un coach nuevo y devuelve (user_id, user_detail_id, headers).
+def _crear_usuario(client, admin_headers, email, role_id):
+    """Da de alta un usuario nuevo y devuelve (user_id, user_detail_id, headers).
 
     El token se firma directamente en vez de pasar por /api/auth/login: ese
     endpoint tiene un límite de 10 peticiones por minuto y estos tests crean
@@ -27,7 +27,7 @@ def _crear_coach(client, admin_headers, email):
 
     r = client.post("/api/users", headers=admin_headers, json={
         "name": email.split("@")[0], "email": email,
-        "password": "Coach123!", "role_id": 5,
+        "password": "Coach123!", "role_id": role_id,
     })
     assert r.status_code == 200, r.text
 
@@ -41,6 +41,10 @@ def _crear_coach(client, admin_headers, email):
 
     token = create_access_token({"sub": str(user_id)})
     return user_id, detail_id, {"Authorization": f"Bearer {token}"}
+
+
+def _crear_coach(client, admin_headers, email):
+    return _crear_usuario(client, admin_headers, email, role_id=5)
 
 
 def _crear_organizacion(owner_detail_id, name):

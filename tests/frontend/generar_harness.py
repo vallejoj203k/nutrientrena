@@ -46,3 +46,20 @@ renderDaysList();
 destino = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'harness.html')
 open(destino, 'w').write(harness)
 print('harness generado en', destino)
+
+# ── Harness de las fechas del programa (client-profile.html) ────────────────
+perfil = open(os.path.join(RAIZ, 'frontend', 'client-profile.html')).read()
+a = perfil.index('/* Fechas en local, sin pasar por UTC')
+b = perfil.index('async function saveDates()')
+logica = perfil[a:b]
+
+fechas = """<!doctype html><html><head><meta charset="utf-8"></head><body>
+<input id="dt_start" type="date"><input id="dt_end" type="date"><input id="dt_weeks" type="number">
+<div id="datesError"></div>
+<script>
+%s
+</script></body></html>""" % logica
+
+destino2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fechas.html')
+open(destino2, 'w').write(fechas)
+print('harness generado en', destino2)

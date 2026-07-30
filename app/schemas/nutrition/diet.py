@@ -36,7 +36,10 @@ class DietCreate(BaseModel):
     fiber: Optional[float] = None
     deficit: Optional[float] = None
     surplus: Optional[float] = None
-    foods: Optional[List[DietFoodCreate]] = []
+    # None = "no toques las comidas" (edición parcial); [] = "déjala sin
+    # ninguna". La diferencia importa: el editor borra por omisión, así que una
+    # lista vacía tiene que poder vaciar la dieta de verdad.
+    foods: Optional[List[DietFoodCreate]] = None
     pathology_ids: Optional[List[int]] = []
     notes: Optional[str] = None
 

@@ -9,6 +9,7 @@ ROLES = [
     {"id": 4, "name": "Closer",            "slug": "closer"},
     {"id": 5, "name": "Coach",             "slug": "coach"},
     {"id": 6, "name": "Cliente",           "slug": "client"},
+    {"id": 7, "name": "Editor de contenido global", "slug": "content-editor"},
 ]
 
 

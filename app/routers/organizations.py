@@ -95,6 +95,39 @@ def get_mine(
     return send_response(_serialize_org(org, db), "OK")
 
 
+@router.get("/switchable", summary="Organizaciones en las que puedo actuar")
+def switchable(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Contextos disponibles para la cabecera `X-Organization-Id`.
+
+    El "segundo sombrero" del documento de jerarquía: la misma persona puede
+    ser super-admin de la plataforma y dueña de una organización. Esto dice a
+    qué puede cambiarse, para que el frontend pueda ofrecer un selector.
+
+    El super-admin puede entrar en cualquier organización; el resto, solo en
+    la suya.
+    """
+    roles = _user_role_ids(current_user.id, db)
+
+    if SUPERADMIN in roles:
+        orgs = db.query(Organization).order_by(Organization.name).all()
+        return send_response({
+            # Sin cabecera se sigue actuando como plataforma: es el contexto
+            # por defecto, no una organización más.
+            "puede_actuar_como_plataforma": True,
+            "organizaciones": [{"id": o.id, "name": o.name, "slug": o.slug} for o in orgs],
+        }, "OK")
+
+    detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+    org = _get_user_org(detail.id, db) if detail else None
+    return send_response({
+        "puede_actuar_como_plataforma": False,
+        "organizaciones": [{"id": org.id, "name": org.name, "slug": org.slug}] if org else [],
+    }, "OK")
+
+
 @router.post("", summary="Crear organización (solo admin de plataforma)")
 def create_org(
     data: OrgCreate,

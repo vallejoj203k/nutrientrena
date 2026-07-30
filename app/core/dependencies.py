@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
@@ -144,14 +144,15 @@ class OrgContext:
         return bool(self.permissions.get(key, False))
 
 
-def get_org_context(
-    current_user=Depends(get_current_user),
-    db: Session = Depends(get_db),
-) -> OrgContext:
-    """
-    Resolves the current user's organization context.
+def _contexto_natural(current_user, db: Session, roles: set[int]) -> OrgContext:
+    """El contexto que le toca a alguien por lo que es, sin cambiar de sombrero.
+
+    Para el contexto efectivo usar `get_org_context`, que además aplica la
+    cabecera `X-Organization-Id`.
+
     - SUPERADMIN (Nivel 1, plataforma) → org_id=None, is_owner=True. Ve y
-      controla todo, siempre: es el único bypass incondicional.
+      controla todo: es el único bypass incondicional. Si quiere actuar dentro
+      de una organización concreta lo pide explícitamente con la cabecera.
     - ADMIN dueño de una organización real (Nivel 2, "con su segundo
       sombrero") → org_id=<su organización>, is_owner=True. Actúa DENTRO de
       esa organización, no por encima de todas.
@@ -182,8 +183,6 @@ def get_org_context(
     from app.models.team_member import TeamMember
     from app.models.user import UserDetail
 
-    roles = _user_role_ids(current_user.id, db)
-
     if SUPERADMIN in roles:
         return OrgContext(org_id=None, is_owner=True, permissions={})
 
@@ -213,6 +212,57 @@ def get_org_context(
     if ADMIN in roles:
         return OrgContext(org_id=None, is_owner=True, permissions={})
     return OrgContext(org_id=None, is_owner=False, permissions={})
+
+
+def get_org_context(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+    x_organization_id: str = Header(None, alias="X-Organization-Id"),
+) -> OrgContext:
+    """Contexto de organización de quien llama, con "segundo sombrero".
+
+    Por defecto devuelve el contexto natural (ver `_contexto_natural`). La
+    cabecera `X-Organization-Id` permite actuar explícitamente dentro de una
+    organización concreta.
+
+    Esto existe por el caso que dibuja el documento de jerarquía: la misma
+    persona es super-admin de la plataforma Y dueña de NutriEntrena, dos
+    sombreros. Sin esto, el super-admin se resolvía SIEMPRE como plataforma y
+    no había manera de entrar en una organización concreta: mientras hubiera
+    una sola organización daba igual, porque "toda la plataforma" y "esa
+    organización" eran el mismo conjunto, pero con dos organizaciones los
+    números divergen y no habría forma de ver la facturación de una sola ni de
+    crear contenido privado para su equipo.
+
+    Quién puede cambiar de sombrero:
+    - Super-admin: a cualquier organización que exista.
+    - Cualquier otro: solo a la suya, es decir, la cabecera únicamente puede
+      confirmar el contexto que ya tenía. Si apunta a otra, 403 — si no, la
+      cabecera sería una escalada de privilegios trivial.
+    """
+    roles = _user_role_ids(current_user.id, db)
+    ctx = _contexto_natural(current_user, db, roles)
+
+    # Llamado como función normal (los tests lo hacen), el valor por defecto es
+    # el objeto Header, no None. Solo una cadena real cuenta como cabecera.
+    if not isinstance(x_organization_id, str) or not x_organization_id.strip():
+        return ctx
+
+    destino = x_organization_id.strip()
+
+    if SUPERADMIN in roles:
+        from app.models.organization import Organization
+
+        org = db.query(Organization).filter(Organization.id == destino).first()
+        if not org:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Organización no encontrada")
+        return OrgContext(org_id=org.id, is_owner=True, permissions={})
+
+    if destino != ctx.org_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="No perteneces a esa organización")
+    return ctx
 
 
 def org_member_detail_ids(org_id: str, db: Session) -> set[str]:

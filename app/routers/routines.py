@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -33,6 +35,47 @@ def _visible_to(obj, org: OrgContext) -> bool:
     if obj.organization_id is None:
         return True
     return obj.organization_id == org.org_id
+
+
+def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session) -> Optional[str]:
+    """Si hay que impedir ver/editar/eliminar esta rutina, el motivo; si no, None.
+
+    Antes esto no comprobaba nada: cualquier coach podía tocar cualquier
+    rutina por id, de cualquier organización. Tres reglas, en este orden:
+
+    1. Quien la creó siempre puede tocar la suya. Esto es lo que evita romper
+       el caso más común: un coach sin organización (organization_id queda
+       NULL al crearla) editando su propia rutina — sin esta regla primero,
+       "solo el dueño de la organización edita lo NULL" le habría bloqueado
+       su propio contenido.
+    2. Si ya está asignada a un cliente concreto (su `user_id` es hoy una
+       cuenta con rol CLIENT), el acceso es por relación coach-cliente, NO
+       por organización — cada coach gestiona solo sus propios clientes,
+       aunque compartan organización con otros coaches.
+    3. Si no, es contenido de biblioteca de OTRO coach: solo puede tocarlo
+       alguien de su misma organización, o superadmin/admin.
+    """
+    if obj.user_id == current_user.id:
+        return None
+
+    if obj.user_id is not None:
+        from app.models.user import RoleUser, UserDetail
+
+        es_cliente = db.query(RoleUser).filter(
+            RoleUser.user_id == obj.user_id, RoleUser.role_id == CLIENT
+        ).first() is not None
+        if es_cliente:
+            client_detail = db.query(UserDetail).filter(UserDetail.user_id == obj.user_id).first()
+            if not client_detail:
+                return "No tienes acceso a esta rutina"
+            verify_client_access(client_detail.id, current_user, db)  # lanza 403 si no toca
+            return None
+
+    if org.org_id is None and org.is_owner:
+        return None  # superadmin/admin: bypass total
+    if obj.organization_id is not None and obj.organization_id == org.org_id:
+        return None  # de tu misma organización
+    return "No tienes acceso a esta rutina"
 
 
 def _serialize_day(day: RoutineDay) -> dict:
@@ -397,10 +440,18 @@ def pdf(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPER
 
 
 @router.get("/{id}/edit", summary="Ver rutina", description="Retorna el detalle completo de una rutina con todos sus días y bloques de ejercicios.")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def edit(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
+    motivo = _bloqueado_para_editar(routine, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
     return send_response(_serialize(routine), "OK")
 
 
@@ -433,10 +484,19 @@ def create(
 
 
 @router.put("/{id}/update", summary="Actualizar rutina", description="Modifica una rutina existente, reemplazando sus días y ejercicios.")
-def updated(id: int, data: RoutineUpdateV2, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def updated(
+    id: int,
+    data: RoutineUpdateV2,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
+    motivo = _bloqueado_para_editar(routine, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
 
     for f in ("name", "gender_id", "training", "training_level_id", "objective", "materials", "time", "days", "notes"):
         v = getattr(data, f, None)
@@ -458,10 +518,18 @@ def updated(id: int, data: RoutineUpdateV2, db: Session = Depends(get_db), _=Dep
 
 
 @router.delete("/{id}", summary="Eliminar rutina", description="Elimina una rutina y todos sus días y ejercicios.")
-def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def delete(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
+):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
+    motivo = _bloqueado_para_editar(routine, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
     # Detach references so FKs don't block the delete (history is kept)
     from app.models.plan import PlanDelivery
     from app.models.session_log import WorkoutSession

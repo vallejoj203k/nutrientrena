@@ -240,3 +240,92 @@ def test_superadmin_sigue_viendo_toda_la_biblioteca(client, seed, admin_headers)
 
     titulos = [x["title"] for x in client.get("/api/diets/findAll", headers=admin_headers).json()["data"]]
     assert "Dieta que el superadmin debe poder ver" in titulos
+
+
+# ── Editar / eliminar: propietario, equipo, cliente asignado ─────────────────
+# Antes, `PUT .../update` y `DELETE ...` no comprobaban nada: cualquier coach
+# podía tocar cualquier rutina o dieta por id. Estos tests cubren las tres
+# reglas nuevas y, sobre todo, que ninguna rompa el caso de siempre: un coach
+# editando su propio contenido o el plan ya asignado a su propio cliente.
+
+def test_coach_sin_organizacion_puede_editar_su_propia_rutina(client, seed, admin_headers):
+    """Este es justo el caso que casi se rompe: sin organización, organization_id
+    queda NULL, y una regla mal escrita podría confundirlo con 'contenido de
+    plataforma' y bloquear al propio autor."""
+    _uid, _det, h = _crear_coach(client, admin_headers, "coach.edita_lo_suyo@nutrientrena-qa.com")
+    r = client.post("/api/routines", headers=h, json={"name": "Mía, sin organización"})
+    routine_id = r.json()["data"]["id"]
+
+    r = client.put(f"/api/routines/{routine_id}/update", headers=h, json={"name": "Mía, editada"})
+    assert r.status_code == 200, r.text
+    assert r.json()["data"]["name"] == "Mía, editada"
+
+
+def test_coach_de_la_misma_organizacion_puede_editar_rutina_del_equipo(client, seed, admin_headers):
+    _uid_s, det_s, h_sergio = _crear_coach(client, admin_headers, "sergio.editar_equipo@nutrientrena-qa.com")
+    _uid_a, det_a, h_andres = _crear_coach(client, admin_headers, "andres.editar_equipo@nutrientrena-qa.com")
+    org_id = _crear_organizacion(det_s, "NutriEntrena (editar en equipo)")
+    _agregar_miembro(org_id, det_a)
+
+    r = client.post("/api/routines", headers=h_sergio, json={"name": "De Sergio"})
+    routine_id = r.json()["data"]["id"]
+
+    r = client.put(f"/api/routines/{routine_id}/update", headers=h_andres, json={"name": "Editada por Andrés"})
+    assert r.status_code == 200, r.text
+
+
+def test_coach_de_otra_organizacion_no_puede_editar_ni_eliminar(client, seed, admin_headers):
+    _uid_a, det_a, h_org_a = _crear_coach(client, admin_headers, "coach.orga.editar@nutrientrena-qa.com")
+    _uid_b, det_b, h_org_b = _crear_coach(client, admin_headers, "coach.orgb.editar@nutrientrena-qa.com")
+    _crear_organizacion(det_a, "Organización A (editar)")
+    _crear_organizacion(det_b, "Organización B (editar)")
+
+    r = client.post("/api/routines", headers=h_org_a, json={"name": "Privada de A"})
+    routine_id = r.json()["data"]["id"]
+
+    r = client.get(f"/api/routines/{routine_id}/edit", headers=h_org_b)
+    assert r.status_code == 403, r.text
+    r = client.put(f"/api/routines/{routine_id}/update", headers=h_org_b, json={"name": "Hackeada"})
+    assert r.status_code == 403, r.text
+    r = client.delete(f"/api/routines/{routine_id}", headers=h_org_b)
+    assert r.status_code == 403, r.text
+
+
+def test_coach_puede_editar_la_dieta_ya_asignada_a_su_propio_cliente(client, seed, admin_headers):
+    """El caso que más se usa en la app: el coach edita el plan que él mismo
+    le asignó a su cliente. No debe verse afectado por nada de esto."""
+    _uid, _det, h = _crear_coach(client, admin_headers, "coach.edita_cliente@nutrientrena-qa.com")
+    r = client.post("/api/diets", headers=h, json={"title": "Plantilla"})
+    diet_id = r.json()["data"]["id"]
+    cliente = _crear_cliente(client, h)
+
+    r = client.post(f"/api/diets/{diet_id}/assign", headers=h,
+                    json={"client_id": cliente, "title": "Plan de mi cliente"})
+    assert r.status_code == 200, r.text
+    dieta_asignada_id = r.json()["data"]["id"]
+
+    r = client.put(f"/api/diets/{dieta_asignada_id}/update", headers=h,
+                json={"id": dieta_asignada_id, "title": "Plan actualizado"})
+    assert r.status_code == 200, r.text
+
+
+def test_coach_no_puede_editar_dieta_asignada_al_cliente_de_otro_coach(client, seed, admin_headers):
+    """El acceso a una dieta ya asignada es por relación coach-cliente, no por
+    organización: aunque compartan equipo, Andrés no gestiona a los clientes
+    de Sergio."""
+    _uid_s, det_s, h_sergio = _crear_coach(client, admin_headers, "sergio.dieta_de_su_cliente@nutrientrena-qa.com")
+    _uid_a, det_a, h_andres = _crear_coach(client, admin_headers, "andres.dieta_de_su_cliente@nutrientrena-qa.com")
+    org_id = _crear_organizacion(det_s, "NutriEntrena (dieta de cliente ajeno)")
+    _agregar_miembro(org_id, det_a)
+
+    r = client.post("/api/diets", headers=h_sergio, json={"title": "Plantilla de Sergio"})
+    diet_id = r.json()["data"]["id"]
+    cliente_de_sergio = _crear_cliente(client, h_sergio)
+
+    r = client.post(f"/api/diets/{diet_id}/assign", headers=h_sergio,
+                    json={"client_id": cliente_de_sergio, "title": "Plan del cliente de Sergio"})
+    dieta_asignada_id = r.json()["data"]["id"]
+
+    r = client.put(f"/api/diets/{dieta_asignada_id}/update", headers=h_andres,
+                json={"id": dieta_asignada_id, "title": "Intento de Andrés"})
+    assert r.status_code == 403, r.text

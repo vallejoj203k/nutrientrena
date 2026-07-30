@@ -221,6 +221,9 @@
     .dp-step.active .dp-step-num{background:#4F46E5;color:#fff;}
     .dp-save-header{padding:8px 20px;border-radius:8px;background:#4F46E5;color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;}
     .dp-save-header:hover{background:#4338CA;}
+    .dp-autosave{font-size:12px;font-weight:600;color:#6B7280;margin-right:12px;white-space:nowrap;transition:color .15s;}
+    .dp-autosave.is-saved{color:#059669;}
+    .dp-autosave.is-error{color:#DC2626;}
 
     /* Body */
     #dpStepsWrap{flex:1;position:relative;overflow:hidden;}
@@ -1002,6 +1005,8 @@
         Plan de comidas
       </button>
     </div>
+
+    <span class="dp-autosave" id="dpAutosave"></span>
 
     <button class="dp-save-header" onclick="saveDiet()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:5px;"><polyline points="20 6 9 17 4 12"/></svg>
@@ -3079,16 +3084,27 @@ async function addRecipeToMeal(recipeId) {
   }
 }
 
-async function saveDiet() {
+async function saveDiet(opts) {
+  // opts.auto = guardado automático: no cierra el panel, no avisa con un toast
+  // y nunca abre el diálogo de "falta el título" — el usuario está escribiendo.
+  var auto = !!(opts && opts.auto);
+  // Guardar a mano cancela el autoguardado en cola: se manda el estado entero
+  // igualmente, así que reintentarlo justo después sería una petición de más.
+  if (!auto && typeof _autosaveTimer !== 'undefined') { clearTimeout(_autosaveTimer); _autosaveTimer = null; }
   saveAllMealDOMState();
   var title = document.getElementById('f_title').value.trim();
   var errEl = document.getElementById('formError');
-  if (!title) { if(errEl){errEl.textContent='';errEl.style.display='none';} openTitleDlg(); return; }
+  if (!title) {
+    if (auto) { _setAutosaveState('idle'); return; }
+    if(errEl){errEl.textContent='';errEl.style.display='none';} openTitleDlg(); return;
+  }
   var lbl = document.getElementById('dpSaveLbl');
   var prevLbl = lbl ? lbl.textContent : '';
   var saveBtns = [document.getElementById('saveBtn'), document.querySelector('.dp-save-header')].filter(Boolean);
-  if (lbl) lbl.textContent = 'Guardando...';
-  saveBtns.forEach(function(b){ b.disabled = true; });
+  if (!auto) {
+    if (lbl) lbl.textContent = 'Guardando...';
+    saveBtns.forEach(function(b){ b.disabled = true; });
+  }
   if(errEl){errEl.textContent='';errEl.style.display='none';}
   var foods = _meals.map(function(meal) {
     var mealName = meal.name || 'Comida';
@@ -3129,7 +3145,17 @@ async function saveDiet() {
     var method = editingId ? 'PUT' : 'POST';
     var r = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
     var j = await r.json();
-    if (!r.ok) { var fe=document.getElementById('formError');if(fe){fe.textContent=j.detail||j.message||'Error al guardar';fe.style.display='block';} return; }
+    if (!r.ok) {
+      if (auto) { _setAutosaveState('error'); return; }
+      var fe=document.getElementById('formError');if(fe){fe.textContent=j.detail||j.message||'Error al guardar';fe.style.display='block';} return;
+    }
+    if (auto) {
+      // Sin esto, lo recién añadido seguiría sin db_id y el siguiente
+      // autoguardado lo volvería a crear: comidas y alimentos duplicados.
+      _syncDbIds(j.data || j);
+      _setAutosaveState('saved');
+      return;
+    }
     if (typeof _EMBED !== 'undefined' && _EMBED) {
       // Modo embebido: avisar al constructor de menús y no tocar la vista de lista
       var saved = j.data || j;
@@ -3142,8 +3168,13 @@ async function saveDiet() {
       return;
     }
     closeForm(); toast(editingId ? 'Dieta actualizada' : 'Dieta creada', 'success'); loadDiets();
-  } catch(e) { var fe=document.getElementById('formError');if(fe){fe.textContent='Error de conexion';fe.style.display='block';} }
-  finally { if (lbl) lbl.textContent = prevLbl || 'Crear dieta'; saveBtns.forEach(function(b){ b.disabled = false; }); }
+  } catch(e) {
+    if (auto) { _setAutosaveState('error'); return; }
+    var fe=document.getElementById('formError');if(fe){fe.textContent='Error de conexion';fe.style.display='block';}
+  }
+  finally {
+    if (!auto) { if (lbl) lbl.textContent = prevLbl || 'Crear dieta'; saveBtns.forEach(function(b){ b.disabled = false; }); }
+  }
 }
 
 function openAssign(id, title) {
@@ -3372,6 +3403,165 @@ async function submitCreateAliment() {
 
 function toggleSidebar(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');s.classList.toggle('open');o.classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Autoguardado del editor de dietas
+
+   El bug que se reportó ("borro un alimento y sigue ahí") acababa siendo esto:
+   se editaba y se cerraba sin darle a Guardar. Así que cualquier cambio sobre
+   una dieta que YA existe se guarda solo.
+
+   Solo aplica al editar. Una dieta nueva se sigue creando con el botón: no
+   tiene id contra el que guardar, y autoguardar mientras se escribe el título
+   llenaría la biblioteca de borradores a medias.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _autosaveTimer = null;      // debounce
+var _autosaveInFlight = false;  // solo una petición a la vez
+var _autosavePending = false;   // llegó un cambio mientras se guardaba
+var _autosaveSuppress = false;  // cargando el formulario: no son cambios del usuario
+var AUTOSAVE_DELAY = 1200;
+
+function _setAutosaveState(state) {
+  var el = document.getElementById('dpAutosave');
+  if (!el) return;
+  var txt = { saving: 'Guardando...', saved: 'Guardado', error: 'Sin guardar — reintentando', pending: 'Cambios sin guardar' };
+  el.textContent = txt[state] || '';
+  el.className = 'dp-autosave' + (state ? ' is-' + state : '');
+}
+
+function scheduleAutosave() {
+  if (_autosaveSuppress) return;
+  if (!editingId) return;  // dieta nueva: se crea con el botón
+  _setAutosaveState('pending');
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer = setTimeout(flushAutosave, AUTOSAVE_DELAY);
+}
+
+async function flushAutosave() {
+  if (_autosaveSuppress || !editingId) return;
+  clearTimeout(_autosaveTimer);
+  if (_autosaveInFlight) { _autosavePending = true; return; }
+  _autosaveInFlight = true;
+  _setAutosaveState('saving');
+  try {
+    await saveDiet({ auto: true });
+  } finally {
+    _autosaveInFlight = false;
+    if (_autosavePending) { _autosavePending = false; scheduleAutosave(); }
+  }
+}
+
+/* Tras guardar, las comidas y filas nuevas ya tienen id en la base. Hay que
+   traérselo al estado local: si no, el siguiente autoguardado las mandaría otra
+   vez sin id y se crearían duplicadas.
+
+   El emparejamiento se apoya en que el backend las crea en el orden en que se
+   envían y los ids son autoincrementales: de las que vuelven, las que no
+   conocíamos son las nuevas, y ordenadas por id ascendente corresponden una a
+   una con las locales sin id, en el orden en que se enviaron. */
+function _syncDbIds(saved) {
+  if (!saved || !saved.foods) return;
+
+  var conocidas = {};
+  _meals.forEach(function(m){ if (m.db_id) conocidas[m.db_id] = m; });
+
+  // Mismo criterio que el payload de saveDiet: lo que no se envía no cuenta.
+  var enviadas = _meals.filter(function(m){
+    return m.rows.filter(function(r){ return r.aliment_id; }).length > 0 || m.db_id;
+  });
+  var localesSinId = enviadas.filter(function(m){ return !m.db_id; });
+  var nuevas = saved.foods
+    .filter(function(f){ return !conocidas[f.id]; })
+    .sort(function(a, b){ return a.id - b.id; });
+  localesSinId.forEach(function(m, i){ if (nuevas[i]) m.db_id = nuevas[i].id; });
+
+  // Y lo mismo con los alimentos dentro de cada comida
+  var porId = {};
+  saved.foods.forEach(function(f){ porId[f.id] = f; });
+  _meals.forEach(function(meal) {
+    var guardada = porId[meal.db_id];
+    if (!guardada || !guardada.detail) return;
+    var filasConocidas = {};
+    meal.rows.forEach(function(r){ if (r.db_id) filasConocidas[r.db_id] = r; });
+    var filasSinId = meal.rows.filter(function(r){ return r.aliment_id && !r.db_id; });
+    var detNuevos = guardada.detail
+      .filter(function(d){ return !filasConocidas[d.id]; })
+      .sort(function(a, b){ return a.id - b.id; });
+    filasSinId.forEach(function(r, i){ if (detNuevos[i]) r.db_id = detNuevos[i].id; });
+  });
+}
+
+/* En vez de tocar veinte funciones una a una, se envuelven las que mutan el
+   estado del editor. Menos sitios donde olvidarse de avisar. */
+[
+  'removeFoodRow', 'removeMeal', 'addFoodRow', 'addNewMeal', 'changeMealCount',
+  'onMealNameChange', 'onActiveMealNameChange', 'onMealTimeChange', 'pm2QtyInput',
+  'pm2Drop', 'selectAliment', 'fsmConfirmAdd', 'addRecipeToMeal',
+  'applyDistribution', 'togglePathoItem', 'setGoalMode', 'setFoodSource',
+].forEach(function(nombre) {
+  var orig = window[nombre];
+  if (typeof orig !== 'function') return;
+  window[nombre] = function() {
+    var r = orig.apply(this, arguments);
+    // Las async mutan después del await, así que se espera a que resuelvan.
+    if (r && typeof r.then === 'function') r.then(function(){ scheduleAutosave(); }, function(){});
+    else scheduleAutosave();
+    return r;
+  };
+});
+
+(function() {
+  function attach() {
+    var panel = document.getElementById('dietPanel');
+    if (!panel) return;
+    // Los campos del formulario (título, kcal, macros, notas, tipo) en bloque:
+    // más fiable que engancharse a cada input.
+    panel.addEventListener('input', function(e){
+      if (e.target && e.target.closest('#dietPanel')) scheduleAutosave();
+    });
+    panel.addEventListener('change', function(e){
+      if (e.target && e.target.closest('#dietPanel')) scheduleAutosave();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attach);
+  else attach();
+})();
+
+/* Cargar una dieta en el formulario dispara addMeal() y rellena inputs: nada de
+   eso son cambios del usuario, así que se silencia mientras dura. */
+var _openFormOriginal = openForm;
+openForm = async function(id) {
+  _autosaveSuppress = true;
+  clearTimeout(_autosaveTimer);
+  _setAutosaveState('');
+  try { return await _openFormOriginal(id); }
+  finally { _autosaveSuppress = false; }
+};
+
+/* Al cerrar, lo que quede pendiente se guarda antes de irse. Cerrar el panel no
+   puede ser una forma de perder cambios: era justo el problema original. */
+var _closeFormOriginal = closeForm;
+closeForm = function() {
+  var habiaPendiente = _autosaveTimer !== null || _autosaveInFlight || _autosavePending;
+  if (editingId && habiaPendiente) {
+    flushAutosave().then(function(){ if (typeof loadDiets === 'function') loadDiets(); });
+  }
+  clearTimeout(_autosaveTimer); _autosaveTimer = null;
+  _autosaveSuppress = true;
+  _setAutosaveState('');
+  var r = _closeFormOriginal.apply(this, arguments);
+  _autosaveSuppress = false;
+  return r;
+};
+
+/* Y si se cierra la pestaña con algo a medias, avisar. */
+window.addEventListener('beforeunload', function(e) {
+  if (!editingId) return;
+  if (_autosaveTimer === null && !_autosaveInFlight && !_autosavePending) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
 </script>
 
 <!-- ════ Create Aliment Modal ════ -->

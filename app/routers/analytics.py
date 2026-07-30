@@ -5,7 +5,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH
+from app.core.dependencies import (
+    require_role_ids, get_org_context, OrgContext,
+    org_client_detail_ids, org_member_detail_ids,
+    SUPERADMIN, ADMIN, COACH,
+)
 from app.models.user import UserDetail, RoleUser, UserParent
 from app.models.role import CLIENT
 from app.models.checkin import WeeklyCheckin
@@ -23,9 +27,24 @@ def _coach_ids(db: Session) -> list[int]:
     return [r.user_id for r in db.query(RoleUser).filter(RoleUser.role_id == COACH).all()]
 
 
-def _get_client_details(db: Session, coach_id: Optional[str] = None):
+def _get_client_details(db: Session, coach_id: Optional[str] = None, org: Optional[OrgContext] = None):
+    """Clientes que entran en las métricas.
+
+    Antes esto devolvía SIEMPRE todos los clientes de la plataforma: el
+    parámetro `coach_id` es opcional y lo pone quien llama, así que bastaba con
+    no mandarlo para que cualquier admin o coach viera los totales de todas las
+    organizaciones. Ahora la organización acota primero, y `coach_id` solo
+    puede afinar dentro de lo que ya se puede ver.
+    """
     client_user_ids = _client_ids(db)
     q = db.query(UserDetail).filter(UserDetail.user_id.in_(client_user_ids))
+
+    if org is not None and org.org_id:
+        detail_ids = org_client_detail_ids(org.org_id, db)
+        if not detail_ids:
+            return []
+        q = q.filter(UserDetail.id.in_(detail_ids))
+
     if coach_id:
         assigned = [
             up.user_detail_id
@@ -42,11 +61,12 @@ def overview(
     coach_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     """
     Totales generales: clientes, activos, nuevos este mes, coaches.
     """
-    clients = _get_client_details(db, coach_id)
+    clients = _get_client_details(db, coach_id, org)
     total = len(clients)
 
     now = datetime.utcnow()
@@ -70,8 +90,13 @@ def overview(
     }
     active = len(recent_checkin_ids)
 
-    # Coaches
-    total_coaches = len(_coach_ids(db)) if not coach_id else 1
+    # Coaches: los de la organización, no los de toda la plataforma
+    if coach_id:
+        total_coaches = 1
+    elif org.org_id:
+        total_coaches = len(org_member_detail_ids(org.org_id, db))
+    else:
+        total_coaches = len(_coach_ids(db))
 
     # Total check-ins globales
     total_checkins = (
@@ -96,11 +121,12 @@ def states_distribution(
     coach_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     """
     Distribución de clientes por estado — para gráfico de barras/dona.
     """
-    clients = _get_client_details(db, coach_id)
+    clients = _get_client_details(db, coach_id, org)
 
     # Group by status_id
     counts: dict[int, int] = {}
@@ -135,11 +161,12 @@ def checkin_stats(
     to_date: Optional[date] = Query(None, alias="to"),
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     """
     Métricas de check-ins: peso promedio perdido, adherencia, totales.
     """
-    clients = _get_client_details(db, coach_id)
+    clients = _get_client_details(db, coach_id, org)
     client_ids = [c.id for c in clients]
 
     q = db.query(WeeklyCheckin).filter(WeeklyCheckin.client_user_detail_id.in_(client_ids))
@@ -197,16 +224,25 @@ def checkin_stats(
 def coaches_stats(
     db: Session = Depends(get_db),
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    org: OrgContext = Depends(get_org_context),
 ):
     """
     Métricas por coach: clientes asignados, check-ins recibidos.
     """
-    coach_user_ids = _coach_ids(db)
-    coach_details = (
-        db.query(UserDetail)
-        .filter(UserDetail.user_id.in_(coach_user_ids))
-        .all()
-    )
+    if org.org_id:
+        # Solo el equipo de la organización propia.
+        detail_ids = org_member_detail_ids(org.org_id, db)
+        coach_details = (
+            db.query(UserDetail).filter(UserDetail.id.in_(detail_ids)).all()
+            if detail_ids else []
+        )
+    else:
+        coach_user_ids = _coach_ids(db)
+        coach_details = (
+            db.query(UserDetail)
+            .filter(UserDetail.user_id.in_(coach_user_ids))
+            .all()
+        )
 
     result = []
     for coach in coach_details:

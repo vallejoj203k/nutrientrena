@@ -25,6 +25,12 @@ class Training(Base):
     rec_reps = Column(String(40), nullable=True)    # reps recomendadas, ej. "8-12"
     rec_rest = Column(String(40), nullable=True)    # descanso recomendado, ej. "60-90s"
     state = Column(Integer, default=1)
+    # NULL = catálogo maestro de la plataforma, visible para todos. Con valor =
+    # ejercicio privado de esa organización.
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
+    # Quién lo creó: su autor siempre puede editar lo suyo, tenga organización
+    # o no (un coach sin organización crea con organization_id NULL).
+    created_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

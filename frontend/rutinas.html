@@ -166,7 +166,14 @@
     .day-chip:hover{border-color:#FCD9A6;background:#FFFCF6;}
     .day-chip.active{border-color:#F59E0B;background:#FFF7ED;}
     .day-grip{color:#C4C7CF;flex-shrink:0;margin-top:3px;display:flex;cursor:grab;}
+    .day-grip:active{cursor:grabbing;}
     .day-chip.active .day-grip{color:#F59E0B;}
+    /* Mismo patrón que .ex-placeholder: el hueco guarda el sitio mientras el
+       fantasma flota siguiendo al puntero. */
+    .day-chip.day-placeholder{background:#EEF2FF !important;border-color:transparent !important;}
+    .day-chip.day-placeholder>*{visibility:hidden;}
+    .day-chip.day-settle{animation:daySettle .6s ease;}
+    @keyframes daySettle{0%{background:#EEF2FF;}100%{background:#fff;}}
     .day-chip-main{flex:1;min-width:0;}
     .day-chip-name{display:block;font-size:14px;font-weight:700;color:#1F2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .day-chip.active .day-chip-name{color:#B45309;}
@@ -1263,8 +1270,132 @@ function renderDaysList(){
     chip.querySelector('.day-edit-btn').addEventListener('click',(e)=>{e.stopPropagation();startRenameDay(i,chip);});
     chip.querySelector('.day-dup-btn').addEventListener('click',(e)=>{e.stopPropagation();duplicateDay(i);});
     chip.querySelector('.day-rm').addEventListener('click',(e)=>{e.stopPropagation();removeDay(i);});
-    chip.addEventListener('click',()=>selectDay(i));
+    chip.addEventListener('click',()=>{
+      // Tras arrastrar de verdad no hay que seleccionar: el puntero acaba
+      // sobre otra tarjeta y cambiaría de día sin que nadie lo pida.
+      if(_dayDrag.justDragged)return;
+      selectDay(i);
+    });
     container.appendChild(chip);
+  });
+  setupDayDrag();
+}
+
+/* ── Arrastrar días para reordenarlos ──────────────────────────────────────
+   El asa ya estaba pintada y con cursor:grab, pero era decorativa: no había
+   ni atributo draggable ni manejadores, así que no se movía nada. Se resuelve
+   con el mismo patrón de pointer events que ya usan los ejercicios (fantasma
+   flotante + hueco que guarda el sitio), para no meter una segunda forma de
+   arrastrar distinta en el mismo editor. */
+let _dayDrag={ghost:null,srcChip:null,chipMap:null,offX:0,offY:0,moved:false,startX:0,startY:0,justDragged:false};
+
+function _dayAbortDrag(){
+  if(_dayDrag.ghost){_dayDrag.ghost.remove();_dayDrag.ghost=null;}
+  if(_dayDrag.srcChip){_dayDrag.srcChip.classList.remove('day-placeholder');_dayDrag.srcChip=null;}
+  _dayDrag.moved=false;
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&_dayDrag.srcChip){_dayAbortDrag();renderDaysList();}});
+
+document.addEventListener('pointermove',e=>{
+  const d=_dayDrag;
+  if(!d.srcChip)return;
+  if(!d.moved){
+    if(Math.hypot(e.clientX-d.startX,e.clientY-d.startY)<5)return;  // un clic no es un arrastre
+    d.moved=true;
+    const rect=d.srcChip.getBoundingClientRect();
+    d.ghost=d.srcChip.cloneNode(true);
+    Object.assign(d.ghost.style,{
+      position:'fixed',top:rect.top+'px',left:rect.left+'px',
+      width:rect.width+'px',margin:'0',zIndex:'9999',pointerEvents:'none',
+      background:'#fff',borderRadius:'12px',
+      boxShadow:'0 16px 48px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.12)',
+      transform:'rotate(2deg) scale(1.03)',opacity:'0',transition:'opacity .08s',
+    });
+    document.body.appendChild(d.ghost);
+    requestAnimationFrame(()=>{if(d.ghost)d.ghost.style.opacity='.97';});
+    d.srcChip.classList.add('day-placeholder');
+  }
+  if(!d.ghost)return;
+  d.ghost.style.top=(e.clientY-d.offY)+'px';
+  d.ghost.style.left=(e.clientX-d.offX)+'px';
+
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  if(!el)return;
+  const tgt=el.closest('.day-chip');
+  if(!tgt||tgt===d.srcChip)return;
+  const list=document.getElementById('daysList');
+  if(!list||tgt.parentNode!==list)return;
+  const tr=tgt.getBoundingClientRect();
+  if(e.clientY<tr.top+tr.height/2)list.insertBefore(d.srcChip,tgt);
+  else list.insertBefore(d.srcChip,tgt.nextSibling);
+});
+
+document.addEventListener('pointerup',()=>{
+  const d=_dayDrag;
+  if(!d.srcChip)return;
+  if(!d.moved){_dayAbortDrag();return;}  // clic en el asa sin mover
+
+  const list=document.getElementById('daysList');
+  if(!list){_dayAbortDrag();return;}
+
+  // La selección tiene que seguir al DÍA, no al índice: si no, arrastrar un
+  // día te deja editando los bloques de otro.
+  const diaSeleccionado=routineData.days_list[selectedDayIdx];
+  const nuevoOrden=[...list.querySelectorAll('.day-chip')].map(c=>d.chipMap.get(c)).filter(Boolean);
+  if(nuevoOrden.length===routineData.days_list.length){
+    routineData.days_list=nuevoOrden;
+    const idx=nuevoOrden.indexOf(diaSeleccionado);
+    if(idx>=0)selectedDayIdx=idx;
+  }
+
+  const movido=d.chipMap.get(d.srcChip);
+  const idxMovido=routineData.days_list.indexOf(movido);
+
+  if(d.ghost){
+    const finalRect=d.srcChip.getBoundingClientRect();
+    Object.assign(d.ghost.style,{
+      transition:'top .22s cubic-bezier(.22,1,.36,1),left .22s cubic-bezier(.22,1,.36,1),transform .2s,opacity .15s .05s,box-shadow .2s',
+      top:finalRect.top+'px',left:finalRect.left+'px',
+      transform:'rotate(0deg) scale(1)',opacity:'0',boxShadow:'0 2px 8px rgba(0,0,0,.06)',
+    });
+    const g=d.ghost; d.ghost=null;
+    setTimeout(()=>g.remove(),280);
+  }
+
+  d.srcChip.classList.remove('day-placeholder');
+  d.srcChip=null; d.moved=false;
+
+  // El click llega justo después del pointerup; sin esta bandera seleccionaría
+  // el día que hubiera debajo del puntero al soltar.
+  d.justDragged=true;
+  setTimeout(()=>{d.justDragged=false;},0);
+
+  renderDaysList();
+  renderBlocks();
+  if(idxMovido>=0){
+    const asentado=document.querySelectorAll('#daysList .day-chip')[idxMovido];
+    if(asentado){asentado.classList.add('day-settle');setTimeout(()=>asentado.classList.remove('day-settle'),600);}
+  }
+});
+
+function setupDayDrag(){
+  _dayDrag.chipMap=new Map();
+  const chips=document.querySelectorAll('#daysList .day-chip');
+  chips.forEach((chip,i)=>{
+    _dayDrag.chipMap.set(chip,routineData.days_list[i]);
+    const grip=chip.querySelector('.day-grip');
+    if(!grip)return;
+    grip.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      _dayAbortDrag();
+      _dayDrag.srcChip=chip;
+      _dayDrag.startX=e.clientX; _dayDrag.startY=e.clientY;
+      const rect=chip.getBoundingClientRect();
+      _dayDrag.offX=e.clientX-rect.left; _dayDrag.offY=e.clientY-rect.top;
+      _dayDrag.moved=false;
+      grip.setPointerCapture(e.pointerId);
+    });
   });
 }
 function startRenameDay(idx,chip){

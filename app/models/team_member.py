@@ -10,6 +10,11 @@ class TeamMember(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_detail_id = Column(String(36), ForeignKey("user_details.id"), nullable=True)
+    # A qué organización pertenece este miembro. Se rellena con la del coach
+    # que lo da de alta (get_org_context), y es lo que hace que "Coaches" deje
+    # de ser una lista plana de toda la plataforma y pase a respetar la
+    # jerarquía de organizaciones, igual que ya pasa con rutinas y dietas.
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     member_name = Column(String(200), nullable=True)
     member_email = Column(String(200), nullable=True)
     role_label = Column(String(100), nullable=True)

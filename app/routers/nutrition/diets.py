@@ -159,7 +159,22 @@ def _save_pathologies(db: Session, diet_id: str, pathology_ids: list):
         db.execute(diet_pathologies_table.insert().values(diet_id=diet_id, pathology_id=pid))
 
 
-def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: int):
+def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_user_id: int):
+    """Guarda las comidas de una dieta.
+
+    El editor borra por omisión: cuando se quita un alimento o una comida,
+    simplemente deja de enviarse. Así que lo que no llega se poda, a los dos
+    niveles (alimentos dentro de cada comida, y comidas dentro de la dieta).
+
+    `foods_data is None` significa "no toques las comidas" — una edición
+    parcial, por ejemplo cambiar solo el título. Sin esa distinción, cualquier
+    petición que no mandara `foods` vaciaría la dieta entera.
+    """
+    if foods_data is None:
+        return
+
+    kept_food_ids = set()
+
     for food_data in foods_data:
         if food_data.delete and food_data.id:
             food = db.query(DietFood).filter(
@@ -263,6 +278,18 @@ def _save_foods(db: Session, diet_id: str, foods_data: list, current_user_id: in
         ).all():
             if orphan.id not in kept_ids:
                 db.delete(orphan)
+
+        kept_food_ids.add(food.id)
+
+    # Y lo mismo un nivel más arriba: las comidas que ya no llegan.
+    # Antes esta poda no existía y la de arriba vive DENTRO del bucle, así que
+    # una comida que dejaba de enviarse no se visitaba nunca y sobrevivía con
+    # todos sus alimentos. Es justo lo que pasaba al borrar el último alimento
+    # de una comida: diets.html descarta del payload las comidas que se quedan
+    # sin alimentos, así que el borrado no se guardaba.
+    for orphan_food in db.query(DietFood).filter(DietFood.diet_id == diet_id).all():
+        if orphan_food.id not in kept_food_ids:
+            db.delete(orphan_food)  # cascade borra sus DietFoodAliment
 
 
 @router.get("/findAll", summary="Listar dietas", description="Retorna la biblioteca de dietas: las de la organización del coach y las plantillas de plataforma.")
@@ -706,7 +733,7 @@ def assigned(
     db.flush()
 
     _save_detail(db, diet.id, data)
-    _save_foods(db, diet.id, data.foods or [], current_user.id)
+    _save_foods(db, diet.id, data.foods, current_user.id)
     _save_pathologies(db, diet.id, data.pathology_ids or [])
     db.commit()
     db.refresh(diet)
@@ -772,7 +799,7 @@ def create(
     db.flush()
 
     _save_detail(db, diet.id, data)
-    _save_foods(db, diet.id, data.foods or [], current_user.id)
+    _save_foods(db, diet.id, data.foods, current_user.id)
     _save_pathologies(db, diet.id, data.pathology_ids or [])
     db.commit()
     db.refresh(diet)
@@ -807,7 +834,7 @@ def updated(
     diet.updated_user_id = current_user.id
 
     _save_detail(db, diet.id, data)
-    _save_foods(db, diet.id, data.foods or [], current_user.id)
+    _save_foods(db, diet.id, data.foods, current_user.id)
     _save_pathologies(db, diet.id, data.pathology_ids or [])
     db.commit()
     db.refresh(diet)

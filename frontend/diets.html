@@ -3102,7 +3102,11 @@ async function saveDiet() {
     var f = { name: mealName, time: meal.time || null, detail: detail };
     if (meal.db_id) f.id = meal.db_id;
     return f;
-  }).filter(function(f){ return f.detail.length > 0; });
+  // Una comida que ya existe se envía aunque se quede sin alimentos: es lo que
+  // el editor está mostrando en pantalla. Si se descarta aquí, el backend no la
+  // ve y no puede saber que hay que vaciarla. Las comidas nuevas sin nada sí se
+  // descartan, que no hay nada que guardar.
+  }).filter(function(f){ return f.detail.length > 0 || f.id; });
   var pNum = function(id){ var v = document.getElementById(id).value; return v !== '' ? parseFloat(v) : null; };
   var notesEl = document.getElementById('f_notes');
   var body = {

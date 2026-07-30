@@ -63,6 +63,7 @@
     .avatar-upload-input{display:none;}
     .upload-spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
+    .ent-loading-spin{width:30px;height:30px;border:3px solid #E5E7EB;border-top-color:#4F46E5;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;}
     .profile-info{flex:1;min-width:0;}
     .profile-name{font-size:20px;font-weight:800;color:#111;line-height:1.2;}
     .profile-email{font-size:13px;color:#6B7280;margin-top:3px;}
@@ -1940,6 +1941,10 @@
         <div class="form-group"><label>Objetivo</label><select id="ec_objective_id"></select></div>
         <div class="form-group"><label>Nivel de actividad</label><select id="ec_activity_id"></select></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label>País</label><select id="ec_country_code"></select></div>
+        <div class="form-group"></div>
+      </div>
 
       <div class="ec-sec">Acceso a la plataforma</div>
       <div class="form-row">
@@ -1973,14 +1978,21 @@
       <div class="form-row">
         <div class="form-group">
           <label>Fecha de inicio</label>
-          <input id="dt_start" type="date"/>
+          <input id="dt_start" type="date" oninput="onStartDateInput()"/>
         </div>
         <div class="form-group">
           <label>Fecha de fin</label>
-          <input id="dt_end" type="date"/>
+          <input id="dt_end" type="date" oninput="onEndDateInput()"/>
         </div>
       </div>
-      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">Las semanas transcurridas se calculan automáticamente a partir de estas fechas.</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Duración (semanas)</label>
+          <input id="dt_weeks" type="number" min="1" max="260" step="1" placeholder="Ej: 12" oninput="onWeeksInput()"/>
+        </div>
+        <div class="form-group"></div>
+      </div>
+      <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">Escribe las semanas y la fecha de fin se calcula sola. Si cambias la fecha de fin a mano, las semanas se recalculan.</div>
       <div class="form-error" id="datesError" style="margin-top:8px;color:#DC2626;font-size:13px;"></div>
     </div>
     <div class="modal-footer">
@@ -2356,7 +2368,11 @@ function _renderClientPanel() {
   const obj = c.objective?.name || c.objective?.description || c.objective_name || c.goal || '—';
   const pesoIni = c.weight ? `${c.weight} kg` : '—';
   const pesoAct = (checkins[0]?.weight ?? c.weight) != null ? `${checkins[0]?.weight ?? c.weight} kg` : '—';
-  const country = c.country?.name || c.country_name || c.country_code || '—';
+  // La API devuelve {code, country}; antes se leía .name, que no existe, así que
+  // acababa cayendo al código crudo ("ES") en vez del nombre.
+  const country = c.country?.country || c.country?.name || c.country_name
+    || (_paisesCache || []).find(p => p.code === c.country_code)?.name
+    || c.country_code || '—';
   const fmtD = d => d ? new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
   const start = c.start_date || c.fecha_inicio, end = c.end_date || c.fecha_fin;
 
@@ -2741,6 +2757,20 @@ async function saveAiDiet() {
    antes no había forma de arreglar un correo mal escrito desde la ficha. */
 const _EC_FIELDS = ['name','last_name','phone','occupation','age','height','weight'];
 
+/* Los países se piden una sola vez por sesión: la lista no cambia y son ~200
+   filas que no hace falta volver a bajar cada vez que se abre el modal. */
+let _paisesCache = null;
+async function _cargarPaises() {
+  if (_paisesCache) return _paisesCache;
+  try {
+    const r = await fetch(`${API}/countries/search`, { headers: h() });
+    if (!r.ok) return (_paisesCache = []);
+    const j = await r.json();
+    _paisesCache = (j.data || j || []).map(c => ({ code: c.code, name: c.country || c.name || c.code }));
+  } catch { _paisesCache = []; }
+  return _paisesCache;
+}
+
 async function openEditClient() {
   await _nutLoadParamOpts();
   const c = clientData || {};
@@ -2759,6 +2789,18 @@ async function openEditClient() {
   document.getElementById('ec_gender_id').innerHTML    = opts(_nutParamOpts?.gender,    c.gender?.id || c.gender_id);
   document.getElementById('ec_objective_id').innerHTML = opts(_nutParamOpts?.objective, c.objective?.id || c.objective_id);
   document.getElementById('ec_activity_id').innerHTML  = opts(_nutParamOpts?.activity,  c.activity?.id || c.activity_id);
+
+  // El valor que se guarda es el código (country_code, FK a countries.code),
+  // no el nombre: por eso un select y no un texto libre.
+  const paisSel = document.getElementById('ec_country_code');
+  if (paisSel) {
+    const actual = c.country?.code || c.country_code || '';
+    const paises = await _cargarPaises();
+    paisSel.innerHTML = '<option value="">—</option>' + paises.map(p =>
+      `<option value="${esc(p.code)}"${p.code === actual ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+    paisSel.value = actual;
+  }
+
   document.getElementById('ecError').textContent = '';
   document.getElementById('editClientOverlay').classList.add('open');
 }
@@ -2786,6 +2828,7 @@ async function saveEditClient() {
     gender_id: parseInt(val('ec_gender_id')) || null,
     objective_id: parseInt(val('ec_objective_id')) || null,
     activity_id: parseInt(val('ec_activity_id')) || null,
+    country_code: val('ec_country_code') || null,
   };
   if (pass) body.password = pass;
 
@@ -2828,9 +2871,54 @@ function openDatesModal() {
   const toInput = d => d ? new Date(d).toISOString().slice(0, 10) : '';
   document.getElementById('dt_start').value = toInput(c.start_date || c.fecha_inicio);
   document.getElementById('dt_end').value = toInput(c.end_date || c.fecha_fin);
+  // Las semanas no se guardan en base: se derivan de las dos fechas. Así no
+  // pueden quedar desincronizadas con ellas.
+  syncWeeksFromDates();
   document.getElementById('datesError').textContent = '';
   document.getElementById('datesOverlay').classList.add('open');
 }
+
+/* Fechas en local, sin pasar por UTC: `new Date('2026-08-03')` se interpreta
+   como medianoche UTC y en husos negativos devuelve el día anterior. */
+function _fechaDeInput(v) {
+  if (!v) return null;
+  const [a, m, d] = v.split('-').map(Number);
+  if (!a || !m || !d) return null;
+  return new Date(a, m - 1, d);
+}
+function _inputDeFecha(f) {
+  if (!f) return '';
+  const p = n => String(n).padStart(2, '0');
+  return `${f.getFullYear()}-${p(f.getMonth() + 1)}-${p(f.getDate())}`;
+}
+
+function syncWeeksFromDates() {
+  const ini = _fechaDeInput(document.getElementById('dt_start').value);
+  const fin = _fechaDeInput(document.getElementById('dt_end').value);
+  const wEl = document.getElementById('dt_weeks');
+  if (!wEl) return;
+  if (!ini || !fin || fin < ini) { wEl.value = ''; return; }
+  wEl.value = Math.max(1, Math.round((fin - ini) / (7 * 86400000)));
+}
+
+function recalcEndFromWeeks() {
+  const ini = _fechaDeInput(document.getElementById('dt_start').value);
+  const semanas = parseInt(document.getElementById('dt_weeks').value, 10);
+  if (!ini || !semanas || semanas < 1) return;
+  const fin = new Date(ini);
+  fin.setDate(fin.getDate() + semanas * 7);
+  document.getElementById('dt_end').value = _inputDeFecha(fin);
+  document.getElementById('datesError').textContent = '';
+}
+
+function onWeeksInput()     { recalcEndFromWeeks(); }
+function onStartDateInput() {
+  // Con semanas puestas, mover el inicio arrastra el fin; si no, solo se
+  // recalculan las semanas a partir de las fechas que haya.
+  if (parseInt(document.getElementById('dt_weeks').value, 10) > 0) recalcEndFromWeeks();
+  else syncWeeksFromDates();
+}
+function onEndDateInput()   { syncWeeksFromDates(); }
 function closeDatesModal() { document.getElementById('datesOverlay').classList.remove('open'); }
 
 async function saveDates() {
@@ -5661,6 +5749,23 @@ async function saveCheckin(dateStr) {
 let editingSessionId = null;
 let _entSelectedDay = 0;
 let _entDetailLoaded = false;
+
+/* Estado de carga de la pestaña de entrenamiento.
+
+   Sin esto, al asignar un plan la pestaña se quedaba enseñando "Sin plan de
+   entrenamiento" —el estado vacío de antes— mientras por detrás terminaba de
+   asignarse, y parecía que no había funcionado. */
+function _tabSetLoading(contenedorId, texto) {
+  const el = document.getElementById(contenedorId);
+  if (!el) return;
+  el.innerHTML = `<div class="card" style="padding:48px;text-align:center;">
+    <div class="ent-loading-spin"></div>
+    <p style="font-size:15px;font-weight:700;color:#374151;margin:0 0 6px;">${esc(texto || 'Cargando…')}</p>
+    <p style="font-size:13px;color:#9CA3AF;margin:0;">Un momento…</p>
+  </div>`;
+}
+function _entSetLoading(texto) { _tabSetLoading('entrenamientoContent', texto); }
+function _nutSetLoading(texto) { _tabSetLoading('nutricionContent', texto); }
 
 async function renderEntrenamientoTab() {
   const el = document.getElementById('entrenamientoContent');
@@ -8500,23 +8605,7 @@ async function confirmAssignDiet() {
     _nutDetail = null;
     _nutActiveDietIdx = 0;
     closeAssignDietModal();
-
-    // Un único correo con todas las dietas asignadas y sus PDF adjuntos.
-    let emailSent = false;
-    if (copies.length) {
-      try {
-        const ep = await fetch(`${API}/plans/deliver`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...h() },
-          body: JSON.stringify({ client_user_detail_id: clientId, diet_ids: copies, send_email: true }),
-        });
-        const ej = await ep.json();
-        emailSent = ej.data?.email_sent === true;
-      } catch {}
-    }
-    const n = copies.length;
-    const what = n > 1 ? `${n} dietas asignadas` : 'Dieta asignada';
-    showToast(emailSent ? `${what} y enviadas por email` : `${what} (no se pudo enviar el email)`, emailSent ? 'success' : 'warning');
+    _nutSetLoading(copies.length > 1 ? 'Asignando dietas' : 'Asignando dieta');
 
     const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
     if (rd.ok) {
@@ -8526,8 +8615,30 @@ async function confirmAssignDiet() {
       if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
     }
     await renderNutricionTab();
+    const n = copies.length;
+    showToast(n > 1 ? `${n} dietas asignadas` : 'Dieta asignada', 'success');
+
+    // Igual que con las rutinas: el correo con los PDF va en segundo plano,
+    // que es lo lento y no hace falta para ver las dietas ya asignadas.
+    if (copies.length) _enviarPdfDietas(copies);
   } catch { document.getElementById('assignDietError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; if (lbl) lbl.textContent = prev; }
+}
+
+/* Un único correo con todas las dietas asignadas y sus PDF adjuntos. */
+async function _enviarPdfDietas(copies) {
+  try {
+    const ep = await fetch(`${API}/plans/deliver`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ client_user_detail_id: clientId, diet_ids: copies, send_email: true }),
+    });
+    const ej = await ep.json().catch(() => ({}));
+    if (ej.data?.email_sent === true) showToast('PDF enviado al cliente por email', 'success');
+    else showToast('Las dietas están asignadas, pero no se pudo enviar el email', 'warning');
+  } catch {
+    showToast('Las dietas están asignadas, pero no se pudo enviar el email', 'warning');
+  }
 }
 
 async function openAssignRoutineModal() {
@@ -8620,23 +8731,16 @@ async function confirmAssignRoutine() {
     }
     _assignReplaceRoutineId = null;
     closeAssignRoutineModal();
+    // Se pinta el estado de carga ANTES de nada: es lo que faltaba, porque si
+    // no la pestaña sigue enseñando "Sin plan de entrenamiento" y parece que
+    // la asignación no ha funcionado.
+    _entSetLoading('Asignando plan de entrenamiento');
 
-    // Send PDF to client email automatically
     const newRoutineId = j.data?.id;
-    let emailSent = false;
-    if (newRoutineId) {
-      try {
-        const ep = await fetch(`${API}/plans/deliver`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...h() },
-          body: JSON.stringify({ client_user_detail_id: clientId, routine_id: newRoutineId, send_email: true }),
-        });
-        const ej = await ep.json();
-        emailSent = ej.data?.email_sent === true;
-      } catch {}
-    }
-    showToast(emailSent ? 'Rutina asignada y PDF enviado por email' : 'Rutina asignada (no se pudo enviar el email)', emailSent ? 'success' : 'warning');
 
+    // El plan se pinta en cuanto está; el PDF por email va aparte. Generar y
+    // enviar el correo es lo lento de todo esto (varios segundos) y no hace
+    // falta esperarlo para ver la rutina asignada.
     const rr = await fetch(`${API}/routines/client/${clientId}`, { headers: h() });
     if (rr.ok) {
       const jr = await rr.json();
@@ -8645,9 +8749,30 @@ async function confirmAssignRoutine() {
     }
     _entDetailLoaded = false;
     _entSelectedDay = 0;
-    renderEntrenamientoTab();
+    await renderEntrenamientoTab();
+    showToast('Rutina asignada', 'success');
+
+    if (newRoutineId) _enviarPdfRutina(newRoutineId);
   } catch { document.getElementById('assignRoutineError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; }
+}
+
+/* Envío del PDF al cliente, en segundo plano. No se espera: solo avisa cuando
+   termina, y únicamente si algo va mal — el aviso de "rutina asignada" ya se
+   ha dado y encadenar dos toast de éxito sobra. */
+async function _enviarPdfRutina(routineId) {
+  try {
+    const ep = await fetch(`${API}/plans/deliver`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ client_user_detail_id: clientId, routine_id: routineId, send_email: true }),
+    });
+    const ej = await ep.json().catch(() => ({}));
+    if (ej.data?.email_sent === true) showToast('PDF enviado al cliente por email', 'success');
+    else showToast('La rutina está asignada, pero no se pudo enviar el email', 'warning');
+  } catch {
+    showToast('La rutina está asignada, pero no se pudo enviar el email', 'warning');
+  }
 }
 
 function filterAssignList(type, q) {

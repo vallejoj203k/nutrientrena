@@ -63,6 +63,7 @@
     .avatar-upload-input{display:none;}
     .upload-spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
+    .ent-loading-spin{width:30px;height:30px;border:3px solid #E5E7EB;border-top-color:#4F46E5;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;}
     .profile-info{flex:1;min-width:0;}
     .profile-name{font-size:20px;font-weight:800;color:#111;line-height:1.2;}
     .profile-email{font-size:13px;color:#6B7280;margin-top:3px;}
@@ -5749,6 +5750,23 @@ let editingSessionId = null;
 let _entSelectedDay = 0;
 let _entDetailLoaded = false;
 
+/* Estado de carga de la pestaña de entrenamiento.
+
+   Sin esto, al asignar un plan la pestaña se quedaba enseñando "Sin plan de
+   entrenamiento" —el estado vacío de antes— mientras por detrás terminaba de
+   asignarse, y parecía que no había funcionado. */
+function _tabSetLoading(contenedorId, texto) {
+  const el = document.getElementById(contenedorId);
+  if (!el) return;
+  el.innerHTML = `<div class="card" style="padding:48px;text-align:center;">
+    <div class="ent-loading-spin"></div>
+    <p style="font-size:15px;font-weight:700;color:#374151;margin:0 0 6px;">${esc(texto || 'Cargando…')}</p>
+    <p style="font-size:13px;color:#9CA3AF;margin:0;">Un momento…</p>
+  </div>`;
+}
+function _entSetLoading(texto) { _tabSetLoading('entrenamientoContent', texto); }
+function _nutSetLoading(texto) { _tabSetLoading('nutricionContent', texto); }
+
 async function renderEntrenamientoTab() {
   const el = document.getElementById('entrenamientoContent');
   if (!el) return;
@@ -8587,23 +8605,7 @@ async function confirmAssignDiet() {
     _nutDetail = null;
     _nutActiveDietIdx = 0;
     closeAssignDietModal();
-
-    // Un único correo con todas las dietas asignadas y sus PDF adjuntos.
-    let emailSent = false;
-    if (copies.length) {
-      try {
-        const ep = await fetch(`${API}/plans/deliver`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...h() },
-          body: JSON.stringify({ client_user_detail_id: clientId, diet_ids: copies, send_email: true }),
-        });
-        const ej = await ep.json();
-        emailSent = ej.data?.email_sent === true;
-      } catch {}
-    }
-    const n = copies.length;
-    const what = n > 1 ? `${n} dietas asignadas` : 'Dieta asignada';
-    showToast(emailSent ? `${what} y enviadas por email` : `${what} (no se pudo enviar el email)`, emailSent ? 'success' : 'warning');
+    _nutSetLoading(copies.length > 1 ? 'Asignando dietas' : 'Asignando dieta');
 
     const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
     if (rd.ok) {
@@ -8613,8 +8615,30 @@ async function confirmAssignDiet() {
       if (clientDiets.length) { _clientDietId = clientDiets[0].id; document.getElementById('pdfDietBtn').style.display = 'inline-flex'; }
     }
     await renderNutricionTab();
+    const n = copies.length;
+    showToast(n > 1 ? `${n} dietas asignadas` : 'Dieta asignada', 'success');
+
+    // Igual que con las rutinas: el correo con los PDF va en segundo plano,
+    // que es lo lento y no hace falta para ver las dietas ya asignadas.
+    if (copies.length) _enviarPdfDietas(copies);
   } catch { document.getElementById('assignDietError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; if (lbl) lbl.textContent = prev; }
+}
+
+/* Un único correo con todas las dietas asignadas y sus PDF adjuntos. */
+async function _enviarPdfDietas(copies) {
+  try {
+    const ep = await fetch(`${API}/plans/deliver`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ client_user_detail_id: clientId, diet_ids: copies, send_email: true }),
+    });
+    const ej = await ep.json().catch(() => ({}));
+    if (ej.data?.email_sent === true) showToast('PDF enviado al cliente por email', 'success');
+    else showToast('Las dietas están asignadas, pero no se pudo enviar el email', 'warning');
+  } catch {
+    showToast('Las dietas están asignadas, pero no se pudo enviar el email', 'warning');
+  }
 }
 
 async function openAssignRoutineModal() {
@@ -8707,23 +8731,16 @@ async function confirmAssignRoutine() {
     }
     _assignReplaceRoutineId = null;
     closeAssignRoutineModal();
+    // Se pinta el estado de carga ANTES de nada: es lo que faltaba, porque si
+    // no la pestaña sigue enseñando "Sin plan de entrenamiento" y parece que
+    // la asignación no ha funcionado.
+    _entSetLoading('Asignando plan de entrenamiento');
 
-    // Send PDF to client email automatically
     const newRoutineId = j.data?.id;
-    let emailSent = false;
-    if (newRoutineId) {
-      try {
-        const ep = await fetch(`${API}/plans/deliver`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...h() },
-          body: JSON.stringify({ client_user_detail_id: clientId, routine_id: newRoutineId, send_email: true }),
-        });
-        const ej = await ep.json();
-        emailSent = ej.data?.email_sent === true;
-      } catch {}
-    }
-    showToast(emailSent ? 'Rutina asignada y PDF enviado por email' : 'Rutina asignada (no se pudo enviar el email)', emailSent ? 'success' : 'warning');
 
+    // El plan se pinta en cuanto está; el PDF por email va aparte. Generar y
+    // enviar el correo es lo lento de todo esto (varios segundos) y no hace
+    // falta esperarlo para ver la rutina asignada.
     const rr = await fetch(`${API}/routines/client/${clientId}`, { headers: h() });
     if (rr.ok) {
       const jr = await rr.json();
@@ -8732,9 +8749,30 @@ async function confirmAssignRoutine() {
     }
     _entDetailLoaded = false;
     _entSelectedDay = 0;
-    renderEntrenamientoTab();
+    await renderEntrenamientoTab();
+    showToast('Rutina asignada', 'success');
+
+    if (newRoutineId) _enviarPdfRutina(newRoutineId);
   } catch { document.getElementById('assignRoutineError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; }
+}
+
+/* Envío del PDF al cliente, en segundo plano. No se espera: solo avisa cuando
+   termina, y únicamente si algo va mal — el aviso de "rutina asignada" ya se
+   ha dado y encadenar dos toast de éxito sobra. */
+async function _enviarPdfRutina(routineId) {
+  try {
+    const ep = await fetch(`${API}/plans/deliver`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ client_user_detail_id: clientId, routine_id: routineId, send_email: true }),
+    });
+    const ej = await ep.json().catch(() => ({}));
+    if (ej.data?.email_sent === true) showToast('PDF enviado al cliente por email', 'success');
+    else showToast('La rutina está asignada, pero no se pudo enviar el email', 'warning');
+  } catch {
+    showToast('La rutina está asignada, pero no se pudo enviar el email', 'warning');
+  }
 }
 
 function filterAssignList(type, q) {

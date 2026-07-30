@@ -63,3 +63,19 @@ fechas = """<!doctype html><html><head><meta charset="utf-8"></head><body>
 destino2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fechas.html')
 open(destino2, 'w').write(fechas)
 print('harness generado en', destino2)
+
+
+# ── Harness del estado de carga al asignar planes (client-profile.html) ─────
+css = '\n'.join(re.findall(r'<style>(.*?)</style>', perfil, re.S))
+a = perfil.index('function _tabSetLoading(')
+b = perfil.index('async function renderEntrenamientoTab()')
+carga = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
+<div id="entrenamientoContent"></div><div id="nutricionContent"></div>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+%s
+</script></body></html>""" % (css, perfil[a:b])
+
+destino3 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'carga.html')
+open(destino3, 'w').write(carga)
+print('harness generado en', destino3)

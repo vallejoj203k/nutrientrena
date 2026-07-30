@@ -79,3 +79,55 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
 destino3 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'carga.html')
 open(destino3, 'w').write(carga)
 print('harness generado en', destino3)
+
+
+# ── Harness del constructor embebido en la ficha del cliente ───────────────
+def _bloque(html, marca):
+    i = html.index(marca); seg = html[i:]; prof = 0; j = 0
+    while j < len(seg):
+        if seg.startswith('<div', j): prof += 1
+        elif seg.startswith('</div>', j):
+            prof -= 1
+            if prof == 0: j += 6; break
+        j += 1
+    return seg[:j]
+
+cssp = '\n'.join(re.findall(r'<style>(.*?)</style>', perfil, re.S))
+overlay = _bloque(perfil, '<div class="ne-backdrop" id="entBuilderOverlay">')
+picker = _bloque(perfil, '<div class="picker-overlay" id="pickerOverlay"')
+i = perfil.index('function addDay(){')
+j = perfil.index('/* \u2500\u2500 Save \u2500\u2500 */', i)
+codigo = perfil[i:j]
+
+builder = """<!doctype html><html><head><meta charset="utf-8"><style>%s
+.ne-backdrop{display:block !important;opacity:1 !important;visibility:visible !important;}
+</style></head><body>
+%s
+%s
+<script>
+const API='http://x';
+function h(){return{};}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function showToast(m){window.__toast=m;}
+let pickerTargetBlockIdx=null, pickerReplaceEi=null;
+let selectedDayIdx=0;
+let routineData={name:'Rutina de fuerza',training:'Gimnasio',days_list:[
+ {day_name:'Lunes',description:'',blocks:[
+   {block_type:'normal',content:'',order_index:0,exercises:[
+     {training_id:1,training_name:'Press de banca',muscle_group_name:'Pecho',series:3,repetitions:'12',break_time:60,intensity_type:'RPE',intensity_value:8,notes:'',order_index:0},
+     {training_id:2,training_name:'Dominadas',muscle_group_name:'Espalda',series:3,repetitions:'8-12',break_time:60,intensity_type:'',intensity_value:null,notes:'',order_index:1}]},
+   {block_type:'superset',content:'',order_index:1,exercises:[
+     {training_id:3,training_name:'Extensiones triceps',muscle_group_name:'Triceps',series:2,repetitions:'10',break_time:60,intensity_type:'RPE',intensity_value:8,notes:'',order_index:0}]}]},
+ {day_name:'Martes',description:'',blocks:[{block_type:'normal',content:'',order_index:0,exercises:[
+     {training_id:4,training_name:'Sentadilla',muscle_group_name:'Pierna',series:4,repetitions:'8',break_time:90,intensity_type:'',intensity_value:null,notes:'',order_index:0}]}]},
+ {day_name:'Mi\u00e9rcoles',description:'',blocks:[]}
+]};
+%s
+window.__orden=()=>routineData.days_list.map(d=>d.day_name);
+window.__ejercicios=()=>routineData.days_list[selectedDayIdx].blocks.map(b=>b.exercises.map(e=>e.training_name));
+renderDaysList(); renderBlocks();
+</script></body></html>""" % (cssp, overlay, picker, codigo)
+
+destino4 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'builder.html')
+open(destino4, 'w').write(builder)
+print('harness generado en', destino4)

@@ -9,7 +9,10 @@ import io
 from sqlalchemy import or_
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, get_org_context, OrgContext, SUPERADMIN, ADMIN, COACH
+from app.core.dependencies import (
+    require_role_ids, get_org_context, OrgContext, _user_role_ids,
+    SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL,
+)
 from app.core.responses import send_response, send_error
 from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
@@ -63,7 +66,7 @@ def _upsert_description(db: Session, aliment_id: str, desc_data: dict):
 @router.get("/findAll", summary="Listar alimentos", description="Retorna todos los alimentos del catálogo (sin clones).")
 def find_all(
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
@@ -80,7 +83,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
@@ -105,7 +108,7 @@ def search(
 
 
 @router.get("/{id}/edit", summary="Ver alimento", description="Retorna el detalle completo de un alimento incluyendo micronutrientes.")
-def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Alimento no encontrado")
@@ -116,7 +119,7 @@ def edit(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
 def create(
     data: AlimentCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     payload = data.model_dump(exclude={"description"})
@@ -147,15 +150,29 @@ def updated(
     id: str,
     data: AlimentUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Alimento no encontrado")
-    # Non-admin coaches cannot edit platform-level content (organization_id IS NULL)
-    if obj.organization_id is None and not org.is_owner:
-        return send_error("No puedes editar alimentos de la plataforma", code=403)
+
+    # Antes esto solo bloqueaba editar contenido de plataforma (organization_id
+    # NULL) para quien no fuera dueño de organización; no comprobaba nada si el
+    # alimento era de OTRA organización — cualquier coach podía editar el
+    # alimento privado de cualquier otra organización con solo saber el id.
+    if org.org_id is None and org.is_owner:
+        pass  # bypass total: superadmin, o admin sin organización propia
+    elif obj.organization_id is None:
+        # Contenido de plataforma: el editor de contenido global es la
+        # excepción explícita — su trabajo es justo ese, y nunca tiene
+        # organización propia, así que sin esto quedaría bloqueado para hacer
+        # lo único que puede hacer.
+        roles = _user_role_ids(current_user.id, db)
+        if EDITOR_CONTENIDO_GLOBAL not in roles:
+            return send_error("No puedes editar alimentos de la plataforma", code=403)
+    elif obj.organization_id != org.org_id:
+        return send_error("No tienes acceso a este alimento", code=403)
 
     for f, v in data.model_dump(exclude_unset=True, exclude={"description"}).items():
         setattr(obj, f, v)
@@ -175,7 +192,7 @@ def updated(
 def delete_aliment(
     id: str,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     obj = _get_or_404(db, id)
     if not obj:
@@ -193,7 +210,7 @@ def delete_aliment(
 async def import_aliments(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     content = await file.read()
     try:
@@ -305,7 +322,7 @@ class UsdaSyncRequest(BaseModel):
 async def usda_sync(
     body: UsdaSyncRequest,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     api_key = settings.USDA_API_KEY
     if not api_key:
@@ -394,7 +411,7 @@ def _sin_momentos():
 def classify_moments(
     body: ClassifyMomentsRequest,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     # joinedload: se lee el grupo de cada alimento, y sin esto serían tantas
     # consultas como alimentos.

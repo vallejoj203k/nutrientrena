@@ -8,6 +8,7 @@ SETTER     = 3
 CLOSER     = 4
 COACH      = 5
 CLIENT     = 6
+EDITOR_CONTENIDO_GLOBAL = 7
 
 
 class Role(Base):

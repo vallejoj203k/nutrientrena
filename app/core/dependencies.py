@@ -14,6 +14,12 @@ SETTER     = 3
 CLOSER     = 4
 COACH      = 5
 CLIENT     = 6
+# Nivel 1 (plataforma), rol limitado: solo alimentos y ejercicios de la base
+# maestra. Aparte a propósito de los grupos de abajo — no gestiona clientes,
+# no ve organizaciones, no gestiona equipo — así que no se añade a
+# STAFF_ROLES/COACH_UP/ADMIN_UP: hay que darle acceso explícito endpoint por
+# endpoint, solo donde corresponde.
+EDITOR_CONTENIDO_GLOBAL = 7
 
 # ── Shorthand groups ──────────────────────────────────────────────────────────
 STAFF_ROLES     = {SUPERADMIN, ADMIN, SETTER, CLOSER, COACH}   # any non-client

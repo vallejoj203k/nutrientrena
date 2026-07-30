@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL
 from app.core.responses import send_response, send_error
 from app.models.training import Training, TrainingClient
 from app.schemas.training import TrainingCreate, TrainingUpdate, TrainingAssignRequest, TrainingOut
@@ -17,7 +17,7 @@ def _get_or_404(db: Session, training_id: int):
 
 
 @router.get("/findAll", summary="Listar ejercicios", description="Retorna todos los ejercicios activos del catálogo.")
-def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     items = db.query(Training).filter(Training.state == 1).all()
     return send_response([TrainingOut.from_orm_training(i).model_dump() for i in items], "OK")
 
@@ -32,7 +32,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     q = db.query(Training)
     if search:
@@ -79,7 +79,7 @@ def assigned(data: TrainingAssignRequest, db: Session = Depends(get_db), _=Depen
 
 
 @router.get("/{id}/edit", summary="Ver ejercicio", description="Retorna el detalle de un ejercicio por su ID.")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
@@ -106,7 +106,7 @@ def _apply_secondary_ids(payload: dict):
 
 
 @router.post("", summary="Crear ejercicio", description="Agrega un nuevo ejercicio al catálogo.")
-def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = Training(**_apply_secondary_ids(data.model_dump()))
     db.add(obj)
     db.commit()
@@ -115,7 +115,7 @@ def create(data: TrainingCreate, db: Session = Depends(get_db), _=Depends(requir
 
 
 @router.put("/{id}/update", summary="Actualizar ejercicio", description="Modifica los datos de un ejercicio existente.")
-def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")
@@ -127,7 +127,7 @@ def updated(id: int, data: TrainingUpdate, db: Session = Depends(get_db), _=Depe
 
 
 @router.delete("/{id}", summary="Eliminar ejercicio", description="Elimina un ejercicio del catálogo.")
-def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def delete(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Ejercicio no encontrado")

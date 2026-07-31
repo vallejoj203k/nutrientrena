@@ -64,6 +64,36 @@
     .upload-spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
     .ent-loading-spin{width:30px;height:30px;border:3px solid #E5E7EB;border-top-color:#4F46E5;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;}
+
+    /* ── Pantalla de carga al asignar plan (SVG en línea, sin vídeo) ── */
+    .ent-loading-card{padding:44px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;}
+    .ent-loading-art{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:18px;}
+    .ent-loading-video{width:180px;max-width:70%;border-radius:12px;margin-bottom:18px;}
+    .ent-loading-title{font-size:15px;font-weight:700;color:#374151;margin:0 0 6px;}
+    .ent-loading-sub{font-size:13px;color:#9CA3AF;margin:0;}
+    /* La barra crece y se encoge: es indeterminada a propósito, no sabemos
+       cuánto queda y una barra que finge un porcentaje miente. */
+    .ent-loading-track{width:140px;height:4px;background:#EEF0F6;border-radius:99px;overflow:hidden;}
+    .ent-loading-fill{width:40%;height:100%;background:#4F46E5;border-radius:99px;animation:entSlide 1.15s ease-in-out infinite;}
+    @keyframes entSlide{0%{transform:translateX(-110%)}100%{transform:translateX(360%)}}
+    .ent-bar{animation:entBar 1.15s ease-in-out infinite;transform-origin:center;}
+    @keyframes entBar{0%,100%{opacity:.35}50%{opacity:1}}
+    .ent-w{transform-origin:center;animation:entW 1.15s ease-in-out infinite;}
+    .ent-w-l{animation-delay:0s}
+    .ent-w-r{animation-delay:.16s}
+    @keyframes entW{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+    .ent-steps{list-style:none;margin:6px 0 0;padding:0;text-align:left;display:flex;flex-direction:column;gap:7px;}
+    .ent-step{display:flex;align-items:center;gap:9px;font-size:13px;color:#9CA3AF;transition:color .2s;}
+    .ent-step-dot{width:7px;height:7px;border-radius:50%;background:#E5E7EB;flex-shrink:0;transition:background .2s,box-shadow .2s;}
+    .ent-step.doing{color:#374151;font-weight:600;}
+    .ent-step.doing .ent-step-dot{background:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.16);}
+    .ent-step.done{color:#6B7280;}
+    .ent-step.done .ent-step-dot{background:#10B981;}
+    /* Quien pide menos animación no debería tragarse nada de esto. */
+    @media (prefers-reduced-motion: reduce){
+      .ent-loading-fill,.ent-bar,.ent-w,.ent-loading-spin{animation:none;}
+      .ent-loading-fill{width:100%;opacity:.5;}
+    }
     .profile-info{flex:1;min-width:0;}
     .profile-name{font-size:20px;font-weight:800;color:#111;line-height:1.2;}
     .profile-email{font-size:13px;color:#6B7280;margin-top:3px;}
@@ -5932,17 +5962,79 @@ let _entDetailLoaded = false;
    Sin esto, al asignar un plan la pestaña se quedaba enseñando "Sin plan de
    entrenamiento" —el estado vacío de antes— mientras por detrás terminaba de
    asignarse, y parecía que no había funcionado. */
-function _tabSetLoading(contenedorId, texto) {
-  const el = document.getElementById(contenedorId);
-  if (!el) return;
-  el.innerHTML = `<div class="card" style="padding:48px;text-align:center;">
-    <div class="ent-loading-spin"></div>
-    <p style="font-size:15px;font-weight:700;color:#374151;margin:0 0 6px;">${esc(texto || 'Cargando…')}</p>
-    <p style="font-size:13px;color:#9CA3AF;margin:0;">Un momento…</p>
+/* Animación de la pantalla de carga: SVG en línea, no un vídeo.
+
+   Un vídeo pesaría entre 300 KB y 2 MB y habría que descargarlo ANTES de
+   poder enseñarlo, así que en la primera carga se vería un hueco negro
+   justo cuando hay que tranquilizar al usuario. Y desde que el envío del
+   email dejó de bloquear, asignar son dos peticiones: la espera suele ser
+   de menos de un segundo, menos de lo que tarda en llegar el vídeo.
+
+   Esto son ~2 KB dentro del HTML, sin ninguna petición, y aparece al
+   instante. Si aun así se quiere vídeo, ver ENT_LOADING_VIDEO más abajo. */
+const ENT_LOADING_VIDEO = null;  // ej: 'assets/cargando.mp4' — ver nota de arriba
+
+function _loadingVisual() {
+  if (ENT_LOADING_VIDEO) {
+    return `<video class="ent-loading-video" src="${esc(ENT_LOADING_VIDEO)}"
+      autoplay loop muted playsinline preload="auto"></video>`;
+  }
+  // Mancuerna con las pesas latiendo y una barra de progreso indeterminada.
+  return `<div class="ent-loading-art" role="status" aria-live="polite" aria-label="Cargando">
+    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <g stroke="#4F46E5" stroke-width="3.5" stroke-linecap="round">
+        <line class="ent-bar" x1="20" y1="32" x2="44" y2="32"/>
+        <g class="ent-w ent-w-l">
+          <line x1="16" y1="23" x2="16" y2="41"/>
+          <line x1="9"  y1="27" x2="9"  y2="37"/>
+        </g>
+        <g class="ent-w ent-w-r">
+          <line x1="48" y1="23" x2="48" y2="41"/>
+          <line x1="55" y1="27" x2="55" y2="37"/>
+        </g>
+      </g>
+    </svg>
+    <div class="ent-loading-track"><div class="ent-loading-fill"></div></div>
   </div>`;
 }
-function _entSetLoading(texto) { _tabSetLoading('entrenamientoContent', texto); }
-function _nutSetLoading(texto) { _tabSetLoading('nutricionContent', texto); }
+
+/* Pantalla de carga de una pestaña.
+
+   `pasos` es opcional: en vez de un "cargando" mudo, va marcando en qué va.
+   Con la espera corta casi no se ven, pero cuando el servidor va lento es la
+   diferencia entre "esto está haciendo algo" y "esto se ha colgado". */
+function _tabSetLoading(contenedorId, texto, pasos) {
+  const el = document.getElementById(contenedorId);
+  if (!el) return;
+  const lista = (pasos || []).map((p, i) =>
+    `<li class="ent-step" data-step="${i}"><span class="ent-step-dot"></span>${esc(p)}</li>`).join('');
+  el.innerHTML = `<div class="card ent-loading-card">
+    ${_loadingVisual()}
+    <p class="ent-loading-title">${esc(texto || 'Cargando…')}</p>
+    ${lista ? `<ul class="ent-steps">${lista}</ul>`
+            : '<p class="ent-loading-sub">Un momento…</p>'}
+  </div>`;
+  // Arranca en el primer paso: si no, la lista nace entera en gris y parece
+  // que no ha empezado nada hasta que el llamador avanza.
+  if (lista) _tabLoadingStep(contenedorId, 0);
+}
+
+/* Marca hasta qué paso se ha llegado. Silencioso si la pantalla ya no está:
+   la carga puede terminar antes de que dé tiempo a avanzar los pasos. */
+function _tabLoadingStep(contenedorId, idx) {
+  const el = document.getElementById(contenedorId);
+  if (!el) return;
+  el.querySelectorAll('.ent-step').forEach(li => {
+    const i = parseInt(li.dataset.step, 10);
+    li.classList.toggle('done', i < idx);
+    li.classList.toggle('doing', i === idx);
+  });
+}
+
+function _entSetLoading(texto, pasos) { _tabSetLoading('entrenamientoContent', texto, pasos); }
+function _entLoadingStep(i) { _tabLoadingStep('entrenamientoContent', i); }
+function _nutSetLoading(texto, pasos) { _tabSetLoading('nutricionContent', texto, pasos); }
+function _nutLoadingStep(i) { _tabLoadingStep('nutricionContent', i); }
 
 async function renderEntrenamientoTab() {
   const el = document.getElementById('entrenamientoContent');
@@ -9055,7 +9147,11 @@ async function confirmAssignDiet() {
     _nutDetail = null;
     _nutActiveDietIdx = 0;
     closeAssignDietModal();
-    _nutSetLoading(copies.length > 1 ? 'Asignando dietas' : 'Asignando dieta');
+    _nutSetLoading(copies.length > 1 ? 'Asignando dietas' : 'Asignando dieta', [
+      copies.length > 1 ? 'Copiando las dietas al cliente' : 'Copiando la dieta al cliente',
+      'Cargando las comidas y alimentos',
+    ]);
+    _nutLoadingStep(1);
 
     const rd = await fetch(`${API}/diets/client/${clientId}`, { headers: h() });
     if (rd.ok) {
@@ -9184,7 +9280,14 @@ async function confirmAssignRoutine() {
     // Se pinta el estado de carga ANTES de nada: es lo que faltaba, porque si
     // no la pestaña sigue enseñando "Sin plan de entrenamiento" y parece que
     // la asignación no ha funcionado.
-    _entSetLoading('Asignando plan de entrenamiento');
+    // Solo los pasos que de verdad ocurren mientras esta pantalla está a la
+    // vista. El envío del PDF va en segundo plano y para entonces ya se ha
+    // pintado el plan, así que listarlo aquí sería un paso inalcanzable.
+    _entSetLoading('Asignando plan de entrenamiento', [
+      'Copiando la rutina al cliente',
+      'Cargando los días y ejercicios',
+    ]);
+    _entLoadingStep(1);  // el copiado ya está hecho al llegar aquí
 
     const newRoutineId = j.data?.id;
 

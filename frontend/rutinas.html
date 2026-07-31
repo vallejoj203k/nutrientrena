@@ -481,6 +481,7 @@
     .rv-chip{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:700;}
     .rv-chip.mine{background:#EEF2FF;color:#4F46E5;}
     .rv-chip.tpl{background:#F3F4F6;color:#6B7280;}
+    .rv-chip.team{background:#FEF3C7;color:#B45309;}
     .rv-chip.outline{background:#fff;color:#6B7280;border:1.5px solid #E5E7EB;font-weight:600;}
     .rv-title{font-size:24px;font-weight:800;color:#111827;line-height:1.2;}
     .rv-meta{font-size:14px;color:#6B7280;margin:7px 0 20px;}
@@ -829,12 +830,14 @@ function openConfirm(title,text,fn){document.getElementById('confirmTitle').text
 function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');}
 function timeAgo(dateStr){if(!dateStr)return'—';const d=new Date(dateStr);const now=new Date();const diff=Math.floor((now-d)/86400000);if(diff<0)return'Futuro';if(diff===0)return'Hoy';if(diff===1)return'Ayer';if(diff<7)return`Hace ${diff} días`;if(diff<30)return`Hace ${Math.floor(diff/7)} sem`;return`Hace ${Math.floor(diff/30)} mes`;}
 
+let _meUserId=null;
 async function initUser(){
   if(!token){location.href='login.html';return;}
   try{
     const r=await fetch(`${API}/auth/me`,{headers:authHeaders()});
     if(!r.ok)throw new Error();
     const d=await r.json();const u=d.data||d;
+    _meUserId=u.id||null;  // para distinguir lo propio de lo del compañero de equipo
     document.getElementById('sidebarName').textContent=u.name||u.email||'—';
     document.getElementById('sidebarRole').textContent=u.role?.name||'';
     (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name||u.email||'U')[0].toUpperCase();}})()
@@ -908,19 +911,31 @@ function renderRoutines(list){
   tbody.innerHTML=list.map(routineRow).join('');
 }
 
+/* Origen de una rutina: de la plataforma, mía, o de un compañero de equipo.
+
+   Antes se decidía solo por organization_id, así que la rutina del compañero
+   salía como "Mía". La etiqueta "Equipo" del diagrama de jerarquía no estaba
+   implementada. */
+function _origenRutina(r){
+  if(r.organization_id==null) return {cls:'tpl', txt:'Plataforma'};
+  if(_meUserId!=null && String(r.user_id)===String(_meUserId)) return {cls:'mine', txt:'Mía'};
+  return {cls:'team', txt:'Equipo'};
+}
+
 function routineRow(r){
   const _rid=parseInt(localStorage.getItem('role_id')||'0');
   const _isAdmin=_rid===1||_rid===2;
   const isPlatformAdmin=r.organization_id==null;
-  // El listado (/routines/findAll) solo trae rutinas del propio usuario,
-  // así que siempre puede editarlas/eliminarlas (aunque figuren como "Plantilla").
+  // Desde que la biblioteca se comparte por organización, el listado ya NO trae
+  // solo lo propio: también llega lo de los compañeros y las plantillas de
+  // plataforma. Editar lo de plataforma lo corta el backend con un 403.
   const canEdit=true;
   const levelName=r.training_level_id?(LEVELS[r.training_level_id]||`Nivel ${r.training_level_id}`):null;
   const levelCls=r.training_level_id?`lvl-${r.training_level_id}`:'';
   const days=r.days_list||[];const sessionCount=days.length;const tags=[r.training].filter(Boolean);
-  const originBadge=isPlatformAdmin
-    ?`<span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#F3F4F6;color:#6B7280;margin-left:6px;">Plantilla</span>`
-    :`<span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#EEF2FF;color:#4F46E5;margin-left:6px;">Mía</span>`;
+  const _o=_origenRutina(r);
+  const _oBg={tpl:'#F3F4F6;color:#6B7280',mine:'#EEF2FF;color:#4F46E5',team:'#FEF3C7;color:#B45309'}[_o.cls];
+  const originBadge=`<span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:${_oBg};margin-left:6px;">${_o.txt}</span>`;
   const subLine=esc(r.objective&&r.training?r.training:(r.training||'')); // línea de equipo/lugar si existe
   return `<tr onclick="openRoutineView(${r.id})">
     <td><div style="display:flex;align-items:center;gap:12px;"><div style="width:38px;height:38px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></div><div><div style="font-weight:700;color:#111827;font-size:13px;">${esc(r.name)}${originBadge}</div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:3px;font-size:11px;color:#6B7280;">${sessionCount?`<span>${sessionCount} sesione${sessionCount!==1?'s':''}</span>`:''}${subLine?`${sessionCount?' · ':''}<span>${subLine}</span>`:''}</div></div></div></td>
@@ -1844,7 +1859,13 @@ function renderRoutineView(rt,id){
   const genderName=rt.gender_id?(GENDERS[rt.gender_id]||null):'Mixto';
 
   const chips=[
-    isPlatform?'<span class="rv-chip tpl">Plantilla</span>':'<span class="rv-chip mine">Mía</span>',
+    (function(){
+      // El detalle puede no traer user_id/organization_id: se cae a la fila del
+      // listado, que sí los tiene.
+      const o=_origenRutina({organization_id:orgId,
+        user_id: rt.user_id!==undefined?rt.user_id:(listRow?listRow.user_id:null)});
+      return `<span class="rv-chip ${o.cls}">${o.txt}</span>`;
+    })(),
     levelName?`<span class="rv-chip lvl-pill lvl-${rt.training_level_id}">${esc(levelName)}</span>`:'',
     genderName?`<span class="rv-chip outline">${esc(genderName)}</span>`:'',
   ].filter(Boolean).join('');

@@ -67,7 +67,7 @@ print('harness generado en', destino2)
 
 # ── Harness del estado de carga al asignar planes (client-profile.html) ─────
 css = '\n'.join(re.findall(r'<style>(.*?)</style>', perfil, re.S))
-a = perfil.index('function _tabSetLoading(')
+a = perfil.index('/* Animaci\u00f3n de la pantalla de carga')
 b = perfil.index('async function renderEntrenamientoTab()')
 carga = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
 <div id="entrenamientoContent"></div><div id="nutricionContent"></div>

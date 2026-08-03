@@ -5,7 +5,10 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, get_org_context, OrgContext, SUPERADMIN, ADMIN
+from app.core.dependencies import (
+    require_role_ids, get_org_context, OrgContext, _user_role_ids,
+    SUPERADMIN, ADMIN, COACH,
+)
 from app.core.responses import send_response, send_error
 from app.models.user import UserDetail, UserParent
 from app.models.team_member import TeamMember
@@ -93,11 +96,31 @@ def _serialize(member: TeamMember, db: Session) -> dict:
     }
 
 
+def _puede_ver_equipo(org: OrgContext, current_user, db: Session) -> bool:
+    """Quién puede ver el equipo de una organización.
+
+    El gate de rol era require_role_ids(SUPERADMIN, ADMIN), que dejaba fuera a
+    COACH por completo. Pero el documento de jerarquía dice que el dueño de la
+    organización —el dueño del centro— gestiona su equipo, y ese dueño puede
+    estar registrado como COACH, no como ADMIN: quedaba bloqueado en su propia
+    pantalla de Equipo.
+
+    A la vez, un coach del equipo que NO es dueño sigue sin ver el equipo
+    (nivel 3: gestiona sus clientes y nada más).
+    """
+    if org.org_id is None and org.is_owner:
+        return True   # superadmin, o admin de plataforma sin organización
+    if org.is_owner:
+        return True   # dueño de la organización, sea COACH o ADMIN
+    # Delegado no dueño: solo si es ADMIN (un coach raso no ve el equipo)
+    return ADMIN in _user_role_ids(current_user.id, db)
+
+
 # ── GET /team ─────────────────────────────────────────────────────────────────
 @router.get("", summary="Listar miembros del equipo")
 def list_team(
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
     org: OrgContext = Depends(get_org_context),
 ):
     # Antes era una lista plana de toda la plataforma: cualquier ADMIN veía y
@@ -107,6 +130,9 @@ def list_team(
     # modo bypass); solo quien está en bypass total (superadmin, o admin sin
     # organización) ve todo. Editar/eliminar exige además ser el dueño —
     # ver la lista no.
+    if not _puede_ver_equipo(org, current_user, db):
+        return send_error("No tienes acceso al equipo", code=403)
+
     q = db.query(TeamMember)
     if org.org_id:
         q = q.filter(or_(TeamMember.organization_id.is_(None), TeamMember.organization_id == org.org_id))
@@ -125,9 +151,15 @@ def list_team(
 def create_team_member(
     data: TeamMemberCreateRequest,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
     org: OrgContext = Depends(get_org_context),
 ):
+    # Dar de alta personal es cosa del dueño del centro. Con COACH ya dentro
+    # del gate de rol, sin esto cualquier coach del equipo podría añadir gente
+    # a la organización.
+    if not (org.is_owner or (org.org_id is None and org.is_owner)):
+        return send_error("Solo el dueño de la organización puede dar de alta miembros", code=403)
+
     if not data.user_detail_id and not data.member_name:
         return send_error("Se requiere user_detail_id o member_name", code=400)
 
@@ -183,7 +215,7 @@ def update_team_member(
     id: int,
     data: TeamMemberUpdateRequest,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
     org: OrgContext = Depends(get_org_context),
 ):
     member = db.query(TeamMember).filter(TeamMember.id == id).first()
@@ -230,7 +262,7 @@ def update_team_member(
 def delete_team_member(
     id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
     org: OrgContext = Depends(get_org_context),
 ):
     member = db.query(TeamMember).filter(TeamMember.id == id).first()

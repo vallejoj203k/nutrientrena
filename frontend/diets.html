@@ -109,6 +109,7 @@
     .lib-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
     .lib-tag-mia{background:#DBEAFE;color:#2563EB;}
     .lib-tag-plantilla{background:#F3F4F6;color:#6B7280;}
+    .lib-tag-equipo{background:#FEF3C7;color:#B45309;}
     .lib-td-kcal{font-weight:700;color:var(--lib-text);display:inline-flex;align-items:center;gap:5px;}
     .lib-td-num{text-align:right;font-weight:600;color:#374151;font-variant-numeric:tabular-nums;}
     .lib-td-comidas{text-align:right;color:var(--lib-primary);font-weight:700;}
@@ -1505,6 +1506,18 @@ function _dietFoodIcon() {
   return '<svg width="19" height="19" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>';
 }
 
+/* Etiqueta de origen de una dieta.
+
+   Antes esto decidía solo por organization_id: cualquier dieta de tu
+   organización salía como "Mía", incluida la del compañero de al lado. La
+   etiqueta "Equipo" que pide el diagrama de jerarquía no existía en el
+   código. Ahora se mira también quién la creó (user_id). */
+function _origenTag(d) {
+  if (d.organization_id == null) return { cls: 'lib-tag-plantilla', txt: 'Plataforma' };
+  if (_meUserId != null && String(d.user_id) === String(_meUserId)) return { cls: 'lib-tag-mia', txt: 'Mía' };
+  return { cls: 'lib-tag-equipo', txt: 'Equipo' };
+}
+
 function dietRow(d) {
   var _rid = parseInt(localStorage.getItem('role_id') || '0');
   var _isAdmin = _rid === 1 || _rid === 2;
@@ -1518,9 +1531,8 @@ function dietRow(d) {
   var comidas = (d.foods || []).length;
   var tipo = getDietTipo(d);
   var id = String(d.id), title = esc(d.title || 'Sin nombre');
-  var tag = isPlatformAdmin
-    ? '<span class="lib-tag lib-tag-plantilla">Plantilla</span>'
-    : '<span class="lib-tag lib-tag-mia">Mía</span>';
+  var _o = _origenTag(d);
+  var tag = '<span class="lib-tag ' + _o.cls + '">' + _o.txt + '</span>';
   var num = function(v, u){ return v != null ? v + (u || '') : '—'; };
   var flame = '<svg width="13" height="13" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>';
 
@@ -1583,7 +1595,7 @@ function dietCard(d) {
   return '<div class="diet-card" onclick="openDietPreview(\'' + id + '\')">'
     // header
     + '<div class="dc-head">'
-    +   '<div><div class="dc-title">' + title + (isPlatformAdmin ? ' <span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#F3F4F6;color:#6B7280;">Plataforma</span>' : '') + '</div></div>'
+    +   '<div><div class="dc-title">' + title + ' <span class="lib-tag ' + _origenTag(d).cls + '" style="font-size:10px;">' + _origenTag(d).txt + '</span></div></div>'
     +   '<button class="dc-menu" onclick="event.stopPropagation();toggleDcMenu(this)" title="Opciones"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>'
     + '</div>'
     // tags

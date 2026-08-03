@@ -144,3 +144,45 @@ def test_admin_delegado_ve_solo_su_organizacion_pero_no_puede_editar(client, see
 
     r = client.put(f"/api/team/{member_id}", headers=h_delegado, json={"member_name": "Intento del delegado"})
     assert r.status_code == 403, r.text
+
+
+# ── El dueño del centro puede ser COACH, no solo ADMIN ─────────────────────
+# El gate de rol era (SUPERADMIN, ADMIN), así que un dueño registrado como
+# COACH quedaba fuera de su propia pantalla de Equipo. El documento de
+# jerarquía dice que el dueño del centro gestiona su equipo, sin decir con qué
+# rol está dado de alta.
+
+def test_un_coach_duenio_de_organizacion_gestiona_su_equipo(client, seed, admin_headers):
+    uid, det, h = _crear_usuario(client, admin_headers, "coach.duenio.centro@nutrientrena-qa.com", role_id=5)
+    _crear_organizacion(det, "Gimnasio de un coach dueño")
+
+    # Ve su equipo
+    r = client.get("/api/team", headers=h)
+    assert r.status_code == 200, r.text
+
+    # Y puede dar de alta personal
+    r = client.post("/api/team", headers=h, json={"member_name": "Nuevo coach del centro"})
+    assert r.status_code == 200, r.text
+    member_id = r.json()["data"]["id"]
+
+    # Lo que crea queda en su organización
+    r = client.put(f"/api/team/{member_id}", headers=h, json={"member_name": "Renombrado"})
+    assert r.status_code == 200, r.text
+
+
+def test_un_coach_del_equipo_sigue_sin_ver_ni_tocar_el_equipo(client, seed, admin_headers):
+    """Nivel 3: gestiona sus clientes y nada más. Abrir el gate a COACH no
+    puede convertir a cualquier coach en gestor de personal."""
+    uid_d, det_d, h_d = _crear_usuario(client, admin_headers, "duenio.con.empleado@nutrientrena-qa.com", role_id=5)
+    org_id = _crear_organizacion(det_d, "Centro con empleado")
+
+    uid_e, det_e, h_e = _crear_usuario(client, admin_headers, "empleado.raso@nutrientrena-qa.com", role_id=5)
+    _agregar_al_equipo(client, h_d, det_e)
+
+    assert client.get("/api/team", headers=h_e).status_code == 403
+    assert client.post("/api/team", headers=h_e, json={"member_name": "Intento"}).status_code == 403
+
+
+def test_un_coach_sin_organizacion_no_da_de_alta_personal(client, seed, admin_headers):
+    uid, det, h = _crear_usuario(client, admin_headers, "coach.suelto.equipo@nutrientrena-qa.com", role_id=5)
+    assert client.post("/api/team", headers=h, json={"member_name": "Intento"}).status_code == 403

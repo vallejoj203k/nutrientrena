@@ -14,7 +14,14 @@ import sqlalchemy as sa
 revision = 'f9d0e1f2a3b4'
 down_revision = 'f8c9d0e1f2a3'
 branch_labels = None
-depends_on = None
+# Esta tabla tiene una clave foránea a `pathologies`, que se crea en
+# c1d2e3f4a5b6 — y esa revisión vive en la OTRA rama del historial. Sin
+# declararlo, `alembic upgrade heads` recorre primero esta rama y falla con
+# "errno 150: Foreign key constraint is incorrectly formed", porque la tabla
+# referenciada aún no existe. En las bases ya migradas no se notaba (para
+# cuando llegó esta revisión, la otra rama ya había pasado), pero una base
+# nueva no se podía levantar.
+depends_on = 'c1d2e3f4a5b6'
 
 
 def _has_table(table):

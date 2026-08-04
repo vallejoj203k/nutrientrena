@@ -121,12 +121,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      # La versión se fija en package.json, no aquí, para que local y CI
-      # instalen exactamente lo mismo.
+      # package.json vive en tests/, NO en la raíz: en la raíz haría que
+      # Nixpacks tome el proyecto por Node en el despliegue y deje de instalar
+      # las dependencias de Python.
       - name: Install Playwright + Chromium
         run: |
-          npm ci || npm install
-          npx playwright install --with-deps chromium
+          npm --prefix tests ci || npm --prefix tests install
+          npx --prefix tests playwright install --with-deps chromium
 
       # Los bancos de prueba se generan extrayendo el código REAL de las
       # páginas y del módulo compartido, no una copia: si alguien mueve una

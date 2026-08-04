@@ -916,6 +916,19 @@ function renderRoutines(list){
    Antes se decidía solo por organization_id, así que la rutina del compañero
    salía como "Mía". La etiqueta "Equipo" del diagrama de jerarquía no estaba
    implementada. */
+/* Si se puede editar/eliminar esta rutina desde la interfaz.
+
+   El listado ofrecía Editar SIEMPRE (canEdit=true), también en las plantillas
+   de plataforma, y el backend respondía 403: se prometía algo que no se podía
+   hacer. Lo de la organización propia sí se puede, aunque lo haya creado un
+   compañero — la biblioteca se comparte. El rol 7 no entra: no gestiona
+   rutinas, solo alimentos y ejercicios. */
+function _puedeEditarRutina(r){
+  if(r && r.organization_id!=null) return true;
+  const rid=parseInt(localStorage.getItem('role_id')||'0');
+  return rid===1||rid===2;
+}
+
 function _origenRutina(r){
   if(r.organization_id==null) return {cls:'tpl', txt:'Plataforma'};
   if(_meUserId!=null && String(r.user_id)===String(_meUserId)) return {cls:'mine', txt:'Mía'};
@@ -928,8 +941,8 @@ function routineRow(r){
   const isPlatformAdmin=r.organization_id==null;
   // Desde que la biblioteca se comparte por organización, el listado ya NO trae
   // solo lo propio: también llega lo de los compañeros y las plantillas de
-  // plataforma. Editar lo de plataforma lo corta el backend con un 403.
-  const canEdit=true;
+  // plataforma, que un coach no puede editar.
+  const canEdit=_puedeEditarRutina(r);
   const levelName=r.training_level_id?(LEVELS[r.training_level_id]||`Nivel ${r.training_level_id}`):null;
   const levelCls=r.training_level_id?`lvl-${r.training_level_id}`:'';
   const days=r.days_list||[];const sessionCount=days.length;const tags=[r.training].filter(Boolean);
@@ -1853,8 +1866,7 @@ function renderRoutineView(rt,id){
   const listRow=allRoutines.find(x=>x.id===id);
   const orgId=rt.organization_id!==undefined?rt.organization_id:(listRow?listRow.organization_id:null);
   const isPlatform=orgId==null;
-  const _rid=parseInt(localStorage.getItem('role_id')||'0');
-  const canEdit=(_rid===1||_rid===2)||!isPlatform;
+  const canEdit=_puedeEditarRutina({organization_id:orgId});
   const levelName=rt.training_level_id?(LEVELS[rt.training_level_id]||null):null;
   const genderName=rt.gender_id?(GENDERS[rt.gender_id]||null):'Mixto';
 

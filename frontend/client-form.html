@@ -452,8 +452,7 @@
               </div>
               <div class="form-group">
                 <label>País</label>
-                <input id="fCountry" list="countryList" autocomplete="off" placeholder="Escribe o selecciona un país…">
-                <datalist id="countryList"></datalist>
+                <select id="fCountry"><option value="">— Seleccionar —</option></select>
               </div>
             </div>
             <div class="form-row">
@@ -662,18 +661,40 @@ async function loadParamSelect(paramName, selectId){
   }catch{}
 }
 
+// El campo se llama country_code por historia, pero desde la migración
+// v0w1x2y3z4a5 guarda el NOMBRE del país en texto libre (sin clave foránea).
+// Antes era un input con sugerencias: se podía escribir cualquier cosa, así que
+// "España", "españa" y "Espana" acababan siendo tres países distintos. Con un
+// select solo entran los nombres del catálogo.
 async function loadCountries(){
   try{
     const r=await fetch(`${API}/countries/search`,{headers:{Authorization:`Bearer ${token}`}});
     if(!r.ok) return;
     const j=await r.json();
-    const dl=document.getElementById('countryList');
+    const sel=document.getElementById('fCountry');
+    const actual=sel.value;
     (j.data||j||[]).forEach(c=>{
+      const nombre=c.country||c.name||'';
+      if(!nombre) return;
       const opt=document.createElement('option');
-      opt.value=c.country||c.name||'';
-      dl.appendChild(opt);
+      opt.value=nombre; opt.textContent=nombre;
+      sel.appendChild(opt);
     });
+    if(actual) _seleccionarPais(sel, actual);
   }catch{}
+}
+
+// Las fichas antiguas pueden tener el código ("ES") en vez del nombre; se
+// acepta para no perder el valor al abrir la ficha.
+function _seleccionarPais(sel, valor){
+  if(!valor) return;
+  const v=String(valor).toLowerCase();
+  for(const o of sel.options){
+    if(o.value.toLowerCase()===v){ sel.value=o.value; return; }
+  }
+  // No está en el catálogo (o es un código): se añade tal cual para no perderlo
+  const opt=document.createElement('option');
+  opt.value=valor; opt.textContent=valor; sel.appendChild(opt); sel.value=valor;
 }
 
 // ── Load client for edit ───────────────────────────────────────────────────────
@@ -727,7 +748,7 @@ async function loadClient(){
     document.getElementById('fGender').value     =d.gender_id||c.gender_id||'';
     document.getElementById('fActivity').value   =d.activity_id||c.activity_id||'';
     document.getElementById('fObjective').value  =d.objective_id||c.objective_id||'';
-    document.getElementById('fCountry').value    =d.country_code||c.country_code||'';
+    _seleccionarPais(document.getElementById('fCountry'), (d.country&&d.country.country)||d.country_code||c.country_code||'');
     document.getElementById('fDeficit').value    =d.defecit||c.defecit||'';
     document.getElementById('fExcedente').value  =d.excedente||c.excedente||'';
     document.getElementById('fStatus').value     =c.status_id||'';

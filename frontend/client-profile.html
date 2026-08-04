@@ -2560,8 +2560,8 @@ function _renderClientPanel() {
   const obj = c.objective?.name || c.objective?.description || c.objective_name || c.goal || '—';
   const pesoIni = c.weight ? `${c.weight} kg` : '—';
   const pesoAct = (checkins[0]?.weight ?? c.weight) != null ? `${checkins[0]?.weight ?? c.weight} kg` : '—';
-  // La API devuelve {code, country}; antes se leía .name, que no existe, así que
-  // acababa cayendo al código crudo ("ES") en vez del nombre.
+  // country_code guarda el nombre en texto libre; para fichas antiguas que
+  // guardaron el código, la relación del backend lo resuelve a su nombre.
   const country = c.country?.country || c.country?.name || c.country_name
     || (_paisesCache || []).find(p => p.code === c.country_code)?.name
     || c.country_code || '—';
@@ -2982,14 +2982,23 @@ async function openEditClient() {
   document.getElementById('ec_objective_id').innerHTML = opts(_nutParamOpts?.objective, c.objective?.id || c.objective_id);
   document.getElementById('ec_activity_id').innerHTML  = opts(_nutParamOpts?.activity,  c.activity?.id || c.activity_id);
 
-  // El valor que se guarda es el código (country_code, FK a countries.code),
-  // no el nombre: por eso un select y no un texto libre.
+  // Se guarda el NOMBRE, no el código. El campo se llama country_code por
+  // historia, pero la migración v0w1x2y3z4a5 quitó la clave foránea a
+  // countries.code y lo dejó como texto libre. La primera versión de este
+  // select guardaba el código, y eso dejaba dos formatos distintos conviviendo
+  // en la misma columna según por qué pantalla se hubiera dado de alta.
   const paisSel = document.getElementById('ec_country_code');
   if (paisSel) {
-    const actual = c.country?.code || c.country_code || '';
+    const actual = c.country?.country || c.country_code || '';
     const paises = await _cargarPaises();
-    paisSel.innerHTML = '<option value="">—</option>' + paises.map(p =>
-      `<option value="${esc(p.code)}"${p.code === actual ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+    let html = '<option value="">—</option>' + paises.map(p =>
+      `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+    // Fichas antiguas con el código guardado: se conserva el valor tal cual
+    // para no borrarlo sin querer al guardar.
+    if (actual && !paises.some(p => p.name === actual)) {
+      html += `<option value="${esc(actual)}">${esc(actual)}</option>`;
+    }
+    paisSel.innerHTML = html;
     paisSel.value = actual;
   }
 

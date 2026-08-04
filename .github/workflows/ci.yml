@@ -101,3 +101,122 @@ jobs:
         with:
           name: coverage-report
           path: .coverage
+
+  frontend:
+    name: Frontend (Chromium)
+    runs-on: ubuntu-latest
+    needs: lint-and-verify
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # La versión se fija en package.json, no aquí, para que local y CI
+      # instalen exactamente lo mismo.
+      - name: Install Playwright + Chromium
+        run: |
+          npm ci || npm install
+          npx playwright install --with-deps chromium
+
+      # Los bancos de prueba se generan extrayendo el código REAL de las
+      # páginas y del módulo compartido, no una copia: si alguien mueve una
+      # función y el extractor deja de encontrarla, esto falla aquí y no en
+      # producción.
+      - name: Generar bancos de prueba
+        run: python3 tests/frontend/generar_harness.py
+
+      - name: Suites de frontend
+        run: |
+          fallos=0
+          for t in tests/frontend/*.test.js; do
+            echo "── $t"
+            node "$t" || fallos=1
+          done
+          exit $fallos
+
+  migrations:
+    name: Migraciones sobre MySQL limpio
+    runs-on: ubuntu-latest
+    needs: lint-and-verify
+
+    # Este job existe por un fallo real: user_pathologies tenía una clave
+    # foránea a una tabla creada en la OTRA rama del historial, así que
+    # `alembic upgrade heads` no levantaba una base nueva. No se veía en las
+    # bases ya migradas, y los tests usan create_all (no alembic), así que
+    # nada lo detectaba.
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nutri_ci
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Migrar desde cero, igual que start.sh
+        env:
+          DATABASE_URL: "mysql+pymysql://root:root@127.0.0.1:3306/nutri_ci"
+          SECRET_KEY: ci-secret-key
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_BUCKET: test-bucket
+          RESEND_API_KEY: test
+        run: alembic upgrade heads
+
+      - name: Sembrar datos iniciales
+        env:
+          DATABASE_URL: "mysql+pymysql://root:root@127.0.0.1:3306/nutri_ci"
+          SECRET_KEY: ci-secret-key
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_BUCKET: test-bucket
+          RESEND_API_KEY: test
+        run: python -m app.seeds.run_seeds
+
+      # El modelo y la base pueden divergir sin que nadie se entere: los tests
+      # crean las tablas desde el modelo, no desde las migraciones.
+      - name: Comprobar que el modelo cuadra con lo migrado
+        env:
+          DATABASE_URL: "mysql+pymysql://root:root@127.0.0.1:3306/nutri_ci"
+          SECRET_KEY: ci-secret-key
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_BUCKET: test-bucket
+          RESEND_API_KEY: test
+        run: |
+          python -c "
+          import app.models  # noqa
+          from sqlalchemy import create_engine, inspect
+          from app.config import SQLALCHEMY_DATABASE_URL
+          from app.database import Base
+          insp = inspect(create_engine(SQLALCHEMY_DATABASE_URL))
+          reales = set(insp.get_table_names())
+          faltan = [t for t in Base.metadata.tables if t not in reales]
+          assert not faltan, f'Tablas del modelo que las migraciones no crean: {faltan}'
+          print(f'✅ {len(reales)} tablas migradas, ninguna del modelo sin migrar')
+          "

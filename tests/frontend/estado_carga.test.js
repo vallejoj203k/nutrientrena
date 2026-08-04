@@ -1,4 +1,4 @@
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('../_pw');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage();
   const errs=[]; p.on('pageerror',e=>errs.push(String(e)));

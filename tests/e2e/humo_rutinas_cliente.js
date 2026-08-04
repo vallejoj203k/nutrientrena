@@ -1,4 +1,4 @@
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('../_pw');
 const FRONT='http://127.0.0.1:8011', API='http://127.0.0.1:8010';
 const PROD='https://nutrientrena-production.up.railway.app';
 
@@ -104,6 +104,33 @@ const PROD='https://nutrientrena-production.up.railway.app';
   await p.waitForTimeout(4000);
   const ent=await p.textContent('#entrenamientoContent');
   ck('el plan aparece asignado', ent.includes('Rutina de humo'), ent.slice(0,150));
+
+  // ── C. El constructor EMBEBIDO en la ficha, ya desde el módulo compartido
+  await p.evaluate(()=>openEntBuilder(0));
+  await p.waitForTimeout(1200);
+  ck('el constructor embebido abre', await p.locator('#entBuilderOverlay.open').count()===1);
+  const nd=await p.locator('#entBuilderOverlay #daysList .day-chip').count();
+  ck('pinta los días del plan asignado', nd===3, nd);
+  ck('con contador y asa (la versión nueva)',
+     await p.locator('#entBuilderOverlay .day-chip-sub').count()===3 &&
+     await p.locator('#entBuilderOverlay .day-grip').count()===3);
+  ck('la tabla usa el formato nuevo', await p.locator('#entBuilderOverlay .ex-row2').count()>0,
+     String(await p.locator('#entBuilderOverlay .ex-row2').count()));
+  ck('hay botones de mover ejercicio', await p.locator('#entBuilderOverlay .ex-move').count()>0);
+  ck('el módulo compartido está cargado una sola vez',
+     await p.evaluate(()=>document.querySelectorAll('script[src*="routine-builder"]').length)===1);
+
+  // Arrastrar días también aquí, con el mismo código
+  const g2=p.locator('#entBuilderOverlay #daysList .day-chip').nth(0).locator('.day-grip');
+  const t2=p.locator('#entBuilderOverlay #daysList .day-chip').nth(2);
+  await g2.waitFor({state:'visible',timeout:8000});
+  const g2b=await g2.boundingBox(), t2b=await t2.boundingBox();
+  await p.mouse.move(g2b.x+g2b.width/2,g2b.y+g2b.height/2); await p.mouse.down();
+  await p.mouse.move(g2b.x+g2b.width/2,g2b.y+25,{steps:5});
+  await p.mouse.move(t2b.x+t2b.width/2,t2b.y+t2b.height-4,{steps:12}); await p.mouse.up();
+  await p.waitForTimeout(400);
+  const ordEmb=await p.evaluate(()=>routineData.days_list.map(d=>d.day_name));
+  ck('arrastrar días funciona TAMBIÉN en el modal del cliente', ordEmb[2]==='Lunes', ordEmb);
 
   ck('sin errores de JS', errs.length===0, errs);
   await b.close(); process.exit(f?1:0);

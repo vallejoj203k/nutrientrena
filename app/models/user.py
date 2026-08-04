@@ -67,7 +67,12 @@ class UserDetail(Base):
     injuries = Column(Text, nullable=True)
     equipment = Column(Text, nullable=True)
     food_preferences = Column(Text, nullable=True)
-    country_code = Column(String(10), ForeignKey("countries.code"), nullable=True)
+    # Pese al nombre, aquí NO va un código ISO: la migración v0w1x2y3z4a5
+    # ("Allow free-text country names") quitó la clave foránea a countries.code
+    # y ensanchó la columna a 100. El modelo se había quedado declarando
+    # String(10) + ForeignKey, así que los tests (que crean el esquema con
+    # create_all) validaban una tabla que producción no tiene.
+    country_code = Column(String(100), nullable=True)
     gender_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     activity_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
     status_id = Column(Integer, ForeignKey("parameter_details.id"), nullable=True)
@@ -105,7 +110,15 @@ class UserDetail(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="detail", foreign_keys=[user_id])
-    country = relationship("Country", foreign_keys=[country_code])
+    # Sin FK hay que decirle a SQLAlchemy cómo unir. Se conserva porque hay
+    # fichas antiguas que sí guardaron el código; para las que guardan el
+    # nombre simplemente no resuelve y el cliente usa country_code tal cual.
+    country = relationship(
+        "Country",
+        primaryjoin="foreign(UserDetail.country_code) == Country.code",
+        viewonly=True,
+        uselist=False,
+    )
     gender = relationship("ParameterDetail", foreign_keys=[gender_id])
     activity = relationship("ParameterDetail", foreign_keys=[activity_id])
     status = relationship("ParameterDetail", foreign_keys=[status_id])

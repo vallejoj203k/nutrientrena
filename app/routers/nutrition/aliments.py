@@ -148,12 +148,18 @@ def create(
 def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session):
     """Motivo por el que no se puede tocar este alimento, o None.
 
-    Tres reglas, en orden:
-    1. Bypass total: superadmin, o admin sin organización propia.
-    2. Contenido de plataforma (organization_id NULL): solo el editor de
+    Cuatro reglas, en orden:
+    1. Su autor siempre puede con lo suyo. Va PRIMERO, igual que en rutinas y
+       dietas: un coach sin organización crea con organization_id NULL, así
+       que su propio alimento queda marcado como de plataforma y la regla 3 le
+       bloqueaba lo que acababa de crear.
+    2. Bypass total: superadmin, o admin sin organización propia.
+    3. Contenido de plataforma (organization_id NULL): solo el editor de
        contenido global, para el que es justamente su único trabajo.
-    3. De una organización: tiene que ser la tuya.
+    4. De una organización: tiene que ser la tuya.
     """
+    if obj.created_user_id is not None and obj.created_user_id == current_user.id:
+        return None
     if org.org_id is None and org.is_owner:
         return None
     if obj.organization_id is None:
@@ -165,19 +171,26 @@ def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session):
     return None
 
 
-def _alcance_masivo(q, org: OrgContext):
+def _alcance_masivo(q, org: OrgContext, current_user, db: Session):
     """Acota una operación masiva a lo que puede tocar quien llama.
 
-    Importar, sincronizar con USDA o clasificar momentos recorrían TODO el
-    catálogo sin mirar organización: un coach podía reescribir los
-    micronutrientes de los alimentos privados de otra organización de una sola
-    llamada. Quien está en bypass sigue viéndolo todo.
+    Tiene que coincidir con _bloqueado_para_editar: la primera versión dejaba
+    fuera el contenido de otras organizaciones pero SÍ incluía el de
+    plataforma, así que un coach no podía editar un alimento del catálogo común
+    uno a uno (403) y sin embargo podía reescribirlo entero con una sola
+    llamada a classify-moments o usda-sync. Dos puertas al mismo sitio con
+    reglas distintas.
     """
     if org.org_id is None and org.is_owner:
-        return q
+        return q  # superadmin, o admin sin organización propia
+
+    # Lo propio siempre entra, tenga la organización que tenga.
+    condiciones = [Aliment.created_user_id == current_user.id]
     if org.org_id:
-        return q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
-    return q.filter(Aliment.organization_id.is_(None))
+        condiciones.append(Aliment.organization_id == org.org_id)
+    if EDITOR_CONTENIDO_GLOBAL in _user_role_ids(current_user.id, db):
+        condiciones.append(Aliment.organization_id.is_(None))
+    return q.filter(or_(*condiciones))
 
 
 @router.put("/{id}/update", summary="Actualizar alimento", description="Modifica los datos nutricionales y micronutrientes de un alimento existente.")
@@ -354,7 +367,7 @@ class UsdaSyncRequest(BaseModel):
 async def usda_sync(
     body: UsdaSyncRequest,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     api_key = settings.USDA_API_KEY
@@ -364,19 +377,19 @@ async def usda_sync(
     # Sin acotar, esto reescribía los micronutrientes de TODO el catálogo,
     # incluidos los alimentos privados de otras organizaciones.
     if body.ids:
-        aliments = _alcance_masivo(db.query(Aliment).filter(Aliment.id.in_(body.ids)), org).all()
+        aliments = _alcance_masivo(db.query(Aliment).filter(Aliment.id.in_(body.ids)), org, current_user, db).all()
     else:
         # sync only those without a description row yet
         synced_ids = db.query(AlimentDescription.aliment_id).scalar_subquery()
         aliments = _alcance_masivo(db.query(Aliment).filter(
             Aliment.parent_id.is_(None),
             ~Aliment.id.in_(synced_ids),
-        ), org).limit(body.batch).all()
+        ), org, current_user, db).limit(body.batch).all()
 
     total_pending = _alcance_masivo(db.query(Aliment).filter(
         Aliment.parent_id.is_(None),
         ~Aliment.id.in_(db.query(AlimentDescription.aliment_id).scalar_subquery()),
-    ), org).count() if not body.ids else 0
+    ), org, current_user, db).count() if not body.ids else 0
 
     synced: List[str] = []
     not_found: List[str] = []
@@ -446,7 +459,7 @@ def _sin_momentos():
 def classify_moments(
     body: ClassifyMomentsRequest,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     # joinedload: se lee el grupo de cada alimento, y sin esto serían tantas
@@ -454,7 +467,7 @@ def classify_moments(
     q = _alcance_masivo(
         db.query(Aliment)
         .options(joinedload(Aliment.group_food))
-        .filter(Aliment.parent_id.is_(None)), org)
+        .filter(Aliment.parent_id.is_(None)), org, current_user, db)
     if body.ids:
         q = q.filter(Aliment.id.in_(body.ids))
     elif not body.force:
@@ -466,7 +479,7 @@ def classify_moments(
     if not body.ids and not body.force:
         pendientes = _alcance_masivo(db.query(Aliment).filter(
             Aliment.parent_id.is_(None), _sin_momentos()
-        ), org).count()
+        ), org, current_user, db).count()
 
     # Primero, gratis: el grupo del alimento (Frutas, Aceites y grasas,
     # Mariscos…) ya dice el momento y viene con cada alimento importado. Es más

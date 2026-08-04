@@ -1,0 +1,11 @@
+{
+  "name": "nutrientrena-tests",
+  "private": true,
+  "description": "Dependencias solo de pruebas: las suites de frontend se ejecutan en Chromium con Playwright. La aplicación no usa node.",
+  "scripts": {
+    "test:frontend": "python3 tests/frontend/generar_harness.py && for t in tests/frontend/*.test.js; do echo \"-- $t\"; node \"$t\" || exit 1; done"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

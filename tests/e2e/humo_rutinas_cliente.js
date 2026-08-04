@@ -1,4 +1,4 @@
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('../_pw');
 const FRONT='http://127.0.0.1:8011', API='http://127.0.0.1:8010';
 const PROD='https://nutrientrena-production.up.railway.app';
 

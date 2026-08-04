@@ -121,9 +121,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      # La versión se fija en package.json, no aquí, para que local y CI
+      # instalen exactamente lo mismo.
       - name: Install Playwright + Chromium
         run: |
-          npm install playwright@1.56.1
+          npm ci || npm install
           npx playwright install --with-deps chromium
 
       # Los bancos de prueba se generan extrayendo el código REAL de las

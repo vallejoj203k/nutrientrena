@@ -1,4 +1,4 @@
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('../_pw');
 
 (async () => {
   const browser = await chromium.launch();

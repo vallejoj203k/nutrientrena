@@ -1,0 +1,11 @@
+{
+  "name": "nutrientrena-tests",
+  "private": true,
+  "description": "Dependencias SOLO de pruebas (Playwright para las suites de frontend). Vive en tests/ y NO en la raíz a propósito: Railway construye con Nixpacks, que detecta el lenguaje por los ficheros de la raíz, y un package.json ahí hace que tome el proyecto por Node en vez de Python — deja de instalar requirements.txt y el arranque falla con 'alembic: command not found'. La aplicación no usa node.",
+  "scripts": {
+    "test:frontend": "cd .. && python3 tests/frontend/generar_harness.py && for t in tests/frontend/*.test.js; do echo \"-- $t\"; node \"$t\" || exit 1; done"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

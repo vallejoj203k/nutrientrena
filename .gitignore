@@ -46,5 +46,7 @@ build/
 .claude/
 scripts/aliments_usda.sql
 
-# Dependencias de node (solo para las pruebas de frontend en Chromium)
+# Dependencias de node (solo para las pruebas de frontend en Chromium).
+# Viven en tests/, no en la raíz: ver tests/package.json.
 node_modules/
+tests/node_modules/

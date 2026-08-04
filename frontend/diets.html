@@ -110,6 +110,16 @@
     .lib-tag-mia{background:#DBEAFE;color:#2563EB;}
     .lib-tag-plantilla{background:#F3F4F6;color:#6B7280;}
     .lib-tag-equipo{background:#FEF3C7;color:#B45309;}
+    /* Cabeceras de grupo por organización */
+    .lib-grp>td{background:#F8FAFC;border-top:1px solid #E9EBF0;border-bottom:1px solid #E9EBF0;padding:9px 14px !important;cursor:pointer;user-select:none;}
+    .lib-grp:hover>td{background:#F1F5F9;}
+    .lib-grp-in{display:flex;align-items:center;gap:9px;}
+    .lib-grp-chev{transition:transform .15s;color:#9CA3AF;flex-shrink:0;}
+    .lib-grp.closed .lib-grp-chev{transform:rotate(-90deg);}
+    .lib-grp-nm{font-size:12px;font-weight:800;color:#334155;letter-spacing:.2px;}
+    .lib-grp-n{font-size:11px;font-weight:600;color:#94A3B8;}
+    .lib-grp-pill{font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:#EEF2FF;color:#4F46E5;}
+    .lib-grp-pill.plat{background:#F3F4F6;color:#6B7280;}
     .lib-td-kcal{font-weight:700;color:var(--lib-text);display:inline-flex;align-items:center;gap:5px;}
     .lib-td-num{text-align:right;font-weight:600;color:#374151;font-variant-numeric:tabular-nums;}
     .lib-td-comidas{text-align:right;color:var(--lib-primary);font-weight:700;}
@@ -1490,6 +1500,71 @@ function applyFilter() {
 // Close any open card dropdown when clicking outside
 document.addEventListener('click', function(){ document.querySelectorAll('.dc-dropdown.open').forEach(function(d){d.classList.remove('open');}); });
 
+/* ── Biblioteca agrupada por organización ────────────────────────────────
+   Antes era una lista plana: el super-admin, que ve el contenido de todas las
+   organizaciones, no podía saber de cuál venía cada dieta. Ahora cada
+   organización tiene su propio bloque y el catálogo de plataforma el suyo.
+
+   Los bloques solo aparecen si hay más de uno que enseñar: a un coach con una
+   sola organización y sin plantillas no se le añade ruido. */
+var _orgNombres = null;   // id de organización -> nombre
+var _grpCerrados = {};    // grupos plegados por el usuario
+
+async function _cargarOrganizaciones() {
+  if (_orgNombres) return _orgNombres;
+  _orgNombres = {};
+  try {
+    var r = await fetch(API + '/organizations/switchable', { headers: { Authorization: 'Bearer ' + token } });
+    if (r.ok) {
+      var j = await r.json();
+      ((j.data || {}).organizaciones || []).forEach(function(o){ _orgNombres[o.id] = o.name; });
+    }
+  } catch(e) {}
+  return _orgNombres;
+}
+
+function _nombreOrg(orgId) {
+  if (orgId == null) return 'Catálogo de plataforma';
+  return (_orgNombres && _orgNombres[orgId]) || 'Otra organización';
+}
+
+function _agruparPorOrg(items) {
+  var mapa = {};
+  items.forEach(function(d){
+    var k = d.organization_id == null ? '__plataforma__' : String(d.organization_id);
+    (mapa[k] = mapa[k] || []).push(d);
+  });
+  var grupos = Object.keys(mapa)
+    .filter(function(k){ return k !== '__plataforma__'; })
+    .map(function(k){ return { key: k, orgId: k, nombre: _nombreOrg(k), items: mapa[k] }; })
+    .sort(function(a,b){ return a.nombre.localeCompare(b.nombre); });
+  // La plataforma va al final: es la base común, no el trabajo de nadie.
+  if (mapa['__plataforma__']) {
+    grupos.push({ key: '__plataforma__', orgId: null, nombre: _nombreOrg(null), items: mapa['__plataforma__'] });
+  }
+  return grupos;
+}
+
+function _filaGrupo(g) {
+  var n = g.items.length;
+  var cerrado = !!_grpCerrados[g.key];
+  var pill = g.orgId == null
+    ? '<span class="lib-grp-pill plat">Plataforma</span>'
+    : '<span class="lib-grp-pill">Organización</span>';
+  return '<tr class="lib-grp' + (cerrado ? ' closed' : '') + '" onclick="toggleGrupoLib(\'' + esc(g.key) + '\')">'
+    + '<td colspan="8"><div class="lib-grp-in">'
+    + '<svg class="lib-grp-chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>'
+    + '<span class="lib-grp-nm">' + esc(g.nombre) + '</span>'
+    + pill
+    + '<span class="lib-grp-n">' + n + ' dieta' + (n !== 1 ? 's' : '') + '</span>'
+    + '</div></td></tr>';
+}
+
+function toggleGrupoLib(key) {
+  _grpCerrados[key] = !_grpCerrados[key];
+  applyFilter();
+}
+
 function renderTable(diets) {
   document.getElementById('dietTotalLabel').textContent = diets.length + ' dieta' + (diets.length !== 1 ? 's' : '');
   var sc = document.getElementById('subcountDietas'); if (sc) sc.textContent = allDiets.length || '';
@@ -1499,7 +1574,15 @@ function renderTable(diets) {
     tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:44px;color:#9CA3AF;">No hay dietas. Crea la primera con “Nueva dieta”.</td></tr>';
     return;
   }
-  tb.innerHTML = diets.map(dietRow).join('');
+  var grupos = _agruparPorOrg(diets);
+  // Con un solo grupo la cabecera no aporta nada: se deja la lista plana.
+  if (grupos.length < 2) {
+    tb.innerHTML = diets.map(dietRow).join('');
+    return;
+  }
+  tb.innerHTML = grupos.map(function(g){
+    return _filaGrupo(g) + (_grpCerrados[g.key] ? '' : g.items.map(dietRow).join(''));
+  }).join('');
 }
 
 function _dietFoodIcon() {
@@ -3234,6 +3317,9 @@ async function downloadPdf(id, title) {
 }
 
 initUser();
+// Los nombres de organización se necesitan para las cabeceras de la biblioteca;
+// al llegar se repinta, que la lista puede haber cargado antes.
+_cargarOrganizaciones().then(function(){ if (allDiets && allDiets.length) applyFilter(); });
 loadDiets();
 loadDietTypes();
 _fsmLoadGroups();

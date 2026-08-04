@@ -9,16 +9,19 @@ import re
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 src = open(os.path.join(RAIZ, 'frontend', 'rutinas.html')).read()
+MODULO = open(os.path.join(RAIZ, 'frontend', 'js', 'routine-builder.js')).read()
+MODULO_CSS = open(os.path.join(RAIZ, 'frontend', 'css', 'routine-builder.css')).read()
 
-css = '\n'.join(re.findall(r'<style>(.*?)</style>', src, re.S))
+css = '\n'.join(re.findall(r'<style>(.*?)</style>', src, re.S)) + '\n' + MODULO_CSS
 
-i = src.index('function renderDaysList(){')
-j = src.index('\n  setupDayDrag();\n}\n', i) + len('\n  setupDayDrag();\n}\n')
-render = src[i:j]
+# El constructor vive en el módulo compartido, no en la página.
+i = MODULO.index('function renderDaysList(){')
+j = MODULO.index('\n  setupDayDrag();\n}\n', i) + len('\n  setupDayDrag();\n}\n')
+render = MODULO[i:j]
 
-a = src.index('/* \u2500\u2500 Arrastrar d\u00edas')
-b = src.index('function startRenameDay(', a)
-drag = src[a:b]
+a = MODULO.index('/* \u2500\u2500 Arrastrar d\u00edas')
+b = MODULO.index('function startRenameDay(', a)
+drag = MODULO[a:b]
 
 harness = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
 <body>
@@ -92,12 +95,12 @@ def _bloque(html, marca):
         j += 1
     return seg[:j]
 
-cssp = '\n'.join(re.findall(r'<style>(.*?)</style>', perfil, re.S))
+cssp = ('\n'.join(re.findall(r'<style>(.*?)</style>', perfil, re.S))
+        + '\n' + open(os.path.join(RAIZ, 'frontend', 'css', 'routine-builder.css')).read())
 overlay = _bloque(perfil, '<div class="ne-backdrop" id="entBuilderOverlay">')
 picker = _bloque(perfil, '<div class="picker-overlay" id="pickerOverlay"')
-i = perfil.index('function addDay(){')
-j = perfil.index('/* \u2500\u2500 Save \u2500\u2500 */', i)
-codigo = perfil[i:j]
+# El constructor ya no está inline: vive en el módulo compartido.
+codigo = open(os.path.join(RAIZ, 'frontend', 'js', 'routine-builder.js')).read()
 
 builder = """<!doctype html><html><head><meta charset="utf-8"><style>%s
 .ne-backdrop{display:block !important;opacity:1 !important;visibility:visible !important;}

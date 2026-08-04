@@ -482,6 +482,16 @@
     .rv-chip.mine{background:#EEF2FF;color:#4F46E5;}
     .rv-chip.tpl{background:#F3F4F6;color:#6B7280;}
     .rv-chip.team{background:#FEF3C7;color:#B45309;}
+    /* Cabeceras de grupo por organización en la biblioteca */
+    .lib-grp>td{background:#F8FAFC;border-top:1px solid #E9EBF0;border-bottom:1px solid #E9EBF0;padding:9px 14px !important;cursor:pointer;user-select:none;}
+    .lib-grp:hover>td{background:#F1F5F9;}
+    .lib-grp-in{display:flex;align-items:center;gap:9px;}
+    .lib-grp-chev{transition:transform .15s;color:#9CA3AF;flex-shrink:0;}
+    .lib-grp.closed .lib-grp-chev{transform:rotate(-90deg);}
+    .lib-grp-nm{font-size:12px;font-weight:800;color:#334155;letter-spacing:.2px;}
+    .lib-grp-n{font-size:11px;font-weight:600;color:#94A3B8;}
+    .lib-grp-pill{font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;background:#EEF2FF;color:#4F46E5;}
+    .lib-grp-pill.plat{background:#F3F4F6;color:#6B7280;}
     .rv-chip.outline{background:#fff;color:#6B7280;border:1.5px solid #E5E7EB;font-weight:600;}
     .rv-title{font-size:24px;font-weight:800;color:#111827;line-height:1.2;}
     .rv-meta{font-size:14px;color:#6B7280;margin:7px 0 20px;}
@@ -903,12 +913,65 @@ function applyRoutineFilter(){
   renderRoutines(allRoutines.filter(r=>(r.name||'').toLowerCase().includes(q)||(r.training||'').toLowerCase().includes(q)));
 }
 
+/* ── Biblioteca agrupada por organización ────────────────────────────────
+   Mismo criterio que en diets.html: cada organización tiene su bloque y el
+   catálogo de plataforma el suyo. Los bloques solo aparecen si hay más de uno
+   que enseñar, así a quien solo tiene una organización no se le añade ruido. */
+let _orgNombres=null, _grpCerrados={};
+
+async function _cargarOrganizaciones(){
+  if(_orgNombres) return _orgNombres;
+  _orgNombres={};
+  try{
+    const r=await fetch(`${API}/organizations/switchable`,{headers:authHeaders()});
+    if(r.ok){
+      const j=await r.json();
+      ((j.data||{}).organizaciones||[]).forEach(o=>{_orgNombres[o.id]=o.name;});
+    }
+  }catch(e){}
+  return _orgNombres;
+}
+
+function _nombreOrg(orgId){
+  if(orgId==null) return 'Catálogo de plataforma';
+  return (_orgNombres&&_orgNombres[orgId])||'Otra organización';
+}
+
+function _agruparPorOrg(items){
+  const mapa={};
+  items.forEach(r=>{
+    const k=r.organization_id==null?'__plataforma__':String(r.organization_id);
+    (mapa[k]=mapa[k]||[]).push(r);
+  });
+  const grupos=Object.keys(mapa).filter(k=>k!=='__plataforma__')
+    .map(k=>({key:k,orgId:k,nombre:_nombreOrg(k),items:mapa[k]}))
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  if(mapa['__plataforma__']) grupos.push({key:'__plataforma__',orgId:null,nombre:_nombreOrg(null),items:mapa['__plataforma__']});
+  return grupos;
+}
+
+function _filaGrupo(g){
+  const n=g.items.length, cerrado=!!_grpCerrados[g.key];
+  const pill=g.orgId==null?'<span class="lib-grp-pill plat">Plataforma</span>':'<span class="lib-grp-pill">Organización</span>';
+  return `<tr class="lib-grp${cerrado?' closed':''}" onclick="toggleGrupoLib('${esc(g.key)}')">`
+    +`<td colspan="6"><div class="lib-grp-in">`
+    +`<svg class="lib-grp-chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`
+    +`<span class="lib-grp-nm">${esc(g.nombre)}</span>${pill}`
+    +`<span class="lib-grp-n">${n} rutina${n!==1?'s':''}</span>`
+    +`</div></td></tr>`;
+}
+
+function toggleGrupoLib(key){ _grpCerrados[key]=!_grpCerrados[key]; applyRoutineFilter(); }
+
 function renderRoutines(list){
   document.getElementById('routineTotalLabel').textContent=`${list.length} rutina${list.length!==1?'s':''}`;
   const sc=document.getElementById('subcountRutinas');if(sc)sc.textContent=allRoutines.length;
   const tbody=document.getElementById('routinesTbody');
   if(!list.length){tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:48px;color:#9CA3AF;"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Sin rutinas. Crea tu primera rutina con el botón "+ Nueva rutina".</td></tr>`;return;}
-  tbody.innerHTML=list.map(routineRow).join('');
+  const grupos=_agruparPorOrg(list);
+  // Con un solo grupo la cabecera no aporta nada: se deja la lista plana.
+  if(grupos.length<2){ tbody.innerHTML=list.map(routineRow).join(''); return; }
+  tbody.innerHTML=grupos.map(g=>_filaGrupo(g)+(_grpCerrados[g.key]?'':g.items.map(routineRow).join(''))).join('');
 }
 
 /* Origen de una rutina: de la plataforma, mía, o de un compañero de equipo.
@@ -1930,6 +1993,8 @@ function renderRoutineView(rt,id){
 }
 
 initUser();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();adaptSidebar();
+// Los nombres de organización se usan en las cabeceras; al llegar se repinta.
+_cargarOrganizaciones().then(()=>{ if(allRoutines&&allRoutines.length) applyRoutineFilter(); });
 // Los nombres de nivel son parámetros: llegan aparte, así que al cargarlos
 // se repinta la tabla (si no, la columna Nivel muestra el id numérico).
 loadParamSelects().then(()=>{if(allRoutines.length)applyRoutineFilter();});

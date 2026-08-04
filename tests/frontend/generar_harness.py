@@ -148,3 +148,31 @@ window.__pinta=(m)=>{document.getElementById('out').innerHTML=_dietpickComida(m)
 destino5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'preview.html')
 open(destino5, 'w').write(prev)
 print('harness generado en', destino5)
+
+
+# ── Harness de la biblioteca agrupada por organización (diets.html) ────────
+dts = open(os.path.join(RAIZ, 'frontend', 'diets.html')).read()
+cssd = '\n'.join(re.findall(r'<style>(.*?)</style>', dts, re.S))
+a = dts.index('/* \u2500\u2500 Biblioteca agrupada por organizaci\u00f3n')
+b = dts.index('function renderTable(diets) {')
+logica = dts[a:b]
+c = dts.index('function renderTable(diets) {')
+d = dts.index('\n}\n', dts.index("return;\n  }\n  tb.innerHTML = grupos.map", c)) + 3
+render = dts[c:d]
+
+grupos = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
+<div class="lib-table-wrap"><table class="lib-table"><tbody id="dietsTbody"></tbody></table></div>
+<span id="dietTotalLabel"></span><span id="subcountDietas"></span>
+<script>
+var API='http://x', token='t', allDiets=[];
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function dietRow(d){return '<tr class="fila" data-org="'+(d.organization_id==null?'plat':d.organization_id)+'"><td colspan="8">'+esc(d.title)+'</td></tr>';}
+function applyFilter(){ renderTable(window.__datos); }
+%s
+%s
+window.__pinta=(datos,nombres)=>{window.__datos=datos;_orgNombres=nombres;_grpCerrados={};renderTable(datos);};
+</script></body></html>""" % (cssd, logica, render)
+
+destino6 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'grupos.html')
+open(destino6, 'w').write(grupos)
+print('harness generado en', destino6)

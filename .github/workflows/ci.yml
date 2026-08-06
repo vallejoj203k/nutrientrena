@@ -221,3 +221,46 @@ jobs:
           assert not faltan, f'Tablas del modelo que las migraciones no crean: {faltan}'
           print(f'✅ {len(reales)} tablas migradas, ninguna del modelo sin migrar')
           "
+
+  build-deploy:
+    name: El despliegue se construye como Python
+    runs-on: ubuntu-latest
+    needs: lint-and-verify
+
+    # Existe por una caída real: un package.json en la raíz hizo que Nixpacks
+    # —quien construye en Railway— tomara el proyecto por Node, no instalara
+    # requirements.txt y el arranque fallara con "alembic: command not found".
+    # CI estaba en verde porque sus jobs instalan las dependencias a mano, así
+    # que la detección de Nixpacks no se ejercitaba en ningún sitio.
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Comprobación determinista y sin dependencias. Es la que corta.
+      - name: La raíz debe indicar Python
+        run: python3 scripts/verificar_build.py
+
+      # Segunda capa: preguntarle a Nixpacks de verdad. Cubre cambios de
+      # detección que la lista de arriba no prevea.
+      #
+      # Solo falla ante una señal CONFIRMADA: si no se puede instalar Nixpacks
+      # o cambia el formato de salida, se avisa y se sigue. Un job que se cae
+      # porque no ha podido comprobar nada solo genera ruido, y el paso
+      # anterior ya cubre el caso conocido.
+      - name: Preguntarle a Nixpacks qué lenguaje detecta
+        run: |
+          if ! curl -sSL --max-time 60 https://nixpacks.com/install.sh | bash; then
+            echo "::warning::No se pudo instalar Nixpacks; se omite esta comprobación."
+            exit 0
+          fi
+          plan=$(nixpacks plan . 2>/dev/null) || {
+            echo "::warning::nixpacks plan no devolvió nada; se omite."
+            exit 0
+          }
+          echo "$plan"
+          if ! echo "$plan" | grep -qi "python\|pip"; then
+            echo "::error::Nixpacks NO detecta Python. El despliegue arrancaría sin alembic ni uvicorn."
+            exit 1
+          fi
+          echo "Nixpacks detecta Python."

@@ -1602,6 +1602,33 @@ function _origenTag(d) {
   return { cls: 'lib-tag-equipo', txt: 'Equipo' };
 }
 
+/* Promover al catálogo de plataforma.
+
+   Lo pide el diagrama de jerarquía: el super-admin promueve lo bueno de una
+   organización para que sirva de base a todas. Solo se ofrece a quien de
+   verdad puede —el backend responde 403 al resto— y solo sobre contenido que
+   hoy pertenece a una organización. */
+function _puedePromover(d) {
+  if (!d || d.organization_id == null) return false;   // ya es de plataforma
+  var rid = parseInt(localStorage.getItem('role_id') || '0');
+  return rid === 1 || rid === 2;
+}
+
+async function promoverDieta(id) {
+  if (!confirm('¿Promover esta dieta al catálogo de plataforma?\n\nPasará a verla toda organización como base de partida. La organización de origen no la pierde. Se puede deshacer.')) return;
+  try {
+    var r = await fetch(API + '/content/diet/' + id + '/organization', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ organization_id: null }),
+    });
+    var j = await r.json();
+    if (!r.ok) { toast(j.message || j.detail || 'No se pudo promover', 'error'); return; }
+    toast('Dieta promovida al catálogo de plataforma', 'success');
+    loadDiets();
+  } catch (e) { toast('Error de conexión', 'error'); }
+}
+
 function dietRow(d) {
   var _rid = parseInt(localStorage.getItem('role_id') || '0');
   var _isAdmin = _rid === 1 || _rid === 2;
@@ -1624,6 +1651,9 @@ function dietRow(d) {
     ? '<div class="dc-dd-item" onclick="event.stopPropagation();closeRowMenus();openForm(\'' + id + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</div>'
       + '<div class="dc-dd-item" onclick="event.stopPropagation();closeRowMenus();downloadPdf(\'' + id + '\',\'' + title + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Descargar PDF</div>'
       + '<div class="dc-dd-item" onclick="event.stopPropagation();closeRowMenus();duplicateDiet(\'' + id + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Duplicar</div>'
+      + (_puedePromover(d)
+          ? '<div class="dc-dd-item" onclick="event.stopPropagation();closeRowMenus();promoverDieta(\'' + id + '\')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19V5"/><polyline points="5 12 12 5 19 12"/></svg>Promover a Plataforma</div>'
+          : '')
       + '<div class="dc-dd-sep"></div>'
       + '<div class="dc-dd-item danger" onclick="event.stopPropagation();closeRowMenus();openConfirm(\'Eliminar dieta\',\'Esta acción no se puede deshacer.\',function(){deleteDiet(\'' + id + '\')})"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar</div>'
     : '<div class="dc-dd-item" style="color:#9CA3AF;cursor:default;">Solo lectura</div>';

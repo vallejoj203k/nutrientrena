@@ -419,6 +419,7 @@
 </style>
 <link rel="stylesheet" href="css/routine-builder.css">
 <script src="js/org-context.js"></script>
+<script src="js/nav-roles.js"></script>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -727,14 +728,7 @@ async function loadPendingBadge(){
     if(n>0){badge.textContent=n;badge.style.display='inline-block';}
   }catch{}
 }
-function adaptSidebar(){
-  const rid=parseInt(localStorage.getItem('role_id')||'0');
-  if(rid!==5)return;
-  ['coaches.html','settings.html','analytics.html'].forEach(href=>{
-    const el=document.querySelector('.nav-item[href="'+href+'"]');
-    if(el)el.style.display='none';
-  });
-}
+
 
 const LEVELS={1:'Principiante',2:'Intermedio',3:'Avanzado'};
 const GENDERS={1:'Masculino',2:'Femenino'};
@@ -1436,7 +1430,7 @@ function renderRoutineView(rt,id){
     <div class="rv-actions${actionBtns.length===2?' two':(actionBtns.length===1?' one':'')}">${actionBtns.join('')}</div>`;
 }
 
-initUser();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();adaptSidebar();
+initUser();loadRoutines();loadPendingBadge();loadMuscleGroupsForFilters();
 // Los nombres de organización se usan en las cabeceras; al llegar se repinta.
 _cargarOrganizaciones().then(()=>{ if(allRoutines&&allRoutines.length) applyRoutineFilter(); });
 // Los nombres de nivel son parámetros: llegan aparte, así que al cargarlos

@@ -236,6 +236,7 @@
     .btn-logout:hover { color: #4F46E5 !important; }
   </style>
 <script src="js/org-context.js"></script>
+<script src="js/nav-roles.js"></script>
 </head>
 <body>
 
@@ -971,17 +972,6 @@ async function loadPendingBadge() {
 
 loadBoard();
 loadPendingBadge();
-
-// ── Sidebar role adaptation ───────────────────────────────────────────────────
-function adaptSidebar() {
-  const rid = parseInt(localStorage.getItem('role_id') || '0');
-  if (rid !== 5) return; // only restrict coaches
-  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
-    const el = document.querySelector('.nav-item[href="' + href + '"]');
-    if (el) el.style.display = 'none';
-  });
-}
-adaptSidebar();
 </script>
 <script>
 var _flyoutMenus={

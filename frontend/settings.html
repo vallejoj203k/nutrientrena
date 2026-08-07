@@ -147,6 +147,7 @@
     }
   </style>
 <script src="js/org-context.js"></script>
+<script src="js/nav-roles.js"></script>
 </head>
 <body>
 
@@ -301,6 +302,38 @@
         </div>
       </div>
 
+      <!-- Personal de plataforma. Solo super-admin: no es equipo de una
+           organización, es gente de Alzum. Por eso no va en la pantalla de
+           Equipo, que ata al miembro a la organización de quien lo crea. -->
+      <div id="platformStaff" style="display:none;">
+        <div class="section-head">Personal de plataforma</div>
+        <p style="font-size:12.5px;color:#6B7280;margin:-6px 0 14px;">
+          El <b>editor de contenido global</b> añade alimentos y ejercicios a la base
+          maestra que comparten todas las organizaciones. No ve clientes, ni equipo,
+          ni facturación, ni el contenido privado de ninguna organización.
+        </p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input id="ecgName" placeholder="Nombre y apellidos"/>
+          </div>
+          <div class="form-group">
+            <label>Correo</label>
+            <input id="ecgEmail" type="email" placeholder="correo@ejemplo.com"/>
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input id="ecgPassword" type="text" placeholder="Mínimo 6 caracteres"/>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+          <button class="btn btn-primary" id="ecgBtn" onclick="crearEditorContenido()">
+            Crear editor de contenido global
+          </button>
+          <span id="ecgMsg" style="font-size:12.5px;"></span>
+        </div>
+      </div>
+
       <div class="footer-actions">
         <span class="save-note" id="saveNote"></span>
         <button class="btn btn-primary" id="saveBtn" onclick="saveSettings()">
@@ -404,18 +437,50 @@ function toast(msg, err = false) {
   setTimeout(() => el.classList.remove('show'), 3500);
 }
 
-init();
+/* ── Personal de plataforma ─────────────────────────────────────────────────
+   El rol de editor de contenido global existía en el backend desde la fase 4,
+   con sus permisos y sus pruebas, pero no se podía asignar desde ninguna
+   pantalla: había que tocar la base de datos. Esto lo cierra. */
+const ROL_EDITOR_CONTENIDO = 7;
 
-// ── Sidebar role adaptation ───────────────────────────────────────────────────
-function adaptSidebar() {
+(function mostrarSiEsSuperadmin(){
   const rid = parseInt(localStorage.getItem('role_id') || '0');
-  if (rid !== 5) return; // only restrict coaches
-  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
-    const el = document.querySelector('.nav-item[href="' + href + '"]');
-    if (el) el.style.display = 'none';
-  });
+  if (rid !== 1) return;                       // solo el super-admin
+  const el = document.getElementById('platformStaff');
+  if (el) el.style.display = '';
+})();
+
+async function crearEditorContenido() {
+  const val = id => (document.getElementById(id)?.value || '').trim();
+  const msg = document.getElementById('ecgMsg');
+  const btn = document.getElementById('ecgBtn');
+  const pinta = (t, err) => { msg.textContent = t; msg.style.color = err ? '#DC2626' : '#059669'; };
+
+  const nombre = val('ecgName'), email = val('ecgEmail'), pass = val('ecgPassword');
+  if (!nombre) return pinta('Falta el nombre.', true);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return pinta('Escribe un correo válido.', true);
+  if (pass.length < 6) return pinta('La contraseña debe tener al menos 6 caracteres.', true);
+
+  const partes = nombre.split(' ');
+  btn.disabled = true; pinta('Creando…');
+  try {
+    const r = await fetch(`${API}/users`, {
+      method: 'POST',
+      headers: hdrs(),
+      body: JSON.stringify({
+        name: partes[0], last_name: partes.slice(1).join(' ') || null,
+        email, password: pass, role_id: ROL_EDITOR_CONTENIDO,
+      }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return pinta(j.detail || j.message || 'No se pudo crear', true);
+    pinta('Creado. Ya puede entrar con ese correo.');
+    ['ecgName','ecgEmail','ecgPassword'].forEach(i => { const e=document.getElementById(i); if(e) e.value=''; });
+  } catch (e) { pinta('Error de conexión', true); }
+  finally { btn.disabled = false; }
 }
-adaptSidebar();
+
+init();
 </script>
 <script>
 var _flyoutMenus={

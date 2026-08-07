@@ -189,6 +189,7 @@
     .sl-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
 </style>
 <script src="js/org-context.js"></script>
+<script src="js/nav-roles.js"></script>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -412,14 +413,7 @@ async function loadPendingBadge(){
     if(n>0){badge.textContent=n;badge.style.display='inline-block';}
   }catch{}
 }
-function adaptSidebar(){
-  const rid=parseInt(localStorage.getItem('role_id')||'0');
-  if(rid!==5)return;
-  ['coaches.html','settings.html','analytics.html'].forEach(href=>{
-    const el=document.querySelector('.nav-item[href="'+href+'"]');
-    if(el)el.style.display='none';
-  });
-}
+
 
 let editingMgId=null,_mgImageUrl=null,_mgUploading=false;
 
@@ -536,7 +530,7 @@ async function saveMuscleGroup(){
   }catch(e){showToast(e.message||'Error al guardar','error');}
 }
 
-initUser();loadMuscleGroups();loadPendingBadge();adaptSidebar();
+initUser();loadMuscleGroups();loadPendingBadge();
 </script>
 <script>
 var _flyoutMenus={

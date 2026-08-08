@@ -22,8 +22,12 @@
 (function () {
   var COACH = 5, EDITOR = 7;
 
-  // Lo único que el editor de contenido global puede usar.
-  var PERMITIDO_EDITOR = ['aliments.html', 'ejercicios.html', 'grupos-musculares.html'];
+  /* Lo único que el editor de contenido global puede usar.
+
+     Grupos musculares NO está: puede LEERLOS —los necesita para el desplegable
+     al crear un ejercicio— pero no administra ese catálogo, así que enseñarle
+     la sección sería ofrecerle una pantalla que le devuelve acceso denegado. */
+  var PERMITIDO_EDITOR = ['aliments.html', 'ejercicios.html'];
 
   // Lo que el coach no ve. Se mantiene el comportamiento que ya había.
   var OCULTO_COACH = ['coaches.html', 'settings.html', 'analytics.html'];

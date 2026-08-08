@@ -69,8 +69,10 @@ function pagina(rol) {
   p.on('pageerror', e => errs.push(String(e)));
   await p.waitForTimeout(150);
   const v7 = (await visibles(p)).sort();
-  ck('[editor] solo ve alimentos, ejercicios y grupos musculares',
-     JSON.stringify(v7) === JSON.stringify(['aliments.html', 'ejercicios.html', 'grupos-musculares.html']), v7);
+  ck('[editor] solo ve alimentos y ejercicios',
+     JSON.stringify(v7) === JSON.stringify(['aliments.html', 'ejercicios.html']), v7);
+  ck('[editor] NO ve grupos musculares: los lee, pero no los administra',
+     !v7.includes('grupos-musculares.html'), v7);
   ck('[editor] NO ve clientes ni check-ins', !v7.includes('clients.html') && !v7.includes('checkins.html'));
   ck('[editor] NO ve equipo, organización ni analíticas',
      !v7.includes('coaches.html') && !v7.includes('mi-organizacion.html') && !v7.includes('analytics.html'));

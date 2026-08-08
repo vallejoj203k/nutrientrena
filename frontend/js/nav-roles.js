@@ -38,6 +38,25 @@
 
   function ocultar(el) { if (el) el.style.display = 'none'; }
 
+  /* La categoría sale de la clase: "lib-cat c-entrenamiento" → entrenamiento.
+     Las clases van en plural y las claves de _flyoutMenus en singular
+     (c-formularios vs formulario), así que se prueban las dos formas. */
+  function categoriaDe(el) {
+    var m = (el.className || '').match(/\bc-([a-z]+)\b/);
+    if (!m) return null;
+    var cat = m[1];
+    if (typeof _flyoutMenus !== 'object' || !_flyoutMenus) return null;
+    if (_flyoutMenus[cat]) return cat;
+    var singular = cat.replace(/s$/, '');
+    return _flyoutMenus[singular] ? singular : null;
+  }
+
+  // Primer destino permitido de una categoría, o null si no le queda ninguno.
+  function destinoPermitido(cat) {
+    if (!cat || !_flyoutMenus[cat] || !_flyoutMenus[cat].items.length) return null;
+    return _flyoutMenus[cat].items[0].href;
+  }
+
   function aplicar() {
     var rid = rol();
 
@@ -94,6 +113,27 @@
         n = n.nextElementSibling;
       }
       if (!hayAlguno) ocultar(sec);
+    });
+
+
+    /* Hay más vías de navegación que el menú lateral, y todas llevaban a
+       páginas bloqueadas: las pestañas de categoría de la Librería
+       (Entrenamiento → rutinas.html) y las sub-pestañas (Dietas, Menús,
+       Recetas…). Al pulsarlas, la redirección de más abajo devolvía al editor
+       a su sitio, que desde fuera se ve como "no me deja entrar".
+
+       Se resuelven con el mismo criterio: si la pestaña tiene un destino
+       permitido dentro de su categoría, se reapunta ahí; si no lo tiene, se
+       oculta. Reapuntar es mejor que ocultar cuando hay adónde ir: pulsar
+       "Entrenamiento" y aterrizar en Ejercicios es lo que el editor espera. */
+    document.querySelectorAll('.lib-cat').forEach(function (el) {
+      var permitido = destinoPermitido(categoriaDe(el));
+      if (permitido) el.setAttribute('href', permitido);
+      else ocultar(el);
+    });
+    document.querySelectorAll('.lib-subtab').forEach(function (el) {
+      var href = (el.getAttribute('href') || '').split('?')[0];
+      if (PERMITIDO_EDITOR.indexOf(href) === -1) ocultar(el);
     });
 
     // Librería se deja visible si le queda alguna categoría, y abierta: es lo

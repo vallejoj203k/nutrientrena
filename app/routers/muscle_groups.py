@@ -3,7 +3,15 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import (
+    require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH,
+    EDITOR_CONTENIDO_GLOBAL,
+)
+
+# El editor de contenido global necesita LEER los grupos para poder clasificar
+# los ejercicios que crea: la pantalla de ejercicios los pide para el
+# desplegable del formulario, así que sin esto no podría crear ninguno.
+# Solo lectura: el catálogo de grupos no es suyo, no lo administra.
 from app.core.responses import send_response, send_error
 from app.models.muscle_group import MuscleGroup
 from app.schemas.muscle_group import MuscleGroupCreate, MuscleGroupUpdate, MuscleGroupOut
@@ -16,7 +24,7 @@ def _get_or_404(db: Session, muscle_id: int):
 
 
 @router.get("/findAll", summary="Listar grupos musculares", description="Retorna todos los grupos musculares activos.")
-def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     items = db.query(MuscleGroup).filter(MuscleGroup.state == 1).all()
     return send_response([MuscleGroupOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -27,7 +35,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     q = db.query(MuscleGroup)
     if search:
@@ -47,7 +55,7 @@ def search(
 
 
 @router.get("/{id}/edit", summary="Ver grupo muscular", description="Retorna el detalle de un grupo muscular por su ID.")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Grupo muscular no encontrado")

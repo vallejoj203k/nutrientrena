@@ -214,3 +214,15 @@ def test_el_editor_creado_no_queda_atado_a_ninguna_organizacion(client, seed, ad
         assert db.query(UserDetail).filter(UserDetail.id == det).first() is not None
     finally:
         db.close()
+
+
+def test_puede_leer_grupos_musculares_pero_no_administrarlos(client, seed, admin_headers):
+    """La pantalla de ejercicios pide /muscle-groups/findAll para el desplegable
+    del formulario: sin permiso de lectura, el editor no podría crear ningún
+    ejercicio. Administrar el catálogo de grupos, en cambio, no es suyo."""
+    _uid, _det, h = _crear_editor(client, admin_headers, "editor.grupos@nutrientrena-qa.com")
+
+    assert client.get("/api/muscle-groups/findAll", headers=h).status_code == 200
+
+    r = client.post("/api/muscle-groups", headers=h, json={"name": "Grupo inventado"})
+    assert r.status_code == 403, r.text

@@ -22,8 +22,12 @@
 (function () {
   var COACH = 5, EDITOR = 7;
 
-  // Lo único que el editor de contenido global puede usar.
-  var PERMITIDO_EDITOR = ['aliments.html', 'ejercicios.html', 'grupos-musculares.html'];
+  /* Lo único que el editor de contenido global puede usar.
+
+     Grupos musculares NO está: puede LEERLOS —los necesita para el desplegable
+     al crear un ejercicio— pero no administra ese catálogo, así que enseñarle
+     la sección sería ofrecerle una pantalla que le devuelve acceso denegado. */
+  var PERMITIDO_EDITOR = ['aliments.html', 'ejercicios.html'];
 
   // Lo que el coach no ve. Se mantiene el comportamiento que ya había.
   var OCULTO_COACH = ['coaches.html', 'settings.html', 'analytics.html'];
@@ -51,10 +55,32 @@
       var href = (el.getAttribute('href') || '').split('?')[0];
       if (PERMITIDO_EDITOR.indexOf(href) === -1) ocultar(el);
     });
-    // Y dentro de Librería, lo mismo.
-    document.querySelectorAll('.nav-sub-item[href]').forEach(function (el) {
-      var href = (el.getAttribute('href') || '').split('?')[0];
-      if (PERMITIDO_EDITOR.indexOf(href) === -1) ocultar(el);
+
+    /* Librería es distinta: sus enlaces NO están en el HTML. Los sub-items son
+       categorías (Entrenamiento, Nutrición…) que abren un panel lateral cuyo
+       contenido sale de _flyoutMenus. Así que se filtra ESE dato, no el DOM:
+       de cada categoría se dejan solo los enlaces permitidos, y la categoría
+       que se queda sin ninguno se oculta.
+
+       La primera versión de esto contaba '.nav-sub-item[href]' —selector que no
+       casa con nada en las páginas reales—, concluía que Librería estaba vacía
+       y la ocultaba entera, dejando al editor sin forma de llegar a ningún
+       sitio. */
+    var categoriasVivas = {};
+    if (typeof _flyoutMenus === 'object' && _flyoutMenus) {
+      Object.keys(_flyoutMenus).forEach(function (cat) {
+        var menu = _flyoutMenus[cat];
+        if (!menu || !menu.items) return;
+        menu.items = menu.items.filter(function (it) {
+          return PERMITIDO_EDITOR.indexOf((it.href || '').split('?')[0]) !== -1;
+        });
+        if (menu.items.length) categoriasVivas[cat] = true;
+      });
+    }
+    document.querySelectorAll('#librarySub .nav-sub-item').forEach(function (el) {
+      var oc = el.getAttribute('onclick') || '';
+      var m = oc.match(/openFlyout\s*\([^,]*,\s*['"]([^'"]+)['"]/);
+      if (!m || !categoriasVivas[m[1]]) ocultar(el);
     });
 
     // Los separadores de sección que se quedan sin ningún enlace visible
@@ -70,15 +96,11 @@
       if (!hayAlguno) ocultar(sec);
     });
 
-    // El desplegable de Librería no tiene href propio: se deja visible solo si
-    // le queda algún hijo, y abierto, que es lo único a lo que puede ir.
+    // Librería se deja visible si le queda alguna categoría, y abierta: es lo
+    // único a lo que el editor puede ir.
     var lib = document.getElementById('navLibrary');
     if (lib) {
-      var vivos = 0;
-      document.querySelectorAll('.nav-sub-item[href]').forEach(function (el) {
-        if (el.style.display !== 'none') vivos++;
-      });
-      if (!vivos) ocultar(lib);
+      if (!Object.keys(categoriasVivas).length) ocultar(lib);
       else if (!lib.classList.contains('open') && typeof toggleLibrary === 'function') toggleLibrary(lib);
     }
 

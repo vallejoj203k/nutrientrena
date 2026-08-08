@@ -541,6 +541,7 @@
 
 </style>
 <script src="js/org-context.js"></script>
+<script src="js/nav-roles.js"></script>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -1932,16 +1933,6 @@ function toast(msg, err) {
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeConfirm(); });
 
 init();
-
-function adaptSidebar() {
-  const rid = parseInt(localStorage.getItem('role_id') || '0');
-  if (rid !== 5) return;
-  ['coaches.html', 'settings.html', 'analytics.html'].forEach(function(href) {
-    const el = document.querySelector('.nav-item[href="' + href + '"]');
-    if (el) el.style.display = 'none';
-  });
-}
-adaptSidebar();
 </script>
 <script>
 var _flyoutMenus={

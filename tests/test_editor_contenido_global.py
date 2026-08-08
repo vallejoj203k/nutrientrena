@@ -168,3 +168,49 @@ def test_superadmin_sigue_editando_cualquier_alimento(client, seed, admin_header
 
     r = client.put(f"/api/aliments/{aliment_id}/update", headers=admin_headers, json={"name": "Editado por superadmin"})
     assert r.status_code == 200, r.text
+
+
+# ── Fase 4.3: el rol se puede dar de alta desde la interfaz ────────────────
+# Existía desde la fase 4 con sus permisos y sus pruebas, pero no aparecía en
+# ninguna pantalla: había que tocar la base de datos para asignarlo. La pantalla
+# de Ajustes lo crea con esta misma llamada.
+
+def test_el_superadmin_puede_dar_de_alta_un_editor(client, seed, admin_headers):
+    db = SessionLocal()
+    try:
+        seed_roles(db)
+    finally:
+        db.close()
+
+    r = client.post("/api/users", headers=admin_headers, json={
+        "name": "Ayudante", "last_name": "De Catálogo",
+        "email": "ayudante.catalogo@nutrientrena-qa.com",
+        "password": "Catalogo123!", "role_id": EDITOR_CONTENIDO_GLOBAL})
+    assert r.status_code == 200, r.text
+
+    db = SessionLocal()
+    try:
+        u = db.query(User).filter(User.email == "ayudante.catalogo@nutrientrena-qa.com").first()
+        assert u is not None
+        assert db.query(RoleUser).filter_by(user_id=u.id, role_id=EDITOR_CONTENIDO_GLOBAL).first()
+    finally:
+        db.close()
+
+
+def test_el_editor_creado_no_queda_atado_a_ninguna_organizacion(client, seed, admin_headers):
+    """Es personal de plataforma, no de una organización. Por eso no se crea
+    desde la pantalla de Equipo, que ata al miembro a la organización de quien
+    lo da de alta."""
+    from app.models.team_member import TeamMember
+    from app.models.organization import OrganizationMember
+    from app.models.user import UserDetail
+
+    _uid, det, _h = _crear_editor(client, admin_headers, "editor.sin.org@nutrientrena-qa.com")
+
+    db = SessionLocal()
+    try:
+        assert db.query(TeamMember).filter(TeamMember.user_detail_id == det).first() is None
+        assert db.query(OrganizationMember).filter(OrganizationMember.user_detail_id == det).first() is None
+        assert db.query(UserDetail).filter(UserDetail.id == det).first() is not None
+    finally:
+        db.close()

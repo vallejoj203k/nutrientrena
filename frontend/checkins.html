@@ -371,6 +371,7 @@
     }
   </style>
 <script src="js/org-context.js"></script>
+<script src="js/nav-roles.js"></script>
 </head>
 <body>
 
@@ -1968,17 +1969,6 @@ document.addEventListener('keydown', function(e) {
    Boot
 ───────────────────────────────────────────── */
 init();
-
-// ── Sidebar role adaptation ───────────────────────────────────────────────────
-function adaptSidebar() {
-  const rid = parseInt(localStorage.getItem('role_id') || '0');
-  if (rid !== 5) return; // only restrict coaches
-  ['coaches.html', 'settings.html', 'analytics.html'].forEach(href => {
-    const el = document.querySelector('.nav-item[href="' + href + '"]');
-    if (el) el.style.display = 'none';
-  });
-}
-adaptSidebar();
 </script>
 <script>
 var _flyoutMenus={

@@ -226,3 +226,21 @@ def test_puede_leer_grupos_musculares_pero_no_administrarlos(client, seed, admin
 
     r = client.post("/api/muscle-groups", headers=h, json={"name": "Grupo inventado"})
     assert r.status_code == 403, r.text
+
+
+def test_puede_leer_los_grupos_de_alimentos_pero_no_administrarlos(client, seed, admin_headers):
+    """La pantalla de alimentos usa /groupFood/findAll para la columna
+    Categoría y para el filtro. Sin permiso de lectura salía todo en "—" y el
+    desplegable vacío, sin ningún error visible: fallaba en silencio."""
+    _uid, _det, h = _crear_editor(client, admin_headers, "editor.grupos.alimento@nutrientrena-qa.com")
+
+    assert client.get("/api/groupFood/findAll", headers=h).status_code == 200
+    assert client.post("/api/groupFood", headers=h, json={"name": "Grupo inventado"}).status_code == 403
+
+
+def test_no_accede_a_los_alimentos_personales_de_los_clientes(client, seed, admin_headers):
+    """El filtro "Personal" de la pantalla apunta aquí. El editor no gestiona
+    clientes, así que el botón se le oculta: pulsarlo solo dejaba la lista
+    vacía sin explicar por qué."""
+    _uid, _det, h = _crear_editor(client, admin_headers, "editor.personales@nutrientrena-qa.com")
+    assert client.get("/api/client-aliments/search", headers=h).status_code == 403

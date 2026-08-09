@@ -27,7 +27,8 @@ const NAV = trozo('<nav', 'nav');
 // Pestañas de categoría y sub-pestañas: otra vía de navegación que también
 // llevaba a páginas bloqueadas.
 const TABS = (PAGINA.match(/<a class="lib-cat[^>]*>.*?<\/a>/gs) || []).join('\n')
-           + (PAGINA.match(/<a class="lib-subtab[^>]*>.*?<\/a>/gs) || []).join('\n');
+           + (PAGINA.match(/<a class="lib-subtab[^>]*>.*?<\/a>/gs) || []).join('\n')
+           + (PAGINA.match(/<button class="source-tab[^>]*>.*?<\/button>/gs) || []).join('\n');
 const FLYOUT = trozo('var _flyoutMenus=');
 
 function pagina(rol) {
@@ -115,8 +116,16 @@ function pagina(rol) {
   const pCoach = await abrir(5, 'aliments.html');
   const tabsCoach = await pCoach.evaluate(() => [...document.querySelectorAll('.lib-cat')]
     .filter(e => e.style.display !== 'none').map(e => e.getAttribute('href')));
+  const fuentesCoach = await pCoach.evaluate(() => [...document.querySelectorAll('.source-tab')]
+    .filter(e => e.style.display !== 'none').length);
+  ck('[coach] conserva el filtro Personal', fuentesCoach === 2, fuentesCoach);
   ck('[coach] conserva las 4 pestañas intactas',
      tabsCoach.length === 4 && tabsCoach.includes('rutinas.html') && tabsCoach.includes('diets.html'), tabsCoach);
+
+  const fuentes = await p.evaluate(() => [...document.querySelectorAll('.source-tab')]
+    .filter(e => e.style.display !== 'none').map(e => e.textContent.trim()));
+  ck('[editor] el filtro "Personal" se oculta: no gestiona clientes',
+     fuentes.length === 1 && /Plataforma/.test(fuentes[0]), fuentes);
 
   const pRedir = await abrir(7, 'dashboard.html');
   await pRedir.waitForTimeout(400);

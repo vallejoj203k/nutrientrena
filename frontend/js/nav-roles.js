@@ -136,6 +136,15 @@
       if (PERMITIDO_EDITOR.indexOf(href) === -1) ocultar(el);
     });
 
+    /* Controles sueltos que no le sirven de nada.
+
+       "Personal" filtra por alimentos personales de cliente, que viven en
+       client-aliments: un endpoint al que el editor no tiene acceso porque no
+       gestiona clientes. Pulsarlo dejaba la lista vacía sin decir por qué. */
+    document.querySelectorAll('.source-tab').forEach(function (el) {
+      if (/personal/i.test(el.getAttribute('onclick') || '')) ocultar(el);
+    });
+
     // Librería se deja visible si le queda alguna categoría, y abierta: es lo
     // único a lo que el editor puede ir.
     var lib = document.getElementById('navLibrary');

@@ -3,7 +3,15 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import (
+    require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH,
+    EDITOR_CONTENIDO_GLOBAL,
+)
+
+# El editor de contenido global necesita LEER los grupos: la pantalla de
+# alimentos los usa para la columna Categoría y para el filtro. Sin esto le
+# salía todo en "—" y el desplegable vacío, sin ningún error visible.
+# Solo lectura: clasifica con ellos, no administra el catálogo de grupos.
 from app.core.responses import send_response, send_error
 from app.models.nutrition.group_food import GroupFood
 from app.schemas.nutrition.food import GroupFoodCreate, GroupFoodUpdate, GroupFoodOut
@@ -16,7 +24,7 @@ def _get_or_404(db: Session, obj_id: int):
 
 
 @router.get("/findAll", summary="Listar grupos de alimentos", description="Retorna todos los grupos de alimentos activos (ej: carnes, verduras, lácteos).")
-def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     items = db.query(GroupFood).filter(GroupFood.status == 1).all()
     return send_response([GroupFoodOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -27,7 +35,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     q = db.query(GroupFood)
     if search:
@@ -41,7 +49,7 @@ def search(
 
 
 @router.get("/{id}/edit", summary="Ver grupo de alimentos", description="Retorna el detalle de un grupo de alimentos por su ID.")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Grupo de alimento no encontrado")

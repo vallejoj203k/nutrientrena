@@ -24,6 +24,11 @@ function trozo(marca, cierre) {
   return PAGINA.slice(i, k) + ';';
 }
 const NAV = trozo('<nav', 'nav');
+// Pestañas de categoría y sub-pestañas: otra vía de navegación que también
+// llevaba a páginas bloqueadas.
+const TABS = (PAGINA.match(/<a class="lib-cat[^>]*>.*?<\/a>/gs) || []).join('\n')
+           + (PAGINA.match(/<a class="lib-subtab[^>]*>.*?<\/a>/gs) || []).join('\n')
+           + (PAGINA.match(/<button class="source-tab[^>]*>.*?<\/button>/gs) || []).join('\n');
 const FLYOUT = trozo('var _flyoutMenus=');
 
 function pagina(rol) {
@@ -31,6 +36,7 @@ function pagina(rol) {
     Object.defineProperty(window,'localStorage',{value:{getItem:()=> '${rol}',setItem(){},removeItem(){}}});
   </script></head><body>
   ${NAV}
+  <div class="lib-tabs">${TABS}</div>
   <div class="sidebar-user">yo</div>
   <script>
     ${FLYOUT}
@@ -88,6 +94,38 @@ function pagina(rol) {
 
   const secs = await p.evaluate(() => [...document.querySelectorAll('.nav-section')].filter(e => e.style.display !== 'none').map(e => e.textContent.trim()));
   ck('[editor] las secciones vacías se ocultan', secs.length === 1, secs);
+
+  // Las pestañas de categoría: reapuntadas o escondidas, nunca a un sitio vetado
+  const tabs = await p.evaluate(() => [...document.querySelectorAll('.lib-cat')]
+    .filter(e => e.style.display !== 'none')
+    .map(e => [e.textContent.trim(), e.getAttribute('href')]));
+  ck('[editor] "Entrenamiento" lleva a Ejercicios, no a Rutinas',
+     tabs.some(t => /Entrenamiento/.test(t[0]) && t[1] === 'ejercicios.html'), tabs);
+  ck('[editor] "Nutrición" lleva a Alimentos, no a Dietas',
+     tabs.some(t => /Nutrici/.test(t[0]) && t[1] === 'aliments.html'), tabs);
+  ck('[editor] las pestañas sin nada permitido se ocultan', tabs.length === 2, tabs);
+  ck('[editor] ninguna pestaña apunta a una página vetada',
+     tabs.every(t => ['aliments.html', 'ejercicios.html'].includes(t[1])), tabs);
+
+  const subs = await p.evaluate(() => [...document.querySelectorAll('.lib-subtab')]
+    .filter(e => e.style.display !== 'none').map(e => e.getAttribute('href')));
+  ck('[editor] las sub-pestañas solo dejan lo permitido',
+     subs.every(h => ['aliments.html', 'ejercicios.html'].includes((h || '').split('?')[0])), subs);
+
+  // Al coach no se le toca ninguna pestaña
+  const pCoach = await abrir(5, 'aliments.html');
+  const tabsCoach = await pCoach.evaluate(() => [...document.querySelectorAll('.lib-cat')]
+    .filter(e => e.style.display !== 'none').map(e => e.getAttribute('href')));
+  const fuentesCoach = await pCoach.evaluate(() => [...document.querySelectorAll('.source-tab')]
+    .filter(e => e.style.display !== 'none').length);
+  ck('[coach] conserva el filtro Personal', fuentesCoach === 2, fuentesCoach);
+  ck('[coach] conserva las 4 pestañas intactas',
+     tabsCoach.length === 4 && tabsCoach.includes('rutinas.html') && tabsCoach.includes('diets.html'), tabsCoach);
+
+  const fuentes = await p.evaluate(() => [...document.querySelectorAll('.source-tab')]
+    .filter(e => e.style.display !== 'none').map(e => e.textContent.trim()));
+  ck('[editor] el filtro "Personal" se oculta: no gestiona clientes',
+     fuentes.length === 1 && /Plataforma/.test(fuentes[0]), fuentes);
 
   const pRedir = await abrir(7, 'dashboard.html');
   await pRedir.waitForTimeout(400);

@@ -114,7 +114,22 @@
   .b-prueba{background:#EEF2FF;color:#4F5BF2;}
   .b-impago{background:#FEE2E2;color:#B91C1C;}
   .b-suspendida{background:#F1F5F9;color:#64748B;}
+  /* Ciclo de vida del cliente final. Mismo lenguaje visual que los estados de
+     cuenta: ámbar = está pasando algo, gris = ya terminó. */
+  .b-activo{background:#FEF3C7;color:#B45309;}
+  .b-pendiente{background:#EEF2FF;color:#4F5BF2;}
+  .b-pausado{background:#FEF3C7;color:#92400E;}
+  .b-finalizado{background:#F1F5F9;color:#64748B;}
   .vacio{color:#D1D5DB;}
+  .org-cel{color:var(--indigo);font-weight:600;}
+
+  /* Aviso informativo de cabecera de sección (no es un error, es un límite) */
+  .nota{display:flex;gap:11px;align-items:flex-start;font-size:13px;color:#3730A3;
+        background:#EEF2FF;border:1px solid #DDE2FE;border-radius:11px;padding:13px 15px;margin-bottom:18px;}
+  .nota svg{flex:none;margin-top:1px;}
+  .sel-cuenta{padding:9px 12px;border:1px solid var(--borde);border-radius:10px;
+              background:#fff;font:inherit;font-size:13px;color:#374151;outline:none;cursor:pointer;}
+  .sel-cuenta:focus{border-color:var(--indigo);}
 
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
@@ -259,7 +274,6 @@ const ICONOS = {
 const PENDIENTE = {
   vision:'Los indicadores del negocio: organizaciones activas, coaches, clientes, ingresos recurrentes y altas y bajas del mes.',
   organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
-  clientes:'Todos los clientes finales de la plataforma, en solo lectura, para soporte y métricas.',
   facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
   planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
   contenido:'La base de datos de fábrica que ven todas las organizaciones, y el contenido privado de cada una para poder promoverlo.',
@@ -300,6 +314,7 @@ async function abrir(id){
   pintarNav();
 
   if (id === 'organizaciones') return pintarCoaches();
+  if (id === 'clientes') return pintarClientes();
   if (id === 'vision') return pintarVision();
   document.getElementById('contenido').innerHTML = enConstruccion(id);
 }
@@ -409,6 +424,102 @@ function tarjeta(titulo, valor, pie, icono, pendiente){
     ${pie ? `<div class="kpi-s">${pie}</div>` : ''}
   </div>`;
 }
+
+/* ── Clientes finales ─────────────────────────────────────────────────────
+   Solo lectura, y a propósito pobre en datos: un cliente final no es cliente
+   de Alzum, es cliente de su coach. Aquí se ve quién es, de qué cuenta y en
+   qué estado —lo justo para dar soporte— y nada de peso, medidas, fotos ni
+   patologías. Para tocar algo suyo está "Entrar como". */
+const LIFECYCLE = { activo:'Activo', pendiente:'Pendiente', pausado:'Pausado', finalizado:'Finalizado' };
+let _clientes = [], _totClientes = {}, _cuentasCli = [], _buscaCli = '', _cuentaCli = '';
+
+function haceCuanto(iso){
+  if (!iso) return '—';
+  const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+  if (isNaN(d)) return '—';
+  const dias = Math.floor((new Date().setHours(0,0,0,0) - d.setHours(0,0,0,0)) / 86400000);
+  if (dias < 0) return d.toLocaleDateString('es-ES');
+  if (dias === 0) return 'Hoy';
+  if (dias === 1) return 'Ayer';
+  if (dias < 31) return `Hace ${dias} días`;
+  const meses = Math.floor(dias / 30);
+  if (meses < 12) return `Hace ${meses} ${meses === 1 ? 'mes' : 'meses'}`;
+  const anios = Math.floor(dias / 365);
+  return `Hace ${anios} ${anios === 1 ? 'año' : 'años'}`;
+}
+const soloFecha = iso => iso ? new Date(iso).toISOString().slice(0, 10) : '—';
+
+function pintarClientes(){
+  document.getElementById('subtitulo').textContent =
+    'Usuarios de los coaches. Vista de solo lectura: Alzum nunca edita los datos de un cliente.';
+  // Como en Visión general: el contenedor deja de ser una tarjeta, porque la
+  // sección trae las suyas propias sobre el fondo gris.
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  const c = document.getElementById('contenido');
+  c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  fetch(`${API}/admin/clients`, { headers: cab() })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      if (!j) { c.innerHTML = '<div class="card"><div class="proximo">No se pudieron cargar los clientes.</div></div>'; return; }
+      const d = j.data || {};
+      _clientes = d.clientes || []; _totClientes = d.totales || {}; _cuentasCli = d.cuentas || [];
+      c.innerHTML = htmlClientes();
+    })
+    .catch(() => { c.innerHTML = '<div class="card"><div class="proximo">No se pudieron cargar los clientes.</div></div>'; });
+}
+
+function htmlClientes(){
+  const q = _buscaCli.toLowerCase();
+  const lista = _clientes.filter(x =>
+    (!_cuentaCli || x.organization_id === _cuentaCli) &&
+    (!q || (x.name + ' ' + (x.email||'') + ' ' + (x.organization_name||'') + ' ' + (x.coach_name||'')).toLowerCase().includes(q)));
+
+  return `
+    <div class="nota">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Estos datos pertenecen a cada coach. Desde aquí solo puedes consultarlos para dar soporte; no se muestran medidas, fotos ni historial médico.</span>
+    </div>
+    <div class="kpis">
+      ${tarjeta('Clientes totales', _totClientes.total ?? 0, '', 'users')}
+      ${tarjeta('Activos', _totClientes.activos ?? 0, '', 'user')}
+      ${tarjeta('Finalizados', _totClientes.finalizados ?? 0, '', 'users')}
+    </div>
+    <div class="barra">
+      <div class="buscar-wrap">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="buscar" id="qc" placeholder="Buscar cliente…" value="${esc(_buscaCli)}" oninput="filtrarClientes(this.value)">
+      </div>
+      <select class="sel-cuenta" id="cuentaCli" onchange="setCuentaCli(this.value)">
+        <option value="">Todas las cuentas</option>
+        ${_cuentasCli.map(o => `<option value="${esc(o.id)}"${o.id===_cuentaCli?' selected':''}>${esc(o.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="card" style="padding:16px 8px;">
+      <table>
+        <thead><tr><th>Cliente</th><th>Coach</th><th>Estado</th><th>Alta</th><th>Última actividad</th></tr></thead>
+        <tbody>
+        ${lista.map(x => `<tr>
+          <td><div class="cta-n">${esc(x.name)}</div><div class="cta-s">${esc(x.email || '—')}</div></td>
+          <td><div class="org-cel">${esc(x.organization_name || 'Sin cuenta')}</div>${x.coach_name ? `<div class="cta-s">${esc(x.coach_name)}</div>` : ''}</td>
+          <td><span class="badge b-${x.state}">${LIFECYCLE[x.state] || x.state}</span></td>
+          <td>${soloFecha(x.created_at)}</td>
+          <td class="${x.last_activity ? '' : 'vacio'}">${x.last_activity ? haceCuanto(x.last_activity) : 'Sin actividad'}</td>
+        </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;padding:36px;color:#9CA3AF;">
+              ${_clientes.length ? 'Ningún cliente con ese filtro.' : 'Todavía no hay clientes en la plataforma.'}</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">«Última actividad» es lo último que hizo el cliente: un entrenamiento registrado, un check-in o un día de progreso.</p>`;
+}
+
+function filtrarClientes(v){
+  _buscaCli = v;
+  document.getElementById('contenido').innerHTML = htmlClientes();
+  const q = document.getElementById('qc');
+  if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+}
+function setCuentaCli(v){ _cuentaCli = v; document.getElementById('contenido').innerHTML = htmlClientes(); }
 
 /* La ficha enseña lo que de verdad tenemos: datos de la cuenta y su equipo.
    El historial de facturación que pide el documento llegará con la pasarela. */

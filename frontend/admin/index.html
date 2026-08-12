@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alzum · Panel de plataforma</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Sistema de diseño del documento. El acento del panel es Tinta #10141E,
+     más oscuro que el índigo del panel de coach, para que se note de un
+     vistazo que estás en el panel de plataforma y no en el del coach. */
+  :root{
+    --tinta:#10141E; --indigo:#4F5BF2; --fondo:#F4F5F9; --borde:#E2E4EA;
+    --activa:#22C55E; --prueba:#FFB23E; --suspendida:#64748B; --morosa:#EF4444;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;background:var(--fondo);color:#111827;}
+
+  .layout{display:flex;min-height:100vh;}
+
+  /* ── Barra lateral ── */
+  .side{width:248px;background:var(--tinta);color:#fff;display:flex;flex-direction:column;flex-shrink:0;}
+  .side-brand{padding:20px 20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);}
+  .side-brand b{font-size:15px;letter-spacing:.2px;}
+  .side-brand span{font-size:10.5px;color:rgba(255,255,255,.45);display:block;margin-top:1px;}
+  .side-nav{flex:1;padding:12px 10px;overflow-y:auto;}
+  .s-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:rgba(255,255,255,.68);
+          font-size:13px;font-weight:500;cursor:pointer;transition:.14s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:inherit;}
+  .s-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+  .s-item.active{background:var(--indigo);color:#fff;font-weight:600;}
+  .s-item svg{flex-shrink:0;opacity:.85;}
+  .side-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .who{min-width:0;flex:1;}
+  .who b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .who span{font-size:10.5px;color:rgba(255,255,255,.45);}
+  .salir{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;}
+  .salir:hover{color:#fff;}
+
+  /* ── Zona principal ── */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .top{background:#fff;border-bottom:1px solid var(--borde);padding:12px 24px;display:flex;align-items:center;gap:14px;}
+  .ctx-label{font-size:12.5px;color:#6B7280;}
+  /* El selector de contexto va ARRIBA y siempre visible, no escondido abajo:
+     el documento insiste en que el cambio de panel sea explícito. */
+  .ctx{display:flex;align-items:center;gap:8px;border:1.5px solid var(--borde);border-radius:9px;
+       padding:6px 10px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#111827;}
+  .ctx:hover{border-color:var(--indigo);}
+  .ctx select{border:none;outline:none;background:none;font:inherit;color:inherit;cursor:pointer;}
+  .body{flex:1;padding:26px 24px;overflow-y:auto;}
+  h1{font-size:20px;font-weight:700;margin-bottom:4px;}
+  .sub{font-size:13px;color:#6B7280;margin-bottom:20px;}
+
+  .card{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:26px;}
+  .proximo{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;color:#6B7280;}
+  .proximo svg{color:#C7CBD6;}
+  .proximo b{color:#374151;font-size:15px;}
+  .proximo p{font-size:13px;max-width:460px;line-height:1.55;}
+
+  .sin-acceso{max-width:440px;margin:80px auto;text-align:center;}
+  .sin-acceso .card{padding:36px;}
+
+  @media(max-width:860px){ .side{width:64px;} .side-brand span,.s-item span,.who{display:none;} }
+</style>
+</head>
+<body>
+
+<div class="layout" id="layout" style="display:none;">
+  <aside class="side">
+    <div class="side-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F5BF2" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div><b>ALZUM</b><span>Panel de plataforma</span></div>
+    </div>
+    <nav class="side-nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="avatar" id="avatar">A</div>
+      <div class="who"><b id="quien">…</b><span id="miRol"></span></div>
+      <button class="salir" onclick="salir()" title="Cerrar sesión">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="top">
+      <span class="ctx-label">Estás en:</span>
+      <div class="ctx">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F5BF2" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <select id="ctxSel" onchange="cambiarContexto()"></select>
+      </div>
+    </div>
+    <div class="body">
+      <h1 id="titulo">Visión general</h1>
+      <div class="sub" id="subtitulo"></div>
+      <div class="card" id="contenido"></div>
+    </div>
+  </div>
+</div>
+
+<div class="sin-acceso" id="sinAcceso" style="display:none;">
+  <div class="card">
+    <h1>Panel de plataforma</h1>
+    <p class="sub" style="margin-top:8px;">Esta zona es para el equipo de Alzum. Tu cuenta no tiene acceso.</p>
+    <button class="ctx" onclick="location.href='../dashboard.html'">Ir al panel de coach</button>
+  </div>
+</div>
+
+<script src="../js/org-context.js"></script>
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+const token = localStorage.getItem('token');
+if (!token) location.replace('../login.html');
+
+const ICONOS = {
+  chart:'<path d="M18 20V10M12 20V4M6 20v-6"/>', users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  card:'<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+  box:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  life:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>',
+  trend:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  team:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.31.4.56.71.71H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+};
+
+/* Qué se está construyendo en cada sección. Se escribe aquí y no en cada
+   pantalla para que, según lleguen los sprints, se sustituya el marcador por
+   la sección de verdad sin tocar la navegación. */
+const PENDIENTE = {
+  vision:'Los indicadores del negocio: organizaciones activas, coaches, clientes, ingresos recurrentes y altas y bajas del mes.',
+  organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
+  clientes:'Todos los clientes finales de la plataforma, en solo lectura, para soporte y métricas.',
+  facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
+  planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
+  contenido:'La base de datos de fábrica que ven todas las organizaciones, y el contenido privado de cada una para poder promoverlo.',
+  soporte:'Incidencias de las organizaciones, anuncios globales y envíos masivos.',
+  analiticas:'Uso de la plataforma, retención y organizaciones en riesgo de irse.',
+  equipo:'Los miembros internos de Alzum y el rol de cada uno.',
+  configuracion:'Ajustes globales: marca, integraciones y dominios.',
+};
+
+let _secciones = [], _actual = null;
+
+function salir(){ localStorage.removeItem('token'); localStorage.removeItem('role_id'); location.replace('../login.html'); }
+
+function pintarNav(){
+  document.getElementById('nav').innerHTML = _secciones.map(s =>
+    `<button class="s-item${s.id===_actual?' active':''}" onclick="abrir('${s.id}')">
+       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[s.icono]||''}</svg>
+       <span>${s.nombre}</span>
+     </button>`).join('');
+}
+
+function abrir(id){
+  const s = _secciones.find(x => x.id === id);
+  if (!s) return;
+  _actual = id;
+  location.hash = id;
+  document.getElementById('titulo').textContent = s.nombre;
+  document.getElementById('subtitulo').textContent = '';
+  document.getElementById('contenido').innerHTML = `
+    <div class="proximo">
+      <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <b>En construcción</b>
+      <p>${PENDIENTE[id] || ''}</p>
+    </div>`;
+  pintarNav();
+}
+
+/* El selector cambia de PANEL, no solo de organización: elegir una
+   organización te lleva al panel de coach trabajando como ella. */
+function cambiarContexto(){
+  const v = document.getElementById('ctxSel').value;
+  if (v === '__plataforma__') return;
+  try {
+    localStorage.setItem('org_context', v);
+    const sel = document.getElementById('ctxSel');
+    localStorage.setItem('org_context_name', sel.options[sel.selectedIndex].textContent);
+  } catch(e){}
+  location.href = '../dashboard.html';
+}
+
+(async function init(){
+  try {
+    const r = await fetch(`${API}/admin/me`, { headers: { Authorization: 'Bearer ' + token } });
+    if (r.status === 401) return location.replace('../login.html');
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { document.getElementById('sinAcceso').style.display = ''; return; }
+
+    const d = j.data || {};
+    _secciones = d.secciones || [];
+    document.getElementById('layout').style.display = '';
+    document.getElementById('quien').textContent = d.nombre || '';
+    document.getElementById('miRol').textContent = d.es_superadmin ? 'Super-admin' : 'Equipo de Alzum';
+    document.getElementById('avatar').textContent = (d.nombre || 'A').charAt(0).toUpperCase();
+
+    document.getElementById('ctxSel').innerHTML =
+      '<option value="__plataforma__">Plataforma Alzum</option>' +
+      (d.organizaciones || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+
+    const inicial = (location.hash || '').replace('#', '');
+    abrir(_secciones.some(s => s.id === inicial) ? inicial : (_secciones[0] || {}).id);
+  } catch(e) {
+    document.getElementById('sinAcceso').style.display = '';
+  }
+})();
+</script>
+</body>
+</html>

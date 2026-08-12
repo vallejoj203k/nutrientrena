@@ -20,6 +20,10 @@ CLIENT     = 6
 # STAFF_ROLES/COACH_UP/ADMIN_UP: hay que darle acceso explícito endpoint por
 # endpoint, solo donde corresponde.
 EDITOR_CONTENIDO_GLOBAL = 7
+# Equipo interno de Alzum: atiende incidencias y consulta organizaciones y
+# clientes para dar soporte, sin tocar facturación. Igual que el rol 7, se deja
+# fuera de los grupos de abajo a propósito.
+SOPORTE = 8
 
 # ── Shorthand groups ──────────────────────────────────────────────────────────
 STAFF_ROLES     = {SUPERADMIN, ADMIN, SETTER, CLOSER, COACH}   # any non-client

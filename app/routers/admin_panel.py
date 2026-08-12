@@ -357,6 +357,160 @@ def ficha_cuenta(
     return send_response(ficha, "OK")
 
 
+# ── Clientes finales ────────────────────────────────────────────────────────
+
+# Los cuatro estados del ciclo de vida que ya usa el panel de coach
+# (UserDetail.lifecycle_status). El panel de plataforma los LEE, no los toca.
+LIFECYCLE = {"activo": "Activo", "pendiente": "Pendiente",
+             "pausado": "Pausado", "finalizado": "Finalizado"}
+
+
+def _ultima_actividad(detail_ids: set, user_ids: set, db: Session) -> dict:
+    """Fecha de la última señal de vida de cada cliente, por user_detail_id.
+
+    Se mira lo que el cliente HACE, no lo que el coach le pone: entrenamientos
+    registrados, check-ins enviados y días de progreso. Sin `last_login` en el
+    modelo, esto es lo más cercano que hay a "última actividad" sin inventarla.
+
+    Se consulta en tres barridos, no uno por cliente: con unos cientos de
+    clientes la versión ingenua serían cientos de consultas por pintar la
+    tabla.
+    """
+    from sqlalchemy import func
+
+    from app.models.checkin import WeeklyCheckin
+    from app.models.progress_day import ProgressDay
+    from app.models.session_log import WorkoutSession
+
+    ultima = {}
+
+    def anotar(detail_id, fecha):
+        if not fecha:
+            return
+        previa = ultima.get(detail_id)
+        if previa is None or fecha > previa:
+            ultima[detail_id] = fecha
+
+    if detail_ids:
+        for did, f in db.query(
+            WorkoutSession.client_user_detail_id, func.max(WorkoutSession.session_date)
+        ).filter(WorkoutSession.client_user_detail_id.in_(detail_ids)).group_by(
+                WorkoutSession.client_user_detail_id).all():
+            anotar(did, f)
+
+        for did, f in db.query(
+            WeeklyCheckin.client_user_detail_id, func.max(WeeklyCheckin.checkin_date)
+        ).filter(WeeklyCheckin.client_user_detail_id.in_(detail_ids)).group_by(
+                WeeklyCheckin.client_user_detail_id).all():
+            anotar(did, f)
+
+    # ProgressDay cuelga de users.id, no de user_details.id.
+    if user_ids:
+        por_user = {}
+        for uid, f in db.query(
+            ProgressDay.user_id, func.max(ProgressDay.date)
+        ).filter(ProgressDay.user_id.in_(user_ids)).group_by(ProgressDay.user_id).all():
+            por_user[uid] = f
+        if por_user:
+            for d in db.query(UserDetail).filter(UserDetail.user_id.in_(list(por_user))).all():
+                anotar(d.id, por_user.get(d.user_id))
+
+    return ultima
+
+
+@router.get("/clients", summary="Clientes finales de la plataforma",
+            description="Los clientes de todos los coaches, en solo lectura, para dar soporte.")
+def listar_clientes(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Vista de solo lectura, y deliberadamente pobre en datos.
+
+    Un cliente final no es cliente de Alzum: es cliente de su coach. Aquí se
+    devuelve lo justo para dar soporte —quién es, de qué cuenta, en qué estado
+    y si sigue vivo— y nada de lo íntimo: ni peso, ni medidas, ni fotos, ni
+    patologías. No es un olvido; es la línea que separa dar soporte de leer el
+    historial médico de alguien que no te lo ha dado a ti.
+
+    Por eso tampoco hay endpoints de edición: desde el panel de plataforma no
+    se modifica el cliente de nadie. Para eso está "Entrar como".
+    """
+    motivo = _exige_seccion(current_user, db, "clientes")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    from app.core.dependencies import org_member_detail_ids
+
+    # A qué cuenta pertenece cada coach, y cómo se llama esa cuenta.
+    orgs = db.query(Organization).order_by(Organization.name).all()
+    cuenta_de_coach, nombre_cuenta = {}, {}
+    for o in orgs:
+        nombre_cuenta[o.id] = o.name
+        for did in org_member_detail_ids(o.id, db):
+            cuenta_de_coach[did] = o.id
+
+    # Los clientes cuelgan de un coach (UserParent), no de la organización.
+    vinculos = db.query(UserParent).all()
+    coach_de_cliente = {v.user_detail_id: v.parent_user_detail_id for v in vinculos}
+    if not coach_de_cliente:
+        return send_response({"clientes": [], "cuentas": [
+            {"id": o.id, "name": o.name} for o in orgs], "totales": {
+            "total": 0, "activos": 0, "finalizados": 0}}, "OK")
+
+    detalles = db.query(UserDetail).filter(
+        UserDetail.id.in_(list(coach_de_cliente)),
+        UserDetail.deleted_at.is_(None),
+    ).all()
+
+    coaches = {d.id: d for d in db.query(UserDetail).filter(
+        UserDetail.id.in_(set(coach_de_cliente.values()))).all()}
+    correos = {u.id: u.email for u in db.query(User).filter(
+        User.id.in_([d.user_id for d in detalles if d.user_id])).all()}
+
+    actividad = _ultima_actividad(
+        {d.id for d in detalles},
+        {d.user_id for d in detalles if d.user_id},
+        db,
+    )
+
+    clientes = []
+    for d in detalles:
+        coach_id = coach_de_cliente.get(d.id)
+        coach = coaches.get(coach_id)
+        org_id = cuenta_de_coach.get(coach_id)
+        act = actividad.get(d.id)
+        clientes.append({
+            "user_detail_id": d.id,
+            "name": f"{d.name} {d.last_name or ''}".strip(),
+            "email": correos.get(d.user_id),
+            # El coach que lo lleva y la cuenta a la que pertenece son cosas
+            # distintas: en un equipo, varios coaches comparten cuenta.
+            "coach_name": (f"{coach.name} {coach.last_name or ''}".strip() if coach else None),
+            "organization_id": org_id,
+            # Un coach sin organización no tiene cuenta a la que atribuirlo.
+            # Se dice, en vez de colgarlo de una cualquiera.
+            "organization_name": nombre_cuenta.get(org_id),
+            "state": d.lifecycle_status or "activo",
+            # "Alta" es cuando entró en la plataforma, no cuando empieza su
+            # programa: start_date se queda vacío en muchas fichas.
+            "created_at": (d.created_at or d.start_date).isoformat() if (d.created_at or d.start_date) else None,
+            "last_activity": act.isoformat() if act else None,
+        })
+    clientes.sort(key=lambda c: (c["name"] or "").lower())
+
+    return send_response({
+        "clientes": clientes,
+        # Para el desplegable "Todas las cuentas": solo las que tienen clientes,
+        # más una entrada para los coaches sueltos si los hay.
+        "cuentas": [{"id": o.id, "name": o.name} for o in orgs],
+        "totales": {
+            "total": len(clientes),
+            "activos": sum(1 for c in clientes if c["state"] == "activo"),
+            "finalizados": sum(1 for c in clientes if c["state"] == "finalizado"),
+        },
+    }, "OK")
+
+
 @router.get("/roles", summary="Roles del equipo de Alzum",
             description="Los roles internos y qué secciones ve cada uno. Para previsualizar el panel.")
 def roles_del_equipo(

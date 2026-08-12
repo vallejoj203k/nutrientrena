@@ -54,7 +54,52 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
      secs[1] === 'Coaches' && secs[3] === 'Facturación' && secs[8] === 'Equipo Alzum', secs);
   ck('la sección queda marcada como activa', await p.locator('.s-item.active').count() === 1);
 
+  // ── Clientes finales ─────────────────────────────────────────────────────
+  // Una cuenta con su propio dueño y un cliente colgando de él: es lo que hace
+  // que la atribución a la cuenta se pueda comprobar de verdad.
+  const cuenta = await post('/admin/organizations', {
+    name: `Centro Clientes ${SUF}`, state: 'activa',
+    owner_name: 'Marta Coach', owner_email: `marta.cli.${SUF}@nutrientrena-qa.com`,
+    owner_password: 'Centro123!' });
+  ck('cuenta con dueño propio creada', !!cuenta.data?.id, cuenta);
+  const cli = await post('/users', { name: 'Laura Gómez', email: `laura.cli.${SUF}@nutrientrena-qa.com`,
+    password: 'Cliente123!', role_id: 6, instructor: cuenta.data.owner_user_detail_id });
+  ck('cliente asignado a ese coach', !!cli.data, cli);
+
+  await p.click('.s-item:nth-child(3)');
+  await p.waitForTimeout(1800);
+  ck('la sección Clientes finales carga', (await p.textContent('#titulo')).trim() === 'Clientes finales');
+  const tc = await p.textContent('#contenido');
+  ck('el cliente sale con su cuenta y su coach',
+     tc.includes('Laura Gómez') && tc.includes(`Centro Clientes ${SUF}`) && tc.includes('Marta Coach'),
+     tc.slice(0, 200));
+  ck('se dice que es solo lectura', tc.includes('no se muestran medidas, fotos ni historial médico'));
+  ck('sin actividad se dice, no se inventa una fecha', tc.includes('Sin actividad'));
+
+  // Lo que NO puede salir: el panel de plataforma no enseña lo íntimo.
+  const bruto = await p.evaluate(async () => {
+    const r = await fetch('https://nutrientrena-production.up.railway.app/api/admin/clients',
+      { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+    return JSON.stringify((await r.json()).data.clientes[0] || {});
+  });
+  ck('la API no manda peso, medidas ni fotos',
+     !/weight|height|body_fat|photo|allergies|patholog/i.test(bruto), bruto.slice(0, 200));
+
+  // Filtro por cuenta: lo que hace que el desplegable signifique algo
+  await p.selectOption('#cuentaCli', cuenta.data.id);
+  await p.waitForTimeout(400);
+  const filas = await p.locator('#contenido tbody tr').count();
+  ck('filtrar por cuenta deja solo sus clientes',
+     filas >= 1 && (await p.textContent('#contenido')).includes('Laura Gómez'), { filas });
+  await p.fill('#qc', 'zzz-no-existe');
+  await p.waitForTimeout(400);
+  ck('buscar algo que no está lo dice', (await p.textContent('#contenido')).includes('Ningún cliente con ese filtro'));
+  await p.fill('#qc', '');
+  await p.waitForTimeout(400);
+
   // Cambiar de contexto lleva al panel de coach
+  await p.click('.s-item:nth-child(2)');
+  await p.waitForTimeout(1200);
   const orgId = org.data.id;
   await p.selectOption('#ctxSel', orgId);
   await p.waitForTimeout(1500);

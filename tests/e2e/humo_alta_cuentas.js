@@ -130,6 +130,43 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.waitForTimeout(700);
   ck('se puede volver a la vista propia', (await p.locator('.s-item span').allTextContents()).length === 10);
 
+  // ── "Entrar como": soporte sin pedirle la contraseña a nadie ─────────────
+  await p.click('.s-item:nth-child(2)');
+  await p.waitForTimeout(1200);
+  await p.click('button:has-text("Ver ficha")');
+  await p.waitForTimeout(900);
+  const nombreFicha = (await p.textContent('#fichaTitulo')).trim();
+  ck('la ficha ofrece entrar en la cuenta', await p.locator('#fichaEntrar').isVisible());
+  await p.click('#fichaEntrar');
+  await p.waitForTimeout(2500);
+
+  ck('lleva al panel de coach', p.url().includes('dashboard.html'), p.url());
+  ck('con el contexto puesto',
+     (await p.evaluate(() => localStorage.getItem('org_context'))) !== null);
+
+  // Lo importante no es el botón: es que no se te olvide dónde estás.
+  // El aviso llega cuando responde /organizations/switchable, así que se
+  // espera a que aparezca en vez de mirar una sola vez.
+  await p.locator('#orgCtxAviso').waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+  ck('avisa en grande de que estás dentro de otra cuenta',
+     await p.locator('#orgCtxAviso').isVisible());
+  ck('y dice de cuál', (await p.textContent('#orgCtxAviso b')) === nombreFicha,
+     await p.textContent('#orgCtxAviso'));
+
+  // Y las peticiones de esa pantalla ya van con la cabecera del contexto
+  const conCabecera = await p.evaluate(async () => {
+    const r = await fetch('https://nutrientrena-production.up.railway.app/api/billing/summary',
+                          { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+    return (await r.json()).data || {};
+  });
+  ck('la API responde ya en el contexto de esa cuenta',
+     conCabecera.alcance === 'organizacion', conCabecera);
+
+  await p.click('#orgCtxAviso button');
+  await p.waitForTimeout(2000);
+  ck('se puede volver a plataforma desde el aviso',
+     (await p.evaluate(() => localStorage.getItem('org_context'))) === null);
+
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);
 })();

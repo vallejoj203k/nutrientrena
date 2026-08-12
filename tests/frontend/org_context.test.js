@@ -75,6 +75,34 @@ function pagina(almacen, contextos) {
   ck('NO se toca la petición a un tercero', res[2].org === null, res[2]);
   ck('el selector recuerda lo elegido', await p.inputValue('#orgCtxSel') === 'o2');
 
+  // ── El aviso de estar dentro de otra cuenta ──────────────────────────────
+  // Sin esto, "Entrar como" es una trampa: la pantalla es idéntica a la propia
+  // y lo que se cree allí queda dentro de la organización ajena.
+  ck('se avisa de que se está dentro de otra cuenta', await p.locator('#orgCtxAviso').count() === 1);
+  ck('el aviso dice de cuál', (await p.locator('#orgCtxAviso b').textContent()) === 'Centro Alfa',
+    await p.locator('#orgCtxAviso').textContent());
+  ck('el aviso no tapa el contenido',
+    await p.evaluate(() => parseInt(getComputedStyle(document.body).paddingTop, 10) >= 38));
+
+  // Y se puede salir desde ahí mismo
+  const salida = await p.evaluate(async () => {
+    document.querySelector('#orgCtxAviso button').click();
+    return window.__store.org_context;
+  });
+  ck('“Volver a plataforma” limpia el contexto', salida === undefined, salida);
+
+  // ── Sin contexto no hay aviso ────────────────────────────────────────────
+  p = await b.newPage();
+  await p.setContent(pagina({ token: 't' }, DOS));
+  await p.waitForTimeout(300);
+  ck('actuando como plataforma no hay aviso', await p.locator('#orgCtxAviso').count() === 0);
+
+  // ── Un dueño en su propia organización no está "dentro de otra" ──────────
+  p = await b.newPage();
+  await p.setContent(pagina({ token: 't', org_context: 'o1' }, UNA));
+  await p.waitForTimeout(300);
+  ck('el dueño de una sola organización no ve el aviso', await p.locator('#orgCtxAviso').count() === 0);
+
   // ── Sin contexto (plataforma): sin cabecera
   p = await b.newPage();
   await p.setContent(pagina({ token: 't' }, DOS));

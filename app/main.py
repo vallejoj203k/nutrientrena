@@ -15,7 +15,7 @@ from app.routers import (
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
     analytics, public, session_logs, client_tasks, programs, weekly_menus, client_exercises,
     calendar_tasks, team, organizations, contracts, documents, client_home, client_activity,
-    billing, content_scope,
+    billing, content_scope, admin_panel,
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes, client_aliments, pathologies
@@ -128,6 +128,7 @@ app.include_router(plans.router, prefix=API_PREFIX)
 app.include_router(analytics.router, prefix=API_PREFIX)
 app.include_router(billing.router, prefix=API_PREFIX)
 app.include_router(content_scope.router, prefix=API_PREFIX)
+app.include_router(admin_panel.router, prefix=API_PREFIX)
 app.include_router(type_food.router, prefix=API_PREFIX)
 app.include_router(group_food.router, prefix=API_PREFIX)
 app.include_router(aliments.router, prefix=API_PREFIX)
@@ -173,6 +174,13 @@ async def global_exception_handler(request: Request, exc: Exception):
 _frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.isdir(_frontend_dir):
     app.mount("/app", StaticFiles(directory=_frontend_dir, html=True), name="frontend")
+
+
+@app.get("/admin", include_in_schema=False)
+def _admin():
+    """El documento pide que el panel viva en /admin. El frontend se sirve
+    bajo /app, así que se redirige en vez de duplicar el montaje."""
+    return RedirectResponse(url="/app/admin/index.html")
 
 
 @app.get("/", include_in_schema=False)

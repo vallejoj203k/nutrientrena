@@ -60,6 +60,52 @@
   .sin-acceso{max-width:440px;margin:80px auto;text-align:center;}
   .sin-acceso .card{padding:36px;}
 
+  /* Tarjetas de indicadores */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:20px;}
+  .kpi{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:16px 18px;}
+  .kpi-t{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#9CA3AF;margin-bottom:8px;}
+  .kpi-v{font-size:27px;font-weight:700;line-height:1.1;}
+  .kpi-s{font-size:11.5px;color:#9CA3AF;margin-top:5px;}
+  .kpi.pend .kpi-v{color:#C7CBD6;font-size:22px;}
+
+  /* Buscador y filtros */
+  .barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .buscar{flex:1;min-width:220px;padding:9px 13px;border:1px solid var(--borde);border-radius:10px;font:inherit;font-size:13px;outline:none;}
+  .buscar:focus{border-color:var(--indigo);}
+  .pill{padding:7px 14px;border:1px solid var(--borde);background:#fff;border-radius:20px;font:inherit;font-size:12.5px;font-weight:600;color:#6B7280;cursor:pointer;}
+  .pill.on{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+  .btn{padding:9px 15px;border:none;border-radius:9px;background:var(--indigo);color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+  .btn.ghost{background:#fff;border:1px solid var(--borde);color:#374151;}
+  .btn.rojo{background:#fff;border:1px solid #FCA5A5;color:#DC2626;}
+
+  /* Tabla */
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:0 14px 10px;}
+  th.num,td.num{text-align:right;}
+  td{padding:13px 14px;border-top:1px solid #F1F2F6;font-size:13px;vertical-align:middle;}
+  .cta-n{font-weight:700;}
+  .cta-s{font-size:11.5px;color:#9CA3AF;margin-top:2px;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .b-activa{background:#DCFCE7;color:#15803D;}
+  .b-prueba{background:#EEF2FF;color:#4F5BF2;}
+  .b-impago{background:#FEE2E2;color:#B91C1C;}
+  .b-suspendida{background:#F1F5F9;color:#64748B;}
+  .vacio{color:#D1D5DB;}
+
+  /* Modal de alta */
+  .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .capa.on{display:flex;}
+  .modal{background:#fff;border-radius:14px;width:520px;max-width:100%;max-height:90vh;overflow-y:auto;}
+  .modal h2{font-size:16px;padding:18px 22px;border-bottom:1px solid var(--borde);}
+  .modal .cuerpo{padding:20px 22px;display:flex;flex-direction:column;gap:14px;}
+  .campo label{display:block;font-size:11.5px;font-weight:600;color:#6B7280;margin-bottom:5px;}
+  .campo input,.campo select{width:100%;padding:9px 11px;border:1px solid var(--borde);border-radius:9px;font:inherit;font-size:13px;outline:none;}
+  .campo input:focus,.campo select:focus{border-color:var(--indigo);}
+  .fila2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .pie{padding:14px 22px;border-top:1px solid var(--borde);display:flex;justify-content:flex-end;gap:9px;align-items:center;}
+  .aviso{font-size:12.5px;color:#B45309;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px;padding:10px 12px;}
+  .error{font-size:12.5px;color:#DC2626;flex:1;}
+
   @media(max-width:860px){ .side{width:64px;} .side-brand span,.s-item span,.who{display:none;} }
 </style>
 </head>
@@ -105,6 +151,43 @@
   </div>
 </div>
 
+<div class="capa" id="capaAlta" onclick="if(event.target===this)cerrarAlta()">
+  <div class="modal">
+    <h2>Dar de alta una cuenta</h2>
+    <div class="cuerpo">
+      <div class="fila2">
+        <div class="campo"><label>Nombre de la cuenta</label><input id="altaNombre" placeholder="Ej: NutriEntrena"></div>
+        <div class="campo"><label>País (opcional)</label><input id="altaPais" placeholder="España"></div>
+      </div>
+      <div class="campo"><label>Estado</label>
+        <select id="altaEstado"><option value="activa">Activa</option><option value="prueba">En prueba</option></select>
+      </div>
+      <div class="campo"><label>Dueño de la cuenta</label>
+        <select id="altaModo" onchange="cambiarModoDueno()">
+          <option value="nuevo">Crear un entrenador nuevo</option>
+          <option value="existente">Usar un usuario que ya existe</option>
+        </select>
+      </div>
+      <div id="bloqueNuevo">
+        <div class="campo" style="margin-bottom:12px;"><label>Nombre y apellidos</label><input id="altaDuenoNombre" placeholder="Oswal Serrano"></div>
+        <div class="fila2">
+          <div class="campo"><label>Correo</label><input id="altaDuenoEmail" type="email" placeholder="hola@nutrientrena.com"></div>
+          <div class="campo"><label>Contraseña</label><input id="altaDuenoClave" type="text" placeholder="Mínimo 6 caracteres"></div>
+        </div>
+      </div>
+      <div id="bloqueExistente" style="display:none;">
+        <div class="campo"><label>Entrenador sin cuenta</label><select id="altaDuenoExistente"></select></div>
+      </div>
+      <div class="aviso">Un entrenador sin cuenta publica su contenido en el catálogo común de la plataforma, donde lo ve todo el mundo. Dándole una cuenta, su trabajo queda dentro de ella.</div>
+    </div>
+    <div class="pie">
+      <span class="error" id="altaError"></span>
+      <button class="btn ghost" onclick="cerrarAlta()">Cancelar</button>
+      <button class="btn" id="altaBtn" onclick="guardarAlta()">Crear cuenta</button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/org-context.js"></script>
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
@@ -139,7 +222,10 @@ const PENDIENTE = {
   configuracion:'Ajustes globales: marca, integraciones y dominios.',
 };
 
-let _secciones = [], _actual = null;
+let _secciones = [], _actual = null, _cuentas = [], _totales = {}, _filtro = 'todas', _busca = '';
+const ESTADOS = { activa:'Activa', prueba:'En prueba', impago:'Impago', suspendida:'Suspendida' };
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const cab = () => ({ 'Content-Type':'application/json', Authorization:'Bearer ' + token });
 
 function salir(){ localStorage.removeItem('token'); localStorage.removeItem('role_id'); location.replace('../login.html'); }
 
@@ -151,20 +237,172 @@ function pintarNav(){
      </button>`).join('');
 }
 
-function abrir(id){
+function enConstruccion(id){
+  return `<div class="card"><div class="proximo">
+      <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <b>En construcción</b><p>${PENDIENTE[id] || ''}</p></div></div>`;
+}
+
+async function abrir(id){
   const s = _secciones.find(x => x.id === id);
   if (!s) return;
   _actual = id;
   location.hash = id;
   document.getElementById('titulo').textContent = s.nombre;
   document.getElementById('subtitulo').textContent = '';
-  document.getElementById('contenido').innerHTML = `
-    <div class="proximo">
-      <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <b>En construcción</b>
-      <p>${PENDIENTE[id] || ''}</p>
-    </div>`;
   pintarNav();
+
+  if (id === 'organizaciones') return pintarCoaches();
+  if (id === 'vision') return pintarVision();
+  document.getElementById('contenido').innerHTML = enConstruccion(id);
+}
+
+async function cargarCuentas(){
+  const r = await fetch(`${API}/admin/organizations`, { headers: cab() });
+  if (!r.ok) { _cuentas = []; _totales = {}; return; }
+  const d = (await r.json()).data || {};
+  _cuentas = d.cuentas || [];
+  _totales = d.totales || {};
+}
+
+/* Los indicadores que dependen de la pasarela de pago (MRR, tickets) se
+   muestran como pendientes en vez de con cifras inventadas: una tarjeta que
+   enseña un número falso parece que funciona y no funciona. */
+function pintarVision(){
+  document.getElementById('subtitulo').textContent = 'Estado general de la plataforma Alzum.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  const c = document.getElementById('contenido');
+  cargarCuentas().then(() => {
+    const t = _totales.por_estado || {};
+    c.innerHTML = `
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-t">Coaches / cuentas</div><div class="kpi-v">${_totales.cuentas ?? 0}</div><div class="kpi-s">${t.prueba || 0} en prueba</div></div>
+        <div class="kpi"><div class="kpi-t">Clientes finales</div><div class="kpi-v">${_totales.clientes ?? 0}</div><div class="kpi-s">Usuarios de los coaches</div></div>
+        <div class="kpi pend"><div class="kpi-t">MRR</div><div class="kpi-v">—</div><div class="kpi-s">Requiere la pasarela de pago</div></div>
+        <div class="kpi pend"><div class="kpi-t">Tickets abiertos</div><div class="kpi-v">—</div><div class="kpi-s">Requiere el módulo de soporte</div></div>
+      </div>
+      ${(t.impago || t.suspendida) ? `<div class="card" style="border-color:#FCA5A5;background:#FEF2F2;margin-bottom:20px;">
+        <b style="color:#B91C1C;font-size:14px;">Atención requerida</b>
+        <div style="font-size:13px;color:#7F1D1D;margin-top:6px;">
+          ${t.impago ? `${t.impago} cuenta(s) en impago. ` : ''}${t.suspendida ? `${t.suspendida} suspendida(s).` : ''}
+          <button class="btn ghost" style="margin-left:8px;" onclick="abrir('organizaciones')">Ver cuentas</button>
+        </div></div>` : ''}
+      <div class="card">
+        <b style="font-size:14px;">Últimas cuentas</b>
+        <table style="margin-top:12px;"><tbody>
+          ${_cuentas.slice(0, 6).map(x => `<tr>
+            <td><div class="cta-n">${esc(x.name)}</div><div class="cta-s">${esc(x.owner_name || '—')} · ${x.clientes} clientes</div></td>
+            <td class="num"><span class="badge b-${x.state}">${ESTADOS[x.state] || x.state}</span></td>
+          </tr>`).join('') || '<tr><td class="vacio">Todavía no hay cuentas.</td></tr>'}
+        </tbody></table>
+      </div>`;
+  });
+}
+
+function pintarCoaches(){
+  document.getElementById('subtitulo').textContent = 'Cuentas (organizaciones) que usan Alzum. Cada una tiene sus propios clientes y contenido.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  const c = document.getElementById('contenido');
+  c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  cargarCuentas().then(() => { c.innerHTML = htmlCoaches(); });
+}
+
+function htmlCoaches(){
+  const q = _busca.toLowerCase();
+  const lista = _cuentas.filter(x =>
+    (_filtro === 'todas' || x.state === _filtro) &&
+    (!q || (x.name + ' ' + (x.owner_name||'') + ' ' + (x.owner_email||'')).toLowerCase().includes(q)));
+
+  return `
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-t">Cuentas totales</div><div class="kpi-v">${_totales.cuentas ?? 0}</div></div>
+      <div class="kpi"><div class="kpi-t">Clientes gestionados</div><div class="kpi-v">${_totales.clientes ?? 0}</div></div>
+      <div class="kpi pend"><div class="kpi-t">MRR de coaches</div><div class="kpi-v">—</div><div class="kpi-s">Requiere la pasarela de pago</div></div>
+    </div>
+    <div class="barra">
+      <input class="buscar" id="q" placeholder="Buscar por nombre, dueño o email…" value="${esc(_busca)}" oninput="filtrar(this.value)">
+      ${['todas','activa','prueba','impago','suspendida'].map(e =>
+        `<button class="pill${_filtro===e?' on':''}" onclick="setFiltro('${e}')">${e==='todas'?'Todas':ESTADOS[e]}</button>`).join('')}
+      <button class="btn" onclick="abrirAlta()">+ Nueva cuenta</button>
+    </div>
+    <div class="card" style="padding:16px 8px;">
+      <table>
+        <thead><tr><th>Cuenta</th><th>Plan</th><th>Estado</th><th class="num">Coaches</th><th class="num">Clientes</th><th class="num">MRR</th><th class="num">Acciones</th></tr></thead>
+        <tbody>
+        ${lista.map(x => `<tr>
+          <td><div class="cta-n">${esc(x.name)}</div><div class="cta-s">${esc(x.owner_name || 'Sin dueño')}${x.owner_email ? ' · ' + esc(x.owner_email) : ''}${x.country ? ' · ' + esc(x.country) : ''}</div></td>
+          <td class="vacio">—</td>
+          <td><span class="badge b-${x.state}">${ESTADOS[x.state] || x.state}</span></td>
+          <td class="num">${x.coaches}</td>
+          <td class="num">${x.clientes}</td>
+          <td class="num vacio">—</td>
+          <td class="num">${x.state === 'suspendida'
+            ? `<button class="btn ghost" onclick="cambiarEstado('${x.id}','activa')">Reactivar</button>`
+            : `<button class="btn rojo" onclick="cambiarEstado('${x.id}','suspendida')">Suspender</button>`}</td>
+        </tr>`).join('') || `<tr><td colspan="7" style="text-align:center;padding:36px;color:#9CA3AF;">
+              ${_cuentas.length ? 'Ninguna cuenta con ese filtro.' : 'Todavía no hay cuentas. Crea la primera con «+ Nueva cuenta».'}</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">Plan y MRR llegarán con la pasarela de pago; hasta entonces se muestran vacíos en vez de con datos de ejemplo.</p>`;
+}
+
+function filtrar(v){ _busca = v; const c = document.getElementById('contenido'); c.innerHTML = htmlCoaches(); const q = document.getElementById('q'); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
+function setFiltro(e){ _filtro = e; document.getElementById('contenido').innerHTML = htmlCoaches(); }
+
+async function cambiarEstado(id, estado){
+  const nombre = (_cuentas.find(x => x.id === id) || {}).name || 'esta cuenta';
+  if (estado === 'suspendida' && !confirm(`¿Suspender «${nombre}»?\n\nSu equipo dejará de poder entrar. Se puede reactivar cuando quieras.`)) return;
+  const r = await fetch(`${API}/admin/organizations/${id}/state`, { method:'PUT', headers: cab(), body: JSON.stringify({ state: estado }) });
+  if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo cambiar el estado'); return; }
+  await cargarCuentas();
+  document.getElementById('contenido').innerHTML = htmlCoaches();
+}
+
+async function abrirAlta(){
+  document.getElementById('capaAlta').classList.add('on');
+  document.getElementById('altaError').textContent = '';
+  // Se ofrecen los entrenadores que hoy están sin cuenta: son justo los que
+  // conviene colocar, porque su contenido está cayendo en el catálogo común.
+  try {
+    const r = await fetch(`${API}/admin/coaches-sin-cuenta`, { headers: cab() });
+    const sueltos = r.ok ? ((await r.json()).data || []) : [];
+    document.getElementById('altaDuenoExistente').innerHTML = sueltos.length
+      ? sueltos.map(s => `<option value="${esc(s.user_detail_id)}">${esc(s.name)}${s.email ? ' · ' + esc(s.email) : ''}</option>`).join('')
+      : '<option value="">No hay entrenadores sin cuenta</option>';
+  } catch(e) {}
+}
+function cerrarAlta(){ document.getElementById('capaAlta').classList.remove('on'); }
+function cambiarModoDueno(){
+  const nuevo = document.getElementById('altaModo').value === 'nuevo';
+  document.getElementById('bloqueNuevo').style.display = nuevo ? '' : 'none';
+  document.getElementById('bloqueExistente').style.display = nuevo ? 'none' : '';
+}
+
+async function guardarAlta(){
+  const v = id => (document.getElementById(id).value || '').trim();
+  const err = document.getElementById('altaError');
+  const btn = document.getElementById('altaBtn');
+  err.textContent = '';
+  const cuerpo = { name: v('altaNombre'), country: v('altaPais') || null, state: v('altaEstado') };
+  if (document.getElementById('altaModo').value === 'nuevo') {
+    Object.assign(cuerpo, { owner_name: v('altaDuenoNombre'), owner_email: v('altaDuenoEmail'), owner_password: v('altaDuenoClave') });
+  } else {
+    cuerpo.owner_user_detail_id = v('altaDuenoExistente');
+  }
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/admin/organizations`, { method:'POST', headers: cab(), body: JSON.stringify(cuerpo) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { err.textContent = j.message || j.detail || 'No se pudo crear'; return; }
+    cerrarAlta();
+    ['altaNombre','altaPais','altaDuenoNombre','altaDuenoEmail','altaDuenoClave'].forEach(i => { const e = document.getElementById(i); if (e) e.value=''; });
+    await cargarCuentas();
+    document.getElementById('contenido').innerHTML = htmlCoaches();
+  } catch(e) { err.textContent = 'Error de conexión'; }
+  finally { btn.disabled = false; }
 }
 
 /* El selector cambia de PANEL, no solo de organización: elegir una

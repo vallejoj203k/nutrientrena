@@ -13,6 +13,11 @@ class Organization(Base):
     slug = Column(String(255), nullable=True, unique=True)
     owner_id = Column(String(36), ForeignKey("user_details.id"), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False, server_default="1")
+    # Estado de la cuenta para el panel de plataforma: activa / prueba /
+    # impago / suspendida. is_active se conserva y se mantiene en sincronía
+    # porque hay código del panel de coach que lo consulta.
+    state = Column(String(20), nullable=False, default="activa", server_default="activa")
+    country = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

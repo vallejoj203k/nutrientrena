@@ -21,6 +21,17 @@
     try { return localStorage.getItem(CLAVE) || ''; } catch (e) { return ''; }
   }
 
+  function nombreActual() {
+    try { return localStorage.getItem(CLAVE_NOMBRE) || ''; } catch (e) { return ''; }
+  }
+
+  function salir() {
+    try {
+      localStorage.removeItem(CLAVE);
+      localStorage.removeItem(CLAVE_NOMBRE);
+    } catch (e) {}
+  }
+
   function esNuestraApi(url) {
     if (!url) return false;
     if (url.indexOf(API_HOST) !== -1) return true;          // absoluta a nuestra API
@@ -78,6 +89,36 @@
     });
   }
 
+  // ── 3. El aviso de "estás dentro de otro centro" ────────────────────────
+  /* Sin esto, "Entrar como" es una trampa: la pantalla es idéntica a la propia
+     y lo que se cree allí (una dieta, una rutina, un cliente) queda dentro de
+     la organización ajena. El selector del sidebar no basta — hay que mirarlo
+     a propósito, y en las páginas sin sidebar ni siquiera existe. */
+  function pintarAviso(nombre) {
+    if (document.getElementById('orgCtxAviso')) return;
+    var barra = document.createElement('div');
+    barra.id = 'orgCtxAviso';
+    barra.className = 'org-ctx-aviso';
+    barra.innerHTML =
+      '<span class="occ-punto"></span>' +
+      '<span>Estás trabajando dentro de <b></b>. Todo lo que crees o edites queda en esa cuenta.</span>' +
+      '<button type="button">Volver a plataforma</button>';
+    barra.querySelector('b').textContent = nombre || 'otra cuenta';
+    barra.querySelector('button').addEventListener('click', function () {
+      salir();
+      location.reload();
+    });
+    document.body.appendChild(barra);
+    document.documentElement.style.setProperty('--org-ctx-aviso', '38px');
+    document.body.style.paddingTop =
+      (parseInt(getComputedStyle(document.body).paddingTop, 10) || 0) + 38 + 'px';
+  }
+
+  function quitarAviso() {
+    var b = document.getElementById('orgCtxAviso');
+    if (b && b.parentNode) b.parentNode.removeChild(b);
+  }
+
   function estilos() {
     if (document.getElementById('orgCtxCss')) return;
     var s = document.createElement('style');
@@ -87,7 +128,15 @@
       '.org-ctx label{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#94A3B8;}' +
       '.org-ctx select{width:100%;padding:6px 8px;border:1px solid rgba(148,163,184,.3);border-radius:7px;' +
       'background:rgba(148,163,184,.10);color:inherit;font-size:12px;font-weight:600;cursor:pointer;outline:none;}' +
-      '.org-ctx select:focus{border-color:#4F46E5;}';
+      '.org-ctx select:focus{border-color:#4F46E5;}' +
+      '.org-ctx-aviso{position:fixed;top:0;left:0;right:0;z-index:99999;height:38px;display:flex;' +
+      'align-items:center;justify-content:center;gap:10px;background:#B45309;color:#fff;' +
+      'font-size:12.5px;font-weight:600;padding:0 14px;box-shadow:0 1px 6px rgba(0,0,0,.18);}' +
+      '.org-ctx-aviso b{font-weight:800;}' +
+      '.org-ctx-aviso .occ-punto{width:8px;height:8px;border-radius:50%;background:#FDE68A;flex:none;}' +
+      '.org-ctx-aviso button{border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.14);' +
+      'color:#fff;font:inherit;padding:3px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;}' +
+      '.org-ctx-aviso button:hover{background:rgba(255,255,255,.26);}';
     document.head.appendChild(s);
   }
 
@@ -111,17 +160,27 @@
         // Con una sola opción el selector no decide nada: solo ocuparía sitio
         // y sugeriría que hay algo que elegir.
         if (opciones < 2) {
-          if (contextoActual()) { try { localStorage.removeItem(CLAVE); } catch (e) {} }
+          if (contextoActual()) { salir(); }
+          quitarAviso();
           return;
         }
         // Si el contexto guardado ya no está disponible, se vuelve a
         // plataforma en vez de seguir mandando una cabecera que dará 403.
         var actual = contextoActual();
         if (actual && !orgs.some(function (o) { return o.id === actual; })) {
-          try { localStorage.removeItem(CLAVE); } catch (e) {}
+          salir();
+          actual = '';
         }
         estilos();
         pintar(orgs, plataforma);
+        // El aviso solo tiene sentido si se puede volver a algún sitio: quien
+        // solo tiene su propia organización no está "dentro de otra".
+        if (actual && plataforma) {
+          var elegida = orgs.filter(function (o) { return o.id === actual; })[0];
+          pintarAviso((elegida && elegida.name) || nombreActual());
+        } else {
+          quitarAviso();
+        }
       })
       .catch(function () {});
   }

@@ -38,18 +38,20 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('la barra lateral usa la tinta oscura del documento',
      (await p.evaluate(() => getComputedStyle(document.querySelector('.side')).backgroundColor)) === 'rgb(16, 20, 30)');
 
-  // Selector de contexto ARRIBA, no abajo
-  const arriba = await p.evaluate(() => {
-    const sel = document.getElementById('ctxSel');
-    return sel && sel.getBoundingClientRect().top < 90;
-  });
-  ck('el selector de contexto está en la barra superior', arriba);
+  /* El selector va en la barra LATERAL, como el diseño que aprobó el cliente.
+     El documento lo situaba en la barra superior; manda la captura. */
+  ck('el selector de contexto está en la barra lateral', await p.evaluate(() => {
+    const c = document.querySelector('.ctx-card');
+    return !!c && c.closest('.side') !== null;
+  }));
   const ops = await p.locator('#ctxSel option').allTextContents();
   ck('ofrece Plataforma Alzum y las organizaciones', ops[0] === 'Plataforma Alzum' && ops.length >= 2, ops);
 
   await p.click('.s-item:nth-child(6)');
   await p.waitForTimeout(200);
   ck('navegar entre secciones funciona', (await p.textContent('#titulo')).includes('Contenido'), await p.textContent('#titulo'));
+  ck('los nombres del menú son los del diseño del cliente',
+     secs[1] === 'Coaches' && secs[3] === 'Facturación' && secs[8] === 'Equipo Alzum', secs);
   ck('la sección queda marcada como activa', await p.locator('.s-item.active').count() === 1);
 
   // Cambiar de contexto lleva al panel de coach

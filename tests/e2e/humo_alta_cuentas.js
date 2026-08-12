@@ -29,7 +29,8 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.waitForTimeout(1800);
 
   ck('la sección Coaches carga', (await p.textContent('#titulo')).trim() === 'Coaches');
-  ck('empieza sin cuentas', (await p.textContent('#contenido')).includes('Todavía no hay cuentas'));
+  // No se asume base vacía: la prueba debe valer con datos previos.
+  ck('la tabla de cuentas se pinta', await p.locator('#contenido table').count() === 1);
 
   // ── Dar de alta NutriEntrena con su dueño
   await p.click('button:has-text("+ Nueva cuenta")');
@@ -72,12 +73,16 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('reactivar lo devuelve', (await p.locator('.badge.b-activa').count()) >= 1);
 
   // ── Filtros
-  await p.click('button.pill:has-text("En prueba")');
+  // Filtrar por estado: solo deben quedar filas de ESE estado, haya las que haya.
+  const filas = () => p.locator('#contenido tbody tr').count();
+  const todas = await filas();
+  await p.click('button.pill:has-text("Activa")');
   await p.waitForTimeout(300);
-  ck('el filtro deja el listado vacío si no hay ninguna', (await p.textContent('#contenido')).includes('Ninguna cuenta con ese filtro'));
+  const activas = await p.locator('#contenido .badge.b-activa').count();
+  ck('filtrar por Activa deja solo cuentas activas', (await filas()) === activas && activas >= 1, { activas });
   await p.click('button.pill:has-text("Todas")');
   await p.waitForTimeout(300);
-  ck('y vuelve al pulsar Todas', (await p.textContent('#contenido')).includes('NutriEntrena'));
+  ck('y vuelve al pulsar Todas', (await filas()) === todas, { todas });
 
   // ── Visión general con datos reales
   await p.click('.s-item:nth-child(1)');
@@ -85,6 +90,45 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   const v = await p.textContent('#contenido');
   ck('Visión general cuenta las cuentas reales', /Coaches \/ cuentas/i.test(v) && v.includes('NutriEntrena'), v.slice(0, 150));
   ck('y marca MRR y tickets como pendientes', v.includes('Requiere la pasarela de pago') && v.includes('Requiere el módulo de soporte'));
+
+  // ── Ficha de la cuenta
+  await p.click('.s-item:nth-child(2)');
+  await p.waitForTimeout(1200);
+  await p.click('button:has-text("Ver ficha")');
+  await p.waitForTimeout(900);
+  ck('la ficha se abre', await p.locator('#capaFicha.on').count() === 1);
+  // Se comprueba la ESTRUCTURA, no un nombre concreto: la fila que se abre
+  // depende del orden del listado y de lo que haya en la base.
+  const fi = await p.textContent('#fichaCuerpo');
+  ck('muestra dueño, estado, país, alta y equipo',
+     ['Dueño','Estado','País','Alta'].every(t => fi.includes(t)) && /Equipo \(\d+\)/.test(fi), fi.slice(0, 160));
+  ck('el equipo lista al menos al dueño', (await p.locator('#fichaCuerpo .badge.b-prueba').count()) >= 1);
+  ck('avisa de lo que falta', fi.includes('pasarela de pago'));
+  await p.click('#capaFicha .btn.ghost');
+  await p.waitForTimeout(300);
+
+  // ── Selector del contexto en la BARRA LATERAL, como la captura del cliente
+  ck('el selector está en la barra lateral', await p.evaluate(() => {
+    const c = document.querySelector('.ctx-card');
+    return !!c && c.closest('.side') !== null;
+  }));
+  ck('la tarjeta "Tu rol" aparece', await p.locator('#rolCard').isVisible());
+
+  // ── Ver el panel como otro rol
+  ck('existe "ver el panel como"', await p.locator('#verComo').isVisible());
+  const ops2 = await p.locator('#verComoSel option').allTextContents();
+  ck('ofrece los roles del equipo', ops2.some(o => /Editor de contenido/i.test(o)), ops2);
+  const idEditor = await p.evaluate(() => [...document.querySelectorAll('#verComoSel option')]
+    .find(o => /Editor de contenido/i.test(o.textContent))?.value);
+  await p.selectOption('#verComoSel', idEditor);
+  await p.waitForTimeout(700);
+  const navPrev = await p.locator('.s-item span').allTextContents();
+  ck('previsualizar como editor deja solo Contenido global',
+     navPrev.length === 1 && /Contenido global/.test(navPrev[0]), navPrev);
+  ck('y avisa de que es una vista previa', await p.locator('#avisoPreview').isVisible());
+  await p.click('#avisoPreview button');
+  await p.waitForTimeout(700);
+  ck('se puede volver a la vista propia', (await p.locator('.s-item span').allTextContents()).length === 10);
 
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);

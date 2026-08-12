@@ -321,3 +321,62 @@ def coaches_sin_cuenta(
             "email": u.email if u else None,
         })
     return send_response(sueltos, "OK")
+
+
+@router.get("/organizations/{org_id}", summary="Ficha de una cuenta",
+            description="Datos de la organización, su equipo y sus clientes.")
+def ficha_cuenta(
+    org_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "organizaciones")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        return send_error("Cuenta no encontrada", code=404)
+
+    ficha = _serializar_cuenta(org, db)
+
+    # Equipo: quién trabaja en esa cuenta y cuántos clientes lleva cada uno.
+    from app.core.dependencies import org_member_detail_ids, _coach_client_ids
+    equipo = []
+    for d in db.query(UserDetail).filter(UserDetail.id.in_(org_member_detail_ids(org.id, db))).all():
+        u = db.query(User).filter(User.id == d.user_id).first()
+        equipo.append({
+            "user_detail_id": d.id,
+            "name": f"{d.name} {d.last_name or ''}".strip(),
+            "email": u.email if u else None,
+            "es_duenio": d.id == org.owner_id,
+            "clientes": len(_coach_client_ids(d.id, db)),
+        })
+    equipo.sort(key=lambda x: (not x["es_duenio"], x["name"] or ""))
+    ficha["equipo"] = equipo
+    return send_response(ficha, "OK")
+
+
+@router.get("/roles", summary="Roles del equipo de Alzum",
+            description="Los roles internos y qué secciones ve cada uno. Para previsualizar el panel.")
+def roles_del_equipo(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Alimenta el selector "ver el panel como".
+
+    Sirve para comprobar qué ve cada miembro del equipo sin tener que crear una
+    cuenta y entrar con ella. Solo el super-admin: es una herramienta de
+    verificación, no una forma de saltarse permisos —previsualizar cambia lo
+    que se PINTA, no lo que la API deja hacer.
+    """
+    if not _es_superadmin(current_user, db):
+        return send_error("Solo el super-admin puede previsualizar el panel", code=403)
+
+    nombres = {r.id: r.name for r in db.query(Role).filter(Role.id.in_(list(ACCESO))).all()}
+    return send_response([
+        {"role_id": rid,
+         "nombre": nombres.get(rid, f"Rol {rid}"),
+         "secciones": [s["id"] for s in secciones_de({rid})]}
+        for rid in ACCESO
+    ], "OK")

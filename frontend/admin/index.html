@@ -29,6 +29,24 @@
   .s-item:hover{background:rgba(255,255,255,.07);color:#fff;}
   .s-item.active{background:var(--indigo);color:#fff;font-weight:600;}
   .s-item svg{flex-shrink:0;opacity:.85;}
+  .ctx-card{margin:12px 12px 4px;padding:9px 10px;border:1px solid rgba(255,255,255,.14);border-radius:11px;
+            display:flex;align-items:center;gap:9px;cursor:pointer;position:relative;background:rgba(255,255,255,.04);}
+  .ctx-card:hover{background:rgba(255,255,255,.08);}
+  .ctx-ico{width:28px;height:28px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .ctx-txt{min-width:0;flex:1;}
+  .ctx-txt b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ctx-txt span{font-size:10px;color:rgba(255,255,255,.45);}
+  .ctx-card select{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+  .rol-card{margin:8px 12px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:rgba(255,255,255,.03);}
+  .rol-t{font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:5px;}
+  .rol-card b{font-size:13px;}
+  .rol-card p{font-size:11px;color:rgba(255,255,255,.5);line-height:1.45;margin-top:4px;}
+  .ver-como{margin:0 12px 10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);}
+  .ver-como select{width:100%;padding:7px 9px;border:1px solid rgba(255,255,255,.16);border-radius:8px;
+                   background:rgba(255,255,255,.05);color:#fff;font:inherit;font-size:12px;cursor:pointer;outline:none;}
+  .ver-como select option{color:#111;}
+  .aviso-preview{background:#FEF3C7;border-bottom:1px solid #FDE68A;color:#92400E;font-size:12.5px;padding:9px 24px;display:flex;align-items:center;gap:10px;}
+  .aviso-preview button{background:#fff;border:1px solid #FDE68A;border-radius:7px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;color:#92400E;font-weight:600;}
   .side-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
   .avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
   .who{min-width:0;flex:1;}
@@ -64,6 +82,12 @@
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:20px;}
   .kpi{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:16px 18px;}
   .kpi-t{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#9CA3AF;margin-bottom:8px;}
+  .kpi-head{display:flex;align-items:flex-start;justify-content:space-between;}
+  .kpi-ico{width:32px;height:32px;border-radius:9px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--indigo);}
+  .kpi-ico.amb{background:#FEF3C7;color:#B45309;}
+  .buscar-wrap{flex:1;min-width:220px;position:relative;display:flex;align-items:center;}
+  .buscar-wrap svg{position:absolute;left:12px;color:#9CA3AF;pointer-events:none;}
+  .buscar-wrap .buscar{padding-left:36px;width:100%;}
   .kpi-v{font-size:27px;font-weight:700;line-height:1.1;}
   .kpi-s{font-size:11.5px;color:#9CA3AF;margin-top:5px;}
   .kpi.pend .kpi-v{color:#C7CBD6;font-size:22px;}
@@ -86,7 +110,7 @@
   .cta-n{font-weight:700;}
   .cta-s{font-size:11.5px;color:#9CA3AF;margin-top:2px;}
   .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-  .b-activa{background:#DCFCE7;color:#15803D;}
+  .b-activa{background:#FEF3C7;color:#B45309;}
   .b-prueba{background:#EEF2FF;color:#4F5BF2;}
   .b-impago{background:#FEE2E2;color:#B91C1C;}
   .b-suspendida{background:#F1F5F9;color:#64748B;}
@@ -117,7 +141,25 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F5BF2" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       <div><b>ALZUM</b><span>Panel de plataforma</span></div>
     </div>
+    <!-- El selector va en la barra lateral, como en el diseño del cliente.
+         El documento lo situaba en la barra superior; se sigue la captura, que
+         es la referencia que el cliente aprobó. -->
+    <div class="ctx-card" onclick="document.getElementById('ctxSel').focus()">
+      <div class="ctx-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div class="ctx-txt"><b id="ctxNombre">Plataforma Alzum</b><span>Panel del dueño</span></div>
+      <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 21 6 15"/><polyline points="6 9 12 3 18 9"/></svg>
+      <select id="ctxSel" onchange="cambiarContexto()"></select>
+    </div>
     <nav class="side-nav" id="nav"></nav>
+    <div class="rol-card" id="rolCard" style="display:none;">
+      <div class="rol-t">Tu rol</div>
+      <b id="rolNombre"></b>
+      <p id="rolDesc"></p>
+    </div>
+    <div class="ver-como" id="verComo" style="display:none;">
+      <div class="rol-t">Ver el panel como</div>
+      <select id="verComoSel" onchange="verComo(this.value)"></select>
+    </div>
     <div class="side-foot">
       <div class="avatar" id="avatar">A</div>
       <div class="who"><b id="quien">…</b><span id="miRol"></span></div>
@@ -128,13 +170,7 @@
   </aside>
 
   <div class="main">
-    <div class="top">
-      <span class="ctx-label">Estás en:</span>
-      <div class="ctx">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F5BF2" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <select id="ctxSel" onchange="cambiarContexto()"></select>
-      </div>
-    </div>
+    <div class="aviso-preview" id="avisoPreview" style="display:none;"></div>
     <div class="body">
       <h1 id="titulo">Visión general</h1>
       <div class="sub" id="subtitulo"></div>
@@ -148,6 +184,14 @@
     <h1>Panel de plataforma</h1>
     <p class="sub" style="margin-top:8px;">Esta zona es para el equipo de Alzum. Tu cuenta no tiene acceso.</p>
     <button class="ctx" onclick="location.href='../dashboard.html'">Ir al panel de coach</button>
+  </div>
+</div>
+
+<div class="capa" id="capaFicha" onclick="if(event.target===this)cerrarFicha()">
+  <div class="modal">
+    <h2 id="fichaTitulo">Ficha</h2>
+    <div class="cuerpo" id="fichaCuerpo"></div>
+    <div class="pie"><button class="btn ghost" onclick="cerrarFicha()">Cerrar</button></div>
   </div>
 </div>
 
@@ -222,7 +266,7 @@ const PENDIENTE = {
   configuracion:'Ajustes globales: marca, integraciones y dominios.',
 };
 
-let _secciones = [], _actual = null, _cuentas = [], _totales = {}, _filtro = 'todas', _busca = '';
+let _secciones = [], _todasMisSecciones = [], _actual = null, _cuentas = [], _totales = {}, _filtro = 'todas', _busca = '';
 const ESTADOS = { activa:'Activa', prueba:'En prueba', impago:'Impago', suspendida:'Suspendida' };
 const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const cab = () => ({ 'Content-Type':'application/json', Authorization:'Bearer ' + token });
@@ -277,10 +321,10 @@ function pintarVision(){
     const t = _totales.por_estado || {};
     c.innerHTML = `
       <div class="kpis">
-        <div class="kpi"><div class="kpi-t">Coaches / cuentas</div><div class="kpi-v">${_totales.cuentas ?? 0}</div><div class="kpi-s">${t.prueba || 0} en prueba</div></div>
-        <div class="kpi"><div class="kpi-t">Clientes finales</div><div class="kpi-v">${_totales.clientes ?? 0}</div><div class="kpi-s">Usuarios de los coaches</div></div>
-        <div class="kpi pend"><div class="kpi-t">MRR</div><div class="kpi-v">—</div><div class="kpi-s">Requiere la pasarela de pago</div></div>
-        <div class="kpi pend"><div class="kpi-t">Tickets abiertos</div><div class="kpi-v">—</div><div class="kpi-s">Requiere el módulo de soporte</div></div>
+        ${tarjeta('Coaches / cuentas', _totales.cuentas ?? 0, `${t.prueba || 0} en prueba`, 'users')}
+        ${tarjeta('Clientes finales', _totales.clientes ?? 0, 'Usuarios de los coaches', 'user')}
+        ${tarjeta('MRR', '—', 'Requiere la pasarela de pago', 'card', true)}
+        ${tarjeta('Tickets abiertos', '—', 'Requiere el módulo de soporte', 'life', true)}
       </div>
       ${(t.impago || t.suspendida) ? `<div class="card" style="border-color:#FCA5A5;background:#FEF2F2;margin-bottom:20px;">
         <b style="color:#B91C1C;font-size:14px;">Atención requerida</b>
@@ -317,36 +361,100 @@ function htmlCoaches(){
 
   return `
     <div class="kpis">
-      <div class="kpi"><div class="kpi-t">Cuentas totales</div><div class="kpi-v">${_totales.cuentas ?? 0}</div></div>
-      <div class="kpi"><div class="kpi-t">Clientes gestionados</div><div class="kpi-v">${_totales.clientes ?? 0}</div></div>
-      <div class="kpi pend"><div class="kpi-t">MRR de coaches</div><div class="kpi-v">—</div><div class="kpi-s">Requiere la pasarela de pago</div></div>
+      ${tarjeta('Cuentas totales', _totales.cuentas ?? 0, '', 'users')}
+      ${tarjeta('Clientes gestionados', _totales.clientes ?? 0, '', 'user')}
+      ${tarjeta('MRR de coaches', '—', 'Requiere la pasarela de pago', 'card', true)}
     </div>
     <div class="barra">
-      <input class="buscar" id="q" placeholder="Buscar por nombre, dueño o email…" value="${esc(_busca)}" oninput="filtrar(this.value)">
+      <div class="buscar-wrap">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="buscar" id="q" placeholder="Buscar por nombre, dueño o email…" value="${esc(_busca)}" oninput="filtrar(this.value)">
+      </div>
       ${['todas','activa','prueba','impago','suspendida'].map(e =>
         `<button class="pill${_filtro===e?' on':''}" onclick="setFiltro('${e}')">${e==='todas'?'Todas':ESTADOS[e]}</button>`).join('')}
       <button class="btn" onclick="abrirAlta()">+ Nueva cuenta</button>
     </div>
     <div class="card" style="padding:16px 8px;">
       <table>
-        <thead><tr><th>Cuenta</th><th>Plan</th><th>Estado</th><th class="num">Coaches</th><th class="num">Clientes</th><th class="num">MRR</th><th class="num">Acciones</th></tr></thead>
+        <thead><tr><th>Cuenta</th><th>Plan</th><th>Estado</th><th class="num">Clientes</th><th class="num">MRR</th><th class="num">Acciones</th></tr></thead>
         <tbody>
         ${lista.map(x => `<tr>
           <td><div class="cta-n">${esc(x.name)}</div><div class="cta-s">${esc(x.owner_name || 'Sin dueño')}${x.owner_email ? ' · ' + esc(x.owner_email) : ''}${x.country ? ' · ' + esc(x.country) : ''}</div></td>
           <td class="vacio">—</td>
           <td><span class="badge b-${x.state}">${ESTADOS[x.state] || x.state}</span></td>
-          <td class="num">${x.coaches}</td>
           <td class="num">${x.clientes}</td>
           <td class="num vacio">—</td>
-          <td class="num">${x.state === 'suspendida'
-            ? `<button class="btn ghost" onclick="cambiarEstado('${x.id}','activa')">Reactivar</button>`
-            : `<button class="btn rojo" onclick="cambiarEstado('${x.id}','suspendida')">Suspender</button>`}</td>
-        </tr>`).join('') || `<tr><td colspan="7" style="text-align:center;padding:36px;color:#9CA3AF;">
+          <td class="num" style="white-space:nowrap;">
+            <button class="btn ghost" onclick="verFicha('${x.id}')">Ver ficha</button>
+            ${x.state === 'suspendida'
+              ? `<button class="btn ghost" style="color:#B45309;border-color:#FDE68A;" onclick="cambiarEstado('${x.id}','activa')">▷ Reactivar</button>`
+              : `<button class="btn rojo" onclick="cambiarEstado('${x.id}','suspendida')">⊘ Suspender</button>`}</td>
+        </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;padding:36px;color:#9CA3AF;">
               ${_cuentas.length ? 'Ninguna cuenta con ese filtro.' : 'Todavía no hay cuentas. Crea la primera con «+ Nueva cuenta».'}</td></tr>`}
         </tbody>
       </table>
     </div>
     <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">Plan y MRR llegarán con la pasarela de pago; hasta entonces se muestran vacíos en vez de con datos de ejemplo.</p>`;
+}
+
+function tarjeta(titulo, valor, pie, icono, pendiente){
+  return `<div class="kpi${pendiente?' pend':''}">
+    <div class="kpi-head">
+      <div><div class="kpi-t">${titulo}</div><div class="kpi-v">${valor}</div></div>
+      <div class="kpi-ico${pendiente?' amb':''}"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[icono]||''}</svg></div>
+    </div>
+    ${pie ? `<div class="kpi-s">${pie}</div>` : ''}
+  </div>`;
+}
+
+/* La ficha enseña lo que de verdad tenemos: datos de la cuenta y su equipo.
+   El historial de facturación que pide el documento llegará con la pasarela. */
+async function verFicha(id){
+  const r = await fetch(`${API}/admin/organizations/${id}`, { headers: cab() });
+  if (!r.ok) return alert('No se pudo cargar la ficha');
+  const d = (await r.json()).data || {};
+  document.getElementById('fichaTitulo').textContent = d.name || '';
+  document.getElementById('fichaCuerpo').innerHTML = `
+    <div class="fila2">
+      <div><div class="kpi-t">Dueño</div><div>${esc(d.owner_name || '—')}</div><div class="cta-s">${esc(d.owner_email || '')}</div></div>
+      <div><div class="kpi-t">Estado</div><span class="badge b-${d.state}">${ESTADOS[d.state] || d.state}</span></div>
+    </div>
+    <div class="fila2">
+      <div><div class="kpi-t">País</div><div>${esc(d.country || '—')}</div></div>
+      <div><div class="kpi-t">Alta</div><div>${d.created_at ? new Date(d.created_at).toLocaleDateString('es-ES') : '—'}</div></div>
+    </div>
+    <div>
+      <div class="kpi-t">Equipo (${(d.equipo||[]).length})</div>
+      <table style="margin-top:6px;"><tbody>
+        ${(d.equipo||[]).map(m => `<tr>
+          <td style="padding:8px 0;"><b>${esc(m.name)}</b>${m.es_duenio?' <span class="badge b-prueba">Dueño</span>':''}<div class="cta-s">${esc(m.email||'')}</div></td>
+          <td class="num" style="padding:8px 0;">${m.clientes} clientes</td>
+        </tr>`).join('') || '<tr><td class="vacio">Sin miembros.</td></tr>'}
+      </tbody></table>
+    </div>
+    <div class="aviso">Historial de facturación y actividad llegarán con la pasarela de pago.</div>`;
+  document.getElementById('capaFicha').classList.add('on');
+}
+function cerrarFicha(){ document.getElementById('capaFicha').classList.remove('on'); }
+
+/* Previsualizar el panel como otro rol del equipo. Cambia lo que se PINTA,
+   no lo que la API permite: es para comprobar qué ve cada uno sin tener que
+   crear una cuenta y entrar con ella. */
+let _rolesEquipo = [], _preview = null;
+function verComo(valor){
+  const aviso = document.getElementById('avisoPreview');
+  if (!valor) {
+    _preview = null; _secciones = _todasMisSecciones; aviso.style.display = 'none';
+  } else {
+    const r = _rolesEquipo.find(x => String(x.role_id) === String(valor));
+    if (!r) return;
+    _preview = r;
+    _secciones = _todasMisSecciones.filter(s => r.secciones.includes(s.id));
+    aviso.style.display = '';
+    aviso.innerHTML = `Estás viendo el panel como <b>${esc(r.nombre)}</b>. Solo cambia lo que se muestra, no tus permisos.
+      <button onclick="document.getElementById('verComoSel').value='';verComo('')">Volver a mi vista</button>`;
+  }
+  abrir((_secciones[0] || {}).id);
 }
 
 function filtrar(v){ _busca = v; const c = document.getElementById('contenido'); c.innerHTML = htmlCoaches(); const q = document.getElementById('q'); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
@@ -409,6 +517,8 @@ async function guardarAlta(){
    organización te lleva al panel de coach trabajando como ella. */
 function cambiarContexto(){
   const v = document.getElementById('ctxSel').value;
+  const sel = document.getElementById('ctxSel');
+  document.getElementById('ctxNombre').textContent = sel.options[sel.selectedIndex].textContent;
   if (v === '__plataforma__') return;
   try {
     localStorage.setItem('org_context', v);
@@ -427,6 +537,7 @@ function cambiarContexto(){
 
     const d = j.data || {};
     _secciones = d.secciones || [];
+    _todasMisSecciones = _secciones.slice();
     document.getElementById('layout').style.display = '';
     document.getElementById('quien').textContent = d.nombre || '';
     document.getElementById('miRol').textContent = d.es_superadmin ? 'Super-admin' : 'Equipo de Alzum';
@@ -434,7 +545,30 @@ function cambiarContexto(){
 
     document.getElementById('ctxSel').innerHTML =
       '<option value="__plataforma__">Plataforma Alzum</option>' +
-      (d.organizaciones || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+      (d.organizaciones || []).map(o => `<option value="${esc(o.id)}">${esc(o.name)}</option>`).join('');
+
+    // Tarjeta "Tu rol"
+    const rc = document.getElementById('rolCard');
+    document.getElementById('rolNombre').textContent = d.es_superadmin ? 'Super-admin' : 'Equipo de Alzum';
+    document.getElementById('rolDesc').textContent = d.es_superadmin
+      ? 'Acceso total: facturación, planes, equipo y configuración de la plataforma.'
+      : 'Acceso a ' + _secciones.map(s => s.nombre).join(', ') + '.';
+    rc.style.display = '';
+
+    // "Ver el panel como": solo el super-admin, y solo para comprobar.
+    if (d.es_superadmin) {
+      try {
+        const rr = await fetch(`${API}/admin/roles`, { headers: cab() });
+        if (rr.ok) {
+          _rolesEquipo = (await rr.json()).data || [];
+          document.getElementById('verComoSel').innerHTML =
+            `<option value="">${esc(d.nombre || 'Yo')} — Super-admin</option>` +
+            _rolesEquipo.filter(r => r.role_id !== 1)
+              .map(r => `<option value="${r.role_id}">${esc(r.nombre)}</option>`).join('');
+          document.getElementById('verComo').style.display = '';
+        }
+      } catch(e) {}
+    }
 
     const inicial = (location.hash || '').replace('#', '');
     abrir(_secciones.some(s => s.id === inicial) ? inicial : (_secciones[0] || {}).id);

@@ -97,6 +97,70 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.fill('#qc', '');
   await p.waitForTimeout(400);
 
+  // ── Contenido global ─────────────────────────────────────────────────────
+  // Contenido de fábrica (plataforma) y contenido privado de una cuenta: la
+  // sección entera se apoya en que no se mezclen.
+  const glob = await post('/trainings', { name: `Sentadilla de fábrica ${SUF}` });
+  ck('ejercicio de plataforma creado', glob.data?.organization_id === null, glob.data);
+  const lgd = await (await ctx.request.post(`${API}/api/auth/login`, {
+    data: { email: `marta.cli.${SUF}@nutrientrena-qa.com`, password: 'Centro123!' } })).json();
+  const priv = await (await ctx.request.post(`${API}/api/trainings`, {
+    data: { name: `Ejercicio privado ${SUF}` },
+    headers: { Authorization: 'Bearer ' + lgd.data.token } })).json();
+  ck('ejercicio privado de una cuenta creado', !!priv.data?.organization_id, priv.data);
+
+  await p.click('.s-item:nth-child(6)');
+  await p.waitForTimeout(1800);
+  ck('la sección Contenido global carga', (await p.textContent('#titulo')).trim() === 'Contenido global');
+  await p.click('.tipo:has-text("Ejercicios")');
+  await p.waitForTimeout(900);
+  const tg = await p.textContent('#contenido');
+  ck('lo de plataforma sale en la lista global', tg.includes(`Sentadilla de fábrica ${SUF}`));
+  ck('lo privado de una cuenta NO se cuela en la global', !tg.includes(`Ejercicio privado ${SUF}`), tg.slice(0, 200));
+
+  await p.click('.fam:has-text("Contenido de organizaciones")');
+  await p.waitForTimeout(1400);
+  const to = await p.textContent('#contenido');
+  ck('lo privado se lista aparte con su cuenta',
+     to.includes(`Ejercicio privado ${SUF}`) && to.includes(`Centro Clientes ${SUF}`), to.slice(0, 220));
+
+  // Promover: el punto de la sección. Es reversible y ya existía por API.
+  p.on('dialog', d => d.accept());
+  await p.click(`tr:has-text("Ejercicio privado ${SUF}") button:has-text("Subir a plataforma")`);
+  await p.waitForTimeout(1500);
+  const trasPromover = await (await ctx.request.get(`${API}/api/admin/content?tipo=trainings&q=${SUF}`, { headers: H })).json();
+  ck('subir a plataforma lo pasa al catálogo común',
+     (trasPromover.data.items || []).some(i => i.nombre === `Ejercicio privado ${SUF}`),
+     (trasPromover.data.items || []).map(i => i.nombre));
+
+  // Catálogos sin dueño: se crean y se renombran aquí, y en ningún otro sitio
+  await p.click('.fam:has-text("Entrenamiento")');
+  await p.waitForTimeout(1200);
+  await p.click('.tipo:has-text("Grupos musculares")');
+  await p.waitForTimeout(900);
+  await p.click('button:has-text("+ Nuevo")');
+  await p.waitForTimeout(400);
+  ck('el alta de catálogo se abre', await p.locator('#capaCat.on').count() === 1);
+  await p.fill('#catNombre', `Isquiotibiales ${SUF}`);
+  await p.click('#catBtn');
+  await p.waitForTimeout(1400);
+  ck('la entrada de catálogo se crea', (await p.textContent('#contenido')).includes(`Isquiotibiales ${SUF}`));
+
+  // Y no se borra si algo lo usa: rompería la librería de todas las cuentas
+  const grupos = await (await ctx.request.get(`${API}/api/admin/content?tipo=muscle_groups&q=${SUF}`, { headers: H })).json();
+  const gid = grupos.data.items[0].id;
+  await post('/trainings', { name: `Ejercicio que usa el grupo ${SUF}`, muscle_group_id: Number(gid) });
+  const negado = await ctx.request.fetch(`${API}/api/admin/content/muscle_groups/${gid}`, { method: 'DELETE', headers: H });
+  ck('no se borra un catálogo en uso', negado.status() === 400, negado.status());
+
+  // Lo que aún no tiene ámbito global se dice, no se finge
+  await p.click('.fam:has-text("Formularios")');
+  await p.waitForTimeout(600);
+  ck('formularios avisa de que le falta el ámbito de organización',
+     (await p.textContent('#contenido')).includes('todavía no tiene ámbito global'));
+  ck('y las propuestas se marcan como pendientes, no como cero',
+     (await p.textContent('#contenido')).includes('Todavía no existe el circuito de propuestas'));
+
   // Cambiar de contexto lleva al panel de coach
   await p.click('.s-item:nth-child(2)');
   await p.waitForTimeout(1200);

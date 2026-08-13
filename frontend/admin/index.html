@@ -131,6 +131,33 @@
               background:#fff;font:inherit;font-size:13px;color:#374151;outline:none;cursor:pointer;}
   .sel-cuenta:focus{border-color:var(--indigo);}
 
+  /* Contenido global: familias (pastillas grandes) y tipos (pestañas) */
+  .fams{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px;}
+  .fam{display:flex;align-items:center;gap:8px;padding:10px 17px;border:1px solid var(--borde);
+       background:#fff;border-radius:11px;font:inherit;font-size:13.5px;font-weight:600;color:#374151;cursor:pointer;}
+  .fam.on{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+  .fam .cnt{background:#F1F2F6;color:#6B7280;border-radius:20px;padding:1px 8px;font-size:11px;font-weight:700;}
+  .fam.on .cnt{background:rgba(255,255,255,.22);color:#fff;}
+  .fam[disabled]{opacity:.5;cursor:not-allowed;}
+  .tipos{display:flex;gap:22px;border-bottom:1px solid var(--borde);margin-bottom:18px;}
+  .tipo{display:flex;align-items:center;gap:7px;padding:0 2px 11px;border:none;background:none;
+        font:inherit;font-size:13.5px;font-weight:600;color:#6B7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tipo.on{color:var(--indigo);border-bottom-color:var(--indigo);}
+  .tipo .cnt{background:#F1F2F6;color:#6B7280;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:700;}
+  .tipo.on .cnt{background:#EEF2FF;color:var(--indigo);}
+  .b-plataforma{background:#EEF2FF;color:#4F5BF2;}
+  .b-organizacion{background:#FEF3C7;color:#B45309;}
+  .ico-cel{width:28px;height:28px;border-radius:8px;background:#EEF2FF;color:var(--indigo);
+           display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:10px;}
+  .icono-btn{width:30px;height:30px;border:1px solid var(--borde);background:#fff;border-radius:8px;
+             color:#6B7280;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;}
+  .icono-btn:hover{border-color:var(--indigo);color:var(--indigo);}
+  .icono-btn.rojo{border-color:#FCA5A5;color:#DC2626;}
+  .icono-btn.rojo:hover{background:#FEF2F2;}
+  .bloque{background:#fff;border:1px solid var(--borde);border-radius:14px;margin-top:20px;overflow:hidden;}
+  .bloque h3{font-size:14.5px;padding:17px 22px 4px;}
+  .bloque .bsub{font-size:12.5px;color:#9CA3AF;padding:0 22px 15px;}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -213,6 +240,21 @@
   </div>
 </div>
 
+<div class="capa" id="capaCat" onclick="if(event.target===this)cerrarCatalogo()">
+  <div class="modal" style="width:420px;">
+    <h2 id="catTitulo">Catálogo</h2>
+    <div class="cuerpo">
+      <div class="campo"><label>Nombre</label><input id="catNombre" placeholder="Ej: Isquiotibiales"></div>
+      <div class="aviso">Estos catálogos los ven todas las cuentas: son la fuente única de verdad de la plataforma.</div>
+    </div>
+    <div class="pie">
+      <span class="error" id="catError"></span>
+      <button class="btn ghost" onclick="cerrarCatalogo()">Cancelar</button>
+      <button class="btn" id="catBtn" onclick="guardarCatalogo()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="capa" id="capaAlta" onclick="if(event.target===this)cerrarAlta()">
   <div class="modal">
     <h2>Dar de alta una cuenta</h2>
@@ -265,6 +307,9 @@ const ICONOS = {
   life:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>',
   trend:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
   team:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  building:'<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="7" x2="9" y2="7"/><line x1="15" y1="7" x2="15" y2="7"/><line x1="9" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="15" y2="12"/><line x1="10" y1="22" x2="14" y2="22"/>',
+  up:'<circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.31.4.56.71.71H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
 };
 
@@ -276,7 +321,6 @@ const PENDIENTE = {
   organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
   facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
   planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
-  contenido:'La base de datos de fábrica que ven todas las organizaciones, y el contenido privado de cada una para poder promoverlo.',
   soporte:'Incidencias de las organizaciones, anuncios globales y envíos masivos.',
   analiticas:'Uso de la plataforma, retención y organizaciones en riesgo de irse.',
   equipo:'Los miembros internos de Alzum y el rol de cada uno.',
@@ -315,6 +359,7 @@ async function abrir(id){
 
   if (id === 'organizaciones') return pintarCoaches();
   if (id === 'clientes') return pintarClientes();
+  if (id === 'contenido') return pintarContenido();
   if (id === 'vision') return pintarVision();
   document.getElementById('contenido').innerHTML = enConstruccion(id);
 }
@@ -520,6 +565,285 @@ function filtrarClientes(v){
   if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
 }
 function setCuentaCli(v){ _cuentaCli = v; document.getElementById('contenido').innerHTML = htmlClientes(); }
+
+/* ── Contenido global ─────────────────────────────────────────────────────
+   La base de fábrica de Alzum: lo que toda cuenta nueva encuentra ya hecho.
+
+   Editar rutinas, dietas, ejercicios y alimentos NO se rehace aquí: se abre el
+   editor que ya existe en el panel de coach, sin contexto de organización, y
+   por tanto lo que se guarde nace con ámbito de plataforma. Duplicar esos
+   editores en el panel sería tener dos que se separan con el tiempo — es
+   exactamente lo que ya pasó con el constructor de rutinas.
+
+   Lo que sí se edita aquí son los tres catálogos que no tienen dueño (grupos
+   musculares, tipos de dieta y grupos de alimentos): son la fuente única de
+   verdad de la plataforma y no viven en la librería de nadie. */
+const FAMILIAS = [
+  { id:'entrenamiento', nombre:'Entrenamiento', icono:'trend' },
+  { id:'nutricion',     nombre:'Nutrición',     icono:'box' },
+  { id:'formularios',   nombre:'Formularios',   icono:'card',  pendiente:'Las plantillas de formulario no tienen ámbito de organización en la base de datos: hoy cada una pertenece a quien la creó. Para tener formularios de plataforma hace falta añadirles ese ámbito, igual que se hizo con rutinas y dietas.' },
+  { id:'documentos',    nombre:'Documentos',    icono:'shield', pendiente:'Los documentos cuelgan del coach que los subió, no de la plataforma. Mismo caso que los formularios.' },
+  { id:'organizaciones', nombre:'Contenido de organizaciones', icono:'building' },
+];
+const LAPIZ = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+const PAPELERA = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+// Dónde se edita cada tipo dentro del panel de coach, y por dónde se borra.
+const BORRADO = { routines:'routines', trainings:'trainings', diets:'diets', aliments:'aliments' };
+const EDITOR = {
+  routines:'../rutinas.html', trainings:'../ejercicios.html',
+  diets:'../diets.html', aliments:'../nutricion/alimentos.html',
+};
+let _cont = null, _fam = 'entrenamiento', _tipo = 'routines', _buscaCont = '';
+
+function pintarContenido(){
+  document.getElementById('subtitulo').textContent =
+    'La misma estructura que la librería del coach, pero todo se guarda con ámbito global (etiqueta «Plataforma»).';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  cargarContenido();
+}
+
+async function cargarContenido(){
+  const c = document.getElementById('contenido');
+  if (!_cont) c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  const url = `${API}/admin/content?tipo=${encodeURIComponent(_tipo)}` +
+              (_buscaCont ? `&q=${encodeURIComponent(_buscaCont)}` : '');
+  try {
+    const r = await fetch(url, { headers: cab() });
+    if (!r.ok) { c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el contenido.</div></div>'; return; }
+    _cont = (await r.json()).data || {};
+    c.innerHTML = htmlContenido();
+    const q = document.getElementById('qg');
+    if (q && _buscaCont){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  } catch(e){ c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el contenido.</div></div>'; }
+}
+
+function tiposDe(familia){
+  const cn = (_cont && _cont.conteos) || {};
+  return Object.keys(cn).filter(t => cn[t].familia === familia);
+}
+
+function htmlContenido(){
+  const cn = _cont.conteos || {}, tot = _cont.totales || {};
+  const fam = FAMILIAS.find(f => f.id === _fam) || FAMILIAS[0];
+  const tipos = tiposDe(_fam);
+
+  return `
+    <div class="nota">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Todo lo que crees aquí nace con ámbito <b>Global</b>: aparece en la librería de todas las cuentas con el origen <b>Plataforma</b>. Los catálogos (grupos musculares, tipos de dieta y grupos de alimentos) son la fuente única de verdad de la plataforma.</span>
+    </div>
+    <div class="kpis">
+      ${tarjeta('Contenido global', tot.global ?? 0, '', 'globe')}
+      ${tarjeta('Contenido de cuentas', tot.cuentas ?? 0, '', 'building')}
+      ${tarjeta('Propuestas pendientes', '—', 'Requiere el circuito de propuestas', 'up', true)}
+    </div>
+    <div class="fams">
+      ${FAMILIAS.map(f => {
+        const n = f.id === 'organizaciones' ? (tot.cuentas ?? 0) : null;
+        return `<button class="fam${f.id===_fam?' on':''}" ${f.pendiente?'title="'+esc(f.pendiente)+'"':''} onclick="abrirFamilia('${f.id}')">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[f.icono]||''}</svg>
+          ${esc(f.nombre)}${n !== null ? `<span class="cnt">${n}</span>` : ''}</button>`;
+      }).join('')}
+    </div>
+    ${fam.pendiente ? bloquePendiente(fam) : (tipos.length ? `
+      <div class="tipos">
+        ${tipos.map(t => `<button class="tipo${t===_tipo?' on':''}" onclick="abrirTipo('${t}')">
+            ${esc(cn[t].etiqueta)}<span class="cnt">${cn[t].global}</span></button>`).join('')}
+      </div>` : '')}
+    ${fam.pendiente ? '' : `
+    <div class="barra">
+      <div class="buscar-wrap">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="buscar" id="qg" placeholder="Buscar por nombre…" value="${esc(_buscaCont)}" oninput="buscarContenido(this.value)">
+      </div>
+      ${botonNuevo()}
+    </div>
+    ${_fam === 'organizaciones' ? tablaOrganizaciones() : tablaGlobal()}
+    ${_cont.recortado ? `<p style="font-size:12px;color:#B45309;margin-top:12px;">Se muestran ${(_cont.items||[]).length} de ${_cont.total}. Afina la búsqueda para ver el resto.</p>` : ''}`}
+    ${bloquePropuestas()}`;
+}
+
+function bloquePendiente(fam){
+  return `<div class="card"><div class="proximo">
+    <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <b>${esc(fam.nombre)} todavía no tiene ámbito global</b><p>${esc(fam.pendiente)}</p></div></div>`;
+}
+
+/* La cola de aprobación del prototipo (un coach propone, la plataforma
+   aprueba) no existe todavía: no hay tabla ni forma de que el coach proponga.
+   Se dice, en vez de pintar una lista vacía que parecería "no hay ninguna". */
+function bloquePropuestas(){
+  return `<div class="bloque">
+    <h3>Propuestas de coaches</h3>
+    <div class="bsub">Contenido que los coaches proponen añadir a la librería global.</div>
+    <div style="padding:0 22px 20px;">
+      <div class="aviso">Todavía no existe el circuito de propuestas: falta que el coach pueda proponer desde su
+      librería y que quede registrado quién propone, qué y cuándo. Mientras tanto, lo bueno de una cuenta se
+      sube a plataforma desde <b>Contenido de organizaciones</b>.</div>
+    </div>
+  </div>`;
+}
+
+function botonNuevo(){
+  if (_fam === 'organizaciones') return '';
+  const cn = (_cont.conteos || {})[_tipo] || {};
+  // Los catálogos sin dueño se crean aquí mismo; el resto, en su editor.
+  if (!cn.organizacion) return `<button class="btn" onclick="abrirCatalogo('')">+ Nuevo</button>`;
+  const destino = EDITOR[_tipo];
+  return destino ? `<button class="btn" onclick="irAlEditor()">+ Crear en el editor</button>` : '';
+}
+
+/* Se limpia el contexto antes de saltar: si quedara puesto el de una
+   organización, lo que se creara "global" nacería dentro de esa cuenta. */
+function irAlEditor(){
+  const destino = EDITOR[_tipo];
+  if (!destino) return;
+  try { localStorage.removeItem('org_context'); localStorage.removeItem('org_context_name'); } catch(e){}
+  location.href = destino;
+}
+
+function tablaGlobal(){
+  const items = _cont.items || [], cn = (_cont.conteos || {})[_tipo] || {};
+  const cols = {
+    routines:  ['Nombre','Objetivo','Nivel','Días/sem','Duración','Origen','Acciones'],
+    trainings: ['Nombre','Grupo muscular','Material','Origen','Acciones'],
+    diets:     ['Nombre','Tipo','Calorías','Origen','Acciones'],
+    aliments:  ['Nombre','Grupo','Calorías','Origen','Acciones'],
+  }[_tipo] || ['Nombre','Descripción','Origen','Acciones'];
+
+  const celdas = x => {
+    const nom = `<td><span class="ico-cel"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS.box}</svg></span><b>${esc(x.nombre)}</b></td>`;
+    const origen = `<td><span class="badge b-plataforma">Plataforma</span></td>`;
+    if (_tipo === 'routines') return nom + `<td>${esc(x.objetivo||'—')}</td><td>${esc(x.nivel||'—')}</td><td>${x.dias ?? '—'}</td><td>${esc(x.duracion||'—')}</td>` + origen;
+    if (_tipo === 'trainings') return nom + `<td>${esc(x.grupo||'—')}</td><td>${esc(x.material||'—')}</td>` + origen;
+    if (_tipo === 'diets') return nom + `<td>${esc(x.tipo_dieta||'—')}</td><td>${x.calorias != null ? Math.round(x.calorias)+' kcal' : '—'}</td>` + origen;
+    if (_tipo === 'aliments') return nom + `<td>${esc(x.grupo||'—')}</td><td>${x.calorias != null ? Math.round(x.calorias)+' kcal' : '—'}</td>` + origen;
+    return nom + `<td class="cta-s">${esc(x.descripcion||'')}</td>` + origen;
+  };
+
+  const acciones = x => `<td class="num" style="white-space:nowrap;">
+      <button class="icono-btn" title="${cn.organizacion ? 'Abrir en el editor' : 'Renombrar'}"
+              onclick="${cn.organizacion ? 'irAlEditor()' : `abrirCatalogo('${x.id}')`}">${LAPIZ}</button>
+      <button class="icono-btn rojo" title="Borrar"
+              onclick="${cn.organizacion ? `borrarGlobal('${x.id}','${esc(x.nombre)}')` : `borrarCatalogo('${x.id}','${esc(x.nombre)}')`}">${PAPELERA}</button>
+    </td>`;
+
+  return `<div class="card" style="padding:16px 8px;">
+    <table>
+      <thead><tr>${cols.map((h,i) => `<th${i===cols.length-1?' class="num"':''}>${h}</th>`).join('')}</tr></thead>
+      <tbody>
+      ${items.map(x => `<tr>${celdas(x)}${acciones(x)}</tr>`).join('') ||
+        `<tr><td colspan="${cols.length}" style="text-align:center;padding:36px;color:#9CA3AF;">
+           ${_buscaCont ? 'Nada con ese nombre.' : 'Todavía no hay nada de plataforma en esta lista.'}</td></tr>`}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+/* El contenido privado de las cuentas. Desde aquí se sube a plataforma lo que
+   merece estar en la base común. Es reversible. */
+function tablaOrganizaciones(){
+  const items = _cont.items || [], cn = _cont.conteos || {};
+  return `<div class="card" style="padding:16px 8px;">
+    <table>
+      <thead><tr><th>Nombre</th><th>Tipo</th><th>Cuenta</th><th>Origen</th><th class="num">Acciones</th></tr></thead>
+      <tbody>
+      ${items.map(x => `<tr>
+        <td><b>${esc(x.nombre)}</b></td>
+        <td>${esc((cn[x.tipo]||{}).etiqueta || x.tipo)}</td>
+        <td class="org-cel">${esc(x.organization_name || '—')}</td>
+        <td><span class="badge b-organizacion">Privado</span></td>
+        <td class="num" style="white-space:nowrap;">
+          <button class="btn ghost" onclick="promover('${x.tipo}','${x.id}','${esc(x.nombre)}')">↑ Subir a plataforma</button></td>
+      </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;padding:36px;color:#9CA3AF;">
+          ${_buscaCont ? 'Nada con ese nombre.' : 'Ninguna cuenta tiene contenido privado todavía.'}</td></tr>`}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function abrirFamilia(id){
+  const fam = FAMILIAS.find(f => f.id === id);
+  _fam = id; _buscaCont = '';
+  if (id === 'organizaciones') _tipo = 'organizaciones';
+  else if (!fam.pendiente) _tipo = tiposDe(id)[0] || _tipo;
+  if (fam.pendiente) { document.getElementById('contenido').innerHTML = htmlContenido(); return; }
+  cargarContenido();
+}
+function abrirTipo(t){ _tipo = t; _buscaCont = ''; cargarContenido(); }
+
+let _tBusca = null;
+function buscarContenido(v){
+  _buscaCont = v;
+  clearTimeout(_tBusca);
+  // Se busca en el servidor porque el catálogo de alimentos no cabe entero en
+  // la pantalla; se espera a que se deje de escribir para no lanzar una
+  // petición por tecla.
+  _tBusca = setTimeout(cargarContenido, 300);
+}
+
+async function promover(tipo, id, nombre){
+  const mapa = { routines:'routine', trainings:'training', diets:'diet', aliments:'aliment' };
+  if (!confirm(`¿Subir «${nombre}» a la plataforma?\n\nPasará a verlo toda cuenta como contenido de fábrica. La cuenta de origen no lo pierde, pierde la exclusividad. Se puede deshacer.`)) return;
+  const r = await fetch(`${API}/content/${mapa[tipo]}/${id}/organization`, {
+    method:'PUT', headers: cab(), body: JSON.stringify({ organization_id: null }) });
+  if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo subir'); return; }
+  cargarContenido();
+}
+
+/* Borrar contenido de plataforma. Va por el endpoint normal del recurso, no
+   por uno nuevo del panel: así vale la misma comprobación de permisos que en
+   el resto de la app, y no hay una segunda puerta que mantener. */
+async function borrarGlobal(id, nombre){
+  const ruta = BORRADO[_tipo];
+  if (!ruta) return;
+  if (!confirm(`¿Borrar «${nombre}» del catálogo de plataforma?\n\nDejará de estar disponible para todas las cuentas.`)) return;
+  const r = await fetch(`${API}/${ruta}/${id}`, { method:'DELETE', headers: cab() });
+  const j = await r.json().catch(()=>({}));
+  // Alimentos y rutinas se niegan si están en uso: es la respuesta útil.
+  if (!r.ok || j.success === false) { alert(j.message || 'No se pudo borrar'); return; }
+  cargarContenido();
+}
+
+// ── Catálogos sin dueño: se crean, renombran y borran aquí ──────────────────
+let _catId = null;
+function abrirCatalogo(id){
+  const item = (_cont.items || []).find(x => String(x.id) === String(id));
+  _catId = id || null;
+  document.getElementById('catTitulo').textContent =
+    (_catId ? 'Renombrar' : 'Nueva entrada') + ' · ' + ((_cont.conteos||{})[_tipo]||{}).etiqueta;
+  document.getElementById('catNombre').value = item ? item.nombre : '';
+  document.getElementById('catError').textContent = '';
+  document.getElementById('capaCat').classList.add('on');
+  setTimeout(() => document.getElementById('catNombre').focus(), 50);
+}
+function cerrarCatalogo(){ document.getElementById('capaCat').classList.remove('on'); }
+
+async function guardarCatalogo(){
+  const nombre = document.getElementById('catNombre').value.trim();
+  const err = document.getElementById('catError');
+  if (!nombre) { err.textContent = 'Escribe un nombre.'; return; }
+  const btn = document.getElementById('catBtn'); btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/admin/content/${_tipo}${_catId ? '/' + _catId : ''}`,
+      { method: _catId ? 'PUT' : 'POST', headers: cab(), body: JSON.stringify({ name: nombre }) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { err.textContent = j.message || 'No se pudo guardar.'; return; }
+    cerrarCatalogo();
+    cargarContenido();
+  } finally { btn.disabled = false; }
+}
+
+async function borrarCatalogo(id, nombre){
+  if (!confirm(`¿Borrar «${nombre}»?\n\nEsta lista la usan todas las cuentas.`)) return;
+  const r = await fetch(`${API}/admin/content/${_tipo}/${id}`, { method:'DELETE', headers: cab() });
+  const j = await r.json().catch(()=>({}));
+  // El backend se niega si algo lo está usando: es la respuesta útil, no un
+  // error que haya que esconder.
+  if (!r.ok) { alert(j.message || 'No se pudo borrar'); return; }
+  cargarContenido();
+}
 
 /* La ficha enseña lo que de verdad tenemos: datos de la cuenta y su equipo.
    El historial de facturación que pide el documento llegará con la pasarela. */

@@ -511,6 +511,288 @@ def listar_clientes(
     }, "OK")
 
 
+# ── Contenido global ────────────────────────────────────────────────────────
+
+# Los tipos que se pueden listar desde el panel, y cómo se lee cada uno.
+#
+# Dos familias distintas, y la diferencia importa:
+#
+# - Con `organizacion=True`: la tabla tiene organization_id, así que existe
+#   contenido "de plataforma" (NULL) y contenido privado de una cuenta. Es lo
+#   que se puede promover.
+# - Con `organizacion=False`: catálogos que no tienen dueño porque son la
+#   fuente única de verdad de la plataforma —grupos musculares, tipos de dieta,
+#   grupos de alimentos—. Todo lo que hay ahí ya es global por definición.
+def _catalogo_contenido():
+    from app.models.muscle_group import MuscleGroup
+    from app.models.nutrition.aliment import Aliment
+    from app.models.nutrition.diet import Diet
+    from app.models.nutrition.group_food import GroupFood
+    from app.models.nutrition.type_food import TypeFood
+    from app.models.routine import Routine
+    from app.models.training import Training
+
+    return {
+        "routines":     {"modelo": Routine,    "campo": "name",  "familia": "entrenamiento", "organizacion": True,  "etiqueta": "Rutinas",              "promover": "routine"},
+        "trainings":    {"modelo": Training,   "campo": "name",  "familia": "entrenamiento", "organizacion": True,  "etiqueta": "Ejercicios",           "promover": "training"},
+        "muscle_groups": {"modelo": MuscleGroup, "campo": "name", "familia": "entrenamiento", "organizacion": False, "etiqueta": "Grupos musculares",   "promover": None},
+        "diets":        {"modelo": Diet,       "campo": "title", "familia": "nutricion",     "organizacion": True,  "etiqueta": "Dietas",               "promover": "diet"},
+        "aliments":     {"modelo": Aliment,    "campo": "name",  "familia": "nutricion",     "organizacion": True,  "etiqueta": "Alimentos",            "promover": "aliment"},
+        "type_foods":   {"modelo": TypeFood,   "campo": "name",  "familia": "nutricion",     "organizacion": False, "etiqueta": "Tipos de dieta",       "promover": None},
+        "group_foods":  {"modelo": GroupFood,  "campo": "name",  "familia": "nutricion",     "organizacion": False, "etiqueta": "Grupos de alimentos",  "promover": None},
+    }
+
+
+# El catálogo de alimentos puede tener miles de filas (la importación del
+# USDA). Se lista un tramo y se dice cuántos hay: una tabla que se corta en
+# silencio parece completa y no lo está.
+TOPE_CONTENIDO = 200
+
+
+def _fila_contenido(tipo: str, obj, cfg: dict, db: Session, nombres_org: dict) -> dict:
+    nombre = getattr(obj, cfg["campo"], None)
+    org_id = getattr(obj, "organization_id", None) if cfg["organizacion"] else None
+    fila = {
+        "id": str(obj.id),
+        "tipo": tipo,
+        "nombre": nombre,
+        "organization_id": org_id,
+        "organization_name": nombres_org.get(org_id) if org_id else None,
+        "origen": "plataforma" if org_id is None else "organizacion",
+        "created_at": obj.created_at.isoformat() if getattr(obj, "created_at", None) else None,
+    }
+    # Las columnas que enseña el prototipo para cada tipo. Se rellenan solo si
+    # el modelo las tiene: el resto de tipos no las gasta.
+    if tipo == "routines":
+        nivel = getattr(obj, "training_level", None)
+        fila.update({
+            "objetivo": obj.objective,
+            # ParameterDetail guarda el texto en `description`, no en `name`.
+            "nivel": getattr(nivel, "description", None),
+            "dias": obj.days,
+            # `time` es la duración del programa en semanas.
+            "duracion": f"{obj.time} semanas" if obj.time else None,
+        })
+    elif tipo == "trainings":
+        grupo = getattr(obj, "muscle_group", None)
+        fila.update({"grupo": getattr(grupo, "name", None), "material": obj.material})
+    elif tipo == "diets":
+        fila.update({"calorias": obj.calories, "tipo_dieta": getattr(getattr(obj, "type", None), "name", None)})
+    elif tipo == "aliments":
+        fila.update({"calorias": obj.calories, "grupo": getattr(getattr(obj, "group_food", None), "name", None)})
+    elif not cfg["organizacion"]:
+        # Los catálogos sin dueño solo tienen nombre y descripción, y se editan
+        # desde el propio panel.
+        fila["descripcion"] = getattr(obj, "description", None)
+    return fila
+
+
+@router.get("/content", summary="Contenido global de la plataforma",
+            description="El catálogo de fábrica que ven todas las cuentas, y el contenido privado de cada una.")
+def listar_contenido(
+    tipo: str = "routines",
+    q: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """La base común de Alzum: lo que toda cuenta nueva encuentra ya hecho.
+
+    Se devuelven siempre los conteos de todos los tipos —los necesita la
+    navegación por pestañas— y las filas solo del tipo pedido.
+    """
+    motivo = _exige_seccion(current_user, db, "contenido")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    catalogo = _catalogo_contenido()
+
+    def base(cfg, solo=None):
+        c = db.query(cfg["modelo"])
+        if cfg["organizacion"] and solo == "plataforma":
+            c = c.filter(cfg["modelo"].organization_id.is_(None))
+        elif cfg["organizacion"] and solo == "organizacion":
+            c = c.filter(cfg["modelo"].organization_id.isnot(None))
+        return c
+
+    conteos = {
+        t: {"global": base(cfg, "plataforma").count(),
+            "cuentas": base(cfg, "organizacion").count() if cfg["organizacion"] else 0,
+            "etiqueta": cfg["etiqueta"], "familia": cfg["familia"],
+            "organizacion": cfg["organizacion"]}
+        for t, cfg in catalogo.items()
+    }
+    totales = {
+        "global": sum(c["global"] for c in conteos.values()),
+        "cuentas": sum(c["cuentas"] for c in conteos.values()),
+        # El circuito de propuestas del prototipo (un coach propone, la
+        # plataforma aprueba) todavía no existe: no hay ni tabla ni forma de
+        # proponer. Se devuelve null en vez de 0 para que la pantalla lo
+        # muestre como pendiente y no como "no hay ninguna".
+        "propuestas": None,
+    }
+
+    nombres_org = {o.id: o.name for o in db.query(Organization).all()}
+
+    # "organizaciones" no es un tipo: es todo el contenido privado de las
+    # cuentas, de los cuatro tipos que tienen organización. Es la lista desde
+    # la que se promueve.
+    if tipo == "organizaciones":
+        filas, total = [], 0
+        for t, cfg in catalogo.items():
+            if not cfg["organizacion"]:
+                continue
+            consulta = base(cfg, "organizacion")
+            if q:
+                consulta = consulta.filter(getattr(cfg["modelo"], cfg["campo"]).ilike(f"%{q}%"))
+            total += consulta.count()
+            for obj in consulta.limit(TOPE_CONTENIDO).all():
+                filas.append(_fila_contenido(t, obj, cfg, db, nombres_org))
+        filas.sort(key=lambda r: (r["organization_name"] or "", r["nombre"] or ""))
+        return send_response({
+            "tipo": tipo, "conteos": conteos, "totales": totales,
+            "items": filas[:TOPE_CONTENIDO], "total": total,
+            "recortado": total > len(filas[:TOPE_CONTENIDO]),
+        }, "OK")
+
+    cfg = catalogo.get(tipo)
+    if not cfg:
+        return send_error(f"Tipo no válido. Admitidos: {', '.join(sorted(catalogo))}, organizaciones", code=400)
+
+    consulta = base(cfg, "plataforma")
+    if q:
+        consulta = consulta.filter(getattr(cfg["modelo"], cfg["campo"]).ilike(f"%{q}%"))
+    total = consulta.count()
+    objetos = consulta.order_by(getattr(cfg["modelo"], cfg["campo"])).limit(TOPE_CONTENIDO).all()
+
+    return send_response({
+        "tipo": tipo, "conteos": conteos, "totales": totales,
+        "items": [_fila_contenido(tipo, o, cfg, db, nombres_org) for o in objetos],
+        "total": total, "recortado": total > len(objetos),
+        "promover": cfg["promover"],
+    }, "OK")
+
+
+class CatalogoItem(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+# Los tres catálogos que el prototipo llama "la fuente única de verdad": no
+# tienen organización, así que se editan aquí y en ningún otro sitio.
+CATALOGOS_EDITABLES = {"muscle_groups", "type_foods", "group_foods"}
+
+
+def _modelo_catalogo(tipo: str):
+    cfg = _catalogo_contenido().get(tipo)
+    return cfg["modelo"] if cfg and tipo in CATALOGOS_EDITABLES else None
+
+
+@router.post("/content/{tipo}", summary="Crear una entrada de catálogo global")
+def crear_catalogo(
+    tipo: str,
+    data: CatalogoItem,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "contenido")
+    if motivo:
+        return send_error(motivo, code=403)
+    modelo = _modelo_catalogo(tipo)
+    if not modelo:
+        return send_error(
+            "Solo se crean desde aquí los catálogos de plataforma: "
+            f"{', '.join(sorted(CATALOGOS_EDITABLES))}", code=400)
+
+    nombre = (data.name or "").strip()
+    if not nombre:
+        return send_error("El nombre es obligatorio", code=400)
+    if db.query(modelo).filter(modelo.name == nombre).first():
+        return send_error("Ya existe una entrada con ese nombre", code=400)
+
+    obj = modelo(name=nombre, description=(data.description or None))
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+    return send_response({"id": obj.id, "name": obj.name}, "Creado")
+
+
+@router.put("/content/{tipo}/{id}", summary="Renombrar una entrada de catálogo global")
+def editar_catalogo(
+    tipo: str,
+    id: int,
+    data: CatalogoItem,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "contenido")
+    if motivo:
+        return send_error(motivo, code=403)
+    modelo = _modelo_catalogo(tipo)
+    if not modelo:
+        return send_error("Ese tipo no se edita desde aquí", code=400)
+
+    obj = db.query(modelo).filter(modelo.id == id).first()
+    if not obj:
+        return send_error("No encontrado", code=404)
+
+    nombre = (data.name or "").strip()
+    if not nombre:
+        return send_error("El nombre es obligatorio", code=400)
+    if db.query(modelo).filter(modelo.name == nombre, modelo.id != id).first():
+        return send_error("Ya existe una entrada con ese nombre", code=400)
+
+    obj.name = nombre
+    if data.description is not None:
+        obj.description = data.description or None
+    db.commit()
+    return send_response({"id": obj.id, "name": obj.name}, "Actualizado")
+
+
+@router.delete("/content/{tipo}/{id}", summary="Borrar una entrada de catálogo global")
+def borrar_catalogo(
+    tipo: str,
+    id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Se niega si algo lo está usando.
+
+    Estos catálogos son la base de toda la plataforma: borrar un grupo muscular
+    que usan trescientos ejercicios de cuatro cuentas distintas no es
+    "limpiar", es romperle la librería a gente que no se ha enterado.
+    """
+    motivo = _exige_seccion(current_user, db, "contenido")
+    if motivo:
+        return send_error(motivo, code=403)
+    modelo = _modelo_catalogo(tipo)
+    if not modelo:
+        return send_error("Ese tipo no se borra desde aquí", code=400)
+
+    obj = db.query(modelo).filter(modelo.id == id).first()
+    if not obj:
+        return send_error("No encontrado", code=404)
+
+    from app.models.nutrition.aliment import Aliment
+    from app.models.nutrition.diet import Diet
+    from app.models.training import Training
+
+    usos = 0
+    if tipo == "muscle_groups":
+        usos = db.query(Training).filter(Training.muscle_group_id == id).count()
+    elif tipo == "type_foods":
+        usos = db.query(Diet).filter(Diet.type_id == id).count()
+    elif tipo == "group_foods":
+        usos = db.query(Aliment).filter(Aliment.group_food_id == id).count()
+    if usos:
+        return send_error(
+            f"No se puede borrar: lo están usando {usos} elemento(s). "
+            "Cámbialos primero o renombra esta entrada.", code=400)
+
+    db.delete(obj)
+    db.commit()
+    return send_response(None, "Borrado")
+
+
 @router.get("/roles", summary="Roles del equipo de Alzum",
             description="Los roles internos y qué secciones ve cada uno. Para previsualizar el panel.")
 def roles_del_equipo(

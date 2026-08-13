@@ -272,6 +272,21 @@
   .marca{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;}
   .marca input{width:16px;height:16px;margin:0;cursor:pointer;accent-color:var(--indigo);}
 
+  /* Ficha de una cuenta */
+  .modal.ancho{width:600px;}
+  .f-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .f-kpi{border:1px solid var(--borde);border-radius:11px;padding:14px;text-align:center;}
+  .f-kpi b{display:block;font-size:21px;font-weight:700;line-height:1.15;}
+  .f-kpi span{font-size:11.5px;color:#9CA3AF;}
+  .f-ro{border:1px solid var(--borde);border-radius:10px;padding:9px 12px;}
+  .f-ro label{display:block;font-size:11px;color:#9CA3AF;margin-bottom:3px;}
+  .f-ro div{font-size:13.5px;}
+  .f-enlace{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;
+            color:var(--indigo);cursor:pointer;background:none;border:none;padding:0;font-family:inherit;}
+  .f-enlace:hover{text-decoration:underline;}
+  #contenido tbody tr[data-fila]{cursor:pointer;}
+  #contenido tbody tr[data-fila]:hover{background:#FAFAFC;}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -348,8 +363,10 @@
     <h2 id="fichaTitulo">Ficha</h2>
     <div class="cuerpo" id="fichaCuerpo"></div>
     <div class="pie">
+      <span class="error" id="fichaError"></span>
       <button class="btn ghost" onclick="cerrarFicha()">Cerrar</button>
-      <button class="btn" id="fichaEntrar" onclick="entrarComo()">Entrar como esta cuenta</button>
+      <button class="btn" id="fichaGuardar" onclick="guardarFicha()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -618,7 +635,7 @@ function htmlCoaches(){
     <div class="kpis">
       ${tarjeta('Cuentas totales', _totales.cuentas ?? 0, '', 'users')}
       ${tarjeta('Clientes gestionados', _totales.clientes ?? 0, '', 'user')}
-      ${tarjeta('MRR de coaches', '—', 'Requiere la pasarela de pago', 'card', true)}
+      ${tarjeta('Cuota contratada', eur(_totales.cuota_contratada || 0), 'Suma de los planes de las cuentas activas', 'card')}
     </div>
     <div class="barra">
       <div class="buscar-wrap">
@@ -631,25 +648,25 @@ function htmlCoaches(){
     </div>
     <div class="card" style="padding:16px 8px;">
       <table>
-        <thead><tr><th>Cuenta</th><th>Plan</th><th>Estado</th><th class="num">Clientes</th><th class="num">MRR</th><th class="num">Acciones</th></tr></thead>
+        <thead><tr><th>Cuenta</th><th>Plan</th><th>Estado</th><th class="num">Clientes</th><th class="num">Cuota</th><th class="num">Acciones</th></tr></thead>
         <tbody>
-        ${lista.map(x => `<tr>
+        ${lista.map(x => `<tr data-fila onclick="verFicha('${x.id}')">
           <td><div class="cta-n">${esc(x.name)}</div><div class="cta-s">${esc(x.owner_name || 'Sin dueño')}${x.owner_email ? ' · ' + esc(x.owner_email) : ''}${x.country ? ' · ' + esc(x.country) : ''}</div></td>
           <td class="${x.plan ? '' : 'vacio'}">${x.plan ? esc(x.plan) : 'Sin plan'}</td>
           <td><span class="badge b-${x.state}">${ESTADOS[x.state] || x.state}</span></td>
           <td class="num">${x.clientes}</td>
-          <td class="num vacio">—</td>
+          <td class="num ${x.cuota_mes != null ? '' : 'vacio'}">${x.cuota_mes != null ? eur(x.cuota_mes) : '—'}</td>
           <td class="num" style="white-space:nowrap;">
-            <button class="btn ghost" onclick="verFicha('${x.id}')">Ver ficha</button>
+            <button class="btn ghost" onclick="event.stopPropagation();verFicha('${x.id}')">Ver ficha</button>
             ${x.state === 'suspendida'
-              ? `<button class="btn ghost" style="color:#B45309;border-color:#FDE68A;" onclick="cambiarEstado('${x.id}','activa')">▷ Reactivar</button>`
-              : `<button class="btn rojo" onclick="cambiarEstado('${x.id}','suspendida')">⊘ Suspender</button>`}</td>
+              ? `<button class="btn ghost" style="color:#B45309;border-color:#FDE68A;" onclick="event.stopPropagation();cambiarEstado('${x.id}','activa')">▷ Reactivar</button>`
+              : `<button class="btn rojo" onclick="event.stopPropagation();cambiarEstado('${x.id}','suspendida')">⊘ Suspender</button>`}</td>
         </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;padding:36px;color:#9CA3AF;">
               ${_cuentas.length ? 'Ninguna cuenta con ese filtro.' : 'Todavía no hay cuentas. Crea la primera con «+ Nueva cuenta».'}</td></tr>`}
         </tbody>
       </table>
     </div>
-    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">El plan se elige en la ficha de cada cuenta. El MRR llega con la pasarela de pago: un plan asignado dice lo que la cuenta debería pagar, no lo que ha pagado.</p>`;
+    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">Pulsa una fila para abrir su ficha. La «cuota contratada» es lo que las cuentas activas <b>deberían</b> pagar según su plan; el MRR real —lo cobrado— llega con la pasarela de pago.</p>`;
 }
 
 function tarjeta(titulo, valor, pie, icono, pendiente){
@@ -1775,24 +1792,43 @@ async function verFicha(id){
   const d = (await r.json()).data || {};
   _ficha = { id: d.id || id, name: d.name || '' };
   document.getElementById('fichaTitulo').textContent = d.name || '';
+  document.getElementById('fichaError').textContent = '';
+  document.querySelector('#capaFicha .modal').classList.add('ancho');
+
+  const soloLectura = (etiqueta, valor) =>
+    `<div class="f-ro"><label>${etiqueta}</label><div>${valor}</div></div>`;
+
   document.getElementById('fichaCuerpo').innerHTML = `
-    <div class="fila2">
-      <div><div class="kpi-t">Dueño</div><div>${esc(d.owner_name || '—')}</div><div class="cta-s">${esc(d.owner_email || '')}</div></div>
-      <div><div class="kpi-t">Estado</div><span class="badge b-${d.state}">${ESTADOS[d.state] || d.state}</span></div>
+    <div class="f-kpis">
+      <div class="f-kpi"><b>${d.clientes ?? 0}</b><span>Clientes</span></div>
+      <div class="f-kpi"><b>${d.coaches ?? 0}</b><span>Coaches</span></div>
+      <div class="f-kpi"><b>${d.cuota_mes != null ? eur(d.cuota_mes) : '—'}</b><span>Cuota/mes</span></div>
     </div>
     <div class="fila2">
-      <div><div class="kpi-t">País</div><div>${esc(d.country || '—')}</div></div>
-      <div><div class="kpi-t">Alta</div><div>${d.created_at ? new Date(d.created_at).toLocaleDateString('es-ES') : '—'}</div></div>
+      ${soloLectura('Alta', d.created_at ? new Date(d.created_at).toISOString().slice(0,10) : '—')}
+      ${soloLectura('Última actividad', d.last_activity ? haceCuanto(d.last_activity) : 'Sin actividad')}
     </div>
-    ${d.trial_ends_at ? `<div><div class="kpi-t">Fin de la prueba</div>
-      <div>${new Date(d.trial_ends_at).toLocaleDateString('es-ES')} · ${haceCuanto(d.trial_ends_at)}</div></div>` : ''}
-    <div><div class="kpi-t">Plan contratado</div>
-      <select class="sel-cuenta" style="width:100%;margin-top:5px;" onchange="asignarPlan('${d.id}', this.value)">
+    <div class="fila2">
+      ${soloLectura('País', esc(d.country || '—'))}
+      ${soloLectura('Dueño', esc(d.owner_name || '—'))}
+    </div>
+    ${soloLectura('ID de la cuenta', `<span style="font-size:11.5px;word-break:break-all;color:#6B7280;">${esc(d.id)}</span>`)}
+    ${d.trial_ends_at ? `<div class="f-ro"><label>Fin de la prueba</label>
+      <div>${new Date(d.trial_ends_at).toISOString().slice(0,10)} · ${haceCuanto(d.trial_ends_at)}</div></div>` : ''}
+    <div class="campo"><label>Plan</label>
+      <select id="fPlan">
         <option value="">Sin plan</option>
-        ${_planes.map(p => `<option value="${p.id}"${p.id===d.plan_id?' selected':''}>${esc(p.name)} · ${eur(p.price_month)}/mes</option>`).join('')}
-      </select>
-      <div class="cta-s" style="margin-top:6px;">Dice lo que esta cuenta debería pagar. El cobro llega con la pasarela.</div>
-    </div>
+        ${_planes.map(p => `<option value="${p.id}"${p.id===d.plan_id?' selected':''}>${esc(p.name)} — ${eur(p.price_month)}/mes</option>`).join('')}
+      </select></div>
+    <div class="campo"><label>Estado</label>
+      <select id="fEstado">
+        ${Object.keys(ESTADOS).map(e => `<option value="${e}"${e===d.state?' selected':''}>${ESTADOS[e]}</option>`).join('')}
+      </select></div>
+    <div class="campo"><label>Notas internas</label>
+      <textarea id="fNotas" class="resp" placeholder="Solo las ve el equipo de Alzum. El coach no las ve por ninguna vía.">${esc(d.internal_notes || '')}</textarea></div>
+    ${_esSuper ? `<button class="f-enlace" onclick="entrarComo()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Abrir el panel de este coach</button>` : ''}
     <div>
       <div class="kpi-t">Equipo (${(d.equipo||[]).length})</div>
       <table style="margin-top:6px;"><tbody>
@@ -1802,23 +1838,41 @@ async function verFicha(id){
         </tr>`).join('') || '<tr><td class="vacio">Sin miembros.</td></tr>'}
       </tbody></table>
     </div>
-    <div class="aviso">Historial de facturación y actividad llegarán con la pasarela de pago.</div>`;
-  // Solo el super-admin puede actuar dentro de otra organización. Ofrecerle el
-  // botón a Soporte sería un botón que siempre da 403.
-  document.getElementById('fichaEntrar').style.display = _esSuper ? '' : 'none';
+    <div class="aviso">«Cuota/mes» es lo que esta cuenta debería pagar según su plan, no lo que ha pagado: el cobro y el historial llegan con la pasarela.</div>`;
   document.getElementById('capaFicha').classList.add('on');
 }
-function cerrarFicha(){ document.getElementById('capaFicha').classList.remove('on'); }
 
-async function asignarPlan(orgId, planId){
-  const r = await fetch(`${API}/admin/organizations/${orgId}/plan`,
-    { method:'PUT', headers: cab(), body: JSON.stringify({ plan_id: planId ? Number(planId) : null }) });
-  if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo asignar el plan'); return; }
-  // El listado de detrás lleva la columna Plan: si no se refresca, la ficha y
-  // la tabla dicen cosas distintas.
-  await cargarCuentas();
-  if (_actual === 'organizaciones') document.getElementById('contenido').innerHTML = htmlCoaches();
+/* Un solo guardado para toda la ficha. Con un endpoint por campo, cambiar plan
+   y estado a la vez serían dos peticiones y media ficha podría quedarse
+   guardada si la segunda falla. */
+async function guardarFicha(){
+  if (!_ficha) return;
+  const err = document.getElementById('fichaError');
+  const plan = document.getElementById('fPlan').value;
+  const cuerpo = {
+    state: document.getElementById('fEstado').value,
+    internal_notes: document.getElementById('fNotas').value,
+  };
+  // "Sin plan" es quitarle el plan, no dejarlo como estaba: se manda el
+  // centinela porque un null a secas no distingue las dos cosas.
+  if (plan) cuerpo.plan_id = Number(plan); else cuerpo.quitar_plan = true;
+
+  const btn = document.getElementById('fichaGuardar'); btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/admin/organizations/${_ficha.id}`,
+      { method:'PUT', headers: cab(), body: JSON.stringify(cuerpo) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { err.textContent = j.message || 'No se pudo guardar.'; return; }
+    err.style.color = '#15803D'; err.textContent = 'Guardado.';
+    // El listado de detrás lleva plan y estado: si no se refresca, la ficha y
+    // la tabla dicen cosas distintas.
+    await cargarCuentas();
+    if (_actual === 'organizaciones') document.getElementById('contenido').innerHTML = htmlCoaches();
+    setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 2500);
+  } finally { btn.disabled = false; }
 }
+
+function cerrarFicha(){ document.getElementById('capaFicha').classList.remove('on'); }
 
 /* "Entrar como": el mismo segundo sombrero que ya existía por cabecera, pero
    a un clic. Sirve para dar soporte — ver lo que ve el coach que escribe

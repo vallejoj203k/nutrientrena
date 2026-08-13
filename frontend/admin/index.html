@@ -203,6 +203,28 @@
   .ret{display:inline-block;min-width:52px;padding:4px 9px;border-radius:7px;
        font-size:11.5px;font-weight:700;color:#312E81;}
 
+  /* Equipo Alzum */
+  .cab{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;}
+  .cab .der{margin-left:auto;}
+  /* Ojo con el nombre: la barra lateral ya tiene su propia .rol-card oscura
+     (la de "Tu rol"). Estas van en el contenido y son blancas; compartir clase
+     dejaba la del menú sin su estilo. */
+  .rol-tarj{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:18px 20px;}
+  .rol-tarj .rh{display:flex;align-items:center;gap:11px;margin-bottom:11px;}
+  .rol-tarj .rh b{font-size:14.5px;}
+  .rol-tarj p{font-size:12.5px;color:#6B7280;line-height:1.55;}
+  .rol-tarj .n{font-size:12px;font-weight:700;color:#374151;margin-top:11px;}
+  .avatar-m{width:34px;height:34px;border-radius:50%;background:#EEF2FF;color:var(--indigo);
+            display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+            flex:none;letter-spacing:.3px;}
+  .miembro{display:flex;align-items:center;gap:11px;}
+  .b-activo2{background:#FEF3C7;color:#B45309;}
+  .b-invitado{background:#EEF2FF;color:#4F5BF2;}
+  .sel-rol{padding:7px 10px;border:1px solid var(--borde);border-radius:9px;background:#fff;
+           font:inherit;font-size:12.5px;color:#374151;outline:none;cursor:pointer;min-width:170px;}
+  .sel-rol:focus{border-color:var(--indigo);}
+  .sel-rol:disabled{background:#F8F9FB;color:#9CA3AF;cursor:not-allowed;}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -281,6 +303,24 @@
     <div class="pie">
       <button class="btn ghost" onclick="cerrarFicha()">Cerrar</button>
       <button class="btn" id="fichaEntrar" onclick="entrarComo()">Entrar como esta cuenta</button>
+    </div>
+  </div>
+</div>
+
+<div class="capa" id="capaMiem" onclick="if(event.target===this)cerrarMiembro()">
+  <div class="modal" style="width:460px;">
+    <h2>Invitar al equipo de Alzum</h2>
+    <div class="cuerpo">
+      <div class="campo"><label>Nombre y apellidos</label><input id="miemNombre" placeholder="Lucía Prats"></div>
+      <div class="campo"><label>Correo</label><input id="miemEmail" type="email" placeholder="lucia@alzum.io"></div>
+      <div class="campo"><label>Rol</label><select id="miemRol"></select></div>
+      <div class="campo"><label>Contraseña</label><input id="miemClave" type="text" placeholder="Mínimo 6 caracteres"></div>
+      <div class="aviso">Si el correo ya existe en la plataforma —por ejemplo, alguien que además es coach— se le añade el rol interno en vez de crear una cuenta nueva; la contraseña se ignora.</div>
+    </div>
+    <div class="pie">
+      <span class="error" id="miemError"></span>
+      <button class="btn ghost" onclick="cerrarMiembro()">Cancelar</button>
+      <button class="btn" id="miemBtn" onclick="guardarMiembro()">Invitar</button>
     </div>
   </div>
 </div>
@@ -389,7 +429,6 @@ const PENDIENTE = {
   organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
   facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
   planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
-  equipo:'Los miembros internos de Alzum y el rol de cada uno.',
   configuracion:'Ajustes globales: marca, integraciones y dominios.',
 };
 
@@ -428,6 +467,7 @@ async function abrir(id){
   if (id === 'contenido') return pintarContenido();
   if (id === 'soporte') return pintarSoporte();
   if (id === 'analiticas') return pintarAnaliticas();
+  if (id === 'equipo') return pintarEquipo();
   if (id === 'vision') return pintarVision();
   document.getElementById('contenido').innerHTML = enConstruccion(id);
 }
@@ -548,9 +588,21 @@ let _clientes = [], _totClientes = {}, _cuentasCli = [], _buscaCli = '', _cuenta
 
 function haceCuanto(iso){
   if (!iso) return '—';
-  const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+  // Las marcas de tiempo del backend son UTC y llegan sin zona; sin la Z, el
+  // navegador las lee como hora local y "hace 2 minutos" sale con dos horas de
+  // desfase. Las fechas sueltas (YYYY-MM-DD) sí van a medianoche local.
+  const conZona = iso.length === 10 ? iso + 'T00:00:00'
+    : (/[Zz]|[+-]\d\d:?\d\d$/.test(iso) ? iso : iso + 'Z');
+  const d = new Date(conZona);
   if (isNaN(d)) return '—';
-  const dias = Math.floor((new Date().setHours(0,0,0,0) - d.setHours(0,0,0,0)) / 86400000);
+  const seg = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (iso.length > 10 && seg >= 0 && seg < 86400) {
+    if (seg < 60) return 'Justo ahora';
+    if (seg < 3600) return `Hace ${Math.floor(seg / 60)} min`;
+    const h = Math.floor(seg / 3600);
+    return `Hace ${h} h`;
+  }
+  const dias = Math.floor((new Date().setHours(0,0,0,0) - new Date(d).setHours(0,0,0,0)) / 86400000);
   if (dias < 0) return d.toLocaleDateString('es-ES');
   if (dias === 0) return 'Hoy';
   if (dias === 1) return 'Ayer';
@@ -911,6 +963,142 @@ async function borrarCatalogo(id, nombre){
   // error que haya que esconder.
   if (!r.ok) { alert(j.message || 'No se pudo borrar'); return; }
   cargarContenido();
+}
+
+/* ── Equipo Alzum ─────────────────────────────────────────────────────────
+   Quién trabaja DENTRO de la plataforma: hoy tres roles, y la descripción de
+   cada uno la sirve el backend en vez de escribirse aquí, para que lo que dice
+   la tarjeta y lo que la API deja hacer no se separen con el tiempo. */
+let _equipo = [], _rolesAlzum = [];
+
+function pintarEquipo(){
+  document.getElementById('subtitulo').textContent = 'Quién trabaja dentro de la plataforma y qué puede ver cada rol.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  cargarEquipo();
+}
+
+async function cargarEquipo(){
+  const c = document.getElementById('contenido');
+  if (!_equipo.length) c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  try {
+    const r = await fetch(`${API}/admin/team`, { headers: cab() });
+    if (!r.ok) { c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el equipo.</div></div>'; return; }
+    const d = (await r.json()).data || {};
+    _equipo = d.miembros || []; _rolesAlzum = d.roles || [];
+    c.innerHTML = htmlEquipo();
+  } catch(e){ c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el equipo.</div></div>'; }
+}
+
+const iniciales = n => String(n || '?').trim().split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase();
+
+function htmlEquipo(){
+  const nombreRol = id => (_rolesAlzum.find(r => r.role_id === id) || {}).nombre || id;
+  // Solo un super-admin queda: no se le puede cambiar el rol ni sacarlo, o la
+  // plataforma se queda sin nadie que pueda entrar al panel. Se desactiva en la
+  // pantalla además de en el backend: un botón que siempre da error es peor
+  // que un botón que no está.
+  const unicoSuper = _equipo.filter(m => m.role_id === 1).length <= 1;
+
+  return `
+    <div class="cab">
+      <div class="der"><button class="btn" onclick="abrirMiembro()">+ Invitar miembro</button></div>
+    </div>
+    <div class="kpis">
+      ${_rolesAlzum.map(r => `<div class="rol-tarj">
+        <div class="rh"><span class="kpi-ico"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[r.icono]||''}</svg></span><b>${esc(r.nombre)}</b></div>
+        <p>${esc(r.descripcion)}</p>
+        <div class="n">${r.miembros} miembro${r.miembros === 1 ? '' : 's'}</div>
+      </div>`).join('')}
+    </div>
+    <div class="card" style="padding:16px 8px;">
+      <table>
+        <thead><tr><th>Miembro</th><th>Rol</th><th>Estado</th><th>Última actividad</th><th class="num">Acciones</th></tr></thead>
+        <tbody>
+        ${_equipo.map(m => {
+          const bloqueado = m.role_id === 1 && unicoSuper;
+          return `<tr>
+          <td><div class="miembro">
+            <span class="avatar-m">${esc(iniciales(m.name))}</span>
+            <div><div class="cta-n">${esc(m.name)}${m.soy_yo ? ' <span class="cta-s" style="display:inline;">(tú)</span>' : ''}</div>
+              <div class="cta-s">${esc(m.email || '')}</div></div>
+          </div></td>
+          <td><select class="sel-rol" ${bloqueado ? 'disabled title="Es el único super-admin"' : ''}
+                      onchange="cambiarRol(${m.user_id}, this.value, '${esc(m.name)}')">
+              ${_rolesAlzum.map(r => `<option value="${r.role_id}"${r.role_id===m.role_id?' selected':''}>${esc(r.nombre)}</option>`).join('')}
+            </select></td>
+          <td><span class="badge b-${m.state === 'activo' ? 'activo2' : 'invitado'}">${m.state}</span></td>
+          <td class="${m.last_login_at ? '' : 'vacio'}">${m.last_login_at ? haceCuanto(m.last_login_at) : 'Nunca ha entrado'}</td>
+          <td class="num" style="white-space:nowrap;">
+            ${m.soy_yo || bloqueado ? ''
+              : `<button class="icono-btn rojo" title="Sacar del equipo" onclick="sacarDelEquipo(${m.user_id},'${esc(m.name)}')">${PAPELERA}</button>`}
+          </td>
+        </tr>`; }).join('') || `<tr><td colspan="5" style="text-align:center;padding:36px;color:#9CA3AF;">
+            Todavía no hay nadie más en el equipo.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">
+      Sacar a alguien del equipo le quita el acceso al panel de plataforma; no borra su cuenta,
+      porque puede ser también coach y tener clientes.
+    </p>`;
+}
+
+async function cambiarRol(userId, roleId, nombre){
+  const r = await fetch(`${API}/admin/team/${userId}/role`,
+    { method:'PUT', headers: cab(), body: JSON.stringify({ role_id: Number(roleId) }) });
+  const j = await r.json().catch(()=>({}));
+  if (!r.ok) {
+    alert(j.message || 'No se pudo cambiar el rol');
+    // Se recarga para que el desplegable vuelva a decir la verdad: si se
+    // quedara con el valor rechazado, la pantalla mentiría.
+    cargarEquipo();
+    return;
+  }
+  // Si te has cambiado el rol a ti mismo, tus permisos ya no son los que el
+  // panel tenía cargados: hay que recargar o la navegación miente.
+  const yo = _equipo.find(m => m.user_id === userId);
+  cargarEquipo();
+  if (yo && yo.soy_yo) location.reload();
+}
+
+async function sacarDelEquipo(userId, nombre){
+  if (!confirm(`¿Sacar a ${nombre} del equipo de Alzum?\n\nPerderá el acceso al panel de plataforma. Su cuenta se conserva.`)) return;
+  const r = await fetch(`${API}/admin/team/${userId}`, { method:'DELETE', headers: cab() });
+  const j = await r.json().catch(()=>({}));
+  if (!r.ok) { alert(j.message || 'No se pudo sacar del equipo'); return; }
+  cargarEquipo();
+}
+
+function abrirMiembro(){
+  document.getElementById('miemError').textContent = '';
+  document.getElementById('miemNombre').value = '';
+  document.getElementById('miemEmail').value = '';
+  document.getElementById('miemClave').value = '';
+  document.getElementById('miemRol').innerHTML =
+    _rolesAlzum.map(r => `<option value="${r.role_id}"${r.role_id===8?' selected':''}>${esc(r.nombre)}</option>`).join('');
+  document.getElementById('capaMiem').classList.add('on');
+  setTimeout(() => document.getElementById('miemNombre').focus(), 50);
+}
+function cerrarMiembro(){ document.getElementById('capaMiem').classList.remove('on'); }
+
+async function guardarMiembro(){
+  const err = document.getElementById('miemError');
+  const cuerpo = {
+    name: document.getElementById('miemNombre').value.trim(),
+    email: document.getElementById('miemEmail').value.trim(),
+    password: document.getElementById('miemClave').value,
+    role_id: Number(document.getElementById('miemRol').value),
+  };
+  if (!cuerpo.name || !cuerpo.email) { err.textContent = 'Hacen falta el nombre y el correo.'; return; }
+  const btn = document.getElementById('miemBtn'); btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/admin/team`, { method:'POST', headers: cab(), body: JSON.stringify(cuerpo) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { err.textContent = j.message || 'No se pudo invitar.'; return; }
+    cerrarMiembro();
+    cargarEquipo();
+  } finally { btn.disabled = false; }
 }
 
 /* ── Analíticas ───────────────────────────────────────────────────────────

@@ -188,6 +188,57 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('el mes 0 de cada cohorte es 100%',
      (ana.data.cohortes || []).every(c => c.valores[0] === 100), ana.data.cohortes);
 
+  // ── Equipo Alzum ─────────────────────────────────────────────────────────
+  await p.click('.s-item:has-text("Equipo Alzum")');
+  await p.locator('.rol-tarj').first().waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
+  ck('la sección Equipo Alzum carga', (await p.textContent('#titulo')).trim() === 'Equipo Alzum');
+  ck('salen los tres roles internos', await p.locator('.rol-tarj').count() === 3);
+  ck('la tarjeta "Tu rol" de la barra lateral sigue en su sitio',
+     await p.evaluate(() => {
+       const c = document.getElementById('rolCard');
+       return !!c && c.closest('.side') !== null && getComputedStyle(c).display !== 'none';
+     }));
+
+  await p.click('button:has-text("+ Invitar miembro")');
+  await p.waitForTimeout(500);
+  await p.fill('#miemNombre', 'Lucía Prats');
+  await p.fill('#miemEmail', `lucia.${SUF}@alzum.io`);
+  await p.selectOption('#miemRol', '7');
+  await p.fill('#miemClave', 'Equipo123!');
+  await p.click('#miemBtn');
+  await p.waitForTimeout(1800);
+  const eq = await p.textContent('#contenido');
+  ck('el miembro invitado aparece', eq.includes(`lucia.${SUF}@alzum.io`), eq.slice(0, 200));
+  ck('y sale como invitado hasta que entre', eq.includes('Nunca ha entrado') && eq.includes('invitado'));
+
+  // El rol no es una etiqueta: cambia lo que ve de verdad
+  const lgL = await (await ctx.request.post(`${API}/api/auth/login`, {
+    data: { email: `lucia.${SUF}@alzum.io`, password: 'Equipo123!' } })).json();
+  const suyas = await (await ctx.request.get(`${API}/api/admin/me`,
+    { headers: { Authorization: 'Bearer ' + lgL.data.token } })).json();
+  ck('el editor de contenido solo ve su sección',
+     JSON.stringify((suyas.data.secciones || []).map(s => s.id)) === '["contenido"]', suyas.data.secciones);
+
+  await p.click('.s-item:has-text("Equipo Alzum")');
+  await p.locator('.rol-tarj').first().waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
+  ck('tras entrar pasa a activo', (await p.textContent('#contenido')).includes('Justo ahora'));
+
+  // Lo que no puede pasar nunca: quedarse sin super-admin
+  const yo = ((await (await ctx.request.get(`${API}/api/admin/team`, { headers: H })).json())
+    .data.miembros || []).find(m => m.soy_yo);
+  const degradar = await ctx.request.fetch(`${API}/api/admin/team/${yo.user_id}/role`,
+    { method: 'PUT', data: { role_id: 8 }, headers: H });
+  ck('NO SE PUEDE DEGRADAR AL ÚNICO SUPER-ADMIN', degradar.status() === 400, degradar.status());
+  const sacarme = await ctx.request.fetch(`${API}/api/admin/team/${yo.user_id}`,
+    { method: 'DELETE', headers: H });
+  ck('ni sacarse uno mismo del equipo', sacarme.status() === 400, sacarme.status());
+  ck('y la pantalla ni siquiera ofrece el botón',
+     await p.evaluate(() => {
+       const fila = [...document.querySelectorAll('#contenido tbody tr')]
+         .find(t => t.textContent.includes('(tú)'));
+       return !!fila && fila.querySelectorAll('.icono-btn').length === 0;
+     }));
+
   // Cambiar de contexto lleva al panel de coach
   await p.click('.s-item:nth-child(2)');
   await p.waitForTimeout(1200);

@@ -23,6 +23,10 @@ class Organization(Base):
     # esta columna, "días de prueba gratuita" sería un número guardado que no
     # le pasa a nadie.
     trial_ends_at = Column(DateTime, nullable=True)
+    # Qué plan tiene contratado. Sin esto, el "N cuentas" de cada plan sería
+    # siempre cero: un número muerto en una pantalla que existe para decidir
+    # precios.
+    plan_id = Column(Integer, ForeignKey("platform_plans.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

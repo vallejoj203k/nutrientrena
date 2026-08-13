@@ -53,8 +53,11 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('la cuenta aparece en el listado', (await p.textContent('#contenido')).includes('NutriEntrena'));
   ck('con su dueño y país', (await p.textContent('#contenido')).includes('Oswal Serrano') && (await p.textContent('#contenido')).includes('España'));
   ck('en estado Activa', (await p.locator('.badge.b-activa').count()) >= 1);
-  ck('plan y MRR salen vacíos, no inventados',
-     (await p.textContent('#contenido')).includes('Plan y MRR llegarán con la pasarela'));
+  // El plan ya es real (se elige en la ficha), pero el MRR no: un plan
+  // asignado dice lo que la cuenta DEBERÍA pagar, no lo que ha pagado.
+  ck('una cuenta nueva nace sin plan', (await p.textContent('#contenido')).includes('Sin plan'));
+  ck('el MRR sigue sin inventarse',
+     (await p.textContent('#contenido')).includes('El MRR llega con la pasarela de pago'));
 
   // ── LO IMPORTANTE: su contenido queda dentro de la cuenta
   const lg2 = await (await ctx.request.post(`${API}/api/auth/login`, { data: { email: correo, password: 'Centro123!' } })).json();

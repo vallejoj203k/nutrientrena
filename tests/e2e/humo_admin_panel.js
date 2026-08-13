@@ -239,6 +239,79 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
        return !!fila && fila.querySelectorAll('.icono-btn').length === 0;
      }));
 
+  // ── Planes ───────────────────────────────────────────────────────────────
+  // "+ Nuevo plan" tiene que crear un plan de verdad con todos los campos del
+  // formulario, y el "N cuentas" de la tarjeta tiene que contar de verdad.
+  await p.click('.s-item:has-text("Planes")');
+  await p.locator('button:has-text("+ Nuevo plan")').waitFor({ state: 'visible', timeout: 20000 });
+  ck('la sección Planes carga', (await p.textContent('#titulo')).includes('Planes'));
+  ck('avisa de que no es lo que el coach vende a sus clientes',
+     (await p.textContent('#subtitulo')).includes('No confundir'));
+
+  await p.click('button:has-text("+ Nuevo plan")');
+  await p.waitForTimeout(500);
+  await p.fill('#pNombre', `Pro ${SUF}`);
+  await p.fill('#pMes', '49');
+  await p.fill('#pAnual', '39');
+  await p.fill('#pClientes', '50');
+  await p.fill('#pCoaches', '1');
+  await p.fill('#pExtra', '15');
+  await p.fill('#pAlmacen', '50 GB');
+  await p.fill('#pSoporte', 'Prioritario < 24 h');
+  await p.fill('#pFeats', 'Todo lo de Starter\nAutomatizaciones y recordatorios');
+  await p.check('#pDestacado');
+  await p.click('#planBtn');
+  await p.locator(`.plan:has-text("Pro ${SUF}")`).waitFor({ state: 'visible', timeout: 20000 });
+
+  const tarjeta = await p.textContent(`.plan:has-text("Pro ${SUF}")`);
+  ck('el plan se crea con su precio', tarjeta.includes('49 €'), tarjeta.slice(0, 120));
+  ck('y con el descuento anual CALCULADO', tarjeta.includes('39 €/mes pagando anual') && tarjeta.includes('20%'), tarjeta);
+  ck('con sus límites', tarjeta.includes('Hasta 50 clientes') && tarjeta.includes('+15 €/coach extra'));
+  ck('y sus funcionalidades', tarjeta.includes('Automatizaciones y recordatorios'));
+  ck('destacado se marca en la tarjeta',
+     await p.locator(`.plan.destacado:has-text("Pro ${SUF}")`).count() === 1);
+  ck('nace sin cuentas dentro', tarjeta.includes('0 cuentas'), tarjeta);
+
+  // Pagar al año más caro que al mes no es un plan, es una errata
+  await p.click('button:has-text("+ Nuevo plan")');
+  await p.waitForTimeout(400);
+  await p.fill('#pNombre', `Al revés ${SUF}`);
+  await p.fill('#pMes', '19');
+  await p.fill('#pAnual', '29');
+  await p.click('#planBtn');
+  await p.waitForTimeout(1200);
+  ck('se rechaza que el anual salga más caro que el mensual',
+     (await p.textContent('#planError')).includes('no puede ser mayor'), await p.textContent('#planError'));
+  await p.click('#capaPlan .btn.ghost');
+  await p.waitForTimeout(400);
+
+  // Asignar el plan a una cuenta desde su ficha, y que el contador lo note
+  const planId = ((await (await ctx.request.get(`${API}/api/admin/plans`, { headers: H })).json())
+    .data.planes || []).find(x => x.name === `Pro ${SUF}`).id;
+  const asignado = await ctx.request.fetch(`${API}/api/admin/organizations/${org.data.id}/plan`,
+    { method: 'PUT', data: { plan_id: planId }, headers: H });
+  ck('se puede asignar el plan a una cuenta', asignado.status() === 200, asignado.status());
+
+  await p.click('.s-item:has-text("Planes")');
+  await p.locator(`.plan:has-text("Pro ${SUF}")`).waitFor({ state: 'visible', timeout: 20000 });
+  ck('EL CONTADOR DE CUENTAS ES REAL',
+     (await p.textContent(`.plan:has-text("Pro ${SUF}")`)).includes('1 cuenta'),
+     await p.textContent(`.plan:has-text("Pro ${SUF}")`));
+
+  // Ocultar no es borrar: el plan sigue existiendo con sus cuentas dentro
+  await p.click(`.plan:has-text("Pro ${SUF}") button:has-text("Ocultar")`);
+  await p.waitForTimeout(1500);
+  ck('ocultar lo marca pero no lo borra',
+     (await p.textContent(`.plan:has-text("Pro ${SUF}")`)).includes('Oculto'));
+  const noBorra = await ctx.request.fetch(`${API}/api/admin/plans/${planId}`, { method: 'DELETE', headers: H });
+  ck('y con cuentas dentro no se deja borrar', noBorra.status() === 400, noBorra.status());
+
+  // La columna Plan del listado de Coaches ya dice algo
+  await p.click('.s-item:has-text("Coaches")');
+  await p.waitForTimeout(1500);
+  ck('el listado de Coaches enseña el plan de cada cuenta',
+     (await p.textContent('#contenido')).includes(`Pro ${SUF}`), (await p.textContent('#contenido')).slice(0, 200));
+
   // Cambiar de contexto lleva al panel de coach
   await p.click('.s-item:nth-child(2)');
   await p.waitForTimeout(1200);

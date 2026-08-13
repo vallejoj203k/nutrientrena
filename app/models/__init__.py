@@ -38,3 +38,4 @@ from app.models.document import Document
 from app.models.team_member import TeamMember
 from app.models.support import SupportTicket, SupportTicketMessage, PlatformAnnouncement
 from app.models.platform_setting import PlatformSetting
+from app.models.subscription_plan import SubscriptionPlan

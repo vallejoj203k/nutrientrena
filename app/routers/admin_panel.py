@@ -145,7 +145,11 @@ def _clientes_de(org_id: str, db: Session) -> int:
 
 
 def _serializar_cuenta(org: Organization, db: Session) -> dict:
+    from app.models.subscription_plan import SubscriptionPlan
+
     dueno = db.query(UserDetail).filter(UserDetail.id == org.owner_id).first()
+    plan = (db.query(SubscriptionPlan).filter(SubscriptionPlan.id == org.plan_id).first()
+            if org.plan_id else None)
     email = None
     if dueno and dueno.user_id:
         u = db.query(User).filter(User.id == dueno.user_id).first()
@@ -162,10 +166,12 @@ def _serializar_cuenta(org: Organization, db: Session) -> dict:
         "clientes": _clientes_de(org.id, db),
         "created_at": org.created_at.isoformat() if org.created_at else None,
         "trial_ends_at": org.trial_ends_at.isoformat() if org.trial_ends_at else None,
-        # Plan e importe dependen de la pasarela de pago, que está fuera de
-        # alcance. Se devuelven en null a propósito en vez de inventarlos: la
-        # pantalla los enseña como "—" y así no parece que ya funcionen.
-        "plan": None,
+        "plan_id": org.plan_id,
+        "plan": (plan.name if plan else None),
+        # El MRR sigue en null: un plan asignado dice lo que la cuenta DEBERÍA
+        # pagar, no lo que ha pagado. Mientras no haya pasarela y registro de
+        # cobros, poner aquí la suma de las tarifas sería enseñar ingresos que
+        # nadie ha cobrado.
         "mrr": None,
     }
 
@@ -806,6 +812,259 @@ def borrar_catalogo(
     db.delete(obj)
     db.commit()
     return send_response(None, "Borrado")
+
+
+# ── Planes ──────────────────────────────────────────────────────────────────
+
+class PlanEntrada(BaseModel):
+    name: str
+    price_month: float = 0
+    price_year_month: Optional[float] = None
+    default_cycle: str = "mensual"
+    max_clients: int = 0
+    coaches_included: int = 1
+    extra_coach_price: Optional[float] = None
+    storage: Optional[str] = None
+    support: Optional[str] = None
+    features: Optional[str] = None
+    visible: bool = True
+    highlighted: bool = False
+
+
+def _serializar_plan(p, db: Session) -> dict:
+    cuentas = db.query(Organization).filter(Organization.plan_id == p.id).count()
+    # El descuento anual se calcula, no se guarda: guardarlo sería un tercer
+    # número que se puede quedar sin cuadrar con los otros dos.
+    descuento = None
+    if p.price_month and p.price_year_month is not None and p.price_month > 0:
+        descuento = round((1 - p.price_year_month / p.price_month) * 100)
+    return {
+        "id": p.id,
+        "name": p.name,
+        "price_month": p.price_month or 0,
+        "price_year_month": p.price_year_month,
+        "descuento_anual": descuento,
+        "default_cycle": p.default_cycle or "mensual",
+        "max_clients": p.max_clients or 0,      # 0 = ilimitado
+        "coaches_included": p.coaches_included or 0,
+        "extra_coach_price": p.extra_coach_price,
+        "storage": p.storage,
+        "support": p.support,
+        "features": [ln.strip() for ln in (p.features or "").splitlines() if ln.strip()],
+        "visible": bool(p.visible),
+        "highlighted": bool(p.highlighted),
+        "cuentas": cuentas,
+    }
+
+
+def _validar_plan(data: PlanEntrada):
+    """Devuelve el motivo por el que no se puede guardar, o None."""
+    from app.models.subscription_plan import CICLOS
+
+    if not (data.name or "").strip():
+        return "El plan necesita un nombre"
+    if data.default_cycle not in CICLOS:
+        return f"Ciclo no válido. Admitidos: {', '.join(CICLOS)}"
+    for etiqueta, valor in [("El precio mensual", data.price_month),
+                            ("El precio anual", data.price_year_month),
+                            ("El precio del coach extra", data.extra_coach_price)]:
+        if valor is not None and valor < 0:
+            return f"{etiqueta} no puede ser negativo"
+    if data.max_clients < 0:
+        return "El máximo de clientes no puede ser negativo"
+    if data.coaches_included < 0:
+        return "Los coaches incluidos no pueden ser negativos"
+    # Pagar al año más caro que al mes no es un plan: es una errata. Cuesta más
+    # descubrirla en la web de precios que negarla aquí.
+    if (data.price_year_month is not None and data.price_month
+            and data.price_year_month > data.price_month):
+        return "El precio pagando al año no puede ser mayor que el mensual"
+    return None
+
+
+def _aplicar_plan(p, data: PlanEntrada):
+    p.name = data.name.strip()[:80]
+    p.price_month = data.price_month or 0
+    p.price_year_month = data.price_year_month
+    p.default_cycle = data.default_cycle
+    p.max_clients = data.max_clients
+    p.coaches_included = data.coaches_included
+    p.extra_coach_price = data.extra_coach_price
+    p.storage = (data.storage or "").strip() or None
+    p.support = (data.support or "").strip() or None
+    p.features = (data.features or "").strip() or None
+    p.visible = bool(data.visible)
+    p.highlighted = bool(data.highlighted)
+
+
+@router.get("/plans", summary="Planes de la plataforma",
+            description="Lo que un coach paga a Alzum: precios, límites y funcionalidades.")
+def listar_planes(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "planes")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    from app.models.subscription_plan import SubscriptionPlan
+    planes = db.query(SubscriptionPlan).order_by(
+        SubscriptionPlan.order_index, SubscriptionPlan.price_month).all()
+    return send_response({
+        "planes": [_serializar_plan(p, db) for p in planes],
+        "totales": {
+            "planes": len(planes),
+            "visibles": sum(1 for p in planes if p.visible),
+            "cuentas_con_plan": db.query(Organization).filter(
+                Organization.plan_id.isnot(None)).count(),
+            "cuentas_sin_plan": db.query(Organization).filter(
+                Organization.plan_id.is_(None)).count(),
+        },
+    }, "OK")
+
+
+@router.post("/plans", summary="Crear un plan")
+def crear_plan(
+    data: PlanEntrada,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "planes")
+    if motivo:
+        return send_error(motivo, code=403)
+    fallo = _validar_plan(data)
+    if fallo:
+        return send_error(fallo, code=400)
+
+    from app.models.subscription_plan import SubscriptionPlan
+    if db.query(SubscriptionPlan).filter(SubscriptionPlan.name == data.name.strip()).first():
+        return send_error("Ya existe un plan con ese nombre", code=400)
+
+    p = SubscriptionPlan()
+    _aplicar_plan(p, data)
+    # Se ordenan por precio de forma natural al crearlos; el índice existe para
+    # poder reordenarlos a mano el día que haga falta.
+    p.order_index = db.query(SubscriptionPlan).count()
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+    return send_response(_serializar_plan(p, db), "Plan creado")
+
+
+@router.put("/plans/{plan_id}", summary="Editar un plan")
+def editar_plan(
+    plan_id: int,
+    data: PlanEntrada,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "planes")
+    if motivo:
+        return send_error(motivo, code=403)
+    fallo = _validar_plan(data)
+    if fallo:
+        return send_error(fallo, code=400)
+
+    from app.models.subscription_plan import SubscriptionPlan
+    p = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    if not p:
+        return send_error("Plan no encontrado", code=404)
+    if db.query(SubscriptionPlan).filter(
+            SubscriptionPlan.name == data.name.strip(),
+            SubscriptionPlan.id != plan_id).first():
+        return send_error("Ya existe un plan con ese nombre", code=400)
+
+    _aplicar_plan(p, data)
+    db.commit()
+    db.refresh(p)
+    return send_response(_serializar_plan(p, db), "Plan actualizado")
+
+
+class VisibilidadPlan(BaseModel):
+    visible: bool
+
+
+@router.put("/plans/{plan_id}/visibility", summary="Mostrar u ocultar un plan")
+def visibilidad_plan(
+    plan_id: int,
+    data: VisibilidadPlan,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Ocultar no es borrar.
+
+    Un plan retirado de la web sigue teniendo cuentas dentro que lo pagan; si
+    ocultarlo lo borrara, esas cuentas se quedarían sin plan de un clic.
+    """
+    motivo = _exige_seccion(current_user, db, "planes")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    from app.models.subscription_plan import SubscriptionPlan
+    p = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    if not p:
+        return send_error("Plan no encontrado", code=404)
+    p.visible = bool(data.visible)
+    db.commit()
+    return send_response(_serializar_plan(p, db),
+                         "Plan visible en la web" if p.visible else "Plan oculto")
+
+
+@router.delete("/plans/{plan_id}", summary="Eliminar un plan")
+def borrar_plan(
+    plan_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "planes")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    from app.models.subscription_plan import SubscriptionPlan
+    p = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    if not p:
+        return send_error("Plan no encontrado", code=404)
+
+    cuentas = db.query(Organization).filter(Organization.plan_id == plan_id).count()
+    if cuentas:
+        # Borrarlo dejaría a esas cuentas sin plan y sin rastro de cuál tenían.
+        return send_error(
+            f"No se puede borrar: {cuentas} cuenta(s) lo tienen contratado. "
+            "Ocúltalo si solo quieres retirarlo de la web.", code=400)
+
+    db.delete(p)
+    db.commit()
+    return send_response(None, "Plan eliminado")
+
+
+class AsignarPlan(BaseModel):
+    plan_id: Optional[int] = None
+
+
+@router.put("/organizations/{org_id}/plan", summary="Asignar un plan a una cuenta")
+def asignar_plan(
+    org_id: str,
+    data: AsignarPlan,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "planes")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        return send_error("Cuenta no encontrada", code=404)
+
+    if data.plan_id is not None:
+        from app.models.subscription_plan import SubscriptionPlan
+        if not db.query(SubscriptionPlan).filter(SubscriptionPlan.id == data.plan_id).first():
+            return send_error("Plan no encontrado", code=404)
+
+    org.plan_id = data.plan_id
+    db.commit()
+    return send_response(_serializar_cuenta(org, db),
+                         "Plan asignado" if data.plan_id else "Plan retirado")
 
 
 # ── Analíticas ──────────────────────────────────────────────────────────────

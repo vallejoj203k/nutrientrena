@@ -133,6 +133,67 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
      (trasPromover.data.items || []).some(i => i.nombre === `Ejercicio privado ${SUF}`),
      (trasPromover.data.items || []).map(i => i.nombre));
 
+  // ── Crear contenido global SIN salir del panel ───────────────────────────
+  // Antes el botón mandaba al editor del panel de coach. El cliente lo pidió
+  // aquí dentro: mismos campos que la librería y contra los mismos endpoints.
+  await p.click('.fam:has-text("Nutrición")');
+  await p.waitForTimeout(1400);
+  await p.click('.tipo:has-text("Alimentos")');
+  await p.waitForTimeout(1200);
+  await p.click('button:has-text("Nuevo alimento global")');
+  await p.locator('#gNombre').waitFor({ state: 'visible', timeout: 15000 });
+  ck('el alta de alimento se abre dentro del panel', await p.locator('#capaGlobal.on').count() === 1);
+  ck('con los campos de la librería',
+     (await p.textContent('#globalCuerpo')).includes('Grupo de alimentos') &&
+     ['Kcal', 'Prot.', 'Carbs', 'Grasa'].every(t => p.locator(`#globalCuerpo:has-text("${t}")`)),
+     await p.textContent('#globalCuerpo'));
+  ck('y avisa de que nace con ámbito plataforma',
+     (await p.textContent('#globalCuerpo')).includes('sin organización asociada'));
+
+  await p.fill('#gNombre', `Pechuga de pollo ${SUF}`);
+  await p.fill('#gKcal', '165');
+  await p.fill('#gProt', '31');
+  await p.fill('#gCarb', '0');
+  await p.fill('#gGrasa', '4');
+  await p.click('#globalBtn');
+  await p.waitForTimeout(2000);
+
+  const creado = await (await ctx.request.get(
+    `${API}/api/admin/content?tipo=aliments&q=${SUF}`, { headers: H })).json();
+  const fila = (creado.data.items || []).find(i => i.nombre === `Pechuga de pollo ${SUF}`);
+  ck('EL ALIMENTO SE CREA DESDE EL PANEL', !!fila, (creado.data.items || []).map(i => i.nombre));
+  ck('con sus macros', fila && fila.calorias === 165, fila);
+  // Lo que de verdad importa: nace en el catálogo común, no dentro de nadie
+  ck('y NACE CON ÁMBITO PLATAFORMA', fila && fila.organization_id === null, fila);
+
+  // El nombre es obligatorio, como en la librería
+  await p.click('button:has-text("Nuevo alimento global")');
+  await p.locator('#gNombre').waitFor({ state: 'visible', timeout: 15000 });
+  await p.click('#globalBtn');
+  await p.waitForTimeout(800);
+  ck('sin nombre no deja guardar',
+     (await p.textContent('#globalError')).includes('obligatorio'), await p.textContent('#globalError'));
+  await p.click('#capaGlobal .btn.ghost');
+  await p.waitForTimeout(400);
+
+  // Y el lápiz de la fila edita ese mismo contenido, no manda a otra pantalla
+  await p.fill('#qg', `Pechuga de pollo ${SUF}`);
+  await p.waitForTimeout(1200);
+  await p.click('#contenido tbody tr:has-text("Pechuga de pollo") .icono-btn');
+  await p.locator('#gNombre').waitFor({ state: 'visible', timeout: 15000 });
+  ck('el lápiz edita en el propio panel',
+     (await p.inputValue('#gNombre')) === `Pechuga de pollo ${SUF}`, await p.inputValue('#gNombre'));
+  await p.fill('#gKcal', '170');
+  await p.click('#globalBtn');
+  await p.waitForTimeout(2000);
+  const editado = await (await ctx.request.get(
+    `${API}/api/admin/content?tipo=aliments&q=${SUF}`, { headers: H })).json();
+  ck('y la edición se guarda',
+     (editado.data.items || [])[0]?.calorias === 170, (editado.data.items || [])[0]);
+
+  await p.click('.fam:has-text("Entrenamiento")');
+  await p.waitForTimeout(1200);
+
   // Catálogos sin dueño: se crean y se renombran aquí, y en ningún otro sitio
   await p.click('.fam:has-text("Entrenamiento")');
   await p.waitForTimeout(1200);

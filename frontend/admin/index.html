@@ -419,7 +419,9 @@
       <div class="campo"><label>Nombre y apellidos</label><input id="miemNombre" placeholder="Lucía Prats"></div>
       <div class="campo"><label>Correo</label><input id="miemEmail" type="email" placeholder="lucia@alzum.io"></div>
       <div class="campo"><label>Rol</label><select id="miemRol"></select></div>
-      <div class="campo"><label>Contraseña</label><input id="miemClave" type="text" placeholder="Mínimo 6 caracteres"></div>
+      <div class="campo"><label>Contraseña</label>
+        <input id="miemClave" type="text" placeholder="Déjalo vacío y la pone él mismo">
+        <p style="font-size:11.5px;color:#9CA3AF;margin-top:5px;">Vacío es lo recomendable: le llega un correo con un enlace para ponerla. Así nadie más conoce la contraseña de esa cuenta.</p></div>
       <div class="aviso">Si el correo ya existe en la plataforma —por ejemplo, alguien que además es coach— se le añade el rol interno en vez de crear una cuenta nueva; la contraseña se ignora.</div>
     </div>
     <div class="pie">
@@ -1641,6 +1643,12 @@ async function guardarMiembro(){
     if (!r.ok) { err.textContent = j.message || 'No se pudo invitar.'; return; }
     cerrarMiembro();
     cargarEquipo();
+    // Si el correo no salió, hay que decirlo: si no, esa persona espera un
+    // mensaje que nunca llegó y su cuenta tiene una contraseña que no conoce
+    // nadie.
+    if (j.data && j.data.invitacion_enviada === false) {
+      alert('La cuenta se ha creado, pero el correo no salió.\n\nDile que entre en la pantalla de acceso y pulse «He olvidado mi contraseña» con ' + (j.data.email || 'su correo') + ' para ponérsela.');
+    }
   } finally { btn.disabled = false; }
 }
 

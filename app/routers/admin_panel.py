@@ -1315,6 +1315,9 @@ class NuevoMiembro(BaseModel):
     name: str
     email: str
     role_id: int
+    # Opcional a propósito. Sin contraseña, se le manda un correo para que la
+    # ponga él: quien invita no tiene por qué conocer la contraseña de otro, y
+    # menos la de un super-admin.
     password: Optional[str] = None
 
 
@@ -1406,7 +1409,14 @@ def invitar_miembro(
                              "Añadido al equipo")
 
     clave = (data.password or "").strip()
-    if len(clave) < 6:
+    por_correo = not clave
+    if por_correo:
+        # Una clave larga y aleatoria que NADIE ve. No se deja el campo vacío
+        # ni se pone una por defecto: una cuenta de super-admin con contraseña
+        # conocida o adivinable es peor que no tener la cuenta.
+        import secrets
+        clave = secrets.token_urlsafe(32)
+    elif len(clave) < 6:
         return send_error("La contraseña debe tener al menos 6 caracteres", code=400)
 
     u = User(name=nombre, email=correo, password=hash_password(clave))
@@ -1416,8 +1426,32 @@ def invitar_miembro(
     db.add(UserDetail(id=str(uuid.uuid4()), user_id=u.id, name=nombre))
     db.commit()
     db.refresh(u)
-    return send_response(_serializar_miembro(u, data.role_id, db, current_user.id),
-                         "Miembro invitado")
+
+    enviado = None
+    if por_correo:
+        # Se reutiliza el correo de recuperación que ya existe: es exactamente
+        # el mismo trámite —poner una contraseña con un enlace de un solo uso—
+        # y un segundo circuito de correos sería otro sitio donde equivocarse.
+        from app.core.email import send_recover_password_email
+        from app.core.security import create_access_token
+        try:
+            enviado = bool(send_recover_password_email(
+                to=u.email, name=nombre,
+                token=create_access_token({"sub": str(u.id), "purpose": "reset"})))
+        except Exception:
+            enviado = False
+
+    fila = _serializar_miembro(u, data.role_id, db, current_user.id)
+    # Se dice si el correo salió DE VERDAD. Dar por hecho que sí dejaría a
+    # alguien esperando un mensaje que nunca llegó, con una cuenta cuya
+    # contraseña no conoce nadie.
+    fila["invitacion_enviada"] = enviado
+    return send_response(
+        fila,
+        "Miembro invitado: le hemos enviado un correo para que ponga su contraseña"
+        if enviado else
+        ("Miembro creado, pero el correo no salió. Dile que use «He olvidado mi contraseña» "
+         "en la pantalla de acceso." if por_correo else "Miembro invitado"))
 
 
 @router.put("/team/{user_id}/role", summary="Cambiar el rol de un miembro")

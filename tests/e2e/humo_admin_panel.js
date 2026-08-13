@@ -284,6 +284,30 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.locator('.rol-tarj').first().waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
   ck('tras entrar pasa a activo', (await p.textContent('#contenido')).includes('Justo ahora'));
 
+  // ── Invitar SIN saber su contraseña ──────────────────────────────────────
+  // Quien invita no tiene por qué conocer la contraseña de otro, y menos la de
+  // un super-admin. Dejando el campo vacío se le manda un correo para que la
+  // ponga él.
+  await p.click('button:has-text("+ Invitar miembro")');
+  await p.waitForTimeout(500);
+  ck('el formulario dice que se puede dejar vacía',
+     (await p.getAttribute('#miemClave', 'placeholder')).includes('la pone él'));
+  await p.fill('#miemNombre', 'Sin Clave');
+  await p.fill('#miemEmail', `sinclave.${SUF}@alzum.io`);
+  await p.selectOption('#miemRol', '1');
+  await p.click('#miemBtn');
+  await p.waitForTimeout(2000);
+  ck('el super-admin invitado aparece',
+     (await p.textContent('#contenido')).includes(`sinclave.${SUF}@alzum.io`),
+     (await p.textContent('#contenido')).slice(0, 200));
+
+  // LO IMPORTANTE: esa cuenta no se abre con nada adivinable
+  for (const intento of ['', '123456', 'password', 'Alzum123!', `sinclave.${SUF}@alzum.io`]) {
+    const r = await ctx.request.post(`${API}/api/auth/login`,
+      { data: { email: `sinclave.${SUF}@alzum.io`, password: intento }, failOnStatusCode: false });
+    ck(`no se entra con «${intento || '(vacío)'}»`, r.status() === 401, r.status());
+  }
+
   // Lo que no puede pasar nunca: quedarse sin super-admin
   const yo = ((await (await ctx.request.get(`${API}/api/admin/team`, { headers: H })).json())
     .data.miembros || []).find(m => m.soy_yo);

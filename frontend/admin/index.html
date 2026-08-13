@@ -247,6 +247,31 @@
   .sw input:disabled{cursor:not-allowed;}
   .sw input:disabled + i{opacity:.45;}
 
+  /* Planes */
+  .planes{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:18px;align-items:start;}
+  .plan{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:22px;display:flex;flex-direction:column;}
+  .plan.destacado{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo);}
+  .plan .ph{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .plan .ph b{font-size:16px;}
+  .plan .ph .badge{margin-left:auto;}
+  .plan .precio{font-size:27px;font-weight:700;line-height:1.1;}
+  .plan .precio span{font-size:13px;font-weight:600;color:#9CA3AF;}
+  .plan .anual{font-size:12px;color:#9CA3AF;margin-top:5px;line-height:1.45;}
+  .plan .limites{font-size:12.5px;color:#4B5563;margin-top:16px;line-height:1.9;}
+  .plan .limites b{color:#111827;}
+  .plan .feats{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:7px;}
+  .plan .feats li{display:flex;gap:8px;font-size:12.5px;color:#4B5563;line-height:1.45;}
+  .plan .feats li svg{flex:none;margin-top:2px;color:#22C55E;}
+  .plan .pie2{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:16px;
+              border-top:1px solid #F1F2F6;}
+  .plan .pie2 .n{font-size:12px;color:#9CA3AF;flex:1;white-space:nowrap;}
+  .plan .pie2 .btn{padding:7px 12px;}
+  .plan .feats{margin-bottom:16px;}
+  .b-oculto{background:#F1F5F9;color:#64748B;}
+  .modal .fila2 .campo{margin-bottom:0;}
+  .marca{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;}
+  .marca input{width:16px;height:16px;margin:0;cursor:pointer;accent-color:var(--indigo);}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -325,6 +350,43 @@
     <div class="pie">
       <button class="btn ghost" onclick="cerrarFicha()">Cerrar</button>
       <button class="btn" id="fichaEntrar" onclick="entrarComo()">Entrar como esta cuenta</button>
+    </div>
+  </div>
+</div>
+
+<div class="capa" id="capaPlan" onclick="if(event.target===this)cerrarPlan()">
+  <div class="modal">
+    <h2 id="planTitulo">Nuevo plan</h2>
+    <div class="cuerpo">
+      <div class="campo"><label>Nombre</label><input id="pNombre" placeholder="Pro"></div>
+      <div class="fila2">
+        <div class="campo"><label>Precio mensual (€)</label><input id="pMes" type="number" min="0" step="0.01" value="0"></div>
+        <div class="campo"><label>Precio anual (€/mes)</label><input id="pAnual" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+      <div class="fila2">
+        <div class="campo"><label>Ciclo por defecto</label>
+          <select id="pCiclo"><option value="mensual">Mensual</option><option value="anual">Anual</option></select></div>
+        <div class="campo"><label>Máx. clientes activos</label><input id="pClientes" type="number" min="0" value="25"></div>
+      </div>
+      <div class="fila2">
+        <div class="campo"><label>Coaches incluidos</label><input id="pCoaches" type="number" min="0" value="1"></div>
+        <div class="campo"><label>Coach extra (€/mes)</label><input id="pExtra" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+      <div class="fila2">
+        <div class="campo"><label>Almacenamiento</label><input id="pAlmacen" placeholder="50 GB"></div>
+        <div class="campo"><label>Soporte</label><input id="pSoporte" placeholder="Prioritario &lt; 24 h"></div>
+      </div>
+      <div class="campo"><label>Funcionalidades (una por línea)</label>
+        <textarea id="pFeats" class="resp" style="min-height:96px;" placeholder="Check-ins avanzados&#10;Documentos y contratos"></textarea></div>
+      <label class="marca"><input type="checkbox" id="pVisible" checked> Visible en la web de precios</label>
+      <label class="marca"><input type="checkbox" id="pDestacado"> Destacar como recomendado</label>
+      <div class="aviso">Deja el máximo de clientes en 0 para que sea ilimitado. El precio anual en 0 significa que ese plan no tiene descuento por pagar al año.</div>
+    </div>
+    <div class="pie">
+      <button class="btn rojo" id="planBorrar" style="display:none;margin-right:auto;" onclick="borrarPlanActual()">Eliminar</button>
+      <span class="error" id="planError"></span>
+      <button class="btn ghost" onclick="cerrarPlan()">Cancelar</button>
+      <button class="btn" id="planBtn" onclick="guardarPlan()">Guardar plan</button>
     </div>
   </div>
 </div>
@@ -450,7 +512,6 @@ const PENDIENTE = {
   vision:'Los indicadores del negocio: organizaciones activas, coaches, clientes, ingresos recurrentes y altas y bajas del mes.',
   organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
   facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
-  planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
 };
 
 let _secciones = [], _todasMisSecciones = [], _actual = null, _cuentas = [], _totales = {}, _filtro = 'todas', _busca = '';
@@ -490,6 +551,7 @@ async function abrir(id){
   if (id === 'analiticas') return pintarAnaliticas();
   if (id === 'equipo') return pintarEquipo();
   if (id === 'configuracion') return pintarConfig();
+  if (id === 'planes') return pintarPlanes();
   if (id === 'vision') return pintarVision();
   document.getElementById('contenido').innerHTML = enConstruccion(id);
 }
@@ -573,7 +635,7 @@ function htmlCoaches(){
         <tbody>
         ${lista.map(x => `<tr>
           <td><div class="cta-n">${esc(x.name)}</div><div class="cta-s">${esc(x.owner_name || 'Sin dueño')}${x.owner_email ? ' · ' + esc(x.owner_email) : ''}${x.country ? ' · ' + esc(x.country) : ''}</div></td>
-          <td class="vacio">—</td>
+          <td class="${x.plan ? '' : 'vacio'}">${x.plan ? esc(x.plan) : 'Sin plan'}</td>
           <td><span class="badge b-${x.state}">${ESTADOS[x.state] || x.state}</span></td>
           <td class="num">${x.clientes}</td>
           <td class="num vacio">—</td>
@@ -587,7 +649,7 @@ function htmlCoaches(){
         </tbody>
       </table>
     </div>
-    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">Plan y MRR llegarán con la pasarela de pago; hasta entonces se muestran vacíos en vez de con datos de ejemplo.</p>`;
+    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">El plan se elige en la ficha de cada cuenta. El MRR llega con la pasarela de pago: un plan asignado dice lo que la cuenta debería pagar, no lo que ha pagado.</p>`;
 }
 
 function tarjeta(titulo, valor, pie, icono, pendiente){
@@ -985,6 +1047,154 @@ async function borrarCatalogo(id, nombre){
   // error que haya que esconder.
   if (!r.ok) { alert(j.message || 'No se pudo borrar'); return; }
   cargarContenido();
+}
+
+/* ── Planes ───────────────────────────────────────────────────────────────
+   Lo que un coach le paga a Alzum. Ojo con el nombre: en el código ya existe
+   "plan" para otra cosa —el envío de una dieta y una rutina a un cliente—, y
+   las dos se llaman igual en castellano. El subtítulo de la pantalla lo aclara
+   por eso.
+
+   Esto es el CATÁLOGO, no la facturación: definir cuánto cuesta el plan Pro no
+   necesita pasarela de pago; cobrarlo sí. */
+let _planes = [], _totPlanes = {};
+const TICK = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+const eur = n => (Number(n) % 1 === 0 ? Number(n) : Number(n).toFixed(2)) + ' €';
+
+function pintarPlanes(){
+  document.getElementById('subtitulo').textContent =
+    'Lo que un coach paga a Alzum. No confundir con los servicios que el coach vende a sus clientes.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  cargarPlanes();
+}
+
+async function cargarPlanes(){
+  const c = document.getElementById('contenido');
+  if (!_planes.length) c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  try {
+    const r = await fetch(`${API}/admin/plans`, { headers: cab() });
+    if (!r.ok) { c.innerHTML = '<div class="card"><div class="proximo">No se pudieron cargar los planes.</div></div>'; return; }
+    const d = (await r.json()).data || {};
+    _planes = d.planes || []; _totPlanes = d.totales || {};
+    c.innerHTML = htmlPlanes();
+  } catch(e){ c.innerHTML = '<div class="card"><div class="proximo">No se pudieron cargar los planes.</div></div>'; }
+}
+
+function htmlPlanes(){
+  return `
+    <div class="cab"><div class="der"><button class="btn" onclick="abrirPlan('')">+ Nuevo plan</button></div></div>
+    <div class="planes">
+      ${_planes.map(p => `<div class="plan${p.highlighted ? ' destacado' : ''}">
+        <div class="ph">
+          <b>${esc(p.name)}</b>
+          ${p.highlighted ? '<svg width="14" height="14" fill="#4F5BF2" viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .9-5 4.8 1.2 7-6.2-3.3L5.8 21 7 14.2 2 9.4l7-.9z"/></svg>' : ''}
+          <span class="badge b-${p.visible ? 'activa' : 'oculto'}">${p.visible ? 'Activo' : 'Oculto'}</span>
+        </div>
+        <div class="precio">${eur(p.price_month)}<span>/mes</span></div>
+        <div class="anual">${p.price_year_month != null
+          ? `${eur(p.price_year_month)}/mes pagando anual${p.descuento_anual ? ` (−${p.descuento_anual}%)` : ''}`
+          : 'Sin descuento anual'}</div>
+        <div class="limites">
+          Hasta <b>${p.max_clients ? p.max_clients : 'ilimitados'}</b> clientes activos<br>
+          Hasta <b>${p.coaches_included}</b> coach(es)${p.extra_coach_price ? ` (+${eur(p.extra_coach_price)}/coach extra)` : ''}<br>
+          ${p.storage ? `Almacenamiento: <b>${esc(p.storage)}</b><br>` : ''}
+          ${p.support ? `Soporte: <b>${esc(p.support)}</b>` : ''}
+        </div>
+        ${p.features.length ? `<ul class="feats">${p.features.map(f => `<li>${TICK}<span>${esc(f)}</span></li>`).join('')}</ul>` : ''}
+        <div class="pie2">
+          <span class="n">${p.cuentas} cuenta${p.cuentas === 1 ? '' : 's'}</span>
+          <button class="btn ghost" onclick="abrirPlan(${p.id})">Editar</button>
+          <button class="btn ghost" onclick="visibilidadPlan(${p.id}, ${p.visible ? 'false' : 'true'})">${p.visible ? 'Ocultar' : 'Mostrar'}</button>
+        </div>
+      </div>`).join('') || `<div class="card" style="grid-column:1/-1;"><div class="proximo">
+          <b>Todavía no hay planes</b><p>Un plan es lo que un coach le paga a Alzum: su precio, sus límites y lo que incluye. Crea el primero con «+ Nuevo plan».</p></div></div>`}
+    </div>
+    ${_totPlanes.cuentas_sin_plan ? `<p style="font-size:12px;color:#9CA3AF;margin-top:16px;">
+      ${_totPlanes.cuentas_sin_plan} cuenta(s) todavía sin plan asignado. El plan de cada una se elige en su ficha, dentro de Coaches.</p>` : ''}
+    <p style="font-size:12px;color:#9CA3AF;margin-top:8px;">
+      Asignar un plan dice lo que una cuenta <b>debería</b> pagar, no lo que ha pagado: el cobro y el MRR real llegan con la pasarela.
+    </p>`;
+}
+
+let _planId = null;
+function abrirPlan(id){
+  const p = _planes.find(x => x.id === id);
+  _planId = id || null;
+  document.getElementById('planTitulo').textContent = _planId ? 'Editar plan' : 'Nuevo plan';
+  const v = (campo, valor) => { document.getElementById(campo).value = valor; };
+  v('pNombre', p ? p.name : '');
+  v('pMes', p ? p.price_month : 0);
+  v('pAnual', p && p.price_year_month != null ? p.price_year_month : 0);
+  v('pCiclo', p ? p.default_cycle : 'mensual');
+  v('pClientes', p ? p.max_clients : 25);
+  v('pCoaches', p ? p.coaches_included : 1);
+  v('pExtra', p && p.extra_coach_price != null ? p.extra_coach_price : 0);
+  v('pAlmacen', p ? (p.storage || '') : '');
+  v('pSoporte', p ? (p.support || '') : '');
+  v('pFeats', p ? p.features.join('\n') : '');
+  document.getElementById('pVisible').checked = p ? p.visible : true;
+  document.getElementById('pDestacado').checked = p ? p.highlighted : false;
+  document.getElementById('planError').textContent = '';
+  // Eliminar solo aparece si el plan existe y nadie lo tiene contratado: con
+  // cuentas dentro el backend se niega, y ofrecer el botón sería ofrecer un
+  // error.
+  document.getElementById('planBorrar').style.display = (p && !p.cuentas) ? '' : 'none';
+  document.getElementById('capaPlan').classList.add('on');
+  setTimeout(() => document.getElementById('pNombre').focus(), 50);
+}
+function cerrarPlan(){ document.getElementById('capaPlan').classList.remove('on'); }
+
+async function guardarPlan(){
+  const err = document.getElementById('planError');
+  const num = id => { const v = document.getElementById(id).value; return v === '' ? null : Number(v); };
+  const cuerpo = {
+    name: document.getElementById('pNombre').value.trim(),
+    price_month: num('pMes') || 0,
+    // Cero en el precio anual significa "sin descuento anual", no "gratis al
+    // año": se manda null para que la tarjeta lo diga en vez de anunciar 0 €.
+    price_year_month: num('pAnual') || null,
+    default_cycle: document.getElementById('pCiclo').value,
+    max_clients: num('pClientes') || 0,
+    coaches_included: num('pCoaches') || 0,
+    extra_coach_price: num('pExtra') || null,
+    storage: document.getElementById('pAlmacen').value.trim(),
+    support: document.getElementById('pSoporte').value.trim(),
+    features: document.getElementById('pFeats').value,
+    visible: document.getElementById('pVisible').checked,
+    highlighted: document.getElementById('pDestacado').checked,
+  };
+  if (!cuerpo.name) { err.textContent = 'El plan necesita un nombre.'; return; }
+
+  const btn = document.getElementById('planBtn'); btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/admin/plans${_planId ? '/' + _planId : ''}`,
+      { method: _planId ? 'PUT' : 'POST', headers: cab(), body: JSON.stringify(cuerpo) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { err.textContent = j.message || 'No se pudo guardar.'; return; }
+    cerrarPlan();
+    cargarPlanes();
+  } finally { btn.disabled = false; }
+}
+
+async function visibilidadPlan(id, visible){
+  const r = await fetch(`${API}/admin/plans/${id}/visibility`,
+    { method:'PUT', headers: cab(), body: JSON.stringify({ visible }) });
+  if (!r.ok) { alert('No se pudo cambiar'); return; }
+  cargarPlanes();
+}
+
+async function borrarPlanActual(){
+  const p = _planes.find(x => x.id === _planId);
+  if (!p) return;
+  if (!confirm(`¿Eliminar el plan «${p.name}»?\n\nSi solo quieres retirarlo de la web de precios, usa «Ocultar».`)) return;
+  const r = await fetch(`${API}/admin/plans/${p.id}`, { method:'DELETE', headers: cab() });
+  const j = await r.json().catch(()=>({}));
+  // El backend se niega si hay cuentas dentro: ocultar y borrar no son lo
+  // mismo, y esa distinción es la respuesta útil.
+  if (!r.ok) { document.getElementById('planError').textContent = j.message || 'No se pudo eliminar'; return; }
+  cerrarPlan();
+  cargarPlanes();
 }
 
 /* ── Configuración ────────────────────────────────────────────────────────
@@ -1552,6 +1762,14 @@ async function borrarComunicado(id, titulo){
    El historial de facturación que pide el documento llegará con la pasarela. */
 let _ficha = null, _esSuper = false;
 async function verFicha(id){
+  // Los planes hacen falta para el desplegable de la ficha. Se piden aquí y no
+  // al abrir la sección porque a Coaches se puede llegar sin pasar por Planes.
+  if (!_planes.length) {
+    try {
+      const rp = await fetch(`${API}/admin/plans`, { headers: cab() });
+      if (rp.ok) _planes = ((await rp.json()).data || {}).planes || [];
+    } catch(e) {}
+  }
   const r = await fetch(`${API}/admin/organizations/${id}`, { headers: cab() });
   if (!r.ok) return alert('No se pudo cargar la ficha');
   const d = (await r.json()).data || {};
@@ -1565,6 +1783,15 @@ async function verFicha(id){
     <div class="fila2">
       <div><div class="kpi-t">País</div><div>${esc(d.country || '—')}</div></div>
       <div><div class="kpi-t">Alta</div><div>${d.created_at ? new Date(d.created_at).toLocaleDateString('es-ES') : '—'}</div></div>
+    </div>
+    ${d.trial_ends_at ? `<div><div class="kpi-t">Fin de la prueba</div>
+      <div>${new Date(d.trial_ends_at).toLocaleDateString('es-ES')} · ${haceCuanto(d.trial_ends_at)}</div></div>` : ''}
+    <div><div class="kpi-t">Plan contratado</div>
+      <select class="sel-cuenta" style="width:100%;margin-top:5px;" onchange="asignarPlan('${d.id}', this.value)">
+        <option value="">Sin plan</option>
+        ${_planes.map(p => `<option value="${p.id}"${p.id===d.plan_id?' selected':''}>${esc(p.name)} · ${eur(p.price_month)}/mes</option>`).join('')}
+      </select>
+      <div class="cta-s" style="margin-top:6px;">Dice lo que esta cuenta debería pagar. El cobro llega con la pasarela.</div>
     </div>
     <div>
       <div class="kpi-t">Equipo (${(d.equipo||[]).length})</div>
@@ -1582,6 +1809,16 @@ async function verFicha(id){
   document.getElementById('capaFicha').classList.add('on');
 }
 function cerrarFicha(){ document.getElementById('capaFicha').classList.remove('on'); }
+
+async function asignarPlan(orgId, planId){
+  const r = await fetch(`${API}/admin/organizations/${orgId}/plan`,
+    { method:'PUT', headers: cab(), body: JSON.stringify({ plan_id: planId ? Number(planId) : null }) });
+  if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo asignar el plan'); return; }
+  // El listado de detrás lleva la columna Plan: si no se refresca, la ficha y
+  // la tabla dicen cosas distintas.
+  await cargarCuentas();
+  if (_actual === 'organizaciones') document.getElementById('contenido').innerHTML = htmlCoaches();
+}
 
 /* "Entrar como": el mismo segundo sombrero que ya existía por cabecera, pero
    a un clic. Sirve para dar soporte — ver lo que ve el coach que escribe

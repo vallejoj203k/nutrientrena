@@ -1341,6 +1341,29 @@ def _serializar_miembro(u: User, rol_id: int, db: Session, yo: int) -> dict:
     }
 
 
+# Alfabeto sin caracteres que se confunden al dictarlos: nada de O/0, I/1, S/5.
+_ALFABETO_CODIGO = "ABCDEFGHJKLMNPQRTUVWXY2346789"
+DIAS_INVITACION = 7
+
+
+def _generar_codigo(u: User, db: Session) -> str:
+    """Código de un solo uso para reclamar la cuenta desde el login.
+
+    Se devuelve en CLARO una sola vez —quien invita lo pasa por WhatsApp o en
+    persona— y en la base solo queda su hash. Guardarlo en claro para poder
+    volver a enseñarlo convertiría la tabla de usuarios en una lista de llaves.
+    """
+    import secrets
+    from datetime import datetime, timedelta
+
+    codigo = "-".join(
+        "".join(secrets.choice(_ALFABETO_CODIGO) for _ in range(4)) for _ in range(2))
+    u.invite_code_hash = hash_password(codigo)
+    u.invite_expires_at = datetime.utcnow() + timedelta(days=DIAS_INVITACION)
+    db.commit()
+    return codigo
+
+
 def _cuantos_superadmin(db: Session) -> int:
     return db.query(RoleUser).filter(RoleUser.role_id == SUPERADMIN).count()
 
@@ -1427,6 +1450,10 @@ def invitar_miembro(
     db.commit()
     db.refresh(u)
 
+    # El código para reclamar la cuenta desde "Soy invitado". Solo tiene
+    # sentido si no se le ha puesto contraseña a mano.
+    codigo = _generar_codigo(u, db) if por_correo else None
+
     enviado = None
     if por_correo:
         # Se reutiliza el correo de recuperación que ya existe: es exactamente
@@ -1446,12 +1473,48 @@ def invitar_miembro(
     # alguien esperando un mensaje que nunca llegó, con una cuenta cuya
     # contraseña no conoce nadie.
     fila["invitacion_enviada"] = enviado
+    # En claro UNA SOLA VEZ. No se puede volver a consultar: en la base solo
+    # queda su hash. Si se pierde, se genera otro.
+    fila["codigo_invitacion"] = codigo
+    fila["dias_codigo"] = DIAS_INVITACION if codigo else None
     return send_response(
         fila,
-        "Miembro invitado: le hemos enviado un correo para que ponga su contraseña"
-        if enviado else
-        ("Miembro creado, pero el correo no salió. Dile que use «He olvidado mi contraseña» "
-         "en la pantalla de acceso." if por_correo else "Miembro invitado"))
+        "Miembro invitado" if not por_correo else
+        ("Miembro invitado: le hemos enviado un correo, y además puede entrar con el código"
+         if enviado else
+         "Miembro creado. El correo no salió: pásale el código para que entre con «Soy invitado»"))
+
+
+@router.post("/team/{user_id}/invite-code", summary="Generar otro código de invitación")
+def regenerar_codigo(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Para cuando el código se pierde, o caduca antes de que lo usen.
+
+    Solo para quien todavía no ha entrado nunca: a quien ya tiene su
+    contraseña no se le regala una vía alternativa de entrar.
+    """
+    motivo = _exige_seccion(current_user, db, "equipo")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    fila = db.query(RoleUser).filter(
+        RoleUser.user_id == user_id, RoleUser.role_id.in_(ROLES_EQUIPO_IDS)).first()
+    if not fila:
+        return send_error("Esa persona no está en el equipo", code=404)
+
+    u = db.query(User).filter(User.id == user_id).first()
+    if not u:
+        return send_error("Usuario no encontrado", code=404)
+    if u.last_login_at is not None:
+        return send_error(
+            "Esa persona ya entró y tiene su contraseña. Si la ha perdido, que use "
+            "«He olvidado mi contraseña».", code=400)
+
+    return send_response({"codigo_invitacion": _generar_codigo(u, db),
+                          "dias_codigo": DIAS_INVITACION}, "Código nuevo generado")
 
 
 @router.put("/team/{user_id}/role", summary="Cambiar el rol de un miembro")

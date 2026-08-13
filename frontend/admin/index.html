@@ -224,6 +224,12 @@
            font:inherit;font-size:12.5px;color:#374151;outline:none;cursor:pointer;min-width:170px;}
   .sel-rol:focus{border-color:var(--indigo);}
   .sel-rol:disabled{background:#F8F9FB;color:#9CA3AF;cursor:not-allowed;}
+  /* El código de invitación: se enseña UNA vez, así que tiene que verse y
+     poder copiarse sin pelearse con él. */
+  .codigo{display:flex;align-items:center;gap:12px;background:#EEF2FF;border:1px solid #DDE2FE;
+          border-radius:11px;padding:14px 16px;margin-top:4px;}
+  .codigo b{font-size:20px;letter-spacing:2px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#312E81;}
+  .codigo .btn{margin-left:auto;}
 
   /* Configuración */
   .cfg2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
@@ -409,6 +415,26 @@
       <button class="btn ghost" onclick="cerrarPlan()">Cancelar</button>
       <button class="btn" id="planBtn" onclick="guardarPlan()">Guardar plan</button>
     </div>
+  </div>
+</div>
+
+<div class="capa" id="capaCodigo" onclick="if(event.target===this)cerrarCodigo()">
+  <div class="modal" style="width:460px;">
+    <h2>Código de invitación</h2>
+    <div class="cuerpo">
+      <p style="font-size:13px;line-height:1.6;">Pásale este código a <b id="codNombre"></b> por donde quieras
+        —WhatsApp, en persona—. Con él entra en la pantalla de acceso, pulsa <b>«Soy invitado»</b>
+        y crea su propia contraseña.</p>
+      <div class="codigo">
+        <b id="codValor"></b>
+        <button class="btn ghost" id="codCopiar" onclick="copiarCodigo()">Copiar</button>
+      </div>
+      <div class="aviso">Solo se enseña <b>ahora</b>: en la base de datos queda cifrado y no se puede volver a
+        consultar. Caduca en <b id="codDias">7</b> días. Si se pierde, genera otro desde su fila.</div>
+      <p id="codCorreo" style="font-size:12.5px;color:#9CA3AF;">También le hemos enviado un correo con un enlace;
+        le vale cualquiera de las dos vías.</p>
+    </div>
+    <div class="pie"><button class="btn" onclick="cerrarCodigo()">Entendido</button></div>
   </div>
 </div>
 
@@ -1575,6 +1601,9 @@ function htmlEquipo(){
           <td><span class="badge b-${m.state === 'activo' ? 'activo2' : 'invitado'}">${m.state}</span></td>
           <td class="${m.last_login_at ? '' : 'vacio'}">${m.last_login_at ? haceCuanto(m.last_login_at) : 'Nunca ha entrado'}</td>
           <td class="num" style="white-space:nowrap;">
+            ${m.state === 'invitado'
+              ? `<button class="btn ghost" title="Genera otro código si el anterior se perdió o caducó"
+                    onclick="otroCodigo(${m.user_id},'${esc(m.name)}')">Código</button>` : ''}
             ${m.soy_yo || bloqueado ? ''
               : `<button class="icono-btn rojo" title="Sacar del equipo" onclick="sacarDelEquipo(${m.user_id},'${esc(m.name)}')">${PAPELERA}</button>`}
           </td>
@@ -1605,6 +1634,31 @@ async function cambiarRol(userId, roleId, nombre){
   const yo = _equipo.find(m => m.user_id === userId);
   cargarEquipo();
   if (yo && yo.soy_yo) location.reload();
+}
+
+/* El código se enseña una sola vez y se copia. No se guarda en claro en
+   ningún sitio: si se pierde, se genera otro desde la fila del miembro. */
+function mostrarCodigo(codigo, dias, nombre, correoEnviado){
+  document.getElementById('codNombre').textContent = nombre || 'esa persona';
+  document.getElementById('codValor').textContent = codigo;
+  document.getElementById('codDias').textContent = dias || 7;
+  document.getElementById('codCorreo').style.display = correoEnviado ? '' : 'none';
+  document.getElementById('capaCodigo').classList.add('on');
+}
+function cerrarCodigo(){ document.getElementById('capaCodigo').classList.remove('on'); }
+
+async function copiarCodigo(){
+  const t = document.getElementById('codValor').textContent;
+  try { await navigator.clipboard.writeText(t); } catch(e) {}
+  const b = document.getElementById('codCopiar');
+  b.textContent = 'Copiado'; setTimeout(() => { b.textContent = 'Copiar'; }, 1800);
+}
+
+async function otroCodigo(userId, nombre){
+  const r = await fetch(`${API}/admin/team/${userId}/invite-code`, { method:'POST', headers: cab() });
+  const j = await r.json().catch(()=>({}));
+  if (!r.ok) { alert(j.message || 'No se pudo generar el código'); return; }
+  mostrarCodigo(j.data.codigo_invitacion, j.data.dias_codigo, nombre, false);
 }
 
 async function sacarDelEquipo(userId, nombre){
@@ -1643,6 +1697,13 @@ async function guardarMiembro(){
     if (!r.ok) { err.textContent = j.message || 'No se pudo invitar.'; return; }
     cerrarMiembro();
     cargarEquipo();
+    // El código solo se puede enseñar AHORA: en la base queda hasheado, así
+    // que no hay forma de volver a consultarlo.
+    if (j.data && j.data.codigo_invitacion) {
+      mostrarCodigo(j.data.codigo_invitacion, j.data.dias_codigo,
+                    cuerpo.name, j.data.invitacion_enviada);
+      return;
+    }
     // Si el correo no salió, hay que decirlo: si no, esa persona espera un
     // mensaje que nunca llegó y su cuenta tiene una contraseña que no conoce
     // nadie.

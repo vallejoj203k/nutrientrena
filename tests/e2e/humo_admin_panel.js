@@ -297,6 +297,15 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.selectOption('#miemRol', '1');
   await p.click('#miemBtn');
   await p.waitForTimeout(2000);
+  // Invitar sin contraseña abre el modal del código: hay que cerrarlo o tapa
+  // todo lo que viene después.
+  ck('se le da un código para entrar por «Soy invitado»',
+     await p.locator('#capaCodigo.on').count() === 1);
+  ck('con el formato que se puede dictar sin confundirse',
+     /^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test((await p.textContent('#codValor')).trim()),
+     await p.textContent('#codValor'));
+  await p.click('#capaCodigo button:has-text("Entendido")');
+  await p.locator('#capaCodigo.on').waitFor({ state: 'hidden', timeout: 10000 });
   ck('el super-admin invitado aparece',
      (await p.textContent('#contenido')).includes(`sinclave.${SUF}@alzum.io`),
      (await p.textContent('#contenido')).slice(0, 200));

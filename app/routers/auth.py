@@ -9,7 +9,7 @@ from app.core.responses import send_response, send_error
 from app.core.email import send_recover_password_email
 from app.models.user import User, UserDetail, RoleUser
 from app.models.menu import Menu, MenuRole
-from app.schemas.auth import LoginRequest, RefreshTokenRequest, RecoverPasswordRequest, ResetPasswordRequest, MenuOut
+from app.schemas.auth import AceptarInvitacionRequest, LoginRequest, RefreshTokenRequest, RecoverPasswordRequest, ResetPasswordRequest, MenuOut
 from app.schemas.user import UserDetailOut
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -120,6 +120,53 @@ def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
     user.password = hash_password(data.password)
     db.commit()
     return send_response(None, "Contraseña actualizada correctamente")
+
+
+@router.post("/accept-invitation", summary="Reclamar una cuenta invitada",
+             description="Quien ha sido invitado pone su correo, el código que le dieron y crea su contraseña.")
+@limiter.limit("5/minute")
+def accept_invitation(request: Request, data: AceptarInvitacionRequest, db: Session = Depends(get_db)):
+    """El flujo "Soy invitado" de la pantalla de acceso.
+
+    Hace falta el código además del correo. Con solo el correo, cualquiera que
+    lo conozca —o lo adivine— podría reclamar la cuenta antes que su dueño, y
+    aquí se reparten cuentas de super-admin.
+
+    Todos los caminos que fallan responden LO MISMO. Distinguir "ese correo no
+    existe" de "el código no es ese" convertiría esto en una forma de averiguar
+    qué correos hay dados de alta, y de saber cuáles están pendientes de
+    reclamar, que es justo lo que interesa a quien quiera colarse.
+    """
+    from datetime import datetime
+
+    generico = "La invitación no es válida, ha caducado o ya se usó"
+
+    if len(data.password or "") < 6:
+        return send_error("La contraseña debe tener al menos 6 caracteres", code=400)
+
+    user = db.query(User).filter(User.email == data.email.lower().strip()).first()
+    if not user or not user.invite_code_hash:
+        return send_error(generico, code=400)
+
+    # Quien ya ha entrado alguna vez no está "pendiente de reclamar": tiene su
+    # contraseña y, si la perdió, el camino es la recuperación de siempre.
+    if user.last_login_at is not None:
+        return send_error(generico, code=400)
+
+    if user.invite_expires_at and user.invite_expires_at < datetime.utcnow():
+        return send_error(generico, code=400)
+
+    if not verify_password((data.code or "").strip().upper(), user.invite_code_hash):
+        return send_error(generico, code=400)
+
+    user.password = hash_password(data.password)
+    # El código se quema aquí: es de un solo uso. Si no, el mismo papelito
+    # serviría para volver a cambiarle la contraseña más adelante.
+    user.invite_code_hash = None
+    user.invite_expires_at = None
+    db.commit()
+
+    return send_response(None, "Contraseña creada. Ya puedes entrar.")
 
 
 @router.get("/me", summary="Perfil del usuario autenticado", description="Retorna el perfil completo y roles del usuario autenticado.")

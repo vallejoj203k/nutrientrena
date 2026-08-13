@@ -379,7 +379,8 @@ def test_tras_poner_su_contrasena_entra_y_manda(client, seed, admin_headers, mon
 
 def test_si_el_correo_no_sale_se_dice(client, seed, admin_headers, monkeypatch):
     """Dar por hecho que salió dejaría a alguien esperando un mensaje que nunca
-    llegó, con una cuenta cuya contraseña no conoce nadie."""
+    llegó. Ahora hay salida: el código de «Soy invitado» no depende del correo,
+    así que el mensaje apunta ahí en vez de a la recuperación."""
     import app.core.email as correo
     monkeypatch.setattr(correo, "send_recover_password_email",
                         lambda **k: (_ for _ in ()).throw(RuntimeError("sin proveedor")))
@@ -388,7 +389,9 @@ def test_si_el_correo_no_sale_se_dice(client, seed, admin_headers, monkeypatch):
         "name": "Correo Caído", "email": "correo.caido@nutrientrena-qa.com", "role_id": SOPORTE})
     assert r.status_code == 200, r.text
     assert r.json()["data"]["invitacion_enviada"] is False
-    assert "olvidado mi contraseña" in r.json()["message"].lower()
+    # Y hay una vía que NO depende del correo: el código va en la respuesta
+    assert r.json()["data"]["codigo_invitacion"]
+    assert "soy invitado" in r.json()["message"].lower()
 
 
 def test_si_se_pone_contrasena_a_mano_sigue_valiendo(client, seed, admin_headers):

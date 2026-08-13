@@ -30,6 +30,12 @@ class User(Base):
     # distinguir a quien está invitado y todavía no ha entrado de quien ya
     # trabaja, y poder decir "última actividad" sin inventarla.
     last_login_at = Column(DateTime, nullable=True)
+    # Invitación al equipo: el código que se le pasa por fuera (WhatsApp, en
+    # persona) para que pueda reclamar su cuenta desde el login. Se guarda
+    # HASHEADO, como una contraseña: si alguien leyera la base de datos, un
+    # código en claro sería una invitación abierta a colarse.
+    invite_code_hash = Column(String(255), nullable=True)
+    invite_expires_at = Column(DateTime, nullable=True)
 
     detail = relationship("UserDetail", back_populates="user", uselist=False,
                           foreign_keys="UserDetail.user_id")

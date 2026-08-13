@@ -98,12 +98,19 @@ def test_no_se_filtran_medidas_ni_fotos_ni_patologias(client, seed, admin_header
         db.close()
 
     fila = _fila(_listar(client, admin_headers), cid)
+
+    # La comprobación de verdad: el conjunto EXACTO de campos. Si alguien añade
+    # uno al serializador, esta línea salta aunque no esté en la lista de
+    # abajo.
     permitidas = {"user_detail_id", "name", "email", "coach_name", "organization_id",
                   "organization_name", "state", "created_at", "last_activity"}
     assert set(fila) == permitidas, set(fila) - permitidas
-    plano = str(fila)
-    for filtrado in ["82.5", "178", "19.0", "foto.jpg", "frutos secos", "hombro"]:
-        assert filtrado not in plano, (filtrado, plano)
+
+    # Y ninguno de los valores íntimos viaja. Se comparan VALORES, no la
+    # cadena entera: buscar "178" dentro del dict serializado da falsos
+    # positivos en cuanto un uuid o una fecha contengan esos dígitos.
+    intimos = {82.5, 178.0, 19.0, "https://ejemplo/foto.jpg", "frutos secos", "hombro derecho"}
+    assert not (set(fila.values()) & intimos), set(fila.values()) & intimos
 
 
 def test_no_hay_forma_de_editar_al_cliente_desde_el_panel(client, seed, admin_headers):

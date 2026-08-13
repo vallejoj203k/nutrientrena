@@ -21,6 +21,13 @@ class ResetPasswordRequest(BaseModel):
     password: str
 
 
+class AceptarInvitacionRequest(BaseModel):
+    """Reclamar una cuenta invitada desde la pantalla de acceso."""
+    email: EmailStr
+    code: str
+    password: str
+
+
 class MenuOut(BaseModel):
     menuId: int
     name: str

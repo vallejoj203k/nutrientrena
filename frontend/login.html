@@ -149,6 +149,32 @@
     }
     .forgot a:hover { text-decoration: underline; }
 
+    /* "Soy invitado": quien acaba de ser dado de alta y todavía no tiene
+       contraseña. Va debajo del login, discreto: es un camino de una sola vez
+       y no debe competir con el acceso normal. */
+    .invitado-link {
+      text-align: center;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(148,163,184,.25);
+      font-size: 13px;
+      color: #6B7280;
+    }
+    .invitado-link button {
+      background: none; border: none; padding: 0; cursor: pointer;
+      color: #4F46E5; font: inherit; font-weight: 600;
+    }
+    .invitado-link button:hover { text-decoration: underline; }
+    #invitadoPanel { display: none; margin-top: 16px; }
+    #invitadoPanel .ayuda {
+      font-size: 12.5px; color: #6B7280; line-height: 1.55;
+      background: #F8F9FB; border: 1px solid #E5E7EB;
+      border-radius: 10px; padding: 11px 13px; margin-bottom: 14px;
+    }
+    #invitadoPanel .input-group { margin-bottom: 12px; }
+    #invitadoPanel input { text-transform: none; }
+    #invCodigo { text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+
     /* Error */
     .error-msg {
       background: #FEE2E2;
@@ -237,6 +263,51 @@
 
       <div class="forgot">
         <a href="#" onclick="doRecover(); return false;">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <div class="invitado-link" id="invitadoEnlace">
+        ¿Te han invitado y aún no tienes contraseña?
+        <button type="button" onclick="abrirInvitado()">Soy invitado</button>
+      </div>
+
+      <div id="invitadoPanel">
+        <div class="ayuda">
+          Escribe el correo con el que te invitaron y el <b>código</b> que te pasaron,
+          y crea tu contraseña. Después entrarás con normalidad.
+        </div>
+        <div class="input-group">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input id="invEmail" type="email" placeholder="tu correo" autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input id="invCodigo" type="text" placeholder="código de invitación" autocomplete="off" />
+        </div>
+        <div class="input-group">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input id="invClave" type="password" placeholder="crea tu contraseña" autocomplete="new-password" />
+        </div>
+        <div class="input-group">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <input id="invClave2" type="password" placeholder="repite la contraseña" autocomplete="new-password" />
+        </div>
+        <button class="btn-login" id="invBtn" onclick="crearClaveInvitado()">
+          <span>Crear contraseña y entrar</span>
+        </button>
+        <div class="forgot" style="margin-top:12px;">
+          <a href="#" onclick="cerrarInvitado(); return false;">Volver al acceso normal</a>
+        </div>
       </div>
 
     </div>
@@ -340,9 +411,76 @@
       }
     }
 
-    // Enter para hacer login
+    /* ── "Soy invitado" ─────────────────────────────────────────────────
+       Quien acaba de ser dado de alta pone su correo, el código que le
+       pasaron y crea su contraseña. Después entra como todo el mundo.
+
+       El código hace falta además del correo: sin él, cualquiera que conozca
+       —o adivine— el correo de un invitado podría reclamar la cuenta antes
+       que su dueño, y aquí se reparten cuentas de super-admin. */
+    function abrirInvitado() {
+      document.getElementById('invitadoPanel').style.display = 'block';
+      document.getElementById('invitadoEnlace').style.display = 'none';
+      // Se arrastra lo que ya hubiera escrito arriba: es el mismo correo.
+      const arriba = document.getElementById('emailInput').value.trim();
+      if (arriba) document.getElementById('invEmail').value = arriba;
+      document.getElementById('invEmail').focus();
+    }
+
+    function cerrarInvitado() {
+      document.getElementById('invitadoPanel').style.display = 'none';
+      document.getElementById('invitadoEnlace').style.display = 'block';
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+
+    function invitadoAbierto() {
+      return document.getElementById('invitadoPanel').style.display === 'block';
+    }
+
+    async function crearClaveInvitado() {
+      const email  = document.getElementById('invEmail').value.trim();
+      const code   = document.getElementById('invCodigo').value.trim();
+      const clave  = document.getElementById('invClave').value;
+      const clave2 = document.getElementById('invClave2').value;
+
+      if (!email || !code) { showError('Hacen falta tu correo y el código.'); return; }
+      if (clave.length < 6) { showError('La contraseña debe tener al menos 6 caracteres.'); return; }
+      // Se pide dos veces porque nadie más la conoce: una errata aquí deja la
+      // cuenta bloqueada hasta pedir otro código.
+      if (clave !== clave2) { showError('Las dos contraseñas no coinciden.'); return; }
+
+      const btn = document.getElementById('invBtn');
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API}/api/auth/accept-invitation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code, password: clave }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          showError(data.message || 'No se pudo crear la contraseña.');
+          return;
+        }
+        // Se entra solo: pedirle que la escriba otra vez recién creada es
+        // hacerle repetir lo que acaba de hacer.
+        showSuccess('Contraseña creada. Entrando…');
+        document.getElementById('emailInput').value = email;
+        document.getElementById('passInput').value = clave;
+        cerrarInvitado();
+        doLogin();
+      } catch {
+        showError('No se pudo conectar con el servidor.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Enter: en el panel de invitado envía ESE formulario, no el de acceso.
     document.addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
+      if (e.key !== 'Enter') return;
+      if (invitadoAbierto()) crearClaveInvitado(); else doLogin();
     });
   </script>
 </body>

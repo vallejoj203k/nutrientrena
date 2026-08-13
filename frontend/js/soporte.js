@@ -22,6 +22,10 @@
   if (!token) return;
 
   var CERRADOS = 'comunicados_cerrados';
+  // Nombre y correo de soporte configurables desde el panel de plataforma. Si
+  // la petición falla se usan estos, para no dejar el panel de ayuda sin
+  // título ni a quién escribir.
+  var plataforma = { platform_name: 'Alzum', support_email: null, maintenance_mode: false };
   var esc = function (s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -74,7 +78,12 @@
       '.sop-tk .m{font-size:11.5px;color:#9CA3AF;margin-top:3px;}' +
       '.sop-tk .r{background:#EEF2FF;border-radius:9px;padding:9px 11px;margin-top:8px;line-height:1.5;}' +
       '.sop-tk .r .q{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#6366F1;margin-bottom:3px;}' +
-      '.sop-err{font-size:12.5px;color:#DC2626;flex:1;}';
+      '.sop-err{font-size:12.5px;color:#DC2626;flex:1;}' +
+      '.sop-mant{position:relative;z-index:41;display:flex;gap:11px;align-items:center;' +
+      'background:#B45309;color:#fff;font-size:13px;font-weight:600;padding:11px 16px;}' +
+      '.sop-mant .p{width:8px;height:8px;border-radius:50%;background:#FDE68A;flex:none;}' +
+      '.sop-correo{font-size:11.5px;color:#6B7280;}' +
+      '.sop-correo a{color:#4F46E5;font-weight:600;}';
     document.head.appendChild(s);
   }
 
@@ -191,13 +200,56 @@
       .finally(function () { boton.disabled = false; });
   }
 
+  /* Mantenimiento: el aviso NO es un adorno. Mientras está puesto, la API
+     responde 503 a todo lo que escribe, así que sin este cartel el coach
+     vería fallar cada guardado sin entender por qué. */
+  function pintarMantenimiento() {
+    if (document.getElementById('sopMant')) return;
+    var barra = document.createElement('div');
+    barra.id = 'sopMant';
+    barra.className = 'sop-mant';
+    barra.innerHTML = '<span class="p"></span><span></span>';
+    barra.lastChild.textContent =
+      plataforma.platform_name + ' está en mantenimiento. Puedes consultar tus datos, ' +
+      'pero los cambios no se guardarán hasta que termine.';
+    document.body.insertBefore(barra, document.body.firstChild);
+  }
+
   function arrancar() {
     estilos();
     montarAyuda();
+
+    fetch(API + '/platform/settings', { headers: cab() })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.data) return;
+        plataforma = j.data;
+        var t = document.querySelector('#sopCapa h3');
+        if (t) t.textContent = 'Soporte de ' + plataforma.platform_name;
+        pintarCorreo();
+        if (plataforma.maintenance_mode) pintarMantenimiento();
+      })
+      .catch(function () {});
+
     fetch(API + '/support/announcements', { headers: cab() })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { if (j) pintarAvisos(j.data || []); })
       .catch(function () {});
+  }
+
+  /* El correo de soporte, donde sirve: dentro del panel de ayuda. Un ajuste
+     que solo se ve en la pantalla donde se escribe no le sirve a nadie. */
+  function pintarCorreo() {
+    if (!plataforma.support_email || document.getElementById('sopCorreo')) return;
+    var pie = document.querySelector('#sopCapa .sop-pie');
+    if (!pie) return;
+    var p = document.createElement('span');
+    p.id = 'sopCorreo';
+    p.className = 'sop-correo';
+    p.style.cssText = 'flex:1;';
+    p.innerHTML = 'O escríbenos a <a href="mailto:' + esc(plataforma.support_email) + '">' +
+                  esc(plataforma.support_email) + '</a>';
+    pie.insertBefore(p, pie.firstChild);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancar);

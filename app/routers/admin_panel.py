@@ -161,6 +161,7 @@ def _serializar_cuenta(org: Organization, db: Session) -> dict:
         "coaches": len(_detalles_de_equipo(org.id, db)),
         "clientes": _clientes_de(org.id, db),
         "created_at": org.created_at.isoformat() if org.created_at else None,
+        "trial_ends_at": org.trial_ends_at.isoformat() if org.trial_ends_at else None,
         # Plan e importe dependen de la pasarela de pago, que está fuera de
         # alcance. Se devuelven en null a propósito en vez de inventarlos: la
         # pantalla los enseña como "—" y así no parece que ya funcionen.
@@ -242,6 +243,19 @@ def crear_cuenta(
         db.flush()
 
     slug = f"{data.name.lower().replace(' ', '-')[:40]}-{str(uuid.uuid4())[:8]}"
+
+    # Si nace en prueba, se le calcula el fin con los días configurados en
+    # Configuración. Es lo que convierte ese ajuste en algo que le pasa a
+    # alguien, en vez de un número guardado.
+    fin_prueba = None
+    if data.state == "prueba":
+        from datetime import datetime as _dt, timedelta as _td
+
+        from app.routers.platform_settings import obtener as _ajustes
+        dias = _ajustes(db).trial_days or 0
+        if dias:
+            fin_prueba = _dt.utcnow() + _td(days=dias)
+
     org = Organization(
         id=str(uuid.uuid4()),
         name=data.name.strip(),
@@ -250,6 +264,7 @@ def crear_cuenta(
         country=(data.country or None),
         state=data.state,
         is_active=(data.state != "suspendida"),
+        trial_ends_at=fin_prueba,
     )
     db.add(org)
     db.commit()

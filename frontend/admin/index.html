@@ -269,6 +269,10 @@
   .plan .feats{margin-bottom:16px;}
   .b-oculto{background:#F1F5F9;color:#64748B;}
   .modal .fila2 .campo{margin-bottom:0;}
+  /* Los formularios de contenido global van en rejilla: los macros ocupan
+     media línea cada uno, como en la librería del coach. */
+  .modal .cuerpo.rejilla{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .modal .cuerpo.rejilla .aviso{grid-column:1/-1;}
   .marca{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;}
   .marca input{width:16px;height:16px;margin:0;cursor:pointer;accent-color:var(--indigo);}
 
@@ -445,6 +449,18 @@
       <span class="error" id="comError"></span>
       <button class="btn ghost" onclick="cerrarComunicado()">Cancelar</button>
       <button class="btn" id="comBtn" onclick="guardarComunicado()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="capa" id="capaGlobal" onclick="if(event.target===this)cerrarGlobal()">
+  <div class="modal">
+    <h2 id="globalTitulo">Nuevo contenido global</h2>
+    <div class="cuerpo rejilla" id="globalCuerpo"></div>
+    <div class="pie">
+      <span class="error" id="globalError"></span>
+      <button class="btn ghost" onclick="cerrarGlobal()">Cancelar</button>
+      <button class="btn" id="globalBtn" onclick="guardarGlobal()">Guardar</button>
     </div>
   </div>
 </div>
@@ -906,22 +922,26 @@ function bloquePropuestas(){
   </div>`;
 }
 
+const SINGULAR = { routines:'rutina', trainings:'ejercicio', diets:'dieta', aliments:'alimento' };
+const GENERO = { routines:'Nueva', trainings:'Nuevo', diets:'Nueva', aliments:'Nuevo' };
+
 function botonNuevo(){
   if (_fam === 'organizaciones') return '';
   const cn = (_cont.conteos || {})[_tipo] || {};
-  // Los catálogos sin dueño se crean aquí mismo; el resto, en su editor.
+  // Los catálogos sin dueño se crean con el formulario corto de siempre.
   if (!cn.organizacion) return `<button class="btn" onclick="abrirCatalogo('')">+ Nuevo</button>`;
-  const destino = EDITOR[_tipo];
-  return destino ? `<button class="btn" onclick="irAlEditor()">+ Crear en el editor</button>` : '';
+  const sg = SINGULAR[_tipo];
+  return sg ? `<button class="btn" onclick="abrirGlobal('')">+ ${GENERO[_tipo]} ${sg} global</button>` : '';
 }
 
-/* Se limpia el contexto antes de saltar: si quedara puesto el de una
-   organización, lo que se creara "global" nacería dentro de esa cuenta. */
-function irAlEditor(){
+/* Abrir el editor del panel de coach, sin contexto de organización, para
+   terminar lo que aquí solo se puede empezar: una rutina necesita sus días y
+   una dieta sus comidas, y eso no cabe en un formulario corto. */
+function irAlEditor(id){
   const destino = EDITOR[_tipo];
   if (!destino) return;
   try { localStorage.removeItem('org_context'); localStorage.removeItem('org_context_name'); } catch(e){}
-  location.href = destino;
+  location.href = destino + (id ? (destino.indexOf('?') === -1 ? '?id=' : '&id=') + id : '');
 }
 
 function tablaGlobal(){
@@ -945,7 +965,7 @@ function tablaGlobal(){
 
   const acciones = x => `<td class="num" style="white-space:nowrap;">
       <button class="icono-btn" title="${cn.organizacion ? 'Abrir en el editor' : 'Renombrar'}"
-              onclick="${cn.organizacion ? 'irAlEditor()' : `abrirCatalogo('${x.id}')`}">${LAPIZ}</button>
+              onclick="${cn.organizacion ? `abrirGlobal('${x.id}')` : `abrirCatalogo('${x.id}')`}">${LAPIZ}</button>
       <button class="icono-btn rojo" title="Borrar"
               onclick="${cn.organizacion ? `borrarGlobal('${x.id}','${esc(x.nombre)}')` : `borrarCatalogo('${x.id}','${esc(x.nombre)}')`}">${PAPELERA}</button>
     </td>`;
@@ -1025,6 +1045,173 @@ async function borrarGlobal(id, nombre){
   // Alimentos y rutinas se niegan si están en uso: es la respuesta útil.
   if (!r.ok || j.success === false) { alert(j.message || 'No se pudo borrar'); return; }
   cargarContenido();
+}
+
+/* ── Crear contenido global sin salir del panel ───────────────────────────
+   Antes esto era un botón que te mandaba al editor del panel de coach. Da el
+   rodeo justo cuando el trabajo es repetitivo —meter veinte alimentos a la
+   base común— así que el formulario vive aquí, con los mismos campos que la
+   librería del coach y contra los MISMOS endpoints. No hay un segundo camino
+   de guardado: es el de siempre, llamado sin contexto de organización, que es
+   lo que hace que nazca con ámbito de plataforma.
+
+   Rutinas y dietas se crean aquí y se TERMINAN en el constructor: una rutina
+   sin días y una dieta sin comidas están vacías, y eso no cabe en un
+   formulario corto ni conviene rehacerlo por segunda vez. */
+const CAMPOS_GLOBAL = {
+  aliments: {
+    titulo: 'alimento global',
+    ruta: '/aliments',
+    campos: [
+      { id:'gNombre', label:'Nombre', clave:'name', req:true, ancho:1, ph:'Nombre del contenido' },
+      { id:'gGrupo',  label:'Grupo de alimentos', clave:'group_food_id', tipo:'select', catalogo:'group_foods' },
+      { id:'gCant',   label:'Cantidad de referencia', clave:'quantity', tipo:'numero', valor:100, sufijo:'g' },
+      { id:'gKcal',   label:'Kcal', clave:'calories', tipo:'numero' },
+      { id:'gProt',   label:'Prot.', clave:'proteins', tipo:'numero' },
+      { id:'gCarb',   label:'Carbs', clave:'carbohydrates', tipo:'numero' },
+      { id:'gGrasa',  label:'Grasa', clave:'fats', tipo:'numero' },
+    ],
+  },
+  trainings: {
+    titulo: 'ejercicio global',
+    ruta: '/trainings',
+    campos: [
+      { id:'gNombre', label:'Nombre', clave:'name', req:true, ancho:1, ph:'Sentadilla trasera' },
+      { id:'gMusculo', label:'Grupo muscular', clave:'muscle_group_id', tipo:'select', catalogo:'muscle_groups' },
+      { id:'gMaterial', label:'Material', clave:'material', ph:'Barra, mancuernas…' },
+      { id:'gTipo', label:'Tipo', clave:'exercise_type', tipo:'opciones',
+        opciones:[['','—'],['compound','Compuesto'],['isolation','Aislamiento'],['cardio','Cardio'],['mobility','Movilidad']] },
+      { id:'gLugar', label:'Dónde', clave:'location', tipo:'opciones',
+        opciones:[['','—'],['gym','Gimnasio'],['home','Casa'],['outdoor','Exterior'],['both','Ambos']] },
+      { id:'gVideo', label:'Vídeo (URL)', clave:'video_url', ancho:1, ph:'https://…' },
+    ],
+  },
+  routines: {
+    titulo: 'rutina global',
+    ruta: '/routines',
+    continuar: true,
+    campos: [
+      { id:'gNombre', label:'Nombre', clave:'name', req:true, ancho:1, ph:'Full body 3 días principiante' },
+      { id:'gObjetivo', label:'Objetivo', clave:'objective', ph:'Ganar masa muscular' },
+      { id:'gDias', label:'Días por semana', clave:'days', tipo:'numero' },
+      { id:'gSemanas', label:'Duración (semanas)', clave:'time', tipo:'numero' },
+    ],
+  },
+  diets: {
+    titulo: 'dieta global',
+    ruta: '/diets',
+    continuar: true,
+    campos: [
+      { id:'gNombre', label:'Nombre', clave:'title', req:true, ancho:1, ph:'Volumen 2500 kcal' },
+      { id:'gTipoDieta', label:'Tipo de dieta', clave:'type_id', tipo:'select', catalogo:'type_foods' },
+      { id:'gCalorias', label:'Calorías objetivo', clave:'calories', tipo:'numero' },
+    ],
+  },
+};
+
+// Los catálogos de los desplegables se piden una vez y se guardan.
+const _catalogos = {};
+async function catalogo(tipo){
+  if (_catalogos[tipo]) return _catalogos[tipo];
+  try {
+    const r = await fetch(`${API}/admin/content?tipo=${tipo}`, { headers: cab() });
+    _catalogos[tipo] = r.ok ? (((await r.json()).data || {}).items || []) : [];
+  } catch(e) { _catalogos[tipo] = []; }
+  return _catalogos[tipo];
+}
+
+let _globalId = null;
+async function abrirGlobal(id){
+  const cfg = CAMPOS_GLOBAL[_tipo];
+  if (!cfg) return;
+  _globalId = id || null;
+
+  /* Para editar se pide el registro a SU endpoint, no se rellena con la fila
+     del listado: la lista devuelve el grupo por su nombre y las claves en
+     castellano, así que prefill desde ahí dejaría los desplegables vacíos y
+     guardar borraría lo que no se hubiera podido cargar. */
+  let item = null;
+  if (_globalId) {
+    try {
+      const r = await fetch(`${API}${cfg.ruta}/${_globalId}/edit`, { headers: cab() });
+      if (r.ok) item = (await r.json()).data || null;
+    } catch(e) {}
+    if (!item) { alert('No se pudo cargar el contenido para editarlo'); return; }
+  }
+
+  // Los desplegables se rellenan ANTES de pintar, para que al editar se pueda
+  // marcar el valor que ya tiene.
+  for (const c of cfg.campos.filter(c => c.tipo === 'select')) {
+    c._opciones = await catalogo(c.catalogo);
+  }
+
+  document.getElementById('globalTitulo').textContent =
+    (_globalId ? 'Editar ' : 'Nuevo ') + cfg.titulo;
+  document.getElementById('globalCuerpo').innerHTML =
+    cfg.campos.map(c => {
+      const val = item ? (item[c.clave] ?? '') : (c.valor ?? '');
+      if (c.tipo === 'select') {
+        return campoGlobal(c, `<select id="${c.id}"><option value="">Selecciona…</option>` +
+          c._opciones.map(o => `<option value="${o.id}"${String(o.id)===String(val)?' selected':''}>${esc(o.nombre)}</option>`).join('') + '</select>');
+      }
+      if (c.tipo === 'opciones') {
+        return campoGlobal(c, `<select id="${c.id}">` +
+          c.opciones.map(([v, t]) => `<option value="${v}"${v===String(val)?' selected':''}>${t}</option>`).join('') + '</select>');
+      }
+      return campoGlobal(c, `<input id="${c.id}" ${c.tipo === 'numero' ? 'type="number" step="any" min="0"' : ''}
+        placeholder="${esc(c.ph || '')}" value="${esc(val)}">${c.sufijo ? `<span class="cta-s"> ${c.sufijo}</span>` : ''}`);
+    }).join('') +
+    `<div class="aviso">Se guardará como contenido <b>Plataforma</b> (global, sin organización asociada): lo verá toda cuenta como base de partida.</div>` +
+    (cfg.continuar && !_globalId
+      ? `<div class="aviso" style="color:#3730A3;background:#EEF2FF;border-color:#DDE2FE;">Al guardar se abre el constructor para añadirle ${_tipo === 'routines' ? 'sus días y ejercicios' : 'sus comidas'}: aquí solo se crea la ficha.</div>`
+      : '');
+
+  document.getElementById('globalError').textContent = '';
+  document.getElementById('capaGlobal').classList.add('on');
+  setTimeout(() => { const n = document.getElementById('gNombre'); if (n) n.focus(); }, 50);
+}
+
+function campoGlobal(c, control){
+  return `<div class="campo" style="${c.ancho ? 'grid-column:1/-1;' : ''}">
+    <label>${c.label}${c.req ? ' *' : ''}</label>${control}</div>`;
+}
+
+function cerrarGlobal(){ document.getElementById('capaGlobal').classList.remove('on'); }
+
+async function guardarGlobal(){
+  const cfg = CAMPOS_GLOBAL[_tipo];
+  const err = document.getElementById('globalError');
+  const cuerpo = {};
+  for (const c of cfg.campos) {
+    const el = document.getElementById(c.id);
+    if (!el) continue;
+    let v = el.value;
+    if (c.req && !String(v).trim()) { err.textContent = `${c.label} es obligatorio.`; el.focus(); return; }
+    if (v === '' || v === null) { if (!c.req) continue; }
+    if (c.tipo === 'numero' || (c.tipo === 'select' && v)) v = Number(v);
+    cuerpo[c.clave] = typeof v === 'string' ? v.trim() : v;
+  }
+  // Los alimentos llevan la unidad junto a la cantidad, como en la librería.
+  if (_tipo === 'aliments' && cuerpo.quantity) cuerpo.quantity_unit = 'g';
+
+  const btn = document.getElementById('globalBtn'); btn.disabled = true;
+  try {
+    // Mismos endpoints que usa el coach. Sin contexto de organización, lo que
+    // se guarde nace con ámbito de plataforma; no hay un segundo camino.
+    const r = await fetch(`${API}${cfg.ruta}${_globalId ? '/' + _globalId + '/update' : ''}`,
+      { method: _globalId ? 'PUT' : 'POST', headers: cab(), body: JSON.stringify(cuerpo) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok || j.success === false) { err.textContent = j.message || 'No se pudo guardar.'; return; }
+
+    cerrarGlobal();
+    if (cfg.continuar && !_globalId && j.data && j.data.id) {
+      if (confirm(`«${cuerpo.name || cuerpo.title}» creada.\n\n¿Abrir el constructor para añadirle ${_tipo === 'routines' ? 'días y ejercicios' : 'comidas'}?`)) {
+        irAlEditor(j.data.id);
+        return;
+      }
+    }
+    cargarContenido();
+  } finally { btn.disabled = false; }
 }
 
 // ── Catálogos sin dueño: se crean, renombran y borran aquí ──────────────────

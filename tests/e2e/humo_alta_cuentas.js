@@ -90,11 +90,15 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.click('.s-item:nth-child(1)');
   await p.waitForTimeout(1500);
   const v = await p.textContent('#contenido');
-  // Ojo: Visión general solo lista las 6 primeras cuentas por nombre, así que
-  // esta comprobación asume una base recién creada. Reutilizando una base con
-  // muchas cuentas de rondas anteriores, NutriEntrena se cae de la lista y
-  // esto falla sin que haya nada roto.
-  ck('Visión general cuenta las cuentas reales', /Coaches \/ cuentas/i.test(v) && v.includes('NutriEntrena'), v.slice(0, 150));
+  // Se comprueba contra el número REAL de cuentas, no contra que salga
+  // "NutriEntrena" en la tabla: Visión general solo lista las 6 primeras por
+  // nombre, así que en una base con muchas cuentas de rondas anteriores se
+  // caía de la lista y esto fallaba sin que hubiera nada roto.
+  const cuantas = ((await (await ctx.request.get(`${API}/api/admin/organizations`,
+    { headers: { Authorization: 'Bearer ' + token } })).json()).data || {}).totales || {};
+  ck('Visión general cuenta las cuentas reales',
+     new RegExp('Coaches / cuentas ?' + cuantas.cuentas + '\\b').test(v.replace(/\s+/g, ' ')),
+     { esperadas: cuantas.cuentas, visto: v.replace(/\s+/g, ' ').slice(0, 120) });
   ck('y marca MRR y tickets como pendientes', v.includes('Requiere la pasarela de pago') && v.includes('Requiere el módulo de soporte'));
 
   // ── Ficha de la cuenta

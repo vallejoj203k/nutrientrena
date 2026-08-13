@@ -36,3 +36,4 @@ from app.models.chat import ChatConversation, ChatParticipant, ChatMessage
 from app.models.contract import Contract, ContractTemplate
 from app.models.document import Document
 from app.models.team_member import TeamMember
+from app.models.support import SupportTicket, SupportTicketMessage, PlatformAnnouncement

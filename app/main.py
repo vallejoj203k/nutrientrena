@@ -15,7 +15,7 @@ from app.routers import (
     muscle_groups, trainings, routines, events, notes, progress, files, forms, checkins, plans,
     analytics, public, session_logs, client_tasks, programs, weekly_menus, client_exercises,
     calendar_tasks, team, organizations, contracts, documents, client_home, client_activity,
-    billing, content_scope, admin_panel, support,
+    billing, content_scope, admin_panel, support, platform_settings,
 )
 from app.routers import settings as settings_router
 from app.routers.nutrition import type_food, group_food, aliments, diets, recipes, client_aliments, pathologies
@@ -102,6 +102,43 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     return response
 
+# ── Modo mantenimiento ────────────────────────────────────────────────────────
+# El interruptor del panel de plataforma tiene que hacer algo de verdad. Con él
+# puesto, nadie salvo el equipo de Alzum puede escribir: así se puede tocar la
+# base de datos sin que a mitad alguien guarde media dieta.
+#
+# Se bloquean solo los métodos que MODIFICAN. Dejar leer a propósito: un coach
+# que entra durante el mantenimiento ve sus datos y el aviso, en vez de una
+# aplicación rota que no sabe interpretar.
+_METODOS_QUE_ESCRIBEN = {"POST", "PUT", "PATCH", "DELETE"}
+# Rutas que siguen abiertas: entrar (para poder llegar al panel y apagarlo),
+# renovar el token, y el propio panel de plataforma.
+_EXENTAS = ("/api/auth/", "/api/admin/")
+
+
+@app.middleware("http")
+async def maintenance_mode(request: Request, call_next):
+    if request.method in _METODOS_QUE_ESCRIBEN and request.url.path.startswith("/api/"):
+        if not request.url.path.startswith(_EXENTAS):
+            from app.database import SessionLocal
+            from app.routers.platform_settings import hay_mantenimiento
+
+            db = SessionLocal()
+            try:
+                bloqueado = hay_mantenimiento(db)
+            finally:
+                db.close()
+            if bloqueado:
+                return JSONResponse(
+                    status_code=503,
+                    content={"success": False,
+                             "message": "La plataforma está en mantenimiento. "
+                                        "Puedes consultar tus datos, pero no guardar cambios "
+                                        "hasta que termine."},
+                )
+    return await call_next(request)
+
+
 API_PREFIX = "/api"
 
 app.include_router(auth.router, prefix=API_PREFIX)
@@ -131,6 +168,8 @@ app.include_router(content_scope.router, prefix=API_PREFIX)
 app.include_router(admin_panel.router, prefix=API_PREFIX)
 app.include_router(support.router, prefix=API_PREFIX)
 app.include_router(support.router_admin, prefix=API_PREFIX)
+app.include_router(platform_settings.router, prefix=API_PREFIX)
+app.include_router(platform_settings.router_admin, prefix=API_PREFIX)
 app.include_router(type_food.router, prefix=API_PREFIX)
 app.include_router(group_food.router, prefix=API_PREFIX)
 app.include_router(aliments.router, prefix=API_PREFIX)

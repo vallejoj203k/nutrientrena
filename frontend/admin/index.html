@@ -225,6 +225,28 @@
   .sel-rol:focus{border-color:var(--indigo);}
   .sel-rol:disabled{background:#F8F9FB;color:#9CA3AF;cursor:not-allowed;}
 
+  /* Configuración */
+  .cfg2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  @media(max-width:1000px){ .cfg2{grid-template-columns:1fr;} }
+  .cfg h3{display:flex;align-items:center;gap:10px;font-size:14.5px;margin-bottom:18px;}
+  .cfg .campo{margin-bottom:16px;}
+  .cfg .campo:last-child{margin-bottom:0;}
+  .sw-fila{display:flex;align-items:flex-start;gap:14px;border:1px solid var(--borde);
+           border-radius:11px;padding:14px 16px;margin-bottom:12px;}
+  .sw-fila:last-child{margin-bottom:0;}
+  .sw-fila .txt{flex:1;min-width:0;}
+  .sw-fila .txt b{font-size:13.5px;}
+  .sw-fila .txt p{font-size:12px;color:#9CA3AF;margin-top:3px;line-height:1.5;}
+  .sw{position:relative;width:42px;height:23px;flex:none;margin-top:2px;}
+  .sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2;}
+  .sw i{position:absolute;inset:0;background:#D8DBE3;border-radius:20px;transition:background .15s;}
+  .sw i::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;
+               background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .sw input:checked + i{background:var(--indigo);}
+  .sw input:checked + i::after{transform:translateX(19px);}
+  .sw input:disabled{cursor:not-allowed;}
+  .sw input:disabled + i{opacity:.45;}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -429,7 +451,6 @@ const PENDIENTE = {
   organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
   facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
   planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
-  configuracion:'Ajustes globales: marca, integraciones y dominios.',
 };
 
 let _secciones = [], _todasMisSecciones = [], _actual = null, _cuentas = [], _totales = {}, _filtro = 'todas', _busca = '';
@@ -468,6 +489,7 @@ async function abrir(id){
   if (id === 'soporte') return pintarSoporte();
   if (id === 'analiticas') return pintarAnaliticas();
   if (id === 'equipo') return pintarEquipo();
+  if (id === 'configuracion') return pintarConfig();
   if (id === 'vision') return pintarVision();
   document.getElementById('contenido').innerHTML = enConstruccion(id);
 }
@@ -963,6 +985,113 @@ async function borrarCatalogo(id, nombre){
   // error que haya que esconder.
   if (!r.ok) { alert(j.message || 'No se pudo borrar'); return; }
   cargarContenido();
+}
+
+/* ── Configuración ────────────────────────────────────────────────────────
+   Ajustes que afectan a toda la plataforma. La regla que se ha seguido en
+   toda la sección: un interruptor que no gobierna nada no se pone. El único
+   que hoy no hace efecto —registro abierto— lo dice en su propia fila, en vez
+   de dar a entender que ya está funcionando. */
+let _cfg = null, _cfgSucio = false;
+
+function pintarConfig(){
+  document.getElementById('subtitulo').textContent = 'Ajustes que afectan a toda la plataforma y a todas las cuentas.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  const c = document.getElementById('contenido');
+  c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  fetch(`${API}/admin/settings`, { headers: cab() })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      if (!j) { c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar la configuración.</div></div>'; return; }
+      _cfg = j.data || {}; _cfgSucio = false;
+      c.innerHTML = htmlConfig();
+    })
+    .catch(() => { c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar la configuración.</div></div>'; });
+}
+
+const MONEDAS_TXT = { EUR:'EUR (€)', USD:'USD ($)', GBP:'GBP (£)', MXN:'MXN ($)',
+                      COP:'COP ($)', ARS:'ARS ($)', CLP:'CLP ($)', PEN:'PEN (S/)' };
+
+function interruptor(id, titulo, texto, valor, extra){
+  return `<div class="sw-fila">
+    <div class="txt"><b>${titulo}</b><p>${texto}</p>${extra || ''}</div>
+    <label class="sw"><input type="checkbox" id="${id}" ${valor ? 'checked' : ''} onchange="marcarSucio()"><i></i></label>
+  </div>`;
+}
+
+function htmlConfig(){
+  const c = _cfg;
+  return `
+    <div class="cab"><div class="der">
+      <button class="btn" id="cfgBtn" onclick="guardarConfig()">Guardar cambios</button>
+    </div></div>
+    <div class="cfg2">
+      <div class="card cfg">
+        <h3><span class="kpi-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS.gear}</svg></span>Marca y contacto</h3>
+        <div class="campo"><label>Nombre de la plataforma</label>
+          <input id="cfgNombre" value="${esc(c.platform_name || '')}" oninput="marcarSucio()"></div>
+        <div class="campo"><label>Email de soporte</label>
+          <input id="cfgCorreo" type="email" placeholder="soporte@alzum.io" value="${esc(c.support_email || '')}" oninput="marcarSucio()">
+          <p style="font-size:11.5px;color:#9CA3AF;margin-top:5px;">Se lo enseñamos al coach en su panel de ayuda.</p></div>
+        <div class="campo"><label>Moneda por defecto</label>
+          <select id="cfgMoneda" onchange="marcarSucio()">
+            ${(c.monedas || ['EUR']).map(m => `<option value="${m}"${m===c.default_currency?' selected':''}>${MONEDAS_TXT[m]||m}</option>`).join('')}
+          </select></div>
+      </div>
+      <div class="card cfg">
+        <h3><span class="kpi-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS.users}</svg></span>Altas y pruebas</h3>
+        <div class="campo"><label>Días de prueba gratuita</label>
+          <input id="cfgDias" type="number" min="0" max="365" value="${c.trial_days ?? 14}" oninput="marcarSucio()">
+          <p style="font-size:11.5px;color:#9CA3AF;margin-top:5px;">Se aplica al dar de alta una cuenta «En prueba»: se le calcula la fecha de fin.</p></div>
+        ${interruptor('cfgRegistro', 'Registro abierto',
+          'Permite que nuevos coaches creen una cuenta desde la web.',
+          c.open_registration,
+          c.registro_publico_existe ? '' :
+            '<p style="font-size:11.5px;color:#B45309;margin-top:7px;">Hoy no hay página pública de alta: los entrenadores se meten a mano desde Coaches. Este interruptor se guarda y gobernará esa página cuando exista.</p>')}
+        ${interruptor('cfgMantenimiento', 'Modo mantenimiento',
+          'Muestra un aviso a todos los coaches y bloquea las escrituras.',
+          c.maintenance_mode,
+          '<p style="font-size:11.5px;color:#9CA3AF;margin-top:7px;">Podrán seguir consultando sus datos; lo que se bloquea es guardar. El equipo de Alzum no se ve afectado.</p>')}
+      </div>
+    </div>
+    <p style="font-size:12px;color:#9CA3AF;margin-top:14px;" id="cfgEstado">
+      ${c.updated_at ? 'Última modificación: ' + haceCuanto(c.updated_at) : 'Sin cambios guardados todavía.'}
+    </p>`;
+}
+
+function marcarSucio(){
+  _cfgSucio = true;
+  const e = document.getElementById('cfgEstado');
+  if (e) e.textContent = 'Hay cambios sin guardar.';
+}
+
+async function guardarConfig(){
+  const btn = document.getElementById('cfgBtn');
+  const estado = document.getElementById('cfgEstado');
+  const antes = _cfg.maintenance_mode;
+  const ahora = document.getElementById('cfgMantenimiento').checked;
+  // Encender el mantenimiento deja a todos los coaches sin poder guardar. Se
+  // pregunta: no es un ajuste más de la lista.
+  if (!antes && ahora && !confirm('¿Encender el modo mantenimiento?\n\nLos coaches podrán consultar sus datos pero no guardar cambios, y verán un aviso. Se apaga desde aquí mismo.')) return;
+
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/admin/settings`, { method:'PUT', headers: cab(), body: JSON.stringify({
+      platform_name: document.getElementById('cfgNombre').value.trim(),
+      support_email: document.getElementById('cfgCorreo').value.trim(),
+      default_currency: document.getElementById('cfgMoneda').value,
+      trial_days: Number(document.getElementById('cfgDias').value),
+      open_registration: document.getElementById('cfgRegistro').checked,
+      maintenance_mode: ahora,
+    })});
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { estado.textContent = j.message || 'No se pudo guardar.'; estado.style.color = '#DC2626'; return; }
+    _cfg = j.data || _cfg; _cfgSucio = false;
+    document.getElementById('contenido').innerHTML = htmlConfig();
+    const e2 = document.getElementById('cfgEstado');
+    e2.textContent = 'Guardado.'; e2.style.color = '#15803D';
+  } finally { btn.disabled = false; }
 }
 
 /* ── Equipo Alzum ─────────────────────────────────────────────────────────

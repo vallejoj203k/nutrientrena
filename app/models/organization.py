@@ -18,6 +18,11 @@ class Organization(Base):
     # porque hay código del panel de coach que lo consulta.
     state = Column(String(20), nullable=False, default="activa", server_default="activa")
     country = Column(String(100), nullable=True)
+    # Cuándo se acaba la prueba, si la cuenta nació en prueba. Se calcula al
+    # darla de alta con los días configurados en el panel de plataforma; sin
+    # esta columna, "días de prueba gratuita" sería un número guardado que no
+    # le pasa a nadie.
+    trial_ends_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

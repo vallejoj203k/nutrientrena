@@ -26,6 +26,10 @@ class User(Base):
     remember_token = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # Última vez que entró. Sirve para dos cosas del panel de plataforma:
+    # distinguir a quien está invitado y todavía no ha entrado de quien ya
+    # trabaja, y poder decir "última actividad" sin inventarla.
+    last_login_at = Column(DateTime, nullable=True)
 
     detail = relationship("UserDetail", back_populates="user", uselist=False,
                           foreign_keys="UserDetail.user_id")

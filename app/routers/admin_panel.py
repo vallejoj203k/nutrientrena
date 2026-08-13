@@ -964,6 +964,206 @@ def analiticas(
     }, "OK")
 
 
+# ── Equipo Alzum ────────────────────────────────────────────────────────────
+
+# Los tres roles internos que existen hoy. La descripción se sirve desde aquí,
+# no se escribe en el HTML, para que lo que dice la tarjeta y lo que la API
+# deja hacer no se separen con el tiempo.
+ROLES_EQUIPO = [
+    {"role_id": SUPERADMIN, "nombre": "Super-admin", "icono": "shield",
+     "descripcion": "Acceso total: facturación, planes, equipo y configuración de la plataforma."},
+    {"role_id": EDITOR_CONTENIDO_GLOBAL, "nombre": "Editor de contenido", "icono": "globe",
+     "descripcion": "Solo contenido global: alimentos, ejercicios y plantillas de fábrica. "
+                    "Sin acceso a coaches, facturación ni configuración."},
+    {"role_id": SOPORTE, "nombre": "Soporte", "icono": "life",
+     "descripcion": "Atiende tickets y consulta cuentas de coaches y clientes. Sin acceso económico."},
+]
+ROLES_EQUIPO_IDS = [r["role_id"] for r in ROLES_EQUIPO]
+
+
+class NuevoMiembro(BaseModel):
+    name: str
+    email: str
+    role_id: int
+    password: Optional[str] = None
+
+
+class CambioRol(BaseModel):
+    role_id: int
+
+
+def _serializar_miembro(u: User, rol_id: int, db: Session, yo: int) -> dict:
+    d = db.query(UserDetail).filter(UserDetail.user_id == u.id).first()
+    return {
+        "user_id": u.id,
+        "name": (f"{d.name} {d.last_name or ''}".strip() if d else None) or u.name,
+        "email": u.email,
+        "role_id": rol_id,
+        # Quien nunca ha entrado está invitado, no activo. Enseñarlo como
+        # "activo" haría creer que alguien tiene acceso funcionando cuando en
+        # realidad ni siquiera ha abierto el correo.
+        "state": "activo" if u.last_login_at else "invitado",
+        "last_login_at": u.last_login_at.isoformat() if u.last_login_at else None,
+        "soy_yo": u.id == yo,
+    }
+
+
+def _cuantos_superadmin(db: Session) -> int:
+    return db.query(RoleUser).filter(RoleUser.role_id == SUPERADMIN).count()
+
+
+@router.get("/team", summary="Equipo interno de Alzum",
+            description="Quién trabaja dentro de la plataforma y qué rol tiene cada uno.")
+def listar_equipo(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "equipo")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    filas = db.query(RoleUser).filter(RoleUser.role_id.in_(ROLES_EQUIPO_IDS)).all()
+    # Una persona podría tener dos roles internos. Se queda con el más alto
+    # (el de menor id), que es el que manda de verdad, en vez de enseñarla dos
+    # veces con permisos distintos.
+    rol_de = {}
+    for f in filas:
+        if f.user_id not in rol_de or f.role_id < rol_de[f.user_id]:
+            rol_de[f.user_id] = f.role_id
+
+    usuarios = db.query(User).filter(User.id.in_(list(rol_de) or [0])).all()
+    miembros = [_serializar_miembro(u, rol_de[u.id], db, current_user.id) for u in usuarios]
+    miembros.sort(key=lambda m: (ROLES_EQUIPO_IDS.index(m["role_id"]), (m["name"] or "").lower()))
+
+    return send_response({
+        "miembros": miembros,
+        "roles": [dict(r, miembros=sum(1 for m in miembros if m["role_id"] == r["role_id"]))
+                  for r in ROLES_EQUIPO],
+    }, "OK")
+
+
+@router.post("/team", summary="Invitar a alguien al equipo de Alzum")
+def invitar_miembro(
+    data: NuevoMiembro,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "equipo")
+    if motivo:
+        return send_error(motivo, code=403)
+    if data.role_id not in ROLES_EQUIPO_IDS:
+        return send_error("Ese rol no es del equipo de Alzum", code=400)
+
+    correo = (data.email or "").strip().lower()
+    nombre = (data.name or "").strip()
+    if not correo or not nombre:
+        return send_error("Hacen falta el nombre y el correo", code=400)
+
+    existente = db.query(User).filter(User.email == correo).first()
+    if existente:
+        # Puede ser alguien que ya está en la plataforma como coach. Se le
+        # añade el rol interno en vez de negarse: negarse obligaría a crearle
+        # una segunda cuenta con otro correo, que es peor.
+        ya = db.query(RoleUser).filter(
+            RoleUser.user_id == existente.id,
+            RoleUser.role_id.in_(ROLES_EQUIPO_IDS),
+        ).first()
+        if ya:
+            return send_error("Esa persona ya está en el equipo", code=400)
+        db.add(RoleUser(role_id=data.role_id, user_id=existente.id))
+        db.commit()
+        return send_response(_serializar_miembro(existente, data.role_id, db, current_user.id),
+                             "Añadido al equipo")
+
+    clave = (data.password or "").strip()
+    if len(clave) < 6:
+        return send_error("La contraseña debe tener al menos 6 caracteres", code=400)
+
+    u = User(name=nombre, email=correo, password=hash_password(clave))
+    db.add(u)
+    db.flush()
+    db.add(RoleUser(role_id=data.role_id, user_id=u.id))
+    db.add(UserDetail(id=str(uuid.uuid4()), user_id=u.id, name=nombre))
+    db.commit()
+    db.refresh(u)
+    return send_response(_serializar_miembro(u, data.role_id, db, current_user.id),
+                         "Miembro invitado")
+
+
+@router.put("/team/{user_id}/role", summary="Cambiar el rol de un miembro")
+def cambiar_rol(
+    user_id: int,
+    data: CambioRol,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "equipo")
+    if motivo:
+        return send_error(motivo, code=403)
+    if data.role_id not in ROLES_EQUIPO_IDS:
+        return send_error("Ese rol no es del equipo de Alzum", code=400)
+
+    filas = db.query(RoleUser).filter(
+        RoleUser.user_id == user_id,
+        RoleUser.role_id.in_(ROLES_EQUIPO_IDS),
+    ).all()
+    if not filas:
+        return send_error("Esa persona no está en el equipo", code=404)
+
+    era_superadmin = any(f.role_id == SUPERADMIN for f in filas)
+    if era_superadmin and data.role_id != SUPERADMIN and _cuantos_superadmin(db) <= 1:
+        # Sin esto, un clic deja la plataforma sin nadie que pueda entrar al
+        # panel — y no hay forma de arreglarlo desde la propia aplicación.
+        return send_error(
+            "Es el único super-admin. Nombra a otro antes de quitarle el rol.", code=400)
+    if era_superadmin and data.role_id != SUPERADMIN and user_id == current_user.id:
+        return send_error("No puedes quitarte a ti mismo el super-admin", code=400)
+
+    for f in filas:
+        db.delete(f)
+    db.add(RoleUser(role_id=data.role_id, user_id=user_id))
+    db.commit()
+
+    u = db.query(User).filter(User.id == user_id).first()
+    return send_response(_serializar_miembro(u, data.role_id, db, current_user.id), "Rol actualizado")
+
+
+@router.delete("/team/{user_id}", summary="Sacar a alguien del equipo de Alzum")
+def sacar_del_equipo(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Le quita el rol interno; NO borra a la persona.
+
+    Puede ser también coach con sus clientes, y borrar el usuario se llevaría
+    por delante su trabajo. Sacar del equipo significa "deja de tener acceso al
+    panel de plataforma", nada más.
+    """
+    motivo = _exige_seccion(current_user, db, "equipo")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    if user_id == current_user.id:
+        return send_error("No puedes sacarte a ti mismo del equipo", code=400)
+
+    filas = db.query(RoleUser).filter(
+        RoleUser.user_id == user_id,
+        RoleUser.role_id.in_(ROLES_EQUIPO_IDS),
+    ).all()
+    if not filas:
+        return send_error("Esa persona no está en el equipo", code=404)
+
+    if any(f.role_id == SUPERADMIN for f in filas) and _cuantos_superadmin(db) <= 1:
+        return send_error(
+            "Es el único super-admin. Nombra a otro antes de sacarlo.", code=400)
+
+    for f in filas:
+        db.delete(f)
+    db.commit()
+    return send_response(None, "Fuera del equipo de Alzum")
+
+
 @router.get("/roles", summary="Roles del equipo de Alzum",
             description="Los roles internos y qué secciones ve cada uno. Para previsualizar el panel.")
 def roles_del_equipo(

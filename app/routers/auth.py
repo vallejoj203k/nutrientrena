@@ -44,6 +44,13 @@ def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
 
     role_user = db.query(RoleUser).filter(RoleUser.user_id == user.id).first()
 
+    # Se apunta la entrada. Es el único rastro fiable de "esta persona sigue
+    # usando esto": sin él, el panel de plataforma no puede distinguir a quien
+    # está invitado y nunca entró de quien trabaja aquí todos los días.
+    from datetime import datetime as _dt
+    user.last_login_at = _dt.utcnow()
+    db.commit()
+
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token = create_refresh_token({"sub": str(user.id)})
 

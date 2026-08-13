@@ -288,3 +288,113 @@ def test_me_reconozco_a_mi_mismo_en_la_lista(client, seed, admin_headers):
     assert m is not None and m["soy_yo"] is True
     assert all(o["soy_yo"] is False for o in _equipo(client, admin_headers)["miembros"]
                if o["email"] != "admin@test.com")
+
+
+# ── Invitar sin conocer la contraseña ───────────────────────────────────────
+
+def test_se_puede_invitar_sin_ponerle_contrasena(client, seed, admin_headers, monkeypatch):
+    """Quien invita no tiene por qué conocer la contraseña de otro, y menos la
+    de un super-admin. Sin contraseña se le manda un correo para que la ponga
+    él, con el mismo enlace de un solo uso que la recuperación de siempre."""
+    enviados = []
+    import app.core.email as correo
+
+    monkeypatch.setattr(correo, "send_recover_password_email",
+                        lambda to, name, token: enviados.append((to, token)) or True)
+
+    r = client.post("/api/admin/team", headers=admin_headers, json={
+        "name": "Sin Clave", "email": "sin.clave@nutrientrena-qa.com", "role_id": SUPERADMIN})
+    assert r.status_code == 200, r.text
+    assert r.json()["data"]["invitacion_enviada"] is True
+    assert enviados and enviados[0][0] == "sin.clave@nutrientrena-qa.com"
+
+    # Existe, es super-admin, y está invitado hasta que entre
+    m = _miembro(_equipo(client, admin_headers), "sin.clave@nutrientrena-qa.com")
+    assert m is not None and m["role_id"] == SUPERADMIN
+    assert m["state"] == "invitado"
+
+
+def test_la_cuenta_invitada_no_tiene_una_contrasena_adivinable(client, seed, admin_headers, monkeypatch):
+    """Lo importante de todo esto. Si sin contraseña se dejara una por defecto
+    —o vacía— una cuenta de SUPER-ADMIN quedaría abierta a quien acertara el
+    correo. Se pone una aleatoria larga que no ve nadie."""
+    import app.core.email as correo
+    monkeypatch.setattr(correo, "send_recover_password_email", lambda **k: True)
+
+    correo_nuevo = "sin.clave.segura@nutrientrena-qa.com"
+    client.post("/api/admin/team", headers=admin_headers, json={
+        "name": "Sin Clave Segura", "email": correo_nuevo, "role_id": SUPERADMIN})
+
+    for intento in ["", " ", "123456", "password", "Alzum123!", correo_nuevo, "Sin Clave Segura"]:
+        r = client.post("/api/auth/login", json={"email": correo_nuevo, "password": intento})
+        assert r.status_code == 401, (intento, r.status_code)
+
+
+def test_tras_poner_su_contrasena_entra_y_manda(client, seed, admin_headers, monkeypatch):
+    """El circuito entero: se le invita sin clave, usa el enlace del correo,
+    pone la suya y ya trabaja como super-admin."""
+    from app.core.security import create_access_token
+    from app.models.user import User as _User
+
+    import app.core.email as correo
+    monkeypatch.setattr(correo, "send_recover_password_email", lambda **k: True)
+
+    email = "nuevo.super@nutrientrena-qa.com"
+    assert client.post("/api/admin/team", headers=admin_headers, json={
+        "name": "Nuevo Super", "email": email, "role_id": SUPERADMIN}).status_code == 200
+
+    db = SessionLocal()
+    try:
+        uid = db.query(_User).filter(_User.email == email).first().id
+    finally:
+        db.close()
+
+    token = create_access_token({"sub": str(uid), "purpose": "reset"})
+    r = client.post("/api/auth/reset-password", json={"token": token, "password": "SuPropia123!"})
+    assert r.status_code == 200, r.text
+
+    lg = client.post("/api/auth/login", json={"email": email, "password": "SuPropia123!"})
+    assert lg.status_code == 200, lg.text
+    h = {"Authorization": f"Bearer {lg.json()['data']['token']}"}
+    d = client.get("/api/admin/me", headers=h).json()["data"]
+    assert d["es_superadmin"] is True
+    assert len(d["secciones"]) == 10
+
+    # Y con dos super-admin, el bloqueo de "el último" se levanta: el nuevo
+    # puede degradar al viejo. Antes no: era el único y el panel lo impedía.
+    # (Nadie puede degradarse a SÍ MISMO, así que lo hace el otro.)
+    db = SessionLocal()
+    try:
+        viejo = db.query(_User).filter(_User.email == "admin@test.com").first().id
+    finally:
+        db.close()
+    try:
+        assert client.put(f"/api/admin/team/{viejo}/role", headers=h,
+                          json={"role_id": SOPORTE}).status_code == 200
+    finally:
+        # Se restituye pase lo que pase: sin esto, el resto de la suite se
+        # quedaría sin el super-admin con el que trabaja.
+        client.put(f"/api/admin/team/{viejo}/role", headers=h, json={"role_id": SUPERADMIN})
+
+
+def test_si_el_correo_no_sale_se_dice(client, seed, admin_headers, monkeypatch):
+    """Dar por hecho que salió dejaría a alguien esperando un mensaje que nunca
+    llegó, con una cuenta cuya contraseña no conoce nadie."""
+    import app.core.email as correo
+    monkeypatch.setattr(correo, "send_recover_password_email",
+                        lambda **k: (_ for _ in ()).throw(RuntimeError("sin proveedor")))
+
+    r = client.post("/api/admin/team", headers=admin_headers, json={
+        "name": "Correo Caído", "email": "correo.caido@nutrientrena-qa.com", "role_id": SOPORTE})
+    assert r.status_code == 200, r.text
+    assert r.json()["data"]["invitacion_enviada"] is False
+    assert "olvidado mi contraseña" in r.json()["message"].lower()
+
+
+def test_si_se_pone_contrasena_a_mano_sigue_valiendo(client, seed, admin_headers):
+    """Regresión: el camino de siempre no se rompe."""
+    r = _invitar(client, admin_headers, "Con Clave", "con.clave@nutrientrena-qa.com")
+    assert r.status_code == 200, r.text
+    assert r.json()["data"].get("invitacion_enviada") is None
+    assert client.post("/api/auth/login", json={
+        "email": "con.clave@nutrientrena-qa.com", "password": "Equipo123!"}).status_code == 200

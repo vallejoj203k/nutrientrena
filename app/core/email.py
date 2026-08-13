@@ -13,6 +13,34 @@ APP_NAME       = os.environ.get("APP_NAME", "Nutrientrena")
 GMAIL_USER     = os.environ.get("GMAIL_USER", "")
 GMAIL_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 
+# URL de producción cuando no hay FRONTEND_URL configurada.
+_URL_POR_DEFECTO = "https://nutrientrena-production.up.railway.app"
+
+
+def frontend_url(ruta: str) -> str:
+    """Enlace a una página del frontend, para meterlo en un correo.
+
+    Existe porque había DOS convenciones para la misma variable de entorno y
+    una de las dos tenía que estar rota siempre:
+
+        forms.py:  f"{FRONTEND_URL}/app/public/form.html"   → sin /app
+        email.py:  f"{FRONTEND_URL}/reset-password.html"    → con /app
+
+    Con FRONTEND_URL apuntando a la raíz —que es lo que asumen los formularios
+    y el cálculo de CORS— el enlace de restablecer contraseña salía a
+    /reset-password.html, que no existe: el frontend se sirve bajo /app. El
+    correo llegaba bien y el botón llevaba a un 404.
+
+    Ahora se normaliza en un solo sitio: se acepte la variable con /app, sin
+    él o sin definir, el enlace sale bien.
+    """
+    base = (os.environ.get("FRONTEND_URL") or "").strip().rstrip("/") or _URL_POR_DEFECTO
+    # En desarrollo el frontend se sirve aparte (otro puerto) y sus páginas
+    # cuelgan de la raíz. En producción lo sirve esta misma API bajo /app.
+    if not base.endswith("/app") and "localhost" not in base and "127.0.0.1" not in base:
+        base += "/app"
+    return f"{base}/{ruta.lstrip('/')}"
+
 
 def _send_gmail(
     to: str, subject: str, html: str,
@@ -310,7 +338,7 @@ def send_plan_email(
 
 
 def send_recover_password_email(to: str, name: str, token: str) -> bool:
-    reset_link = f"{os.environ.get('FRONTEND_URL', 'https://nutrientrena-production.up.railway.app/app')}/reset-password.html?token={token}"
+    reset_link = frontend_url(f"reset-password.html?token={token}")
     body = f"""
     <p style="color:#6B7280;font-size:15px;line-height:1.7;margin:0 0 20px;">
       Hola <strong>{name}</strong>,<br><br>

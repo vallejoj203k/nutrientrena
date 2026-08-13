@@ -46,3 +46,33 @@ Asignar una rutina deja la pantalla de carga a la vista **26 ms** en local.
 Es el dato que descartó poner un vídeo de carga: no daría tiempo ni a
 descargarlo. En producción será más por la latencia de red, pero del mismo
 orden.
+
+## humo_restablecer_clave.js
+
+Necesita dos variables porque el token del correo se firma con la clave del
+backend y no se puede fabricar desde el navegador:
+
+```bash
+export DATABASE_URL=... SECRET_KEY=smoke   # los mismos que la API
+CORREO="reset.$(date +%s)@alzum.io"
+TOK=$(python - "$CORREO" <<'PY'
+import sys, uuid, secrets
+from app.database import SessionLocal
+from app.models.user import User, RoleUser, UserDetail
+from app.core.security import hash_password, create_access_token
+correo = sys.argv[1]
+db = SessionLocal()
+u = User(name="Reset QA", email=correo, password=hash_password(secrets.token_urlsafe(32)))
+db.add(u); db.flush()
+db.add(RoleUser(role_id=1, user_id=u.id))
+db.add(UserDetail(id=str(uuid.uuid4()), user_id=u.id, name="Reset QA"))
+db.commit()
+print(create_access_token({"sub": str(u.id), "purpose": "reset"}))
+PY
+)
+TOKEN_RESET="$TOK" CORREO_RESET="$CORREO" node tests/e2e/humo_restablecer_clave.js
+```
+
+Comprueba lo que falló en producción: que la página del enlace EXISTE donde el
+correo la busca (/app/reset-password.html, no la raíz) y que poner la
+contraseña allí sirve para entrar.

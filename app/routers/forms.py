@@ -212,7 +212,8 @@ def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_
     # Send public form link to client
     client_user = db.query(User).filter(User.id == client.user_id).first()
     if client_user and client_user.email:
-        form_link = f"{settings.FRONTEND_URL}/app/public/form.html?id={assignment.id}"
+        from app.core.email import frontend_url
+        form_link = frontend_url(f"public/form.html?id={assignment.id}")
         client_name = f"{client.name or ''} {client.last_name or ''}".strip() or ""
         coach_detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
         coach_name = f"{coach_detail.name or ''} {coach_detail.last_name or ''}".strip() if coach_detail else ""

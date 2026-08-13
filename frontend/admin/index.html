@@ -158,6 +158,38 @@
   .bloque h3{font-size:14.5px;padding:17px 22px 4px;}
   .bloque .bsub{font-size:12.5px;color:#9CA3AF;padding:0 22px 15px;}
 
+  /* Soporte: bandeja a la izquierda, conversación a la derecha */
+  .sop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start;}
+  @media(max-width:1100px){ .sop{grid-template-columns:1fr;} }
+  .tk{padding:15px 18px;border-top:1px solid #F1F2F6;cursor:pointer;display:flex;gap:12px;align-items:flex-start;}
+  .tk:first-child{border-top:none;}
+  .tk:hover{background:#FAFAFC;}
+  .tk.on{background:#EEF2FF;}
+  .tk-t{font-weight:700;font-size:13.5px;}
+  .tk-m{font-size:11.5px;color:#9CA3AF;margin-top:4px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+  .b-abierto{background:#FEF3C7;color:#B45309;}
+  .b-en_curso{background:#EEF2FF;color:#4F5BF2;}
+  .b-resuelto{background:#F1F5F9;color:#64748B;}
+  .b-alta{background:#FEE2E2;color:#B91C1C;}
+  .b-media{background:#FEF3C7;color:#B45309;}
+  .b-baja{background:#F1F5F9;color:#64748B;}
+  .hilo{display:flex;flex-direction:column;gap:11px;max-height:360px;overflow-y:auto;padding:2px;}
+  .msg{padding:10px 13px;border-radius:11px;font-size:13px;line-height:1.5;max-width:88%;}
+  .msg.coach{background:#F4F5F9;align-self:flex-start;}
+  .msg.alzum{background:#EEF2FF;align-self:flex-end;}
+  .msg .quien{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9CA3AF;margin-bottom:4px;}
+  .resp{width:100%;min-height:74px;padding:10px 12px;border:1px solid var(--borde);border-radius:10px;
+        font:inherit;font-size:13px;outline:none;resize:vertical;}
+  .resp:focus{border-color:var(--indigo);}
+  .com{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:18px 20px;margin-bottom:13px;}
+  .com-h{display:flex;align-items:center;gap:10px;}
+  .com-h b{font-size:14px;}
+  .com-h .der{margin-left:auto;display:flex;gap:8px;}
+  .com p{font-size:13px;color:#4B5563;margin-top:9px;line-height:1.5;}
+  .com .meta{font-size:11.5px;color:#9CA3AF;margin-top:9px;}
+  .b-publicado{background:#FEF3C7;color:#B45309;}
+  .b-borrador{background:#F1F5F9;color:#64748B;}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -236,6 +268,29 @@
     <div class="pie">
       <button class="btn ghost" onclick="cerrarFicha()">Cerrar</button>
       <button class="btn" id="fichaEntrar" onclick="entrarComo()">Entrar como esta cuenta</button>
+    </div>
+  </div>
+</div>
+
+<div class="capa" id="capaCom" onclick="if(event.target===this)cerrarComunicado()">
+  <div class="modal">
+    <h2 id="comTitulo">Nuevo comunicado</h2>
+    <div class="cuerpo">
+      <div class="campo"><label>Título</label><input id="comT" placeholder="Ej: Mantenimiento programado"></div>
+      <div class="campo"><label>Mensaje</label>
+        <textarea id="comB" class="resp" placeholder="El domingo de 03:00 a 04:00 (CET) la plataforma podría no estar disponible."></textarea></div>
+      <div class="campo"><label>Audiencia</label>
+        <select id="comA">
+          <option value="todos">Todas las cuentas</option>
+          <option value="activos">Solo cuentas activas</option>
+          <option value="prueba">Solo cuentas en prueba</option>
+        </select></div>
+      <div class="aviso">Se guarda en borrador. Publicarlo es un paso aparte: así no se escapa un aviso a todas las cuentas por darle a guardar.</div>
+    </div>
+    <div class="pie">
+      <span class="error" id="comError"></span>
+      <button class="btn ghost" onclick="cerrarComunicado()">Cancelar</button>
+      <button class="btn" id="comBtn" onclick="guardarComunicado()">Guardar</button>
     </div>
   </div>
 </div>
@@ -321,7 +376,6 @@ const PENDIENTE = {
   organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
   facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
   planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
-  soporte:'Incidencias de las organizaciones, anuncios globales y envíos masivos.',
   analiticas:'Uso de la plataforma, retención y organizaciones en riesgo de irse.',
   equipo:'Los miembros internos de Alzum y el rol de cada uno.',
   configuracion:'Ajustes globales: marca, integraciones y dominios.',
@@ -360,6 +414,7 @@ async function abrir(id){
   if (id === 'organizaciones') return pintarCoaches();
   if (id === 'clientes') return pintarClientes();
   if (id === 'contenido') return pintarContenido();
+  if (id === 'soporte') return pintarSoporte();
   if (id === 'vision') return pintarVision();
   document.getElementById('contenido').innerHTML = enConstruccion(id);
 }
@@ -843,6 +898,195 @@ async function borrarCatalogo(id, nombre){
   // error que haya que esconder.
   if (!r.ok) { alert(j.message || 'No se pudo borrar'); return; }
   cargarContenido();
+}
+
+/* ── Soporte ──────────────────────────────────────────────────────────────
+   Dos cosas distintas compartiendo pantalla: los tickets, que van de uno a uno
+   (una cuenta pregunta, Alzum responde), y los comunicados, que van de Alzum a
+   todos. Por eso los comunicados no son "un ticket sin remitente". */
+const EST_TK = { abierto:'Abierto', en_curso:'En curso', resuelto:'Resuelto' };
+const AUDIENCIAS = { todos:'todos', activos:'activos', prueba:'en prueba' };
+let _tks = [], _totTk = {}, _tkSel = null, _coms = [], _pest = 'tickets';
+
+function pintarSoporte(){
+  document.getElementById('subtitulo').textContent =
+    'Tickets de los coaches y comunicados que se muestran dentro de la plataforma.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  cargarSoporte();
+}
+
+async function cargarSoporte(){
+  const c = document.getElementById('contenido');
+  if (!_tks.length && !_coms.length) c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  try {
+    const [rt, rc] = await Promise.all([
+      fetch(`${API}/admin/support/tickets`, { headers: cab() }),
+      fetch(`${API}/admin/support/announcements`, { headers: cab() }),
+    ]);
+    if (rt.ok) { const d = (await rt.json()).data || {}; _tks = d.tickets || []; _totTk = d.totales || {}; }
+    if (rc.ok) _coms = (await rc.json()).data || [];
+    c.innerHTML = htmlSoporte();
+  } catch(e){ c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el soporte.</div></div>'; }
+}
+
+function htmlSoporte(){
+  return `
+    <div class="kpis">
+      ${tarjeta('Abiertos', _totTk.abiertos ?? 0, '', 'life')}
+      ${tarjeta('En curso', _totTk.en_curso ?? 0, '', 'life')}
+      ${tarjeta('Resueltos', _totTk.resueltos ?? 0, '', 'life')}
+    </div>
+    <div class="fams">
+      <button class="fam${_pest==='tickets'?' on':''}" onclick="abrirPestSop('tickets')">Tickets</button>
+      <button class="fam${_pest==='comunicados'?' on':''}" onclick="abrirPestSop('comunicados')">Comunicados</button>
+    </div>
+    ${_pest === 'tickets' ? htmlTickets() : htmlComunicados()}`;
+}
+
+function htmlTickets(){
+  const sel = _tks.find(t => t.id === _tkSel);
+  return `<div class="sop">
+    <div class="card" style="padding:0;overflow:hidden;">
+      ${_tks.map(t => `<div class="tk${t.id===_tkSel?' on':''}" onclick="verTicket('${t.id}')">
+        <div style="flex:1;min-width:0;">
+          <div class="tk-t">${esc(t.subject)}</div>
+          <div class="tk-m">${esc(t.organization_name || t.autor || '—')} · ${(t.created_at||'').slice(0,10)}
+            <span class="badge b-${t.state}">${EST_TK[t.state] || t.state}</span>
+            ${t.respuestas ? `<span>${t.respuestas} respuesta${t.respuestas>1?'s':''}</span>` : ''}</div>
+        </div>
+        <span class="badge b-${t.priority}">${esc(t.priority)}</span>
+      </div>`).join('') || `<div style="text-align:center;padding:40px;color:#9CA3AF;font-size:13px;">
+        Ningún coach ha abierto un ticket todavía.</div>`}
+    </div>
+    <div class="card">
+      ${sel ? htmlHilo(sel) : `<div style="text-align:center;padding:60px 20px;color:#9CA3AF;font-size:13px;">
+        Selecciona un ticket para responderlo.</div>`}
+    </div>
+  </div>`;
+}
+
+function htmlHilo(t){
+  const m = _hilo || [];
+  return `
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;">
+      <div style="flex:1;"><b style="font-size:15px;">${esc(t.subject)}</b>
+        <div class="cta-s" style="margin-top:4px;">${esc(t.organization_name || 'Sin cuenta')} · ${esc(t.autor || '')}</div></div>
+      <select class="sel-cuenta" onchange="estadoTicket('${t.id}', this.value)">
+        ${Object.keys(EST_TK).map(e => `<option value="${e}"${e===t.state?' selected':''}>${EST_TK[e]}</option>`).join('')}
+      </select>
+    </div>
+    <div class="hilo" style="margin:16px 0;">
+      <div class="msg coach"><div class="quien">${esc(t.autor || 'Coach')}</div>${esc(t.body || '(sin detalle)')}</div>
+      ${m.map(x => `<div class="msg ${x.de_plataforma?'alzum':'coach'}">
+        <div class="quien">${x.de_plataforma ? 'Alzum' : esc(x.autor || 'Coach')}</div>${esc(x.body)}</div>`).join('')}
+    </div>
+    <textarea class="resp" id="respTexto" placeholder="Escribe la respuesta…"></textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+      <button class="btn" onclick="responder('${t.id}')">Responder</button>
+    </div>
+    <p style="font-size:11.5px;color:#9CA3AF;margin-top:10px;">Responder pasa el ticket a «En curso» solo. Si tuvieras que acordarte de moverlo a mano, la bandeja mentiría a los dos días.</p>`;
+}
+
+let _hilo = [];
+async function verTicket(id){
+  _tkSel = id; _hilo = [];
+  document.getElementById('contenido').innerHTML = htmlSoporte();
+  const r = await fetch(`${API}/admin/support/tickets/${id}`, { headers: cab() });
+  if (!r.ok) return;
+  _hilo = ((await r.json()).data || {}).mensajes || [];
+  document.getElementById('contenido').innerHTML = htmlSoporte();
+}
+
+async function responder(id){
+  const caja = document.getElementById('respTexto');
+  const texto = (caja.value || '').trim();
+  if (!texto) { caja.focus(); return; }
+  const r = await fetch(`${API}/support/tickets/${id}/messages`,
+    { method:'POST', headers: cab(), body: JSON.stringify({ body: texto }) });
+  if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo enviar'); return; }
+  await cargarSoporte();
+  verTicket(id);
+}
+
+async function estadoTicket(id, estado){
+  const r = await fetch(`${API}/admin/support/tickets/${id}/state`,
+    { method:'PUT', headers: cab(), body: JSON.stringify({ state: estado }) });
+  if (!r.ok) { alert('No se pudo cambiar el estado'); return; }
+  await cargarSoporte();
+  verTicket(id);
+}
+
+function abrirPestSop(p){ _pest = p; document.getElementById('contenido').innerHTML = htmlSoporte(); }
+
+function htmlComunicados(){
+  return `
+    <div style="margin-bottom:16px;"><button class="btn" onclick="abrirComunicado('')">+ Nuevo comunicado</button></div>
+    ${_coms.map(a => `<div class="com">
+      <div class="com-h">
+        <svg width="16" height="16" fill="none" stroke="#4F5BF2" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+        <b>${esc(a.title)}</b>
+        <span class="badge b-${a.state}">${a.state === 'publicado' ? 'Publicado' : 'Borrador'}</span>
+        <span class="der">
+          <button class="btn ghost" onclick="abrirComunicado('${a.id}')">Editar</button>
+          <button class="btn ghost" onclick="publicarComunicado('${a.id}','${a.state === 'publicado' ? 'borrador' : 'publicado'}')">
+            ${a.state === 'publicado' ? 'Despublicar' : 'Publicar'}</button>
+          <button class="btn rojo" onclick="borrarComunicado('${a.id}','${esc(a.title)}')">Eliminar</button>
+        </span>
+      </div>
+      ${a.body ? `<p>${esc(a.body)}</p>` : ''}
+      <div class="meta">Audiencia: ${AUDIENCIAS[a.audience] || a.audience} · ${(a.published_at || a.created_at || '').slice(0,10)}</div>
+    </div>`).join('') || `<div class="card"><div class="proximo">
+        <b>Todavía no hay comunicados</b><p>Sirven para avisar de un mantenimiento o de una novedad sin escribir a cada coach por separado.</p></div></div>`}`;
+}
+
+let _comId = null;
+function abrirComunicado(id){
+  const a = _coms.find(x => x.id === id);
+  _comId = id || null;
+  document.getElementById('comTitulo').textContent = _comId ? 'Editar comunicado' : 'Nuevo comunicado';
+  document.getElementById('comT').value = a ? a.title : '';
+  document.getElementById('comB').value = a ? (a.body || '') : '';
+  document.getElementById('comA').value = a ? a.audience : 'todos';
+  document.getElementById('comError').textContent = '';
+  document.getElementById('capaCom').classList.add('on');
+  setTimeout(() => document.getElementById('comT').focus(), 50);
+}
+function cerrarComunicado(){ document.getElementById('capaCom').classList.remove('on'); }
+
+async function guardarComunicado(){
+  const err = document.getElementById('comError');
+  const cuerpo = {
+    title: document.getElementById('comT').value.trim(),
+    body: document.getElementById('comB').value.trim(),
+    audience: document.getElementById('comA').value,
+  };
+  if (!cuerpo.title) { err.textContent = 'Ponle un título.'; return; }
+  const btn = document.getElementById('comBtn'); btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/admin/support/announcements${_comId ? '/' + _comId : ''}`,
+      { method: _comId ? 'PUT' : 'POST', headers: cab(), body: JSON.stringify(cuerpo) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { err.textContent = j.message || 'No se pudo guardar.'; return; }
+    cerrarComunicado();
+    cargarSoporte();
+  } finally { btn.disabled = false; }
+}
+
+async function publicarComunicado(id, estado){
+  // Publicar alcanza a todas las cuentas de golpe: se pregunta.
+  if (estado === 'publicado' && !confirm('¿Publicar el comunicado?\n\nLo verán los coaches de la audiencia elegida al entrar en la plataforma.')) return;
+  const r = await fetch(`${API}/admin/support/announcements/${id}/state`,
+    { method:'PUT', headers: cab(), body: JSON.stringify({ state: estado }) });
+  if (!r.ok) { alert('No se pudo cambiar'); return; }
+  cargarSoporte();
+}
+
+async function borrarComunicado(id, titulo){
+  if (!confirm(`¿Eliminar «${titulo}»?`)) return;
+  const r = await fetch(`${API}/admin/support/announcements/${id}`, { method:'DELETE', headers: cab() });
+  if (!r.ok) { alert('No se pudo eliminar'); return; }
+  cargarSoporte();
 }
 
 /* La ficha enseña lo que de verdad tenemos: datos de la cuenta y su equipo.

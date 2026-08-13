@@ -14,6 +14,20 @@ os.environ.setdefault("RESEND_API_KEY", "test")
 import uuid
 import pytest
 from fastapi.testclient import TestClient
+
+# El limitador de peticiones queda apagado durante las pruebas.
+#
+# Todas comparten la misma IP (testclient), así que sus llamadas se suman
+# contra el mismo cupo de 200/minuto. En cuanto la suite creció lo suficiente,
+# empezó a fallar por el orden en que se ejecutan los tests y por lo rápido
+# que va la máquina: un test que crea un usuario perfectamente válido recibía
+# un 429 porque otros ficheros habían gastado el cupo antes.
+#
+# Ninguna prueba comprueba el limitador (los 429 que sí se prueban son los de
+# la API de Groq, y están simulados), así que apagarlo no deja nada sin
+# cubrir; lo que quita es una fuente de fallos que no dependen del código.
+from app.core.limiter import limiter as _limiter  # noqa: E402
+_limiter.enabled = False
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 

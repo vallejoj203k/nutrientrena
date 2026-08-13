@@ -36,8 +36,10 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.click('button:has-text("+ Nueva cuenta")');
   await p.waitForTimeout(400);
   ck('se abre el formulario de alta', await p.locator('#capaAlta.on').count() === 1);
+  // Acotado al modal de alta a propósito: hay más avisos en la página y un
+  // `.aviso` a secas cogía el primero que hubiera en el DOM.
   ck('avisa del riesgo de dejar a un entrenador sin cuenta',
-     (await p.textContent('.aviso')).includes('catálogo común'));
+     (await p.textContent('#capaAlta .aviso')).includes('catálogo común'));
 
   const correo = `oswal.${SUF}@nutrientrena-qa.com`;
   await p.fill('#altaNombre', 'NutriEntrena');

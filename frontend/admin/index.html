@@ -190,6 +190,19 @@
   .b-publicado{background:#FEF3C7;color:#B45309;}
   .b-borrador{background:#F1F5F9;color:#64748B;}
 
+  /* Analíticas */
+  .graf2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:1000px){ .graf2{grid-template-columns:1fr;} }
+  .graf h3{font-size:14.5px;margin-bottom:4px;}
+  .graf .gsub{font-size:11.5px;color:#9CA3AF;margin-bottom:14px;}
+  .graf svg{display:block;width:100%;height:auto;}
+  .graf .eje{font-size:11px;fill:#9CA3AF;}
+  .graf .val{font-size:11.5px;font-weight:700;fill:#374151;}
+  .coh td,.coh th{text-align:center;}
+  .coh td:first-child,.coh th:first-child{text-align:left;}
+  .ret{display:inline-block;min-width:52px;padding:4px 9px;border-radius:7px;
+       font-size:11.5px;font-weight:700;color:#312E81;}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -376,7 +389,6 @@ const PENDIENTE = {
   organizaciones:'Todas las organizaciones con su plan, su equipo, su facturación y su estado. Suspender, cambiar de plan y entrar como ellas para dar soporte.',
   facturacion:'Ingresos recurrentes, suscripciones, historial de pagos, morosos y reembolsos.',
   planes:'Los planes que ofrece Alzum, con su precio y sus límites de coaches y clientes.',
-  analiticas:'Uso de la plataforma, retención y organizaciones en riesgo de irse.',
   equipo:'Los miembros internos de Alzum y el rol de cada uno.',
   configuracion:'Ajustes globales: marca, integraciones y dominios.',
 };
@@ -415,6 +427,7 @@ async function abrir(id){
   if (id === 'clientes') return pintarClientes();
   if (id === 'contenido') return pintarContenido();
   if (id === 'soporte') return pintarSoporte();
+  if (id === 'analiticas') return pintarAnaliticas();
   if (id === 'vision') return pintarVision();
   document.getElementById('contenido').innerHTML = enConstruccion(id);
 }
@@ -898,6 +911,135 @@ async function borrarCatalogo(id, nombre){
   // error que haya que esconder.
   if (!r.ok) { alert(j.message || 'No se pudo borrar'); return; }
   cargarContenido();
+}
+
+/* ── Analíticas ───────────────────────────────────────────────────────────
+   Las gráficas se dibujan a mano en SVG. No es cabezonería: meter una librería
+   de gráficos son cientos de kilobytes y una dependencia externa para pintar
+   siete barras y una línea, y el panel se sirve como fichero estático.
+
+   Todo lo que sale aquí viene de datos reales o va vacío. MRR y ARPA dependen
+   de la pasarela de pago —son lo que las cuentas le pagan a Alzum, y eso hoy
+   no existe en ninguna tabla— así que salen como pendientes. Rellenarlos con
+   lo que los coaches cobran a SUS clientes daría un número creíble y falso,
+   que es la peor clase de número en un panel del que se toman decisiones. */
+const MES_CORTO = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const etiquetaMes = m => MES_CORTO[parseInt(m.slice(5), 10) - 1] || m;
+const etiquetaMesAnio = m => `${etiquetaMes(m)} ${m.slice(0, 4)}`;
+let _ana = null;
+
+function pintarAnaliticas(){
+  document.getElementById('subtitulo').textContent = 'Cómo crece y se retiene la plataforma.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  const c = document.getElementById('contenido');
+  c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  fetch(`${API}/admin/analytics`, { headers: cab() })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      if (!j) { c.innerHTML = '<div class="card"><div class="proximo">No se pudieron cargar las analíticas.</div></div>'; return; }
+      _ana = j.data || {};
+      c.innerHTML = htmlAnaliticas();
+    })
+    .catch(() => { c.innerHTML = '<div class="card"><div class="proximo">No se pudieron cargar las analíticas.</div></div>'; });
+}
+
+/* Las dos gráficas comparten sistema de coordenadas: 320x200 con 14 de
+   margen a los lados, para que la primera y la última etiqueta no se corten.
+   Se escala de forma uniforme (sin preserveAspectRatio="none"): estirar el
+   SVG para que ocupe un alto fijo deforma también el texto, y los meses salen
+   aplastados. */
+const G = { W: 320, H: 200, ML: 16, MR: 16, MT: 18, MB: 26 };
+const gx = (i, n) => G.ML + (n > 1 ? (G.W - G.ML - G.MR) * i / (n - 1) : (G.W - G.ML - G.MR) / 2);
+const gy = (v, max) => (G.H - G.MB) - (v / max) * (G.H - G.MB - G.MT);
+
+/* El eje empieza en cero siempre: una gráfica con la base recortada convierte
+   una diferencia de dos en un salto que parece enorme. */
+function barras(datos){
+  const n = datos.length;
+  if (!n) return '<div class="vacio" style="padding:40px;text-align:center;">Sin datos todavía.</div>';
+  const max = Math.max(1, ...datos.map(d => d.valor));
+  const util = G.W - G.ML - G.MR;
+  const paso = util / n, ancho = Math.min(paso * 0.5, 30);
+  return `<svg viewBox="0 0 ${G.W} ${G.H}" role="img" aria-label="Altas de coaches por mes">
+    <line x1="${G.ML}" y1="${G.H - G.MB}" x2="${G.W - G.MR}" y2="${G.H - G.MB}" stroke="#E2E4EA" stroke-width="1"/>
+    ${datos.map((d, i) => {
+      const x = G.ML + paso * i + paso / 2;
+      const y = gy(d.valor, max), alto = Math.max((G.H - G.MB) - y, 1);
+      return `<rect x="${(x - ancho/2).toFixed(1)}" y="${y.toFixed(1)}" width="${ancho.toFixed(1)}" height="${alto.toFixed(1)}" rx="3" fill="#4F5BF2"/>
+        <text class="val" x="${x.toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="middle">${d.valor}</text>
+        <text class="eje" x="${x.toFixed(1)}" y="${G.H - G.MB + 15}" text-anchor="middle">${etiquetaMes(d.mes)}</text>`;
+    }).join('')}
+  </svg>`;
+}
+
+/* Línea con área. Misma regla: base en cero. */
+function linea(datos){
+  const n = datos.length;
+  if (!n) return '<div class="vacio" style="padding:40px;text-align:center;">Sin datos todavía.</div>';
+  const max = Math.max(1, ...datos.map(d => d.valor));
+  const pts = datos.map((d, i) => [gx(i, n), gy(d.valor, max)]);
+  const linea_d = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+  const base = G.H - G.MB;
+  return `<svg viewBox="0 0 ${G.W} ${G.H}" role="img" aria-label="Cuentas acumuladas">
+    <line x1="${G.ML}" y1="${base}" x2="${G.W - G.MR}" y2="${base}" stroke="#E2E4EA" stroke-width="1"/>
+    <path d="${linea_d} L${pts[n-1][0].toFixed(1)} ${base} L${pts[0][0].toFixed(1)} ${base} Z" fill="#4F5BF2" opacity="0.10"/>
+    <path d="${linea_d}" fill="none" stroke="#4F5BF2" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.2" fill="#fff" stroke="#4F5BF2" stroke-width="2"/>
+      <text class="val" x="${p[0].toFixed(1)}" y="${(p[1] - 9).toFixed(1)}" text-anchor="middle">${datos[i].valor}</text>
+      <text class="eje" x="${p[0].toFixed(1)}" y="${base + 15}" text-anchor="middle">${etiquetaMes(datos[i].mes)}</text>`).join('')}
+  </svg>`;
+}
+
+function htmlAnaliticas(){
+  const k = _ana.kpis || {};
+  const cohortes = _ana.cohortes || [];
+  // El color de la celda acompaña al número: una tabla de retención en la que
+  // todo es del mismo tono hay que leerla cifra a cifra.
+  const celda = v => v === null || v === undefined
+    ? '<span class="vacio">—</span>'
+    : `<span class="ret" style="background:rgba(79,91,242,${(0.10 + v/100*0.45).toFixed(2)});">${v}%</span>`;
+
+  return `
+    <div class="kpis">
+      ${tarjeta('MRR', '—', 'Requiere la pasarela de pago', 'card', true)}
+      ${tarjeta('ARPA', '—', 'Requiere la pasarela de pago', 'card', true)}
+      ${tarjeta('Cuentas caídas', (k.cuentas_caidas ?? 0) + (k.cuentas ? ` (${k.cuentas_caidas_pct}%)` : ''), 'Suspendidas o impagadas ahora', 'shield')}
+      ${tarjeta('Clientes / coach', k.clientes_por_coach ?? 0, `${k.clientes ?? 0} clientes entre ${k.coaches ?? 0} coaches`, 'users')}
+    </div>
+    <div class="graf2">
+      <div class="card graf">
+        <h3>Altas de coaches por mes</h3>
+        <div class="gsub">Cuentas nuevas en cada mes.</div>
+        ${barras(_ana.altas_por_mes || [])}
+      </div>
+      <div class="card graf">
+        <h3>Cuentas acumuladas</h3>
+        <div class="gsub">El total que hay al cerrar cada mes. El MRR acumulado llegará con la pasarela.</div>
+        ${linea(_ana.acumulado || [])}
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px;">
+      <h3 style="font-size:14.5px;">Retención por cohorte</h3>
+      <div class="gsub" style="font-size:11.5px;color:#9CA3AF;margin-bottom:14px;">
+        Cada fila es el mes en que se dieron de alta esas cuentas. El porcentaje es cuántas seguían
+        con actividad de sus clientes —entrenamientos, check-ins o progreso— N meses después.
+      </div>
+      <table class="coh">
+        <thead><tr><th>Cohorte</th><th>Mes 0</th><th>Mes 1</th><th>Mes 2</th><th>Mes 3</th></tr></thead>
+        <tbody>
+        ${cohortes.map(c => `<tr>
+          <td><b>${etiquetaMesAnio(c.cohorte)}</b><div class="cta-s">${c.cuentas} cuenta${c.cuentas>1?'s':''}</div></td>
+          ${c.valores.map(v => `<td>${celda(v)}</td>`).join('')}
+        </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;padding:34px;color:#9CA3AF;">
+            Todavía no hay cuentas suficientes para calcular cohortes.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">
+      «Cuentas caídas» es la foto de ahora mismo, no el churn del mes: no se guarda el historial de
+      cambios de estado, así que no se puede decir cuántas se fueron en un mes concreto sin inventarlo.
+    </p>`;
 }
 
 /* ── Soporte ──────────────────────────────────────────────────────────────

@@ -793,6 +793,177 @@ def borrar_catalogo(
     return send_response(None, "Borrado")
 
 
+# ── Analíticas ──────────────────────────────────────────────────────────────
+
+MESES_VENTANA = 7   # los que enseña el prototipo
+
+
+def _mes(f) -> str:
+    return f"{f.year:04d}-{f.month:02d}"
+
+
+def _sumar_meses(clave: str, n: int) -> str:
+    a, m = int(clave[:4]), int(clave[5:])
+    total = (a * 12 + (m - 1)) + n
+    return f"{total // 12:04d}-{total % 12 + 1:02d}"
+
+
+def _ultimos_meses(n: int, hasta=None) -> list:
+    from datetime import date
+    hoy = hasta or date.today()
+    base = _mes(hoy)
+    return [_sumar_meses(base, -i) for i in range(n - 1, -1, -1)]
+
+
+def _meses_activos_por_organizacion(db: Session) -> dict:
+    """En qué meses dio señales de vida cada cuenta.
+
+    "Viva" se mide por lo que hacen sus CLIENTES —entrenamientos registrados,
+    check-ins, días de progreso—, no por lo que el coach tenga guardado. Una
+    cuenta con cincuenta rutinas creadas hace un año y nadie entrenando está
+    muerta, y la retención tiene que decirlo.
+
+    Se resuelve en tres barridos y un cruce en memoria: una consulta por cuenta
+    y mes sería una tabla de retención que tarda medio minuto en pintarse.
+    """
+    from app.core.dependencies import org_client_detail_ids
+    from app.models.checkin import WeeklyCheckin
+    from app.models.progress_day import ProgressDay
+    from app.models.session_log import WorkoutSession
+
+    # cliente -> cuenta
+    cuenta_de_cliente = {}
+    for org in db.query(Organization).all():
+        for did in org_client_detail_ids(org.id, db):
+            cuenta_de_cliente[did] = org.id
+    if not cuenta_de_cliente:
+        return {}
+
+    activos = {}
+
+    def anotar(detail_id, fecha):
+        org_id = cuenta_de_cliente.get(detail_id)
+        if org_id and fecha:
+            activos.setdefault(org_id, set()).add(_mes(fecha))
+
+    ids = list(cuenta_de_cliente)
+    for s in db.query(WorkoutSession).filter(WorkoutSession.client_user_detail_id.in_(ids)).all():
+        anotar(s.client_user_detail_id, s.session_date)
+    for c in db.query(WeeklyCheckin).filter(WeeklyCheckin.client_user_detail_id.in_(ids)).all():
+        anotar(c.client_user_detail_id, c.checkin_date)
+
+    detalle_de_user = {d.user_id: d.id for d in db.query(UserDetail).filter(
+        UserDetail.id.in_(ids), UserDetail.user_id.isnot(None)).all()}
+    if detalle_de_user:
+        for p in db.query(ProgressDay).filter(ProgressDay.user_id.in_(list(detalle_de_user))).all():
+            anotar(detalle_de_user.get(p.user_id), p.date)
+
+    return activos
+
+
+@router.get("/analytics", summary="Analíticas de la plataforma",
+            description="Cómo crece y se retiene la plataforma: altas, acumulado y retención por cohorte.")
+def analiticas(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Todo lo que se devuelve sale de datos reales, o va en null.
+
+    MRR y ARPA dependen de la pasarela de pago, que está fuera de alcance: son
+    lo que las cuentas le pagan a Alzum, y hoy eso no existe en ninguna tabla.
+    Se devuelven en null. Rellenarlos con lo que los coaches cobran a SUS
+    clientes daría un número creíble y falso, que es la peor clase de número en
+    un panel del que se toman decisiones.
+    """
+    motivo = _exige_seccion(current_user, db, "analiticas")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    from app.core.dependencies import org_client_detail_ids, org_member_detail_ids
+
+    orgs = db.query(Organization).all()
+    meses = _ultimos_meses(MESES_VENTANA)
+
+    # ── Altas por mes y acumulado ───────────────────────────────────────────
+    altas = {m: 0 for m in meses}
+    antes_de_la_ventana = 0
+    for o in orgs:
+        if not o.created_at:
+            continue
+        m = _mes(o.created_at)
+        if m in altas:
+            altas[m] += 1
+        elif m < meses[0]:
+            antes_de_la_ventana += 1
+
+    acumulado, corriendo = [], antes_de_la_ventana
+    for m in meses:
+        corriendo += altas[m]
+        acumulado.append({"mes": m, "valor": corriendo})
+
+    # ── Indicadores ─────────────────────────────────────────────────────────
+    coaches = clientes = 0
+    for o in orgs:
+        coaches += len(org_member_detail_ids(o.id, db))
+        clientes += len(org_client_detail_ids(o.id, db))
+
+    por_estado = {}
+    for o in orgs:
+        e = o.state or "activa"
+        por_estado[e] = por_estado.get(e, 0) + 1
+    caidas = por_estado.get("suspendida", 0) + por_estado.get("impago", 0)
+
+    # ── Retención por cohorte ───────────────────────────────────────────────
+    # La cohorte es el mes en que se dio de alta la cuenta. El mes 0 es 100%
+    # por definición: acaba de entrar.
+    activos = _meses_activos_por_organizacion(db)
+    cohortes_meses = _ultimos_meses(5)
+    ahora = meses[-1]
+
+    cohortes = []
+    for c in cohortes_meses:
+        miembros = [o for o in orgs if o.created_at and _mes(o.created_at) == c]
+        if not miembros:
+            continue
+        fila = {"cohorte": c, "cuentas": len(miembros), "valores": []}
+        for k in range(4):
+            objetivo = _sumar_meses(c, k)
+            if objetivo > ahora:
+                # Un mes que todavía no ha pasado no es un 0%: es un hueco.
+                fila["valores"].append(None)
+                continue
+            if k == 0:
+                fila["valores"].append(100)
+                continue
+            vivas = sum(1 for o in miembros if objetivo in activos.get(o.id, set()))
+            fila["valores"].append(round(vivas * 100 / len(miembros)))
+        cohortes.append(fila)
+    # `_ultimos_meses` ya devuelve del más antiguo al más reciente, que es el
+    # orden del prototipo (Sep 2025 arriba). No hay nada que invertir.
+
+    return send_response({
+        "kpis": {
+            # Dependen de la pasarela de pago. En null a propósito.
+            "mrr": None,
+            "arpa": None,
+            # Esto sí es real, pero NO es churn mensual: no se guarda el
+            # historial de cambios de estado, así que no se puede decir cuántas
+            # se fueron en un mes concreto. Es la foto de ahora mismo, y así se
+            # llama en la pantalla.
+            "cuentas_caidas": caidas,
+            "cuentas_caidas_pct": round(caidas * 100 / len(orgs)) if orgs else 0,
+            "clientes_por_coach": round(clientes / coaches, 1) if coaches else 0,
+            "cuentas": len(orgs),
+            "coaches": coaches,
+            "clientes": clientes,
+        },
+        "altas_por_mes": [{"mes": m, "valor": altas[m]} for m in meses],
+        "acumulado": acumulado,
+        "cohortes": cohortes,
+        "por_estado": por_estado,
+    }, "OK")
+
+
 @router.get("/roles", summary="Roles del equipo de Alzum",
             description="Los roles internos y qué secciones ve cada uno. Para previsualizar el panel.")
 def roles_del_equipo(

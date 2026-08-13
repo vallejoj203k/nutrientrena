@@ -161,6 +161,33 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('y las propuestas se marcan como pendientes, no como cero',
      (await p.textContent('#contenido')).includes('Todavía no existe el circuito de propuestas'));
 
+  // ── Analíticas ───────────────────────────────────────────────────────────
+  // Lo que importa aquí es que las gráficas se dibujen con datos REALES y que
+  // lo que no se puede calcular salga vacío en vez de inventado.
+  await p.click('.s-item:has-text("Analíticas")');
+  await p.locator('.graf svg').first().waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
+  ck('la sección Analíticas carga', (await p.textContent('#titulo')).trim() === 'Analíticas');
+  ck('se dibujan las dos gráficas', await p.locator('.graf svg').count() === 2);
+  ck('la de altas tiene una barra por mes', await p.locator('.graf svg rect').count() === 7);
+  ck('la de acumulado tiene un punto por mes', await p.locator('.graf svg circle').count() === 7);
+
+  const ana = await (await ctx.request.get(`${API}/api/admin/analytics`, { headers: H })).json();
+  const acumulado = ana.data.acumulado.map(x => x.valor);
+  ck('el acumulado nunca baja', JSON.stringify(acumulado) === JSON.stringify([...acumulado].sort((a, b) => a - b)), acumulado);
+  ck('y su último valor es el total de cuentas',
+     acumulado[acumulado.length - 1] === ana.data.kpis.cuentas, { acumulado, kpis: ana.data.kpis });
+
+  const txtAna = await p.textContent('#contenido');
+  ck('MRR y ARPA salen como pendientes, no con un número inventado',
+     ana.data.kpis.mrr === null && ana.data.kpis.arpa === null &&
+     (txtAna.match(/Requiere la pasarela de pago/g) || []).length === 2, txtAna.slice(0, 160));
+  ck('«cuentas caídas» se explica como la foto de ahora, no como churn del mes',
+     txtAna.includes('no el churn del mes'));
+  ck('la retención se calcula por cohorte',
+     /Mes 0/i.test(txtAna) && (await p.locator('.coh tbody tr').count()) >= 1);
+  ck('el mes 0 de cada cohorte es 100%',
+     (ana.data.cohortes || []).every(c => c.valores[0] === 100), ana.data.cohortes);
+
   // Cambiar de contexto lleva al panel de coach
   await p.click('.s-item:nth-child(2)');
   await p.waitForTimeout(1200);

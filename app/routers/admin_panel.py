@@ -144,6 +144,52 @@ def _clientes_de(org_id: str, db: Session) -> int:
     return len(org_client_detail_ids(org_id, db))
 
 
+def _ultima_actividad_org(org_id: str, db: Session):
+    """Última señal de vida de una cuenta, en ISO, o None.
+
+    Se mira lo que hace el EQUIPO (su último acceso) y lo que hacen sus
+    clientes (entrenamientos y check-ins). Con solo lo primero, una cuenta cuyo
+    coach entra a diario parecería viva aunque nadie entrene; con solo lo
+    segundo, un centro que acaba de empezar parecería muerto.
+    """
+    from app.core.dependencies import org_client_detail_ids, org_member_detail_ids
+    from app.models.checkin import WeeklyCheckin
+    from app.models.session_log import WorkoutSession
+
+    marcas = []
+
+    equipo = org_member_detail_ids(org_id, db)
+    if equipo:
+        user_ids = [d.user_id for d in db.query(UserDetail).filter(
+            UserDetail.id.in_(equipo), UserDetail.user_id.isnot(None)).all()]
+        if user_ids:
+            for u in db.query(User).filter(User.id.in_(user_ids),
+                                           User.last_login_at.isnot(None)).all():
+                marcas.append(u.last_login_at)
+
+    clientes = org_client_detail_ids(org_id, db)
+    if clientes:
+        from sqlalchemy import func
+        for tabla, columna in [(WorkoutSession, WorkoutSession.session_date),
+                               (WeeklyCheckin, WeeklyCheckin.checkin_date)]:
+            f = db.query(func.max(columna)).filter(
+                tabla.client_user_detail_id.in_(clientes)).scalar()
+            if f:
+                marcas.append(f)
+
+    if not marcas:
+        return None
+    # Hay fechas y fechas-con-hora mezcladas; se comparan por su día para no
+    # tener que inventar una hora a las que no la tienen.
+    from datetime import date, datetime
+
+    def como_fecha(x):
+        return x.date() if isinstance(x, datetime) else x
+
+    mejor = max(marcas, key=lambda x: (como_fecha(x), isinstance(x, datetime)))
+    return mejor.isoformat() if isinstance(mejor, (date, datetime)) else None
+
+
 def _serializar_cuenta(org: Organization, db: Session) -> dict:
     from app.models.subscription_plan import SubscriptionPlan
 
@@ -168,6 +214,12 @@ def _serializar_cuenta(org: Organization, db: Session) -> dict:
         "trial_ends_at": org.trial_ends_at.isoformat() if org.trial_ends_at else None,
         "plan_id": org.plan_id,
         "plan": (plan.name if plan else None),
+        # Lo que esta cuenta DEBERÍA pagar al mes según su plan. No es MRR: el
+        # MRR son ingresos cobrados, y hasta que no haya pasarela y registro de
+        # cobros no existen. La pantalla lo llama "cuota" por eso.
+        "cuota_mes": (plan.price_month if plan else None),
+        "internal_notes": org.internal_notes,
+        "last_activity": _ultima_actividad_org(org.id, db),
         # El MRR sigue en null: un plan asignado dice lo que la cuenta DEBERÍA
         # pagar, no lo que ha pagado. Mientras no haya pasarela y registro de
         # cobros, poner aquí la suma de las tarifas sería enseñar ingresos que
@@ -193,6 +245,10 @@ def listar_cuentas(
         "totales": {
             "cuentas": len(cuentas),
             "clientes": sum(c["clientes"] for c in cuentas),
+            # Suma de las cuotas de las cuentas ACTIVAS. Se llama cuota y no
+            # MRR a propósito: es lo contratado, no lo cobrado.
+            "cuota_contratada": sum(c["cuota_mes"] or 0 for c in cuentas
+                                    if c["state"] == "activa"),
             "por_estado": {e: sum(1 for c in cuentas if c["state"] == e) for e in ESTADOS},
         },
     }, "OK")
@@ -1436,6 +1492,65 @@ def sacar_del_equipo(
         db.delete(f)
     db.commit()
     return send_response(None, "Fuera del equipo de Alzum")
+
+
+class FichaCuenta(BaseModel):
+    """Lo editable de la ficha. Todo opcional: se guarda solo lo que llega."""
+    state: Optional[str] = None
+    plan_id: Optional[int] = None
+    internal_notes: Optional[str] = None
+    # `plan_id: null` significa "quítale el plan", que es distinto de "no lo
+    # toques". Sin este centinela no habría forma de decir lo primero.
+    quitar_plan: bool = False
+
+
+@router.put("/organizations/{org_id}", summary="Guardar los cambios de la ficha",
+            description="Estado, plan y notas internas en una sola llamada.")
+def guardar_ficha(
+    org_id: str,
+    data: FichaCuenta,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Un solo guardado para toda la ficha.
+
+    Con un endpoint por campo, cambiar plan y estado a la vez serían dos
+    peticiones y media ficha podría quedarse guardada si la segunda falla.
+    """
+    motivo = _exige_seccion(current_user, db, "organizaciones")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        return send_error("Cuenta no encontrada", code=404)
+
+    cambios = data.model_dump(exclude_unset=True)
+
+    if "state" in cambios and cambios["state"] is not None:
+        if cambios["state"] not in ESTADOS:
+            return send_error(f"Estado no válido. Admitidos: {', '.join(ESTADOS)}", code=400)
+        org.state = cambios["state"]
+        org.is_active = cambios["state"] != "suspendida"
+
+    if data.quitar_plan:
+        org.plan_id = None
+    elif "plan_id" in cambios and cambios["plan_id"] is not None:
+        # Cambiar de plan es cosa de la sección Planes; aquí se comprueba
+        # igualmente porque este endpoint también lo acepta.
+        if _exige_seccion(current_user, db, "planes"):
+            return send_error("No puedes cambiar el plan de una cuenta", code=403)
+        from app.models.subscription_plan import SubscriptionPlan
+        if not db.query(SubscriptionPlan).filter(SubscriptionPlan.id == cambios["plan_id"]).first():
+            return send_error("Plan no encontrado", code=404)
+        org.plan_id = cambios["plan_id"]
+
+    if "internal_notes" in cambios:
+        org.internal_notes = (cambios["internal_notes"] or "").strip() or None
+
+    db.commit()
+    db.refresh(org)
+    return send_response(_serializar_cuenta(org, db), "Cambios guardados")
 
 
 @router.get("/roles", summary="Roles del equipo de Alzum",

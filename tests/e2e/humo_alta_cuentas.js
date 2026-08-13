@@ -57,7 +57,7 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   // asignado dice lo que la cuenta DEBERÍA pagar, no lo que ha pagado.
   ck('una cuenta nueva nace sin plan', (await p.textContent('#contenido')).includes('Sin plan'));
   ck('el MRR sigue sin inventarse',
-     (await p.textContent('#contenido')).includes('El MRR llega con la pasarela de pago'));
+     (await p.textContent('#contenido')).includes('el MRR real'));
 
   // ── LO IMPORTANTE: su contenido queda dentro de la cuenta
   const lg2 = await (await ctx.request.post(`${API}/api/auth/login`, { data: { email: correo, password: 'Centro123!' } })).json();
@@ -107,16 +107,44 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   // ── Ficha de la cuenta
   await p.click('.s-item:nth-child(2)');
   await p.waitForTimeout(1200);
-  await p.click('button:has-text("Ver ficha")');
-  await p.waitForTimeout(900);
-  ck('la ficha se abre', await p.locator('#capaFicha.on').count() === 1);
+  // Se abre pulsando la FILA, no el botón: es lo que pidió el cliente.
+  await p.click('#contenido tbody tr:has-text("NutriEntrena")');
+  await p.waitForTimeout(1200);
+  ck('pulsar la fila abre la ficha', await p.locator('#capaFicha.on').count() === 1);
+  ck('con los tres indicadores arriba', await p.locator('#fichaCuerpo .f-kpi').count() === 3);
+  ck('y los campos de solo lectura', (await p.textContent('#fichaCuerpo')).includes('ID de la cuenta'));
+
+  // Guardar plan, estado y notas de una sola vez
+  const planesDisp = await p.locator('#fPlan option').count();
+  if (planesDisp > 1) await p.selectOption('#fPlan', { index: 1 });
+  await p.selectOption('#fEstado', 'prueba');
+  await p.fill('#fNotas', `Nota interna ${SUF}`);
+  await p.click('#fichaGuardar');
+  await p.waitForTimeout(1800);
+  ck('la ficha guarda de una sola vez',
+     (await p.textContent('#fichaError')).includes('Guardado'), await p.textContent('#fichaError'));
+
+  await p.click('#capaFicha .btn.ghost');
+  await p.waitForTimeout(400);
+  await p.click('#contenido tbody tr:has-text("NutriEntrena")');
+  await p.waitForTimeout(1200);
+  ck('y lo guardado sigue ahí al reabrirla',
+     (await p.inputValue('#fNotas')) === `Nota interna ${SUF}` &&
+     (await p.inputValue('#fEstado')) === 'prueba',
+     { notas: await p.inputValue('#fNotas'), estado: await p.inputValue('#fEstado') });
+  ck('el estado nuevo llega también a la tabla de detrás',
+     (await p.textContent('#contenido')).includes('En prueba'));
+
+  await p.selectOption('#fEstado', 'activa');
+  await p.click('#fichaGuardar');
+  await p.waitForTimeout(1500);
   // Se comprueba la ESTRUCTURA, no un nombre concreto: la fila que se abre
   // depende del orden del listado y de lo que haya en la base.
   const fi = await p.textContent('#fichaCuerpo');
   ck('muestra dueño, estado, país, alta y equipo',
      ['Dueño','Estado','País','Alta'].every(t => fi.includes(t)) && /Equipo \(\d+\)/.test(fi), fi.slice(0, 160));
   ck('el equipo lista al menos al dueño', (await p.locator('#fichaCuerpo .badge.b-prueba').count()) >= 1);
-  ck('avisa de lo que falta', fi.includes('pasarela de pago'));
+  ck('avisa de que la cuota no es lo cobrado', fi.includes('pasarela'));
   await p.click('#capaFicha .btn.ghost');
   await p.waitForTimeout(300);
 
@@ -149,8 +177,9 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.click('button:has-text("Ver ficha")');
   await p.waitForTimeout(900);
   const nombreFicha = (await p.textContent('#fichaTitulo')).trim();
-  ck('la ficha ofrece entrar en la cuenta', await p.locator('#fichaEntrar').isVisible());
-  await p.click('#fichaEntrar');
+  ck('la ficha ofrece abrir el panel del coach',
+     await p.locator('#fichaCuerpo .f-enlace').isVisible());
+  await p.click('#fichaCuerpo .f-enlace');
   await p.waitForTimeout(2500);
 
   ck('lleva al panel de coach', p.url().includes('dashboard.html'), p.url());

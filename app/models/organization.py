@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, JSON
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean, JSON, Text
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -27,6 +27,10 @@ class Organization(Base):
     # siempre cero: un número muerto en una pantalla que existe para decidir
     # precios.
     plan_id = Column(Integer, ForeignKey("platform_plans.id"), nullable=True)
+    # Notas del equipo de Alzum sobre la cuenta. NO las ve el coach: son para
+    # acordarse de por qué se le hizo un precio especial o de que la última
+    # incidencia venía de ahí.
+    internal_notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

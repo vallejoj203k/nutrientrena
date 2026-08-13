@@ -251,3 +251,115 @@ def test_los_totales_cuentan_las_que_todavia_no_tienen_plan(client, seed, admin_
     t = _planes(client, admin_headers)["totales"]
     cuentas = client.get("/api/admin/organizations", headers=admin_headers).json()["data"]["totales"]["cuentas"]
     assert t["cuentas_con_plan"] + t["cuentas_sin_plan"] == cuentas
+
+
+# ── Ficha de la cuenta ──────────────────────────────────────────────────────
+
+def test_la_ficha_se_guarda_entera_de_una_vez(client, seed, admin_headers):
+    """Con un endpoint por campo, cambiar plan y estado a la vez serían dos
+    peticiones y media ficha podría quedarse guardada si la segunda falla."""
+    pid = _crear(client, admin_headers, name="Ficha QA").json()["data"]["id"]
+    d = _crear_cuenta(client, admin_headers, name="Centro de la ficha",
+                      owner_name="Ficha Dueño", owner_email="ficha.duenio@nutrientrena-qa.com",
+                      owner_password="Centro123!").json()["data"]
+
+    r = client.put(f"/api/admin/organizations/{d['id']}", headers=admin_headers, json={
+        "state": "prueba", "plan_id": pid, "internal_notes": "Cuenta demo interna."})
+    assert r.status_code == 200, r.text
+    g = r.json()["data"]
+    assert g["state"] == "prueba"
+    assert g["plan"] == "Ficha QA"
+    assert g["internal_notes"] == "Cuenta demo interna."
+    # Y la cuota sale del plan
+    assert g["cuota_mes"] == 49
+
+
+def test_quitar_el_plan_desde_la_ficha_se_distingue_de_no_tocarlo(client, seed, admin_headers):
+    """Un null a secas no distingue "quítaselo" de "no lo cambies"; por eso hay
+    un centinela."""
+    pid = _crear(client, admin_headers, name="Centinela QA").json()["data"]["id"]
+    _uid, det, _h = _crear_usuario(client, admin_headers, "duenio.pl.centinela@nutrientrena-qa.com", role_id=2)
+    org_id = _crear_organizacion(det, "Centro del centinela")
+    client.put(f"/api/admin/organizations/{org_id}", headers=admin_headers, json={"plan_id": pid})
+
+    # Guardar solo las notas NO le quita el plan
+    r = client.put(f"/api/admin/organizations/{org_id}", headers=admin_headers,
+                   json={"internal_notes": "Solo una nota"})
+    assert r.json()["data"]["plan"] == "Centinela QA", r.text
+
+    # Con el centinela sí
+    r = client.put(f"/api/admin/organizations/{org_id}", headers=admin_headers,
+                   json={"quitar_plan": True})
+    assert r.json()["data"]["plan"] is None, r.text
+
+
+def test_las_notas_internas_no_salen_por_el_lado_del_coach(client, seed, admin_headers):
+    """Son notas del equipo de Alzum SOBRE la cuenta. Que las viera el coach
+    sería peor que no tenerlas."""
+    _uid, det, h = _crear_usuario(client, admin_headers, "coach.notas@nutrientrena-qa.com", role_id=5)
+    org_id = _crear_organizacion(det, "Centro con notas")
+    client.put(f"/api/admin/organizations/{org_id}", headers=admin_headers,
+               json={"internal_notes": "Ojo: pidió descuento"})
+
+    # El coach no entra al panel de plataforma
+    assert client.get(f"/api/admin/organizations/{org_id}", headers=h).status_code == 403
+    # Y su propia organización no se las devuelve
+    r = client.get("/api/organizations/switchable", headers=h)
+    assert "descuento" not in r.text
+
+
+def test_un_estado_inventado_no_se_guarda_desde_la_ficha(client, seed, admin_headers):
+    _uid, det, _h = _crear_usuario(client, admin_headers, "duenio.pl.estado@nutrientrena-qa.com", role_id=2)
+    org_id = _crear_organizacion(det, "Centro con estado raro")
+    assert client.put(f"/api/admin/organizations/{org_id}", headers=admin_headers,
+                      json={"state": "zombi"}).status_code == 400
+
+
+def test_suspender_desde_la_ficha_desactiva_la_cuenta(client, seed, admin_headers):
+    """is_active se mantiene en sincronía: hay código antiguo que lo consulta."""
+    from app.models.organization import Organization as _Org
+
+    _uid, det, _h = _crear_usuario(client, admin_headers, "duenio.pl.susp@nutrientrena-qa.com", role_id=2)
+    org_id = _crear_organizacion(det, "Centro que se suspende desde la ficha")
+    client.put(f"/api/admin/organizations/{org_id}", headers=admin_headers, json={"state": "suspendida"})
+
+    db = SessionLocal()
+    try:
+        assert db.query(_Org).filter(_Org.id == org_id).first().is_active is False
+    finally:
+        db.close()
+
+
+def test_la_ultima_actividad_de_una_cuenta_mira_al_equipo_y_a_sus_clientes(client, seed, admin_headers):
+    """Con solo los accesos del coach, una cuenta cuyo dueño entra a diario
+    parecería viva aunque nadie entrene; con solo la actividad de los clientes,
+    un centro que acaba de empezar parecería muerto."""
+    d = _crear_cuenta(client, admin_headers, name="Centro recién nacido",
+                      owner_name="Nuevo Dueño", owner_email="nuevo.duenio@nutrientrena-qa.com",
+                      owner_password="Centro123!").json()["data"]
+
+    # Nadie ha entrado todavía
+    ficha = client.get(f"/api/admin/organizations/{d['id']}", headers=admin_headers).json()["data"]
+    assert ficha["last_activity"] is None, ficha
+
+    # El dueño entra: ya hay actividad, aunque no tenga ni un cliente
+    client.post("/api/auth/login", json={"email": "nuevo.duenio@nutrientrena-qa.com",
+                                         "password": "Centro123!"})
+    ficha = client.get(f"/api/admin/organizations/{d['id']}", headers=admin_headers).json()["data"]
+    assert ficha["last_activity"] is not None, ficha
+
+
+def test_la_cuota_contratada_suma_solo_las_cuentas_activas(client, seed, admin_headers):
+    """Una cuenta suspendida no paga. Sumarla inflaría el número justo cuando
+    más importa que sea verdad."""
+    pid = _crear(client, admin_headers, name="Suma QA", price_month=100).json()["data"]["id"]
+    d = _crear_cuenta(client, admin_headers, name="Centro que se cae de la suma",
+                      owner_name="Suma Dueño", owner_email="suma.duenio@nutrientrena-qa.com",
+                      owner_password="Centro123!").json()["data"]
+    client.put(f"/api/admin/organizations/{d['id']}", headers=admin_headers,
+               json={"plan_id": pid, "state": "activa"})
+
+    con = client.get("/api/admin/organizations", headers=admin_headers).json()["data"]["totales"]["cuota_contratada"]
+    client.put(f"/api/admin/organizations/{d['id']}", headers=admin_headers, json={"state": "suspendida"})
+    sin = client.get("/api/admin/organizations", headers=admin_headers).json()["data"]["totales"]["cuota_contratada"]
+    assert con - sin == 100, (con, sin)

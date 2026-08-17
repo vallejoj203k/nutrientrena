@@ -844,7 +844,12 @@ function setCuentaCli(v){ _cuentaCli = v; document.getElementById('contenido').i
    musculares, tipos de dieta y grupos de alimentos): son la fuente única de
    verdad de la plataforma y no viven en la librería de nadie. */
 const FAMILIAS = [
-  { id:'entrenamiento', nombre:'Entrenamiento', icono:'trend' },
+  // `pagina` = la pantalla de la librería del coach que se sirve dentro del
+  // panel. Es la MISMA página, sin su menú lateral: sus filtros, sus acciones y
+  // sus formularios son los de siempre, así que un arreglo allí lo hereda el
+  // panel y al revés. Rehacerla aquí serían dos versiones separándose desde el
+  // día siguiente, que es lo que ya pasó con el constructor de rutinas.
+  { id:'entrenamiento', nombre:'Entrenamiento', icono:'trend', pagina:'../rutinas.html' },
   { id:'nutricion',     nombre:'Nutrición',     icono:'box' },
   { id:'formularios',   nombre:'Formularios',   icono:'card',  pendiente:'Las plantillas de formulario no tienen ámbito de organización en la base de datos: hoy cada una pertenece a quien la creó. Para tener formularios de plataforma hace falta añadirles ese ámbito, igual que se hizo con rutinas y dietas.' },
   { id:'documentos',    nombre:'Documentos',    icono:'shield', pendiente:'Los documentos cuelgan del coach que los subió, no de la plataforma. Mismo caso que los formularios.' },
@@ -911,12 +916,13 @@ function htmlContenido(){
           ${esc(f.nombre)}${n !== null ? `<span class="cnt">${n}</span>` : ''}</button>`;
       }).join('')}
     </div>
-    ${fam.pendiente ? bloquePendiente(fam) : (tipos.length ? `
+    ${fam.pagina ? libreriaEmbebida(fam) : ''}
+    ${fam.pagina ? '' : (fam.pendiente ? bloquePendiente(fam) : (tipos.length ? `
       <div class="tipos">
         ${tipos.map(t => `<button class="tipo${t===_tipo?' on':''}" onclick="abrirTipo('${t}')">
             ${esc(cn[t].etiqueta)}<span class="cnt">${cn[t].global}</span></button>`).join('')}
-      </div>` : '')}
-    ${fam.pendiente ? '' : `
+      </div>` : ''))}
+    ${fam.pagina || fam.pendiente ? '' : `
     <div class="barra">
       <div class="buscar-wrap">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -928,6 +934,29 @@ function htmlContenido(){
     ${_cont.recortado ? `<p style="font-size:12px;color:#B45309;margin-top:12px;">Se muestran ${(_cont.items||[]).length} de ${_cont.total}. Afina la búsqueda para ver el resto.</p>` : ''}`}
     ${bloquePropuestas()}`;
 }
+
+/* La librería del coach, dentro del panel. Antes de abrirla se limpia el
+   contexto de organización: si quedara puesto el de una cuenta, lo que se
+   creara "global" nacería dentro de ella. */
+function libreriaEmbebida(fam){
+  try { localStorage.removeItem('org_context'); localStorage.removeItem('org_context_name'); } catch(e) {}
+  return `<div class="card" style="padding:0;overflow:hidden;">
+    <iframe id="libFrame" src="${fam.pagina}?embed=1" title="Librería de ${esc(fam.nombre)}"
+            scrolling="no" style="width:100%;border:0;display:block;height:760px;"></iframe>
+  </div>
+  <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">
+    Es la misma pantalla que usa el coach, con sus mismas funciones. Lo que crees o edites aquí
+    nace con ámbito <b>Plataforma</b> porque estás actuando como la plataforma, no dentro de una cuenta.
+  </p>`;
+}
+
+/* El marco se ajusta a lo que mide la página de dentro. Sin esto queda una
+   barra de scroll dentro de otra, que es incómoda de usar de verdad. */
+window.addEventListener('message', function(e){
+  if (!e.data || e.data.tipo !== 'libreria-alto') return;
+  const f = document.getElementById('libFrame');
+  if (f) f.style.height = Math.max(400, Math.min(e.data.alto + 24, 20000)) + 'px';
+});
 
 function bloquePendiente(fam){
   return `<div class="card"><div class="proximo">

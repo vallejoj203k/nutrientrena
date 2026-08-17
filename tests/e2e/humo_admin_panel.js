@@ -112,11 +112,42 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.click('.s-item:nth-child(6)');
   await p.waitForTimeout(1800);
   ck('la sección Contenido global carga', (await p.textContent('#titulo')).trim() === 'Contenido global');
-  await p.click('.tipo:has-text("Ejercicios")');
-  await p.waitForTimeout(900);
-  const tg = await p.textContent('#contenido');
-  ck('lo de plataforma sale en la lista global', tg.includes(`Sentadilla de fábrica ${SUF}`));
-  ck('lo privado de una cuenta NO se cuela en la global', !tg.includes(`Ejercicio privado ${SUF}`), tg.slice(0, 200));
+
+  /* ── Entrenamiento: la MISMA librería del coach, servida dentro ──────────
+     El cliente pidió que estas pantallas sean idénticas a las suyas. En vez
+     de rehacerlas —dos versiones separándose desde el día siguiente— se sirve
+     la página real sin su menú lateral. Se comprueba justamente eso: que es
+     la página de verdad, con sus funciones, y sin el segundo menú. */
+  const lib = p.frameLocator('#libFrame');
+  await lib.locator('table tbody tr').first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
+  ck('Entrenamiento sirve la librería del coach', await p.locator('#libFrame').count() === 1);
+  ck('sin su menú lateral, para no tener dos menús',
+     !(await lib.locator('.sidebar').isVisible().catch(() => false)));
+  ck('con su buscador y sus filtros',
+     await lib.locator('input[placeholder*="Buscar rutinas"]').isVisible() &&
+     await lib.getByText('Nivel', { exact: true }).first().isVisible());
+  ck('y sus acciones por fila (asignar, ver, editar, borrar)',
+     (await lib.locator('button:has-text("Asignar")').count()) >= 1);
+  ck('el marco se ajusta a lo que mide la página, sin scroll dentro de scroll',
+     parseInt(await p.locator('#libFrame').evaluate(e => e.style.height), 10) > 600,
+     await p.locator('#libFrame').evaluate(e => e.style.height));
+
+  // Las pestañas de dentro siguen navegando DENTRO del panel: si perdieran el
+  // modo incrustado, aparecería el menú del coach dentro del marco.
+  await lib.locator('a:has-text("Ejercicios")').first().click();
+  await p.waitForTimeout(2500);
+  ck('navegar por sus pestañas no saca del panel', await p.locator('#libFrame').count() === 1);
+  ck('y sigue sin menú lateral dentro',
+     !(await lib.locator('.sidebar').isVisible().catch(() => false)));
+
+  // La separación entre plataforma y cuentas se comprueba por API: es una
+  // propiedad de los datos, no de la pantalla.
+  const listaGlobal = await (await ctx.request.get(
+    `${API}/api/admin/content?tipo=trainings&q=${SUF}`, { headers: H })).json();
+  const nombresGlobal = (listaGlobal.data.items || []).map(i => i.nombre);
+  ck('lo de plataforma está en el catálogo global', nombresGlobal.includes(`Sentadilla de fábrica ${SUF}`), nombresGlobal);
+  ck('lo privado de una cuenta NO se cuela en la global',
+     !nombresGlobal.includes(`Ejercicio privado ${SUF}`), nombresGlobal);
 
   await p.click('.fam:has-text("Contenido de organizaciones")');
   await p.waitForTimeout(1400);
@@ -191,27 +222,23 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('y la edición se guarda',
      (editado.data.items || [])[0]?.calorias === 170, (editado.data.items || [])[0]);
 
-  await p.click('.fam:has-text("Entrenamiento")');
-  await p.waitForTimeout(1200);
-
-  // Catálogos sin dueño: se crean y se renombran aquí, y en ningún otro sitio
-  await p.click('.fam:has-text("Entrenamiento")');
-  await p.waitForTimeout(1200);
-  await p.click('.tipo:has-text("Grupos musculares")');
+  // Catálogos sin dueño: se crean y se renombran en el panel. Se prueba con
+  // "Grupos de alimentos" porque Entrenamiento ya sirve la página del coach.
+  await p.click('.tipo:has-text("Grupos de alimentos")');
   await p.waitForTimeout(900);
   await p.click('button:has-text("+ Nuevo")');
   await p.waitForTimeout(400);
   ck('el alta de catálogo se abre', await p.locator('#capaCat.on').count() === 1);
-  await p.fill('#catNombre', `Isquiotibiales ${SUF}`);
+  await p.fill('#catNombre', `Legumbres ${SUF}`);
   await p.click('#catBtn');
   await p.waitForTimeout(1400);
-  ck('la entrada de catálogo se crea', (await p.textContent('#contenido')).includes(`Isquiotibiales ${SUF}`));
+  ck('la entrada de catálogo se crea', (await p.textContent('#contenido')).includes(`Legumbres ${SUF}`));
 
   // Y no se borra si algo lo usa: rompería la librería de todas las cuentas
-  const grupos = await (await ctx.request.get(`${API}/api/admin/content?tipo=muscle_groups&q=${SUF}`, { headers: H })).json();
+  const grupos = await (await ctx.request.get(`${API}/api/admin/content?tipo=group_foods&q=${SUF}`, { headers: H })).json();
   const gid = grupos.data.items[0].id;
-  await post('/trainings', { name: `Ejercicio que usa el grupo ${SUF}`, muscle_group_id: Number(gid) });
-  const negado = await ctx.request.fetch(`${API}/api/admin/content/muscle_groups/${gid}`, { method: 'DELETE', headers: H });
+  await post('/aliments', { name: `Lenteja que usa el grupo ${SUF}`, group_food_id: Number(gid) });
+  const negado = await ctx.request.fetch(`${API}/api/admin/content/group_foods/${gid}`, { method: 'DELETE', headers: H });
   ck('no se borra un catálogo en uso', negado.status() === 400, negado.status());
 
   // Lo que aún no tiene ámbito global se dice, no se finge

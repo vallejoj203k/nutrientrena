@@ -84,7 +84,13 @@ app.add_middleware(
     allow_origins=_origins,
     allow_credentials=_origins != ["*"],   # credentials only when origins are explicit
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+    # X-Organization-Id es la cabecera del "segundo sombrero" (actuar dentro de
+    # una cuenta, o como la plataforma). Sin ponerla aquí el navegador tumba la
+    # comprobación previa y TODAS las llamadas de esa página fallan con un
+    # "NetworkError" que no dice de qué va: una cabecera propia obliga a un
+    # preflight, y el preflight solo pasa las que estén en esta lista.
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With",
+                   "X-Organization-Id"],
 )
 
 # ── Security headers ──────────────────────────────────────────────────────────

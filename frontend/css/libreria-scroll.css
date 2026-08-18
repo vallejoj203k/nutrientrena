@@ -1,0 +1,37 @@
+/* Que la Librería baje entera, y no solo su tabla.
+
+   Cómo estaba: `.main` tenía `height:100vh; overflow:hidden`, la cabecera
+   —título, pestañas, sub-pestañas, la nota de "¿qué es una rutina?" y la barra
+   de búsqueda— iba con `flex-shrink:0`, y el único que scrolleaba era el cajón
+   de la tabla. En una pantalla de portátil eso deja la cabecera comiéndose
+   media ventana sin poder apartarla, y encima cortada: la información de arriba
+   no se llegaba a ver completa y no había forma de llegar a ella.
+
+   Ahora scrollea `.main`: la cabecera se va hacia arriba como cualquier otro
+   contenido y la lista aprovecha la ventana entera.
+
+   Vale para las dos barras laterales —la del coach y la de plataforma— porque
+   son las mismas páginas; la barra no se mueve porque cuelga del <body>, que
+   sigue fijo.
+
+   El fichero es compartido en vez de repetir la regla en las 13 páginas: es la
+   misma lección de siempre en este proyecto, que dos copias de algo acaban
+   separándose (el menú de la Librería llegó a tener 31, y una ya distinta). */
+
+.main { overflow-y: auto; }
+
+/* El cajón interior deja de ser el que scrollea; si no, quedaría un scroll
+   dentro de otro y la cabecera seguiría sin poder apartarse. Se listan las dos
+   formas que usan las páginas —una clase en unas, el estilo suelto en otras— y
+   solo cuando cuelgan directamente del contenedor de la lista, para no tocar
+   los paneles de dentro (el editor, la ficha lateral, el constructor), que sí
+   tienen que scrollar por su cuenta. */
+#listView { overflow: visible; }
+
+.main > .content,
+.main > div[style*="overflow-y:auto"],
+#listView > .content,
+#listView > div[style*="overflow-y:auto"] {
+  overflow: visible !important;
+  flex: none !important;
+}

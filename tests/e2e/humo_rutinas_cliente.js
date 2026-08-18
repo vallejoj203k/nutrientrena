@@ -38,6 +38,32 @@ const PROD='https://nutrientrena-production.up.railway.app';
   await p.evaluate(([t,r])=>{localStorage.setItem('token',t);localStorage.setItem('role_id',r);},[token,roleId]);
   await p.goto(FRONT+'/rutinas.html');
   await p.waitForTimeout(2500);
+
+  /* La Librería baja ENTERA, no solo su tabla. Antes la cabecera —título,
+     pestañas, la nota y el buscador— se quedaba clavada arriba comiéndose media
+     ventana, y la información de arriba se veía cortada sin forma de llegar a
+     ella. Se comprueba en el panel del coach; la misma hoja de estilos la usa
+     el de plataforma. */
+  const desplaza = await p.evaluate(() => {
+    const m = document.querySelector('.main');
+    const cab = document.querySelector('.lib-header');
+    if (!m || !cab) return null;
+    const antes = cab.getBoundingClientRect().top;
+    m.scrollTop = 400;
+    return { movida: Math.round(antes - cab.getBoundingClientRect().top),
+             margen: m.scrollHeight - m.clientHeight };
+  });
+  ck('LA CABECERA DE LA LIBRERÍA SE APARTA AL BAJAR',
+     desplaza && desplaza.margen > 0 && desplaza.movida > 100, desplaza);
+  ck('y no queda un scroll dentro de otro', await p.evaluate(() => {
+    const dentro = Array.from(document.querySelectorAll('.main > *, #listView > *')).filter(e => {
+      const s = getComputedStyle(e);
+      return (s.overflowY === 'auto' || s.overflowY === 'scroll') && e.scrollHeight - e.clientHeight > 4;
+    });
+    return dentro.length === 0;
+  }));
+  await p.evaluate(() => { document.querySelector('.main').scrollTop = 0; });
+
   await p.evaluate(id=>openForm(id), rut.data.id);
   await p.waitForTimeout(2000);
   await p.evaluate(()=>wizardNext());

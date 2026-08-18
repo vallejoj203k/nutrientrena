@@ -112,11 +112,22 @@ class Settings(BaseSettings):
           1. ALLOWED_ORIGINS env var (explicit, comma-separated)
           2. FRONTEND_URL when it points to a real domain (not localhost)
           3. Wildcard "*" — only as a last resort for local dev
+
+        Un origen es esquema + dominio (+ puerto) y NADA más. FRONTEND_URL suele
+        llevar la carpeta de la app (".../app"), y dejarla puesta daba una lista
+        que el navegador no puede casar nunca —manda `Origin: https://alzum.io`,
+        no `https://alzum.io/app`—, así que todas las peticiones se caían sin
+        que el motivo se viera por ninguna parte.
         """
+        def _origen(u: str) -> str:
+            from urllib.parse import urlsplit
+            p = urlsplit(u.strip())
+            return f"{p.scheme}://{p.netloc}" if p.scheme and p.netloc else u.strip().rstrip("/")
+
         if self.ALLOWED_ORIGINS:
-            return [o.strip() for o in self.ALLOWED_ORIGINS.split(",")]
+            return [_origen(o) for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
         if "localhost" not in self.FRONTEND_URL and "127.0.0.1" not in self.FRONTEND_URL:
-            return [self.FRONTEND_URL.rstrip("/")]
+            return [_origen(self.FRONTEND_URL)]
         return ["*"]
 
     @property

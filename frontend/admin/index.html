@@ -476,6 +476,7 @@
   </div>
 </div>
 
+<script src="../js/libreria-menu.js"></script>
 <script src="../js/menu-plataforma.js"></script>
 <script src="../js/org-context.js"></script>
 <script>
@@ -516,31 +517,32 @@ function salir(){ localStorage.removeItem('token'); localStorage.removeItem('rol
 
 function pintarNav(){
   document.getElementById('nav').innerHTML = _secciones.map(s => {
-    // "Contenido global" se despliega, como "Librería" en el panel del coach:
-    // sus entradas son las páginas de verdad, no pantallas rehechas aquí.
-    if (s.id === 'contenido') return itemLibreria(s);
+    /* "Contenido global" se despliega y no navega, igual que "Librería" en el
+       panel del coach. La sección sigue existiendo —es lo que le da acceso al
+       editor de contenido global, que no tiene ninguna otra— y su portada se
+       ve al entrar por ahí; lo que no hace es robarle el clic al desplegable. */
+    if (s.id === 'contenido') return itemLibreria();
     return `<button class="s-item${s.id===_actual?' active':''}" onclick="abrir('${s.id}')">
        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[s.icono]||''}</svg>
        <span>${s.nombre}</span>
      </button>`;
   }).join('');
+
+  // El desplegable y su panel lateral los maneja menu-plataforma.js: los mismos
+  // que en la Librería, así que se comportan igual sin repetir el código.
+  const M = window.MenuPlataforma;
+  if (M) M.conectarFlyout(document.getElementById('nav'), '../', M.conModo);
 }
 
-/* El mapa de la librería lo sirve menu-plataforma.js, que es el mismo que usan
-   esas páginas para pintar SU menú. Tenerlo en los dos sitios sería la cuarta
-   vez que dos copias de lo mismo se separan en este proyecto. */
-function itemLibreria(s){
+/* El desplegable NO se pinta aquí: lo pinta menu-plataforma.js, que es el
+   mismo que lo pinta dentro de las páginas de la Librería, y que a su vez lee
+   las familias de js/libreria-menu.js, que es el mismo mapa que usa el menú del
+   coach. Un solo sitio para las tres pantallas donde aparece.
+
+   El "../" es porque el panel vive en /admin y la Librería en la raíz. */
+function itemLibreria(){
   const M = window.MenuPlataforma;
-  const abierto = _actual === 'contenido';
-  const sub = (M ? M.LIBRERIA : []).map(g =>
-    `<div class="s-grupo">${esc(g.grupo)}</div>` +
-    g.items.map(i => `<a href="../${M.conModo(i.pagina)}">${esc(i.nombre)}</a>`).join('')
-  ).join('');
-  return `<button class="s-item${abierto?' active abierto':''}" onclick="abrir('contenido')">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[s.icono]||''}</svg>
-      <span>${esc(s.nombre)}</span>
-      <svg class="chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-    </button><div class="s-sub${abierto?' abierto':''}">${sub}</div>`;
+  return M ? M.htmlItemContenido('../', M.conModo) : '';
 }
 
 function enConstruccion(id){
@@ -820,10 +822,10 @@ function pintarPortadaLibreria(){
       para volver al panel, pulsa <b>Plataforma Alzum</b> arriba del menú.</span>
     </div>
     <div class="kpis">
-      ${(M ? M.LIBRERIA : []).map(g => `<div class="rol-tarj">
-        <div class="rh"><b>${esc(g.grupo)}</b></div>
+      ${(M ? M.familias() : []).map(f => `<div class="rol-tarj">
+        <div class="rh"><b>${esc(f.menu.title)}</b></div>
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
-          ${g.items.map(i => `<a href="../${M.conModo(i.pagina)}" style="font-size:13px;color:var(--indigo);font-weight:600;text-decoration:none;">${esc(i.nombre)} →</a>`).join('')}
+          ${f.menu.items.map(i => `<a href="../${M.conModo(i.href)}" style="font-size:13px;color:var(--indigo);font-weight:600;text-decoration:none;">${esc(i.label)} →</a>`).join('')}
         </div></div>`).join('')}
     </div>`;
 }

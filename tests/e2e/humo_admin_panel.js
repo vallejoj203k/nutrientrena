@@ -109,22 +109,40 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
     headers: { Authorization: 'Bearer ' + lgd.data.token } })).json();
   ck('ejercicio privado de una cuenta creado', !!priv.data?.organization_id, priv.data);
 
+  // "Contenido global" se despliega, no navega: exactamente como "Librería" en
+  // el panel del coach, que es lo que pidió el cliente.
   await p.click('.s-item:has-text("Contenido global")');
-  await p.waitForTimeout(1500);
-  ck('la sección Contenido global carga', (await p.textContent('#titulo')).trim() === 'Contenido global');
+  await p.locator('.s-sub.abierto').waitFor({ state: 'visible', timeout: 10000 });
+  ck('«Contenido global» se despliega, como «Librería» en el panel del coach',
+     (await p.locator('.s-sub.abierto').count()) === 1);
 
   /* ── Contenido global ES la Librería ────────────────────────────────────
      El cliente lo pidió literal: que el botón lleve a las páginas de verdad y
      que todo funcione igual que en el panel del coach, pero conservando el
      menú de la plataforma. Así que no se comprueba una pantalla rehecha aquí:
      se comprueba que se abre la página real y que trae el menú correcto. */
-  const sub = await p.locator('.s-sub.abierto a').allTextContents();
-  ck('el menú despliega las pantallas de la librería', sub.length === 13, sub);
-  ck('con los grupos de la librería del coach',
-     ['Rutinas', 'Ejercicios', 'Grupos musculares', 'Dietas', 'Alimentos', 'Formularios', 'Plantillas']
-       .every(n => sub.includes(n)), sub);
+  const fams = await p.locator('.s-sub.abierto .s-fam span').allTextContents();
+  ck('el menú despliega las MISMAS familias que la Librería del coach',
+     JSON.stringify(fams) === JSON.stringify(['Entrenamiento', 'Nutrición', 'Formulario', 'Documentos']), fams);
 
-  await p.click('.s-sub.abierto a:has-text("Rutinas")');
+  // Y cada familia abre a un lado su panel con sus pantallas, igual que allí.
+  await p.click('.s-fam:has-text("Entrenamiento")');
+  await p.locator('.plat-fly.on').waitFor({ state: 'visible', timeout: 10000 });
+  const deEntreno = await p.locator('.plat-fly-item').allTextContents();
+  ck('y cada familia abre su panel con sus pantallas',
+     JSON.stringify(deEntreno) === JSON.stringify(['Rutinas', 'Ejercicios', 'Grupos Musculares', 'Programas']),
+     deEntreno);
+  ck('con el nombre de la familia arriba',
+     (await p.textContent('.plat-fly-cab b')) === 'Entrenamiento');
+
+  // El mapa es literalmente el mismo fichero que usa el menú del coach: si
+  // alguien añade una pantalla allí, aquí sale sola.
+  ck('SALE DEL MISMO MAPA QUE EL MENÚ DEL COACH', await p.evaluate(() => {
+    const m = window.LIBRERIA_MENU;
+    return !!m && m === window._flyoutMenus && Object.keys(m).length === 4;
+  }));
+
+  await p.click('.plat-fly-item:has-text("Rutinas")');
   await p.waitForLoadState('domcontentloaded');
   // Se espera a "Visión general": el menú se pinta en dos tiempos —primero lo
   // que sabe la página, luego las secciones que contesta el servidor— y esa
@@ -135,7 +153,8 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('con el menú de la plataforma', await p.locator('#sidePlataforma .s-item').count() >= 11);
   ck('y sin el menú del coach, para no tener dos',
      !(await p.locator('body > .layout > .sidebar, body > .sidebar').first().isVisible().catch(() => false)));
-  ck('la pantalla marca dónde estás', await p.locator('.s-sub.abierto a.active:has-text("Rutinas")').count() === 1);
+  ck('la pantalla marca dónde estás',
+     await p.locator('.s-sub.abierto .s-fam.on:has-text("Entrenamiento")').count() === 1);
 
   await p.locator('table tbody tr').first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
   ck('con su buscador y sus filtros',
@@ -146,7 +165,7 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
 
   // Los enlaces de dentro arrastran el modo: si lo perdieran, a mitad de
   // navegación reaparecería el menú del coach.
-  await p.click('a:has-text("Ejercicios")');
+  await p.click('a.lib-subtab:has-text("Ejercicios")');
   await p.waitForLoadState('domcontentloaded');
   await p.locator('#sidePlataforma .s-item:has-text("Visión general")')
           .waitFor({ state: 'visible', timeout: 25000 });
@@ -212,7 +231,7 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
      (await pagRota.locator('#sidePlataforma').count()) === 1 &&
      !(await pagRota.locator('body > .layout > .sidebar, body > .sidebar').first().isVisible().catch(() => false)));
   ck('y la Librería se sigue pudiendo recorrer',
-     (await pagRota.locator('#sidePlataforma .s-sub a').count()) === 13);
+     (await pagRota.locator('#sidePlataforma .s-fam').count()) === 4);
   await pagRota.close();
 
   // La separación entre plataforma y cuentas se comprueba por API: es una

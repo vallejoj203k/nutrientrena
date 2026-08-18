@@ -15,32 +15,25 @@
 (function () {
   var PARAM = 'panel', VALOR = 'plataforma';
 
-  /* El mapa de la Librería, en UN solo sitio. Lo usan el panel (/admin) para
-     pintar su sub-menú y estas páginas para pintar el suyo: si estuviera en
-     los dos, se separarían al añadir una pantalla. */
-  var LIBRERIA = [
-    { grupo: 'Entrenamiento', items: [
-      { pagina: 'rutinas.html',            nombre: 'Rutinas' },
-      { pagina: 'ejercicios.html',         nombre: 'Ejercicios' },
-      { pagina: 'grupos-musculares.html',  nombre: 'Grupos musculares' },
-    ]},
-    { grupo: 'Nutrición', items: [
-      { pagina: 'diets.html',                        nombre: 'Dietas' },
-      { pagina: 'menus.html',                        nombre: 'Menús' },
-      { pagina: 'recipes.html',                      nombre: 'Recetas' },
-      { pagina: 'aliments.html',                     nombre: 'Alimentos' },
-      { pagina: 'nutrition-catalog.html?tab=tipos',  nombre: 'Tipos de dieta' },
-      { pagina: 'nutrition-catalog.html?tab=grupos', nombre: 'Grupos de alimentos' },
-    ]},
-    { grupo: 'Formularios', items: [
-      { pagina: 'forms.html', nombre: 'Formularios' },
-    ]},
-    { grupo: 'Documentos', items: [
-      { pagina: 'contratos.html',  nombre: 'Contratos' },
-      { pagina: 'guias.html',      nombre: 'Guías' },
-      { pagina: 'plantillas.html', nombre: 'Plantillas' },
-    ]},
-  ];
+  /* Las familias de la Librería y sus pantallas salen de js/libreria-menu.js,
+     que es EL MISMO fichero que usa el menú del coach. Antes había aquí una
+     lista propia, y por tanto dos: la del coach ya tenía Programas y Catálogos
+     y esta no. El cliente pidió que "Contenido global" funcione exactamente
+     igual que "Librería"; la única manera de que siga siendo verdad dentro de
+     un mes es que sea la misma lista, no una copia parecida. */
+  function familias() {
+    var m = window.LIBRERIA_MENU || window._flyoutMenus || {};
+    return Object.keys(m).map(function (k) { return { clave: k, menu: m[k] }; });
+  }
+
+  /* El icono de cada familia en el desplegable, igual que en el menú del
+     coach. Las pantallas traen el suyo dentro del mapa compartido. */
+  var ICONOS_FAM = {
+    entrenamiento: '<path d="M6 4v16M18 4v16M6 12h12"/>',
+    nutricion:     '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    formulario:    '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+    documento:     '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  };
 
   var ICONOS = {
     chart:'<path d="M18 20V10M12 20V4M6 20v-6"/>',
@@ -66,13 +59,32 @@
     return href + (href.indexOf('?') === -1 ? '?' : '&') + PARAM + '=' + VALOR;
   }
 
+  /* Qué pantalla se está viendo, para marcarla. Se compara con el `cat` porque
+     las tres entradas de Formulario son la misma página con distinto filtro:
+     sin eso, estando en Encuestas se marcaría Check-ins. */
   function paginaActual() {
     var f = location.pathname.split('/').pop() || 'index.html';
-    var tab = new URLSearchParams(location.search).get('tab');
-    return tab ? f + '?tab=' + tab : f;
+    var cat = new URLSearchParams(location.search).get('cat');
+    return cat ? f + '?cat=' + cat : f;
   }
 
-  window.MenuPlataforma = { LIBRERIA: LIBRERIA, conModo: conModo, modoPlataforma: modoPlataforma };
+  function esLaActual(href) {
+    return href.split('&')[0] === paginaActual();
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  window.MenuPlataforma = {
+    familias: familias, conModo: conModo, modoPlataforma: modoPlataforma,
+    esLaActual: esLaActual,
+    // Lo que usa el panel (/admin) para pintar el MISMO desplegable.
+    htmlItemContenido: function (prefijo, enlace) { return htmlItemContenido(prefijo, enlace); },
+    conectarFlyout: conectarFlyout,
+    cerrarFlyout: cerrarFlyout,
+  };
 
   if (!modoPlataforma()) return;
 
@@ -83,10 +95,6 @@
      plataforma, que es lo que hacía pensar que se había cambiado de panel. */
   esconderMenuDelCoach();
 
-  var esc = function (s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  };
 
   function arrancar() {
     var token;
@@ -218,13 +226,12 @@
   function pintar(d) {
     var previo = document.getElementById('sidePlataforma');
 
-    var actual = paginaActual();
     var side = document.createElement('aside');
     side.className = 'side';
     side.id = 'sidePlataforma';
 
     var secciones = (d.secciones || []).map(function (s) {
-      if (s.id === 'contenido') return itemContenido(actual);
+      if (s.id === 'contenido') return itemContenido();
       return '<a class="s-item" href="admin/index.html#' + s.id + '">' +
              svg(s.icono) + '<span>' + esc(s.nombre) + '</span></a>';
     }).join('');
@@ -232,7 +239,7 @@
     // Contenido global se pinta siempre, venga o no la lista de secciones: es
     // la pantalla en la que se está, y es lo que permite moverse por la
     // Librería aunque el servidor no haya contestado quién eres.
-    if (!/id="itemContenido"/.test(secciones)) secciones = itemContenido(actual) + secciones;
+    if (!/id="itemContenido"/.test(secciones)) secciones = itemContenido() + secciones;
 
     side.innerHTML =
       '<div class="side-brand">' + svgEscudo() +
@@ -258,36 +265,24 @@
       location.replace('login.html');
     });
 
-    var cab = side.querySelector('#itemContenido');
-    if (cab) cab.addEventListener('click', function () {
-      cab.classList.toggle('abierto');
-      document.getElementById('subContenido').classList.toggle('abierto');
-    });
+    conectarFlyout(side, '', conModo);
   }
 
-  function itemContenido(actual) {
-    var abierto = LIBRERIA.some(function (g) {
-      return g.items.some(function (i) { return i.pagina === actual; });
-    });
-    var sub = LIBRERIA.map(function (g) {
-      return '<div class="s-grupo">' + esc(g.grupo) + '</div>' +
-        g.items.map(function (i) {
-          return '<a href="' + conModo(i.pagina) + '"' +
-                 (i.pagina === actual ? ' class="active"' : '') + '>' + esc(i.nombre) + '</a>';
-        }).join('');
-    }).join('');
-
-    return '<button class="s-item' + (abierto ? ' active abierto' : '') + '" id="itemContenido" type="button">' +
-           svg('shield') + '<span>Contenido global</span>' +
-           '<svg class="chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>' +
-           '</button><div class="s-sub' + (abierto ? ' abierto' : '') + '" id="subContenido">' + sub + '</div>';
+  /* "Contenido global" se despliega igual que "Librería" en el panel del coach:
+     primero las cuatro familias, y cada una abre a un lado el panel con sus
+     pantallas. Es el mismo mapa y la misma forma de navegar; lo único distinto
+     es que estas pantallas se abren en modo plataforma. */
+  function itemContenido() {
+    return htmlItemContenido('', conModo);
   }
 
   /* Los enlaces de la propia librería tienen que arrastrar el modo. Sin esto,
      pulsar "Nutrición" devolvería al menú del coach a mitad de navegación. */
   function marcarEnlaces() {
     var paginas = {};
-    LIBRERIA.forEach(function (g) { g.items.forEach(function (i) { paginas[i.pagina.split('?')[0]] = 1; }); });
+    familias().forEach(function (f) {
+      f.menu.items.forEach(function (i) { paginas[i.href.split('?')[0]] = 1; });
+    });
 
     var enlaces = document.querySelectorAll('a[href]:not([data-menu-plat])');
     for (var i = 0; i < enlaces.length; i++) {
@@ -298,6 +293,116 @@
       if (!paginas[href.split('?')[0]]) continue;      // solo páginas de la librería
       a.setAttribute('href', conModo(href));
     }
+  }
+
+  /* ── El desplegable de dos niveles, compartido ──────────────────────────
+     Lo pintan los DOS sitios: el panel (/admin) y estas páginas. Vive aquí
+     porque tenerlo en los dos era exactamente lo que acaba de pasarle al menú
+     del coach: 31 copias y una ya distinta de las demás.
+
+     `prefijo` es lo que hay que anteponer a las direcciones ('../' desde
+     /admin, nada desde la raíz) y `enlace` decide cómo se compone cada una. */
+  function htmlItemContenido(prefijo, enlace, activa) {
+    var fams = familias();
+    var abierta = activa || familiaDeLaPagina();
+
+    var sub = fams.map(function (f) {
+      return '<button type="button" class="s-fam' + (f.clave === abierta ? ' on' : '') +
+             '" data-fam="' + f.clave + '">' +
+             '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+             (ICONOS_FAM[f.clave] || '') + '</svg>' +
+             '<span>' + esc(f.menu.title) + '</span>' +
+             '<svg class="flecha" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>' +
+             '</button>';
+    }).join('');
+
+    return '<button class="s-item' + (abierta ? ' active abierto' : '') + '" id="itemContenido" type="button">' +
+           svg('shield') + '<span>Contenido global</span>' +
+           '<svg class="chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>' +
+           '</button><div class="s-sub' + (abierta ? ' abierto' : '') + '" id="subContenido">' + sub + '</div>';
+  }
+
+  // Qué familia contiene la pantalla que se está viendo. Sirve para dejar el
+  // desplegable abierto por donde estás, sin tener que buscarte tú.
+  function familiaDeLaPagina() {
+    var act = paginaActual(), encontrada = '';
+    familias().forEach(function (f) {
+      f.menu.items.forEach(function (i) {
+        if (i.href === act || i.href.split('?')[0] === act) encontrada = encontrada || f.clave;
+      });
+    });
+    return encontrada;
+  }
+
+  /* El panel lateral que se abre a la derecha con las pantallas de la familia.
+     Se crea aquí y no se toma el de la página: el de la página cuelga del menú
+     del coach, que en modo plataforma está escondido. */
+  function conectarFlyout(raiz, prefijo, enlace) {
+    var item = raiz.querySelector('#itemContenido');
+    var sub = raiz.querySelector('#subContenido');
+    if (item && sub) item.addEventListener('click', function () {
+      item.classList.toggle('abierto');
+      sub.classList.toggle('abierto');
+      if (!sub.classList.contains('abierto')) cerrarFlyout();
+    });
+
+    Array.prototype.forEach.call(raiz.querySelectorAll('.s-fam'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        abrirFlyout(b, b.getAttribute('data-fam'), prefijo, enlace);
+      });
+    });
+  }
+
+  function cajaFlyout() {
+    var caja = document.getElementById('platFlyout');
+    if (caja) return caja;
+    var fondo = document.createElement('div');
+    fondo.id = 'platFlyoutFondo';
+    fondo.className = 'plat-fly-fondo';
+    fondo.addEventListener('click', cerrarFlyout);
+    caja = document.createElement('div');
+    caja.id = 'platFlyout';
+    caja.className = 'plat-fly';
+    caja.innerHTML = '<div class="plat-fly-cab"><span class="punto"></span><b></b></div><div class="plat-fly-items"></div>';
+    document.body.appendChild(fondo);
+    document.body.appendChild(caja);
+    // Cerrar con Escape: es un panel flotante, y quedarse sin salida con el
+    // teclado es lo que convierte un menú en una trampa.
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrarFlyout(); });
+    return caja;
+  }
+
+  function abrirFlyout(boton, clave, prefijo, enlace) {
+    var m = (window.LIBRERIA_MENU || window._flyoutMenus || {})[clave];
+    if (!m) return;
+    var caja = cajaFlyout(), fondo = document.getElementById('platFlyoutFondo');
+
+    caja.querySelector('.punto').style.background = m.color;
+    caja.querySelector('b').textContent = m.title;
+    caja.querySelector('.plat-fly-items').innerHTML = m.items.map(function (i) {
+      var href = prefijo + enlace(i.href);
+      return '<a class="plat-fly-item' + (esLaActual(enlace(i.href)) ? ' on' : '') + '" href="' + href + '">' +
+             '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">' +
+             i.icon + '</svg>' + esc(i.label) + '</a>';
+    }).join('');
+
+    var r = boton.getBoundingClientRect();
+    caja.style.left = Math.round(r.right + 8) + 'px';
+    caja.style.top = Math.max(8, Math.min(r.top, window.innerHeight - (m.items.length * 40 + 76))) + 'px';
+    caja.classList.add('on');
+    fondo.classList.add('on');
+
+    Array.prototype.forEach.call(document.querySelectorAll('.s-fam'), function (b) {
+      b.classList.toggle('on', b === boton);
+    });
+  }
+
+  function cerrarFlyout() {
+    var caja = document.getElementById('platFlyout');
+    var fondo = document.getElementById('platFlyoutFondo');
+    if (caja) caja.classList.remove('on');
+    if (fondo) fondo.classList.remove('on');
   }
 
   function svg(nombre) {

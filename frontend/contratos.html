@@ -237,6 +237,9 @@
        desde el panel no enseñe por un instante el panel equivocado. -->
   <link rel="stylesheet" href="css/panel-plataforma.css">
   <script src="js/menu-plataforma.js"></script>
+  <!-- El menú de la Librería, en un solo sitio. Estaba copiado en 31 páginas
+       y una copia ya se había quedado atrás. -->
+  <script src="js/libreria-menu.js"></script>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -1126,30 +1129,6 @@ let toastTimer;
 function showToast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500);}
 
 // ── Flyout (library nav) ──────────────────────────────────────────────────────
-var _flyoutMenus={
-  entrenamiento:{title:'Entrenamiento',color:'#4F46E5',items:[
-    {label:'Rutinas',href:'rutinas.html',icon:'<path d="M3 12h18M3 6h18M3 18h18"/>'},
-    {label:'Ejercicios',href:'ejercicios.html',icon:'<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4"/>'},
-    {label:'Grupos Musculares',href:'grupos-musculares.html',icon:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'},
-    {label:'Programas',href:'programas.html',icon:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'}
-  ]},
-  nutricion:{title:'Nutrición',color:'#059669',items:[
-    {label:'Dietas',href:'diets.html',icon:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
-    {label:'Menús',href:'menus.html',icon:'<path d="M3 11l19-9-9 19-2-8-8-2z"/>'},
-    {label:'Alimentos',href:'aliments.html',icon:'<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>'},
-    {label:'Recetas',href:'recipes.html',icon:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'}
-  ]},
-  formulario:{title:'Formulario',color:'#D97706',items:[
-    {label:'Check-ins',href:'forms.html?cat=checkin',icon:'<path d="M9 11l3 3L22 4"/>'},
-    {label:'Onboarding',href:'forms.html?cat=onboarding',icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>'},
-    {label:'Encuestas',href:'forms.html?cat=survey',icon:'<circle cx="12" cy="12" r="10"/>'}
-  ]},
-  documento:{title:'Documentos',color:'#7C3AED',items:[
-    {label:'Contratos',href:'contratos.html',icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
-    {label:'Guías',href:'guias.html',icon:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>'},
-    {label:'Plantillas',href:'plantillas.html',icon:'<rect x="3" y="3" width="18" height="18" rx="2"/>'}
-  ]}
-};
 function openFlyout(e,cat){
   e.stopPropagation();
   var menu=_flyoutMenus[cat];if(!menu)return;

@@ -16,6 +16,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from sqlalchemy import String, cast
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -752,6 +753,227 @@ def listar_contenido(
         "items": [_fila_contenido(tipo, o, cfg, db, nombres_org) for o in objetos],
         "total": total, "recortado": total > len(objetos),
         "promover": cfg["promover"],
+    }, "OK")
+
+
+# ── Ficha de una pieza de contenido de una cuenta ──────────────────────────
+# Para decidir si sube a la plataforma hay que poder VERLA. Antes la lista solo
+# daba el nombre y la cuenta, así que "subir a plataforma" era una decisión a
+# ciegas sobre algo que van a ver todas las cuentas.
+
+
+def _texto(v):
+    """Un valor listo para enseñar, o None si no hay nada que enseñar."""
+    if v is None:
+        return None
+    if isinstance(v, str):
+        v = v.strip()
+        return v or None
+    if isinstance(v, float) and v == int(v):
+        return str(int(v))
+    return str(v)
+
+
+def _campos(pares):
+    return [{"etiqueta": e, "valor": _texto(v)} for e, v in pares if _texto(v) is not None]
+
+
+def _detalle_rutina(obj, db):
+    from app.models.routine import RoutineDayDetail
+
+    TIPOS_BLOQUE = {"warmup": "Calentamiento", "normal": "Bloque", "superset": "Superserie",
+                    "circuit": "Circuito", "text": "Nota"}
+    bloques, ejercicios, privados = [], 0, []
+    for dia in (obj.days_list or []):
+        filas = []
+        for blq in (dia.blocks or []):
+            etiqueta = TIPOS_BLOQUE.get(blq.block_type, blq.block_type or "Bloque")
+            if blq.block_type == "text":
+                filas.append([etiqueta, _texto(blq.content) or "—", "", "", ""])
+                continue
+            for ej in (blq.exercises or []):
+                tr = ej.training
+                ejercicios += 1
+                if tr is not None and tr.organization_id is not None:
+                    privados.append(tr.name)
+                filas.append([
+                    etiqueta,
+                    (tr.name if tr else None) or "—",
+                    _texto(ej.series) or "—",
+                    _texto(ej.repetitions) or "—",
+                    (_texto(ej.break_time) + "s") if _texto(ej.break_time) else "—",
+                ])
+        bloques.append({
+            "titulo": _texto(dia.day_name) or "Día",
+            "subtitulo": _texto(dia.description),
+            "cabeceras": ["Bloque", "Ejercicio", "Series", "Reps", "Descanso"],
+            "filas": filas,
+        })
+
+    nivel = getattr(obj, "training_level", None)
+    campos = _campos([
+        ("Objetivo", obj.objective),
+        ("Nivel", getattr(nivel, "description", None)),
+        ("Días por semana", obj.days),
+        ("Duración", f"{obj.time} semanas" if obj.time else None),
+        ("Material", obj.materials),
+        ("Notas", obj.notes),
+        ("Días definidos", len(obj.days_list or [])),
+        ("Ejercicios en total", ejercicios),
+    ])
+    return campos, bloques, privados
+
+
+def _detalle_ejercicio(obj, db):
+    from app.models.routine import RoutineDayDetail
+
+    NIVELES = {1: "Principiante", 2: "Intermedio", 3: "Avanzado"}
+    TIPOS = {"compound": "Compuesto", "isolation": "Aislamiento",
+             "cardio": "Cardio", "mobility": "Movilidad"}
+    LUGARES = {"gym": "Gimnasio", "home": "Casa", "outdoor": "Exterior", "both": "Ambos"}
+    usos = db.query(RoutineDayDetail).filter(RoutineDayDetail.training_id == obj.id).count()
+    campos = _campos([
+        ("Grupo muscular", getattr(getattr(obj, "muscle_group", None), "name", None)),
+        ("Tipo", TIPOS.get(obj.exercise_type, obj.exercise_type)),
+        ("Dificultad", NIVELES.get(obj.difficulty, obj.difficulty)),
+        ("Material", obj.material),
+        ("Dónde", LUGARES.get(obj.location, obj.location)),
+        ("Patrón de movimiento", obj.movement_pattern),
+        ("Series recomendadas", obj.rec_series),
+        ("Reps recomendadas", obj.rec_reps),
+        ("Descanso recomendado", obj.rec_rest),
+        ("Descripción", obj.description),
+        ("Vídeo", obj.video_url),
+        ("Se usa en", f"{usos} rutina{'s' if usos != 1 else ''}"),
+    ])
+    return campos, [], []
+
+
+def _detalle_dieta(obj, db):
+    comidas, total_alimentos, privados = [], 0, []
+    for comida in (obj.foods or []):
+        filas = []
+        for det in (comida.detail or []):
+            al = det.aliment
+            total_alimentos += 1
+            if al is not None and al.organization_id is not None:
+                privados.append(al.name)
+            filas.append([
+                (al.name if al else None) or "—",
+                (_texto(det.quantity) or "—") + " " + ((al.quantity_unit if al else None) or "g"),
+                _texto(getattr(al, "calories", None)) or "—",
+            ])
+        comidas.append({
+            "titulo": _texto(comida.name) or "Comida",
+            "subtitulo": _texto(comida.time),
+            "cabeceras": ["Alimento", "Cantidad", "Kcal/100"],
+            "filas": filas,
+        })
+
+    d = getattr(obj, "detail", None)
+    campos = _campos([
+        ("Tipo de dieta", getattr(getattr(obj, "type", None), "name", None)),
+        ("Calorías", obj.calories),
+        ("Proteínas", getattr(d, "proteins", None)),
+        ("Carbohidratos", getattr(d, "carbs", None)),
+        ("Grasas", getattr(d, "fats", None)),
+        ("Fibra", getattr(d, "fiber", None)),
+        ("Notas", obj.notes),
+        ("Comidas", len(obj.foods or [])),
+        ("Alimentos en total", total_alimentos),
+    ])
+    return campos, comidas, privados
+
+
+def _detalle_alimento(obj, db):
+    from app.models.nutrition.diet import DietFoodAliment
+
+    usos = db.query(DietFoodAliment).filter(DietFoodAliment.aliment_id == obj.id).count()
+    unidad = obj.quantity_unit or "g"
+    campos = _campos([
+        ("Grupo de alimentos", getattr(getattr(obj, "group_food", None), "name", None)),
+        ("Marca", obj.brand),
+        ("Ración", f"{_texto(obj.quantity)} {unidad}" if _texto(obj.quantity) else None),
+        ("Calorías", obj.calories),
+        ("Proteínas", obj.proteins),
+        ("Carbohidratos", obj.carbohydrates),
+        ("Grasas", obj.fats),
+        ("Momentos del día", obj.meal_moments),
+        ("Lo usa el generador", "Sí" if obj.use_in_generator else "No"),
+        ("Comentarios", obj.comments),
+        ("Se usa en", f"{usos} dieta{'s' if usos != 1 else ''}"),
+    ])
+    return campos, [], []
+
+
+_DETALLE = {
+    "routines": _detalle_rutina,
+    "trainings": _detalle_ejercicio,
+    "diets": _detalle_dieta,
+    "aliments": _detalle_alimento,
+}
+
+
+@router.get("/content/{tipo}/{id}/detalle", summary="Ficha de una pieza de contenido",
+            description="El contenido entero de una rutina, ejercicio, dieta o alimento, "
+                        "para decidir con criterio si sube al catálogo de la plataforma.")
+def detalle_contenido(
+    tipo: str,
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    motivo = _exige_seccion(current_user, db, "contenido")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    cfg = _catalogo_contenido().get(tipo)
+    if not cfg or tipo not in _DETALLE:
+        return send_error(
+            f"Tipo sin ficha. Admitidos: {', '.join(sorted(_DETALLE))}", code=400)
+
+    modelo = cfg["modelo"]
+    # El id es entero en unas tablas y uuid en otras; se compara como texto para
+    # no tener que saber cuál es cada vez.
+    obj = db.query(modelo).filter(cast(modelo.id, String) == str(id)).first()
+    if not obj:
+        return send_error("No encontrado", code=404)
+
+    campos, bloques, privados = _DETALLE[tipo](obj, db)
+
+    org_id = getattr(obj, "organization_id", None)
+    org = db.query(Organization).filter(Organization.id == org_id).first() if org_id else None
+
+    autor_id = getattr(obj, "created_user_id", None) or getattr(obj, "user_id", None)
+    autor = db.query(User).filter(User.id == autor_id).first() if autor_id else None
+
+    # Lo que de verdad hay que mirar antes de subir algo: si por dentro usa
+    # contenido PRIVADO de esa cuenta. Promover solo cambia el ámbito de esta
+    # pieza, no el de lo que hay dentro, así que en la librería de las demás
+    # cuentas aparecería una rutina con ejercicios que no pueden ver. No se
+    # arregla por su cuenta —eso sería promover cosas que nadie ha pedido—: se
+    # dice, y decide quien mira.
+    unicos = sorted(set(n for n in privados if n))
+    aviso = {
+        "cuantas": len(unicos),
+        "nombres": unicos[:12],
+        "recortado": len(unicos) > 12,
+    } if unicos else None
+
+    return send_response({
+        "tipo": tipo,
+        "id": str(obj.id),
+        "etiqueta": cfg["etiqueta"],
+        "nombre": getattr(obj, cfg["campo"], None),
+        "cuenta": {"id": org.id, "nombre": org.name} if org else None,
+        "autor": (autor.name or autor.email) if autor else None,
+        "creado": obj.created_at.isoformat() if getattr(obj, "created_at", None) else None,
+        "actualizado": obj.updated_at.isoformat() if getattr(obj, "updated_at", None) else None,
+        "en_plataforma": org_id is None,
+        "promover": cfg["promover"],
+        "campos": campos,
+        "bloques": bloques,
+        "dependencias_privadas": aviso,
     }, "OK")
 
 

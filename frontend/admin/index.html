@@ -255,6 +255,19 @@
   #contenido tbody tr[data-fila]{cursor:pointer;}
   #contenido tbody tr[data-fila]:hover{background:#FAFAFC;}
 
+  /* Ficha de una pieza de contenido */
+  .pz-campos{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pz-bloque{border:1px solid var(--borde);border-radius:11px;overflow:hidden;}
+  .pz-bloque .bh{padding:10px 14px;background:#FAFAFC;border-bottom:1px solid var(--borde);}
+  .pz-bloque .bh b{font-size:13px;}
+  .pz-bloque .bh span{font-size:11.5px;color:#9CA3AF;margin-left:7px;}
+  .pz-bloque table{width:100%;border-collapse:collapse;}
+  .pz-bloque th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#9CA3AF;
+                text-align:left;padding:8px 14px;font-weight:700;}
+  .pz-bloque td{padding:8px 14px;font-size:12.5px;border-top:1px solid #F3F4F6;color:#374151;}
+  .pz-vacio{padding:18px 14px;font-size:12.5px;color:#9CA3AF;text-align:center;}
+  .pz-cab{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12.5px;color:#6B7280;}
+
   /* Modal de alta */
   .capa{position:fixed;inset:0;background:rgba(16,20,30,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .capa.on{display:flex;}
@@ -323,6 +336,21 @@
     <h1>Panel de plataforma</h1>
     <p class="sub" style="margin-top:8px;">Esta zona es para el equipo de Alzum. Tu cuenta no tiene acceso.</p>
     <button class="ctx" onclick="location.href='../dashboard.html'">Ir al panel de coach</button>
+  </div>
+</div>
+
+<!-- Ficha de una pieza de contenido de una cuenta. Se abre pulsando la fila en
+     "Contenido de organizaciones": subir algo al catálogo común lo pone delante
+     de todas las cuentas, así que hay que poder verlo antes de decidir. -->
+<div class="capa" id="capaPieza" onclick="if(event.target===this)cerrarPieza()">
+  <div class="modal ancho">
+    <h2 id="piezaTitulo">Contenido</h2>
+    <div class="cuerpo" id="piezaCuerpo"></div>
+    <div class="pie">
+      <span class="error" id="piezaError"></span>
+      <button class="btn ghost" onclick="cerrarPieza()">Cerrar</button>
+      <button class="btn" id="piezaSubir" onclick="subirPieza()">↑ Subir a plataforma</button>
+    </div>
   </div>
 </div>
 
@@ -893,22 +921,99 @@ function bloquePropuestas(){
    merece estar en la base común. Es reversible. */
 function tablaOrganizaciones(){
   const items = _cont.items || [], cn = _cont.conteos || {};
-  return `<div class="card" style="padding:16px 8px;">
+  return `<p style="font-size:12px;color:#9CA3AF;margin:0 0 10px 2px;">
+    Pulsa una fila para ver el contenido entero antes de decidir si sube a la plataforma.</p>
+  <div class="card" style="padding:16px 8px;">
     <table>
       <thead><tr><th>Nombre</th><th>Tipo</th><th>Cuenta</th><th>Origen</th><th class="num">Acciones</th></tr></thead>
       <tbody>
-      ${items.map(x => `<tr>
+      ${items.map(x => `<tr data-fila onclick="verPieza('${x.tipo}','${x.id}')">
         <td><b>${esc(x.nombre)}</b></td>
         <td>${esc((cn[x.tipo]||{}).etiqueta || x.tipo)}</td>
         <td class="org-cel">${esc(x.organization_name || '—')}</td>
         <td><span class="badge b-organizacion">Privado</span></td>
         <td class="num" style="white-space:nowrap;">
-          <button class="btn ghost" onclick="promover('${x.tipo}','${x.id}','${esc(x.nombre)}')">↑ Subir a plataforma</button></td>
+          <button class="btn ghost" onclick="event.stopPropagation();promover('${x.tipo}','${x.id}','${esc(x.nombre)}')">↑ Subir a plataforma</button></td>
       </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;padding:36px;color:#9CA3AF;">
           ${_buscaCont ? 'Nada con ese nombre.' : 'Ninguna cuenta tiene contenido privado todavía.'}</td></tr>`}
       </tbody>
     </table>
   </div>`;
+}
+
+/* ── Ficha de una pieza de contenido ───────────────────────────────────────
+   Subir algo al catálogo común lo pone delante de TODAS las cuentas, y hasta
+   ahora esa decisión se tomaba viendo solo el nombre y de quién era. Aquí se
+   ve entera: sus campos y, si es una rutina o una dieta, lo que lleva dentro. */
+let _pieza = null;
+
+async function verPieza(tipo, id){
+  _pieza = null;
+  document.getElementById('piezaError').textContent = '';
+  document.getElementById('piezaTitulo').textContent = 'Cargando…';
+  document.getElementById('piezaCuerpo').innerHTML =
+    '<div class="proximo">Cargando el contenido…</div>';
+  document.getElementById('piezaSubir').style.display = 'none';
+  document.getElementById('capaPieza').classList.add('on');
+
+  const r = await fetch(`${API}/admin/content/${encodeURIComponent(tipo)}/${encodeURIComponent(id)}/detalle`,
+                        { headers: cab() });
+  if (!r.ok) {
+    const j = await r.json().catch(()=>({}));
+    document.getElementById('piezaTitulo').textContent = 'No se pudo abrir';
+    document.getElementById('piezaCuerpo').innerHTML =
+      `<div class="proximo">${esc(j.message || 'No se pudo cargar el contenido.')}</div>`;
+    return;
+  }
+  _pieza = (await r.json()).data || {};
+  pintarPieza();
+}
+
+function pintarPieza(){
+  const d = _pieza;
+  document.getElementById('piezaTitulo').textContent = d.nombre || 'Contenido';
+  document.getElementById('piezaSubir').style.display = d.promover && !d.en_plataforma ? '' : 'none';
+
+  const dep = d.dependencias_privadas;
+  document.getElementById('piezaCuerpo').innerHTML = `
+    <div class="pz-cab">
+      <span class="badge b-organizacion">${esc(d.etiqueta || d.tipo)}</span>
+      <span>${d.cuenta ? 'De <b>' + esc(d.cuenta.nombre) + '</b>' : 'Sin cuenta'}</span>
+      ${d.autor ? `<span>· Creado por ${esc(d.autor)}</span>` : ''}
+      ${d.creado ? `<span>· ${esc(haceCuanto(d.creado))}</span>` : ''}
+    </div>
+
+    ${dep ? `<div class="aviso" style="background:#FEF3C7;border-color:#FDE68A;color:#92400E;">
+      <b>Ojo antes de subirlo.</b> Por dentro usa ${dep.cuantas}
+      ${d.tipo === 'diets' ? 'alimento' : 'ejercicio'}${dep.cuantas === 1 ? '' : 's'}
+      privado${dep.cuantas === 1 ? '' : 's'} de esa cuenta: ${esc(dep.nombres.join(', '))}${dep.recortado ? '…' : ''}.
+      Subir esto NO los sube a ellos, así que en las demás cuentas se vería
+      ${d.tipo === 'diets' ? 'la dieta' : 'la rutina'} con huecos. Súbelos antes, o déjalo donde está.
+    </div>` : ''}
+
+    ${(d.campos || []).length ? `<div class="pz-campos">
+      ${d.campos.map(c => `<div class="f-ro"><label>${esc(c.etiqueta)}</label><div>${esc(c.valor)}</div></div>`).join('')}
+    </div>` : '<div class="proximo">Sin datos que enseñar: la ficha está vacía.</div>'}
+
+    ${(d.bloques || []).map(b => `<div class="pz-bloque">
+      <div class="bh"><b>${esc(b.titulo)}</b>${b.subtitulo ? `<span>${esc(b.subtitulo)}</span>` : ''}</div>
+      ${(b.filas || []).length ? `<table>
+        <thead><tr>${(b.cabeceras || []).map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+        <tbody>${b.filas.map(f => `<tr>${f.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table>` : '<div class="pz-vacio">Sin contenido.</div>'}
+    </div>`).join('')}`;
+}
+
+function cerrarPieza(){ document.getElementById('capaPieza').classList.remove('on'); }
+
+async function subirPieza(){
+  if (!_pieza) return;
+  const btn = document.getElementById('piezaSubir');
+  btn.disabled = true;
+  try {
+    const ok = await promover(_pieza.tipo, _pieza.id, _pieza.nombre);
+    if (ok) cerrarPieza();
+  } finally { btn.disabled = false; }
 }
 
 let _tBusca = null;
@@ -921,13 +1026,17 @@ function buscarContenido(v){
   _tBusca = setTimeout(cargarContenido, 300);
 }
 
+// Devuelve si se ha subido: quien la llama desde la ficha necesita saberlo
+// para cerrarla, y con un `return` a secas no había manera de distinguir
+// "cancelado" de "hecho".
 async function promover(tipo, id, nombre){
   const mapa = { routines:'routine', trainings:'training', diets:'diet', aliments:'aliment' };
-  if (!confirm(`¿Subir «${nombre}» a la plataforma?\n\nPasará a verlo toda cuenta como contenido de fábrica. La cuenta de origen no lo pierde, pierde la exclusividad. Se puede deshacer.`)) return;
+  if (!confirm(`¿Subir «${nombre}» a la plataforma?\n\nPasará a verlo toda cuenta como contenido de fábrica. La cuenta de origen no lo pierde, pierde la exclusividad. Se puede deshacer.`)) return false;
   const r = await fetch(`${API}/content/${mapa[tipo]}/${id}/organization`, {
     method:'PUT', headers: cab(), body: JSON.stringify({ organization_id: null }) });
-  if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo subir'); return; }
+  if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo subir'); return false; }
   cargarContenido();
+  return true;
 }
 
 /* ── Planes ───────────────────────────────────────────────────────────────

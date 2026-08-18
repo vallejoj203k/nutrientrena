@@ -255,6 +255,60 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('y las propuestas se marcan como pendientes, no como cero',
      to.includes('Todavía no existe el circuito de propuestas'));
 
+  /* ── Ver la pieza antes de decidir ───────────────────────────────────────
+     Subirla la pone delante de todas las cuentas, así que la fila se pulsa y
+     se abre entera. Se prueba con una RUTINA porque es donde hay algo que
+     mirar: sus días, sus ejercicios y —lo que de verdad decide— si por dentro
+     usa contenido privado que no viajaría con ella. */
+  const rutPriv = await (await ctx.request.post(`${API}/api/routines`, {
+    headers: { Authorization: 'Bearer ' + lgd.data.token },
+    data: {
+      name: `Rutina privada ${SUF}`, objective: 'Hipertrofia', days: 3, time: 8,
+      days_list: [{ day_name: 'Día 1 · Empuje', blocks: [{ block_type: 'normal', exercises: [
+        { training_id: priv.data.id, series: 4, repetitions: '10', break_time: 90 }] }] }],
+    } })).json();
+  ck('rutina de prueba creada dentro de la cuenta', !!rutPriv.data?.id, rutPriv.data);
+
+  await p.fill('#qg', `Rutina privada ${SUF}`);
+  await p.locator(`#contenido tbody tr:has-text("Rutina privada ${SUF}")`)
+          .waitFor({ state: 'visible', timeout: 25000 });
+  await p.click(`#contenido tbody tr:has-text("Rutina privada ${SUF}")`);
+  await p.locator('#capaPieza.on').waitFor({ state: 'visible', timeout: 20000 });
+  await p.locator('.pz-bloque').first().waitFor({ state: 'visible', timeout: 20000 });
+
+  ck('PULSAR LA FILA ABRE EL CONTENIDO ENTERO',
+     (await p.textContent('#piezaTitulo')) === `Rutina privada ${SUF}`);
+  const campos = await p.locator('#piezaCuerpo .f-ro label').allTextContents();
+  ck('con sus campos', campos.includes('Objetivo') && campos.includes('Días por semana'), campos);
+  const dentro = await p.textContent('.pz-bloque');
+  ck('y con lo que lleva dentro: sus días y sus ejercicios',
+     dentro.includes('Día 1 · Empuje') && dentro.includes(`Ejercicio privado ${SUF}`), dentro.slice(0, 160));
+  ck('AVISA DE QUE USA CONTENIDO PRIVADO QUE NO VIAJARÍA CON ELLA',
+     (await p.textContent('#piezaCuerpo .aviso')).includes(`Ejercicio privado ${SUF}`));
+  ck('y ofrece subirla desde la propia ficha', await p.locator('#piezaSubir').isVisible());
+
+  await p.click('#capaPieza .btn.ghost');
+  await p.waitForTimeout(400);
+  ck('se puede cerrar sin hacer nada', await p.locator('#capaPieza.on').count() === 0);
+
+  // Y desde la ficha se sube: es la decisión que la pantalla existe para tomar.
+  p.on('dialog', d => d.accept());
+  await p.click(`#contenido tbody tr:has-text("Rutina privada ${SUF}")`);
+  await p.locator('#capaPieza.on').waitFor({ state: 'visible', timeout: 20000 });
+  await p.locator('#piezaSubir').waitFor({ state: 'visible', timeout: 20000 });
+  await p.click('#piezaSubir');
+  await p.waitForTimeout(2000);
+  ck('la ficha se cierra al subirla', await p.locator('#capaPieza.on').count() === 0);
+  const subida = await (await ctx.request.get(
+    `${API}/api/admin/content?tipo=routines&q=${SUF}`, { headers: H })).json();
+  ck('SUBIR DESDE LA FICHA LA PASA AL CATÁLOGO COMÚN',
+     (subida.data.items || []).some(i => i.nombre === `Rutina privada ${SUF}`),
+     (subida.data.items || []).map(i => i.nombre));
+
+  await p.fill('#qg', SUF);
+  await p.locator(`#contenido tbody tr:has-text("Ejercicio privado ${SUF}")`)
+          .waitFor({ state: 'visible', timeout: 25000 });
+
   // Promover: el punto de la sección. Es reversible y ya existía por API.
   p.on('dialog', d => d.accept());
   await p.click(`tr:has-text("Ejercicio privado ${SUF}") button:has-text("Subir a plataforma")`);

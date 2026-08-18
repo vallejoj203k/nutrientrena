@@ -55,12 +55,35 @@
 /* Cabe la librería entera (4 grupos, 13 pantallas). Se quedó corto una vez y
    recortaba "Guías" y "Plantillas" sin avisar. */
 .s-sub.abierto{max-height:700px;}
-.s-sub a{display:block;padding:7px 12px 7px 40px;border-radius:8px;color:rgba(255,255,255,.55);
-         font-size:12.5px;text-decoration:none;margin-bottom:1px;}
-.s-sub a:hover{background:rgba(255,255,255,.07);color:#fff;}
-.s-sub a.active{color:#fff;background:rgba(79,91,242,.35);font-weight:600;}
-.s-sub .s-grupo{font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
-                color:rgba(255,255,255,.3);padding:8px 12px 3px 40px;}
+/* Las familias (Entrenamiento, Nutrición, Formulario, Documento). Cada una
+   abre a un lado el panel con sus pantallas, igual que en el menú del coach. */
+.s-fam{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px 8px 34px;border:none;
+       background:none;font:inherit;font-size:12.5px;text-align:left;cursor:pointer;border-radius:8px;
+       color:rgba(255,255,255,.55);margin-bottom:1px;}
+.s-fam:hover{background:rgba(255,255,255,.07);color:#fff;}
+.s-fam.on{color:#fff;background:rgba(79,91,242,.35);font-weight:600;}
+.s-fam svg{flex-shrink:0;opacity:.7;}
+.s-fam .flecha{margin-left:auto;opacity:.45;}
+.s-fam:hover .flecha,.s-fam.on .flecha{opacity:1;}
+
+/* El panel que se abre al lado. Es claro, como el del coach: se lee sobre la
+   página, no sobre la barra. */
+.plat-fly-fondo{display:none;position:fixed;inset:0;z-index:9998;}
+.plat-fly-fondo.on{display:block;}
+.plat-fly{display:none;position:fixed;z-index:9999;background:#fff;border:1px solid #E5E7EB;
+  border-radius:12px;min-width:210px;overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);
+  transform:translateX(-8px);opacity:0;transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .2s ease;}
+.plat-fly.on{display:block;transform:translateX(0);opacity:1;}
+.plat-fly-cab{padding:12px 16px 10px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:8px;}
+.plat-fly-cab .punto{width:8px;height:8px;border-radius:50%;flex:none;}
+.plat-fly-cab b{font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;}
+.plat-fly-items{padding:6px;}
+.plat-fly-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#374151;
+  text-decoration:none;font-size:13.5px;transition:background .15s,color .15s;}
+.plat-fly-item:hover{background:#F5F3FF;color:#4F46E5;}
+.plat-fly-item.on{background:#EEF2FF;color:#4F46E5;font-weight:600;}
+.plat-fly-item svg{opacity:.6;flex-shrink:0;}
 /* Cuando no se ha podido comprobar el acceso al panel. Se avisa en vez de
    devolver el panel del coach por las bravas: cambiar de panel por un fallo de
    red hace creer que te has cambiado de sitio tú. */

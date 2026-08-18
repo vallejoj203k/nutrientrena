@@ -86,14 +86,11 @@
     try { token = localStorage.getItem('token'); } catch (e) { return; }
     if (!token) return;
 
-    // Se entra como la PLATAFORMA, así que se suelta el contexto de cuenta que
-    // hubiera puesto el selector del panel: si quedara puesto, lo que se creara
-    // aquí nacería dentro de esa cuenta en vez de en el catálogo común, y nada
-    // en la pantalla lo diría.
-    try {
-      localStorage.removeItem('org_context');
-      localStorage.removeItem('org_context_name');
-    } catch (e) {}
+    /* Del ámbito se encarga org-context.js, que ve el mismo ?panel=plataforma
+       y manda la cabecera X-Organization-Id: plataforma en TODAS las llamadas.
+       Aquí no se toca localStorage: borrar el contexto de cuenta que hubiera
+       elegido el usuario le cambiaría, sin decírselo, lo que ve al volver al
+       panel del coach. El modo vive en la URL y solo mientras dura. */
 
     document.body.classList.add('panel-plataforma');
     esconderMenuDelCoach();

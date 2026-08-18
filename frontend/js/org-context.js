@@ -16,8 +16,24 @@
   var API_HOST = 'nutrientrena-production.up.railway.app';
   var CLAVE = 'org_context';       // '' = plataforma
   var CLAVE_NOMBRE = 'org_context_name';
+  // Centinela que entiende el backend: "solo el catálogo de la plataforma".
+  var SOLO_PLATAFORMA = 'plataforma';
+
+  /* La Librería abierta desde el panel de plataforma (?panel=plataforma) mira
+     el catálogo COMÚN, no la biblioteca entera. Sin esto, un super-admin veía
+     ahí dentro también el contenido privado de cada cuenta: correcto para
+     administrar, pero lo contrario de lo que dice la pantalla donde entró.
+
+     Se lee de la URL y no de localStorage a propósito: un ajuste guardado
+     seguiría filtrando al volver al panel del coach, y sería un estado
+     invisible que nadie sabría quitar. */
+  function modoPlataforma() {
+    try { return new URLSearchParams(location.search).get('panel') === SOLO_PLATAFORMA; }
+    catch (e) { return false; }
+  }
 
   function contextoActual() {
+    if (modoPlataforma()) return SOLO_PLATAFORMA;
     try { return localStorage.getItem(CLAVE) || ''; } catch (e) { return ''; }
   }
 
@@ -144,6 +160,10 @@
     var token;
     try { token = localStorage.getItem('token'); } catch (e) { return; }
     if (!token) return;
+
+    // En modo plataforma manda la URL: ni selector (no hay nada que elegir) ni
+    // aviso de "estás dentro de otra cuenta" (no se está dentro de ninguna).
+    if (modoPlataforma()) return;
 
     // Se usa _fetch: esta llamada no debe llevar la cabecera, porque justamente
     // sirve para saber a qué contextos se puede cambiar.

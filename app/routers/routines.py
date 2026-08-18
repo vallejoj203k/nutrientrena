@@ -30,9 +30,11 @@ def _visible_to(obj, org: OrgContext) -> bool:
     """Si quien llama puede ver esta rutina: es de plataforma (organization_id
     NULL), es de su propia organización, o quien llama es superadmin/admin sin
     organización (bypass total, igual que en aliments.py)."""
-    if org.org_id is None and org.is_owner:
-        return True
     if obj.organization_id is None:
+        return True
+    if org.solo_plataforma:
+        return False        # se está mirando el catálogo común, no las cuentas
+    if org.org_id is None and org.is_owner:
         return True
     return obj.organization_id == org.org_id
 
@@ -71,6 +73,8 @@ def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session) -> O
             verify_client_access(client_detail.id, current_user, db)  # lanza 403 si no toca
             return None
 
+    if org.solo_plataforma and obj.organization_id is not None:
+        return "No tienes acceso a esta rutina"   # actuando solo como plataforma
     if org.org_id is None and org.is_owner:
         return None  # superadmin/admin: bypass total
     if obj.organization_id is not None and obj.organization_id == org.org_id:
@@ -280,7 +284,9 @@ def find_all(
     client_ids = db.query(RoleUser.user_id).filter(RoleUser.role_id == CLIENT).scalar_subquery()
     q = db.query(Routine).filter(or_(Routine.user_id.is_(None), ~Routine.user_id.in_(client_ids)))
 
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Routine.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Routine.organization_id.is_(None), Routine.organization_id == org.org_id))
     elif not org.is_owner:
         # Sin organización y sin ser superadmin/admin: solo lo propio, como antes.

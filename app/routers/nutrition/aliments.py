@@ -70,7 +70,9 @@ def find_all(
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Aliment.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
     items = q.all()
     return send_response([AlimentOut.model_validate(i).model_dump() for i in items], "OK")
@@ -91,7 +93,9 @@ def search(
         q = q.filter(Aliment.name.ilike(f"%{search}%"))
     if group_food_id:
         q = q.filter(Aliment.group_food_id == group_food_id)
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Aliment.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Aliment.organization_id.is_(None), Aliment.organization_id == org.org_id))
     total = q.count()
     items = q.order_by(Aliment.name).offset((page - 1) * per_page).limit(per_page).all()
@@ -158,6 +162,8 @@ def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session):
        contenido global, para el que es justamente su único trabajo.
     4. De una organización: tiene que ser la tuya.
     """
+    if org.solo_plataforma and obj.organization_id is not None:
+        return "No tienes acceso a este alimento"   # actuando solo como plataforma
     if obj.created_user_id is not None and obj.created_user_id == current_user.id:
         return None
     if org.org_id is None and org.is_owner:
@@ -181,6 +187,8 @@ def _alcance_masivo(q, org: OrgContext, current_user, db: Session):
     llamada a classify-moments o usda-sync. Dos puertas al mismo sitio con
     reglas distintas.
     """
+    if org.solo_plataforma:
+        return q.filter(Aliment.organization_id.is_(None))  # solo el catálogo común
     if org.org_id is None and org.is_owner:
         return q  # superadmin, o admin sin organización propia
 

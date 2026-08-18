@@ -821,6 +821,10 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Antes de los scripts de la página: envuelve fetch para mandar el contexto
+     de organización en todas las llamadas. Esta página se lo había quedado sin
+     él, así que era la única de la librería que ignoraba el "segundo sombrero". -->
+<script src="js/org-context.js"></script>
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
 const token = localStorage.getItem('token');

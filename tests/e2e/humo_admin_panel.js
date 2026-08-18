@@ -148,10 +148,24 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('navegar por sus pestañas conserva el menú de plataforma',
      p.url().includes('panel=plataforma'), p.url());
 
-  // Lo que de verdad importa de "entrar como plataforma": lo que se cree aquí
-  // nace en el catálogo común, no dentro de una cuenta.
-  ck('se trabaja sin contexto de cuenta, así que lo nuevo nace global',
-     await p.evaluate(() => localStorage.getItem('org_context')) === null);
+  /* Y enseña SOLO el catálogo común. Un super-admin sin contexto ve la
+     biblioteca entera —lo de la plataforma y lo privado de cada cuenta—, que
+     es lo correcto para administrar y lo contrario de lo que dice la pantalla
+     por la que ha entrado. */
+  // Se busca por el sufijo de esta ejecución: los dos ejercicios —el de
+  // plataforma y el privado— lo llevan, así que la caja los sacaría a los dos
+  // si el ámbito no filtrara.
+  await p.fill('#searchExercises', SUF);
+  await p.waitForTimeout(2500);
+  const enPantalla = await p.textContent('body');
+  ck('el catálogo de plataforma sí está', enPantalla.includes(`Sentadilla de fábrica ${SUF}`),
+     enPantalla.slice(0, 200));
+  ck('LO PRIVADO DE UNA CUENTA NO SE VE EN CONTENIDO GLOBAL',
+     !enPantalla.includes(`Ejercicio privado ${SUF}`));
+  ck('y se pide explícitamente, con la cabecera de plataforma',
+     (await (await ctx.request.get(`${API}/api/trainings/findAll`,
+        { headers: { ...H, 'X-Organization-Id': 'plataforma' } })).json())
+       .data.every(t => t.organization_id === null));
 
   await p.click('#sidePlataforma .ctx-card');
   await p.waitForLoadState('domcontentloaded');
@@ -368,7 +382,9 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
 
   // La columna Plan del listado de Coaches ya dice algo
   await p.click('.s-item:has-text("Coaches")');
-  await p.waitForTimeout(1500);
+  // Se espera a la tabla, no un tiempo fijo: la base de pruebas acumula
+  // cuentas de ejecuciones anteriores y el listado tarda más cada vez.
+  await p.locator('#contenido tbody tr').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
   ck('el listado de Coaches enseña el plan de cada cuenta',
      (await p.textContent('#contenido')).includes(`Pro ${SUF}`), (await p.textContent('#contenido')).slice(0, 200));
 

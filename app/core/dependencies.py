@@ -137,12 +137,27 @@ def verify_client_access(client_detail_id: str, current_user, db: Session) -> No
                             detail="No tienes acceso a este cliente")
 
 
+# Valor centinela de `X-Organization-Id` para "actúo como la plataforma y solo
+# quiero SU catálogo". No es un id de organización porque no lo es: es la
+# ausencia de organización, dicha explícitamente.
+#
+# Hace falta porque "todo" y "lo de la plataforma" no son lo mismo para un
+# super-admin: sin cabecera ve la biblioteca entera —incluido lo privado de
+# cada cuenta—, que es lo correcto cuando administra, y lo contrario de lo que
+# espera quien entra por "Contenido global" a mantener el catálogo común.
+SOLO_PLATAFORMA = "plataforma"
+
+
 class OrgContext:
     """Resolved organization context for the current user."""
-    def __init__(self, org_id: str | None, is_owner: bool, permissions: dict):
+    def __init__(self, org_id: str | None, is_owner: bool, permissions: dict,
+                 solo_plataforma: bool = False):
         self.org_id = org_id
         self.is_owner = is_owner
         self.permissions = permissions
+        # True: se ve SOLO el catálogo de plataforma (organization_id NULL), no
+        # lo privado de las cuentas. Nunca amplía lo que se ve, solo lo estrecha.
+        self.solo_plataforma = solo_plataforma
 
     def can(self, key: str) -> bool:
         return bool(self.permissions.get(key, False))
@@ -253,6 +268,17 @@ def get_org_context(
         return ctx
 
     destino = x_organization_id.strip()
+
+    # "Solo la plataforma": lo pide quien ya está en contexto de plataforma
+    # (super-admin, o admin sin organización propia). A cualquier otro no se le
+    # ignora en silencio —se quedaría viendo lo suyo creyendo ver el catálogo
+    # común—: se le dice que no.
+    if destino == SOLO_PLATAFORMA:
+        if ctx.org_id is None and ctx.is_owner:
+            return OrgContext(org_id=None, is_owner=True, permissions={},
+                              solo_plataforma=True)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="No puedes actuar como la plataforma")
 
     if SUPERADMIN in roles:
         from app.models.organization import Organization

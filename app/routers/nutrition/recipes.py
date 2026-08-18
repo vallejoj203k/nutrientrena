@@ -26,7 +26,9 @@ def find_all(
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Recipe).filter(Recipe.state == 1)
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Recipe.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Recipe.organization_id.is_(None), Recipe.organization_id == org.org_id))
     return send_response([RecipeOut.model_validate(i).model_dump() for i in q.all()], "OK")
 
@@ -43,7 +45,9 @@ def search(
     q = db.query(Recipe).filter(Recipe.state == 1)
     if search:
         q = q.filter(Recipe.name.ilike(f"%{search}%"))
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Recipe.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Recipe.organization_id.is_(None), Recipe.organization_id == org.org_id))
     total = q.count()
     items = q.order_by(Recipe.name).offset((page - 1) * per_page).limit(per_page).all()

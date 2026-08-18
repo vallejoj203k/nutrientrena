@@ -28,9 +28,11 @@ def _visible_to(obj, org: OrgContext) -> bool:
     """Si quien llama puede ver esta dieta: es de plataforma (organization_id
     NULL), es de su propia organización, o quien llama es superadmin/admin sin
     organización (bypass total, igual que en aliments.py)."""
-    if org.org_id is None and org.is_owner:
-        return True
     if obj.organization_id is None:
+        return True
+    if org.solo_plataforma:
+        return False        # se está mirando el catálogo común, no las cuentas
+    if org.org_id is None and org.is_owner:
         return True
     return obj.organization_id == org.org_id
 
@@ -69,6 +71,8 @@ def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session) -> O
             verify_client_access(client_detail.id, current_user, db)  # lanza 403 si no toca
             return None
 
+    if org.solo_plataforma and obj.organization_id is not None:
+        return "No tienes acceso a esta dieta"    # actuando solo como plataforma
     if org.org_id is None and org.is_owner:
         return None  # superadmin/admin: bypass total
     if obj.organization_id is not None and obj.organization_id == org.org_id:
@@ -316,7 +320,9 @@ def find_all(
         .filter(or_(Diet.user_id.is_(None), ~Diet.user_id.in_(client_ids)))
     )
 
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Diet.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Diet.organization_id.is_(None), Diet.organization_id == org.org_id))
     elif not org.is_owner:
         q = q.filter(Diet.user_id == current_user.id)
@@ -422,7 +428,9 @@ def _catalogo_generador(db: Session, org):
     catálogo base siga generando dietas.
     """
     base = db.query(Aliment).filter(Aliment.calories.isnot(None))
-    if org.org_id:
+    if org.solo_plataforma:
+        base = base.filter(Aliment.organization_id.is_(None))
+    elif org.org_id:
         base = base.filter(or_(Aliment.organization_id.is_(None),
                                Aliment.organization_id == org.org_id))
 

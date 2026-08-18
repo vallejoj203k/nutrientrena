@@ -21,10 +21,12 @@ def _get_or_404(db: Session, training_id: int):
 
 def _visible_para(obj: Training, org: OrgContext) -> bool:
     """Un ejercicio se ve si es del catálogo maestro o de tu organización."""
-    if org.org_id is None and org.is_owner:
-        return True  # superadmin, o admin sin organización propia
     if obj.organization_id is None:
         return True  # catálogo maestro: compartido por toda la plataforma
+    if org.solo_plataforma:
+        return False  # se está mirando el catálogo común, no las cuentas
+    if org.org_id is None and org.is_owner:
+        return True  # superadmin, o admin sin organización propia
     return obj.organization_id == org.org_id
 
 
@@ -44,6 +46,9 @@ def _bloqueado_para_editar(obj: Training, org: OrgContext, current_user, db: Ses
     """
     if obj.created_user_id is not None and obj.created_user_id == current_user.id:
         return None
+
+    if org.solo_plataforma and obj.organization_id is not None:
+        return "No tienes acceso a este ejercicio"   # actuando solo como plataforma
 
     if org.org_id is None and org.is_owner:
         return None  # bypass total
@@ -66,7 +71,9 @@ def find_all(
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Training).filter(Training.state == 1)
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Training.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Training.organization_id.is_(None), Training.organization_id == org.org_id))
     items = q.all()
     return send_response([TrainingOut.from_orm_training(i).model_dump() for i in items], "OK")
@@ -86,7 +93,9 @@ def search(
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Training)
-    if org.org_id:
+    if org.solo_plataforma:
+        q = q.filter(Training.organization_id.is_(None))
+    elif org.org_id:
         q = q.filter(or_(Training.organization_id.is_(None), Training.organization_id == org.org_id))
     if search:
         q = q.filter(Training.name.ilike(f"%{search}%"))

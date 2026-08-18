@@ -70,11 +70,13 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
 
   // ── Suspender y reactivar
   p.on('dialog', d => d.accept());
+  // Se espera al resultado y no un tiempo fijo: la base de pruebas acumula
+  // cuentas de ejecuciones anteriores y el listado tarda más en cada ronda.
   await p.click('button:has-text("Suspender")');
-  await p.waitForTimeout(1500);
+  await p.locator('.badge.b-suspendida').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
   ck('suspender cambia el estado', (await p.locator('.badge.b-suspendida').count()) >= 1);
   await p.click('button:has-text("Reactivar")');
-  await p.waitForTimeout(1500);
+  await p.locator('.badge.b-activa').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
   ck('reactivar lo devuelve', (await p.locator('.badge.b-activa').count()) >= 1);
 
   // ── Filtros
@@ -91,7 +93,11 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
 
   // ── Visión general con datos reales
   await p.click('.s-item:nth-child(1)');
-  await p.waitForTimeout(1500);
+  // Se espera a una tarjeta que SOLO existe en Visión general: con la base de
+  // pruebas cargada, el pintado del listado de Coaches todavía en vuelo llega
+  // después del cambio de sección y repisa lo que acaba de pintarse.
+  await p.locator('#contenido .kpi:has-text("Coaches / cuentas")')
+          .waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
   const v = await p.textContent('#contenido');
   // Se comprueba contra el número REAL de cuentas, no contra que salga
   // "NutriEntrena" en la tabla: Visión general solo lista las 6 primeras por

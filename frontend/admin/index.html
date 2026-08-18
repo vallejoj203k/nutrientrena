@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alzum · Panel de plataforma</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/panel-plataforma.css">
 <style>
   /* Sistema de diseño del documento. El acento del panel es Tinta #10141E,
      más oscuro que el índigo del panel de coach, para que se note de un
@@ -17,43 +18,6 @@
   body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;background:var(--fondo);color:#111827;}
 
   .layout{display:flex;min-height:100vh;}
-
-  /* ── Barra lateral ── */
-  .side{width:248px;background:var(--tinta);color:#fff;display:flex;flex-direction:column;flex-shrink:0;}
-  .side-brand{padding:20px 20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);}
-  .side-brand b{font-size:15px;letter-spacing:.2px;}
-  .side-brand span{font-size:10.5px;color:rgba(255,255,255,.45);display:block;margin-top:1px;}
-  .side-nav{flex:1;padding:12px 10px;overflow-y:auto;}
-  .s-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:rgba(255,255,255,.68);
-          font-size:13px;font-weight:500;cursor:pointer;transition:.14s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:inherit;}
-  .s-item:hover{background:rgba(255,255,255,.07);color:#fff;}
-  .s-item.active{background:var(--indigo);color:#fff;font-weight:600;}
-  .s-item svg{flex-shrink:0;opacity:.85;}
-  .ctx-card{margin:12px 12px 4px;padding:9px 10px;border:1px solid rgba(255,255,255,.14);border-radius:11px;
-            display:flex;align-items:center;gap:9px;cursor:pointer;position:relative;background:rgba(255,255,255,.04);}
-  .ctx-card:hover{background:rgba(255,255,255,.08);}
-  .ctx-ico{width:28px;height:28px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .ctx-txt{min-width:0;flex:1;}
-  .ctx-txt b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .ctx-txt span{font-size:10px;color:rgba(255,255,255,.45);}
-  .ctx-card select{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
-  .rol-card{margin:8px 12px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:rgba(255,255,255,.03);}
-  .rol-t{font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:5px;}
-  .rol-card b{font-size:13px;}
-  .rol-card p{font-size:11px;color:rgba(255,255,255,.5);line-height:1.45;margin-top:4px;}
-  .ver-como{margin:0 12px 10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);}
-  .ver-como select{width:100%;padding:7px 9px;border:1px solid rgba(255,255,255,.16);border-radius:8px;
-                   background:rgba(255,255,255,.05);color:#fff;font:inherit;font-size:12px;cursor:pointer;outline:none;}
-  .ver-como select option{color:#111;}
-  .aviso-preview{background:#FEF3C7;border-bottom:1px solid #FDE68A;color:#92400E;font-size:12.5px;padding:9px 24px;display:flex;align-items:center;gap:10px;}
-  .aviso-preview button{background:#fff;border:1px solid #FDE68A;border-radius:7px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;color:#92400E;font-weight:600;}
-  .side-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
-  .avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
-  .who{min-width:0;flex:1;}
-  .who b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .who span{font-size:10.5px;color:rgba(255,255,255,.45);}
-  .salir{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;}
-  .salir:hover{color:#fff;}
 
   /* ── Zona principal ── */
   .main{flex:1;display:flex;flex-direction:column;min-width:0;}
@@ -139,12 +103,6 @@
   .fam .cnt{background:#F1F2F6;color:#6B7280;border-radius:20px;padding:1px 8px;font-size:11px;font-weight:700;}
   .fam.on .cnt{background:rgba(255,255,255,.22);color:#fff;}
   .fam[disabled]{opacity:.5;cursor:not-allowed;}
-  .tipos{display:flex;gap:22px;border-bottom:1px solid var(--borde);margin-bottom:18px;}
-  .tipo{display:flex;align-items:center;gap:7px;padding:0 2px 11px;border:none;background:none;
-        font:inherit;font-size:13.5px;font-weight:600;color:#6B7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
-  .tipo.on{color:var(--indigo);border-bottom-color:var(--indigo);}
-  .tipo .cnt{background:#F1F2F6;color:#6B7280;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:700;}
-  .tipo.on .cnt{background:#EEF2FF;color:var(--indigo);}
   .b-plataforma{background:#EEF2FF;color:#4F5BF2;}
   .b-organizacion{background:#FEF3C7;color:#B45309;}
   .ico-cel{width:28px;height:28px;border-radius:8px;background:#EEF2FF;color:var(--indigo);
@@ -314,7 +272,7 @@
   @media(max-width:860px){ .side{width:64px;} .side-brand span,.s-item span,.who{display:none;} }
 </style>
 </head>
-<body>
+<body class="panel-plataforma">
 
 <div class="layout" id="layout" style="display:none;">
   <aside class="side">
@@ -481,33 +439,6 @@
   </div>
 </div>
 
-<div class="capa" id="capaGlobal" onclick="if(event.target===this)cerrarGlobal()">
-  <div class="modal">
-    <h2 id="globalTitulo">Nuevo contenido global</h2>
-    <div class="cuerpo rejilla" id="globalCuerpo"></div>
-    <div class="pie">
-      <span class="error" id="globalError"></span>
-      <button class="btn ghost" onclick="cerrarGlobal()">Cancelar</button>
-      <button class="btn" id="globalBtn" onclick="guardarGlobal()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<div class="capa" id="capaCat" onclick="if(event.target===this)cerrarCatalogo()">
-  <div class="modal" style="width:420px;">
-    <h2 id="catTitulo">Catálogo</h2>
-    <div class="cuerpo">
-      <div class="campo"><label>Nombre</label><input id="catNombre" placeholder="Ej: Isquiotibiales"></div>
-      <div class="aviso">Estos catálogos los ven todas las cuentas: son la fuente única de verdad de la plataforma.</div>
-    </div>
-    <div class="pie">
-      <span class="error" id="catError"></span>
-      <button class="btn ghost" onclick="cerrarCatalogo()">Cancelar</button>
-      <button class="btn" id="catBtn" onclick="guardarCatalogo()">Guardar</button>
-    </div>
-  </div>
-</div>
-
 <div class="capa" id="capaAlta" onclick="if(event.target===this)cerrarAlta()">
   <div class="modal">
     <h2>Dar de alta una cuenta</h2>
@@ -545,6 +476,7 @@
   </div>
 </div>
 
+<script src="../js/menu-plataforma.js"></script>
 <script src="../js/org-context.js"></script>
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
@@ -583,11 +515,32 @@ const cab = () => ({ 'Content-Type':'application/json', Authorization:'Bearer ' 
 function salir(){ localStorage.removeItem('token'); localStorage.removeItem('role_id'); location.replace('../login.html'); }
 
 function pintarNav(){
-  document.getElementById('nav').innerHTML = _secciones.map(s =>
-    `<button class="s-item${s.id===_actual?' active':''}" onclick="abrir('${s.id}')">
+  document.getElementById('nav').innerHTML = _secciones.map(s => {
+    // "Contenido global" se despliega, como "Librería" en el panel del coach:
+    // sus entradas son las páginas de verdad, no pantallas rehechas aquí.
+    if (s.id === 'contenido') return itemLibreria(s);
+    return `<button class="s-item${s.id===_actual?' active':''}" onclick="abrir('${s.id}')">
        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[s.icono]||''}</svg>
        <span>${s.nombre}</span>
-     </button>`).join('');
+     </button>`;
+  }).join('');
+}
+
+/* El mapa de la librería lo sirve menu-plataforma.js, que es el mismo que usan
+   esas páginas para pintar SU menú. Tenerlo en los dos sitios sería la cuarta
+   vez que dos copias de lo mismo se separan en este proyecto. */
+function itemLibreria(s){
+  const M = window.MenuPlataforma;
+  const abierto = _actual === 'contenido';
+  const sub = (M ? M.LIBRERIA : []).map(g =>
+    `<div class="s-grupo">${esc(g.grupo)}</div>` +
+    g.items.map(i => `<a href="../${M.conModo(i.pagina)}">${esc(i.nombre)}</a>`).join('')
+  ).join('');
+  return `<button class="s-item${abierto?' active abierto':''}" onclick="abrir('contenido')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[s.icono]||''}</svg>
+      <span>${esc(s.nombre)}</span>
+      <svg class="chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button><div class="s-sub${abierto?' abierto':''}">${sub}</div>`;
 }
 
 function enConstruccion(id){
@@ -607,7 +560,8 @@ async function abrir(id){
 
   if (id === 'organizaciones') return pintarCoaches();
   if (id === 'clientes') return pintarClientes();
-  if (id === 'contenido') return pintarContenido();
+  if (id === 'contenido') return pintarPortadaLibreria();
+  if (id === 'contenido_orgs') return pintarContenidoOrgs();
   if (id === 'soporte') return pintarSoporte();
   if (id === 'analiticas') return pintarAnaliticas();
   if (id === 'equipo') return pintarEquipo();
@@ -633,7 +587,9 @@ function pintarVision(){
   const el = document.getElementById('contenido');
   el.outerHTML = '<div id="contenido"></div>';
   const c = document.getElementById('contenido');
-  cargarCuentas().then(() => {
+  // Los totales de contenido también se piden aquí: a Visión general se llega
+  // sin pasar por la librería, y una tarjeta con "…" para siempre no informa.
+  Promise.all([cargarCuentas(), cargarContenido(true)]).then(() => {
     const t = _totales.por_estado || {};
     c.innerHTML = `
       <div class="kpis">
@@ -641,6 +597,9 @@ function pintarVision(){
         ${tarjeta('Clientes finales', _totales.clientes ?? 0, 'Usuarios de los coaches', 'user')}
         ${tarjeta('MRR', '—', 'Requiere la pasarela de pago', 'card', true)}
         ${tarjeta('Tickets abiertos', '—', 'Requiere el módulo de soporte', 'life', true)}
+        ${tarjeta('Contenido global', _cont ? (_cont.totales.global ?? 0) : '…', 'La base de fábrica de Alzum', 'globe')}
+        ${tarjeta('Contenido de cuentas', _cont ? (_cont.totales.cuentas ?? 0) : '…', 'Privado de cada coach', 'building')}
+        ${tarjeta('Propuestas pendientes', '—', 'Requiere el circuito de propuestas', 'up', true)}
       </div>
       ${(t.impago || t.suspendida) ? `<div class="card" style="border-color:#FCA5A5;background:#FEF2F2;margin-bottom:20px;">
         <b style="color:#B91C1C;font-size:14px;">Atención requerida</b>
@@ -843,125 +802,74 @@ function setCuentaCli(v){ _cuentaCli = v; document.getElementById('contenido').i
    Lo que sí se edita aquí son los tres catálogos que no tienen dueño (grupos
    musculares, tipos de dieta y grupos de alimentos): son la fuente única de
    verdad de la plataforma y no viven en la librería de nadie. */
-const FAMILIAS = [
-  // `pagina` = la pantalla de la librería del coach que se sirve dentro del
-  // panel. Es la MISMA página, sin su menú lateral: sus filtros, sus acciones y
-  // sus formularios son los de siempre, así que un arreglo allí lo hereda el
-  // panel y al revés. Rehacerla aquí serían dos versiones separándose desde el
-  // día siguiente, que es lo que ya pasó con el constructor de rutinas.
-  { id:'entrenamiento', nombre:'Entrenamiento', icono:'trend', pagina:'../rutinas.html' },
-  { id:'nutricion',     nombre:'Nutrición',     icono:'box' },
-  { id:'formularios',   nombre:'Formularios',   icono:'card',  pendiente:'Las plantillas de formulario no tienen ámbito de organización en la base de datos: hoy cada una pertenece a quien la creó. Para tener formularios de plataforma hace falta añadirles ese ámbito, igual que se hizo con rutinas y dietas.' },
-  { id:'documentos',    nombre:'Documentos',    icono:'shield', pendiente:'Los documentos cuelgan del coach que los subió, no de la plataforma. Mismo caso que los formularios.' },
-  { id:'organizaciones', nombre:'Contenido de organizaciones', icono:'building' },
-];
-const LAPIZ = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
 const PAPELERA = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
-// Dónde se edita cada tipo dentro del panel de coach, y por dónde se borra.
-const BORRADO = { routines:'routines', trainings:'trainings', diets:'diets', aliments:'aliments' };
-const EDITOR = {
-  routines:'../rutinas.html', trainings:'../ejercicios.html',
-  diets:'../diets.html', aliments:'../nutricion/alimentos.html',
-};
-let _cont = null, _fam = 'entrenamiento', _tipo = 'routines', _buscaCont = '';
+let _cont = null, _tipo = 'organizaciones', _buscaCont = '';
 
-function pintarContenido(){
+/* Contenido global ya no es una pantalla propia: son las de la librería. Esto
+   es su portada, para quien llega por el menú sin desplegarlo. */
+function pintarPortadaLibreria(){
   document.getElementById('subtitulo').textContent =
-    'La misma estructura que la librería del coach, pero todo se guarda con ámbito global (etiqueta «Plataforma»).';
+    'Las mismas pantallas que usa el coach. Lo que crees o edites aquí nace con ámbito Plataforma.';
   const el = document.getElementById('contenido');
   el.outerHTML = '<div id="contenido"></div>';
+  const M = window.MenuPlataforma;
+  document.getElementById('contenido').innerHTML = `
+    <div class="nota">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Son las pantallas de la librería, con todas sus funciones. Se abren con este mismo menú de plataforma;
+      para volver al panel, pulsa <b>Plataforma Alzum</b> arriba del menú.</span>
+    </div>
+    <div class="kpis">
+      ${(M ? M.LIBRERIA : []).map(g => `<div class="rol-tarj">
+        <div class="rh"><b>${esc(g.grupo)}</b></div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+          ${g.items.map(i => `<a href="../${M.conModo(i.pagina)}" style="font-size:13px;color:var(--indigo);font-weight:600;text-decoration:none;">${esc(i.nombre)} →</a>`).join('')}
+        </div></div>`).join('')}
+    </div>`;
+}
+
+/* Lo privado de cada cuenta, y el botón para subirlo al catálogo común. Antes
+   era una pestaña dentro de Contenido global; al pasar esa sección a ser la
+   librería del coach, se quedó sin sitio y ahora es su propia entrada. */
+function pintarContenidoOrgs(){
+  document.getElementById('subtitulo').textContent =
+    'Contenido privado de cada cuenta. Desde aquí se sube a la plataforma lo que merece estar en la base común.';
+  const el = document.getElementById('contenido');
+  el.outerHTML = '<div id="contenido"></div>';
+  _tipo = 'organizaciones'; _buscaCont = '';
   cargarContenido();
 }
 
-async function cargarContenido(){
+async function cargarContenido(soloDatos){
   const c = document.getElementById('contenido');
-  if (!_cont) c.innerHTML = '<div class="card"><div class="proximo">Cargando…</div></div>';
+  if (!soloDatos && !_cont) c.innerHTML = '<div class="card"><div class="proximo">Cargando\u2026</div></div>';
   const url = `${API}/admin/content?tipo=${encodeURIComponent(_tipo)}` +
               (_buscaCont ? `&q=${encodeURIComponent(_buscaCont)}` : '');
   try {
     const r = await fetch(url, { headers: cab() });
-    if (!r.ok) { c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el contenido.</div></div>'; return; }
+    if (!r.ok) { if (!soloDatos) c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el contenido.</div></div>'; return; }
     _cont = (await r.json()).data || {};
+    if (soloDatos) return;              // Visión general solo quiere los números
     c.innerHTML = htmlContenido();
     const q = document.getElementById('qg');
     if (q && _buscaCont){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
-  } catch(e){ c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el contenido.</div></div>'; }
+  } catch(e){ if (!soloDatos) c.innerHTML = '<div class="card"><div class="proximo">No se pudo cargar el contenido.</div></div>'; }
 }
 
-function tiposDe(familia){
-  const cn = (_cont && _cont.conteos) || {};
-  return Object.keys(cn).filter(t => cn[t].familia === familia);
-}
-
+/* Lo que queda de la pantalla propia: la tabla del contenido privado de las
+   cuentas. Las familias, sus pestañas y sus formularios se fueron con ella —
+   ahora se trabajan en las páginas de la librería, que es lo que se pidió. */
 function htmlContenido(){
-  const cn = _cont.conteos || {}, tot = _cont.totales || {};
-  const fam = FAMILIAS.find(f => f.id === _fam) || FAMILIAS[0];
-  const tipos = tiposDe(_fam);
-
   return `
-    <div class="nota">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span>Todo lo que crees aquí nace con ámbito <b>Global</b>: aparece en la librería de todas las cuentas con el origen <b>Plataforma</b>. Los catálogos (grupos musculares, tipos de dieta y grupos de alimentos) son la fuente única de verdad de la plataforma.</span>
-    </div>
-    <div class="kpis">
-      ${tarjeta('Contenido global', tot.global ?? 0, '', 'globe')}
-      ${tarjeta('Contenido de cuentas', tot.cuentas ?? 0, '', 'building')}
-      ${tarjeta('Propuestas pendientes', '—', 'Requiere el circuito de propuestas', 'up', true)}
-    </div>
-    <div class="fams">
-      ${FAMILIAS.map(f => {
-        const n = f.id === 'organizaciones' ? (tot.cuentas ?? 0) : null;
-        return `<button class="fam${f.id===_fam?' on':''}" ${f.pendiente?'title="'+esc(f.pendiente)+'"':''} onclick="abrirFamilia('${f.id}')">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS[f.icono]||''}</svg>
-          ${esc(f.nombre)}${n !== null ? `<span class="cnt">${n}</span>` : ''}</button>`;
-      }).join('')}
-    </div>
-    ${fam.pagina ? libreriaEmbebida(fam) : ''}
-    ${fam.pagina ? '' : (fam.pendiente ? bloquePendiente(fam) : (tipos.length ? `
-      <div class="tipos">
-        ${tipos.map(t => `<button class="tipo${t===_tipo?' on':''}" onclick="abrirTipo('${t}')">
-            ${esc(cn[t].etiqueta)}<span class="cnt">${cn[t].global}</span></button>`).join('')}
-      </div>` : ''))}
-    ${fam.pagina || fam.pendiente ? '' : `
     <div class="barra">
       <div class="buscar-wrap">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input class="buscar" id="qg" placeholder="Buscar por nombre…" value="${esc(_buscaCont)}" oninput="buscarContenido(this.value)">
       </div>
-      ${botonNuevo()}
     </div>
-    ${_fam === 'organizaciones' ? tablaOrganizaciones() : tablaGlobal()}
-    ${_cont.recortado ? `<p style="font-size:12px;color:#B45309;margin-top:12px;">Se muestran ${(_cont.items||[]).length} de ${_cont.total}. Afina la búsqueda para ver el resto.</p>` : ''}`}
+    ${tablaOrganizaciones()}
+    ${_cont.recortado ? `<p style="font-size:12px;color:#B45309;margin-top:12px;">Se muestran ${(_cont.items||[]).length} de ${_cont.total}. Afina la búsqueda para ver el resto.</p>` : ''}
     ${bloquePropuestas()}`;
-}
-
-/* La librería del coach, dentro del panel. Antes de abrirla se limpia el
-   contexto de organización: si quedara puesto el de una cuenta, lo que se
-   creara "global" nacería dentro de ella. */
-function libreriaEmbebida(fam){
-  try { localStorage.removeItem('org_context'); localStorage.removeItem('org_context_name'); } catch(e) {}
-  return `<div class="card" style="padding:0;overflow:hidden;">
-    <iframe id="libFrame" src="${fam.pagina}?embed=1" title="Librería de ${esc(fam.nombre)}"
-            scrolling="no" style="width:100%;border:0;display:block;height:760px;"></iframe>
-  </div>
-  <p style="font-size:12px;color:#9CA3AF;margin-top:12px;">
-    Es la misma pantalla que usa el coach, con sus mismas funciones. Lo que crees o edites aquí
-    nace con ámbito <b>Plataforma</b> porque estás actuando como la plataforma, no dentro de una cuenta.
-  </p>`;
-}
-
-/* El marco se ajusta a lo que mide la página de dentro. Sin esto queda una
-   barra de scroll dentro de otra, que es incómoda de usar de verdad. */
-window.addEventListener('message', function(e){
-  if (!e.data || e.data.tipo !== 'libreria-alto') return;
-  const f = document.getElementById('libFrame');
-  if (f) f.style.height = Math.max(400, Math.min(e.data.alto + 24, 20000)) + 'px';
-});
-
-function bloquePendiente(fam){
-  return `<div class="card"><div class="proximo">
-    <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <b>${esc(fam.nombre)} todavía no tiene ámbito global</b><p>${esc(fam.pendiente)}</p></div></div>`;
 }
 
 /* La cola de aprobación del prototipo (un coach propone, la plataforma
@@ -976,66 +884,6 @@ function bloquePropuestas(){
       librería y que quede registrado quién propone, qué y cuándo. Mientras tanto, lo bueno de una cuenta se
       sube a plataforma desde <b>Contenido de organizaciones</b>.</div>
     </div>
-  </div>`;
-}
-
-const SINGULAR = { routines:'rutina', trainings:'ejercicio', diets:'dieta', aliments:'alimento' };
-const GENERO = { routines:'Nueva', trainings:'Nuevo', diets:'Nueva', aliments:'Nuevo' };
-
-function botonNuevo(){
-  if (_fam === 'organizaciones') return '';
-  const cn = (_cont.conteos || {})[_tipo] || {};
-  // Los catálogos sin dueño se crean con el formulario corto de siempre.
-  if (!cn.organizacion) return `<button class="btn" onclick="abrirCatalogo('')">+ Nuevo</button>`;
-  const sg = SINGULAR[_tipo];
-  return sg ? `<button class="btn" onclick="abrirGlobal('')">+ ${GENERO[_tipo]} ${sg} global</button>` : '';
-}
-
-/* Abrir el editor del panel de coach, sin contexto de organización, para
-   terminar lo que aquí solo se puede empezar: una rutina necesita sus días y
-   una dieta sus comidas, y eso no cabe en un formulario corto. */
-function irAlEditor(id){
-  const destino = EDITOR[_tipo];
-  if (!destino) return;
-  try { localStorage.removeItem('org_context'); localStorage.removeItem('org_context_name'); } catch(e){}
-  location.href = destino + (id ? (destino.indexOf('?') === -1 ? '?id=' : '&id=') + id : '');
-}
-
-function tablaGlobal(){
-  const items = _cont.items || [], cn = (_cont.conteos || {})[_tipo] || {};
-  const cols = {
-    routines:  ['Nombre','Objetivo','Nivel','Días/sem','Duración','Origen','Acciones'],
-    trainings: ['Nombre','Grupo muscular','Material','Origen','Acciones'],
-    diets:     ['Nombre','Tipo','Calorías','Origen','Acciones'],
-    aliments:  ['Nombre','Grupo','Calorías','Origen','Acciones'],
-  }[_tipo] || ['Nombre','Descripción','Origen','Acciones'];
-
-  const celdas = x => {
-    const nom = `<td><span class="ico-cel"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONOS.box}</svg></span><b>${esc(x.nombre)}</b></td>`;
-    const origen = `<td><span class="badge b-plataforma">Plataforma</span></td>`;
-    if (_tipo === 'routines') return nom + `<td>${esc(x.objetivo||'—')}</td><td>${esc(x.nivel||'—')}</td><td>${x.dias ?? '—'}</td><td>${esc(x.duracion||'—')}</td>` + origen;
-    if (_tipo === 'trainings') return nom + `<td>${esc(x.grupo||'—')}</td><td>${esc(x.material||'—')}</td>` + origen;
-    if (_tipo === 'diets') return nom + `<td>${esc(x.tipo_dieta||'—')}</td><td>${x.calorias != null ? Math.round(x.calorias)+' kcal' : '—'}</td>` + origen;
-    if (_tipo === 'aliments') return nom + `<td>${esc(x.grupo||'—')}</td><td>${x.calorias != null ? Math.round(x.calorias)+' kcal' : '—'}</td>` + origen;
-    return nom + `<td class="cta-s">${esc(x.descripcion||'')}</td>` + origen;
-  };
-
-  const acciones = x => `<td class="num" style="white-space:nowrap;">
-      <button class="icono-btn" title="${cn.organizacion ? 'Abrir en el editor' : 'Renombrar'}"
-              onclick="${cn.organizacion ? `abrirGlobal('${x.id}')` : `abrirCatalogo('${x.id}')`}">${LAPIZ}</button>
-      <button class="icono-btn rojo" title="Borrar"
-              onclick="${cn.organizacion ? `borrarGlobal('${x.id}','${esc(x.nombre)}')` : `borrarCatalogo('${x.id}','${esc(x.nombre)}')`}">${PAPELERA}</button>
-    </td>`;
-
-  return `<div class="card" style="padding:16px 8px;">
-    <table>
-      <thead><tr>${cols.map((h,i) => `<th${i===cols.length-1?' class="num"':''}>${h}</th>`).join('')}</tr></thead>
-      <tbody>
-      ${items.map(x => `<tr>${celdas(x)}${acciones(x)}</tr>`).join('') ||
-        `<tr><td colspan="${cols.length}" style="text-align:center;padding:36px;color:#9CA3AF;">
-           ${_buscaCont ? 'Nada con ese nombre.' : 'Todavía no hay nada de plataforma en esta lista.'}</td></tr>`}
-      </tbody>
-    </table>
   </div>`;
 }
 
@@ -1061,16 +909,6 @@ function tablaOrganizaciones(){
   </div>`;
 }
 
-function abrirFamilia(id){
-  const fam = FAMILIAS.find(f => f.id === id);
-  _fam = id; _buscaCont = '';
-  if (id === 'organizaciones') _tipo = 'organizaciones';
-  else if (!fam.pendiente) _tipo = tiposDe(id)[0] || _tipo;
-  if (fam.pendiente) { document.getElementById('contenido').innerHTML = htmlContenido(); return; }
-  cargarContenido();
-}
-function abrirTipo(t){ _tipo = t; _buscaCont = ''; cargarContenido(); }
-
 let _tBusca = null;
 function buscarContenido(v){
   _buscaCont = v;
@@ -1087,226 +925,6 @@ async function promover(tipo, id, nombre){
   const r = await fetch(`${API}/content/${mapa[tipo]}/${id}/organization`, {
     method:'PUT', headers: cab(), body: JSON.stringify({ organization_id: null }) });
   if (!r.ok) { const j = await r.json().catch(()=>({})); alert(j.message || 'No se pudo subir'); return; }
-  cargarContenido();
-}
-
-/* Borrar contenido de plataforma. Va por el endpoint normal del recurso, no
-   por uno nuevo del panel: así vale la misma comprobación de permisos que en
-   el resto de la app, y no hay una segunda puerta que mantener. */
-async function borrarGlobal(id, nombre){
-  const ruta = BORRADO[_tipo];
-  if (!ruta) return;
-  if (!confirm(`¿Borrar «${nombre}» del catálogo de plataforma?\n\nDejará de estar disponible para todas las cuentas.`)) return;
-  const r = await fetch(`${API}/${ruta}/${id}`, { method:'DELETE', headers: cab() });
-  const j = await r.json().catch(()=>({}));
-  // Alimentos y rutinas se niegan si están en uso: es la respuesta útil.
-  if (!r.ok || j.success === false) { alert(j.message || 'No se pudo borrar'); return; }
-  cargarContenido();
-}
-
-/* ── Crear contenido global sin salir del panel ───────────────────────────
-   Antes esto era un botón que te mandaba al editor del panel de coach. Da el
-   rodeo justo cuando el trabajo es repetitivo —meter veinte alimentos a la
-   base común— así que el formulario vive aquí, con los mismos campos que la
-   librería del coach y contra los MISMOS endpoints. No hay un segundo camino
-   de guardado: es el de siempre, llamado sin contexto de organización, que es
-   lo que hace que nazca con ámbito de plataforma.
-
-   Rutinas y dietas se crean aquí y se TERMINAN en el constructor: una rutina
-   sin días y una dieta sin comidas están vacías, y eso no cabe en un
-   formulario corto ni conviene rehacerlo por segunda vez. */
-const CAMPOS_GLOBAL = {
-  aliments: {
-    titulo: 'alimento global',
-    ruta: '/aliments',
-    campos: [
-      { id:'gNombre', label:'Nombre', clave:'name', req:true, ancho:1, ph:'Nombre del contenido' },
-      { id:'gGrupo',  label:'Grupo de alimentos', clave:'group_food_id', tipo:'select', catalogo:'group_foods' },
-      { id:'gCant',   label:'Cantidad de referencia', clave:'quantity', tipo:'numero', valor:100, sufijo:'g' },
-      { id:'gKcal',   label:'Kcal', clave:'calories', tipo:'numero' },
-      { id:'gProt',   label:'Prot.', clave:'proteins', tipo:'numero' },
-      { id:'gCarb',   label:'Carbs', clave:'carbohydrates', tipo:'numero' },
-      { id:'gGrasa',  label:'Grasa', clave:'fats', tipo:'numero' },
-    ],
-  },
-  trainings: {
-    titulo: 'ejercicio global',
-    ruta: '/trainings',
-    campos: [
-      { id:'gNombre', label:'Nombre', clave:'name', req:true, ancho:1, ph:'Sentadilla trasera' },
-      { id:'gMusculo', label:'Grupo muscular', clave:'muscle_group_id', tipo:'select', catalogo:'muscle_groups' },
-      { id:'gMaterial', label:'Material', clave:'material', ph:'Barra, mancuernas…' },
-      { id:'gTipo', label:'Tipo', clave:'exercise_type', tipo:'opciones',
-        opciones:[['','—'],['compound','Compuesto'],['isolation','Aislamiento'],['cardio','Cardio'],['mobility','Movilidad']] },
-      { id:'gLugar', label:'Dónde', clave:'location', tipo:'opciones',
-        opciones:[['','—'],['gym','Gimnasio'],['home','Casa'],['outdoor','Exterior'],['both','Ambos']] },
-      { id:'gVideo', label:'Vídeo (URL)', clave:'video_url', ancho:1, ph:'https://…' },
-    ],
-  },
-  routines: {
-    titulo: 'rutina global',
-    ruta: '/routines',
-    continuar: true,
-    campos: [
-      { id:'gNombre', label:'Nombre', clave:'name', req:true, ancho:1, ph:'Full body 3 días principiante' },
-      { id:'gObjetivo', label:'Objetivo', clave:'objective', ph:'Ganar masa muscular' },
-      { id:'gDias', label:'Días por semana', clave:'days', tipo:'numero' },
-      { id:'gSemanas', label:'Duración (semanas)', clave:'time', tipo:'numero' },
-    ],
-  },
-  diets: {
-    titulo: 'dieta global',
-    ruta: '/diets',
-    continuar: true,
-    campos: [
-      { id:'gNombre', label:'Nombre', clave:'title', req:true, ancho:1, ph:'Volumen 2500 kcal' },
-      { id:'gTipoDieta', label:'Tipo de dieta', clave:'type_id', tipo:'select', catalogo:'type_foods' },
-      { id:'gCalorias', label:'Calorías objetivo', clave:'calories', tipo:'numero' },
-    ],
-  },
-};
-
-// Los catálogos de los desplegables se piden una vez y se guardan.
-const _catalogos = {};
-async function catalogo(tipo){
-  if (_catalogos[tipo]) return _catalogos[tipo];
-  try {
-    const r = await fetch(`${API}/admin/content?tipo=${tipo}`, { headers: cab() });
-    _catalogos[tipo] = r.ok ? (((await r.json()).data || {}).items || []) : [];
-  } catch(e) { _catalogos[tipo] = []; }
-  return _catalogos[tipo];
-}
-
-let _globalId = null;
-async function abrirGlobal(id){
-  const cfg = CAMPOS_GLOBAL[_tipo];
-  if (!cfg) return;
-  _globalId = id || null;
-
-  /* Para editar se pide el registro a SU endpoint, no se rellena con la fila
-     del listado: la lista devuelve el grupo por su nombre y las claves en
-     castellano, así que prefill desde ahí dejaría los desplegables vacíos y
-     guardar borraría lo que no se hubiera podido cargar. */
-  let item = null;
-  if (_globalId) {
-    try {
-      const r = await fetch(`${API}${cfg.ruta}/${_globalId}/edit`, { headers: cab() });
-      if (r.ok) item = (await r.json()).data || null;
-    } catch(e) {}
-    if (!item) { alert('No se pudo cargar el contenido para editarlo'); return; }
-  }
-
-  // Los desplegables se rellenan ANTES de pintar, para que al editar se pueda
-  // marcar el valor que ya tiene.
-  for (const c of cfg.campos.filter(c => c.tipo === 'select')) {
-    c._opciones = await catalogo(c.catalogo);
-  }
-
-  document.getElementById('globalTitulo').textContent =
-    (_globalId ? 'Editar ' : 'Nuevo ') + cfg.titulo;
-  document.getElementById('globalCuerpo').innerHTML =
-    cfg.campos.map(c => {
-      const val = item ? (item[c.clave] ?? '') : (c.valor ?? '');
-      if (c.tipo === 'select') {
-        return campoGlobal(c, `<select id="${c.id}"><option value="">Selecciona…</option>` +
-          c._opciones.map(o => `<option value="${o.id}"${String(o.id)===String(val)?' selected':''}>${esc(o.nombre)}</option>`).join('') + '</select>');
-      }
-      if (c.tipo === 'opciones') {
-        return campoGlobal(c, `<select id="${c.id}">` +
-          c.opciones.map(([v, t]) => `<option value="${v}"${v===String(val)?' selected':''}>${t}</option>`).join('') + '</select>');
-      }
-      return campoGlobal(c, `<input id="${c.id}" ${c.tipo === 'numero' ? 'type="number" step="any" min="0"' : ''}
-        placeholder="${esc(c.ph || '')}" value="${esc(val)}">${c.sufijo ? `<span class="cta-s"> ${c.sufijo}</span>` : ''}`);
-    }).join('') +
-    `<div class="aviso">Se guardará como contenido <b>Plataforma</b> (global, sin organización asociada): lo verá toda cuenta como base de partida.</div>` +
-    (cfg.continuar && !_globalId
-      ? `<div class="aviso" style="color:#3730A3;background:#EEF2FF;border-color:#DDE2FE;">Al guardar se abre el constructor para añadirle ${_tipo === 'routines' ? 'sus días y ejercicios' : 'sus comidas'}: aquí solo se crea la ficha.</div>`
-      : '');
-
-  document.getElementById('globalError').textContent = '';
-  document.getElementById('capaGlobal').classList.add('on');
-  setTimeout(() => { const n = document.getElementById('gNombre'); if (n) n.focus(); }, 50);
-}
-
-function campoGlobal(c, control){
-  return `<div class="campo" style="${c.ancho ? 'grid-column:1/-1;' : ''}">
-    <label>${c.label}${c.req ? ' *' : ''}</label>${control}</div>`;
-}
-
-function cerrarGlobal(){ document.getElementById('capaGlobal').classList.remove('on'); }
-
-async function guardarGlobal(){
-  const cfg = CAMPOS_GLOBAL[_tipo];
-  const err = document.getElementById('globalError');
-  const cuerpo = {};
-  for (const c of cfg.campos) {
-    const el = document.getElementById(c.id);
-    if (!el) continue;
-    let v = el.value;
-    if (c.req && !String(v).trim()) { err.textContent = `${c.label} es obligatorio.`; el.focus(); return; }
-    if (v === '' || v === null) { if (!c.req) continue; }
-    if (c.tipo === 'numero' || (c.tipo === 'select' && v)) v = Number(v);
-    cuerpo[c.clave] = typeof v === 'string' ? v.trim() : v;
-  }
-  // Los alimentos llevan la unidad junto a la cantidad, como en la librería.
-  if (_tipo === 'aliments' && cuerpo.quantity) cuerpo.quantity_unit = 'g';
-
-  const btn = document.getElementById('globalBtn'); btn.disabled = true;
-  try {
-    // Mismos endpoints que usa el coach. Sin contexto de organización, lo que
-    // se guarde nace con ámbito de plataforma; no hay un segundo camino.
-    const r = await fetch(`${API}${cfg.ruta}${_globalId ? '/' + _globalId + '/update' : ''}`,
-      { method: _globalId ? 'PUT' : 'POST', headers: cab(), body: JSON.stringify(cuerpo) });
-    const j = await r.json().catch(()=>({}));
-    if (!r.ok || j.success === false) { err.textContent = j.message || 'No se pudo guardar.'; return; }
-
-    cerrarGlobal();
-    if (cfg.continuar && !_globalId && j.data && j.data.id) {
-      if (confirm(`«${cuerpo.name || cuerpo.title}» creada.\n\n¿Abrir el constructor para añadirle ${_tipo === 'routines' ? 'días y ejercicios' : 'comidas'}?`)) {
-        irAlEditor(j.data.id);
-        return;
-      }
-    }
-    cargarContenido();
-  } finally { btn.disabled = false; }
-}
-
-// ── Catálogos sin dueño: se crean, renombran y borran aquí ──────────────────
-let _catId = null;
-function abrirCatalogo(id){
-  const item = (_cont.items || []).find(x => String(x.id) === String(id));
-  _catId = id || null;
-  document.getElementById('catTitulo').textContent =
-    (_catId ? 'Renombrar' : 'Nueva entrada') + ' · ' + ((_cont.conteos||{})[_tipo]||{}).etiqueta;
-  document.getElementById('catNombre').value = item ? item.nombre : '';
-  document.getElementById('catError').textContent = '';
-  document.getElementById('capaCat').classList.add('on');
-  setTimeout(() => document.getElementById('catNombre').focus(), 50);
-}
-function cerrarCatalogo(){ document.getElementById('capaCat').classList.remove('on'); }
-
-async function guardarCatalogo(){
-  const nombre = document.getElementById('catNombre').value.trim();
-  const err = document.getElementById('catError');
-  if (!nombre) { err.textContent = 'Escribe un nombre.'; return; }
-  const btn = document.getElementById('catBtn'); btn.disabled = true;
-  try {
-    const r = await fetch(`${API}/admin/content/${_tipo}${_catId ? '/' + _catId : ''}`,
-      { method: _catId ? 'PUT' : 'POST', headers: cab(), body: JSON.stringify({ name: nombre }) });
-    const j = await r.json().catch(()=>({}));
-    if (!r.ok) { err.textContent = j.message || 'No se pudo guardar.'; return; }
-    cerrarCatalogo();
-    cargarContenido();
-  } finally { btn.disabled = false; }
-}
-
-async function borrarCatalogo(id, nombre){
-  if (!confirm(`¿Borrar «${nombre}»?\n\nEsta lista la usan todas las cuentas.`)) return;
-  const r = await fetch(`${API}/admin/content/${_tipo}/${id}`, { method:'DELETE', headers: cab() });
-  const j = await r.json().catch(()=>({}));
-  // El backend se niega si algo lo está usando: es la respuesta útil, no un
-  // error que haya que esconder.
-  if (!r.ok) { alert(j.message || 'No se pudo borrar'); return; }
   cargarContenido();
 }
 

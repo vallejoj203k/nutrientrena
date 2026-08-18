@@ -68,7 +68,7 @@ def test_el_invitado_crea_su_contrasena_y_entra(client, seed, admin_headers):
     # Y es super-admin de verdad, no solo una cuenta con contraseña
     h = {"Authorization": f"Bearer {lg.json()['data']['token']}"}
     d = client.get("/api/admin/me", headers=h).json()["data"]
-    assert d["es_superadmin"] is True and len(d["secciones"]) == 10
+    assert d["es_superadmin"] is True and len(d["secciones"]) == 11
 
 
 def test_el_codigo_se_devuelve_una_vez_y_no_queda_en_claro(client, seed, admin_headers):

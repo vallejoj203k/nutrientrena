@@ -169,7 +169,7 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('y avisa de que es una vista previa', await p.locator('#avisoPreview').isVisible());
   await p.click('#avisoPreview button');
   await p.waitForTimeout(700);
-  ck('se puede volver a la vista propia', (await p.locator('.s-item span').allTextContents()).length === 10);
+  ck('se puede volver a la vista propia', (await p.locator('.s-item span').allTextContents()).length === 11);
 
   // ── "Entrar como": soporte sin pedirle la contraseña a nadie ─────────────
   await p.click('.s-item:nth-child(2)');

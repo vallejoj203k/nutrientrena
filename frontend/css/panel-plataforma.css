@@ -1,0 +1,69 @@
+/* El menú lateral del panel de plataforma.
+
+   Vive en su propio fichero porque lo usan DOS sitios: el panel (/admin) y las
+   páginas de la Librería cuando se abren como plataforma. Copiarlo en cada uno
+   sería la cuarta vez que en este proyecto dos copias de lo mismo se separan
+   con el tiempo —ya pasó con el constructor de rutinas, con el menú del coach
+   (21 copias) y con el globito de chat (38)—.
+
+   La tinta oscura es a propósito: se distingue de un vistazo del índigo del
+   panel del coach, para que nadie se confunda de sitio. */
+/* Los colores se declaran en la propia barra y no en el <body>: las páginas de
+   la librería tienen su --indigo (#4F46E5) y pisárselo desde fuera les
+   cambiaría la marca entera sin que nadie lo hubiera pedido. */
+  /* ── Barra lateral ── */
+  .side{--tinta:#10141E; --indigo:#4F5BF2;
+        width:248px;background:var(--tinta);color:#fff;display:flex;flex-direction:column;flex-shrink:0;}
+  .side-brand{padding:20px 20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);}
+  .side-brand b{font-size:15px;letter-spacing:.2px;}
+  .side-brand span{font-size:10.5px;color:rgba(255,255,255,.45);display:block;margin-top:1px;}
+  .side-nav{flex:1;padding:12px 10px;overflow-y:auto;}
+  .s-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:rgba(255,255,255,.68);
+          font-size:13px;font-weight:500;cursor:pointer;transition:.14s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:inherit;
+          text-decoration:none;}   /* en la librería son <a>, no <button> */
+  .s-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+  .s-item.active{background:var(--indigo);color:#fff;font-weight:600;}
+  .s-item svg{flex-shrink:0;opacity:.85;}
+  .ctx-card{margin:12px 12px 4px;padding:9px 10px;border:1px solid rgba(255,255,255,.14);border-radius:11px;
+            display:flex;align-items:center;gap:9px;cursor:pointer;position:relative;background:rgba(255,255,255,.04);}
+  .ctx-card:hover{background:rgba(255,255,255,.08);}
+  .ctx-ico{width:28px;height:28px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .ctx-txt{min-width:0;flex:1;}
+  .ctx-txt b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ctx-txt span{font-size:10px;color:rgba(255,255,255,.45);}
+  .ctx-card select{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+  .rol-card{margin:8px 12px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:rgba(255,255,255,.03);}
+  .rol-t{font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:5px;}
+  .rol-card b{font-size:13px;}
+  .rol-card p{font-size:11px;color:rgba(255,255,255,.5);line-height:1.45;margin-top:4px;}
+  .ver-como{margin:0 12px 10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);}
+  .ver-como select{width:100%;padding:7px 9px;border:1px solid rgba(255,255,255,.16);border-radius:8px;
+                   background:rgba(255,255,255,.05);color:#fff;font:inherit;font-size:12px;cursor:pointer;outline:none;}
+  .ver-como select option{color:#111;}
+  .aviso-preview{background:#FEF3C7;border-bottom:1px solid #FDE68A;color:#92400E;font-size:12.5px;padding:9px 24px;display:flex;align-items:center;gap:10px;}
+  .aviso-preview button{background:#fff;border:1px solid #FDE68A;border-radius:7px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;color:#92400E;font-weight:600;}
+  .side-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .who{min-width:0;flex:1;}
+  .who b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .who span{font-size:10.5px;color:rgba(255,255,255,.45);}
+  .salir{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;}
+  .salir:hover{color:#fff;}
+
+/* ── Sub-menú desplegable (Contenido global) ────────────────────────────── */
+.s-sub{overflow:hidden;max-height:0;transition:max-height .18s ease;}
+/* Cabe la librería entera (4 grupos, 13 pantallas). Se quedó corto una vez y
+   recortaba "Guías" y "Plantillas" sin avisar. */
+.s-sub.abierto{max-height:700px;}
+.s-sub a{display:block;padding:7px 12px 7px 40px;border-radius:8px;color:rgba(255,255,255,.55);
+         font-size:12.5px;text-decoration:none;margin-bottom:1px;}
+.s-sub a:hover{background:rgba(255,255,255,.07);color:#fff;}
+.s-sub a.active{color:#fff;background:rgba(79,91,242,.35);font-weight:600;}
+.s-sub .s-grupo{font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+                color:rgba(255,255,255,.3);padding:8px 12px 3px 40px;}
+/* En la librería la página es larga: sin esto el menú se estiraría con ella y
+   habría que subir hasta arriba del todo para cambiar de pantalla. */
+#sidePlataforma{position:sticky;top:0;height:100vh;align-self:flex-start;}
+
+.s-item .chev{margin-left:auto;transition:transform .18s;opacity:.6;}
+.s-item.abierto .chev{transform:rotate(180deg);}

@@ -33,7 +33,7 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
 
   ck('el panel carga', await p.locator('#layout').isVisible());
   const secs = await p.locator('.s-item span').allTextContents();
-  ck('las 10 secciones del documento', secs.length === 10, secs);
+  ck('las 11 secciones del documento', secs.length === 11, secs);
   ck('empieza en Visión general', (await p.textContent('#titulo')).trim() === 'Visión general');
   ck('la barra lateral usa la tinta oscura del documento',
      (await p.evaluate(() => getComputedStyle(document.querySelector('.side')).backgroundColor)) === 'rgb(16, 20, 30)');
@@ -47,11 +47,11 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   const ops = await p.locator('#ctxSel option').allTextContents();
   ck('ofrece Plataforma Alzum y las organizaciones', ops[0] === 'Plataforma Alzum' && ops.length >= 2, ops);
 
-  await p.click('.s-item:nth-child(6)');
+  await p.click('.s-item:has-text("Planes y suscripciones")');
   await p.waitForTimeout(200);
-  ck('navegar entre secciones funciona', (await p.textContent('#titulo')).includes('Contenido'), await p.textContent('#titulo'));
+  ck('navegar entre secciones funciona', (await p.textContent('#titulo')).includes('Planes'), await p.textContent('#titulo'));
   ck('los nombres del menú son los del diseño del cliente',
-     secs[1] === 'Coaches' && secs[3] === 'Facturación' && secs[8] === 'Equipo Alzum', secs);
+     secs[1] === 'Coaches' && secs[3] === 'Facturación' && secs[9] === 'Equipo Alzum', secs);
   ck('la sección queda marcada como activa', await p.locator('.s-item.active').count() === 1);
 
   // ── Clientes finales ─────────────────────────────────────────────────────
@@ -109,36 +109,54 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
     headers: { Authorization: 'Bearer ' + lgd.data.token } })).json();
   ck('ejercicio privado de una cuenta creado', !!priv.data?.organization_id, priv.data);
 
-  await p.click('.s-item:nth-child(6)');
-  await p.waitForTimeout(1800);
+  await p.click('.s-item:has-text("Contenido global")');
+  await p.waitForTimeout(1500);
   ck('la sección Contenido global carga', (await p.textContent('#titulo')).trim() === 'Contenido global');
 
-  /* ── Entrenamiento: la MISMA librería del coach, servida dentro ──────────
-     El cliente pidió que estas pantallas sean idénticas a las suyas. En vez
-     de rehacerlas —dos versiones separándose desde el día siguiente— se sirve
-     la página real sin su menú lateral. Se comprueba justamente eso: que es
-     la página de verdad, con sus funciones, y sin el segundo menú. */
-  const lib = p.frameLocator('#libFrame');
-  await lib.locator('table tbody tr').first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
-  ck('Entrenamiento sirve la librería del coach', await p.locator('#libFrame').count() === 1);
-  ck('sin su menú lateral, para no tener dos menús',
-     !(await lib.locator('.sidebar').isVisible().catch(() => false)));
-  ck('con su buscador y sus filtros',
-     await lib.locator('input[placeholder*="Buscar rutinas"]').isVisible() &&
-     await lib.getByText('Nivel', { exact: true }).first().isVisible());
-  ck('y sus acciones por fila (asignar, ver, editar, borrar)',
-     (await lib.locator('button:has-text("Asignar")').count()) >= 1);
-  ck('el marco se ajusta a lo que mide la página, sin scroll dentro de scroll',
-     parseInt(await p.locator('#libFrame').evaluate(e => e.style.height), 10) > 600,
-     await p.locator('#libFrame').evaluate(e => e.style.height));
+  /* ── Contenido global ES la Librería ────────────────────────────────────
+     El cliente lo pidió literal: que el botón lleve a las páginas de verdad y
+     que todo funcione igual que en el panel del coach, pero conservando el
+     menú de la plataforma. Así que no se comprueba una pantalla rehecha aquí:
+     se comprueba que se abre la página real y que trae el menú correcto. */
+  const sub = await p.locator('.s-sub.abierto a').allTextContents();
+  ck('el menú despliega las pantallas de la librería', sub.length === 13, sub);
+  ck('con los grupos de la librería del coach',
+     ['Rutinas', 'Ejercicios', 'Grupos musculares', 'Dietas', 'Alimentos', 'Formularios', 'Plantillas']
+       .every(n => sub.includes(n)), sub);
 
-  // Las pestañas de dentro siguen navegando DENTRO del panel: si perdieran el
-  // modo incrustado, aparecería el menú del coach dentro del marco.
-  await lib.locator('a:has-text("Ejercicios")').first().click();
-  await p.waitForTimeout(2500);
-  ck('navegar por sus pestañas no saca del panel', await p.locator('#libFrame').count() === 1);
-  ck('y sigue sin menú lateral dentro',
-     !(await lib.locator('.sidebar').isVisible().catch(() => false)));
+  await p.click('.s-sub.abierto a:has-text("Rutinas")');
+  await p.waitForLoadState('domcontentloaded');
+  await p.locator('#sidePlataforma').waitFor({ state: 'visible', timeout: 25000 });
+  ck('abre la página de verdad, no una copia', p.url().includes('/rutinas.html'), p.url());
+  ck('con el menú de la plataforma', await p.locator('#sidePlataforma .s-item').count() >= 11);
+  ck('y sin el menú del coach, para no tener dos',
+     !(await p.locator('body > .layout > .sidebar, body > .sidebar').first().isVisible().catch(() => false)));
+  ck('la pantalla marca dónde estás', await p.locator('.s-sub.abierto a.active:has-text("Rutinas")').count() === 1);
+
+  await p.locator('table tbody tr').first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
+  ck('con su buscador y sus filtros',
+     await p.locator('input[placeholder*="Buscar rutinas"]').isVisible() &&
+     await p.getByText('Nivel', { exact: true }).first().isVisible());
+  ck('y sus acciones por fila (asignar, ver, editar, borrar)',
+     (await p.locator('button:has-text("Asignar")').count()) >= 1);
+
+  // Los enlaces de dentro arrastran el modo: si lo perdieran, a mitad de
+  // navegación reaparecería el menú del coach.
+  await p.click('a:has-text("Ejercicios")');
+  await p.waitForLoadState('domcontentloaded');
+  await p.locator('#sidePlataforma').waitFor({ state: 'visible', timeout: 25000 });
+  ck('navegar por sus pestañas conserva el menú de plataforma',
+     p.url().includes('panel=plataforma'), p.url());
+
+  // Lo que de verdad importa de "entrar como plataforma": lo que se cree aquí
+  // nace en el catálogo común, no dentro de una cuenta.
+  ck('se trabaja sin contexto de cuenta, así que lo nuevo nace global',
+     await p.evaluate(() => localStorage.getItem('org_context')) === null);
+
+  await p.click('#sidePlataforma .ctx-card');
+  await p.waitForLoadState('domcontentloaded');
+  await p.waitForTimeout(1500);
+  ck('«Plataforma Alzum» devuelve al panel', (await p.textContent('#titulo')).trim().length > 0);
 
   // La separación entre plataforma y cuentas se comprueba por API: es una
   // propiedad de los datos, no de la pantalla.
@@ -149,11 +167,17 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('lo privado de una cuenta NO se cuela en la global',
      !nombresGlobal.includes(`Ejercicio privado ${SUF}`), nombresGlobal);
 
-  await p.click('.fam:has-text("Contenido de organizaciones")');
-  await p.waitForTimeout(1400);
+  // ── Contenido de organizaciones ─────────────────────────────────────────
+  // Subir a la base común lo bueno de una cuenta. Era una pestaña dentro de
+  // Contenido global; al pasar esa sección a ser la librería, es su propia
+  // entrada.
+  await p.click('.s-item:has-text("Contenido de organizaciones")');
+  await p.waitForTimeout(1600);
   const to = await p.textContent('#contenido');
   ck('lo privado se lista aparte con su cuenta',
      to.includes(`Ejercicio privado ${SUF}`) && to.includes(`Centro Clientes ${SUF}`), to.slice(0, 220));
+  ck('y las propuestas se marcan como pendientes, no como cero',
+     to.includes('Todavía no existe el circuito de propuestas'));
 
   // Promover: el punto de la sección. Es reversible y ya existía por API.
   p.on('dialog', d => d.accept());
@@ -163,91 +187,6 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('subir a plataforma lo pasa al catálogo común',
      (trasPromover.data.items || []).some(i => i.nombre === `Ejercicio privado ${SUF}`),
      (trasPromover.data.items || []).map(i => i.nombre));
-
-  // ── Crear contenido global SIN salir del panel ───────────────────────────
-  // Antes el botón mandaba al editor del panel de coach. El cliente lo pidió
-  // aquí dentro: mismos campos que la librería y contra los mismos endpoints.
-  await p.click('.fam:has-text("Nutrición")');
-  await p.waitForTimeout(1400);
-  await p.click('.tipo:has-text("Alimentos")');
-  await p.waitForTimeout(1200);
-  await p.click('button:has-text("Nuevo alimento global")');
-  await p.locator('#gNombre').waitFor({ state: 'visible', timeout: 15000 });
-  ck('el alta de alimento se abre dentro del panel', await p.locator('#capaGlobal.on').count() === 1);
-  ck('con los campos de la librería',
-     (await p.textContent('#globalCuerpo')).includes('Grupo de alimentos') &&
-     ['Kcal', 'Prot.', 'Carbs', 'Grasa'].every(t => p.locator(`#globalCuerpo:has-text("${t}")`)),
-     await p.textContent('#globalCuerpo'));
-  ck('y avisa de que nace con ámbito plataforma',
-     (await p.textContent('#globalCuerpo')).includes('sin organización asociada'));
-
-  await p.fill('#gNombre', `Pechuga de pollo ${SUF}`);
-  await p.fill('#gKcal', '165');
-  await p.fill('#gProt', '31');
-  await p.fill('#gCarb', '0');
-  await p.fill('#gGrasa', '4');
-  await p.click('#globalBtn');
-  await p.waitForTimeout(2000);
-
-  const creado = await (await ctx.request.get(
-    `${API}/api/admin/content?tipo=aliments&q=${SUF}`, { headers: H })).json();
-  const fila = (creado.data.items || []).find(i => i.nombre === `Pechuga de pollo ${SUF}`);
-  ck('EL ALIMENTO SE CREA DESDE EL PANEL', !!fila, (creado.data.items || []).map(i => i.nombre));
-  ck('con sus macros', fila && fila.calorias === 165, fila);
-  // Lo que de verdad importa: nace en el catálogo común, no dentro de nadie
-  ck('y NACE CON ÁMBITO PLATAFORMA', fila && fila.organization_id === null, fila);
-
-  // El nombre es obligatorio, como en la librería
-  await p.click('button:has-text("Nuevo alimento global")');
-  await p.locator('#gNombre').waitFor({ state: 'visible', timeout: 15000 });
-  await p.click('#globalBtn');
-  await p.waitForTimeout(800);
-  ck('sin nombre no deja guardar',
-     (await p.textContent('#globalError')).includes('obligatorio'), await p.textContent('#globalError'));
-  await p.click('#capaGlobal .btn.ghost');
-  await p.waitForTimeout(400);
-
-  // Y el lápiz de la fila edita ese mismo contenido, no manda a otra pantalla
-  await p.fill('#qg', `Pechuga de pollo ${SUF}`);
-  await p.waitForTimeout(1200);
-  await p.click('#contenido tbody tr:has-text("Pechuga de pollo") .icono-btn');
-  await p.locator('#gNombre').waitFor({ state: 'visible', timeout: 15000 });
-  ck('el lápiz edita en el propio panel',
-     (await p.inputValue('#gNombre')) === `Pechuga de pollo ${SUF}`, await p.inputValue('#gNombre'));
-  await p.fill('#gKcal', '170');
-  await p.click('#globalBtn');
-  await p.waitForTimeout(2000);
-  const editado = await (await ctx.request.get(
-    `${API}/api/admin/content?tipo=aliments&q=${SUF}`, { headers: H })).json();
-  ck('y la edición se guarda',
-     (editado.data.items || [])[0]?.calorias === 170, (editado.data.items || [])[0]);
-
-  // Catálogos sin dueño: se crean y se renombran en el panel. Se prueba con
-  // "Grupos de alimentos" porque Entrenamiento ya sirve la página del coach.
-  await p.click('.tipo:has-text("Grupos de alimentos")');
-  await p.waitForTimeout(900);
-  await p.click('button:has-text("+ Nuevo")');
-  await p.waitForTimeout(400);
-  ck('el alta de catálogo se abre', await p.locator('#capaCat.on').count() === 1);
-  await p.fill('#catNombre', `Legumbres ${SUF}`);
-  await p.click('#catBtn');
-  await p.waitForTimeout(1400);
-  ck('la entrada de catálogo se crea', (await p.textContent('#contenido')).includes(`Legumbres ${SUF}`));
-
-  // Y no se borra si algo lo usa: rompería la librería de todas las cuentas
-  const grupos = await (await ctx.request.get(`${API}/api/admin/content?tipo=group_foods&q=${SUF}`, { headers: H })).json();
-  const gid = grupos.data.items[0].id;
-  await post('/aliments', { name: `Lenteja que usa el grupo ${SUF}`, group_food_id: Number(gid) });
-  const negado = await ctx.request.fetch(`${API}/api/admin/content/group_foods/${gid}`, { method: 'DELETE', headers: H });
-  ck('no se borra un catálogo en uso', negado.status() === 400, negado.status());
-
-  // Lo que aún no tiene ámbito global se dice, no se finge
-  await p.click('.fam:has-text("Formularios")');
-  await p.waitForTimeout(600);
-  ck('formularios avisa de que le falta el ámbito de organización',
-     (await p.textContent('#contenido')).includes('todavía no tiene ámbito global'));
-  ck('y las propuestas se marcan como pendientes, no como cero',
-     (await p.textContent('#contenido')).includes('Todavía no existe el circuito de propuestas'));
 
   // ── Analíticas ───────────────────────────────────────────────────────────
   // Lo que importa aquí es que las gráficas se dibujen con datos REALES y que

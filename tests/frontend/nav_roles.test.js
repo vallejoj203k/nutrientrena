@@ -11,6 +11,10 @@ const path = require('path');
 const RAIZ = path.join(__dirname, '..', '..');
 const MOD = fs.readFileSync(path.join(RAIZ, 'frontend', 'js', 'nav-roles.js'), 'utf8');
 const PAGINA = fs.readFileSync(path.join(RAIZ, 'frontend', 'aliments.html'), 'utf8');
+// El menú de la Librería ya no está copiado dentro de cada página: vive en su
+// propio fichero, que es el que cargan las páginas. Se lee de ahí, que además
+// es más honesto que sacarlo del HTML a base de contar llaves.
+const FLYOUT = fs.readFileSync(path.join(RAIZ, 'frontend', 'js', 'libreria-menu.js'), 'utf8');
 
 function trozo(marca, cierre) {
   const i = PAGINA.indexOf(marca);
@@ -29,7 +33,15 @@ const NAV = trozo('<nav', 'nav');
 const TABS = (PAGINA.match(/<a class="lib-cat[^>]*>.*?<\/a>/gs) || []).join('\n')
            + (PAGINA.match(/<a class="lib-subtab[^>]*>.*?<\/a>/gs) || []).join('\n')
            + (PAGINA.match(/<button class="source-tab[^>]*>.*?<\/button>/gs) || []).join('\n');
-const FLYOUT = trozo('var _flyoutMenus=');
+
+for (const [nombre, txt] of [['NAV', NAV], ['TABS', TABS], ['FLYOUT', FLYOUT]]) {
+  if (!txt || txt.length < 40) {
+    console.error(`FALLO el banco no pudo extraer ${nombre} de la página real. ` +
+                  'Si el código se ha movido de sitio, hay que actualizar el extractor: ' +
+                  'seguir con un trozo vacío haría pasar la prueba sin probar nada.');
+    process.exit(1);
+  }
+}
 
 function pagina(rol) {
   return `<!doctype html><html><head><script>

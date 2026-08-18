@@ -358,7 +358,7 @@ def test_tras_poner_su_contrasena_entra_y_manda(client, seed, admin_headers, mon
     h = {"Authorization": f"Bearer {lg.json()['data']['token']}"}
     d = client.get("/api/admin/me", headers=h).json()["data"]
     assert d["es_superadmin"] is True
-    assert len(d["secciones"]) == 10
+    assert len(d["secciones"]) == 11
 
     # Y con dos super-admin, el bloqueo de "el último" se levanta: el nuevo
     # puede degradar al viejo. Antes no: era el único y el panel lo impedía.

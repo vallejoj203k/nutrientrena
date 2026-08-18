@@ -1,7 +1,7 @@
 """Esqueleto del panel de administración de plataforma.
 
 El documento lo describe como una aplicación SEPARADA del panel de coach, con
-diez secciones y una navegación que depende del rol del miembro del equipo de
+once secciones y una navegación que depende del rol del miembro del equipo de
 Alzum.
 
 Las secciones las sirve el backend, no el HTML: así el menú de un rol no
@@ -31,12 +31,13 @@ def _secciones(client, headers):
 
 # ── Quién entra ────────────────────────────────────────────────────────────
 
-def test_el_superadmin_ve_las_diez_secciones(client, seed, admin_headers):
+def test_el_superadmin_ve_todas_las_secciones(client, seed, admin_headers):
     codigo, secs = _secciones(client, admin_headers)
     assert codigo == 200
     ids = [s["id"] for s in secs]
     assert ids == ["vision", "organizaciones", "clientes", "facturacion", "planes",
-                   "contenido", "soporte", "analiticas", "equipo", "configuracion"], ids
+                   "contenido", "contenido_orgs", "soporte", "analiticas", "equipo",
+                   "configuracion"], ids
 
 
 def test_un_coach_no_entra(client, seed, admin_headers):

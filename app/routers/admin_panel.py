@@ -39,6 +39,10 @@ SECCIONES = [
     {"id": "facturacion",  "nombre": "Facturación",           "icono": "card"},
     {"id": "planes",       "nombre": "Planes y suscripciones", "icono": "box"},
     {"id": "contenido",    "nombre": "Contenido global",      "icono": "shield"},
+    # Las pantallas de Contenido global SON las de la librería del coach, así
+    # que esto —promover a plataforma lo bueno de una cuenta— no cabía dentro y
+    # pasa a ser su propia entrada.
+    {"id": "contenido_orgs", "nombre": "Contenido de organizaciones", "icono": "building"},
     {"id": "soporte",      "nombre": "Soporte",               "icono": "life"},
     {"id": "analiticas",   "nombre": "Analíticas",            "icono": "trend"},
     {"id": "equipo",       "nombre": "Equipo Alzum",          "icono": "team"},
@@ -52,6 +56,8 @@ SECCIONES = [
 # todavía: un rol que nadie puede asignar solo añade ruido.
 ACCESO = {
     SUPERADMIN: [s["id"] for s in SECCIONES],          # todo
+    # Promover contenido de una cuenta al catálogo común es cosa de la
+    # plataforma, no del editor: por eso `contenido_orgs` no está aquí.
     EDITOR_CONTENIDO_GLOBAL: ["contenido"],
     SOPORTE: ["soporte", "organizaciones", "clientes"],
 }

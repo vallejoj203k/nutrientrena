@@ -115,7 +115,7 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
       { headers: { Authorization: 'Bearer ' + j.data.token }, failOnStatusCode: false });
     ck('es super-admin de verdad, no solo una cuenta con clave', me.status() === 200, me.status());
     const d = await me.json();
-    ck('con las diez secciones', (d.data.secciones || []).length === 10, (d.data.secciones || []).length);
+    ck('con las once secciones', (d.data.secciones || []).length === 11, (d.data.secciones || []).length);
   }
 
   // ── 5. El código es de un solo uso ──────────────────────────────────────

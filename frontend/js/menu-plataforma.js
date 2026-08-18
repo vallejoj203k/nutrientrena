@@ -76,6 +76,13 @@
 
   if (!modoPlataforma()) return;
 
+  /* El menú del coach se esconde AQUÍ, según se lee el fichero, y no al estar
+     listo el documento: este script se carga en la cabecera justamente para
+     que el panel del coach no llegue a dibujarse ni un instante. Cargado al
+     final del documento se veía primero el panel del coach y luego el de
+     plataforma, que es lo que hacía pensar que se había cambiado de panel. */
+  esconderMenuDelCoach();
+
   var esc = function (s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -84,7 +91,7 @@
   function arrancar() {
     var token;
     try { token = localStorage.getItem('token'); } catch (e) { return; }
-    if (!token) return;
+    if (!token) { restaurarMenuDelCoach(); return; }
 
     /* Del ámbito se encarga org-context.js, que ve el mismo ?panel=plataforma
        y manda la cabecera X-Organization-Id: plataforma en TODAS las llamadas.
@@ -93,23 +100,58 @@
        panel del coach. El modo vive en la URL y solo mientras dura. */
 
     document.body.classList.add('panel-plataforma');
-    esconderMenuDelCoach();
     marcarEnlaces();
     // La librería repinta sus tablas y sus pestañas al filtrar; sin observar
     // el DOM, los enlaces nuevos saldrían sin el modo y devolverían al panel
     // del coach a mitad de camino.
     new MutationObserver(marcarEnlaces).observe(document.documentElement, { childList: true, subtree: true });
 
+    // Se pinta ya con lo que hay en este fichero —la marca, la vuelta al panel
+    // y las pantallas de la Librería— y luego se rellena con las secciones que
+    // conteste el servidor. Esperar a la respuesta dejaba la página sin ningún
+    // menú mientras tanto, que es justo cuando uno cree que algo se ha roto.
+    pintar({ secciones: [], nombre: '', es_superadmin: false });
+    pedirAcceso(token, 0);
+  }
+
+  /* Quién eres se pregunta al servidor, y el servidor puede tardar o fallar.
+     Hay que distinguir las dos respuestas, porque piden cosas contrarias:
+
+     - "no eres del equipo de Alzum" (403): se le devuelve su panel de coach y
+       se limpia el ?panel=plataforma de la barra de direcciones, para que lo
+       que ve y lo que dice la URL sean lo mismo.
+     - "no he podido preguntarlo" (red caída, 502, arranque frío): NO se le
+       devuelve el panel del coach. Cambiar de panel por un fallo de red hace
+       creer que se ha cambiado de sitio, y encima calladamente. Se dice lo que
+       pasa y se ofrece reintentar. */
+  function pedirAcceso(token, intento) {
     fetch('https://nutrientrena-production.up.railway.app/api/admin/me',
           { headers: { Authorization: 'Bearer ' + token } })
-      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) { salirDelModo(); return null; }
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
       .then(function (j) {
-        // Sin acceso al panel de plataforma no se pinta su menú: se devuelve
-        // el del coach, que es el que le corresponde.
-        if (!j || !j.data) { restaurarMenuDelCoach(); return; }
+        if (!j) return;
+        if (!j.data) { salirDelModo(); return; }
+        quitarAvisoDeFallo();
         pintar(j.data);
       })
-      .catch(function () { restaurarMenuDelCoach(); });
+      .catch(function () {
+        // Dos reintentos cortos: un arranque frío del servidor tarda unos
+        // segundos y no es un error que haya que enseñarle a nadie.
+        if (intento < 2) {
+          setTimeout(function () { pedirAcceso(token, intento + 1); }, 1200 * (intento + 1));
+          return;
+        }
+        // El menú se pinta igual con lo que se sabe sin preguntar: la marca,
+        // la vuelta al panel y las pantallas de la Librería, que están en este
+        // mismo fichero. Faltará la lista de secciones, y eso es lo que dice
+        // el aviso. Dejarle sin ningún menú sería un callejón sin salida.
+        pintar({ secciones: [], nombre: '', es_superadmin: false });
+        avisarDeFallo(token);
+      });
   }
 
   function esconderMenuDelCoach() {
@@ -118,21 +160,63 @@
     s.id = 'menuPlataformaCss';
     // Se esconde, no se borra: si la sesión no puede entrar al panel de
     // plataforma hay que devolvérselo tal cual estaba.
+    //
+    // Sin la clase en el <body> —que se pone al estar listo el documento— el
+    // selector no casa, así que se esconde también por el atributo del <html>,
+    // que sí existe desde el primer instante.
     s.textContent = 'body.panel-plataforma>.layout>.sidebar,' +
-                    'body.panel-plataforma>.sidebar{display:none !important;}';
-    document.head.appendChild(s);
+                    'body.panel-plataforma>.sidebar,' +
+                    'html[data-panel-plataforma] body>.layout>.sidebar,' +
+                    'html[data-panel-plataforma] body>.sidebar{display:none !important;}';
+    (document.head || document.documentElement).appendChild(s);
+    document.documentElement.setAttribute('data-panel-plataforma', '1');
+  }
+
+  /* Salir del modo de verdad: además de devolver el menú del coach, se quita
+     el ?panel=plataforma. Si se quedara, recargar volvería a intentarlo y la
+     dirección seguiría diciendo que estás en el panel de plataforma cuando no
+     lo estás. */
+  function salirDelModo() {
+    restaurarMenuDelCoach();
+    try {
+      var u = new URL(location.href);
+      u.searchParams.delete(PARAM);
+      history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    } catch (e) {}
+  }
+
+  function avisarDeFallo(token) {
+    if (document.getElementById('menuPlatFallo')) return;
+    var d = document.createElement('div');
+    d.id = 'menuPlatFallo';
+    d.className = 'plat-fallo';
+    d.innerHTML = '<span>No se ha podido comprobar tu acceso al panel de plataforma. ' +
+                  'Sigues en <b>Contenido global</b>: lo que veas puede estar incompleto.</span>' +
+                  '<button type="button">Reintentar</button>';
+    d.querySelector('button').addEventListener('click', function () {
+      quitarAvisoDeFallo();
+      pedirAcceso(token, 0);
+    });
+    document.body.appendChild(d);
+  }
+
+  function quitarAvisoDeFallo() {
+    var d = document.getElementById('menuPlatFallo');
+    if (d) d.remove();
   }
 
   function restaurarMenuDelCoach() {
     var s = document.getElementById('menuPlataformaCss');
     if (s) s.remove();
-    document.body.classList.remove('panel-plataforma');
+    document.documentElement.removeAttribute('data-panel-plataforma');
+    if (document.body) document.body.classList.remove('panel-plataforma');
     var mio = document.getElementById('sidePlataforma');
     if (mio) mio.remove();
+    quitarAvisoDeFallo();
   }
 
   function pintar(d) {
-    if (document.getElementById('sidePlataforma')) return;
+    var previo = document.getElementById('sidePlataforma');
 
     var actual = paginaActual();
     var side = document.createElement('aside');
@@ -144,6 +228,11 @@
       return '<a class="s-item" href="admin/index.html#' + s.id + '">' +
              svg(s.icono) + '<span>' + esc(s.nombre) + '</span></a>';
     }).join('');
+
+    // Contenido global se pinta siempre, venga o no la lista de secciones: es
+    // la pantalla en la que se está, y es lo que permite moverse por la
+    // Librería aunque el servidor no haya contestado quién eres.
+    if (!/id="itemContenido"/.test(secciones)) secciones = itemContenido(actual) + secciones;
 
     side.innerHTML =
       '<div class="side-brand">' + svgEscudo() +
@@ -159,7 +248,10 @@
       '<span>' + (d.es_superadmin ? 'Super-admin' : 'Equipo de Alzum') + '</span></div>' +
       '<button class="salir" title="Cerrar sesión">' + svgSalir() + '</button></div>';
 
-    document.body.insertBefore(side, document.body.firstChild);
+    // Repintar en vez de salir si ya había uno: el reintento tras un fallo
+    // trae la lista de secciones que faltaba.
+    if (previo) previo.replaceWith(side);
+    else document.body.insertBefore(side, document.body.firstChild);
 
     side.querySelector('.salir').addEventListener('click', function () {
       try { localStorage.removeItem('token'); localStorage.removeItem('role_id'); } catch (e) {}

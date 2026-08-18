@@ -26,7 +26,9 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.goto(FRONT + '/admin/index.html');
   await p.evaluate(t => localStorage.setItem('token', t), token);
   await p.goto(FRONT + '/admin/index.html#organizaciones');
-  await p.waitForTimeout(1800);
+  // A la tabla, no a un tiempo fijo: la base de pruebas acumula cuentas de
+  // cada ejecución y el listado tarda más en cada ronda.
+  await p.locator('#contenido table').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
 
   ck('la sección Coaches carga', (await p.textContent('#titulo')).trim() === 'Coaches');
   // No se asume base vacía: la prueba debe valer con datos previos.

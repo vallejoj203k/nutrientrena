@@ -126,7 +126,11 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
 
   await p.click('.s-sub.abierto a:has-text("Rutinas")');
   await p.waitForLoadState('domcontentloaded');
-  await p.locator('#sidePlataforma').waitFor({ state: 'visible', timeout: 25000 });
+  // Se espera a "Visión general": el menú se pinta en dos tiempos —primero lo
+  // que sabe la página, luego las secciones que contesta el servidor— y esa
+  // entrada solo existe en la segunda.
+  await p.locator('#sidePlataforma .s-item:has-text("Visión general")')
+          .waitFor({ state: 'visible', timeout: 25000 });
   ck('abre la página de verdad, no una copia', p.url().includes('/rutinas.html'), p.url());
   ck('con el menú de la plataforma', await p.locator('#sidePlataforma .s-item').count() >= 11);
   ck('y sin el menú del coach, para no tener dos',
@@ -144,7 +148,9 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   // navegación reaparecería el menú del coach.
   await p.click('a:has-text("Ejercicios")');
   await p.waitForLoadState('domcontentloaded');
-  await p.locator('#sidePlataforma').waitFor({ state: 'visible', timeout: 25000 });
+  await p.locator('#sidePlataforma .s-item:has-text("Visión general")')
+          .waitFor({ state: 'visible', timeout: 25000 });
+  await p.locator('table tbody tr').first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
   ck('navegar por sus pestañas conserva el menú de plataforma',
      p.url().includes('panel=plataforma'), p.url());
 
@@ -171,6 +177,43 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.waitForLoadState('domcontentloaded');
   await p.waitForTimeout(1500);
   ck('«Plataforma Alzum» devuelve al panel', (await p.textContent('#titulo')).trim().length > 0);
+
+  /* ── Que no se cambie de panel a media carga ─────────────────────────────
+     Lo que se veía: abrir la Librería desde el panel enseñaba el panel del
+     COACH. Dos causas, las dos comprobadas aquí:
+       1. el menú del coach se dibujaba primero y se escondía después;
+       2. si /admin/me fallaba, se le devolvía el panel del coach en silencio,
+          que parece que te has cambiado de sitio tú. */
+  const pagLenta = await ctx.newPage();
+  let vistoElDelCoach = false;
+  await pagLenta.goto(FRONT + '/rutinas.html?panel=plataforma', { waitUntil: 'commit' });
+  for (let i = 0; i < 50; i++) {
+    const v = await pagLenta.evaluate(() => {
+      const s = document.querySelector('body > .layout > .sidebar, body > .sidebar');
+      return !!s && getComputedStyle(s).display !== 'none' && s.getBoundingClientRect().width > 0;
+    }).catch(() => false);
+    if (v) { vistoElDelCoach = true; break; }
+    await pagLenta.waitForTimeout(60);
+  }
+  ck('EL MENÚ DEL COACH NO LLEGA A VERSE NI UN INSTANTE', !vistoElDelCoach);
+  await pagLenta.locator('#sidePlataforma .s-item:has-text("Visión general")')
+                .waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
+  ck('y el de plataforma aparece con sus secciones',
+     (await pagLenta.locator('#sidePlataforma .s-item').count()) >= 11);
+  await pagLenta.close();
+
+  // Con el servidor caído se avisa y se sigue en plataforma; no se cambia de panel.
+  const pagRota = await ctx.newPage();
+  await pagRota.route(u => u.href.includes('/api/admin/me'), r => r.fulfill({ status: 502, body: 'boom' }));
+  await pagRota.goto(FRONT + '/rutinas.html?panel=plataforma');
+  await pagRota.locator('.plat-fallo').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
+  ck('si no se puede comprobar el acceso, SE AVISA en vez de cambiar de panel',
+     (await pagRota.locator('.plat-fallo').count()) === 1 &&
+     (await pagRota.locator('#sidePlataforma').count()) === 1 &&
+     !(await pagRota.locator('body > .layout > .sidebar, body > .sidebar').first().isVisible().catch(() => false)));
+  ck('y la Librería se sigue pudiendo recorrer',
+     (await pagRota.locator('#sidePlataforma .s-sub a').count()) === 13);
+  await pagRota.close();
 
   // La separación entre plataforma y cuentas se comprueba por API: es una
   // propiedad de los datos, no de la pantalla.
@@ -407,6 +450,15 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p2.waitForTimeout(1200);
   ck('un coach ve el aviso de sin acceso', await p2.locator('#sinAcceso').isVisible());
   ck('y no ve el panel', !(await p2.locator('#layout').isVisible()));
+
+  // Y si llega a una página de la Librería con el modo de plataforma puesto,
+  // se le devuelve SU menú y se le limpia la dirección: lo que ve y lo que
+  // dice la URL tienen que ser lo mismo.
+  await p2.goto(FRONT + '/rutinas.html?panel=plataforma');
+  await p2.locator('body > .layout > .sidebar, body > .sidebar').first()
+          .waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
+  ck('a un coach se le devuelve su propio menú', !p2.url().includes('panel=plataforma') &&
+     (await p2.locator('#sidePlataforma').count()) === 0, p2.url());
 
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);

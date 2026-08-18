@@ -310,7 +310,8 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
           .waitFor({ state: 'visible', timeout: 25000 });
 
   // Promover: el punto de la sección. Es reversible y ya existía por API.
-  p.on('dialog', d => d.accept());
+  // (El manejador de confirmaciones ya está puesto arriba: registrarlo dos
+  //  veces hace que el segundo intente aceptar un diálogo ya aceptado.)
   await p.click(`tr:has-text("Ejercicio privado ${SUF}") button:has-text("Subir a plataforma")`);
   await p.waitForTimeout(1500);
   const trasPromover = await (await ctx.request.get(`${API}/api/admin/content?tipo=trainings&q=${SUF}`, { headers: H })).json();
@@ -513,6 +514,21 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('elegir una organización lleva al panel de coach', p.url().includes('dashboard.html'), p.url());
   ck('y deja puesto ese contexto', await p.evaluate(() => localStorage.getItem('org_context')) === orgId);
 
+  /* Y el camino de vuelta. Desde el panel se podía entrar en una cuenta, pero
+     para volver al de plataforma había que escribir la dirección a mano. */
+  await p.locator('#irAlPanel').waitFor({ state: 'attached', timeout: 20000 }).catch(() => {});
+  ck('el super-admin tiene el atajo al panel de plataforma en su barra',
+     await p.locator('#irAlPanel').count() === 1);
+  ck('y el nombre se lee entero, sin cortar', await p.evaluate(() => {
+    const e = document.querySelector('#irAlPanel .ip-txt b');
+    return !!e && e.scrollWidth <= e.clientWidth + 1;
+  }));
+  await p.click('#irAlPanel');
+  await p.waitForLoadState('domcontentloaded');
+  await p.waitForTimeout(2000);
+  ck('EL ATAJO DEVUELVE AL PANEL DE PLATAFORMA',
+     p.url().includes('/admin/index.html') && await p.locator('#layout').isVisible(), p.url());
+
   // ── Un coach no entra
   const c = await post('/users', { name: 'Coach fuera', email: `coach.fuera.${SUF}@nutrientrena-qa.com`, password: 'Coach123!', role_id: 5 });
   const lg2 = await (await ctx.request.post(`${API}/api/auth/login`, { data: { email: `coach.fuera.${SUF}@nutrientrena-qa.com`, password: 'Coach123!' } })).json();
@@ -521,6 +537,14 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p2.evaluate(t => localStorage.setItem('token', t), lg2.data.token);
   await p2.goto(FRONT + '/admin/index.html');
   await p2.waitForTimeout(1200);
+  // A un coach ese atajo no le sale: lleva a una puerta cerrada, y un botón que
+  // no se puede pulsar es peor que no tener botón.
+  await p2.goto(FRONT + '/dashboard.html');
+  await p2.waitForTimeout(3000);
+  ck('a un coach NO le aparece el atajo', await p2.locator('#irAlPanel').count() === 0);
+  await p2.goto(FRONT + '/admin/index.html');
+  await p2.waitForTimeout(1500);
+
   ck('un coach ve el aviso de sin acceso', await p2.locator('#sinAcceso').isVisible());
   ck('y no ve el panel', !(await p2.locator('#layout').isVisible()));
 

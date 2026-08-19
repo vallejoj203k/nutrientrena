@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.core.responses import send_response, send_error
-from app.core.dependencies import require_role_ids, verify_client_access, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import (require_role_ids, verify_client_access, SUPERADMIN, ADMIN,
+                                   SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)
 from app.core.email import _send
 from app.routers.files import _get_r2_client, _public_url
 from app.models.document import Document
@@ -48,7 +49,7 @@ async def create_document(
     category: str = Form("guias"),
     name: str = Form(None),
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     cat = category if category in _CATEGORIES else "guias"
     if file.content_type not in _ALLOWED:
@@ -95,7 +96,7 @@ async def create_document(
 def list_documents(
     category: str | None = None,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     q = db.query(Document).filter(Document.coach_id == current_user.id)
     if category:
@@ -153,7 +154,7 @@ def send_document(
 def delete_document(
     doc_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     doc = db.query(Document).filter(Document.id == doc_id, Document.coach_id == current_user.id).first()
     if not doc:

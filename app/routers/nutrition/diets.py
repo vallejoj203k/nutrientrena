@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.database import get_db
 from sqlalchemy import or_
 from app.core.dependencies import (
+    EDITOR_CONTENIDO_GLOBAL,
     require_role_ids, get_org_context, OrgContext,
     verify_client_access, SUPERADMIN, ADMIN, COACH, CLIENT,
 )
@@ -299,7 +300,7 @@ def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_u
 @router.get("/findAll", summary="Listar dietas", description="Retorna la biblioteca de dietas: las de la organización del coach y las plantillas de plataforma.")
 def find_all(
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     from app.models.user import RoleUser
@@ -700,7 +701,7 @@ def ai_generate(
 
 
 @router.get("/{id}/pdf", summary="Exportar dieta a PDF", description="Genera y descarga la dieta en formato PDF.")
-def pdf(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def pdf(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL))):
     diet = _get_or_404(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
@@ -752,7 +753,7 @@ def assigned(
 def edit(
     id: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     diet = _get_or_404_with_pathologies(db, id)
@@ -790,7 +791,7 @@ def _save_detail(db: Session, diet_id: str, data: DietCreate):
 def create(
     data: DietCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     diet = Diet(
@@ -819,7 +820,7 @@ def updated(
     id: str,
     data: DietUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     diet = _get_or_404(db, id)
@@ -853,7 +854,7 @@ def updated(
 def delete(
     id: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     diet = _get_or_404(db, id)

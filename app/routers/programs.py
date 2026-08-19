@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, get_current_user, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import require_role_ids, get_current_user, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL
 from app.core.responses import send_response, send_error
 from app.models.program import Program, ProgramPhase, ProgramClient
 from app.models.user import User
@@ -12,6 +12,9 @@ from app.schemas.program import ProgramCreate, ProgramUpdate, ProgramAssignReque
 router = APIRouter(prefix="/programs", tags=["Programs"])
 
 ALLOWED = (SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)
+# El editor de contenido global mantiene la BIBLIOTECA (plantillas y programas
+# de fábrica), pero no gestiona clientes: por eso hay dos listas y no una.
+BIBLIOTECA = ALLOWED + (EDITOR_CONTENIDO_GLOBAL,)
 
 
 def _serialize(p: Program) -> dict:
@@ -54,7 +57,7 @@ def list_programs(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
 ):
     q = db.query(Program).filter(Program.coach_id == current_user.id)
     if category:
@@ -73,7 +76,7 @@ def create_program(
     data: ProgramCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
 ):
     program = Program(
         name=data.name,
@@ -104,7 +107,7 @@ def get_program(
     id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
 ):
     p = _get_or_404(db, id, current_user)
     if not p:
@@ -119,7 +122,7 @@ def update_program(
     data: ProgramUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
 ):
     p = _get_or_404(db, id, current_user)
     if not p:
@@ -154,7 +157,7 @@ def delete_program(
     id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
 ):
     p = _get_or_404(db, id, current_user)
     if not p:
@@ -214,7 +217,7 @@ def duplicate_program(
     id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
 ):
     p = _get_or_404(db, id, current_user)
     if not p:

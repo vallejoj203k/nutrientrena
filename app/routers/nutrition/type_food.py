@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL
 from app.core.responses import send_response, send_error
 from app.models.nutrition.type_food import TypeFood
 from app.schemas.nutrition.food import TypeFoodCreate, TypeFoodUpdate, TypeFoodOut
@@ -16,7 +16,7 @@ def _get_or_404(db: Session, obj_id: int):
 
 
 @router.get("/findAll", summary="Listar tipos de alimento", description="Retorna todos los tipos de alimento activos (ej: proteína, carbohidrato).")
-def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def find_all(db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     items = db.query(TypeFood).filter(TypeFood.status == 1).all()
     return send_response([TypeFoodOut.model_validate(i).model_dump() for i in items], "OK")
 
@@ -27,7 +27,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     q = db.query(TypeFood)
     if search:
@@ -41,7 +41,7 @@ def search(
 
 
 @router.get("/{id}/edit", summary="Ver tipo de alimento", description="Retorna el detalle de un tipo de alimento por su ID.")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     obj = _get_or_404(db, id)
     if not obj:
         return send_error("Tipo de alimento no encontrado")

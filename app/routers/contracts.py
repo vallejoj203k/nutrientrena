@@ -10,13 +10,16 @@ from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models.contract import Contract, ContractTemplate
 from app.models.user import User, UserDetail
-from app.core.dependencies import require_role_ids, get_current_user, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import require_role_ids, get_current_user, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL
 from app.core.responses import send_response, send_error
 from app.pdf.contract_pdf import generate_contract_pdf
 
 router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
 ALLOWED = (SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)
+# El editor de contenido global mantiene la BIBLIOTECA (plantillas y programas
+# de fábrica), pero no gestiona clientes: por eso hay dos listas y no una.
+BIBLIOTECA = ALLOWED + (EDITOR_CONTENIDO_GLOBAL,)
 
 DEFAULT_TEMPLATE_TITLE = "Contrato de Servicios de Entrenamiento Personal"
 DEFAULT_TEMPLATE_CONTENT = """CONTRATO DE SERVICIOS DE ENTRENAMIENTO PERSONAL
@@ -163,7 +166,7 @@ class TemplateUpdate(BaseModel):
 @router.get("/templates")
 def list_templates(
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
     db: Session = Depends(get_db),
 ):
     _ensure_default_templates(db, current_user.id)
@@ -175,7 +178,7 @@ def list_templates(
 def create_template(
     data: TemplateCreate,
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
     db: Session = Depends(get_db),
 ):
     t = ContractTemplate(coach_id=current_user.id, title=data.title, type=data.type, content=data.content)
@@ -190,7 +193,7 @@ def update_template(
     template_id: int,
     data: TemplateUpdate,
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
     db: Session = Depends(get_db),
 ):
     t = db.query(ContractTemplate).filter_by(id=template_id, coach_id=current_user.id).first()
@@ -211,7 +214,7 @@ def update_template(
 def delete_template(
     template_id: int,
     current_user: User = Depends(get_current_user),
-    _=Depends(require_role_ids(*ALLOWED)),
+    _=Depends(require_role_ids(*BIBLIOTECA)),
     db: Session = Depends(get_db),
 ):
     t = db.query(ContractTemplate).filter_by(id=template_id, coach_id=current_user.id).first()

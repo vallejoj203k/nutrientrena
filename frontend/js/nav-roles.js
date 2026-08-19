@@ -36,6 +36,19 @@
     try { return parseInt(localStorage.getItem('role_id') || '0', 10); } catch (e) { return 0; }
   }
 
+  /* Abierta desde el panel de plataforma, la Librería NO se poda.
+
+     La lista de lo permitido al editor —alimentos y ejercicios— se escribió
+     cuando el panel de plataforma no existía y su única puerta era el panel del
+     coach. Ahora su sección "Contenido global" ES la Librería entera, que es
+     justo lo que tiene que mantener; podarla aquí le dejaba fuera rutinas,
+     formularios y documentos, y encima le echaba a alimentos si intentaba
+     entrar. Allí manda el menú de plataforma, que ya enseña solo sus secciones. */
+  function modoPlataforma() {
+    try { return new URLSearchParams(location.search).get('panel') === 'plataforma'; }
+    catch (e) { return false; }
+  }
+
   function ocultar(el) { if (el) el.style.display = 'none'; }
 
   /* La categoría sale de la clase: "lib-cat c-entrenamiento" → entrenamiento.
@@ -59,6 +72,7 @@
 
   function aplicar() {
     var rid = rol();
+    if (modoPlataforma()) return;   // manda el menú de plataforma, no este
 
     if (rid === COACH) {
       OCULTO_COACH.forEach(function (href) {

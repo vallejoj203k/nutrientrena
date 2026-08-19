@@ -84,6 +84,17 @@
 .plat-fly-item:hover{background:#F5F3FF;color:#4F46E5;}
 .plat-fly-item.on{background:#EEF2FF;color:#4F46E5;font-weight:600;}
 .plat-fly-item svg{opacity:.6;flex-shrink:0;}
+/* El aviso de vista previa dentro de la Librería.
+
+   Va FIJO abajo, no dentro del flujo: el <body> de estas páginas es un flex de
+   dos columnas —barra y contenido—, así que meterle un hijo más lo convertía en
+   una tercera columna y descuadraba la pantalla entera. */
+.plat-preview{position:fixed;bottom:0;left:0;right:0;z-index:99997;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  border-bottom:none;border-top:1px solid #FDE68A;
+  box-shadow:0 -1px 6px rgba(0,0,0,.10);}
+.plat-preview button{flex:none;}
+
 /* Cuando no se ha podido comprobar el acceso al panel. Se avisa en vez de
    devolver el panel del coach por las bravas: cambiar de panel por un fallo de
    red hace creer que te has cambiado de sitio tú. */

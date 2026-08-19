@@ -72,6 +72,33 @@
     return href.split('&')[0] === paginaActual();
   }
 
+  /* La vista previa del panel ("ver el panel como otro rol") vale también aquí.
+
+     Contenido global abre las páginas de la Librería, que son otras páginas: si
+     la vista previa se quedara en el panel, al entrar en Rutinas reaparecería
+     el menú entero del super-admin y uno creería que se le ha caído la
+     previsualización. Solo cambia lo que se PINTA, igual que en el panel: los
+     permisos siguen siendo los de quien mira. */
+  function vistaPrevia() {
+    try { return JSON.parse(sessionStorage.getItem('panel_vista_previa') || 'null'); }
+    catch (e) { return null; }
+  }
+
+  function avisarVistaPrevia(prev) {
+    if (document.getElementById('platPreview')) return;
+    var d = document.createElement('div');
+    d.id = 'platPreview';
+    d.className = 'aviso-preview plat-preview';
+    d.innerHTML = '<span>Estás viendo el panel como <b>' + esc(prev.nombre) +
+                  '</b>. Solo cambia lo que se muestra, no tus permisos.</span>' +
+                  '<button type="button">Volver a mi vista</button>';
+    d.querySelector('button').addEventListener('click', function () {
+      try { sessionStorage.removeItem('panel_vista_previa'); } catch (e) {}
+      location.reload();
+    });
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -145,6 +172,8 @@
         if (!j.data) { salirDelModo(); return; }
         quitarAvisoDeFallo();
         pintar(j.data);
+        var prev = vistaPrevia();
+        if (prev && j.data.es_superadmin) avisarVistaPrevia(prev);
       })
       .catch(function () {
         // Dos reintentos cortos: un arranque frío del servidor tarda unos
@@ -230,16 +259,25 @@
     side.className = 'side';
     side.id = 'sidePlataforma';
 
-    var secciones = (d.secciones || []).map(function (s) {
+    var lista = d.secciones || [];
+    var prev = vistaPrevia();
+    if (prev && prev.secciones) {
+      lista = lista.filter(function (s) { return prev.secciones.indexOf(s.id) !== -1; });
+    }
+
+    var secciones = lista.map(function (s) {
       if (s.id === 'contenido') return itemContenido();
       return '<a class="s-item" href="admin/index.html#' + s.id + '">' +
              svg(s.icono) + '<span>' + esc(s.nombre) + '</span></a>';
     }).join('');
 
-    // Contenido global se pinta siempre, venga o no la lista de secciones: es
-    // la pantalla en la que se está, y es lo que permite moverse por la
-    // Librería aunque el servidor no haya contestado quién eres.
-    if (!/id="itemContenido"/.test(secciones)) secciones = itemContenido() + secciones;
+    // Sin lista de secciones —el servidor no contestó— se pinta al menos
+    // Contenido global: es la pantalla en la que se está, y es lo que permite
+    // seguir moviéndose por la Librería. Con lista, manda la lista: si el rol
+    // que se previsualiza no la tiene, no debe salir.
+    if (!lista.length && !/id="itemContenido"/.test(secciones)) {
+      secciones = itemContenido() + secciones;
+    }
 
     side.innerHTML =
       '<div class="side-brand">' + svgEscudo() +

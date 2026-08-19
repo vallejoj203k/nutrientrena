@@ -504,6 +504,19 @@
   </div>
 </div>
 
+<script>
+/* Entrar aquí es volver a ser la plataforma.
+
+   Antes, si se venía de "Entrar como", el contexto de esa cuenta se quedaba
+   puesto: la tarjeta de arriba decía el nombre del coach, salía el aviso naranja
+   de "estás trabajando dentro de…" y el menú era el del super-admin. Tres cosas
+   que se contradicen en la misma pantalla.
+
+   Se limpia AQUÍ, en la cabecera y antes que org-context.js, para que no haya
+   carrera entre quien lo borra y quien lo lee. Para trabajar dentro de una
+   cuenta está el selector, que lleva a su panel de coach. */
+try { localStorage.removeItem('org_context'); localStorage.removeItem('org_context_name'); } catch(e) {}
+</script>
 <script src="../js/libreria-menu.js"></script>
 <script src="../js/menu-plataforma.js"></script>
 <script src="../js/org-context.js"></script>
@@ -1910,20 +1923,49 @@ function entrarComo(){
    no lo que la API permite: es para comprobar qué ve cada uno sin tener que
    crear una cuenta y entrar con ella. */
 let _rolesEquipo = [], _preview = null;
-function verComo(valor){
+
+/* La vista previa se guarda para que sobreviva al salir del panel.
+
+   "Contenido global" abre las pantallas de verdad, que son otras páginas: si la
+   vista previa vivía solo en una variable, al entrar en Rutinas volvía a
+   aparecer el menú entero del super-admin y la vista previa se perdía sin
+   avisar. Se guarda en sessionStorage y no en localStorage a propósito: es algo
+   temporal, tiene que morir al cerrar la pestaña y no contagiar a otras. */
+const CLAVE_PREVIEW = 'panel_vista_previa';
+
+function guardarPreview(r){
+  try {
+    if (r) sessionStorage.setItem(CLAVE_PREVIEW, JSON.stringify(
+      { role_id: r.role_id, nombre: r.nombre, secciones: r.secciones }));
+    else sessionStorage.removeItem(CLAVE_PREVIEW);
+  } catch(e) {}
+}
+
+function leerPreview(){
+  try { return JSON.parse(sessionStorage.getItem(CLAVE_PREVIEW) || 'null'); }
+  catch(e) { return null; }
+}
+
+function verComo(valor, silencioso){
   const aviso = document.getElementById('avisoPreview');
   if (!valor) {
     _preview = null; _secciones = _todasMisSecciones; aviso.style.display = 'none';
+    guardarPreview(null);
   } else {
-    const r = _rolesEquipo.find(x => String(x.role_id) === String(valor));
-    if (!r) return;
-    _preview = r;
-    _secciones = _todasMisSecciones.filter(s => r.secciones.includes(s.id));
+    // Al restaurar tras recargar puede que la lista de roles no esté todavía;
+    // entonces vale lo guardado, que trae ya sus secciones.
+    const guardado = leerPreview();
+    const rol = _rolesEquipo.find(x => String(x.role_id) === String(valor)) ||
+                (guardado && String(guardado.role_id) === String(valor) ? guardado : null);
+    if (!rol) return;
+    _preview = rol;
+    _secciones = _todasMisSecciones.filter(s => rol.secciones.includes(s.id));
+    guardarPreview(rol);
     aviso.style.display = '';
-    aviso.innerHTML = `Estás viendo el panel como <b>${esc(r.nombre)}</b>. Solo cambia lo que se muestra, no tus permisos.
+    aviso.innerHTML = `Estás viendo el panel como <b>${esc(rol.nombre)}</b>. Solo cambia lo que se muestra, no tus permisos.
       <button onclick="document.getElementById('verComoSel').value='';verComo('')">Volver a mi vista</button>`;
   }
-  abrir((_secciones[0] || {}).id);
+  if (!silencioso) abrir((_secciones[0] || {}).id);
 }
 
 function filtrar(v){ _busca = v; const c = document.getElementById('contenido'); c.innerHTML = htmlCoaches(); const q = document.getElementById('q'); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
@@ -2037,15 +2079,6 @@ function cambiarContexto(){
       card.querySelector('.ctx-txt span').textContent =
         d.es_superadmin ? 'Panel del dueño' : 'Equipo de Alzum';
     }
-    // Si se venía de "Entrar como", el selector tiene que decirlo: llegar al
-    // panel de plataforma con un contexto puesto y verlo en blanco engaña.
-    const _ctxGuardado = (() => { try { return localStorage.getItem('org_context') || ''; } catch(e){ return ''; } })();
-    if (_ctxGuardado && (d.organizaciones || []).some(o => o.id === _ctxGuardado)) {
-      const s = document.getElementById('ctxSel');
-      s.value = _ctxGuardado;
-      document.getElementById('ctxNombre').textContent = s.options[s.selectedIndex].textContent;
-    }
-
     // Tarjeta "Tu rol"
     const rc = document.getElementById('rolCard');
     document.getElementById('rolNombre').textContent = d.es_superadmin ? 'Super-admin' : 'Equipo de Alzum';
@@ -2067,6 +2100,18 @@ function cambiarContexto(){
           document.getElementById('verComo').style.display = '';
         }
       } catch(e) {}
+    }
+
+    // Si se estaba viendo el panel como otro rol, se sigue viendo así al volver
+    // de la Librería: perderlo por el camino es lo que hacía que apareciera de
+    // pronto el menú entero del super-admin.
+    const prev = leerPreview();
+    if (prev && d.es_superadmin) {
+      const sel = document.getElementById('verComoSel');
+      if (sel) sel.value = String(prev.role_id);
+      verComo(String(prev.role_id), true);
+    } else if (prev) {
+      guardarPreview(null);   // ya no eres quien podía previsualizar
     }
 
     const inicial = (location.hash || '').replace('#', '');

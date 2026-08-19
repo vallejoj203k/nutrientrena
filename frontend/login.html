@@ -379,8 +379,17 @@
         } catch {}
 
         showSuccess('¡Bienvenido! Redirigiendo...');
-        // El cliente (rol 6) va a su zona; el resto al panel del coach.
-        const dest = String(roleId) === '6' ? 'client-home.html' : 'dashboard.html';
+        /* Cada rol a SU panel. El editor de contenido global y soporte son
+           equipo de Alzum, no entrenadores: su sitio es el panel de plataforma.
+           Antes caían en el del coach, donde el menú les quedaba recortado a
+           dos pantallas sueltas —la librería a medias, sin formularios ni
+           documentos— porque esa poda se escribió cuando el panel de
+           plataforma todavía no existía. */
+        const PANEL_PLATAFORMA = ['7', '8'];
+        const rol = String(roleId);
+        const dest = rol === '6' ? 'client-home.html'
+                   : PANEL_PLATAFORMA.includes(rol) ? 'admin/index.html'
+                   : 'dashboard.html';
         setTimeout(() => {
           window.location.href = dest;
         }, 800);

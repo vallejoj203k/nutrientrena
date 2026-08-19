@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import Optional
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import (require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH,
+                                   EDITOR_CONTENIDO_GLOBAL)
 from app.core.responses import send_response, send_error
 from app.core.email import notify_coach_form_submitted, send_form_link_email
 from app.config import settings
@@ -67,7 +68,7 @@ def update_default_template(
 # ── Templates ─────────────────────────────────────────────────────────────────
 
 @router_templates.post("", summary="Crear plantilla de formulario", description="Crea una nueva plantilla de formulario con campos personalizados.")
-def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     if data.is_default:
         db.query(FormTemplate).filter(
             FormTemplate.created_by == current_user.id,
@@ -102,7 +103,7 @@ def create_template(data: FormTemplateCreate, db: Session = Depends(get_db), cur
 
 
 @router_templates.get("/default", summary="Plantilla por defecto", description="Retorna la plantilla marcada como predeterminada para nuevos clientes.")
-def get_default(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def get_default(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     template = db.query(FormTemplate).filter(
         FormTemplate.is_default.is_(True),
     ).first()
@@ -112,7 +113,7 @@ def get_default(db: Session = Depends(get_db), current_user=Depends(require_role
 
 
 @router_templates.get("", summary="Listar plantillas", description="Retorna las plantillas de formulario creadas por el usuario autenticado. Se puede filtrar por categoría (checkin|onboarding|survey).")
-def list_templates(category: str | None = None, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def list_templates(category: str | None = None, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     query = db.query(FormTemplate).filter(FormTemplate.created_by == current_user.id)
     if category:
         query = query.filter(FormTemplate.category == category)
@@ -121,7 +122,7 @@ def list_templates(category: str | None = None, db: Session = Depends(get_db), c
 
 
 @router_templates.get("/{id}", summary="Ver plantilla", description="Retorna el detalle de una plantilla con todos sus campos.")
-def get_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def get_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
         return send_error("Plantilla no encontrada")
@@ -129,7 +130,7 @@ def get_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_
 
 
 @router_templates.put("/{id}", summary="Actualizar plantilla", description="Modifica una plantilla de formulario y reemplaza sus campos.")
-def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
         return send_error("Plantilla no encontrada")
@@ -169,7 +170,7 @@ def update_template(id: int, data: FormTemplateUpdate, db: Session = Depends(get
 
 
 @router_templates.delete("/{id}", summary="Eliminar plantilla", description="Elimina una plantilla de formulario por su ID.")
-def delete_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def delete_template(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     template = db.query(FormTemplate).filter(FormTemplate.id == id).first()
     if not template:
         return send_error("Plantilla no encontrada")
@@ -228,7 +229,7 @@ def assign_form(data: FormAssignRequest, db: Session = Depends(get_db), current_
 
 
 @router_assignments.get("/pending-count", summary="Conteo de formularios pendientes", description="Retorna el número de formularios pendientes de respuesta asignados por el usuario.")
-def pending_count(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def pending_count(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     count = db.query(FormAssignment).filter(
         FormAssignment.assigned_by == current_user.id,
         FormAssignment.status == "pending",
@@ -237,7 +238,7 @@ def pending_count(db: Session = Depends(get_db), current_user=Depends(require_ro
 
 
 @router_assignments.get("/pending", summary="Formularios pendientes", description="Lista todos los formularios pendientes de respuesta asignados por el usuario.")
-def pending_assignments(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
+def pending_assignments(db: Session = Depends(get_db), current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL))):
     assignments = db.query(FormAssignment).filter(
         FormAssignment.assigned_by == current_user.id,
         FormAssignment.status == "pending",
@@ -328,7 +329,7 @@ def get_responses(id: str, db: Session = Depends(get_db), _=Depends(require_role
 def list_assignments(
     status: Optional[str] = Query(None, description="Filtrar por estado: pending | submitted"),
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     q = db.query(FormAssignment).filter(FormAssignment.assigned_by == current_user.id)
     if status:

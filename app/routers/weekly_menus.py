@@ -4,7 +4,7 @@ from typing import Optional, Union
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH
+from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL
 from app.core.responses import send_response, send_error
 from app.models.weekly_menu import WeeklyMenu, WeeklyMenuDay
 from app.schemas.weekly_menu import WeeklyMenuCreate, WeeklyMenuUpdate
@@ -38,7 +38,7 @@ def _serialize(m: WeeklyMenu) -> dict:
 @router.get("", summary="Listar menús semanales")
 def list_menus(
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     from app.models.client_menu import ClientMenu
     # Las copias por cliente no son plantillas: no aparecen en la biblioteca.
@@ -56,7 +56,7 @@ def list_menus(
 def create_menu(
     data: WeeklyMenuCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     menu = WeeklyMenu(
         name=data.name,
@@ -83,7 +83,7 @@ def create_menu(
 def get_menu(
     id: str,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
     if not menu:
@@ -96,7 +96,7 @@ def update_menu(
     id: str,
     data: WeeklyMenuUpdate,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
     if not menu:
@@ -124,7 +124,7 @@ def patch_menu(
     id: str,
     data: WeeklyMenuUpdate,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
     if not menu:
@@ -296,7 +296,7 @@ def unassign_client_menu(
 def delete_menu(
     id: str,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, EDITOR_CONTENIDO_GLOBAL)),
 ):
     menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == id).first()
     if not menu:

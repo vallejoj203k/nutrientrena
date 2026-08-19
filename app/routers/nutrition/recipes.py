@@ -5,6 +5,7 @@ from typing import Optional
 
 from app.database import get_db
 from app.core.dependencies import (
+    EDITOR_CONTENIDO_GLOBAL,
     require_role_ids, get_current_user, get_org_context, OrgContext,
     verify_client_access, SUPERADMIN, ADMIN, COACH,
 )
@@ -22,7 +23,7 @@ def _get_or_404(db: Session, recipe_id: int):
 @router.get("/findAll", summary="Listar recetas", description="Retorna todas las recetas activas del catálogo.")
 def find_all(
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Recipe).filter(Recipe.state == 1)
@@ -39,7 +40,7 @@ def search(
     page: int = Query(1),
     per_page: int = Query(15),
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     q = db.query(Recipe).filter(Recipe.state == 1)
@@ -89,7 +90,7 @@ def clients(
 def create(
     data: RecipeCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     recipe_data = data.model_dump(exclude={"details"})
@@ -106,7 +107,7 @@ def create(
 
 
 @router.get("/{id}/edit", summary="Ver receta", description="Retorna el detalle completo de una receta con sus ingredientes.")
-def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL))):
     recipe = _get_or_404(db, id)
     if not recipe:
         return send_error("Receta no encontrada")
@@ -117,7 +118,7 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
 def delete(
     id: int,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     recipe = _get_or_404(db, id)
@@ -135,7 +136,7 @@ def updated(
     id: int,
     data: RecipeUpdate,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     recipe = _get_or_404(db, id)

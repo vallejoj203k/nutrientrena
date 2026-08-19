@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from sqlalchemy import or_
 from app.core.dependencies import (
+    EDITOR_CONTENIDO_GLOBAL,
     require_role_ids, get_org_context, OrgContext,
     verify_client_access, SUPERADMIN, ADMIN, COACH, CLIENT,
 )
@@ -267,7 +268,7 @@ def _clone_days(db: Session, source: Routine, new_routine_id: int):
 @router.get("/findAll", summary="Listar rutinas", description="Retorna la biblioteca de rutinas: las de la organización del coach y las plantillas de plataforma.")
 def find_all(
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     from app.models.user import RoleUser
@@ -302,7 +303,7 @@ def find_all(
 def clone(
     data: RoutineCloneRequest,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     source = _get_or_404(db, data.id)
@@ -356,7 +357,7 @@ def assigned(data: RoutineAssignRequest, db: Session = Depends(get_db), current_
 
 
 @router.post("/list", summary="Listar rutinas por IDs", description="Retorna múltiples rutinas por sus IDs.")
-def list_ids(data: RoutineListRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def list_ids(data: RoutineListRequest, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL))):
     items = db.query(Routine).filter(Routine.id.in_(data.ids)).all()
     return send_response([_serialize(i) for i in items], "OK")
 
@@ -429,7 +430,7 @@ def mail(customer_id: str, db: Session = Depends(get_db), _=Depends(require_role
 
 
 @router.get("/{id}/pdf", summary="Exportar rutina a PDF", description="Genera y descarga la rutina en formato PDF.")
-def pdf(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH))):
+def pdf(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL))):
     routine = _get_or_404(db, id)
     if not routine:
         return send_error("Rutina no encontrada")
@@ -449,7 +450,7 @@ def pdf(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPER
 def edit(
     id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     routine = _get_or_404(db, id)
@@ -465,7 +466,7 @@ def edit(
 def create(
     data: RoutineCreateV2,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     routine = Routine(
@@ -494,7 +495,7 @@ def updated(
     id: int,
     data: RoutineUpdateV2,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     routine = _get_or_404(db, id)
@@ -527,7 +528,7 @@ def updated(
 def delete(
     id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     routine = _get_or_404(db, id)

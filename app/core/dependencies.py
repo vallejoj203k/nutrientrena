@@ -274,7 +274,11 @@ def get_org_context(
     # ignora en silencio —se quedaría viendo lo suyo creyendo ver el catálogo
     # común—: se le dice que no.
     if destino == SOLO_PLATAFORMA:
-        if ctx.org_id is None and ctx.is_owner:
+        # El editor de contenido global entra también: mantener el catálogo
+        # común ES su trabajo, y este modo solo ESTRECHA lo que se ve (a lo que
+        # no tiene organización), nunca amplía. Sin esto, la Librería abierta
+        # desde su panel le respondía 403 en cada pantalla.
+        if (ctx.org_id is None and ctx.is_owner) or EDITOR_CONTENIDO_GLOBAL in roles:
             return OrgContext(org_id=None, is_owner=True, permissions={},
                               solo_plataforma=True)
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,

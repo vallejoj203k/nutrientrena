@@ -2021,6 +2021,22 @@ function cambiarContexto(){
     document.getElementById('ctxSel').innerHTML =
       '<option value="__plataforma__">Plataforma Alzum</option>' +
       (d.organizaciones || []).map(o => `<option value="${esc(o.id)}">${esc(o.name)}</option>`).join('');
+
+    /* Sin cuentas a las que saltar no hay nada que elegir: el editor de
+       contenido y soporte no tienen panel de coach al que ir. Se quita el
+       aspecto de selector —flechas y desplegable— y el subtítulo deja de decir
+       "Panel del dueño", que para ellos ni es verdad ni significa nada. */
+    if (!(d.organizaciones || []).length) {
+      const card = document.querySelector('.ctx-card');
+      card.removeAttribute('onclick');
+      card.style.cursor = 'default';
+      const sel = document.getElementById('ctxSel');
+      if (sel) sel.style.display = 'none';
+      const iconos = card.querySelectorAll('svg');
+      if (iconos.length) iconos[iconos.length - 1].style.display = 'none';   // las flechas
+      card.querySelector('.ctx-txt span').textContent =
+        d.es_superadmin ? 'Panel del dueño' : 'Equipo de Alzum';
+    }
     // Si se venía de "Entrar como", el selector tiene que decirlo: llegar al
     // panel de plataforma con un contexto puesto y verlo en blanco engaña.
     const _ctxGuardado = (() => { try { return localStorage.getItem('org_context') || ''; } catch(e){ return ''; } })();

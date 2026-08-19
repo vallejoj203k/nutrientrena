@@ -529,6 +529,63 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('EL ATAJO DEVUELVE AL PANEL DE PLATAFORMA',
      p.url().includes('/admin/index.html') && await p.locator('#layout').isVisible(), p.url());
 
+  /* ── "Ver el panel como" con cualquier rol del equipo ────────────────────
+     Lo que se veía: al previsualizar otro rol y entrar en Contenido global,
+     reaparecía el menú entero del super-admin. La vista previa vivía solo en
+     una variable del panel, y la Librería son OTRAS páginas. */
+  await p.goto(FRONT + '/admin/index.html');
+  await p.locator('#nav .s-item').first().waitFor({ state: 'visible', timeout: 25000 });
+  await p.waitForTimeout(1200);
+
+  ck('el panel de plataforma NO arrastra el contexto de una cuenta',
+     (await p.textContent('#ctxNombre')).trim() === 'Plataforma Alzum' &&
+     (await p.evaluate(() => localStorage.getItem('org_context'))) === null,
+     await p.textContent('#ctxNombre'));
+
+  const rolEditor = await p.evaluate(() => {
+    const s = document.getElementById('verComoSel');
+    const o = [...s.options].find(x => /editor/i.test(x.textContent));
+    return o ? o.value : null;
+  });
+  ck('el super-admin puede previsualizar los roles del equipo', !!rolEditor);
+  await p.selectOption('#verComoSel', rolEditor);
+  await p.waitForTimeout(1200);
+  ck('la vista previa recorta el menú al del rol elegido',
+     JSON.stringify(await p.locator('.s-item span').allTextContents()) === '["Contenido global"]',
+     await p.locator('.s-item span').allTextContents());
+
+  await p.click('.s-item:has-text("Contenido global")');
+  await p.waitForTimeout(600);
+  await p.click('.s-fam:has-text("Entrenamiento")');
+  await p.waitForTimeout(600);
+  await p.click('.plat-fly-item:has-text("Rutinas")');
+  await p.waitForLoadState('domcontentloaded');
+  await p.locator('#sidePlataforma').waitFor({ state: 'visible', timeout: 25000 });
+  await p.waitForTimeout(2500);
+  ck('LA VISTA PREVIA SIGUE PUESTA AL ENTRAR EN LA LIBRERÍA',
+     JSON.stringify(await p.locator('#sidePlataforma .s-item span').allTextContents()) === '["Contenido global"]',
+     await p.locator('#sidePlataforma .s-item span').allTextContents());
+  ck('y se dice, para que no parezca que se ha perdido el menú',
+     (await p.locator('.plat-preview').count()) === 1);
+  ck('el aviso no descuadra la página', await p.evaluate(() => {
+    const s = document.querySelector('#sidePlataforma');
+    return !!s && s.getBoundingClientRect().left < 5;   // la barra sigue pegada al borde
+  }));
+
+  await p.click('#sidePlataforma .ctx-card');
+  await p.waitForLoadState('domcontentloaded');
+  await p.locator('#nav .s-item').first().waitFor({ state: 'visible', timeout: 25000 });
+  await p.waitForTimeout(1500);
+  ck('y al volver al panel se sigue viendo como ese rol',
+     (await p.inputValue('#verComoSel')) === String(rolEditor));
+
+  await p.selectOption('#verComoSel', '');
+  await p.waitForTimeout(1200);
+  ck('«Volver a mi vista» devuelve las 11 secciones',
+     (await p.locator('.s-item span').allTextContents()).length === 11);
+  ck('y no queda nada guardado de la vista previa',
+     (await p.evaluate(() => sessionStorage.getItem('panel_vista_previa'))) === null);
+
   // ── Un coach no entra
   const c = await post('/users', { name: 'Coach fuera', email: `coach.fuera.${SUF}@nutrientrena-qa.com`, password: 'Coach123!', role_id: 5 });
   const lg2 = await (await ctx.request.post(`${API}/api/auth/login`, { data: { email: `coach.fuera.${SUF}@nutrientrena-qa.com`, password: 'Coach123!' } })).json();

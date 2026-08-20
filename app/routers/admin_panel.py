@@ -1553,11 +1553,30 @@ class CambioRol(BaseModel):
     role_id: int
 
 
+class EdicionMiembro(BaseModel):
+    """Los datos con los que se dio de alta, para poder corregirlos.
+
+    Todo opcional: se cambia lo que llega y lo demás se queda como está. La
+    contraseña va aparte porque mandarla en blanco tiene que significar "no la
+    toques", no "déjala vacía".
+    """
+    name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+
+
 def _serializar_miembro(u: User, rol_id: int, db: Session, yo: int) -> dict:
     d = db.query(UserDetail).filter(UserDetail.user_id == u.id).first()
     return {
         "user_id": u.id,
         "name": (f"{d.name} {d.last_name or ''}".strip() if d else None) or u.name,
+        # Sueltos además del nombre completo: el formulario de edición necesita
+        # cada campo por separado para poder rellenarlo.
+        "nombre": (d.name if d else None) or u.name,
+        "apellidos": (d.last_name if d else None) or "",
+        "phone": (d.phone if d else None) or "",
         "email": u.email,
         "role_id": rol_id,
         # Quien nunca ha entrado está invitado, no activo. Enseñarlo como
@@ -1743,6 +1762,82 @@ def regenerar_codigo(
 
     return send_response({"codigo_invitacion": _generar_codigo(u, db),
                           "dias_codigo": DIAS_INVITACION}, "Código nuevo generado")
+
+
+@router.put("/team/{user_id}", summary="Editar los datos de un miembro del equipo")
+def editar_miembro(
+    user_id: int,
+    data: EdicionMiembro,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Corregir nombre, apellidos, correo, teléfono o contraseña.
+
+    Existe aparte de `PUT /team/{id}/role` porque son dos decisiones distintas:
+    el rol dice qué puede ver esa persona, y esto son sus datos. Mezclarlos en
+    una sola llamada obligaría a mandar el rol cada vez que se arregla una
+    errata en un apellido.
+
+    Poner la contraseña de otro es un poder real, y aquí lo tiene cualquiera
+    que entre a esta sección. No se restringe más porque no serviría de nada:
+    quien puede editar el equipo ya puede invitar super-admins y cambiar roles,
+    así que un cerrojo aquí sería un rodeo, no una barrera.
+    """
+    motivo = _exige_seccion(current_user, db, "equipo")
+    if motivo:
+        return send_error(motivo, code=403)
+
+    fila = db.query(RoleUser).filter(
+        RoleUser.user_id == user_id,
+        RoleUser.role_id.in_(ROLES_EQUIPO_IDS),
+    ).first()
+    if not fila:
+        # Sin esto, con un id a mano se editaría a cualquier usuario de la
+        # plataforma desde una pantalla que solo habla del equipo interno.
+        return send_error("Esa persona no está en el equipo", code=404)
+
+    u = db.query(User).filter(User.id == user_id).first()
+    if not u:
+        return send_error("Usuario no encontrado", code=404)
+
+    if data.email is not None:
+        correo = (data.email or "").strip().lower()
+        if not correo or "@" not in correo:
+            return send_error("El email no es válido", code=400)
+        # Ojo al propio: corregir solo el nombre no puede fallar por "ya existe".
+        otro = db.query(User).filter(User.email == correo, User.id != u.id).first()
+        if otro:
+            return send_error("Ese email ya está registrado en otra cuenta", code=400)
+        u.email = correo
+
+    if data.password is not None and data.password != "":
+        if len(data.password) < 6:
+            return send_error("La contraseña debe tener al menos 6 caracteres", code=400)
+        u.password = hash_password(data.password)
+        # Un código de invitación pendiente deja de valer: si se le acaba de
+        # poner una contraseña, esa es la forma de entrar y no debe quedar
+        # abierta una segunda puerta que nadie recuerda haber dejado abierta.
+        u.invite_code_hash = None
+        u.invite_expires_at = None
+
+    d = db.query(UserDetail).filter(UserDetail.user_id == u.id).first()
+    if data.name is not None:
+        nombre = (data.name or "").strip()
+        if not nombre:
+            return send_error("El nombre es obligatorio", code=400)
+        u.name = nombre
+        if d:
+            d.name = nombre
+    if d:
+        if data.last_name is not None:
+            d.last_name = (data.last_name or "").strip() or None
+        if data.phone is not None:
+            d.phone = (data.phone or "").strip() or None
+
+    db.commit()
+    db.refresh(u)
+    return send_response(_serializar_miembro(u, fila.role_id, db, current_user.id),
+                         "Datos actualizados")
 
 
 @router.put("/team/{user_id}/role", summary="Cambiar el rol de un miembro")

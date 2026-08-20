@@ -281,10 +281,16 @@
     if (tasks.length){
       html += '<div class="det-sec-lbl">Tareas de tu coach</div>';
       tasks.forEach(function(t){
+        /* Un check-in no se "marca hecho": se ENVÍA. Con la casilla genérica el
+           cliente lo daba por cumplido sin mandar nada, y al coach le
+           desaparecía de "esperando que envíen" sin haber recibido un peso. */
+        var accion = (t.task_type === 'checkin' && !t.done)
+          ? '<a class="det-link" href="client-progreso.html">Enviar →</a>'
+          : '<button class="det-chk'+(t.done?' on':'')+'" title="Marcar hecha" onclick="toggleTask('+t.id+','+(!t.done)+')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>';
         html += '<div class="det-task'+(t.done?' done':'')+'" id="task-'+t.id+'"><span class="bar" style="background:'+esc(t.color||'#9CA3AF')+'"></span>'
           + '<div class="det-task-info"><b>'+esc(t.title||'Tarea')+'</b><small>'+esc(t.task_type||'')+'</small>'
           + (t.notes?'<div class="nt">'+esc(t.notes)+'</div>':'')+'</div>'
-          + '<button class="det-chk'+(t.done?' on':'')+'" title="Marcar hecha" onclick="toggleTask('+t.id+','+(!t.done)+')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button></div>';
+          + accion+'</div>';
       });
     }
 

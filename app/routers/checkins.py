@@ -36,6 +36,151 @@ def _get_coach_detail(db: Session, user_id: int) -> Optional[UserDetail]:
     return db.query(UserDetail).filter(UserDetail.user_id == user_id).first()
 
 
+# ── La bandeja del coach ─────────────────────────────────────────────────────
+# Tres listas que responden a las tres preguntas de la pantalla: qué me ha
+# llegado y no he mirado, a quién le tocaba y no ha enviado, y qué he despachado
+# hoy. Van juntas en una sola llamada porque son la misma pantalla.
+
+def _mis_clientes(current_user, db: Session):
+    """Los clientes de este coach: {detail_id: UserDetail}."""
+    from app.core.dependencies import _coach_client_ids
+
+    detalle = _get_coach_detail(db, current_user.id)
+    if not detalle:
+        return {}
+    ids = _coach_client_ids(detalle.id, db)
+    if not ids:
+        return {}
+    return {d.id: d for d in db.query(UserDetail).filter(UserDetail.id.in_(list(ids))).all()}
+
+
+def _persona(detalle: Optional[UserDetail]) -> dict:
+    nombre = f"{detalle.name} {detalle.last_name or ''}".strip() if detalle else "—"
+    iniciales = "".join(p[0] for p in nombre.split()[:2] if p).upper() or "?"
+    return {
+        "client_user_detail_id": detalle.id if detalle else None,
+        "nombre": nombre,
+        "iniciales": iniciales,
+        "foto": detalle.photo if detalle else None,
+    }
+
+
+def _fila_recibido(c: WeeklyCheckin, detalle: Optional[UserDetail]) -> dict:
+    adjuntos = len([f for f in (c.photo_url, c.photo2, c.photo3) if f])
+    return {
+        **_persona(detalle),
+        "id": c.id,
+        "checkin_date": c.checkin_date.isoformat() if c.checkin_date else None,
+        # `created_at` es CUÁNDO lo mandó, que es lo que la pantalla enseña
+        # ("Hace 10 min"). `checkin_date` es a qué día corresponde, y no son lo
+        # mismo si alguien envía el lunes el check-in del domingo.
+        "enviado_at": c.created_at.isoformat() if c.created_at else None,
+        "weight": c.weight,
+        "energy": c.energy,
+        "effort": c.effort,
+        "hunger": c.hunger,
+        "sleep": c.sleep,
+        "fotos": adjuntos,
+        "tiene_comentario": bool((c.notes or "").strip()),
+        "reviewed_at": c.reviewed_at.isoformat() if c.reviewed_at else None,
+    }
+
+
+@router.get("/bandeja", summary="Bandeja de check-ins del coach",
+            description="Lo recibido sin revisar, a quién le tocaba y no ha enviado, "
+                        "y lo que se ha revisado hoy.")
+def bandeja(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    from datetime import date, datetime, timedelta
+
+    from app.models.calendar_task import CalendarTask
+
+    clientes = _mis_clientes(current_user, db)
+    if not clientes:
+        return send_response({"recibidos": [], "esperando": [], "revisados_hoy": []}, "OK")
+
+    ids = list(clientes)
+    hoy = date.today()
+    desde = datetime.combine(hoy, datetime.min.time())
+
+    todos = (
+        db.query(WeeklyCheckin)
+        .filter(WeeklyCheckin.client_user_detail_id.in_(ids))
+        .order_by(WeeklyCheckin.created_at.desc())
+        .all()
+    )
+
+    recibidos, revisados_hoy = [], []
+    for c in todos:
+        fila = _fila_recibido(c, clientes.get(c.client_user_detail_id))
+        if c.reviewed_at is None:
+            recibidos.append(fila)
+        elif c.reviewed_at >= desde:
+            revisados_hoy.append(fila)
+
+    # A quién le TOCABA. Lo marca el calendario: el coach le pone una tarea de
+    # tipo check-in en un día, y mientras no la cumpla sigue esperándose. Se
+    # incluyen las de días pasados, que son justamente las que hay que reclamar.
+    pendientes = (
+        db.query(CalendarTask)
+        .filter(
+            CalendarTask.client_user_detail_id.in_(ids),
+            CalendarTask.task_type == "checkin",
+            CalendarTask.done.is_(False),
+            CalendarTask.task_date <= hoy,
+        )
+        .order_by(CalendarTask.task_date.asc())
+        .all()
+    )
+    esperando, ya_vistos = [], set()
+    for t in pendientes:
+        # Una fila por cliente: si acumula tres check-ins sin enviar, lo que
+        # hace falta es recordárselo una vez, no tres.
+        if t.client_user_detail_id in ya_vistos:
+            continue
+        ya_vistos.add(t.client_user_detail_id)
+        esperando.append({
+            **_persona(clientes.get(t.client_user_detail_id)),
+            "task_id": t.id,
+            "task_date": t.task_date.isoformat() if t.task_date else None,
+            "dias_de_retraso": (hoy - t.task_date).days if t.task_date else 0,
+        })
+
+    return send_response({
+        "recibidos": recibidos,
+        "esperando": esperando,
+        "revisados_hoy": revisados_hoy,
+    }, "OK")
+
+
+@router.put("/{id}/revisado", summary="Marcar un check-in como revisado",
+            description="Lo saca de «por revisar» y lo pasa a «revisados hoy». "
+                        "Se puede deshacer con revisado=false.")
+def marcar_revisado(
+    id: str,
+    revisado: bool = Query(True, description="false para volver a dejarlo pendiente"),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    """Existe aparte de las notas del coach porque "lo he leído y está bien" no
+    deja notas, y sin esto ese check-in se quedaba pendiente para siempre."""
+    from datetime import datetime
+
+    c = db.query(WeeklyCheckin).filter(WeeklyCheckin.id == id).first()
+    if not c:
+        return send_error("Check-in no encontrado", code=404)
+    verify_client_access(c.client_user_detail_id, current_user, db)
+
+    detalle = _get_coach_detail(db, current_user.id)
+    c.reviewed_at = datetime.utcnow() if revisado else None
+    c.reviewed_by_user_detail_id = (detalle.id if detalle else None) if revisado else None
+    db.commit()
+    return send_response({"id": c.id, "reviewed_at": c.reviewed_at.isoformat() if c.reviewed_at else None},
+                         "Revisado" if revisado else "Vuelve a estar pendiente")
+
+
 # ── Create: admin, coach ───────────────────────────────────────────────────────
 @router.post("", summary="Registrar check-in", description="Registra un check-in semanal del cliente con peso, medidas y foto.")
 def create_checkin(

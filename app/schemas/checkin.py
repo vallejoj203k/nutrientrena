@@ -65,6 +65,13 @@ class CheckinOut(BaseModel):
     hips: Optional[float] = None
     arms: Optional[float] = None
     legs: Optional[float] = None
+    # Cómo se ha sentido la semana, de 0 a 10. La ficha del cliente ya las
+    # pintaba y siempre salían "—" porque no llegaban.
+    energy: Optional[int] = None
+    effort: Optional[int] = None
+    hunger: Optional[int] = None
+    sleep: Optional[int] = None
+    reviewed_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

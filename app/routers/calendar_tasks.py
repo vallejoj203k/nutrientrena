@@ -32,7 +32,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH, CLIENT
-from app.core.dependencies import _user_role_ids
+from app.core.dependencies import _user_role_ids, verify_client_access
 from app.core.responses import send_error, send_response
 from app.database import get_db
 from app.models.calendar_task import CalendarTask, VALID_TASK_TYPES, COLOR_MAP
@@ -224,6 +224,13 @@ class CheckinRegister(BaseModel):
     legs: Optional[float] = None
     notes: Optional[str] = None
     photo_url: Optional[str] = None
+    photo2: Optional[str] = None
+    photo3: Optional[str] = None
+    # Cómo se ha sentido la semana, de 0 a 10. Las pone el cliente.
+    energy: Optional[int] = None
+    effort: Optional[int] = None
+    hunger: Optional[int] = None
+    sleep: Optional[int] = None
 
 
 # ── Read endpoints ────────────────────────────────────────────────────────────
@@ -653,13 +660,24 @@ def register_checkin(
     id: int,
     data: CheckinRegister,
     db: Session = Depends(get_db),
-    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
 ):
     task = db.query(CalendarTask).filter(CalendarTask.id == id).first()
     if not task:
         return send_error("Tarea no encontrada")
     if task.task_type != "checkin":
         return send_error("Esta tarea no es de tipo 'checkin'")
+
+    # Quien envía el check-in es el cliente, desde la tarea que le puso su
+    # coach. Un cliente solo puede enviar el SUYO: sin esto, con el id de otra
+    # tarea a mano estaría escribiendo el peso y las fotos de otra persona.
+    roles = _user_role_ids(current_user.id, db)
+    if CLIENT in roles and COACH not in roles and ADMIN not in roles and SUPERADMIN not in roles:
+        mio = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+        if not mio or task.client_user_detail_id != mio.id:
+            return send_error("Este check-in no es tuyo", code=403)
+    else:
+        verify_client_access(task.client_user_detail_id, current_user, db)
 
     # Return existing if already linked
     if task.checkin_id:
@@ -689,6 +707,12 @@ def register_checkin(
         legs=data.legs,
         notes=data.notes,
         photo_url=data.photo_url,
+        photo2=data.photo2,
+        photo3=data.photo3,
+        energy=data.energy,
+        effort=data.effort,
+        hunger=data.hunger,
+        sleep=data.sleep,
     )
     db.add(checkin)
     db.flush()
@@ -751,6 +775,14 @@ def toggle_done(
     if not t:
         return send_error("Tarea no encontrada")
     _assert_client_access(current_user, t.client_user_detail_id, db)
+    # Un check-in no se marca hecho: se envía. Si el cliente pudiera darlo por
+    # cumplido desde aquí, al coach le desaparecería de "esperando que envíen"
+    # sin haber recibido ni un peso. El coach sí puede: puede querer perdonar
+    # la semana.
+    roles = _user_role_ids(current_user.id, db)
+    solo_cliente = CLIENT in roles and not ({SUPERADMIN, ADMIN, COACH} & set(roles))
+    if t.task_type == "checkin" and data.done and solo_cliente:
+        return send_error("Este check-in se envía, no se marca: usa el formulario de check-in", code=400)
     t.done = data.done
     t.done_at = datetime.utcnow() if data.done else None
     if data.checkin_id is not None:

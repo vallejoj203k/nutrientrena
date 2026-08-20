@@ -18,6 +18,13 @@ class CheckinCreate(BaseModel):
     hips: Optional[float] = None
     arms: Optional[float] = None
     legs: Optional[float] = None
+    # Cómo dice el cliente que le ha ido la semana. Las rellena él al cumplir
+    # su tarea del calendario, pero el coach también puede anotarlas cuando le
+    # registra el check-in a mano (una consulta presencial, una llamada).
+    energy: Optional[int] = None
+    effort: Optional[int] = None
+    hunger: Optional[int] = None
+    sleep: Optional[int] = None
 
 
 class CheckinUpdate(BaseModel):
@@ -34,6 +41,10 @@ class CheckinUpdate(BaseModel):
     hips: Optional[float] = None
     arms: Optional[float] = None
     legs: Optional[float] = None
+    energy: Optional[int] = None
+    effort: Optional[int] = None
+    hunger: Optional[int] = None
+    sleep: Optional[int] = None
 
 
 class CheckinCoachUpdate(BaseModel):

@@ -70,12 +70,22 @@ class TrainingOut(BaseModel):
     state: int
     # NULL = catálogo maestro de la plataforma; con valor = privado de esa organización.
     organization_id: Optional[str] = None
+    # Quién lo creó. Sobrevive a subirlo a la plataforma —eso cambia el ámbito,
+    # no la autoría—, así que es lo único que queda para saber de dónde salió un
+    # ejercicio que antes era de una cuenta.
+    created_user_id: Optional[int] = None
+    created_by_name: Optional[str] = None
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
     @classmethod
-    def from_orm_training(cls, t):
+    def from_orm_training(cls, t, autores: Optional[dict] = None):
+        """`autores` es {user_id: nombre}, resuelto de una vez por quien llama.
+
+        Se pasa en vez de buscarlo aquí para no hacer una consulta por fila: el
+        catálogo de ejercicios se lista de 200 en 200.
+        """
         raw = t.secondary_muscle_group_ids
         sec_ids = [int(x) for x in str(raw).split(",") if str(x).strip().isdigit()] if raw else []
         if not sec_ids and t.secondary_muscle_group_id:
@@ -106,5 +116,7 @@ class TrainingOut(BaseModel):
             rec_rest=t.rec_rest,
             state=t.state,
             organization_id=t.organization_id,
+            created_user_id=t.created_user_id,
+            created_by_name=(autores or {}).get(t.created_user_id),
             created_at=t.created_at,
         )

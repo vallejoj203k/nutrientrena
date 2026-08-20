@@ -783,6 +783,8 @@ async function initUser(){
     const r=await fetch(`${API}/auth/me`,{headers:authHeaders()});
     if(!r.ok)throw new Error();
     const d=await r.json();const u=d.data||d;
+    // Para no ponerte a ti mismo de autor en tus propios ejercicios.
+    _miUserId = u.user_id ?? u.id ?? null;
     document.getElementById('sidebarName').textContent=u.name||u.email||'—';
     document.getElementById('sidebarRole').textContent=u.role?.name||'';
     (function(){var _av=document.getElementById('sidebarAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=(u.name||u.email||'U')[0].toUpperCase();}})()
@@ -900,6 +902,22 @@ async function loadExercises(page=1){
 }
 
 const EX_TYPE_LABELS={compound:'Compuesto',isolation:'Aislamiento',cardio:'Cardio',mobility:'Movilidad'};
+
+/* De dónde salió el ejercicio.
+
+   Subirlo a la plataforma le cambia el ÁMBITO, no la autoría: sigue siendo de
+   quien lo hizo. Sin decirlo, un ejercicio que un coach creó y la plataforma
+   subió queda indistinguible de los de fábrica, y no hay forma de saber a quién
+   preguntarle si algo está mal.
+
+   Se calla cuando no aporta: si el ejercicio es tuyo, ya lo sabes. */
+function origenHtml(ex){
+  const autor = (ex.created_by_name || '').trim();
+  if (!autor) return '';
+  if (ex.created_user_id && String(ex.created_user_id) === String(_miUserId)) return '';
+  return `<span class="badge badge-blue" title="Creado por ${esc(autor)}">${esc(autor)}</span>`;
+}
+let _miUserId = null;
 const EX_LOC_LABELS={gym:'Gimnasio',home:'Casa',outdoor:'Exterior',both:'Ambos'};
 
 const _EX_PLACEHOLDER_SVG='<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5h2M6 19h2M16 5h2M16 19h2M4 12h16M8 8v8M16 8v8"/></svg>';
@@ -936,6 +954,7 @@ function renderExercisesTable(items){
           <div class="exg-chips">
             ${ex.exercise_type?`<span class="badge badge-gray">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:''}
             ${lvlPills(ex)}
+            ${origenHtml(ex)}
           </div>
           <div class="exg-foot" onclick="event.stopPropagation()">${_exActionsHtml(ex)}</div>
         </div>
@@ -943,13 +962,14 @@ function renderExercisesTable(items){
     return;
   }
   wrap.className='table-wrap';
-  wrap.innerHTML=`<table><thead><tr><th>Ejercicio</th><th>Grupo</th><th>Material</th><th>Tipo</th><th>Dificultad</th><th style="text-align:right;">Acciones</th></tr></thead><tbody>
+  wrap.innerHTML=`<table><thead><tr><th>Ejercicio</th><th>Grupo</th><th>Material</th><th>Tipo</th><th>Dificultad</th><th>Creado por</th><th style="text-align:right;">Acciones</th></tr></thead><tbody>
     ${items.map(ex=>`<tr onclick="openExerciseView(${ex.id})" style="cursor:pointer;">
       <td><div style="display:flex;align-items:center;gap:12px;">${_exIcon(ex)}<div><div style="font-weight:700;color:#111827;font-size:13px;">${esc(ex.name)}</div>${ex.state?'':'<span class="badge badge-gray" style="margin-top:3px;">Archivado</span>'}</div></div></td>
       <td style="color:#374151;">${esc(ex.muscle_group_name||'—')}</td>
       <td style="color:#6B7280;">${esc(ex.material||'—')}</td>
       <td>${ex.exercise_type?`<span class="badge badge-gray">${esc(EX_TYPE_LABELS[ex.exercise_type]||ex.exercise_type)}</span>`:'<span style="color:#9CA3AF">—</span>'}</td>
       <td>${lvlPills(ex)||'<span style="color:#9CA3AF">—</span>'}</td>
+      <td>${origenHtml(ex)||'<span style="color:#9CA3AF">—</span>'}</td>
       <td onclick="event.stopPropagation()">${_exActionsHtml(ex)}</td>
     </tr>`).join('')}
   </tbody></table>`;

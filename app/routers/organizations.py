@@ -56,10 +56,19 @@ def _serialize_org(org: Organization, db: Session) -> dict:
     members = []
     for m in org.members:
         ud = m.user_detail
+        # Nombre y apellidos van también por separado, no solo pegados: la ficha
+        # de edición necesita rellenar cada campo con lo suyo, y partir el
+        # nombre completo por el primer espacio se equivoca con "Ana María".
         members.append({
             "id": m.id,
             "user_detail_id": m.user_detail_id,
             "name": f"{ud.name} {ud.last_name or ''}".strip() if ud else "—",
+            "first_name": ud.name if ud else None,
+            "last_name": (ud.last_name if ud else None) or None,
+            # Sin el email no se sabe ni a quién se añadió: la tarjeta enseñaba
+            # un "Coach empleado" fijo, igual para todos.
+            "email": (ud.user.email if ud and ud.user else None),
+            "phone": (ud.phone if ud else None),
             "permissions": m.permissions or {},
             "joined_at": m.joined_at.isoformat() if m.joined_at else None,
         })
@@ -326,6 +335,100 @@ def create_coach_member(
         {"user_detail_id": new_detail.id, "member_id": member.id, "email": data.email},
         "Coach creado y añadido a la organización",
     )
+
+
+class MemberUpdate(BaseModel):
+    """Los datos con los que se dio de alta al miembro, para poder corregirlos.
+
+    Todo opcional: se cambia lo que se manda y lo demás se queda como está. La
+    contraseña va aparte del resto porque escribirla en blanco tiene que
+    significar "no la toques", no "déjala vacía".
+    """
+    name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+
+
+@router.put("/{org_id}/members/{member_id}", summary="Editar los datos de un miembro")
+def update_member(
+    org_id: str,
+    member_id: int,
+    data: MemberUpdate,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Corregir el nombre, el correo, el teléfono o la contraseña de un miembro.
+
+    Existe aparte de `PUT /users/{id}/update` porque aquel comprueba el acceso
+    A CLIENTES: un dueño que además es coach no pasa esa puerta para tocar a
+    alguien de su equipo, que no es cliente suyo. Aquí la pregunta correcta es
+    otra —¿es tuya esta organización y es tuyo este miembro?— y se comprueba
+    esa.
+    """
+    from app.models.user import User
+    from app.core.security import hash_password
+
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        return send_error("Organización no encontrada", code=404)
+
+    detail = db.query(UserDetail).filter(UserDetail.user_id == current_user.id).first()
+    roles = _user_role_ids(current_user.id, db)
+    is_admin = SUPERADMIN in roles or ADMIN in roles
+    is_owner = detail and org.owner_id == detail.id
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Solo el dueño puede editar a los miembros")
+
+    # El miembro tiene que ser de ESTA organización: sin esto, con el id a mano
+    # se podría editar al de otra cuenta.
+    member = db.query(OrganizationMember).filter(
+        OrganizationMember.id == member_id,
+        OrganizationMember.organization_id == org_id,
+    ).first()
+    if not member:
+        return send_error("Miembro no encontrado", code=404)
+
+    ud = member.user_detail
+    if not ud or not ud.user:
+        return send_error("El miembro no tiene una cuenta asociada", code=404)
+
+    if data.email is not None:
+        correo = data.email.strip().lower()
+        if not correo or "@" not in correo:
+            return send_error("El email no es válido", code=400)
+        # Ojo al propio: cambiar solo el nombre no puede fallar por "ya existe".
+        otro = db.query(User).filter(User.email == correo, User.id != ud.user.id).first()
+        if otro:
+            return send_error("Ese email ya está registrado en otra cuenta", code=400)
+        ud.user.email = correo
+
+    if data.password is not None and data.password != "":
+        if len(data.password) < 6:
+            return send_error("La contraseña debe tener al menos 6 caracteres", code=400)
+        ud.user.password = hash_password(data.password)
+
+    if data.name is not None:
+        if not data.name.strip():
+            return send_error("El nombre es obligatorio", code=400)
+        ud.name = data.name.strip()
+        ud.user.name = data.name.strip()
+    if data.last_name is not None:
+        ud.last_name = data.last_name.strip() or None
+    if data.phone is not None:
+        ud.phone = data.phone.strip() or None
+
+    db.commit()
+    db.refresh(ud)
+    return send_response({
+        "id": member.id,
+        "first_name": ud.name,
+        "last_name": ud.last_name,
+        "email": ud.user.email,
+        "phone": ud.phone,
+    }, "Miembro actualizado")
 
 
 @router.patch("/{org_id}/members/{member_id}/permissions", summary="Actualizar permisos de un miembro")

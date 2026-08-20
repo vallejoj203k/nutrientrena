@@ -138,6 +138,7 @@
   <!-- Atajo al panel de plataforma desde la barra del coach. Solo lo ve el
        super-admin; el módulo lo comprueba contra el servidor. -->
   <script src="js/ir-al-panel.js"></script>
+  <script src="js/libreria-flyout.js"></script>
 </head>
 <body>
 
@@ -375,53 +376,6 @@ initUser();
 loadPendingBadge();
 </script>
 <script>
-function openFlyout(e,cat){
-  e.stopPropagation();
-  var menu=_flyoutMenus[cat]; if(!menu) return;
-  var panel=document.getElementById('flyoutPanel');
-  var backdrop=document.getElementById('flyoutBackdrop');
-  var rect=e.currentTarget.getBoundingClientRect();
-  document.getElementById('flyoutTitle').textContent=menu.title;
-  document.getElementById('flyoutDot').style.background=menu.color;
-  var html='';
-  menu.items.forEach(function(item){
-    html+='<a class="flyout-item" href="'+item.href+'"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+item.icon+'</svg>'+item.label+'</a>';
-  });
-  document.getElementById('flyoutItems').innerHTML=html;
-  panel.style.top=Math.min(rect.top,window.innerHeight-(menu.items.length*44+60))+'px';
-  panel.style.display='block';
-  backdrop.style.display='block';
-  requestAnimationFrame(function(){
-    panel.style.transform='translateX(0)';
-    panel.style.opacity='1';
-  });
-}
-function closeFlyout(){
-  var panel=document.getElementById('flyoutPanel');
-  var backdrop=document.getElementById('flyoutBackdrop');
-  panel.style.transform='translateX(-8px)';
-  panel.style.opacity='0';
-  setTimeout(function(){panel.style.display='none';backdrop.style.display='none';},200);
-}
-function toggleLibrary(el){
-  if(!el||typeof el==='string') el=document.getElementById('navLibrary');
-  if(!el) return;
-  el.classList.toggle('open');
-  var sub=document.getElementById('librarySub');
-  if(sub) sub.classList.toggle('open');
-}
-(function(){
-  if(window.location.pathname.includes('library')){
-    document.addEventListener('DOMContentLoaded',function(){
-      var el=document.getElementById('navLibrary');
-      if(el) toggleLibrary(el);
-      var cat=new URLSearchParams(window.location.search).get('cat');
-      if(cat) document.querySelectorAll('.nav-sub-item').forEach(function(a){
-        if(a.href.includes('cat='+cat)) a.classList.add('active');
-      });
-    });
-  }
-})();
 
   (function(){var _rm={1:'Superadmin',2:'Admin',3:'Setter',4:'Closer',5:'Coach',6:'Cliente',7:'Editor de contenido global'};var _rid=parseInt(localStorage.getItem('role_id')||'0');var _el=document.getElementById('topbarRoleBadge');if(_el&&_rm[_rid])_el.textContent=_rm[_rid];})();
 
@@ -429,15 +383,6 @@ function toggleSidebar(){const s=document.getElementById('sidebar');const o=docu
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 </script>
 
-<!-- Library flyout -->
-<div id="flyoutBackdrop" onclick="closeFlyout()" style="display:none;position:fixed;inset:0;z-index:998;"></div>
-<div id="flyoutPanel" style="display:none;position:fixed;left:244px;z-index:999;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);border:1px solid #E5E7EB;min-width:200px;overflow:hidden;transform:translateX(-8px);opacity:0;transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .2s ease;">
-  <div id="flyoutHeader" style="padding:12px 16px 10px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:8px;">
-    <div id="flyoutDot" style="width:8px;height:8px;border-radius:50%;"></div>
-    <span id="flyoutTitle" style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;"></span>
-  </div>
-  <div id="flyoutItems" style="padding:6px;"></div>
-</div>
 <script src="js/chat-badge.js"></script>
 <script src="js/soporte.js"></script>
 <script>

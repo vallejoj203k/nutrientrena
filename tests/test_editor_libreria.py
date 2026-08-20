@@ -84,6 +84,35 @@ def test_y_puede_hacerlo_actuando_como_la_plataforma(client, seed, admin_headers
     assert all(x.get("organization_id") is None for x in r.json()["data"])
 
 
+def test_el_editor_puede_subir_imagenes(client, seed, admin_headers):
+    """Las fotos de los ejercicios las sube él: es media hora de su trabajo.
+
+    Faltaba el permiso, así que se llevaba un 403 que la pantalla enseñaba como
+    "Error al subir imagen", sin decir que era de permisos. Un CLIENTE podía
+    subir foto de perfil y el editor de contenido no.
+
+    No se comprueba que la subida termine bien —eso depende del almacenamiento,
+    que en las pruebas no existe— sino que la PUERTA sea la misma que para un
+    coach: si a él le dejan pasar y al editor no, es un problema de permisos.
+    """
+    suf = uuid.uuid4().hex[:8]
+    h_editor = _editor(client, admin_headers, suf)
+    _uid, _det, h_coach = _crear_usuario(client, admin_headers,
+                                         f"coach.sube.{suf}@nutrientrena-qa.com", role_id=5)
+
+    # Un PNG de 1x1: lo mínimo que el servidor acepta como imagen de verdad.
+    png = (b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+           b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\rIDATx\xdac\xfc\xcf"
+           b"\xc0P\x0f\x00\x04\x85\x01\x80\x84\xa9\x8c!\x00\x00\x00\x00IEND\xaeB`\x82")
+    fichero = {"file": ("pixel.png", png, "image/png")}
+
+    r_editor = client.post("/api/files/upload", headers=h_editor, files=fichero)
+    r_coach = client.post("/api/files/upload", headers=h_coach, files=fichero)
+
+    assert r_editor.status_code != 403, r_editor.text
+    assert r_editor.status_code == r_coach.status_code, (r_editor.status_code, r_coach.status_code)
+
+
 # ── Los clientes: no ───────────────────────────────────────────────────────
 
 def test_el_editor_no_ve_la_lista_de_clientes(client, seed, admin_headers):

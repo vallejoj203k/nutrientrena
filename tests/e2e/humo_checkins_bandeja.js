@@ -58,6 +58,19 @@ const hoy = () => new Date().toISOString().slice(0, 10);
     task_type: 'checkin', title: 'Check-in semanal' }, Tc);
   ck('la tarea de check-in queda puesta en el calendario', !!tarea.data?.id, tarea);
 
+  /* Dos semanas anteriores, para que el historial de cada tarjeta tenga algo
+     que enseñar. Sin esto la ventana se prueba siempre con un cliente recién
+     llegado, que es justo el caso en el que el historial no se ve. */
+  const haceDias = n => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
+  for (const [dias, kg, cintura] of [[14, 70.2, 80.5], [7, 69.3, 79.8]]) {
+    const viejo = await J('POST', '/api/checkins', {
+      client_user_detail_id: detCli, checkin_date: haceDias(dias), weight: kg,
+      waist: cintura, hips: 96, chest: 93, arms: 31,
+      notes: `Semana de hace ${dias / 7}`, energy: 6, effort: 6, hunger: 5, sleep: 6 }, Tc);
+    // Ya despachados: si no, aparecerían hoy en "por revisar" y no es verdad.
+    await J('PUT', `/api/checkins/${viejo.data.id}/revisado`, {}, Tc);
+  }
+
   // ── El coach: todavía no ha llegado nada ─────────────────────────────────
   const p = await ctx.newPage(); p.on('pageerror', e => errs.push('coach: ' + e));
   await p.goto(FRONT + '/checkins.html');
@@ -112,7 +125,7 @@ const hoy = () => new Date().toISOString().slice(0, 10);
   ck('el check-in aparece en "por revisar"', recibido.includes('Lucia'), recibido);
   ck('con el peso que mandó', recibido.includes('68.4 kg'), recibido);
   ck('Y CON LAS CUATRO PUNTUACIONES, que es lo que no existía',
-     ['Energía 9', 'Esfuerzo 7', 'Hambre 3', 'Descanso 8'].every(t => recibido.includes(t)),
+     ['Energía 9', 'Esfuerzo 7', 'Hambre 3', 'Sueño 8'].every(t => recibido.includes(t)),
      recibido);
   ck('ya no se le reclama', (await p.locator('#revWaitingCards .ci-card').count()) === 0);
 
@@ -122,6 +135,68 @@ const hoy = () => new Date().toISOString().slice(0, 10);
   await p.waitForTimeout(2500);
   ck('la ficha se abre con las puntuaciones desglosadas',
      (await p.textContent('#rmMetrics')).includes('Energía'), await p.textContent('#rmMetrics'));
+  ck('y con las mediciones aparte de las puntuaciones',
+     (await p.locator('#rmMedsSection').isVisible()));
+
+  /* ── El historial, tarjeta por tarjeta ───────────────────────────────────
+     Es lo que pidió el cliente: en la esquina de cada bloque, un botón que
+     abre las semanas anteriores DE ESE bloque. Antes solo había un gráfico de
+     peso al final; para comparar la cintura había que salirse de la ventana. */
+  for (const s of ['peso', 'metricas', 'mediciones', 'notas', 'fotos']) {
+    ck(`"${s}" tiene su propio botón de historial`,
+       await p.locator(`#rmHb-${s}`).isVisible());
+    ck(`y empieza plegado`, !(await p.locator(`#rmHist-${s}`).isVisible()));
+  }
+
+  await p.click('#rmHb-mediciones');
+  await p.locator('#rmHist-mediciones').waitFor({ state: 'visible', timeout: 8000 });
+  await p.waitForTimeout(500);
+  const tablaMed = await p.textContent('#rmHist-mediciones');
+  ck('MEDICIONES abre las semanas anteriores con sus columnas',
+     ['Semanas anteriores', 'Cintura', 'Cadera', 'Pecho', 'Brazo'].every(t => tablaMed.includes(t)),
+     tablaMed);
+  ck('y una fila por semana, con el dato de aquella semana',
+     (await p.locator('#rmHist-mediciones tbody tr').count()) === 2 &&
+     tablaMed.includes('80.5') && tablaMed.includes('79.8'),
+     tablaMed);
+  ck('las filas se nombran por lo lejos que quedan, no por su fecha',
+     tablaMed.includes('Hace 1 sem') && tablaMed.includes('Hace 2 sem'), tablaMed);
+  /* El check-in que se está mirando ya está arriba en la tarjeta: repetirlo en
+     la tabla haría dudar de cuál es cuál. */
+  ck('el check-in abierto NO se repite dentro de su propio historial',
+     !tablaMed.includes('68.4'), tablaMed);
+
+  /* La página tiene un `table{min-width:700px}` global para la tabla ancha del
+     historial por cliente. Dentro del modal, que es más estrecho, forzaba la
+     tabla a 700px: las dos últimas columnas quedaban fuera y sin scroll a la
+     vista, así que el coach ni sabía que estaban. */
+  ck('la tabla cabe en su tarjeta, sin columnas escondidas a la derecha',
+     await p.evaluate(() => {
+       const t = document.querySelector('#rmHist-mediciones table');
+       return t.scrollWidth <= t.parentElement.clientWidth + 1;
+     }));
+
+  ck('se puede pedir más historia', await p.evaluate(async () => {
+    document.querySelector('#rmHist-mediciones .rm-hist-tab:nth-child(3)').click();
+    return true;
+  }));
+  await p.waitForTimeout(400);
+  ck('y el selector de semanas se queda donde lo has dejado',
+     (await p.textContent('#rmHist-mediciones .rm-hist-tab.active')).includes('12'),
+     await p.textContent('#rmHist-mediciones .rm-hist-tab.active'));
+
+  await p.click('#rmHb-peso');
+  await p.waitForTimeout(500);
+  const tablaPeso = await p.textContent('#rmHist-peso');
+  ck('PESO abre el suyo, con los pesos de antes',
+     tablaPeso.includes('70.2') && tablaPeso.includes('69.3'), tablaPeso);
+  ck('abrir uno no cierra el otro: se comparan a la vez',
+     (await p.locator('#rmHist-mediciones').isVisible()) &&
+     (await p.locator('#rmHist-peso').isVisible()));
+
+  await p.click('#rmHb-peso');
+  await p.waitForTimeout(300);
+  ck('y se vuelve a plegar', !(await p.locator('#rmHist-peso').isVisible()));
 
   await p.fill('#rmCoachNotes', 'Buena semana, seguimos igual.');
   await p.click('#btnMarkDone');

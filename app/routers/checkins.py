@@ -211,6 +211,10 @@ def create_checkin(
         hips=data.hips,
         arms=data.arms,
         legs=data.legs,
+        energy=data.energy,
+        effort=data.effort,
+        hunger=data.hunger,
+        sleep=data.sleep,
     )
     db.add(checkin)
     db.commit()

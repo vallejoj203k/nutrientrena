@@ -232,17 +232,45 @@
     /* Review modal */
     .review-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;z-index:300;overflow-y:auto;padding:24px 16px;opacity:0;pointer-events:none;transition:opacity .2s;}
     .review-modal-overlay.open{opacity:1;pointer-events:all;}
-    .review-modal{background:#fff;border-radius:20px;width:100%;max-width:600px;overflow:hidden;transform:translateY(20px);transition:transform .25s;margin:auto;}
+    .review-modal{background:#fff;border-radius:20px;width:100%;max-width:680px;overflow:hidden;transform:translateY(20px);transition:transform .25s;margin:auto;}
     .review-modal-overlay.open .review-modal{transform:translateY(0);}
-    .rm-header{background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);padding:28px 24px 20px;color:#fff;position:relative;}
+    .rm-header{background:linear-gradient(115deg,#4F46E5 0%,#7C3AED 32%,#F59E0B 70%,#10B981 100%);padding:22px 24px;color:#fff;position:relative;display:flex;align-items:center;gap:13px;}
+    .rm-avatar{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.24);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;}
+    /* Cada dato vive en su tarjeta y cada tarjeta tiene su propio historial:
+       el coach mira una cosa a la vez, no las doce a la vez. */
+    .rm-card{border:1px solid #E5E7EB;border-radius:14px;padding:14px 16px;margin-bottom:12px;background:#fff;}
+    .rm-card-head{display:flex;align-items:center;gap:8px;margin-bottom:11px;}
+    .rm-card-title{font-size:13px;font-weight:700;color:#374151;display:flex;align-items:center;gap:7px;}
+    .rm-hist-btn{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#6B7280;background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:5px 10px;cursor:pointer;transition:.15s;white-space:nowrap;}
+    .rm-hist-btn:hover{background:#F9FAFB;color:#374151;}
+    .rm-hist-btn.open{background:#EEF2FF;color:#4F46E5;border-color:#C7D2FE;}
+    .rm-hist{margin-top:13px;border-top:1px solid #F3F4F6;padding-top:12px;}
+    .rm-hist-head{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
+    .rm-hist-title{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
+    /* `table{min-width:700px}` de más arriba es para la tabla ancha del
+       historial por cliente; aquí dentro del modal desbordaba la tarjeta. */
+    .rm-tabla{width:100%;min-width:0;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+    .rm-tabla th{text-align:right;font-size:9.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.3px;padding:6px 4px;border-bottom:1px solid #F3F4F6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .rm-tabla td{text-align:right;padding:8px 4px;font-weight:700;color:#374151;border-bottom:1px solid #F9FAFB;}
+    .rm-tabla th:first-child,.rm-tabla td:first-child{text-align:left;color:#6B7280;font-weight:500;width:92px;white-space:nowrap;}
+    .rm-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+    .rm-score{border-radius:12px;padding:13px 10px 11px;text-align:center;}
+    .rm-score-val{font-size:23px;font-weight:800;line-height:1;}
+    .rm-score-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6B7280;margin-top:7px;}
+    .rm-score-bar{height:4px;border-radius:3px;margin-top:9px;}
+    .rm-meds{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+    .rm-med{background:#F9FAFB;border-radius:11px;padding:11px 12px;}
+    .rm-med-lbl{font-size:9.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+    .rm-med-val{font-size:16px;font-weight:800;color:#111;}
+    @media(max-width:600px){.rm-scores,.rm-meds{grid-template-columns:repeat(2,1fr);}}
     .rm-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300;transition:.15s;}
     .rm-close:hover{background:rgba(255,255,255,.3);}
     .rm-client-name{font-size:20px;font-weight:800;margin-bottom:3px;}
     .rm-date{font-size:13px;opacity:.75;}
-    .rm-weight-row{margin-top:18px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
-    .rm-weight-val{font-size:38px;font-weight:900;line-height:1;}
-    .rm-weight-unit{font-size:17px;opacity:.8;}
-    .rm-weight-delta{font-size:13px;font-weight:700;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,.18);}
+    .rm-weight-row{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+    .rm-weight-val{font-size:36px;font-weight:900;line-height:1;color:#4F46E5;}
+    .rm-weight-unit{font-size:16px;font-weight:700;color:#4F46E5;opacity:.7;}
+    .rm-weight-delta{font-size:12.5px;font-weight:700;padding:4px 11px;border-radius:20px;background:#F3F4F6;color:#6B7280;}
     .rm-body{padding:20px 20px 16px;}
     .rm-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
     .rm-metric-card{background:#F9FAFB;border-radius:12px;padding:14px 14px 12px;}
@@ -816,36 +844,99 @@
     <!-- Gradient header -->
     <div class="rm-header">
       <button class="rm-close" onclick="closeReviewModal()" aria-label="Cerrar">&#x2715;</button>
-      <div class="rm-client-name" id="rmClientName">—</div>
-      <div class="rm-date" id="rmDate">—</div>
-      <div class="rm-weight-row">
-        <span class="rm-weight-val" id="rmWeight">—</span>
-        <span class="rm-weight-unit">kg</span>
-        <span class="rm-weight-delta" id="rmDelta"></span>
+      <div class="rm-avatar" id="rmAvatar">—</div>
+      <div style="min-width:0;">
+        <div class="rm-client-name" id="rmClientName">—</div>
+        <div class="rm-date" id="rmDate">—</div>
       </div>
     </div>
     <!-- Body -->
     <div class="rm-body">
-      <div class="rm-metrics" id="rmMetrics"></div>
-      <div class="rm-section-title">Historial de peso</div>
-      <div class="rm-hist-tabs">
-        <button class="rm-hist-tab active" onclick="setHistRange(4,this)">4 semanas</button>
-        <button class="rm-hist-tab" onclick="setHistRange(8,this)">8 semanas</button>
-        <button class="rm-hist-tab" onclick="setHistRange(12,this)">12 semanas</button>
-      </div>
-      <div class="rm-hist-chart" id="rmHistChart"></div>
-      <div class="rm-section-title">Notas del cliente</div>
-      <div class="rm-notes-box" id="rmClientNotes">—</div>
-      <div id="rmPhotosSection" style="display:none;">
-        <div class="rm-section-title">Fotos</div>
-        <div id="rmPhotos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;"></div>
-      </div>
-      <div class="rm-section-title">Notas internas (solo tú)</div>
-      <textarea class="rm-coach-notes" id="rmCoachNotes" placeholder="Notas privadas sobre este check-in..."></textarea>
+
+      <!-- Peso -->
+      <section class="rm-card">
+        <div class="rm-card-head">
+          <span class="rm-card-title">
+            <svg width="15" height="15" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 0-3.87 3H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.13A4 4 0 0 0 12 3z"/><path d="M12 7v5"/></svg>
+            Peso registrado
+          </span>
+          <button class="rm-hist-btn" id="rmHb-peso" onclick="revToggleHist('peso',this)">Historial &#x2304;</button>
+        </div>
+        <div class="rm-weight-row">
+          <span class="rm-weight-val" id="rmWeight">—</span>
+          <span class="rm-weight-unit">kg</span>
+          <span class="rm-weight-delta" id="rmDelta"></span>
+        </div>
+        <div class="rm-hist" id="rmHist-peso" style="display:none;"></div>
+      </section>
+
+      <!-- Las cuatro puntuaciones -->
+      <section class="rm-card" id="rmScoresSection">
+        <div class="rm-card-head">
+          <span class="rm-card-title">
+            <svg width="15" height="15" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Métricas del cliente
+          </span>
+          <button class="rm-hist-btn" id="rmHb-metricas" onclick="revToggleHist('metricas',this)">Historial &#x2304;</button>
+        </div>
+        <div class="rm-scores" id="rmMetrics"></div>
+        <div class="rm-hist" id="rmHist-metricas" style="display:none;"></div>
+      </section>
+
+      <!-- Mediciones -->
+      <section class="rm-card" id="rmMedsSection">
+        <div class="rm-card-head">
+          <span class="rm-card-title">
+            <svg width="15" height="15" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0L2.7 16.7a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z"/><path d="m7.5 10.5 2 2M11 7l2 2M14.5 3.5l2 2M4 14l2 2"/></svg>
+            Mediciones
+          </span>
+          <button class="rm-hist-btn" id="rmHb-mediciones" onclick="revToggleHist('mediciones',this)">Historial &#x2304;</button>
+        </div>
+        <div class="rm-meds" id="rmMeds"></div>
+        <div class="rm-hist" id="rmHist-mediciones" style="display:none;"></div>
+      </section>
+
+      <!-- Nota del cliente -->
+      <section class="rm-card">
+        <div class="rm-card-head">
+          <span class="rm-card-title">
+            <svg width="15" height="15" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Nota del cliente
+          </span>
+          <button class="rm-hist-btn" id="rmHb-notas" onclick="revToggleHist('notas',this)">Historial &#x2304;</button>
+        </div>
+        <div id="rmClientNotes" style="font-size:13px;color:#374151;line-height:1.6;font-style:italic;">—</div>
+        <div class="rm-hist" id="rmHist-notas" style="display:none;"></div>
+      </section>
+
+      <!-- Fotos -->
+      <section class="rm-card" id="rmPhotosSection" style="display:none;">
+        <div class="rm-card-head">
+          <span class="rm-card-title">
+            <svg width="15" height="15" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span id="rmPhotosTitle">Fotos</span>
+          </span>
+          <button class="rm-hist-btn" id="rmHb-fotos" onclick="revToggleHist('fotos',this)">Historial &#x2304;</button>
+        </div>
+        <div id="rmPhotos" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        <div class="rm-hist" id="rmHist-fotos" style="display:none;"></div>
+      </section>
+
+      <!-- Mis notas -->
+      <section class="rm-card">
+        <div class="rm-card-head">
+          <span class="rm-card-title">
+            <svg width="15" height="15" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Mis notas (solo tú las ves)
+          </span>
+        </div>
+        <textarea class="rm-coach-notes" id="rmCoachNotes" placeholder="Ej: Subir proteína esta semana. Parece cansada por el trabajo..."></textarea>
+      </section>
+
     </div>
     <div class="rm-footer">
-      <button class="btn btn-ghost" onclick="closeReviewModal()">Cerrar</button>
-      <button class="btn-mark-done" id="btnMarkDone" onclick="markAsReviewed()">✓ Marcar como revisado</button>
+      <button class="btn-mark-done" id="btnMarkDone" style="flex:1;justify-content:center;" onclick="markAsReviewed()">&#10003; Marcar como revisado</button>
+      <button class="btn btn-ghost" onclick="closeReviewModal()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1573,8 +1664,10 @@ var _revLoading = false;
 var _revRemindSent = {};           // clientId → true
 var _revSearchQ = '';
 var _revActiveItem = null;         // la fila abierta en el modal
+var _revActiveCI = null;           // ese check-in ya con todo el detalle
 var _revActiveHist = [];           // su historial, pedido al abrirla
-var _revHistRange = 4;
+var _revHistRange = {};            // sección → cuántas semanas atrás mirar
+var _revHistAbierto = {};          // sección → historial desplegado
 var _revDoneOpen = true;
 var _remindClientId = null;
 
@@ -1661,19 +1754,41 @@ function _revAvatarHtml(f, idx) {
    (pasa hambre); en las otras tres, alto es bueno. Es la única que se lee al
    revés, y pintarlas todas del mismo color obligaría a leer el número. */
 var _REV_METRICAS = [
-  { k: 'energy', etq: 'Energía'  },
-  { k: 'effort', etq: 'Esfuerzo' },
-  { k: 'hunger', etq: 'Hambre'   },
-  { k: 'sleep',  etq: 'Descanso' }
+  { k: 'energy', etq: 'Energía',  icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+  { k: 'effort', etq: 'Esfuerzo', icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M3 8v8M6 5v14M18 5v14M21 8v8"/></svg>' },
+  { k: 'hunger', etq: 'Hambre',   icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7a3 3 0 0 0 6 0V2M6 9v13M18 2c-1.7 0-3 2.2-3 5s1.3 5 3 5v10"/></svg>' },
+  { k: 'sleep',  etq: 'Sueño',    icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>' }
+];
+var _REV_MEDIDAS = [
+  { k: 'waist',    etq: 'Cintura', suf: ' cm' },
+  { k: 'hips',     etq: 'Cadera',  suf: ' cm' },
+  { k: 'chest',    etq: 'Pecho',   suf: ' cm' },
+  { k: 'arms',     etq: 'Brazo',   suf: ' cm' },
+  { k: 'legs',     etq: 'Piernas', suf: ' cm' },
+  { k: 'body_fat', etq: 'Grasa',   suf: '%'   }
 ];
 var _REV_FONDO = { '#059669': '#ECFDF5', '#D97706': '#FFFBEB', '#DC2626': '#FEF2F2' };
+
+function _revColorScore(clave, v) {
+  var mal  = clave === 'hunger' ? v >= 8 : v <= 4;
+  var bien = clave === 'hunger' ? v <= 5 : v >= 7;
+  return mal ? '#DC2626' : (bien ? '#059669' : '#D97706');
+}
+
+function _revFotosDe(ci) {
+  return [ci.photo_url, ci.photo2, ci.photo3].filter(Boolean);
+}
+
+function _revFotoHtml(url, px) {
+  return '<img src="' + escHtml(url) + '" loading="lazy" style="width:' + px + 'px;height:' + px +
+    'px;border-radius:9px;object-fit:cover;cursor:pointer;background:#F3F4F6;" ' +
+    'onclick="openPhoto(\'' + escHtml(url) + '\')" />';
+}
 
 function _revChipsHtml(f) {
   var chips = _REV_METRICAS.filter(function(m) { return f[m.k] != null; }).map(function(m) {
     var v     = Number(f[m.k]);
-    var mal   = m.k === 'hunger' ? v >= 8 : v <= 4;
-    var bien  = m.k === 'hunger' ? v <= 5 : v >= 7;
-    var color = mal ? '#DC2626' : (bien ? '#059669' : '#D97706');
+    var color = _revColorScore(m.k, v);
     return '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;' +
            'color:' + color + ';background:' + _REV_FONDO[color] + ';">' +
            m.etq + ' ' + v + '</span>';
@@ -1774,9 +1889,21 @@ async function openReviewModal(checkinId) {
   if (!found) return;
   _revActiveItem  = found;
   _revActiveHist  = [];
-  _revHistRange   = 4;
+  _revHistRange   = { peso: 4, metricas: 4, mediciones: 4, notas: 4, fotos: 4 };
+  _revHistAbierto = {};
 
-  document.getElementById('rmHistChart').innerHTML = _revCargando();
+  /* La cabecera se puede pintar ya, con lo que trae la bandeja: el resto llega
+     con la petición del detalle. */
+  document.getElementById('rmAvatar').textContent    = found.iniciales || '?';
+  document.getElementById('rmClientName').textContent = found.nombre;
+  document.getElementById('rmDate').textContent =
+    'Check-in recibido  ·  ' + _revTimeAgo(found.enviado_at || found.checkin_date);
+  ['peso','metricas','mediciones','notas','fotos'].forEach(function(s) {
+    var p = document.getElementById('rmHist-' + s);
+    if (p) { p.style.display = 'none'; p.innerHTML = ''; }
+    var b = document.getElementById('rmHb-' + s);
+    if (b) b.classList.remove('open');
+  });
   document.getElementById('reviewModal').classList.add('open');
 
   var ci = found;
@@ -1797,10 +1924,7 @@ async function openReviewModal(checkinId) {
 }
 
 function _revPintarModal(ci, found) {
-  var name = found.nombre;
-
-  document.getElementById('rmClientName').textContent = name;
-  document.getElementById('rmDate').textContent = 'Check-in  ·  ' + formatDate(ci.checkin_date);
+  _revActiveCI = ci;
 
   var weightStr = ci.weight != null ? parseFloat(ci.weight).toFixed(1) : '—';
   document.getElementById('rmWeight').textContent = weightStr;
@@ -1816,118 +1940,173 @@ function _revPintarModal(ci, found) {
     var delta = parseFloat((ci.weight - previo.weight).toFixed(1));
     if (delta < 0) {
       deltaEl.textContent = String.fromCharCode(9660) + ' ' + Math.abs(delta).toFixed(1) + ' kg';
-      deltaEl.style.background = 'rgba(16,185,129,.25)';
+      deltaEl.style.cssText = 'background:#ECFDF5;color:#059669;';
     } else if (delta > 0) {
       deltaEl.textContent = String.fromCharCode(9650) + ' ' + delta.toFixed(1) + ' kg';
-      deltaEl.style.background = 'rgba(239,68,68,.25)';
+      deltaEl.style.cssText = 'background:#FEF2F2;color:#DC2626;';
     } else {
       deltaEl.textContent = 'sin cambio';
-      deltaEl.style.background = 'rgba(255,255,255,.18)';
+      deltaEl.style.cssText = 'background:#F3F4F6;color:#6B7280;';
     }
-    deltaEl.style.display = '';
   } else {
-    deltaEl.style.display = 'none';
+    deltaEl.textContent = 'primer check-in';
+    deltaEl.style.cssText = 'background:#F3F4F6;color:#9CA3AF;';
   }
 
-  /* Body measurements */
-  var measDefs = [
-    { key:'body_fat', label:'Grasa corporal', suffix:'%',  max:40,  color:'#F59E0B' },
-    { key:'waist',    label:'Cintura',         suffix:' cm', max:120, color:'#4F46E5' },
-    { key:'chest',    label:'Pecho',           suffix:' cm', max:140, color:'#7C3AED' },
-    { key:'hips',     label:'Cadera',          suffix:' cm', max:130, color:'#059669' },
-    { key:'arms',     label:'Brazos',          suffix:' cm', max:50,  color:'#D97706' },
-    { key:'legs',     label:'Piernas',         suffix:' cm', max:80,  color:'#DC2626' }
-  ];
-  var measHtml = measDefs.filter(function(m){ return ci[m.key] != null; }).map(function(m) {
-    var v   = parseFloat(ci[m.key]);
-    var pct = Math.min(v / m.max * 100, 100);
-    return '<div class="rm-metric-card">' +
-      '<div class="rm-metric-label">' + m.label + '</div>' +
-      '<div class="rm-metric-val">' + v.toFixed(1) + m.suffix + '</div>' +
-      '<div class="rm-metric-bar"><div class="rm-metric-fill" style="width:' + pct + '%;background:' + m.color + ';"></div></div>' +
-    '</div>';
-  }).join('');
-  /* Las cuatro puntuaciones van primero: son lo que el cliente ha CONTESTADO,
-     y las medidas puede que no las haya tomado esta semana. */
+  /* Las cuatro puntuaciones que ha contestado el cliente. */
   var scoreHtml = _REV_METRICAS.filter(function(m){ return ci[m.k] != null; }).map(function(m) {
-    var v   = Number(ci[m.k]);
-    var mal = m.k === 'hunger' ? v >= 8 : v <= 4;
-    var col = mal ? '#DC2626' : ((m.k === 'hunger' ? v <= 5 : v >= 7) ? '#059669' : '#D97706');
-    return '<div class="rm-metric-card">' +
-      '<div class="rm-metric-label">' + m.etq + '</div>' +
-      '<div class="rm-metric-val">' + v + '<span style="font-size:12px;color:#9CA3AF;"> / 10</span></div>' +
-      '<div class="rm-metric-bar"><div class="rm-metric-fill" style="width:' + (v * 10) + '%;background:' + col + ';"></div></div>' +
+    var col = _revColorScore(m.k, Number(ci[m.k]));
+    return '<div class="rm-score" style="background:' + _REV_FONDO[col] + ';">' +
+      '<div style="color:' + col + ';font-size:14px;line-height:1;">' + m.icono + '</div>' +
+      '<div class="rm-score-val" style="color:' + col + ';margin-top:7px;">' + Number(ci[m.k]) +
+        '<span style="font-size:12px;opacity:.6;">/10</span></div>' +
+      '<div class="rm-score-lbl">' + m.etq + '</div>' +
+      '<div class="rm-score-bar" style="background:' + col + ';width:' + (Number(ci[m.k]) * 10) + '%;"></div>' +
     '</div>';
   }).join('');
-  document.getElementById('rmMetrics').innerHTML = (scoreHtml + measHtml) ||
-    '<div style="font-size:13px;color:#9CA3AF;padding:2px 0;grid-column:1/-1;">Sin medidas registradas en este check-in.</div>';
+  document.getElementById('rmMetrics').innerHTML = scoreHtml ||
+    '<div style="font-size:13px;color:#9CA3AF;grid-column:1/-1;">Este check-in no trae puntuaciones.</div>';
 
-  /* Client notes */
-  document.getElementById('rmClientNotes').textContent = ci.notes || 'Sin notas.';
+  /* Mediciones. */
+  var medHtml = _REV_MEDIDAS.filter(function(m){ return ci[m.k] != null; }).map(function(m) {
+    return '<div class="rm-med">' +
+      '<div class="rm-med-lbl">' + m.etq + '</div>' +
+      '<div class="rm-med-val">' + parseFloat(ci[m.k]).toFixed(1) + m.suf + '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('rmMeds').innerHTML = medHtml ||
+    '<div style="font-size:13px;color:#9CA3AF;grid-column:1/-1;">Sin mediciones en este check-in.</div>';
 
-  /* Coach notes (pre-fill if already reviewed) */
+  document.getElementById('rmClientNotes').textContent = ci.notes ? '"' + ci.notes + '"' : 'Sin notas.';
   document.getElementById('rmCoachNotes').value = ci.coach_notes || '';
 
-  /* Fotos: el cliente puede mandar hasta tres. */
-  var fotos = [ci.photo_url, ci.photo2, ci.photo3].filter(Boolean);
-  if (fotos.length) {
-    document.getElementById('rmPhotosSection').style.display = 'block';
-    document.getElementById('rmPhotos').innerHTML = fotos.map(function(u) {
-      return '<img src="' + escHtml(u) + '" style="width:' + (fotos.length > 1 ? 'calc(33% - 6px)' : '100%') +
-        ';border-radius:8px;max-height:220px;object-fit:cover;cursor:pointer;" ' +
-        'onclick="openPhoto(\'' + escHtml(u) + '\')" />';
-    }).join('');
-  } else {
-    document.getElementById('rmPhotosSection').style.display = 'none';
-  }
+  /* Fotos: el cliente puede mandar hasta tres. La sección se enseña SIEMPRE,
+     porque su botón de historial es la forma de ver las de semanas anteriores
+     aunque esta semana no haya mandado ninguna. */
+  var fotos = _revFotosDe(ci);
+  document.getElementById('rmPhotosSection').style.display = 'block';
+  document.getElementById('rmPhotosTitle').textContent = 'Fotos (' + fotos.length + ')';
+  document.getElementById('rmPhotos').innerHTML = fotos.length
+    ? fotos.map(function(u){ return _revFotoHtml(u, 96); }).join('')
+    : '<div style="font-size:12.5px;color:#9CA3AF;">Sin fotos en este check-in.</div>';
 
-  /* Mark-done button visibility */
   document.getElementById('btnMarkDone').style.display = ci.reviewed_at ? 'none' : '';
 
-  /* History chart */
-  document.querySelectorAll('.rm-hist-tab').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelectorAll('.rm-hist-tab')[0].classList.add('active');
-  _revRenderHistChart(_revActiveHist, 4);
+  /* Si el coach tenía una sección desplegada, se vuelve a pintar. */
+  Object.keys(_revHistAbierto).forEach(function(s) {
+    if (_revHistAbierto[s]) _revPintarHist(s);
+  });
 }
 
 function closeReviewModal() {
   document.getElementById('reviewModal').classList.remove('open');
   _revActiveItem = null;
+  _revActiveCI   = null;
 }
 
-function setHistRange(weeks, btn) {
-  _revHistRange = weeks;
-  document.querySelectorAll('.rm-hist-tab').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  if (_revActiveItem) _revRenderHistChart(_revActiveHist, weeks);
+/* ── Historial por sección ───────────────────────────────────────────────────
+   Cada tarjeta abre el suyo. Antes había un único gráfico de peso al final del
+   modal: para comparar la cintura o el hambre con las semanas de antes había
+   que salir e irse al historial por cliente. */
+function revToggleHist(seccion, btn) {
+  var abierto = !_revHistAbierto[seccion];
+  _revHistAbierto[seccion] = abierto;
+  var panel = document.getElementById('rmHist-' + seccion);
+  panel.style.display = abierto ? 'block' : 'none';
+  btn.classList.toggle('open', abierto);
+  btn.innerHTML = abierto ? 'Ocultar &#x2303;' : 'Historial &#x2304;';
+  if (abierto) _revPintarHist(seccion);
 }
 
-function _revRenderHistChart(allCheckins, weeks) {
-  var slice = allCheckins.slice(0, weeks)
-    .filter(function(ci){ return ci.weight != null; })
-    .reverse();
-  if (slice.length === 0) {
-    document.getElementById('rmHistChart').innerHTML =
-      '<div style="font-size:12px;color:#9CA3AF;text-align:center;padding:20px;">Sin historial de peso disponible.</div>';
-    return;
+function revHistSemanas(seccion, semanas) {
+  _revHistRange[seccion] = semanas;
+  _revPintarHist(seccion);
+}
+
+/* Los check-ins ANTERIORES al que está abierto. El que se está mirando ya está
+   arriba en la tarjeta; repetirlo en la tabla haría dudar de cuál es cuál. */
+function _revSemanasPrevias(seccion) {
+  var hist = _revActiveHist, ci = _revActiveCI;
+  var pos = -1;
+  for (var i = 0; i < hist.length; i++) { if (ci && hist[i].id === ci.id) { pos = i; break; } }
+  var previas = hist.slice(pos + 1);
+  return previas.slice(0, _revHistRange[seccion] || 4);
+}
+
+function _revEtiquetaSemana(fila, i) {
+  var base = _revActiveCI && _revActiveCI.checkin_date;
+  if (base && fila.checkin_date) {
+    var d = Math.round((new Date(base + 'T00:00:00') - new Date(fila.checkin_date + 'T00:00:00')) / 604800000);
+    if (d >= 1) return 'Hace ' + d + ' sem';
   }
-  var weights = slice.map(function(ci){ return parseFloat(ci.weight); });
-  var wMin = Math.min.apply(null, weights) - 0.5;
-  var wMax = Math.max.apply(null, weights) + 0.5;
-  var range = wMax - wMin || 1;
-  var bars  = slice.map(function(ci, i) {
-    var v     = parseFloat(ci.weight);
-    var h     = Math.round((v - wMin) / range * 56);
-    var isLast = i === slice.length - 1;
-    var label = formatDate(ci.checkin_date).split(' ').slice(0,2).join(' ');
-    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;">' +
-      '<div style="font-size:9px;color:#9CA3AF;white-space:nowrap;">' + v.toFixed(1) + '</div>' +
-      '<div style="width:100%;background:' + (isLast ? '#4F46E5' : '#C7D2FE') + ';border-radius:3px 3px 0 0;height:' + Math.max(h,3) + 'px;"></div>' +
-      '<div style="font-size:9px;color:#9CA3AF;overflow:hidden;max-width:32px;white-space:nowrap;text-overflow:ellipsis;">' + label + '</div>' +
-    '</div>';
+  return 'Hace ' + (i + 1) + ' sem';
+}
+
+function _revHistCabecera(seccion) {
+  var sem = _revHistRange[seccion] || 4;
+  var tabs = [4, 8, 12].map(function(n) {
+    return '<button class="rm-hist-tab' + (n === sem ? ' active' : '') + '" ' +
+           'onclick="revHistSemanas(\'' + seccion + '\',' + n + ')">' + n + ' sem</button>';
   }).join('');
-  document.getElementById('rmHistChart').innerHTML =
-    '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;">' + bars + '</div>';
+  return '<div class="rm-hist-head">' +
+    '<span class="rm-hist-title">Semanas anteriores</span>' +
+    '<div class="rm-hist-tabs" style="margin:0 0 0 auto;">' + tabs + '</div>' +
+  '</div>';
+}
+
+function _revPintarHist(seccion) {
+  var panel = document.getElementById('rmHist-' + seccion);
+  if (!panel) return;
+  var filas = _revSemanasPrevias(seccion);
+  var cuerpo;
+  if (!filas.length) {
+    cuerpo = '<div style="font-size:12.5px;color:#9CA3AF;padding:6px 0;">' +
+             'No hay check-ins anteriores de este cliente.</div>';
+  } else if (seccion === 'fotos') {
+    cuerpo = filas.map(function(f, i) {
+      var fotos = _revFotosDe(f);
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F9FAFB;">' +
+        '<div style="font-size:12px;color:#6B7280;width:82px;flex-shrink:0;">' + _revEtiquetaSemana(f, i) + '</div>' +
+        (fotos.length
+          ? '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + fotos.map(function(u){ return _revFotoHtml(u, 52); }).join('') + '</div>'
+          : '<div style="font-size:12px;color:#D1D5DB;">sin fotos</div>') +
+      '</div>';
+    }).join('');
+  } else if (seccion === 'notas') {
+    cuerpo = filas.map(function(f, i) {
+      return '<div style="padding:8px 0;border-bottom:1px solid #F9FAFB;">' +
+        '<div style="font-size:11px;color:#9CA3AF;font-weight:600;">' + _revEtiquetaSemana(f, i) + '</div>' +
+        '<div style="font-size:12.5px;color:' + (f.notes ? '#374151' : '#D1D5DB') + ';font-style:italic;margin-top:3px;">' +
+          escHtml(f.notes || 'sin nota') + '</div>' +
+      '</div>';
+    }).join('');
+  } else {
+    var cols = seccion === 'peso'
+      ? [{ k: 'weight', etq: 'Peso', suf: '', dec: 1 }]
+      : (seccion === 'metricas'
+          ? _REV_METRICAS.map(function(m){ return { k: m.k, etq: m.etq, suf: '', dec: 0 }; })
+          : _REV_MEDIDAS.map(function(m){ return { k: m.k, etq: m.etq, suf: '', dec: 1 }; }));
+    /* Solo las columnas con algún dato: una tabla con cuatro columnas de
+       guiones ocupa sitio y no dice nada. */
+    cols = cols.filter(function(c) {
+      return filas.some(function(f){ return f[c.k] != null; });
+    });
+    if (!cols.length) {
+      cuerpo = '<div style="font-size:12.5px;color:#9CA3AF;padding:6px 0;">' +
+               'Ningún check-in anterior trae estos datos.</div>';
+    } else {
+      var th = '<th>Semana</th>' + cols.map(function(c){ return '<th>' + c.etq + '</th>'; }).join('');
+      var tr = filas.map(function(f, i) {
+        return '<tr><td>' + _revEtiquetaSemana(f, i) + '</td>' + cols.map(function(c) {
+          if (f[c.k] == null) return '<td style="color:#D1D5DB;font-weight:500;">—</td>';
+          return '<td>' + parseFloat(f[c.k]).toFixed(c.dec) + c.suf + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+      cuerpo = '<div style="overflow-x:auto;"><table class="rm-tabla">' +
+               '<thead><tr>' + th + '</tr></thead><tbody>' + tr + '</tbody></table></div>';
+    }
+  }
+  panel.innerHTML = _revHistCabecera(seccion) + cuerpo;
 }
 
 async function markAsReviewed() {

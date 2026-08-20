@@ -339,8 +339,17 @@
           <input type="email" id="newCoachEmail" placeholder="coach@ejemplo.com"/>
         </div>
         <div class="form-group" style="margin:0;">
-          <label>Contraseña *</label>
+          <label>Teléfono</label>
+          <input type="text" id="newCoachPhone" placeholder="Opcional"/>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label id="newCoachPasswordLabel">Contraseña *</label>
           <input type="password" id="newCoachPassword" placeholder="Mínimo 6 caracteres"/>
+          <!-- Al editar, en blanco significa "no la toques". Sin decirlo, quien
+               deja el campo vacío no sabe si va a borrar la contraseña. -->
+          <div id="newCoachPasswordHint" style="display:none;font-size:11.5px;color:#6B7280;margin-top:5px;">
+            Déjala en blanco para no cambiarla.
+          </div>
         </div>
         <div id="newCoachError" style="display:none;color:#DC2626;font-size:12px;font-weight:600;padding:8px 12px;background:#FEF2F2;border-radius:8px;border:1px solid #FECACA;"></div>
       </div>
@@ -602,7 +611,7 @@
         <div class="member-card">
           <div class="card-menu">
             ${_isOwner ? `
-            <button class="icon-btn" onclick="openEditMember(${m.id},'${esc(m.name)}')" title="Editar permisos">
+            <button class="icon-btn" onclick="openEditMember(${m.id},'${esc(m.name)}')" title="Editar miembro">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
             <button class="icon-btn" onclick="removeMember(${m.id},'${esc(m.name)}')" title="Eliminar del equipo" style="color:#EF4444;">
@@ -612,7 +621,7 @@
           <div class="card-head">
             <div class="card-avatar" style="background:${color};">${initials(m.name)}</div>
             <div class="card-name">${esc(m.name)}</div>
-            <div class="card-email">Coach empleado</div>
+            <div class="card-email">${esc(m.email || 'Sin email')}</div>
           </div>
           <div class="card-perms">
             ${activePerm.length ? permBadges + extra : '<span style="font-size:11px;color:#9CA3AF;">Sin permisos adicionales</span>'}
@@ -621,7 +630,7 @@
           <div class="card-actions">
             <button class="btn btn-outline btn-sm" onclick="openEditMember(${m.id},'${esc(m.name)}')">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              Permisos
+              Editar
             </button>
           </div>` : ''}
         </div>`;
@@ -664,12 +673,23 @@
 
   function openEditMember(memberId, memberName) {
     _editingMemberId = memberId;
-    const member = (_org.members || []).find(m => m.id === memberId);
-    _currentPerms = { ...(member?.permissions || {}) };
-    document.getElementById('memberModalTitle').textContent = 'Editar permisos';
-    document.getElementById('memberModalSub').textContent = `Permisos de ${memberName}`;
+    const member = (_org.members || []).find(m => m.id === memberId) || {};
+    _currentPerms = { ...(member.permissions || {}) };
+
+    // Los mismos campos con los que se dio de alta, rellenos con lo suyo. Antes
+    // aquí solo se podían tocar los permisos: si te equivocabas al escribir el
+    // correo, no había forma de corregirlo desde ninguna pantalla.
+    document.getElementById('newCoachName').value = member.first_name || '';
+    document.getElementById('newCoachLastName').value = member.last_name || '';
+    document.getElementById('newCoachEmail').value = member.email || '';
+    document.getElementById('newCoachPhone').value = member.phone || '';
+    document.getElementById('newCoachPassword').value = '';
+    document.getElementById('newCoachError').style.display = 'none';
+
+    document.getElementById('memberModalTitle').textContent = 'Editar miembro';
+    document.getElementById('memberModalSub').textContent = memberName;
     buildPermissionsPanel(_currentPerms);
-    goStep(2, true);
+    goStep(1, true);
     openModal('memberModal');
   }
 
@@ -705,25 +725,39 @@
   function goStep(step, force = false) {
     const isEdit = !!_editingMemberId;
 
-    if (step === 2 && !isEdit && !force) {
+    // Al EDITAR, la contraseña vacía significa "no la cambies", así que no se
+    // exige. Lo demás se valida igual: un miembro sin nombre o sin correo no
+    // sirve, se esté creando o corrigiendo.
+    if (step === 2 && !force) {
       const name = document.getElementById('newCoachName').value.trim();
       const email = document.getElementById('newCoachEmail').value.trim();
       const pwd = document.getElementById('newCoachPassword').value;
       const errEl = document.getElementById('newCoachError');
-      if (!name) { errEl.textContent = 'El nombre es obligatorio.'; errEl.style.display = 'block'; return; }
-      if (!email) { errEl.textContent = 'El email es obligatorio.'; errEl.style.display = 'block'; return; }
-      if (pwd.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; errEl.style.display = 'block'; return; }
+      const fallo = !name ? 'El nombre es obligatorio.'
+                  : !email ? 'El email es obligatorio.'
+                  : (!isEdit && pwd.length < 6) ? 'La contraseña debe tener al menos 6 caracteres.'
+                  : (isEdit && pwd && pwd.length < 6) ? 'La contraseña nueva debe tener al menos 6 caracteres.'
+                  : null;
+      if (fallo) { errEl.textContent = fallo; errEl.style.display = 'block'; return; }
       errEl.style.display = 'none';
     }
 
     if (step === 2) buildPermissionsPanel(_currentPerms);
 
+    // Editar también son dos pasos —datos y permisos—, así que la guía de
+    // arriba se mantiene; solo cambian los rótulos.
+    document.getElementById('wstep1').querySelector('.w-step-label').textContent =
+      isEdit ? '1. Datos' : '1. Datos del coach';
+    document.getElementById('newCoachPasswordLabel').textContent =
+      isEdit ? 'Contraseña nueva' : 'Contraseña *';
+    document.getElementById('newCoachPasswordHint').style.display = isEdit ? 'block' : 'none';
+
     document.getElementById('wstep1').className = 'w-step' + (step === 1 ? ' active' : ' done');
     document.getElementById('wstep2').className = 'w-step' + (step === 2 ? ' active' : '');
-    document.getElementById('wizardSteps').style.display = isEdit ? 'none' : 'flex';
+    document.getElementById('wizardSteps').style.display = 'flex';
     document.getElementById('panel1').className = 'tab-panel' + (step === 1 ? ' active' : '');
     document.getElementById('panel2').className = 'tab-panel' + (step === 2 ? ' active' : '');
-    document.getElementById('footerBack').style.display = (step === 2 && !isEdit) ? 'flex' : 'none';
+    document.getElementById('footerBack').style.display = (step === 2) ? 'flex' : 'none';
     document.getElementById('footerNext').style.display = (step === 1) ? 'flex' : 'none';
     document.getElementById('footerSave').style.display = (step === 2) ? 'flex' : 'none';
   }
@@ -736,13 +770,33 @@
 
     try {
       if (_editingMemberId) {
+        // Primero los datos y después los permisos. En este orden porque si el
+        // correo choca con el de otra cuenta hay que parar ANTES de haber
+        // guardado nada: si no, quedarían los permisos cambiados y los datos no.
+        const datos = {
+          name: document.getElementById('newCoachName').value.trim(),
+          last_name: document.getElementById('newCoachLastName').value.trim(),
+          email: document.getElementById('newCoachEmail').value.trim(),
+          phone: document.getElementById('newCoachPhone').value.trim(),
+        };
+        const clave = document.getElementById('newCoachPassword').value;
+        if (clave) datos.password = clave;
+
+        const rd = await fetch(`${API}/organizations/${_org.id}/members/${_editingMemberId}`, {
+          method: 'PUT', headers: h(), body: JSON.stringify(datos),
+        });
+        const jd = await rd.json().catch(() => ({}));
+        if (!rd.ok || jd.success === false) {
+          throw new Error(jd.message || jd.detail || 'No se pudieron guardar los datos');
+        }
+
         const r = await fetch(`${API}/organizations/${_org.id}/members/${_editingMemberId}/permissions`, {
           method: 'PATCH',
           headers: h(),
           body: JSON.stringify({ permissions: _currentPerms }),
         });
         if (!r.ok) { const j = await r.json(); throw new Error(j.message || j.detail || 'Error'); }
-        showToast('Permisos actualizados');
+        showToast(clave ? 'Miembro actualizado y contraseña cambiada' : 'Miembro actualizado');
       } else {
         const name = document.getElementById('newCoachName').value.trim();
         const last_name = document.getElementById('newCoachLastName').value.trim() || null;

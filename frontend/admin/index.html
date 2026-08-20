@@ -444,6 +444,27 @@
   </div>
 </div>
 
+<div class="capa" id="capaEditMiem" onclick="if(event.target===this)cerrarEditMiembro()">
+  <div class="modal" style="width:460px;">
+    <h2 id="edMiemTitulo">Editar miembro</h2>
+    <div class="cuerpo">
+      <div class="campo"><label>Nombre</label><input id="edMiemNombre" placeholder="Lucía"></div>
+      <div class="campo"><label>Apellidos</label><input id="edMiemApellidos" placeholder="Prats Gómez"></div>
+      <div class="campo"><label>Correo</label><input id="edMiemEmail" type="email" placeholder="lucia@alzum.io"></div>
+      <div class="campo"><label>Teléfono</label><input id="edMiemTel" placeholder="600 00 00 00"></div>
+      <div class="campo"><label>Contraseña nueva</label>
+        <input id="edMiemClave" type="text" autocomplete="new-password" placeholder="Déjalo vacío para no cambiarla">
+        <p style="font-size:11.5px;color:#9CA3AF;margin-top:5px;">Solo se cambia si escribes algo. Mínimo 6 caracteres.</p></div>
+      <div class="aviso" id="edMiemAviso">Ponerle una contraseña aquí es entrar en su cuenta: hazlo solo si esa persona te lo ha pedido. Para que la ponga ella misma, existe «He olvidado mi contraseña» en el login.</div>
+    </div>
+    <div class="pie">
+      <span class="error" id="edMiemError"></span>
+      <button class="btn ghost" onclick="cerrarEditMiembro()">Cancelar</button>
+      <button class="btn" id="edMiemBtn" onclick="guardarEditMiembro()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="capa" id="capaCom" onclick="if(event.target===this)cerrarComunicado()">
   <div class="modal">
     <h2 id="comTitulo">Nuevo comunicado</h2>
@@ -845,6 +866,7 @@ function setCuentaCli(v){ _cuentaCli = v; document.getElementById('contenido').i
    Lo que sí se edita aquí son los tres catálogos que no tienen dueño (grupos
    musculares, tipos de dieta y grupos de alimentos): son la fuente única de
    verdad de la plataforma y no viven en la librería de nadie. */
+const LAPIZ = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>';
 const PAPELERA = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
 let _cont = null, _tipo = 'organizaciones', _buscaCont = '';
 
@@ -1375,6 +1397,7 @@ function htmlEquipo(){
             ${m.state === 'invitado'
               ? `<button class="btn ghost" title="Genera otro código si el anterior se perdió o caducó"
                     onclick="otroCodigo(${m.user_id},'${esc(m.name)}')">Código</button>` : ''}
+            <button class="icono-btn" title="Editar datos" onclick="abrirEditMiembro(${m.user_id})">${LAPIZ}</button>
             ${m.soy_yo || bloqueado ? ''
               : `<button class="icono-btn rojo" title="Sacar del equipo" onclick="sacarDelEquipo(${m.user_id},'${esc(m.name)}')">${PAPELERA}</button>`}
           </td>
@@ -1438,6 +1461,70 @@ async function sacarDelEquipo(userId, nombre){
   const j = await r.json().catch(()=>({}));
   if (!r.ok) { alert(j.message || 'No se pudo sacar del equipo'); return; }
   cargarEquipo();
+}
+
+/* ── Editar los datos de un miembro ─────────────────────────────────────────
+   El desplegable de la fila cambia el ROL; esto son sus datos. Hasta ahora una
+   errata en un apellido o un correo mal escrito al invitar no se podían
+   arreglar desde ninguna parte. */
+let _edMiemId = null;
+
+function abrirEditMiembro(userId){
+  const m = _equipo.find(x => x.user_id === userId);
+  if (!m) return;
+  _edMiemId = userId;
+  document.getElementById('edMiemTitulo').textContent = 'Editar a ' + (m.name || 'este miembro');
+  document.getElementById('edMiemError').textContent = '';
+  document.getElementById('edMiemNombre').value    = m.nombre || '';
+  document.getElementById('edMiemApellidos').value = m.apellidos || '';
+  document.getElementById('edMiemEmail').value     = m.email || '';
+  document.getElementById('edMiemTel').value       = m.phone || '';
+  document.getElementById('edMiemClave').value     = '';
+  // A quien todavía no ha entrado no se le está "quitando" nada: ponerle la
+  // contraseña a mano es una forma legítima de darle acceso.
+  document.getElementById('edMiemAviso').textContent = m.state === 'invitado'
+    ? 'Todavía no ha entrado. Si le pones una contraseña aquí, el código de invitación pendiente deja de valer y tendrás que pasarle tú la contraseña.'
+    : 'Ponerle una contraseña aquí es entrar en su cuenta: hazlo solo si esa persona te lo ha pedido. Para que la ponga ella misma, existe «He olvidado mi contraseña» en el login.';
+  document.getElementById('capaEditMiem').classList.add('on');
+}
+
+function cerrarEditMiembro(){
+  document.getElementById('capaEditMiem').classList.remove('on');
+  _edMiemId = null;
+}
+
+async function guardarEditMiembro(){
+  if (_edMiemId == null) return;
+  const err = document.getElementById('edMiemError');
+  const btn = document.getElementById('edMiemBtn');
+  const clave = document.getElementById('edMiemClave').value;
+  err.textContent = '';
+
+  const nombre = document.getElementById('edMiemNombre').value.trim();
+  if (!nombre) { err.textContent = 'El nombre es obligatorio'; return; }
+  if (clave && clave.length < 6) { err.textContent = 'La contraseña debe tener al menos 6 caracteres'; return; }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const r = await fetch(`${API}/admin/team/${_edMiemId}`, {
+      method: 'PUT', headers: cab(), body: JSON.stringify({
+        name: nombre,
+        last_name: document.getElementById('edMiemApellidos').value.trim(),
+        email: document.getElementById('edMiemEmail').value.trim(),
+        phone: document.getElementById('edMiemTel').value.trim(),
+        // Vacío significa "no la toques", no "déjala vacía".
+        password: clave || null,
+      }),
+    });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) { err.textContent = j.message || 'No se pudieron guardar los datos'; return; }
+    cerrarEditMiembro();
+    await cargarEquipo();
+  } catch(e) {
+    err.textContent = 'No se pudo conectar con el servidor';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar';
+  }
 }
 
 function abrirMiembro(){

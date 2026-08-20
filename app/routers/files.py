@@ -5,7 +5,8 @@ import uuid
 
 from app.config import settings
 from app.core.responses import send_response, send_error
-from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, CLIENT
+from app.core.dependencies import (require_role_ids, SUPERADMIN, ADMIN, SETTER, CLOSER, COACH,
+                                   CLIENT, EDITOR_CONTENIDO_GLOBAL)
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
@@ -34,7 +35,12 @@ def _public_url(key: str) -> str:
 async def upload_file(
     file: UploadFile = File(...),
     folder: Optional[str] = Form("uploads"),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, CLIENT)),
+    # El editor de contenido global sube las fotos de los ejercicios y las
+    # imágenes del catálogo: es media hora de su trabajo. Faltaba, así que se
+    # llevaba un 403 que la pantalla enseñaba como "Error al subir imagen", sin
+    # decir que era de permisos. Un CLIENTE podía subir foto y él no.
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH, CLIENT,
+                               EDITOR_CONTENIDO_GLOBAL)),
 ):
     """
     Sube una imagen a Cloudflare R2 y devuelve la URL pública.

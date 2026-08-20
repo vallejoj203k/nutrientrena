@@ -1053,15 +1053,25 @@ function removeExVideo(){
   _setExVideoPreview(null);
   document.getElementById('ex_videoFile').value='';
 }
+/* Los dos subidores enseñan el motivo que da el servidor. Antes decían
+   "Error al subir" y punto: con un 403 de permisos parecía que el fichero era
+   demasiado grande o que estaba roto, y no había por dónde empezar a mirar. */
 async function uploadExVideo(input){
   const file=input.files[0];if(!file)return;
   const fd=new FormData();fd.append('file',file);fd.append('folder','videos');
   try{
     const r=await fetch(`${API}/files/upload`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd});
-    const d=await r.json();
-    if(d.data?.url)_setExVideoPreview(d.data.url);
-    else showToast('Error al subir video','error');
-  }catch{showToast('Error al subir video','error');}
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&d.data?.url)_setExVideoPreview(d.data.url);
+    else showToast(motivoSubida(r,d,'video'),'error');
+  }catch{showToast('No se pudo subir el video: no hay conexión con el servidor','error');}
+}
+
+function motivoSubida(r,d,que){
+  if(r.status===403)return `No tienes permiso para subir ${que==='video'?'videos':'imágenes'}.`;
+  if(r.status===401)return 'Tu sesión ha caducado. Vuelve a entrar.';
+  if(r.status===413)return `El ${que} es demasiado grande (máximo 10 MB).`;
+  return (d&&d.message)||`Error al subir el ${que}`;
 }
 function onExVideoDrop(e){
   e.preventDefault();
@@ -1079,10 +1089,10 @@ async function uploadExImage(input){
   const fd=new FormData();fd.append('file',file);
   try{
     const r=await fetch(`${API}/files/upload`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body:fd});
-    const d=await r.json();
-    if(d.data?.url)setExImagePreview(d.data.url);
-    else showToast('Error al subir imagen','error');
-  }catch{showToast('Error al subir imagen','error');}
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&d.data?.url)setExImagePreview(d.data.url);
+    else showToast(motivoSubida(r,d,'imagen'),'error');
+  }catch{showToast('No se pudo subir la imagen: no hay conexión con el servidor','error');}
 }
 
 let _ms2Selected=[];

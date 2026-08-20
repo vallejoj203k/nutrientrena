@@ -64,6 +64,30 @@
     .btn-start{display:block;width:100%;margin-top:10px;padding:9px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
     .btn-start:hover{background:var(--purple-mid);}
     .btn-start:disabled{opacity:.5;cursor:not-allowed;}
+    .grp-modos{display:flex;gap:6px;margin-bottom:10px;}
+    .grp-modo{flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:9px;background:#fff;
+              font:inherit;font-size:12.5px;font-weight:600;color:#6B7280;cursor:pointer;}
+    .grp-modo.active{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
+    .grp-nota{font-size:11.5px;color:#9CA3AF;line-height:1.45;margin-top:8px;}
+    .grp-contactos{max-height:210px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;margin-top:8px;}
+    .grp-grupo-rol{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+                   color:#9CA3AF;padding:8px 12px 4px;}
+    .grp-contacto{display:flex;align-items:center;gap:9px;padding:7px 12px;cursor:pointer;font-size:13px;}
+    .grp-contacto:hover{background:#F8FAFC;}
+    .grp-contacto input{width:16px;height:16px;accent-color:var(--purple);cursor:pointer;}
+    .grp-contacto .c-mail{font-size:11px;color:#9CA3AF;}
+    /* El globo de ayuda es fijo abajo a la derecha y en esta pantalla cae justo
+       encima del botón de enviar: al pulsar "enviar" se abría la ayuda. Aquí se
+       sube por encima de la barra de escribir. */
+    #sopBtn{bottom:104px !important;}
+
+    .aviso-difusion{display:flex;align-items:center;justify-content:center;gap:12px;
+                    padding:12px 16px;border-top:1px solid var(--border);background:#F8FAFC;
+                    font-size:12.5px;color:#6B7280;}
+    .aviso-difusion button{border:1px solid var(--purple);background:#fff;color:var(--purple);
+                           font:inherit;font-size:12.5px;font-weight:600;padding:6px 12px;
+                           border-radius:8px;cursor:pointer;white-space:nowrap;}
+    .aviso-difusion button:hover{background:var(--purple-light);}
     .target-opts{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
     .target-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;background:#fff;}
     .target-opt:hover{border-color:var(--purple-mid);}
@@ -292,10 +316,26 @@
         <div class="panel-selected-tags" id="selectedUsers"></div>
         <button class="btn-start" id="btnStartInd" onclick="createConversation()" style="display:none;">Iniciar conversación</button>
       </div>
-      <!-- Group sub-panel -->
+      <!-- Group sub-panel: dos formas de definir un grupo, y no son lo mismo.
+           Por rol la lista se actualiza sola; a medida es la que elijas. -->
       <div class="new-chat-panel-body" id="grpPanel" style="display:none;">
+        <div class="grp-modos">
+          <button type="button" class="grp-modo active" id="modoRol" onclick="setModoGrupo('rol')">Por rol</button>
+          <button type="button" class="grp-modo" id="modoMano" onclick="setModoGrupo('mano')">A medida</button>
+        </div>
         <input type="text" class="grp-name-input" id="grpName" placeholder="Nombre del grupo (opcional)"/>
-        <div class="target-opts" id="targetOpts"></div>
+
+        <div id="grpPorRol">
+          <div class="target-opts" id="targetOpts"></div>
+          <div class="grp-nota" id="grpNotaRol"></div>
+        </div>
+
+        <div id="grpAMano" style="display:none;">
+          <input type="text" id="grpBuscar" placeholder="Buscar entre tus contactos…" oninput="filtrarContactos(this.value)"/>
+          <div class="grp-contactos" id="grpContactos"></div>
+          <div class="grp-nota">Todos los del grupo se leen y escriben entre sí, como en WhatsApp.</div>
+        </div>
+
         <button class="btn-start" onclick="createConversation()">Crear grupo</button>
       </div>
     </div>
@@ -417,7 +457,8 @@ function showNewPanel(type) {
     document.getElementById('grpPanel').style.display = '';
     document.getElementById('grpName').value = '';
     _target = null;
-    renderTargetOpts();
+    _elegidos = new Set();
+    setModoGrupo('rol');   // carga los contactos y pinta las opciones
   }
 
   document.getElementById('newChatPanel').style.display = '';
@@ -532,10 +573,17 @@ async function selectConversation(id) {
     av.textContent = isGroup ? '👥' : convInitial(_activeConv);
   }
   document.getElementById('msgHeaderName').textContent = convName(_activeConv);
-  document.getElementById('msgHeaderSub').textContent = isGroup ? `${(_activeConv.participants || []).length} participantes` : 'Cliente';
+  // En un grupo de difusión, quien recibe no sabe cuánta gente hay —ni le sirve
+  // ni le corresponde—: el servidor no manda el total y aquí se dice qué es.
+  const total = _activeConv.participantes_total;
+  document.getElementById('msgHeaderSub').textContent = !isGroup ? 'Cliente'
+    : (total != null ? `${total} participantes`
+       : (_activeConv.broadcast ? 'Mensaje de tu coach' : 'Grupo'));
+
+  aplicarDifusion(_activeConv);
 
   await loadMessages(id);
-  document.getElementById('sendInput').focus();
+  if (_activeConv.puedo_escribir !== false) document.getElementById('sendInput').focus();
 }
 
 async function loadMessages(convId) {
@@ -673,35 +721,118 @@ function renderSelectedUsers() {
 
 // ── Group targets ──────────────────────────────────────────────────────────
 
+/* Un grupo se define de dos maneras, y la diferencia importa:
+
+   · Por ROL: "mis clientes", "mis coaches". La lista se resuelve en el
+     servidor cada vez, así que quien entra en la cuenta entra en el grupo. Es
+     de difusión: escribes tú y te responden en privado.
+   · A MEDIDA: eliges las personas, la lista no cambia sola, y ahí habla todo
+     el mundo, como en WhatsApp.
+
+   Los nombres de antes (`all_coaches`, `my_clients`) los mandaba esta pantalla
+   y el servidor no los entendía: "todos los coaches" acababa creando un grupo
+   con todos los clientes. Ahora se manda `audience` y son los mismos nombres
+   en los dos lados. */
+let _modoGrupo = 'rol', _contactos = [], _elegidos = new Set(), _filtroContactos = '';
+
+function setModoGrupo(m) {
+  _modoGrupo = m;
+  cargarContactos();
+  document.getElementById('modoRol').classList.toggle('active', m === 'rol');
+  document.getElementById('modoMano').classList.toggle('active', m === 'mano');
+  document.getElementById('grpPorRol').style.display = m === 'rol' ? '' : 'none';
+  document.getElementById('grpAMano').style.display = m === 'mano' ? '' : 'none';
+}
+
 function renderTargetOpts() {
-  const roles = (_me?.roles || []).map(r => r.id || r.role_id);
-  const isAdmin = roles.includes(1) || roles.includes(2);
-  const isCoach = roles.includes(5);
+  /* Qué grupos por rol se ofrecen sale de con quién puedes hablar de verdad,
+     no del rol guardado en el navegador: así "Mis coaches" aparece cuando
+     tienes equipo y no cuando el rol dice que podrías tenerlo. Ofrecer un
+     grupo que va a salir vacío es prometer algo que no existe. */
+  const hay = rol => _contactos.some(c => c.rol === rol);
   const opts = [];
-  if (isCoach || isAdmin) opts.push({ value: 'my_clients', label: '👤 Mis clientes', desc: 'Todos tus clientes asignados' });
-  if (isAdmin) {
-    opts.push({ value: 'all_coaches', label: '🏋️ Todos los coaches', desc: 'Mensaje a todo el equipo' });
-    opts.push({ value: 'all_clients', label: '👥 Todos los clientes', desc: 'Mensaje masivo a clientes' });
+  if (hay('cliente')) opts.push({ value: 'mis_clientes', label: '👥 Mis clientes',
+    desc: 'Todos tus clientes. Los nuevos entran solos.' });
+  if (hay('coach')) opts.push({ value: 'mis_coaches', label: '🏋️ Mis coaches',
+    desc: 'Tu equipo. Los nuevos entran solos.' });
+  if (!opts.length) {
+    document.getElementById('targetOpts').innerHTML =
+      '<div class="grp-nota">Todavía no tienes clientes ni equipo con quien montar un grupo.</div>';
+    document.getElementById('grpNotaRol').textContent = '';
+    return;
   }
   document.getElementById('targetOpts').innerHTML = opts.map(o => `
     <div class="target-opt ${_target === o.value ? 'active' : ''}" onclick="selectTarget('${o.value}')">
       <div><div>${o.label}</div><div style="font-size:11px;color:#9CA3AF;font-weight:400;">${o.desc}</div></div>
     </div>`).join('');
+  document.getElementById('grpNotaRol').textContent =
+    'Escribes tú y les llega a todos. Cada uno te responde en privado, y no se ven entre ellos.';
 }
 
 function selectTarget(val) { _target = val; renderTargetOpts(); }
+
+// ── Grupos a medida ────────────────────────────────────────────────────────
+async function cargarContactos() {
+  if (_contactos.length) { renderContactos(); renderTargetOpts(); return; }
+  document.getElementById('grpContactos').innerHTML =
+    '<div class="grp-grupo-rol">Cargando…</div>';
+  try {
+    const j = await apiFetch('/chat/contactos');
+    _contactos = (j.data || []);
+  } catch (e) { _contactos = []; }
+  renderContactos();
+  renderTargetOpts();
+}
+
+function filtrarContactos(v) { _filtroContactos = (v || '').toLowerCase(); renderContactos(); }
+
+function renderContactos() {
+  const caja = document.getElementById('grpContactos');
+  const q = _filtroContactos;
+  const vis = _contactos.filter(c =>
+    !q || (c.name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q));
+  if (!vis.length) {
+    caja.innerHTML = `<div class="grp-grupo-rol">${
+      _contactos.length ? 'Nadie con ese nombre.' : 'Todavía no tienes contactos con quien hablar.'}</div>`;
+    return;
+  }
+  // Agrupados por rol: es como se piensa en ellos al montar un grupo.
+  const ROTULO = { coach: 'Tu equipo', cliente: 'Tus clientes' };
+  let html = '', rolPrevio = null;
+  vis.forEach(c => {
+    if (c.rol !== rolPrevio) { html += `<div class="grp-grupo-rol">${ROTULO[c.rol] || c.rol}</div>`; rolPrevio = c.rol; }
+    html += `<label class="grp-contacto">
+      <input type="checkbox" ${_elegidos.has(c.user_id) ? 'checked' : ''} onchange="alternarContacto(${c.user_id})">
+      <span><div>${escHtml(c.name || '')}</div><div class="c-mail">${escHtml(c.email || '')}</div></span>
+    </label>`;
+  });
+  caja.innerHTML = html;
+}
+
+function alternarContacto(id) {
+  if (_elegidos.has(id)) _elegidos.delete(id); else _elegidos.add(id);
+}
 
 // ── Create conversation ────────────────────────────────────────────────────
 
 async function createConversation() {
   if (_convType === 'individual' && !_selectedUsers.length) { alert('Selecciona al menos una persona'); return; }
-  if (_convType === 'group' && !_target) { alert('Selecciona a quién enviar el mensaje'); return; }
+  if (_convType === 'group' && _modoGrupo === 'rol' && !_target) {
+    alert('Elige a quién va el grupo'); return;
+  }
+  if (_convType === 'group' && _modoGrupo === 'mano' && !_elegidos.size) {
+    alert('Elige al menos una persona para el grupo'); return;
+  }
 
+  const esGrupoPorRol = _convType === 'group' && _modoGrupo === 'rol';
   const body = {
     type: _convType,
-    participant_user_ids: _selectedUsers.map(u => u.user_id),
+    // Un grupo por rol no manda lista: la resuelve el servidor cada vez, que
+    // es lo que hace que los nuevos entren solos.
+    participant_user_ids: esGrupoPorRol ? null
+      : (_convType === 'group' ? [..._elegidos] : _selectedUsers.map(u => u.user_id)),
     name: _convType === 'group' ? (document.getElementById('grpName').value.trim() || null) : null,
-    target: _convType === 'group' ? _target : null,
+    audience: esGrupoPorRol ? _target : null,
   };
 
   const r = await apiFetch('/chat/conversations', { method: 'POST', body: JSON.stringify(body) });
@@ -712,6 +843,43 @@ async function createConversation() {
   } else {
     alert(r.message || 'Error al crear conversación');
   }
+}
+
+/* Un grupo de difusión no se responde: quien lo recibe escribe al coach en
+   privado. Se le quita el cuadro de escribir y se le da el camino, en vez de
+   dejarle teclear un mensaje que el servidor va a rechazar. */
+function aplicarDifusion(conv) {
+  const barra = document.querySelector('.send-bar');
+  const aviso = document.getElementById('avisoDifusion');
+  if (aviso) aviso.remove();
+  if (!barra) return;
+
+  const puedo = conv ? conv.puedo_escribir !== false : true;
+  barra.style.display = puedo ? '' : 'none';
+  if (puedo) return;
+
+  const creador = (conv.participants || []).find(p => p.user_id === conv.created_by_user_id);
+  const caja = document.createElement('div');
+  caja.id = 'avisoDifusion';
+  caja.className = 'aviso-difusion';
+  caja.innerHTML = '<span>En este grupo escribe solo ' +
+    escHtml((creador && creador.name) || 'quien lo creó') + '.</span>' +
+    '<button type="button">Responder en privado</button>';
+  caja.querySelector('button').addEventListener('click', () => abrirPrivadoCon(conv.created_by_user_id));
+  barra.parentNode.insertBefore(caja, barra.nextSibling);
+}
+
+async function abrirPrivadoCon(userId) {
+  // Si ya hay conversación con esa persona, se abre; si no, se crea.
+  const ya = (_convs || []).find(c => c.type === 'individual' &&
+    (c.participants || []).some(p => p.user_id === userId));
+  if (ya) { selectConversation(ya.id); return; }
+  const r = await apiFetch('/chat/conversations', {
+    method: 'POST',
+    body: JSON.stringify({ type: 'individual', participant_user_ids: [userId] }),
+  });
+  if (r.success) { await loadConversations(); selectConversation(r.data.id); }
+  else alert(r.message || 'No se pudo abrir el chat privado');
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────

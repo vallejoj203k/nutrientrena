@@ -281,3 +281,142 @@ def test_los_contactos_son_los_de_mi_cuenta_y_nadie_mas(client, seed, admin_head
     correos = [c.get("email") for c in r.json()["data"]]
     assert any(f"cli1.chat.{suf}a" in (c or "") for c in correos), correos
     assert not any(f"cli1.chat.{suf}b" in (c or "") for c in correos), correos
+
+
+# ── Añadir y quitar gente ──────────────────────────────────────────────────
+
+def _grupo_a_medida(client, h_coach, con_quien):
+    r = _crear_grupo(client, h_coach, participant_user_ids=con_quien, name="Reto")
+    assert r.status_code == 200, r.text
+    return r.json()["data"]
+
+
+def _ids_de(client, headers, rol=None):
+    datos = client.get("/api/chat/contactos", headers=headers).json()["data"]
+    return [c["user_id"] for c in datos if not rol or c["rol"] == rol]
+
+
+def test_se_puede_anadir_gente_a_un_grupo_a_medida(client, seed, admin_headers):
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, _h1, _h2 = _monta_centro(client, admin_headers, suf)
+    clientes = _ids_de(client, h_coach, "cliente")
+    grupo = _grupo_a_medida(client, h_coach, [clientes[0]])
+    assert grupo["participantes_total"] == 2
+
+    r = client.post(f"/api/chat/conversations/{grupo['id']}/participants",
+                    headers=h_coach, json={"user_ids": [clientes[1]]})
+    assert r.status_code == 200, r.text
+    assert r.json()["data"]["participantes_total"] == 3, r.json()["data"]
+
+
+def test_se_puede_sacar_a_alguien(client, seed, admin_headers):
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, _h1, _h2 = _monta_centro(client, admin_headers, suf)
+    clientes = _ids_de(client, h_coach, "cliente")
+    grupo = _grupo_a_medida(client, h_coach, clientes)
+
+    r = client.delete(f"/api/chat/conversations/{grupo['id']}/participants/{clientes[0]}",
+                      headers=h_coach)
+    assert r.status_code == 200, r.text
+
+    convs = client.get("/api/chat/conversations", headers=h_coach).json()["data"]
+    ahora = next(c for c in convs if c["id"] == grupo["id"])
+    assert ahora["participantes_total"] == 2, ahora
+
+
+def test_a_quien_sacan_deja_de_ver_el_grupo(client, seed, admin_headers):
+    """Que baje el contador no basta: lo que importa es que ya no lo lea."""
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, h_c1, _h2 = _monta_centro(client, admin_headers, suf)
+    clientes = _ids_de(client, h_coach, "cliente")
+    grupo = _grupo_a_medida(client, h_coach, clientes)
+
+    suyas = client.get("/api/chat/conversations", headers=h_c1).json()["data"]
+    assert any(c["id"] == grupo["id"] for c in suyas), suyas
+
+    # Se saca al primero de la lista, que es cli1 (el de h_c1).
+    client.delete(f"/api/chat/conversations/{grupo['id']}/participants/{clientes[0]}",
+                  headers=h_coach)
+    suyas = client.get("/api/chat/conversations", headers=h_c1).json()["data"]
+    assert not any(c["id"] == grupo["id"] for c in suyas), suyas
+    # Y tampoco puede leer los mensajes con el id a mano.
+    r = client.get(f"/api/chat/conversations/{grupo['id']}/messages", headers=h_c1)
+    assert r.status_code == 404, r.text
+
+
+def test_uno_se_puede_salir_del_grupo(client, seed, admin_headers):
+    """Estar en un grupo no es una condena."""
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, h_c1, _h2 = _monta_centro(client, admin_headers, suf)
+    clientes = _ids_de(client, h_coach, "cliente")
+    grupo = _grupo_a_medida(client, h_coach, clientes)
+
+    r = client.delete(f"/api/chat/conversations/{grupo['id']}/participants/{clientes[0]}",
+                      headers=h_c1)
+    assert r.status_code == 200, r.text
+    suyas = client.get("/api/chat/conversations", headers=h_c1).json()["data"]
+    assert not any(c["id"] == grupo["id"] for c in suyas)
+
+
+def test_quien_creo_el_grupo_no_se_sale_de_el(client, seed, admin_headers):
+    """Se quedaría sin dueño. Lo que quiere hacer es borrarlo."""
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, _h1, _h2 = _monta_centro(client, admin_headers, suf)
+    clientes = _ids_de(client, h_coach, "cliente")
+    grupo = _grupo_a_medida(client, h_coach, clientes)
+    yo = grupo["created_by_user_id"]
+
+    r = client.delete(f"/api/chat/conversations/{grupo['id']}/participants/{yo}", headers=h_coach)
+    assert r.status_code == 400, r.text
+    assert "bórralo" in r.json()["message"].lower(), r.json()
+
+
+def test_un_miembro_no_saca_a_otro(client, seed, admin_headers):
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, h_c1, _h2 = _monta_centro(client, admin_headers, suf)
+    clientes = _ids_de(client, h_coach, "cliente")
+    grupo = _grupo_a_medida(client, h_coach, clientes)
+
+    r = client.delete(f"/api/chat/conversations/{grupo['id']}/participants/{clientes[1]}",
+                      headers=h_c1)
+    assert r.status_code == 403, r.text
+
+
+def test_no_se_puede_colar_a_alguien_de_otra_cuenta(client, seed, admin_headers):
+    """La misma comprobación que al crear: si no, bastaría con hacer un grupo
+    limpio y después meter a quien no toca."""
+    suf = uuid.uuid4().hex[:8]
+    _orgA, _detA, h_coachA, _a1, _a2 = _monta_centro(client, admin_headers, suf + "a")
+    _orgB, _detB, h_coachB, _b1, _b2 = _monta_centro(client, admin_headers, suf + "b")
+    mios = _ids_de(client, h_coachA, "cliente")
+    ajeno = _ids_de(client, h_coachB, "cliente")[0]
+    grupo = _grupo_a_medida(client, h_coachA, [mios[0]])
+
+    r = client.post(f"/api/chat/conversations/{grupo['id']}/participants",
+                    headers=h_coachA, json={"user_ids": [ajeno]})
+    assert r.status_code == 403, r.text
+
+
+def test_en_un_grupo_por_regla_no_se_anade_a_mano(client, seed, admin_headers):
+    """Se desharía solo la próxima vez que se resuelve la regla, así que se
+    dice en vez de dejar hacer algo que no dura."""
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, _h1, _h2 = _monta_centro(client, admin_headers, suf)
+    grupo = _crear_grupo(client, h_coach, audience="mis_clientes").json()["data"]
+    otros = _ids_de(client, h_coach, "cliente")
+
+    r = client.post(f"/api/chat/conversations/{grupo['id']}/participants",
+                    headers=h_coach, json={"user_ids": otros[:1]})
+    assert r.status_code == 400, r.text
+    assert "regla" in r.json()["message"].lower(), r.json()
+
+
+def test_anadir_a_quien_ya_esta_no_lo_duplica(client, seed, admin_headers):
+    suf = uuid.uuid4().hex[:8]
+    _org, _det, h_coach, _h1, _h2 = _monta_centro(client, admin_headers, suf)
+    clientes = _ids_de(client, h_coach, "cliente")
+    grupo = _grupo_a_medida(client, h_coach, clientes)
+
+    r = client.post(f"/api/chat/conversations/{grupo['id']}/participants",
+                    headers=h_coach, json={"user_ids": [clientes[0]]})
+    assert r.status_code == 400, r.text

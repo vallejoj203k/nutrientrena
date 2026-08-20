@@ -81,6 +81,24 @@
        sube por encima de la barra de escribir. */
     #sopBtn{bottom:104px !important;}
 
+    .btn-parts{display:flex;align-items:center;gap:7px;margin-left:auto;padding:7px 11px;
+               border:1px solid var(--border);border-radius:9px;background:#fff;
+               font:inherit;font-size:12.5px;font-weight:600;color:#6B7280;cursor:pointer;}
+    .btn-parts:hover{border-color:var(--purple);color:var(--purple);}
+    .panel-parts{border-bottom:1px solid var(--border);background:#F8FAFC;padding:12px 16px;
+                 max-height:280px;overflow-y:auto;}
+    .pp-fila{display:flex;align-items:center;gap:10px;padding:7px 4px;font-size:13px;}
+    .pp-fila .pp-nom{flex:1;min-width:0;}
+    .pp-fila .pp-rol{font-size:11px;color:#9CA3AF;}
+    .pp-quitar{border:none;background:none;color:#EF4444;cursor:pointer;font:inherit;
+               font-size:12px;font-weight:600;padding:4px 8px;border-radius:7px;}
+    .pp-quitar:hover{background:#FEF2F2;}
+    .pp-titulo{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+               color:#9CA3AF;margin:6px 0 2px;}
+    .pp-anadir select{width:100%;padding:8px 10px;border:1px solid var(--border);
+                      border-radius:9px;font:inherit;font-size:13px;margin-top:4px;}
+    .pp-salir{width:100%;margin-top:8px;padding:8px;border:1px solid #FECACA;background:#fff;
+              color:#EF4444;font:inherit;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer;}
     .aviso-difusion{display:flex;align-items:center;justify-content:center;gap:12px;
                     padding:12px 16px;border-top:1px solid var(--border);background:#F8FAFC;
                     font-size:12.5px;color:#6B7280;}
@@ -361,6 +379,16 @@
           <div class="msg-header-name" id="msgHeaderName">—</div>
           <div class="msg-header-sub" id="msgHeaderSub">—</div>
         </div>
+        <!-- Quién está en el grupo. Solo en los de a medida: en uno por regla
+             la lista la manda la regla y no hay nada que tocar. -->
+        <button class="btn-parts" id="btnParts" onclick="alternarParticipantes()" style="display:none;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          <span id="btnPartsTxt">Participantes</span>
+        </button>
+      </div>
+      <div class="panel-parts" id="panelParts" style="display:none;">
+        <div class="pp-lista" id="ppLista"></div>
+        <div class="pp-anadir" id="ppAnadir"></div>
       </div>
       <div class="msg-body" id="msgBody"></div>
       <div class="typing-indicator" id="typingIndicator" style="display:none;"></div>
@@ -581,6 +609,7 @@ async function selectConversation(id) {
        : (_activeConv.broadcast ? 'Mensaje de tu coach' : 'Grupo'));
 
   aplicarDifusion(_activeConv);
+  prepararParticipantes(_activeConv);
 
   await loadMessages(id);
   if (_activeConv.puedo_escribir !== false) document.getElementById('sendInput').focus();
@@ -867,6 +896,106 @@ function aplicarDifusion(conv) {
     '<button type="button">Responder en privado</button>';
   caja.querySelector('button').addEventListener('click', () => abrirPrivadoCon(conv.created_by_user_id));
   barra.parentNode.insertBefore(caja, barra.nextSibling);
+}
+
+/* ── Quién está en el grupo ────────────────────────────────────────────────
+   Solo tiene sentido en los grupos hechos a mano: en uno por regla la lista la
+   manda la regla, y tocarla a mano se desharía solo la próxima vez que se
+   resuelve. Por eso ahí el botón no aparece. */
+function prepararParticipantes(conv) {
+  const btn = document.getElementById('btnParts');
+  const panel = document.getElementById('panelParts');
+  panel.style.display = 'none';
+  const esGrupoAMano = conv && conv.type === 'group' && !conv.audience;
+  btn.style.display = esGrupoAMano ? '' : 'none';
+  if (esGrupoAMano) {
+    const soyDuenio = conv.created_by_user_id === _me?.user_id;
+    document.getElementById('btnPartsTxt').textContent =
+      soyDuenio ? 'Participantes' : 'Ver participantes';
+  }
+}
+
+function alternarParticipantes() {
+  const panel = document.getElementById('panelParts');
+  const abierto = panel.style.display !== 'none';
+  panel.style.display = abierto ? 'none' : '';
+  if (!abierto) pintarParticipantes();
+}
+
+async function pintarParticipantes() {
+  const conv = _activeConv;
+  if (!conv) return;
+  const soyDuenio = conv.created_by_user_id === _me?.user_id;
+  const dentro = conv.participants || [];
+
+  document.getElementById('ppLista').innerHTML =
+    `<div class="pp-titulo">${dentro.length} en el grupo</div>` +
+    dentro.map(p => {
+      const esDuenio = p.user_id === conv.created_by_user_id;
+      const yo = p.user_id === _me?.user_id;
+      return `<div class="pp-fila">
+        <div class="pp-nom">${escHtml(p.name || '')}${yo ? ' (tú)' : ''}
+          ${esDuenio ? '<div class="pp-rol">Creó el grupo</div>' : ''}</div>
+        ${(soyDuenio && !esDuenio) ? `<button class="pp-quitar" onclick="quitarDelGrupo(${p.user_id},'${escHtml(p.name || '')}')">Quitar</button>` : ''}
+      </div>`;
+    }).join('');
+
+  const caja = document.getElementById('ppAnadir');
+  if (!soyDuenio) {
+    // Estar en un grupo no es una condena: quien no lo creó puede salirse.
+    caja.innerHTML = '<button class="pp-salir" onclick="salirDelGrupo()">Salir del grupo</button>';
+    return;
+  }
+
+  await cargarContactos();
+  const yaEstan = new Set(dentro.map(p => p.user_id));
+  const libres = _contactos.filter(c => !yaEstan.has(c.user_id));
+  caja.innerHTML = libres.length
+    ? `<div class="pp-titulo">Añadir a alguien</div>
+       <select onchange="anadirAlGrupo(this.value); this.value='';">
+         <option value="">Elige a quién añadir…</option>
+         ${libres.map(c => `<option value="${c.user_id}">${escHtml(c.name || '')}</option>`).join('')}
+       </select>`
+    : '<div class="pp-titulo">Ya están todos tus contactos</div>';
+}
+
+async function anadirAlGrupo(userId) {
+  if (!userId) return;
+  const r = await apiFetch(`/chat/conversations/${_activeConv.id}/participants`,
+    { method: 'POST', body: JSON.stringify({ user_ids: [Number(userId)] }) });
+  if (!r.success) { alert(r.message || 'No se pudo añadir'); return; }
+  await refrescarConversacionActiva();
+}
+
+async function quitarDelGrupo(userId, nombre) {
+  if (!confirm(`¿Sacar a ${nombre} del grupo?\n\nDejará de ver los mensajes, incluidos los de antes.`)) return;
+  const r = await apiFetch(`/chat/conversations/${_activeConv.id}/participants/${userId}`,
+    { method: 'DELETE' });
+  if (!r.success) { alert(r.message || 'No se pudo sacar'); return; }
+  await refrescarConversacionActiva();
+}
+
+async function salirDelGrupo() {
+  if (!confirm('¿Salir del grupo?\n\nDejarás de ver sus mensajes.')) return;
+  const r = await apiFetch(`/chat/conversations/${_activeConv.id}/participants/${_me?.user_id}`,
+    { method: 'DELETE' });
+  if (!r.success) { alert(r.message || 'No se pudo salir'); return; }
+  _activeConv = null;
+  document.getElementById('convState').style.display = 'none';
+  document.getElementById('noConvState').style.display = '';
+  await loadConversations();
+}
+
+async function refrescarConversacionActiva() {
+  const id = _activeConv?.id;
+  await loadConversations();
+  const fresca = _convs.find(c => c.id === id);
+  if (!fresca) return;
+  _activeConv = fresca;
+  const total = fresca.participantes_total;
+  document.getElementById('msgHeaderSub').textContent =
+    total != null ? `${total} participantes` : 'Grupo';
+  pintarParticipantes();
 }
 
 async function abrirPrivadoCon(userId) {

@@ -107,6 +107,42 @@ const rutear = ctx => ctx.route(u => u.href.startsWith(PROD), async route => {
      (await p.textContent('#msgHeaderName')) === 'Reto de verano' &&
      (await p.textContent('#msgHeaderSub')).includes('2 participantes'),
      await p.textContent('#msgHeaderSub'));
+  /* ── Añadir y quitar gente ───────────────────────────────────────────────
+     Un grupo a medida se retoca; uno por regla no, porque lo define la regla. */
+  ck('el grupo a medida ofrece gestionar quién está dentro',
+     await p.locator('#btnParts').isVisible());
+  await p.click('#btnParts');
+  await p.locator('.pp-fila').first().waitFor({ state: 'visible', timeout: 15000 });
+  await p.waitForTimeout(800);
+  ck('se ve quién está y quién lo creó',
+     (await p.textContent('#ppLista')).includes('Creó el grupo'));
+  /* El aviso de comunicados se metía como un hijo más del <body>, que en esta
+     pantalla es un flex de columnas: se convertía en una COLUMNA y empujaba
+     todo. Medido: la barra lateral empezaba en x=375 y el panel de mensajes se
+     quedaba en 385px de ancho. Lo que se comprueba es el síntoma. */
+  ck('el aviso de comunicados no descuadra la pantalla', await p.evaluate(() => {
+    const s = document.querySelector('.sidebar');
+    return !!s && s.getBoundingClientRect().left < 5;
+  }));
+
+  const antes = await p.locator('.pp-fila').count();
+  await p.selectOption('.pp-anadir select', { index: 1 });
+  await p.waitForTimeout(2200);
+  ck('SE PUEDE AÑADIR A ALGUIEN', (await p.locator('.pp-fila').count()) === antes + 1,
+     { antes, ahora: await p.locator('.pp-fila').count() });
+
+  p.on('dialog', d => d.accept());
+  await p.locator('.pp-quitar').first().click();
+  await p.waitForTimeout(2200);
+  ck('Y SE PUEDE SACAR', (await p.locator('.pp-fila').count()) === antes,
+     await p.locator('.pp-fila').count());
+
+  // En un grupo por regla no hay nada que tocar a mano.
+  await p.locator('.conv-item, .conv-row').filter({ hasText: 'Avisos del centro' }).first().click();
+  await p.waitForTimeout(1500);
+  ck('en un grupo por regla no se ofrece tocar la lista',
+     !(await p.locator('#btnParts').isVisible()));
+
   await ctx.close();
 
   // ── Lo que ve el CLIENTE ─────────────────────────────────────────────────

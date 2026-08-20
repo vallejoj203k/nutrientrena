@@ -622,6 +622,124 @@ async def send_message_rest(
     return send_response(data, "Mensaje enviado")
 
 
+class ParticipantesAdd(BaseModel):
+    user_ids: list[int]
+
+
+def _grupo_editable(conv_id: str, current_user, db: Session):
+    """El grupo, si quien llama puede cambiar quién está dentro.
+
+    Devuelve (conv, error). Dos reglas:
+
+      · Solo los grupos hechos a MANO. Uno por regla ("mis clientes") lo define
+        la regla: añadir a alguien a mano ahí duraría hasta la próxima vez que
+        se resuelve, así que se dice en vez de dejar hacer algo que se deshace
+        solo.
+      · Solo quien lo creó. Es quien reunió a esa gente.
+    """
+    conv = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
+    if not conv:
+        return None, send_error("Conversación no encontrada", code=404)
+    if conv.type != "group":
+        return None, send_error("Esto no es un grupo", code=400)
+    if conv.audience:
+        return None, send_error(
+            "Este grupo se arma solo con la gente que cumple la regla "
+            "(«mis clientes», «mis coaches»). Para elegir a mano, crea un grupo a medida.",
+            code=400)
+    if conv.created_by_user_id != current_user.id:
+        return None, send_error("Solo quien creó el grupo puede cambiar quién está dentro", code=403)
+    return conv, None
+
+
+@router.post("/conversations/{conv_id}/participants", summary="Añadir gente al grupo")
+async def anadir_participantes(
+    conv_id: str,
+    body: ParticipantesAdd,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    conv, error = _grupo_editable(conv_id, current_user, db)
+    if error:
+        return error
+
+    # La misma comprobación que al crearlo: solo gente de tu cuenta. Si no,
+    # bastaría con crear un grupo limpio y luego colar a quien no toca.
+    roles = _user_role_ids(current_user.id, db)
+    permitidos = _alcance(current_user.id, db)
+    es_plataforma = SUPERADMIN in roles and not permitidos
+    fuera = [] if es_plataforma else [uid for uid in body.user_ids if uid not in permitidos]
+    if fuera:
+        return send_error("Hay personas en la lista que no son de tu cuenta", code=403)
+
+    ya = {p.user_id for p in conv.participants}
+    nuevos = [uid for uid in dict.fromkeys(body.user_ids) if uid not in ya]
+    if not nuevos:
+        return send_error("Esas personas ya están en el grupo", code=400)
+
+    ahora = datetime.utcnow()
+    for uid in nuevos:
+        db.add(ChatParticipant(conversation_id=conv_id, user_id=uid, joined_at=ahora))
+    db.commit()
+    db.refresh(conv)
+
+    # A quien entra se le avisa para que le aparezca el grupo sin recargar.
+    await manager.broadcast_to_users(
+        [p.user_id for p in conv.participants],
+        {"type": "participants", "conversation_id": conv_id},
+    )
+    return send_response(_serialize_conversation(conv, current_user.id, db), "Añadidos al grupo")
+
+
+@router.delete("/conversations/{conv_id}/participants/{user_id}", summary="Sacar a alguien del grupo")
+async def quitar_participante(
+    conv_id: str,
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Sacar a alguien, o salirse uno mismo.
+
+    Salir del grupo lo puede hacer cualquiera: estar dentro no es una condena.
+    Sacar a otro, solo quien lo creó.
+    """
+    conv = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
+    if not conv:
+        return send_error("Conversación no encontrada", code=404)
+
+    soy_yo = user_id == current_user.id
+    if not soy_yo:
+        conv, error = _grupo_editable(conv_id, current_user, db)
+        if error:
+            return error
+    elif conv.audience:
+        return send_error(
+            "De este grupo no se sale: está armado con la gente que cumple la regla. "
+            "Habla con quien te lo envía.", code=400)
+
+    # Quien creó el grupo no puede salirse y dejarlo sin dueño: lo que quiere
+    # hacer es borrarlo, y para eso está el botón de borrar.
+    if soy_yo and conv.created_by_user_id == current_user.id:
+        return send_error("Creaste tú el grupo: bórralo en vez de salirte", code=400)
+
+    parte = db.query(ChatParticipant).filter(
+        ChatParticipant.conversation_id == conv_id,
+        ChatParticipant.user_id == user_id,
+    ).first()
+    if not parte:
+        return send_error("Esa persona no está en el grupo", code=404)
+
+    quedan = [p.user_id for p in conv.participants if p.user_id != user_id]
+    db.delete(parte)
+    db.commit()
+
+    await manager.broadcast_to_users(
+        quedan + [user_id],
+        {"type": "participants", "conversation_id": conv_id},
+    )
+    return send_response(None, "Ha salido del grupo" if soy_yo else "Sacado del grupo")
+
+
 @router.delete("/conversations/{conv_id}")
 def delete_conversation(
     conv_id: str,

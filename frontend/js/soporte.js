@@ -47,7 +47,12 @@
     var s = document.createElement('style');
     s.id = 'sopCss';
     s.textContent =
-      '.sop-aviso{position:relative;z-index:40;display:flex;gap:11px;align-items:flex-start;' +
+      /* Fijo arriba y no dentro del flujo: media aplicación tiene el <body> en
+         flex de dos columnas —barra lateral y contenido—, así que meterle un
+         hijo más lo convertía en una TERCERA columna y descuadraba la pantalla
+         entera. En el chat dejaba el panel de mensajes fuera de la ventana. */
+      '.sop-aviso{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;gap:11px;' +
+      'align-items:flex-start;box-shadow:0 1px 4px rgba(0,0,0,.08);' +
       'background:#EEF2FF;border-bottom:1px solid #DDE2FE;color:#3730A3;font-size:13px;padding:11px 16px;}' +
       '.sop-aviso b{font-weight:800;}' +
       '.sop-aviso .x{margin-left:auto;border:none;background:none;color:inherit;font-size:17px;line-height:1;' +
@@ -103,8 +108,23 @@
     barra.querySelector('.x').addEventListener('click', function () {
       marcarLeido(a.id);
       if (barra.parentNode) barra.parentNode.removeChild(barra);
+      ajustarHueco();
     });
     document.body.insertBefore(barra, document.body.firstChild);
+    ajustarHueco();
+  }
+
+  /* La barra va fija arriba, así que hay que hacerle sitio empujando la página.
+     Es lo mismo que hace el aviso de "estás dentro de otra cuenta"; sin esto
+     taparía la cabecera de la pantalla que haya debajo. */
+  function ajustarHueco() {
+    var alto = 0;
+    var barras = document.querySelectorAll('.sop-aviso');
+    for (var i = 0; i < barras.length; i++) alto += barras[i].offsetHeight;
+    document.body.style.paddingTop = alto ? alto + 'px' : '';
+    for (var j = 0; j < barras.length; j++) {
+      barras[j].style.top = (j === 0 ? 0 : barras[j - 1].offsetHeight) + 'px';
+    }
   }
 
   // ── Ayuda ───────────────────────────────────────────────────────────────

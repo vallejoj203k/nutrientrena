@@ -489,6 +489,13 @@ class _ClientCheckinBody(BaseModel):
     arms: Optional[float] = None
     legs: Optional[float] = None
     notes: Optional[str] = None
+    # Cómo se ha sentido la semana, de 0 a 10. Sin esto el cliente solo podía
+    # mandar números de báscula, y la bandeja del coach enseñaba las cuatro
+    # puntuaciones siempre vacías.
+    energy: Optional[int] = None
+    effort: Optional[int] = None
+    hunger: Optional[int] = None
+    sleep: Optional[int] = None
 
 
 @router.post("/checkin", summary="Registrar check-in (cliente)", description="El cliente registra/actualiza su check-in de hoy (peso, medidas o fotos).")
@@ -518,6 +525,8 @@ def client_checkin(body: _ClientCheckinBody, db: Session = Depends(get_db), curr
         "photo3": body.photo_espalda, "body_fat": body.body_fat, "muscle_mass": body.muscle_mass,
         "waist": body.waist, "chest": body.chest, "hips": body.hips, "arms": body.arms,
         "legs": body.legs, "notes": body.notes,
+        "energy": body.energy, "effort": body.effort,
+        "hunger": body.hunger, "sleep": body.sleep,
     }
     for field, value in mapping.items():
         if value is not None:
@@ -693,6 +702,7 @@ _REQ_FIELDS = {
     "peso": ["weight"],
     "medidas": ["body_fat", "muscle_mass", "waist", "chest", "hips", "arms", "legs"],
     "fotos": ["photo_url", "photo2", "photo3"],
+    "sensaciones": ["energy", "effort", "hunger", "sleep"],
 }
 
 

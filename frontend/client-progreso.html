@@ -246,6 +246,22 @@
         </div>
       </div>
 
+      <!-- Cómo ha ido la semana.
+           La báscula no cuenta toda la historia: bajar de peso durmiendo mal y
+           muerto de hambre no es lo mismo que bajarlo entrenando fuerte, y sin
+           esto el coach no tenía manera de distinguirlo. -->
+      <div class="card" id="feelCard">
+        <div class="card-head">
+          <div class="card-title">Cómo ha ido la semana</div>
+          <button class="btn-indigo" id="feelToggle" onclick="toggleFeelForm()">+ Registrar</button>
+        </div>
+        <div id="pgFeel" class="pg-empty">Cuéntale a tu coach cómo te has encontrado: energía, esfuerzo en los entrenos, hambre y descanso.</div>
+        <div id="feelForm" style="display:none;flex-direction:column;gap:14px;margin-top:6px;"></div>
+        <div id="feelActions" style="display:none;justify-content:flex-end;margin-top:12px;">
+          <button class="btn-green" id="feelBtn" onclick="guardarSensaciones()">Guardar</button>
+        </div>
+      </div>
+
 
       <div class="card">
         <div class="card-head">
@@ -492,6 +508,49 @@
       await loadProgress();
     }catch(e){ toast('No se pudieron guardar', true); }
     finally{ btn.disabled=false; btn.textContent='Guardar medidas'; }
+  }
+
+  // ── Cómo ha ido la semana ──────────────────────────────────────────────────
+  const FEEL=[
+    {k:'energy', etq:'Energía',  ayuda:'0 arrastrándote · 10 a tope'},
+    {k:'effort', etq:'Esfuerzo en los entrenos', ayuda:'0 muy flojo · 10 al límite'},
+    {k:'hunger', etq:'Hambre',   ayuda:'0 saciado · 10 con mucha hambre'},
+    {k:'sleep',  etq:'Descanso', ayuda:'0 fatal · 10 he dormido genial'}
+  ];
+  function toggleFeelForm(){
+    var f=document.getElementById('feelForm'), a=document.getElementById('feelActions'),
+        b=document.getElementById('feelToggle');
+    var open = f.style.display==='none';
+    if(open && !f.innerHTML){
+      f.innerHTML = FEEL.map(function(e){ return ''
+        + '<div>'
+        +   '<div style="display:flex;align-items:baseline;gap:8px;">'
+        +     '<span style="font-size:12px;font-weight:700;color:#6B7280;">'+e.etq+'</span>'
+        +     '<span id="f-v-'+e.k+'" style="margin-left:auto;font-size:15px;font-weight:800;color:#4F46E5;">5</span>'
+        +   '</div>'
+        +   '<input type="range" id="f_'+e.k+'" min="0" max="10" step="1" value="5" '
+        +     'oninput="document.getElementById(\'f-v-'+e.k+'\').textContent=this.value" '
+        +     'style="width:100%;margin-top:4px;accent-color:#4F46E5;"/>'
+        +   '<div style="font-size:11px;color:#9CA3AF;">'+e.ayuda+'</div>'
+        + '</div>';
+      }).join('');
+    }
+    f.style.display = open ? 'flex' : 'none';
+    a.style.display = open ? 'flex' : 'none';
+    b.textContent = open ? 'Cancelar' : '+ Registrar';
+  }
+  async function guardarSensaciones(){
+    var body={};
+    FEEL.forEach(function(e){ body[e.k]=parseInt(document.getElementById('f_'+e.k).value,10); });
+    var btn=document.getElementById('feelBtn'); btn.disabled=true; btn.textContent='Guardando…';
+    try{
+      const r=await fetch(API+'/client/checkin',{method:'POST',headers:headers(),body:JSON.stringify(body)});
+      if(!r.ok) throw new Error();
+      toggleFeelForm();
+      toast('Enviado a tu coach');
+      await loadProgress();
+    }catch(e){ toast('No se pudo guardar', true); }
+    finally{ btn.disabled=false; btn.textContent='Guardar'; }
   }
 
   async function registrarPeso(){

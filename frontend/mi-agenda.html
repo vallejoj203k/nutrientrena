@@ -220,6 +220,41 @@
   </div>
 </div>
 
+<!-- ══ El check-in que manda el CLIENTE ══
+     Hasta ahora una tarea de tipo check-in era la única del calendario sin
+     botón: se le pedía algo y no había por dónde entregarlo. -->
+<div id="ciOverlay" style="display:none;position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:900;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:14px;max-width:460px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.25);">
+    <div style="padding:18px 20px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;">
+      <strong style="font-size:15px;color:#111;">Tu check-in</strong>
+      <button onclick="cerrarCheckin()" style="margin-left:auto;background:none;border:none;font-size:20px;color:#9CA3AF;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <div style="padding:18px 20px;display:flex;flex-direction:column;gap:16px;">
+      <label style="font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;">
+        Peso (kg)
+        <input type="number" id="ciPeso" step="0.1" min="0" placeholder="71.6"
+               style="display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;font-weight:400;text-transform:none;letter-spacing:0;color:#111;"/>
+      </label>
+      <div id="ciEscalas" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <label style="font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;">
+        ¿Cómo ha ido la semana?
+        <textarea id="ciNotas" rows="3" placeholder="Descanso, entrenamientos, comidas fuera de casa..."
+                  style="display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;font-weight:400;text-transform:none;letter-spacing:0;color:#111;resize:vertical;"></textarea>
+      </label>
+      <label style="font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;">
+        Fotos (hasta 3, opcional)
+        <input type="file" id="ciFotos" accept="image/*" multiple
+               style="display:block;width:100%;margin-top:6px;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;color:#374151;"/>
+      </label>
+      <div id="ciAviso" style="display:none;font-size:13px;color:#B91C1C;background:#FEF2F2;border-radius:8px;padding:10px 12px;"></div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="cerrarCheckin()" style="padding:9px 16px;border:1px solid #E5E7EB;background:#fff;border-radius:8px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">Cancelar</button>
+      <button id="ciEnviar" onclick="enviarCheckin()" style="padding:9px 18px;border:none;background:#4F46E5;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;">Enviar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -449,7 +484,10 @@ function _renderDayPanel(dateStr) {
         ${t.task_type !== 'checkin' ? `
           <button class="ag-task-done-btn ${t.done?'mark-undone':'mark-done'}" onclick="agToggleDone(${t.id},${!t.done},'${dateStr}')">
             ${t.done ? '↩ Marcar pendiente' : '✓ Marcar completado'}
-          </button>` : ''}
+          </button>` : (t.done ? '' : `
+          <button class="ag-task-done-btn mark-done" onclick="abrirCheckin(${t.id},'${dateStr}')">
+            Enviar mi check-in
+          </button>`)}
       </div>`).join('') +
     checkins.map(c => `
       <div class="ag-checkin-card">
@@ -470,6 +508,96 @@ async function agToggleDone(taskId, done, dateStr) {
     await agLoad();
     if (_agSelDate) _renderDayPanel(dateStr);
   } catch { toast('Error de conexión', 'error'); }
+}
+
+// ── Enviar el check-in ────────────────────────────────────────────────────────
+// El coach pone la tarea; esto es lo que la cumple. Mientras no se envíe, el
+// cliente le sale al coach en "esperando que envíen".
+const CI_ESCALAS = [
+  { k: 'energy', etq: 'Energía',  ayuda: '0 arrastrándote · 10 a tope' },
+  { k: 'effort', etq: 'Esfuerzo en los entrenos', ayuda: '0 muy flojo · 10 al límite' },
+  { k: 'hunger', etq: 'Hambre',   ayuda: '0 saciado · 10 con mucha hambre' },
+  { k: 'sleep',  etq: 'Descanso', ayuda: '0 fatal · 10 he dormido genial' }
+];
+let _ciTarea = null, _ciFecha = null;
+
+function abrirCheckin(taskId, dateStr) {
+  _ciTarea = taskId; _ciFecha = dateStr;
+  document.getElementById('ciPeso').value = '';
+  document.getElementById('ciNotas').value = '';
+  document.getElementById('ciFotos').value = '';
+  document.getElementById('ciAviso').style.display = 'none';
+  document.getElementById('ciEscalas').innerHTML = CI_ESCALAS.map(e => `
+    <div>
+      <div style="display:flex;align-items:baseline;gap:8px;">
+        <span style="font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;">${e.etq}</span>
+        <span id="ci-v-${e.k}" style="margin-left:auto;font-size:15px;font-weight:800;color:#4F46E5;">5</span>
+      </div>
+      <input type="range" id="ci-${e.k}" min="0" max="10" step="1" value="5"
+             oninput="document.getElementById('ci-v-${e.k}').textContent=this.value"
+             style="width:100%;margin-top:4px;accent-color:#4F46E5;"/>
+      <div style="font-size:11px;color:#9CA3AF;">${e.ayuda}</div>
+    </div>`).join('');
+  const ov = document.getElementById('ciOverlay');
+  ov.style.display = 'flex';
+}
+
+function cerrarCheckin() {
+  document.getElementById('ciOverlay').style.display = 'none';
+  _ciTarea = null;
+}
+
+async function _ciSubirFoto(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('folder', 'checkins');
+  const r = await fetch(`${API}/files/upload`, {
+    method: 'POST', headers: { Authorization: `Bearer ${_token}` }, body: fd
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.message || 'no se ha podido subir una foto');
+  return (j.data || j).url;
+}
+
+async function enviarCheckin() {
+  if (!_ciTarea) return;
+  const peso = document.getElementById('ciPeso').value;
+  const aviso = document.getElementById('ciAviso');
+  const btn = document.getElementById('ciEnviar');
+  aviso.style.display = 'none';
+
+  const cuerpo = { notes: document.getElementById('ciNotas').value.trim() || null };
+  if (peso !== '') cuerpo.weight = parseFloat(peso);
+  CI_ESCALAS.forEach(e => { cuerpo[e.k] = parseInt(document.getElementById('ci-' + e.k).value, 10); });
+
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try {
+    // Las fotos primero: si una falla, se dice y no se manda un check-in a
+    // medias que además dejaría la tarea por cumplida.
+    const files = Array.from(document.getElementById('ciFotos').files).slice(0, 3);
+    const urls = [];
+    for (const f of files) urls.push(await _ciSubirFoto(f));
+    if (urls[0]) cuerpo.photo_url = urls[0];
+    if (urls[1]) cuerpo.photo2 = urls[1];
+    if (urls[2]) cuerpo.photo3 = urls[2];
+
+    const r = await fetch(`${API}/calendar-tasks/${_ciTarea}/checkin`, {
+      method: 'POST', headers: h(), body: JSON.stringify(cuerpo)
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || 'no se ha podido enviar');
+
+    const fecha = _ciFecha;
+    cerrarCheckin();
+    toast('Check-in enviado ✓', 'success');
+    await agLoad();
+    if (fecha) _renderDayPanel(fecha);
+  } catch (e) {
+    aviso.textContent = 'No se ha enviado: ' + (e.message || 'error');
+    aviso.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar';
+  }
 }
 
 init();

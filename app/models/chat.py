@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -13,6 +13,18 @@ class ChatConversation(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     type = Column(String(20), nullable=False)  # 'individual' | 'group'
     name = Column(String(255), nullable=True)
+    # Un grupo se define de dos maneras distintas, y conviene no mezclarlas:
+    #
+    #   · por REGLA (audience): "mis clientes", "mis coaches". La lista se
+    #     resuelve cada vez, así que quien entra en la cuenta entra en el grupo
+    #     y quien se va, sale. Es lo que se espera de "todos mis clientes".
+    #   · a mano (audience NULL): la lista de personas que se eligió al crearlo
+    #     y no cambia sola, como un grupo de WhatsApp.
+    audience = Column(String(30), nullable=True)
+    # Difusión: solo escribe quien lo creó, y los demás responden en privado.
+    # Sin esto, "un mensaje a todos mis clientes" pone a hablar entre sí a
+    # gente que no se conoce y que no eligió estar junta.
+    broadcast = Column(Boolean, nullable=False, default=False, server_default="0")
     created_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

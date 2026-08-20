@@ -33,7 +33,15 @@ class ConversationCreate(BaseModel):
     type: str  # 'individual' | 'group'
     participant_user_ids: Optional[list[int]] = None
     name: Optional[str] = None
-    target: Optional[str] = None  # 'coaches' | 'clients' (admin group)
+    # Grupo por REGLA: 'mis_clientes' | 'mis_coaches'. Sin esto, la lista de
+    # participantes es la que se manda y no cambia sola.
+    audience: Optional[str] = None
+    # Difusión: solo escribe quien lo crea. Por defecto lo son los grupos por
+    # regla, porque "un mensaje a todos mis clientes" no es una tertulia.
+    broadcast: Optional[bool] = None
+    # Nombre viejo de `audience`, de cuando solo lo usaba el admin. Se sigue
+    # aceptando para no romper a quien lo mandara.
+    target: Optional[str] = None
 
 
 class MessageCreate(BaseModel):
@@ -68,6 +76,15 @@ def _serialize_message(msg: ChatMessage, db: Session) -> dict:
 
 def _serialize_conversation(conv: ChatConversation, current_user_id: int, db: Session) -> dict:
     participant_user_ids = [p.user_id for p in conv.participants]
+
+    # En un grupo de difusión, quien recibe no ve a los demás: son clientes que
+    # no se conocen entre sí y que no eligieron estar juntos. Solo se le enseña
+    # quién le escribe (y él mismo).
+    es_creador = conv.created_by_user_id == current_user_id
+    if conv.broadcast and not es_creador:
+        participant_user_ids = [uid for uid in participant_user_ids
+                                if uid in (conv.created_by_user_id, current_user_id)]
+
     participants_info = []
     for uid in participant_user_ids:
         detail = _user_detail(db, uid)
@@ -98,6 +115,14 @@ def _serialize_conversation(conv: ChatConversation, current_user_id: int, db: Se
         "created_at": conv.created_at.isoformat() if conv.created_at else None,
         "updated_at": conv.updated_at.isoformat() if conv.updated_at else None,
         "participants": participants_info,
+        # Cuánta gente hay de verdad. En difusión solo lo sabe quien lo creó:
+        # a quien recibe no le dice nada útil y sí cuenta de más sobre otros.
+        "participantes_total": len(conv.participants) if (es_creador or not conv.broadcast) else None,
+        "audience": conv.audience,
+        "broadcast": bool(conv.broadcast),
+        # Lo que la pantalla necesita para decidir si enseña el cuadro de
+        # escribir o el botón de "responder en privado".
+        "puedo_escribir": (not conv.broadcast) or es_creador,
         "last_message": last_message,
     }
 
@@ -116,16 +141,233 @@ def _get_client_user_ids_for_coach(coach_user_id: int, db: Session) -> list[int]
 
 
 def _get_all_coach_user_ids(db: Session) -> list[int]:
+    """TODOS los coaches de la plataforma. Solo vale para el super-admin.
+
+    Estaba usándose para el grupo "todos los coaches" de cualquier ADMIN, que
+    es de una organización concreta: metía en el mismo grupo a gente de cuentas
+    distintas, y en un grupo todos se leen entre sí.
+    """
     rows = db.query(RoleUser).filter(RoleUser.role_id == COACH).all()
     return [r.user_id for r in rows]
 
 
 def _get_all_client_user_ids(db: Session) -> list[int]:
+    """TODOS los clientes de la plataforma. Ver la nota de arriba."""
     rows = db.query(RoleUser).filter(RoleUser.role_id == CLIENT).all()
     return [r.user_id for r in rows]
 
 
+# ── A quién alcanza cada uno ─────────────────────────────────────────────────
+# El chat cruza la frontera entre cuentas si se le deja: un grupo mete a varias
+# personas a leerse entre sí. Todo lo de aquí abajo responde a la misma
+# pregunta —¿con quién puede hablar este usuario?— y la responde una vez.
+
+def _mi_organizacion(user_id: int, db: Session):
+    """La organización de la que este usuario es dueño o miembro, o None."""
+    from app.models.organization import Organization, OrganizationMember
+    from app.models.team_member import TeamMember
+
+    detail = _user_detail(db, user_id)
+    if not detail:
+        return None
+    org = db.query(Organization).filter(Organization.owner_id == detail.id).first()
+    if org:
+        return org
+    fila = db.query(TeamMember).filter(
+        TeamMember.user_detail_id == detail.id,
+        TeamMember.organization_id.isnot(None),
+    ).first()
+    if fila:
+        return db.query(Organization).filter(Organization.id == fila.organization_id).first()
+    miembro = db.query(OrganizationMember).filter(
+        OrganizationMember.user_detail_id == detail.id
+    ).first()
+    if miembro:
+        return db.query(Organization).filter(Organization.id == miembro.organization_id).first()
+    return None
+
+
+def _user_ids_de_detalles(detail_ids, db: Session) -> list[int]:
+    if not detail_ids:
+        return []
+    filas = db.query(UserDetail).filter(UserDetail.id.in_(list(detail_ids))).all()
+    return [d.user_id for d in filas if d.user_id]
+
+
+def _coaches_de_la_organizacion(org, db: Session) -> list[int]:
+    """El dueño y su equipo. Sin organización, nadie."""
+    from app.models.organization import OrganizationMember
+    from app.models.team_member import TeamMember
+
+    if not org:
+        return []
+    detail_ids = {org.owner_id}
+    detail_ids.update(
+        m.user_detail_id for m in
+        db.query(OrganizationMember).filter(OrganizationMember.organization_id == org.id).all()
+    )
+    detail_ids.update(
+        t.user_detail_id for t in
+        db.query(TeamMember).filter(TeamMember.organization_id == org.id).all()
+        if t.user_detail_id
+    )
+    return _user_ids_de_detalles(detail_ids, db)
+
+
+def _clientes_de_la_organizacion(org, db: Session) -> list[int]:
+    """Los clientes de todos los coaches de esa organización."""
+    if not org:
+        return []
+    ids: set[int] = set()
+    for coach_user_id in _coaches_de_la_organizacion(org, db):
+        ids.update(_get_client_user_ids_for_coach(coach_user_id, db))
+    return list(ids)
+
+
+def _resolver_audiencia(audiencia: str, user_id: int, db: Session) -> list[int]:
+    """Quién está HOY en un grupo definido por una regla.
+
+    Se resuelve cada vez, no al crearlo: es lo que hace que un cliente nuevo
+    entre solo en "mis clientes" y que quien se va deje de recibir.
+    """
+    roles = _user_role_ids(user_id, db)
+    org = _mi_organizacion(user_id, db)
+
+    if audiencia == "mis_coaches":
+        # El super-admin sin organización propia ES la plataforma: sus coaches
+        # son todos. Con organización, la suya, como cualquier otro.
+        if SUPERADMIN in roles and not org:
+            return [uid for uid in _get_all_coach_user_ids(db) if uid != user_id]
+        return [uid for uid in _coaches_de_la_organizacion(org, db) if uid != user_id]
+
+    if audiencia == "mis_clientes":
+        if COACH in roles and ADMIN not in roles and SUPERADMIN not in roles:
+            # Un coach a secas: los suyos, no los de sus compañeros.
+            return _get_client_user_ids_for_coach(user_id, db)
+        if SUPERADMIN in roles and not org:
+            return _get_all_client_user_ids(db)
+        return _clientes_de_la_organizacion(org, db)
+
+    return []
+
+
+AUDIENCIAS = ("mis_clientes", "mis_coaches")
+
+# Los nombres que mandaba la pantalla antes. "all_coaches" no lo entendía el
+# backend y caía en el `else`, que eran CLIENTES: pulsar "todos los coaches"
+# creaba un grupo con todos los clientes.
+AUDIENCIA_VIEJA = {
+    "clients": "mis_clientes",
+    "my_clients": "mis_clientes",
+    "all_clients": "mis_clientes",
+    "coaches": "mis_coaches",
+    "all_coaches": "mis_coaches",
+}
+
+
+def _coaches_de_un_cliente(user_id: int, db: Session) -> list[int]:
+    """Los coaches a los que está asignado este cliente."""
+    from app.models.user import UserParent
+
+    detalle = _user_detail(db, user_id)
+    if not detalle:
+        return []
+    padres = db.query(UserParent).filter(UserParent.user_detail_id == detalle.id).all()
+    return _user_ids_de_detalles([p.parent_user_detail_id for p in padres], db)
+
+
+def _alcance(user_id: int, db: Session) -> set[int]:
+    """Con quién puede abrir conversación este usuario.
+
+    Sin esto, `participant_user_ids` aceptaba cualquier id: se podía montar un
+    grupo con el cliente de otra cuenta metiendo su número a mano.
+    """
+    roles = _user_role_ids(user_id, db)
+    org = _mi_organizacion(user_id, db)
+    if SUPERADMIN in roles and not org:
+        return set()   # la plataforma habla con quien haga falta; se comprueba aparte
+
+    # Un cliente habla con SU coach y con nadie más. Es quien menos alcance
+    # tiene y el que primero se rompe si esto se olvida: sin él, responder al
+    # mensaje de su coach le respondía que no puede.
+    if CLIENT in roles and COACH not in roles and ADMIN not in roles:
+        return set(_coaches_de_un_cliente(user_id, db))
+
+    alcance: set[int] = set()
+    alcance.update(_coaches_de_la_organizacion(org, db))
+    if COACH in roles and ADMIN not in roles and SUPERADMIN not in roles:
+        alcance.update(_get_client_user_ids_for_coach(user_id, db))
+    else:
+        alcance.update(_clientes_de_la_organizacion(org, db))
+    alcance.discard(user_id)
+    return alcance
+
+
+def _sincronizar_audiencia(conv: ChatConversation, db: Session) -> None:
+    """Pone al día los participantes de un grupo definido por una regla.
+
+    Se guardan filas de participantes igual que en los grupos hechos a mano
+    —así el resto del chat (no leídos, listados, avisos) sigue funcionando sin
+    saber que este grupo es especial— pero se recalculan al abrirlo.
+    """
+    if not conv.audience:
+        return
+    deberian = set(_resolver_audiencia(conv.audience, conv.created_by_user_id, db))
+    deberian.add(conv.created_by_user_id)
+
+    actuales = {p.user_id: p for p in conv.participants}
+    ahora = datetime.utcnow()
+
+    for uid in deberian - set(actuales):
+        db.add(ChatParticipant(conversation_id=conv.id, user_id=uid, joined_at=ahora))
+    for uid in set(actuales) - deberian:
+        db.delete(actuales[uid])
+    if deberian != set(actuales):
+        db.commit()
+
+
 # ── REST endpoints ────────────────────────────────────────────────────────────
+
+@router.get("/contactos", summary="Con quién puedo hablar",
+            description="Las personas de tu cuenta con las que puedes abrir un chat o "
+                        "montar un grupo: tu equipo y tus clientes.")
+def listar_contactos(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """La lista para armar un grupo a mano.
+
+    Es la misma que valida el servidor al crear la conversación: si aquí sale
+    alguien, se puede; si no sale, tampoco se cuela mandando su id a mano.
+    """
+    roles = _user_role_ids(current_user.id, db)
+    ids = _alcance(current_user.id, db)
+
+    # El super-admin sin organización propia es la plataforma: su lista es todo
+    # el equipo y todos los clientes.
+    if SUPERADMIN in roles and not ids:
+        ids = set(_get_all_coach_user_ids(db)) | set(_get_all_client_user_ids(db))
+        ids.discard(current_user.id)
+
+    fuera = []
+    for uid in ids:
+        detalle = _user_detail(db, uid)
+        usuario = db.query(User).filter(User.id == uid).first()
+        if not usuario:
+            continue
+        sus_roles = _user_role_ids(uid, db)
+        fuera.append({
+            "user_id": uid,
+            "name": (f"{detalle.name} {detalle.last_name or ''}".strip()
+                     if detalle else usuario.name),
+            "email": usuario.email,
+            "photo": detalle.photo if detalle else None,
+            # Para que la pantalla pueda agrupar por rol al elegir.
+            "rol": "cliente" if CLIENT in sus_roles else "coach",
+        })
+    fuera.sort(key=lambda c: (c["rol"], (c["name"] or "").lower()))
+    return send_response(fuera, "OK")
+
 
 @router.get("/conversations")
 def list_conversations(
@@ -144,6 +386,11 @@ def list_conversations(
         .order_by(ChatConversation.updated_at.desc())
         .all()
     )
+    # Los grupos por regla se recalculan al abrir la lista: es lo que hace que
+    # un cliente nuevo aparezca en "mis clientes" sin que nadie lo añada.
+    for c in convs:
+        if c.audience and c.created_by_user_id == current_user.id:
+            _sincronizar_audiencia(c, db)
     data = [_serialize_conversation(c, current_user.id, db) for c in convs]
     return send_response(data, "Conversaciones obtenidas")
 
@@ -164,28 +411,54 @@ def create_conversation(
 
     participant_ids: list[int] = list(body.participant_user_ids or [])
 
-    if body.type == "group" and not participant_ids:
-        is_coach = COACH in user_roles
-        is_admin = ADMIN in user_roles or SUPERADMIN in user_roles
-        if is_admin:
-            target = body.target or "clients"
-            if target == "coaches":
-                participant_ids = _get_all_coach_user_ids(db)
-            else:
-                participant_ids = _get_all_client_user_ids(db)
-        elif is_coach:
-            participant_ids = _get_client_user_ids_for_coach(current_user.id, db)
-        else:
-            return send_error("No se puede determinar los participantes", code=400)
+    # ¿Grupo por regla o lista a mano? El nombre viejo (`target`) se traduce.
+    audiencia = body.audience or AUDIENCIA_VIEJA.get(body.target or "")
+    if audiencia and audiencia not in AUDIENCIAS:
+        return send_error(f"Audiencia no válida. Admitidas: {', '.join(AUDIENCIAS)}", code=400)
+    if audiencia and body.type != "group":
+        return send_error("Solo un grupo puede tener audiencia", code=400)
+
+    if audiencia:
+        participant_ids = _resolver_audiencia(audiencia, current_user.id, db)
+        if not participant_ids:
+            return send_error(
+                "Todavía no hay nadie en ese grupo: "
+                + ("no tienes clientes asignados." if audiencia == "mis_clientes"
+                   else "no tienes coaches en tu equipo."), code=400)
+    elif body.type == "group" and not participant_ids:
+        return send_error("Elige a quién va el grupo", code=400)
+
+    # Una conversación individual es con OTRA persona. Sin esto se podía crear
+    # una consigo mismo —una fila en la lista que no lleva a nadie— pasando la
+    # lista vacía o el propio id.
+    if body.type == "individual" and not [
+            uid for uid in participant_ids if uid != current_user.id]:
+        return send_error("Elige con quién quieres hablar", code=400)
+
+    # Nadie puede montar un grupo con gente que no es suya. Antes se aceptaba
+    # cualquier id: bastaba con escribir el número del cliente de otra cuenta.
+    if not audiencia:
+        permitidos = _alcance(current_user.id, db)
+        es_plataforma = SUPERADMIN in user_roles and not permitidos
+        fuera = [] if es_plataforma else [
+            uid for uid in participant_ids if uid != current_user.id and uid not in permitidos]
+        if fuera:
+            return send_error("Hay personas en la lista que no son de tu cuenta", code=403)
 
     if current_user.id not in participant_ids:
         participant_ids.append(current_user.id)
+
+    # Un grupo por regla nace de difusión: "un mensaje a todos mis clientes" no
+    # es una tertulia entre clientes que no se conocen. Uno hecho a mano, no.
+    difusion = body.broadcast if body.broadcast is not None else bool(audiencia)
 
     now = datetime.utcnow()
     conv = ChatConversation(
         id=str(uuid.uuid4()),
         type=body.type,
         name=body.name,
+        audience=audiencia,
+        broadcast=bool(difusion) and body.type == "group",
         created_by_user_id=current_user.id,
         created_at=now,
         updated_at=now,
@@ -310,6 +583,11 @@ async def send_message_rest(
     if not part:
         return send_error("Conversación no encontrada", code=404)
 
+    conv_previa = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
+    if conv_previa and conv_previa.broadcast and conv_previa.created_by_user_id != current_user.id:
+        return send_error(
+            "En este grupo solo escribe quien lo creó. Respóndele por privado.", code=403)
+
     now = datetime.utcnow()
     msg = ChatMessage(
         id=str(uuid.uuid4()),
@@ -419,6 +697,20 @@ async def websocket_chat(websocket: WebSocket, token: str = Query(...)):
                     ChatParticipant.user_id == user_id,
                 ).first()
                 if not part:
+                    continue
+
+                # La misma regla que por REST: en un grupo de difusión solo
+                # escribe quien lo creó. Cerrar una puerta y dejar la otra
+                # abierta es no cerrar ninguna.
+                conv_previa = db.query(ChatConversation).filter(
+                    ChatConversation.id == conv_id).first()
+                if conv_previa and conv_previa.broadcast and \
+                        conv_previa.created_by_user_id != user_id:
+                    await websocket.send_json({
+                        "type": "error", "conversation_id": conv_id,
+                        "message": "En este grupo solo escribe quien lo creó. "
+                                   "Respóndele por privado.",
+                    })
                     continue
 
                 now = datetime.utcnow()

@@ -19,6 +19,29 @@ def _get_or_404(db: Session, training_id: int):
     return db.query(Training).filter(Training.id == training_id).first()
 
 
+def _autores_de(items, db: Session) -> dict:
+    """{user_id: nombre} de quienes crearon estos ejercicios, en una consulta.
+
+    Hace falta para poder decir en la pantalla de dónde salió cada uno: subir
+    un ejercicio a la plataforma le cambia el ámbito, no quién lo hizo, y sin
+    esto esa información se perdía de vista.
+    """
+    from app.models.user import User, UserDetail
+
+    ids = {t.created_user_id for t in items if t.created_user_id}
+    if not ids:
+        return {}
+    nombres = {}
+    for d in db.query(UserDetail).filter(UserDetail.user_id.in_(ids)).all():
+        nombres[d.user_id] = f"{d.name} {d.last_name or ''}".strip()
+    # Quien no tenga ficha todavía: al menos su nombre de usuario.
+    faltan = ids - set(nombres)
+    if faltan:
+        for u in db.query(User).filter(User.id.in_(faltan)).all():
+            nombres[u.id] = u.name
+    return nombres
+
+
 def _visible_para(obj: Training, org: OrgContext) -> bool:
     """Un ejercicio se ve si es del catálogo maestro o de tu organización."""
     if obj.organization_id is None:
@@ -76,7 +99,8 @@ def find_all(
     elif org.org_id:
         q = q.filter(or_(Training.organization_id.is_(None), Training.organization_id == org.org_id))
     items = q.all()
-    return send_response([TrainingOut.from_orm_training(i).model_dump() for i in items], "OK")
+    autores = _autores_de(items, db)
+    return send_response([TrainingOut.from_orm_training(i, autores).model_dump() for i in items], "OK")
 
 
 @router.get("/search", summary="Buscar ejercicios", description="Búsqueda paginada de ejercicios con filtro por nombre o grupo muscular.")
@@ -120,7 +144,7 @@ def search(
     items = q.offset((page - 1) * per_page).limit(per_page).all()
     return send_response(
         {
-            "data": [TrainingOut.from_orm_training(i).model_dump() for i in items],
+            "data": [TrainingOut.from_orm_training(i, _autores_de(items, db)).model_dump() for i in items],
             "total": total,
             "page": page,
             "per_page": per_page,
@@ -167,7 +191,7 @@ def edit(
         return send_error("Ejercicio no encontrado")
     if not _visible_para(obj, org):
         return send_error("No tienes acceso a este ejercicio", code=403)
-    return send_response(TrainingOut.from_orm_training(obj).model_dump(), "OK")
+    return send_response(TrainingOut.from_orm_training(obj, _autores_de([obj], db)).model_dump(), "OK")
 
 
 def _apply_secondary_ids(payload: dict):

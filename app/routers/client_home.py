@@ -62,6 +62,8 @@ def _routine_day_muscles(day):
 @router.get("/home", summary="Inicio del cliente", description="Datos agregados de la pantalla de inicio del cliente.")
 def client_home(
     week_offset: int = Query(0),
+    dia: Optional[str] = Query(
+        None, description="Día que se está mirando, AAAA-MM-DD. Por defecto, hoy."),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
 ):
@@ -70,6 +72,19 @@ def client_home(
     monday = today - timedelta(days=today_idx)
     week_start = monday + timedelta(days=week_offset * 7)
     week_end = week_start + timedelta(days=6)
+
+    # Qué día se está mirando. La pantalla enseña una tira de siete días, y
+    # hasta ahora eran adorno: se podía cambiar de semana pero no de día, y el
+    # entrenamiento y el menú de abajo eran SIEMPRE los de hoy. Mirar el
+    # miércoles y ver la comida del lunes es peor que no poder mirarlo.
+    visto = today
+    if dia:
+        try:
+            visto = date.fromisoformat(dia)
+        except ValueError:
+            visto = today          # una fecha ilegible no rompe la pantalla
+    visto_idx = visto.weekday()
+    lunes_visto = visto - timedelta(days=visto_idx)
 
     detail = _client_detail(db, current_user)
 
@@ -112,6 +127,9 @@ def client_home(
             "done": d in session_dates,
             "is_today": d == today,
             "is_future": d > today,
+            # Cuál se está mirando. Puede no ser hoy, y puede no estar en esta
+            # semana si se ha navegado: entonces no se marca ninguno.
+            "is_selected": d == visto,
         })
     week_range = f"{week_start.day}–{week_end.day} {_MONTHS_ES[week_end.month - 1].capitalize()}"
 
@@ -127,12 +145,12 @@ def client_home(
     r = db.query(Routine).filter(Routine.user_id == current_user.id).order_by(Routine.id.desc()).first()
     if r:
         days = r.days_list or []
-        rd = days[today_idx] if today_idx < len(days) else None
+        rd = days[visto_idx] if visto_idx < len(days) else None
         if rd:
             muscles = _routine_day_muscles(rd)
             routine = {
                 "id": r.id,
-                "name": rd.day_name or f"Día {today_idx + 1}",
+                "name": rd.day_name or f"Día {visto_idx + 1}",
                 "muscles": muscles,
                 "focus": " · ".join(muscles) if muscles else (r.objective or r.training or None),
                 "duration_min": r.time,
@@ -141,14 +159,14 @@ def client_home(
         else:
             routine = {"id": r.id, "name": None, "muscles": [], "focus": None, "duration_min": None, "is_rest": True}
 
-    # ── Menú/dieta de HOY (kcal + nº de comidas) ──
+    # ── Menú/dieta del día que se está mirando ──
     menu = None
     if detail:
-        menu = _today_menu_summary(db, detail, current_user, today_idx)
+        menu = _today_menu_summary(db, detail, current_user, visto_idx)
 
     # ── Check-in solicitado por el coach (pendiente si no hay uno esta semana) ──
-    this_monday = monday
-    this_sunday = monday + timedelta(days=6)
+    this_monday = lunes_visto
+    this_sunday = lunes_visto + timedelta(days=6)
     checkin_done = False
     if detail:
         checkin_done = db.query(WeeklyCheckin).filter(
@@ -167,6 +185,13 @@ def client_home(
         "profile": profile,
         "coach": coach,
         "today": {"weekday": _WEEKDAY_NAMES[today_idx], "day": today.day, "month": _MONTHS_ES[today.month - 1]},
+        "dia_visto": {
+            "fecha": visto.isoformat(),
+            "weekday": _WEEKDAY_NAMES[visto_idx],
+            "day": visto.day,
+            "month": _MONTHS_ES[visto.month - 1],
+            "es_hoy": visto == today,
+        },
         "week": {"range": week_range, "days": week, "offset": week_offset},
         "streak": streak,
         "routine": routine,
@@ -706,6 +731,69 @@ _REQ_FIELDS = {
 }
 
 
+def _asegurar_asignacion(db: Session, t, detail, req: dict, current_user):
+    """La asignación de formulario que hay detrás de una tarea de calendario.
+
+    Cuando el coach programa un formulario para un día, la tarea guarda el id de
+    la PLANTILLA (`form_template_id`). Pero un cliente no rellena una plantilla:
+    rellena una asignación suya, que es la que recoge sus respuestas. Ese salto
+    no lo daba nadie, así que la tarea aparecía en su pantalla sin forma de
+    abrirla: solo quedaba "marcar hecho", que es mentir sobre haberlo rellenado.
+
+    La asignación se crea aquí, la primera vez que el cliente ve la tarea, y su
+    id se guarda en la propia tarea para que no se cree otra en cada visita. Es
+    una escritura dentro de una lectura, que no es bonito, pero es lo que arregla
+    también las tareas que ya estaban creadas sin ella — que son las que el
+    coach tiene hoy en pantalla.
+    """
+    from app.models.form import FormAssignment
+
+    if not detail:
+        return None
+
+    ya = req.get("form_assignment_id")
+    if ya:
+        asign = db.query(FormAssignment).filter(FormAssignment.id == ya).first()
+        if asign:
+            return asign          # si se borró, se vuelve a crear más abajo
+
+    plantilla_id = req.get("form_template_id")
+    if not plantilla_id:
+        return None
+    try:
+        plantilla_id = int(plantilla_id)
+    except (TypeError, ValueError):
+        return None
+
+    # Si el coach ya se la había mandado por correo, se reutiliza esa: crear
+    # una segunda le dejaría dos formularios iguales sin saber cuál rellenar.
+    asign = (
+        db.query(FormAssignment)
+        .filter(
+            FormAssignment.client_user_detail_id == detail.id,
+            FormAssignment.form_template_id == plantilla_id,
+        )
+        .order_by(FormAssignment.created_at.desc())
+        .first()
+    )
+    if not asign:
+        asign = FormAssignment(
+            form_template_id=plantilla_id,
+            client_user_detail_id=detail.id,
+            # Quien la programó fue el coach de la tarea, no quien mira ahora.
+            assigned_by=t.coach_user_id or current_user.id,
+            status="pending",
+        )
+        db.add(asign)
+        db.flush()
+
+    import json
+    req["form_assignment_id"] = asign.id
+    t.requirements = json.dumps(req)
+    db.commit()
+    return asign
+
+
 def _task_requirements(t):
     """requirements de la tarea (JSON en texto) como dict."""
     import json
@@ -792,6 +880,17 @@ def client_requests(
             entry["action"] = "nutricion"
         elif t.task_type == "formulario":
             entry["action"] = "formulario"
+            asignacion = _asegurar_asignacion(db, t, detail, req, current_user)
+            if asignacion:
+                entry["form_assignment_id"] = asignacion.id
+                # Ya contestado: la tarea está cumplida aunque nadie le haya
+                # dado a "marcar hecho".
+                if asignacion.status == "submitted":
+                    entry["done"] = True
+            else:
+                # Sin formulario detrás no se puede prometer un enlace. Se deja
+                # como tarea normal en vez de llevar a una página rota.
+                entry["action"] = None
         elif t.task_type == "mensaje":
             entry["action"] = "mensaje"
 

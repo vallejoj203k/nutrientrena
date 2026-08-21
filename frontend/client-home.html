@@ -81,6 +81,10 @@
     .wk-circle.done{background:var(--green);color:#fff;}
     .wk-circle.today{background:var(--indigo);color:#fff;}
     .wk-circle.future{background:#F9FAFB;color:#C4C7CF;}
+    .wk-circle.sel{box-shadow:0 0 0 2.5px var(--indigo);color:#111827;}
+    .wk-day{cursor:pointer;border-radius:12px;padding:4px 0;transition:background .12s;}
+    .wk-day:hover{background:#F9FAFB;}
+    .wk-day:focus-visible{outline:2px solid var(--indigo);outline-offset:2px;}
     .wk-circle .b{position:absolute;top:-4px;right:-4px;width:17px;height:17px;border-radius:50%;background:var(--amber);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
     .wk-emoji{font-size:12px;margin-top:5px;height:15px;color:#D1D5DB;}
 
@@ -89,6 +93,8 @@
     .today-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
     .today-head .t{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;}
     .today-pill{font-size:11px;font-weight:800;color:var(--green);background:#D1FAE5;padding:3px 10px;border-radius:20px;}
+    .today-pill.volver{color:var(--indigo);background:#EEF2FF;border:none;cursor:pointer;font-family:inherit;}
+    .today-pill.volver:hover{background:#E0E7FF;}
 
     .ci-card{background:#FFF7ED;border:1px solid #FCE3BE;border-radius:14px;padding:15px;margin-bottom:12px;}
     .ci-card.done{background:#ECFDF3;border-color:#C6F0D8;}
@@ -257,6 +263,10 @@
   }
 
   let _weekOffset = 0, _requests = [];
+  /* Qué día se está mirando. Null = hoy. La tira de siete días era adorno:
+     se podía cambiar de semana, pero no de día, y el entrenamiento y el menú
+     de abajo eran SIEMPRE los de hoy. */
+  let _diaVisto = null;
 
   const IC = {
     check: '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
@@ -276,12 +286,17 @@
       +   '<button class="wk-nav" onclick="shiftWeek(1)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>'
       + '</div>'
       + '<div class="wk-days">' + days.map(function(d){
-          var cls = 'wk-circle' + (d.is_today?' today':(d.done?' done':(d.is_future?' future':'')));
-          var inner = (d.done || d.is_today && d.done) ? IC.check : d.day;
-          if (d.is_today && !d.done) inner = d.day;
+          var cls = 'wk-circle' + (d.is_today?' today':(d.done?' done':(d.is_future?' future':'')))
+                    + (d.is_selected && !d.is_today ? ' sel' : '');
+          var inner = d.done ? IC.check : d.day;
+          if (d.is_today) inner = d.day;
           var badge = d.is_today ? '<span class="b">'+IC.dumbbell.replace('width="20" height="20"','width="10" height="10"')+'</span>' : '';
           var emoji = d.done ? '💪' : '·';
-          return '<div class="wk-day'+(d.is_today?' today':'')+'"><div class="wk-dl">'+esc(d.label)+'</div>'
+          return '<div class="wk-day'+(d.is_today?' today':'')+'" role="button" tabindex="0"'
+            + ' aria-label="Ver el ' + esc(d.date||'') + '"'
+            + ' onclick="verDia(\''+esc(d.date||'')+'\')"'
+            + ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();verDia(\''+esc(d.date||'')+'\');}">'
+            + '<div class="wk-dl">'+esc(d.label)+'</div>'
             + '<div class="'+cls+'">'+inner+badge+'</div>'
             + '<div class="wk-emoji">'+emoji+'</div></div>';
         }).join('')
@@ -346,8 +361,14 @@
     if (!list.length) return '';
     return '<div class="req-card"><div class="req-h">Pendiente de tu coach</div>'
       + list.map(function(r){
-          var dest = REQ_DEST[r.action] || null;
-          var cta = dest ? '<a class="req-go" href="'+dest+'">Ver →</a>'
+          /* Un formulario se abre; no se "marca hecho" a mano. Antes no había
+             destino para esta acción, así que la única salida era decir que lo
+             habías rellenado sin haberlo rellenado. */
+          var dest = r.action === 'formulario'
+            ? (r.form_assignment_id ? 'public/form.html?id=' + encodeURIComponent(r.form_assignment_id) : null)
+            : (REQ_DEST[r.action] || null);
+          var etiqueta = r.action === 'formulario' ? 'Rellenar →' : 'Ver →';
+          var cta = dest ? '<a class="req-go" href="'+dest+'">'+etiqueta+'</a>'
                          : '<button class="req-go" onclick="markRequestDone('+r.id+')">Marcar hecho</button>';
           return '<div class="req-item"><span class="req-bar" style="background:'+esc(r.color||'#9CA3AF')+'"></span>'
             + '<div class="req-info"><b>'+esc(r.title||'Tarea')+'</b>'
@@ -385,11 +406,15 @@
   }
 
   function render(data){
-    var t = data.today || {};
+    var t = data.dia_visto || data.today || {};
     var pin = '📌 ' + ((t.weekday||'').toUpperCase()) + ' ' + (t.day||'') + ' ' + ((t.month||'').toUpperCase());
+    var esHoy = t.es_hoy !== false;
     var streak = data.streak || 0;
     var html = renderWeek(data.week || {});
-    html += '<div class="today-sec"><div class="today-head"><div class="t">'+esc(pin)+'</div><span class="today-pill">Hoy</span></div>'
+    html += '<div class="today-sec"><div class="today-head"><div class="t">'+esc(pin)+'</div>'
+      + (esHoy ? '<span class="today-pill">Hoy</span>'
+               : '<button class="today-pill volver" onclick="verDia(null)">Volver a hoy</button>')
+      + '</div>'
       + renderCheckin(data.checkin)
       + renderRoutine(data.routine)
       + renderMenu(data.menu)
@@ -415,10 +440,21 @@
 
   function shiftWeek(dir){ _weekOffset += dir; load(); }
 
+  /* Pulsar un día. Con null se vuelve a hoy, y también a la semana de hoy:
+     quedarse en otra semana con "hoy" seleccionado no se entiende. */
+  function verDia(fecha){
+    _diaVisto = fecha || null;
+    if (!fecha) _weekOffset = 0;
+    load();
+    var caja = document.getElementById('homeBody');
+    if (caja && caja.scrollIntoView) caja.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
   async function load(){
     try{
       const [rh, rq] = await Promise.all([
-        fetch(API + '/client/home?week_offset=' + _weekOffset, { headers: H() }),
+        fetch(API + '/client/home?week_offset=' + _weekOffset
+              + (_diaVisto ? '&dia=' + encodeURIComponent(_diaVisto) : ''), { headers: H() }),
         fetch(API + '/client/requests', { headers: H() }).catch(function(){ return null; }),
       ]);
       const d = await rh.json(); const data = d.data || {};

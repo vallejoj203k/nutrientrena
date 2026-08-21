@@ -67,8 +67,19 @@ def _bloqueado_para_editar(obj: Training, org: OrgContext, current_user, db: Ses
        justamente su único trabajo.
     3. Si es de una organización, tiene que ser la tuya.
     """
+    # Quien lo creó puede tocar lo suyo — pero solo mientras SIGA siendo suyo.
+    # Subirlo al catálogo común cambia de quién es: pasa a ser material del que
+    # dependen otras cuentas, y un clic del autor se lo llevaría por delante.
+    # Antes esta regla iba primero y sin condición, así que el coach conservaba
+    # la llave sobre algo que ya había entregado.
+    #
+    # La excepción de abajo es el caso para el que se escribió la regla: un
+    # coach SIN organización crea con organization_id NULL, y sin ella "lo NULL
+    # es de la plataforma" le bloquearía su propio contenido. Solo se le aplica
+    # a él, no a un coach con centro, para el que NULL sí significa plataforma.
     if obj.created_user_id is not None and obj.created_user_id == current_user.id:
-        return None
+        if obj.organization_id is not None or org.org_id is None:
+            return None
 
     if org.solo_plataforma and obj.organization_id is not None:
         return "No tienes acceso a este ejercicio"   # actuando solo como plataforma

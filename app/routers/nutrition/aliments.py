@@ -164,8 +164,12 @@ def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session):
     """
     if org.solo_plataforma and obj.organization_id is not None:
         return "No tienes acceso a este alimento"   # actuando solo como plataforma
+    # Solo mientras siga siendo suyo: subirlo al catálogo común cambia de quién
+    # es. La excepción es el coach SIN organización, que crea con NULL y sin
+    # ella se quedaría bloqueado con su propio alimento.
     if obj.created_user_id is not None and obj.created_user_id == current_user.id:
-        return None
+        if obj.organization_id is not None or org.org_id is None:
+            return None
     if org.org_id is None and org.is_owner:
         return None
     if obj.organization_id is None:

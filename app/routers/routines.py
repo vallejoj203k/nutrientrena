@@ -58,8 +58,14 @@ def _bloqueado_para_editar(obj, org: OrgContext, current_user, db: Session) -> O
     3. Si no, es contenido de biblioteca de OTRO coach: solo puede tocarlo
        alguien de su misma organización, o superadmin/admin.
     """
+    # Solo mientras siga siendo suya: subirla al catálogo común cambia de
+    # quién es, y un clic del autor se la llevaría por delante a cuentas que
+    # ya dependen de ella. La excepción es el coach SIN organización, que
+    # crea con organization_id NULL y sin ella se quedaría bloqueado con lo
+    # suyo propio.
     if obj.user_id == current_user.id:
-        return None
+        if obj.organization_id is not None or org.org_id is None:
+            return None
 
     if obj.user_id is not None:
         from app.models.user import RoleUser, UserDetail

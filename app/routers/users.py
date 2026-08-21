@@ -302,10 +302,24 @@ def clients_portfolio(
         weeks_remaining = max(0, math.ceil(total_weeks - elapsed_weeks)) if total_weeks else None
         return {"name": program.name, "phase_name": phase_name, "weeks_remaining": weeks_remaining}
 
+    # ── Quién tiene dieta o rutina asignada (batch) ──
+    # "Sin plan" es lo primero que mira un coach al abrir el panel, y hasta
+    # ahora la pantalla lo adivinaba con campos que no existen en la respuesta.
+    # Dos consultas de ids, no una por cliente.
+    con_dieta, con_rutina = set(), set()
+    if user_ids:
+        from app.models.nutrition.diet import Diet
+        from app.models.routine import Routine
+
+        con_dieta = {r[0] for r in db.query(Diet.user_id).filter(Diet.user_id.in_(user_ids)).distinct()}
+        con_rutina = {r[0] for r in db.query(Routine.user_id).filter(Routine.user_id.in_(user_ids)).distinct()}
+
     clients = []
     for d in details:
         lci = last_ci.get(d.id)
         pending = (lci is None) or ((today - lci).days >= 7)
+        dieta = d.user_id in con_dieta
+        rutina = d.user_id in con_rutina
         clients.append({
             "id": d.id,
             "user_id": d.user_id,
@@ -319,6 +333,15 @@ def clients_portfolio(
             "adherence": adh_pct(d.id),
             "last_checkin_date": lci.isoformat() if lci else None,
             "checkin_pending": pending,
+            "tiene_dieta": dieta,
+            "tiene_rutina": rutina,
+            # Sin ninguna de las dos: es a quien hay que preparar el plan.
+            "sin_plan": not dieta and not rutina,
+            # Cuánto paga y desde cuándo es cliente. Los dos salen en la
+            # tarjeta de "clientes sin plan": el precio dice a qué atender
+            # primero, y la antigüedad, cuánto lleva esperando.
+            "precio": d.precio,
+            "alta": d.created_at.isoformat() if d.created_at else None,
         })
 
     activos = [c for c in clients if c["lifecycle_status"] == "activo"]
@@ -334,6 +357,9 @@ def clients_portfolio(
         "en_riesgo": len(en_riesgo),
         "checkin_pendiente": len(checkin_pendiente),
         "adherencia_media": adherencia_media,
+        # Los que están esperando su plan. Se cuenta solo entre los activos:
+        # un cliente pausado o finalizado sin plan no es trabajo pendiente.
+        "sin_plan": len([c for c in activos if c["sin_plan"]]),
     }
     return send_response({"stats": stats, "clients": clients}, "OK")
 

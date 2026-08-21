@@ -86,105 +86,111 @@
 
     .content{flex:1;overflow-y:auto;padding:24px 28px;}
 
-    /* ── KPI Cards ── */
-    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+    /* ── Cabecera ── */
+    .head-ayuda{
+      display:flex;align-items:center;gap:7px;
+      background:#fff;border:1px solid #E5E7EB;border-radius:20px;
+      padding:8px 15px;font-size:13px;font-weight:600;color:#4B5563;
+      cursor:pointer;white-space:nowrap;transition:.15s;font-family:inherit;
+    }
+    .head-ayuda:hover{border-color:var(--indigo);color:var(--indigo);}
+
+    /* ── Indicadores ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
     .kpi-card{
-      background:#fff;border-radius:12px;padding:20px 20px 16px;
-      box-shadow:0 1px 4px rgba(0,0,0,.09);border:1px solid #E5E7EB;
-      display:flex;flex-direction:column;gap:12px;
+      background:#fff;border-radius:14px;padding:18px 20px 16px;
+      border:1px solid #E9EBEF;box-shadow:0 1px 3px rgba(16,24,40,.04);
+      display:flex;flex-direction:column;gap:11px;
     }
     .kpi-top{display:flex;align-items:center;justify-content:space-between;}
-    .kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .kpi-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .kpi-icon.indigo{background:#EEF2FF;}
     .kpi-icon.green {background:#F0FDF4;}
     .kpi-icon.amber {background:#FFFBEB;}
     .kpi-icon.blue  {background:#EFF6FF;}
-    .kpi-trend{font-size:11px;font-weight:600;padding:3px 7px;border-radius:20px;}
-    .kpi-trend.up  {background:#DCFCE7;color:#16A34A;}
-    .kpi-trend.down{background:#FEE2E2;color:#DC2626;}
-    .kpi-trend.neu {background:#F3F4F6;color:#6B7280;}
-    .kpi-val{font-size:30px;font-weight:800;color:#111827;line-height:1;}
-    .kpi-label{font-size:13px;color:#6B7280;}
+    /* Flecha discreta arriba a la derecha, no una pastilla de color: en el
+       diseño el indicador no compite con el número. */
+    .kpi-flecha{font-size:15px;line-height:1;color:#9CA3AF;}
+    .kpi-flecha.up{color:#16A34A;}
+    .kpi-flecha.down{color:#DC2626;}
+    .kpi-val{font-size:31px;font-weight:800;color:#111827;line-height:1;}
+    .kpi-label{font-size:13.5px;color:#374151;font-weight:500;margin-top:-4px;}
+    .kpi-sub{font-size:11.5px;color:#9CA3AF;margin-top:-6px;}
 
-    /* ── Quick Access ── */
-    .quick-row{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
-    .quick-btn{
-      display:flex;align-items:center;gap:10px;
-      background:#fff;border:1px solid #E5E7EB;border-radius:12px;
-      padding:14px 20px;text-decoration:none;color:#374151;
-      font-size:14px;font-weight:600;cursor:pointer;
-      box-shadow:0 1px 4px rgba(0,0,0,.07);
-      transition:border-color .15s,box-shadow .15s,background .15s;
-      white-space:nowrap;
-    }
-    .quick-btn:hover{border-color:var(--indigo);box-shadow:0 2px 8px rgba(79,70,229,.15);background:#FAFBFF;color:var(--indigo);}
-    .quick-btn:hover svg{opacity:1;}
-    .quick-btn svg{opacity:.6;transition:opacity .15s;flex-shrink:0;}
-    .quick-btn .q-badge{
-      margin-left:4px;background:#EEF2FF;color:var(--indigo);
-      font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
-    }
+    /* ── Dos columnas ── */
+    .two-col{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start;}
 
-    /* ── Two-col ── */
-    .two-col{display:grid;grid-template-columns:1fr 340px;gap:20px;}
-
-    /* ── Card base ── */
-    .card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;box-shadow:0 1px 4px rgba(0,0,0,.09);}
-    .card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #EBEBEB;}
+    /* ── Tarjeta ── */
+    .card{background:#fff;border-radius:14px;border:1px solid #E9EBEF;box-shadow:0 1px 3px rgba(16,24,40,.04);min-width:0;}
+    .card-head{display:flex;align-items:center;gap:11px;padding:16px 20px;border-bottom:1px solid #F1F2F5;min-width:0;}
+    .card-head>div{min-width:0;}
+    .card-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#F3F4F6;}
     .card-title{font-size:14px;font-weight:700;color:#111827;}
-    .card-action{font-size:13px;color:var(--indigo);text-decoration:none;font-weight:500;}
-    .card-action:hover{color:var(--indigo-dark);text-decoration:underline;}
-    .card-body{padding:0;}
-
-    /* ── Clients-no-plan list ── */
-    .client-row{
-      display:flex;align-items:center;gap:12px;
-      padding:13px 20px;border-bottom:1px solid #EBEBEB;
-      transition:background .12s;
+    .card-sub{font-size:11.5px;color:#9CA3AF;margin-top:1px;}
+    .card-badge{
+      margin-left:auto;display:flex;align-items:center;gap:5px;
+      background:#F3F4F6;color:#6B7280;font-size:11.5px;font-weight:600;
+      padding:4px 10px;border-radius:20px;white-space:nowrap;
     }
+    .card-action{margin-left:auto;font-size:12.5px;color:var(--indigo);text-decoration:none;font-weight:600;white-space:nowrap;}
+    .card-action:hover{text-decoration:underline;}
+    .card-body{padding:0;}
+    .card-pie{padding:12px 16px;border-top:1px solid #F1F2F5;}
+    .btn-pie{
+      display:block;width:100%;text-align:center;text-decoration:none;
+      background:#F9FAFB;border:1px solid #E9EBEF;border-radius:9px;
+      padding:10px;font-size:13px;font-weight:600;color:#374151;transition:.15s;
+    }
+    .btn-pie:hover{background:#F3F4F6;color:var(--indigo);border-color:#D9DDE3;}
+
+    /* ── Clientes sin plan ── */
+    .client-row{display:flex;align-items:center;gap:13px;padding:14px 20px;border-bottom:1px solid #F1F2F5;transition:background .12s;}
     .client-row:last-child{border-bottom:none;}
-    .client-row:hover{background:#FAFAFA;}
+    .client-row:hover{background:#FAFBFC;}
     .c-avatar{
-      width:36px;height:36px;border-radius:50%;
+      position:relative;width:38px;height:38px;border-radius:11px;
       background:#EEF2FF;color:var(--indigo);
       display:flex;align-items:center;justify-content:center;
       font-weight:700;font-size:13px;flex-shrink:0;
     }
+    /* El punto dice de un vistazo cuánto lleva esperando, sin leer la fecha. */
+    .c-punto{position:absolute;left:-2px;bottom:-2px;width:9px;height:9px;border-radius:50%;border:2px solid #fff;}
     .c-info{flex:1;min-width:0;}
-    .c-name{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .c-sub{font-size:11px;color:#6B7280;margin-top:1px;}
-    .c-tags{display:flex;gap:4px;margin-top:4px;}
-    .tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;}
-    .tag.missing{background:#FEF3C7;color:#92400E;}
-    .tag.ok{background:#DCFCE7;color:#166534;}
+    .c-linea{display:flex;align-items:center;gap:8px;min-width:0;}
+    .c-name{font-size:13.5px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .c-meta{display:flex;align-items:center;gap:13px;margin-top:5px;flex-wrap:wrap;}
+    .c-dato{display:flex;align-items:center;gap:5px;font-size:11.5px;color:#6B7280;white-space:nowrap;}
+    .c-dato svg{flex-shrink:0;opacity:.65;}
+    .c-precio{font-size:11.5px;font-weight:700;color:#374151;white-space:nowrap;}
+    .tag{font-size:10px;font-weight:700;padding:2.5px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:3px;}
+    .tag.urgente{background:#FEF2F2;color:#DC2626;}
+    .tag.aviso  {background:#F3F4F6;color:#6B7280;}
     .btn-assign{
-      font-size:12px;font-weight:600;color:var(--indigo);
-      background:#EEF2FF;border:none;border-radius:7px;
-      padding:6px 12px;cursor:pointer;white-space:nowrap;transition:background .15s;
+      display:flex;align-items:center;gap:6px;
+      font-size:12.5px;font-weight:700;color:#fff;
+      background:var(--indigo);border:none;border-radius:9px;
+      padding:9px 14px;cursor:pointer;white-space:nowrap;transition:background .15s;
+      font-family:inherit;flex-shrink:0;
     }
-    .btn-assign:hover{background:#E0E7FF;}
+    .btn-assign:hover{background:var(--indigo-dark);}
 
-    /* ── Events list ── */
-    .event-row{
-      display:flex;align-items:flex-start;gap:12px;
-      padding:13px 20px;border-bottom:1px solid #EBEBEB;
-    }
+    /* ── Próximos 5 días ── */
+    .event-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #F1F2F5;}
     .event-row:last-child{border-bottom:none;}
     .event-date-box{
-      min-width:40px;text-align:center;
-      background:#F8FAFC;border:1px solid #E5E7EB;
-      border-radius:8px;padding:6px 4px;flex-shrink:0;
+      min-width:46px;text-align:center;
+      background:#F9FAFB;border:1px solid #EEF0F3;
+      border-radius:10px;padding:6px 4px;flex-shrink:0;
     }
-    .event-day{font-size:18px;font-weight:800;color:#111827;line-height:1;}
-    .event-mon{font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
+    .event-date-box.hoy{background:#EEF2FF;border-color:#C7D2FE;}
+    .event-mon{font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+    .event-date-box.hoy .event-mon{color:var(--indigo);}
+    .event-day{font-size:17px;font-weight:800;color:#111827;line-height:1.15;}
+    .event-punto{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
     .event-info{flex:1;min-width:0;}
     .event-title{font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .event-who{font-size:11px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .event-type{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;flex-shrink:0;margin-top:2px;}
-    .event-type.cita   {background:#DBEAFE;color:#1E40AF;}
-    .event-type.tarea  {background:#FEF3C7;color:#92400E;}
-    .event-type.otro   {background:#F3F4F6;color:#374151;}
-    .event-type.check  {background:#DCFCE7;color:#166534;}
+    .event-who{font-size:11.5px;color:#9CA3AF;margin-top:2px;display:flex;align-items:center;gap:7px;}
+    .event-row.vacio .event-title{color:#C6CAD1;font-weight:500;font-style:italic;}
 
     /* ── Empty state ── */
     .empty{padding:32px 20px;text-align:center;color:#9CA3AF;}
@@ -207,7 +213,7 @@
 
     @media(max-width:1100px){
       .kpi-grid{grid-template-columns:repeat(2,1fr);}
-      .two-col{grid-template-columns:1fr;}
+      .two-col{grid-template-columns:minmax(0,1fr);}
     }
     @media(max-width:768px){
       body{overflow-y:auto;height:auto;display:block;}
@@ -225,10 +231,7 @@
       .topbar-left p{font-size:12px;}
       .badge-online{display:none;}
       .content{flex:none;overflow-y:visible;padding:16px;}
-      .quick-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-      .quick-row::-webkit-scrollbar{display:none;}
-      .quick-btn{flex-shrink:0;}
-      .two-col{grid-template-columns:1fr;}
+      .two-col{grid-template-columns:minmax(0,1fr);}
     }
     @media(max-width:480px){
       .kpi-grid{grid-template-columns:1fr 1fr;gap:10px;}
@@ -290,6 +293,7 @@
     <a class="nav-item" href="events.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Mi Calendario
+      <span class="nav-badge" id="agendaBadge" style="display:none"></span>
     </a>
     <a class="nav-item" href="clients.html">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -377,9 +381,12 @@
       <p id="greetRole" style="display:none;font-size:12px;font-weight:600;color:#4F46E5;margin-top:2px;letter-spacing:.3px;text-transform:uppercase;"></p>
     </div>
     <div class="topbar-right">
-      <div class="badge-online"><div class="dot-green">
-        <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
-      </div>Producción</div>
+      <span id="topbarRoleBadge" style="font-size:11px;font-weight:700;color:#4F46E5;background:#EEF2FF;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
+      <!-- Abre la ayuda que ya existe en la burbuja, en vez de montar otra. -->
+      <button class="head-ayuda" onclick="abrirAyuda()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Ayuda
+      </button>
     </div>
   </div>
 
@@ -389,99 +396,79 @@
     <div class="kpi-grid" id="kpiGrid">
       <div class="kpi-card">
         <div class="kpi-top">
-          <div class="kpi-icon indigo"><svg width="20" height="20" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <span class="kpi-trend neu" id="trendActive">—</span>
+          <div class="kpi-icon indigo"><svg width="19" height="19" fill="none" stroke="#4F46E5" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <span class="kpi-flecha" id="flechaActive"></span>
         </div>
-        <div class="kpi-val sk" id="valActive" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
+        <div class="kpi-val sk" id="valActive" style="width:52px;height:31px;">&nbsp;</div>
         <div class="kpi-label">Clientes activos</div>
+        <div class="kpi-sub" id="subActive">&nbsp;</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-top">
-          <div class="kpi-icon amber"><svg width="20" height="20" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-          <span class="kpi-trend neu" id="trendCheckins">—</span>
+          <div class="kpi-icon amber"><svg width="19" height="19" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2"/></svg></div>
+          <span class="kpi-flecha" id="flechaNew"></span>
         </div>
-        <div class="kpi-val sk" id="valCheckins" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
-        <div class="kpi-label">Check-ins pendientes</div>
+        <div class="kpi-val sk" id="valNew" style="width:52px;height:31px;">&nbsp;</div>
+        <div class="kpi-label">Nuevos este mes</div>
+        <div class="kpi-sub" id="subNew">&nbsp;</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-top">
-          <div class="kpi-icon blue"><svg width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <span class="kpi-trend neu" id="trendEvents">—</span>
+          <div class="kpi-icon blue"><svg width="19" height="19" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <span class="kpi-flecha" id="flechaCheckins"></span>
         </div>
-        <div class="kpi-val sk" id="valEvents" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
-        <div class="kpi-label">Próximas citas</div>
+        <div class="kpi-val sk" id="valCheckins" style="width:52px;height:31px;">&nbsp;</div>
+        <div class="kpi-label">Check-ins por revisar</div>
+        <div class="kpi-sub" id="subCheckins">&nbsp;</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-top">
-          <div class="kpi-icon green"><svg width="20" height="20" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-          <span class="kpi-trend up" id="trendNew">este mes</span>
+          <div class="kpi-icon amber"><svg width="19" height="19" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <span class="kpi-flecha" id="flechaPlanes"></span>
         </div>
-        <div class="kpi-val sk" id="valNew" style="width:60px;height:36px;border-radius:6px;">&nbsp;</div>
-        <div class="kpi-label">Nuevos clientes</div>
+        <div class="kpi-val sk" id="valPlanes" style="width:52px;height:31px;">&nbsp;</div>
+        <div class="kpi-label">Planes pendientes</div>
+        <div class="kpi-sub" id="subPlanes">&nbsp;</div>
       </div>
     </div>
 
-    <!-- Quick access -->
-    <div class="quick-row">
-      <a class="quick-btn" href="coaches.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Coaches
-      </a>
-      <a class="quick-btn" href="clients.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Clientes
-      </a>
-      <a class="quick-btn" href="programas.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Programas
-      </a>
-      <a class="quick-btn" href="formularios.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Formularios
-      </a>
-      <a class="quick-btn" href="events.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Calendario
-      </a>
-      <a class="quick-btn" href="progress.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Progreso
-      </a>
-      <a class="quick-btn" href="kanban.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
-        Kanban
-      </a>
-    </div>
-
-    <!-- Two columns -->
+    <!-- Dos columnas -->
     <div class="two-col">
 
-      <!-- Left: Clientes sin plan -->
+      <!-- Izquierda: clientes esperando su plan -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Clientes sin plan asignado</span>
-          <a class="card-action" href="clients.html">Ver todos →</a>
+          <span class="card-ico">
+            <svg width="16" height="16" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </span>
+          <div>
+            <div class="card-title">Clientes sin plan</div>
+            <div class="card-sub">Requieren acción</div>
+          </div>
+          <span class="card-badge" id="noPlanBadge">
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="noPlanCount">—</span>
+          </span>
         </div>
         <div class="card-body" id="noPlanList">
-          <div class="empty">
-            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <p>Cargando clientes...</p>
-          </div>
+          <div class="empty"><p>Cargando clientes…</p></div>
         </div>
+        <div class="card-pie"><a class="btn-pie" href="clients.html">Ver todos los clientes →</a></div>
       </div>
 
-      <!-- Right: Próximos 5 días -->
+      <!-- Derecha: próximos 5 días -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Próximos 5 días</span>
-          <a class="card-action" href="events.html">Calendario →</a>
+          <span class="card-ico">
+            <svg width="16" height="16" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          <div class="card-title">Próximos 5 días</div>
+          <a class="card-action" href="events.html">Ver todo →</a>
         </div>
         <div class="card-body" id="upcomingList">
-          <div class="empty">
-            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <p>Cargando eventos...</p>
-          </div>
+          <div class="empty"><p>Cargando agenda…</p></div>
         </div>
+        <div class="card-pie"><a class="btn-pie" href="events.html">Abrir calendario →</a></div>
       </div>
 
     </div>
@@ -494,6 +481,17 @@
 const API = 'https://nutrientrena-production.up.railway.app';
 const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DIAS   = DAYS;
+const DIAS_LARGOS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES_LARGOS = ['enero','febrero','marzo','abril','mayo','junio','julio',
+                      'agosto','septiembre','octubre','noviembre','diciembre'];
+
+/* El nombre de un cliente lo escribe una persona y acaba dentro de HTML. */
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
 
 function tok(){ return localStorage.getItem('token'); }
 
@@ -522,33 +520,62 @@ function initials(name=''){
   return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
 }
 
-function setKpi(id, value, skeleton=false){
+function setKpi(id, value){
   const el=document.getElementById(id);
   if(!el) return;
-  if(skeleton){ el.classList.add('sk'); el.innerHTML='&nbsp;'; return; }
   el.classList.remove('sk');
-  el.style.width=''; el.style.height=''; el.style.borderRadius='';
+  el.style.width=''; el.style.height='';
   el.textContent=value;
 }
 
-function setTrend(id, text, type='neu'){
+function setSub(id, texto){
+  const el=document.getElementById(id);
+  if(el) el.textContent=texto||' ';
+}
+
+/* La flecha del diseño: discreta, arriba a la derecha. Solo se pinta cuando
+   hay algo que decir; una flecha gris permanente es ruido. */
+function setFlecha(id, sentido){
   const el=document.getElementById(id);
   if(!el) return;
-  el.textContent=text;
-  el.className='kpi-trend '+type;
+  el.className='kpi-flecha'+(sentido?' '+sentido:'');
+  el.textContent=sentido==='up'?'↑':sentido==='down'?'↓':'';
+}
+
+function abrirAyuda(){
+  const b=document.getElementById('sopBtn');
+  if(b){ b.click(); return; }
+  toast('La ayuda está cargando, inténtalo en un momento');
+}
+
+function haceCuanto(iso){
+  if(!iso) return null;
+  const dias=Math.floor((Date.now()-new Date(iso).getTime())/86400000);
+  if(dias<=0){
+    const horas=Math.floor((Date.now()-new Date(iso).getTime())/3600000);
+    return horas<=1?'Alta hace 1 hora':'Alta hace '+horas+' horas';
+  }
+  if(dias===1) return 'Alta hace 1 día';
+  if(dias<30)  return 'Alta hace '+dias+' días';
+  const meses=Math.floor(dias/30);
+  return 'Alta hace '+meses+(meses===1?' mes':' meses');
+}
+
+function diasDesde(iso){
+  if(!iso) return 0;
+  return Math.floor((Date.now()-new Date(iso).getTime())/86400000);
 }
 
 async function load(){
   if(!tok()){ window.location.href='login.html'; return; }
 
-  // Greeting
   const now=new Date();
   const h=now.getHours();
   const greeting=h<13?'Buenos días':h<19?'Buenas tardes':'Buenas noches';
-  document.getElementById('todayDate').textContent=
-    DAYS[now.getDay()]+', '+now.getDate()+' de '+['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][now.getMonth()]+' '+now.getFullYear();
+  const fecha=DIAS_LARGOS[now.getDay()]+', '+now.getDate()+' de '+
+    MESES_LARGOS[now.getMonth()]+' de '+now.getFullYear();
+  document.getElementById('todayDate').textContent=fecha;
 
-  // Profile
   const me = await api('/api/auth/me');
   if(!me) return;
   const u=me.data||{};
@@ -557,58 +584,81 @@ async function load(){
   document.getElementById('userName').textContent=name;
   const roleName=(u.roles&&u.roles[0]?.name)||'';
   document.getElementById('userRole').textContent=roleName||'—';
-  if(roleName){const gr=document.getElementById('greetRole');gr.textContent=roleName;gr.style.display='block';}
   (function(){var _av=document.getElementById('userAvatar');if(u.photo){_av.innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';_av.style.background='transparent';}else{_av.textContent=initials(name);}})()
 
-  // Parallel fetch
-  const [ov, ck, ev, cl] = await Promise.all([
+  /* La cartera trae los clientes YA enriquecidos —quién tiene plan, cuánto
+     paga, desde cuándo— en una sola llamada. Antes esta pantalla pedía
+     `/api/users?role_id=3`, una ruta que no existe: devolvía 405 y el panel de
+     "clientes sin plan" salía siempre vacío, dijera lo que dijera la realidad. */
+  const [ov, band, ev, cart] = await Promise.all([
     api('/api/analytics/overview'),
-    api('/api/analytics/checkins'),
-    api('/api/events?per_page=20&sort=date&order=asc'),
-    api('/api/users?role_id=3&per_page=50'),
+    api('/api/checkins/bandeja'),
+    api('/api/events?per_page=40&sort=date&order=asc'),
+    api('/api/users/clients/portfolio'),
   ]);
 
-  // KPI — Clientes activos
-  const active=ov?.data?.active_clients;
-  setKpi('valActive', active??'—');
-  setTrend('trendActive', (ov?.data?.total_clients??'—')+' total', 'neu');
+  const stats   = cart?.data?.stats || {};
+  const clients = cart?.data?.clients || [];
 
-  // KPI — Check-ins pendientes
-  const pending=ck?.data?.pending_reviews??ck?.data?.pending;
-  setKpi('valCheckins', pending??'—');
-  if(pending>0){ setTrend('trendCheckins','requieren revisión','down'); }
-  else { setTrend('trendCheckins','al día','up'); }
-  if(pending>0){
-    const badge=document.getElementById('checkinsBadge');
-    if(badge){ badge.textContent=pending>99?'99+':pending; badge.style.display='inline-block'; }
+  // ── Clientes activos ──
+  const activos = stats.activos ?? ov?.data?.active_clients;
+  setKpi('valActive', activos??'—');
+  const nuevos = ov?.data?.new_this_month;
+  if(typeof nuevos==='number' && nuevos>0){
+    setFlecha('flechaActive','up');
+    setSub('subActive','+'+nuevos+' este mes');
+  } else {
+    setFlecha('flechaActive','');
+    setSub('subActive',(ov?.data?.total_clients??'—')+' en total');
   }
 
-  // KPI — Próximas citas (events in next 5 days)
+  // ── Nuevos este mes ──
+  setKpi('valNew', nuevos??'—');
+  setSub('subNew', nuevos===0?'Ninguno todavía':'Altas del mes en curso');
+
+  // ── Check-ins por revisar ──
+  const porRevisar=(band?.data?.recibidos||[]).length;
+  setKpi('valCheckins', porRevisar);
+  const esperando=(band?.data?.esperando||[]).length;
+  setSub('subCheckins', esperando>0
+    ? esperando+(esperando===1?' esperando enviar':' esperando enviar')
+    : 'Nadie pendiente de enviar');
+  setFlecha('flechaCheckins', porRevisar>0?'down':'');
+
+  // ── Planes pendientes ──
+  const sinPlan=clients.filter(c=>c.sin_plan && c.lifecycle_status==='activo');
+  // Urgente = lleva más de dos días de alta esperando su plan.
+  const urgentes=sinPlan.filter(c=>diasDesde(c.alta)>=3).length;
+  setKpi('valPlanes', sinPlan.length);
+  setSub('subPlanes', urgentes>0?urgentes+(urgentes===1?' urgente':' urgentes'):'Ninguno urgente');
+  setFlecha('flechaPlanes', urgentes>0?'down':'');
+
+  // ── Cuántas cosas hay que hacer hoy ──
+  const acciones=porRevisar+sinPlan.length;
+  document.getElementById('todayDate').textContent=
+    fecha+(acciones>0?'  ·  '+acciones+(acciones===1?' acción pendiente hoy':' acciones pendientes hoy'):'  ·  Nada pendiente hoy');
+
+  renderNoPlan(sinPlan);
+
+  // ── Próximos 5 días ──
   const evItems=ev?.data?.items||ev?.data||[];
-  const in5=new Date(now); in5.setDate(in5.getDate()+5);
-  const upcoming=evItems.filter(e=>{
+  renderUpcoming(evItems, now);
+
+  // Insignias del menú.
+  if(porRevisar>0){
+    const badge=document.getElementById('checkinsBadge');
+    if(badge){ badge.textContent=porRevisar>99?'99+':porRevisar; badge.style.display='inline-block'; }
+  }
+  // Lo que pasa HOY en la agenda: es lo que la insignia del diseño cuenta.
+  const hoyClave=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString().slice(0,10);
+  const deHoy=evItems.filter(e=>{
     const d=new Date(e.date||e.scheduled_at||e.start_date);
-    return d>=now && d<=in5;
-  });
-  setKpi('valEvents', upcoming.length);
-  setTrend('trendEvents','próximos 5 días','neu');
-
-  // KPI — Nuevos este mes
-  const newM=ov?.data?.new_this_month;
-  setKpi('valNew', newM??'—');
-
-  // Panel: Clientes sin plan
-  const clients=cl?.data?.items||cl?.data||[];
-  const noPlan=clients.filter(c=>!c.diet_id&&!c.routine_id);
-  const toShow=noPlan.length>0?noPlan:clients.filter((_,i)=>i<8);
-  const isFiltered=noPlan.length>0;
-  renderNoPlan(toShow, isFiltered);
-
-  // Panel: Próximos 5 días
-  const next5=evItems.filter(e=>new Date(e.date||e.scheduled_at||e.start_date)>=now).slice(0,5);
-  renderUpcoming(next5);
-
-  // Forms badge
+    return !isNaN(d) && d.toISOString().slice(0,10)===hoyClave;
+  }).length;
+  if(deHoy>0){
+    const ab=document.getElementById('agendaBadge');
+    if(ab){ ab.textContent=deHoy>99?'99+':deHoy; ab.style.display='inline-block'; }
+  }
   try{
     const fr=await api('/api/form-assignments?status=pending&per_page=1');
     const total=(fr?.data?.total)||(fr?.total)||0;
@@ -617,63 +667,109 @@ async function load(){
   }catch{}
 }
 
-function renderNoPlan(clients, isFiltered){
+function renderNoPlan(clients){
   const el=document.getElementById('noPlanList');
+  document.getElementById('noPlanCount').textContent=
+    clients.length+(clients.length===1?' pendiente':' pendientes');
+
   if(!clients.length){
     el.innerHTML=`<div class="empty">
       <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      <p>${isFiltered?'Todos los clientes tienen plan asignado':'No hay clientes registrados aún'}</p>
+      <p>Todos tus clientes activos tienen plan</p>
     </div>`;
     return;
   }
-  el.innerHTML=clients.slice(0,8).map(c=>{
-    const fullName=(c.name||'')+' '+(c.last_name||'');
-    const hasDiet=!!c.diet_id; const hasRoutine=!!c.routine_id;
-    const tags=`
-      <span class="tag ${hasDiet?'ok':'missing'}">${hasDiet?'✓ Dieta':'Sin dieta'}</span>
-      <span class="tag ${hasRoutine?'ok':'missing'}">${hasRoutine?'✓ Rutina':'Sin rutina'}</span>`;
+
+  /* Primero quien lleva más tiempo esperando: es el que peor lo está pasando
+     y el que antes se va. */
+  const orden=clients.slice().sort((a,b)=>diasDesde(b.alta)-diasDesde(a.alta));
+
+  el.innerHTML=orden.slice(0,8).map(c=>{
+    const nombre=((c.name||'')+' '+(c.last_name||'')).trim()||c.email||'—';
+    const dias=diasDesde(c.alta);
+    const punto=dias>=7?'#DC2626':dias>=3?'#F59E0B':'#3B82F6';
+    const etiqueta=dias>=3
+      ? '<span class="tag urgente"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Urgente</span>'
+      : (!c.objective ? '<span class="tag aviso">Sin formulario</span>' : '');
+    const objetivo=c.objective?.name;
+    const alta=haceCuanto(c.alta);
     return `<div class="client-row">
-      <div class="c-avatar">${initials(fullName)}</div>
+      <div class="c-avatar">${initials(nombre)}<span class="c-punto" style="background:${punto};"></span></div>
       <div class="c-info">
-        <div class="c-name">${fullName.trim()||c.email||'—'}</div>
-        <div class="c-sub">${c.email||''}</div>
-        <div class="c-tags">${tags}</div>
+        <div class="c-linea"><span class="c-name">${esc(nombre)}</span>${etiqueta}</div>
+        <div class="c-meta">
+          ${objetivo?`<span class="c-dato"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>${esc(objetivo)}</span>`:''}
+          ${alta?`<span class="c-dato"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${alta}</span>`:''}
+          ${c.precio!=null?`<span class="c-precio">${c.precio}€/mes</span>`:''}
+        </div>
       </div>
-      <button class="btn-assign" onclick="window.location.href='client-profile.html?id=${c.id}'">Ver perfil</button>
+      <button class="btn-assign" onclick="window.location.href='client-profile.html?id=${c.id}'">
+        Crear plan
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
     </div>`;
   }).join('');
 }
 
-function renderUpcoming(events){
+/* El diseño enseña CINCO días seguidos, no los cinco próximos eventos: los
+   días sin nada también salen, con su "Sin eventos". Un hueco vacío en la
+   agenda es información —ahí cabe una sesión—, y saltárselo hace creer que la
+   semana está más llena de lo que está. */
+function renderUpcoming(eventos, ahora){
   const el=document.getElementById('upcomingList');
-  if(!events.length){
-    el.innerHTML=`<div class="empty">
-      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <p>Sin eventos en los próximos 5 días</p>
-    </div>`;
-    return;
-  }
-  const typeMap={cita:'cita',appointment:'cita',check:'check',checkin:'check',tarea:'tarea',task:'tarea'};
-  el.innerHTML=events.map(e=>{
+  const COLORES={cita:'#3B82F6',check:'#F59E0B',checkin:'#F59E0B',tarea:'#8B5CF6',otro:'#9CA3AF'};
+
+  const porDia={};
+  eventos.forEach(e=>{
     const d=new Date(e.date||e.scheduled_at||e.start_date);
-    const typeRaw=(e.type||e.event_type||'otro').toLowerCase();
-    const typeCls=typeMap[typeRaw]||'otro';
-    const typeLabel={cita:'Cita',check:'Check-in',tarea:'Tarea',otro:'Evento'}[typeCls];
-    return `<div class="event-row">
-      <div class="event-date-box">
-        <div class="event-day">${d.getDate()}</div>
-        <div class="event-mon">${MONTHS[d.getMonth()]}</div>
-      </div>
-      <div class="event-info">
-        <div class="event-title">${e.title||e.name||'Evento'}</div>
-        <div class="event-who">${e.client_name||e.description||''}</div>
-        <span class="event-type ${typeCls}">${typeLabel}</span>
-      </div>
-    </div>`;
-  }).join('');
+    if(isNaN(d)) return;
+    const clave=d.toISOString().slice(0,10);
+    (porDia[clave]=porDia[clave]||[]).push({ev:e,fecha:d});
+  });
+
+  const filas=[];
+  for(let i=0;i<5;i++){
+    const d=new Date(ahora); d.setDate(d.getDate()+i); d.setHours(0,0,0,0);
+    const clave=d.toISOString().slice(0,10);
+    const etiqueta=i===0?'Hoy':i===1?'Mañana':DIAS[d.getDay()];
+    const delDia=(porDia[clave]||[]).sort((a,b)=>a.fecha-b.fecha);
+
+    if(!delDia.length){
+      filas.push(`<div class="event-row vacio">
+        ${cajaFecha(etiqueta,d,i===0)}
+        <div class="event-info"><div class="event-title">Sin eventos</div></div>
+      </div>`);
+      continue;
+    }
+    delDia.forEach((x,n)=>{
+      const e=x.ev;
+      const tipo=(e.type||e.event_type||'otro').toLowerCase();
+      const hora=x.fecha.getHours()||x.fecha.getMinutes()
+        ? String(x.fecha.getHours()).padStart(2,'0')+':'+String(x.fecha.getMinutes()).padStart(2,'0')
+        : '';
+      const quien=e.client_name||e.description||'';
+      filas.push(`<div class="event-row">
+        ${n===0?cajaFecha(etiqueta,d,i===0):'<div style="min-width:46px;flex-shrink:0;"></div>'}
+        <span class="event-punto" style="background:${COLORES[tipo]||COLORES.otro};"></span>
+        <div class="event-info">
+          <div class="event-title">${esc(e.title||e.name||'Evento')}</div>
+          <div class="event-who">
+            ${quien?`<span>con ${esc(quien)}</span>`:''}
+            ${hora?`<span>🕘 ${hora}</span>`:''}
+          </div>
+        </div>
+      </div>`);
+    });
+  }
+  el.innerHTML=filas.join('');
 }
 
-
+function cajaFecha(etiqueta,d,esHoy){
+  return `<div class="event-date-box${esHoy?' hoy':''}">
+    <div class="event-mon">${esc(etiqueta)}</div>
+    <div class="event-day">${d.getDate()}</div>
+  </div>`;
+}
 
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');

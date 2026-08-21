@@ -24,6 +24,29 @@ _FORM_PARAM_NAMES = {
 }
 
 
+@router.get("/plataforma", summary="Datos públicos de la plataforma",
+            description="Nombre y correo de soporte, para pantallas donde todavía "
+                        "no hay sesión: el login y el alta de invitados.")
+def datos_publicos(db: Session = Depends(get_db)):
+    """Lo mínimo que el login necesita saber, y nada más.
+
+    El correo de soporte se configura en el panel, pero esa ruta pide sesión y
+    en el login no la hay. Sin esto, «Contactar a soporte» habría que teclearlo
+    en el HTML: dejaría de responder a la pantalla de Configuración y el día
+    que cambie, cambiaría en un sitio y no en el otro.
+
+    Se devuelve solo lo que puede leer cualquiera. El resto de ajustes —días de
+    prueba, moneda, modo mantenimiento— no salen de aquí.
+    """
+    from app.models.platform_setting import PlatformSetting
+
+    s = db.query(PlatformSetting).filter(PlatformSetting.id == 1).first()
+    return send_response({
+        "platform_name": (s.platform_name if s else None) or "Alzum.io",
+        "support_email": (s.support_email if s else None),
+    }, "OK")
+
+
 @router.get("/form-options", summary="Opciones de formulario público")
 def get_form_options(db: Session = Depends(get_db)):
     result = {}

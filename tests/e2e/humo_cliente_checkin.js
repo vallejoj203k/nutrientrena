@@ -77,8 +77,13 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   // ── Arranca en blanco ────────────────────────────────────────────────────
   ck('EL PESO ARRANCA VACÍO', (await p.inputValue('#ckPeso')) === '');
   ck('LAS MEDIDAS ARRANCAN VACÍAS', await p.evaluate(() =>
-     ['body_fat','muscle_mass','waist','chest','hips','arms','legs']
+     ['waist','chest','hips','arms','legs']
        .every(k => document.getElementById('ck_' + k).value === '')));
+  /* Un cliente no tiene báscula de bioimpedancia ni plicómetros. Pedirle esos
+     dos lleva a una de dos cosas, las dos malas: o los deja vacíos siempre, o
+     se inventa un número que al coach le llega como una medición. */
+  ck('NO SE LE PIDE % DE GRASA NI MASA MUSCULAR', await p.evaluate(() =>
+     !document.getElementById('ck_body_fat') && !document.getElementById('ck_muscle_mass')));
   ck('el comentario arranca vacío', (await p.inputValue('#ckNota')) === '');
   /* La trampa: un 5 puesto de salida es una respuesta que nadie ha dado. */
   ck('NINGUNA PUNTUACIÓN VIENE ELEGIDA', (await p.locator('.ck-num.on').count()) === 0);
@@ -99,7 +104,7 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   await p.click('.ck-num[data-k="hunger"][data-n="4"]');
 
   await p.fill('#ck_waist', '86');
-  await p.fill('#ck_body_fat', '18.2');
+  await p.fill('#ck_hips', '95.5');
   await p.fill('#ckNota', `Semana dura pero bien ${SUF}`);
 
   await p.click('#ckBtn');
@@ -126,8 +131,11 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   const lista = Array.isArray(bruto) ? bruto : (bruto.checkins || []);
   const hoy = lista.find(x => x.id === fila.id) || {};
   ck('lo que se dejó en blanco no pisó lo anterior', hoy.chest === 100, hoy.chest);
-  ck('y lo que se cambió, se cambió', hoy.waist === 86 && hoy.body_fat === 18.2,
-     { waist: hoy.waist, body_fat: hoy.body_fat });
+  ck('y lo que se cambió, se cambió', hoy.waist === 86 && hoy.hips === 95.5,
+     { waist: hoy.waist, hips: hoy.hips });
+  /* Y lo que el coach había anotado con su aparato sigue ahí: quitarle al
+     cliente esos campos no puede borrar lo que ya estaba medido. */
+  ck('el % de grasa que anotó el coach sigue intacto', hoy.body_fat === 19, hoy.body_fat);
 
   /* Progreso pasa a ser solo historial: se le quitan los tres mini-formularios
      que hacían lo mismo repartido. Lo que NO puede pasar es que quede sin

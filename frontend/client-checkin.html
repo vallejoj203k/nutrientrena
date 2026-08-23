@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <title>NutriEntrena — Check-in</title>
+  <script>
+    (function(){ var t=localStorage.getItem('token'),r=localStorage.getItem('role_id')||'';
+      if(!t){location.replace('login.html');return;} if(r&&r!=='6'){location.replace('dashboard.html');} })();
+  </script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--green:#059669;--green-pale:#D1FAE5;--amber:#F59E0B;--red:#DC2626;--gray-bg:#F8FAFC;--sidebar-w:240px;}
+    body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;border-bottom:1px solid #EBEBEB;}
+    .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
+    .sl-txt{display:flex;flex-direction:column;line-height:1.15;}
+    .sl-txt b{font-size:17px;font-weight:800;letter-spacing:.3px;}
+    .sl-txt b .n1{color:var(--indigo);}.sl-txt b .n2{color:var(--green);}
+    .sl-txt small{color:#6B7280;font-size:11px;margin-top:2px;}
+    .sidebar-nav{flex:1;padding:12px 0;}
+    .nav-section{padding:12px 20px 4px;font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#374151;cursor:pointer;font-size:14px;transition:all .15s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:#F8FAFC;color:var(--indigo);}
+    .nav-item.active{background:#EEF2FF;color:var(--indigo);border-left-color:var(--indigo);font-weight:600;}
+    .nav-item svg{flex-shrink:0;opacity:.75;}
+    .nav-item.active svg,.nav-item:hover svg{opacity:1;}
+    .nav-item.disabled{opacity:.6;cursor:default;}
+    .nav-item.disabled:hover{background:none;color:#374151;}
+    .nav-soon-tag{margin-left:auto;font-size:9px;font-weight:700;color:#9CA3AF;background:#F3F4F6;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+    .sidebar-user{padding:14px 20px;border-top:1px solid #F3F4F6;display:flex;align-items:center;gap:10px;}
+    .s-avatar{width:34px;height:34px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;flex-shrink:0;overflow:hidden;}
+    .s-avatar img{width:100%;height:100%;object-fit:cover;}
+    .user-info{flex:1;min-width:0;}.user-name{color:#111827;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.user-role{color:#6B7280;font-size:11px;}
+    .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
+    .logout-btn:hover{color:#EF4444;}
+
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:64px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;}
+    .menu-btn:hover{background:#F3F4F6;}
+    .topbar-title{font-size:17px;font-weight:800;color:#111827;flex:1;}
+
+    .content{flex:1;overflow-y:auto;padding:26px 28px 40px;}
+    .content-inner{max-width:720px;margin:0 auto;}
+    .page-head{margin-bottom:18px;}
+    .page-head h1{font-size:26px;font-weight:800;color:#111827;}
+    .page-head p{font-size:14px;color:#6B7280;margin-top:2px;}
+
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+    .stat{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px;text-align:center;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .stat-v{font-size:22px;font-weight:800;}
+    .stat-l{font-size:11.5px;color:#9CA3AF;margin-top:2px;}
+    .stat.a .stat-v{color:var(--indigo);}.stat.b .stat-v{color:var(--green);}.stat.c .stat-v{color:var(--amber);}
+
+    /* Métricas tipo panel del coach */
+    .pg-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+    .pg-stat{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .pg-stat-v{font-size:19px;font-weight:800;color:#111827;line-height:1.15;}
+    .pg-stat-l{font-size:10.5px;color:#9CA3AF;margin-top:3px;text-transform:uppercase;letter-spacing:.3px;font-weight:700;}
+    @media(max-width:820px){.pg-stats{grid-template-columns:repeat(2,1fr);}}
+
+    .pg-legend{display:flex;gap:12px;font-size:11.5px;color:#6B7280;}
+    .pg-legend span{display:flex;align-items:center;gap:5px;}
+    .pg-legend i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+    .pg-legend .lg-real{background:#22C55E;}
+    .pg-legend .lg-obj{background:#7C3AED;}
+    .pg-chart-grid{display:grid;grid-template-columns:1fr 190px;gap:16px;align-items:start;}
+    @media(max-width:760px){.pg-chart-grid{grid-template-columns:1fr;}}
+    .pg-chart-grid svg{width:100%;height:auto;display:block;}
+    .pg-obj{background:#F9FAFB;border:1px solid #EEF0F3;border-radius:14px;padding:14px;}
+    .pg-obj-t{font-size:10.5px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:.4px;}
+    .pg-obj-w{font-size:24px;font-weight:800;color:var(--indigo);margin:4px 0 10px;}
+    .pg-obj-row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-top:1px solid #EEF0F3;}
+    .pg-obj-row span:first-child{color:#9CA3AF;}
+    .pg-obj-row span:last-child{color:#111827;font-weight:700;}
+
+    /* Fuerza */
+    .pg-exs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+    .pg-ex{border:1px solid #E5E7EB;border-radius:12px;padding:12px;background:#fff;}
+    .pg-ex-nm{font-size:13px;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .pg-ex-mg{font-size:10.5px;color:#9CA3AF;margin-top:1px;}
+    .pg-ex-spark{margin:8px 0 6px;}
+    .pg-ex-foot{display:flex;align-items:baseline;justify-content:space-between;gap:6px;}
+    .pg-ex-w{font-size:15px;font-weight:800;color:var(--indigo);}
+    .pg-ex-d{font-size:11.5px;font-weight:700;}
+    .pg-ex-d.up{color:var(--green);}.pg-ex-d.down{color:var(--red);}.pg-ex-d.flat{color:#9CA3AF;}
+
+    /* Medidas */
+    .pg-meas{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+    .pg-meas-i{border:1px solid #E5E7EB;border-radius:12px;padding:11px 12px;}
+    .pg-meas-l{font-size:10.5px;color:#9CA3AF;text-transform:uppercase;font-weight:700;letter-spacing:.3px;}
+    .pg-meas-v{font-size:17px;font-weight:800;color:#111827;margin-top:2px;}
+    .pg-meas-d{font-size:11.5px;font-weight:700;margin-top:1px;}
+    .pg-empty{color:#9CA3AF;font-size:13px;padding:18px 0;text-align:center;}
+    .meas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid #F3F4F6;}
+    .meas-grid label{display:block;font-size:11.5px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.3px;}
+    .meas-grid input{width:100%;margin-top:5px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:10px;font-size:14px;color:#111;outline:none;font-family:inherit;background:#F9FAFB;}
+    .meas-grid input:focus{border-color:var(--indigo);background:#fff;}
+
+    .card{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+    .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .card-title{font-size:16px;font-weight:800;color:#111827;display:flex;align-items:center;gap:8px;}
+    .badge-green{font-size:12px;font-weight:700;color:var(--green);background:var(--green-pale);padding:3px 10px;border-radius:20px;}
+
+    .chart{display:flex;align-items:flex-end;gap:8px;height:120px;margin-bottom:6px;}
+    .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+    .bar{width:100%;max-width:44px;border-radius:8px 8px 0 0;background:#DDD6FE;transition:.2s;}
+    .bar.now{background:var(--green);}
+    .bar-lbl{font-size:11px;color:#9CA3AF;}
+    .chart-empty{color:#9CA3AF;font-size:13px;text-align:center;padding:24px 0;}
+
+    .reg-row{display:flex;gap:10px;margin-top:12px;}
+    .reg-row input{flex:1;padding:12px 14px;border:1px solid #E5E7EB;border-radius:10px;font-size:15px;color:#111;outline:none;font-family:inherit;background:#F9FAFB;}
+    .reg-row input:focus{border-color:var(--indigo);background:#fff;}
+    .btn-green{display:inline-flex;align-items:center;gap:6px;padding:12px 18px;border-radius:10px;border:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
+    .btn-green:hover{background:#047857;}
+    .btn-green:disabled{opacity:.6;cursor:default;}
+    .btn-indigo{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;border:none;background:var(--indigo);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+    .btn-indigo:hover{background:var(--indigo-dark);}
+
+    .ptabs{display:flex;gap:2px;background:#F3F4F6;border-radius:10px;padding:3px;margin-bottom:16px;}
+    .ptab{flex:1;padding:8px;border:none;background:transparent;border-radius:7px;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;transition:.15s;}
+    .ptab.sel{background:#fff;color:#111827;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+    .cmp-lbl{text-align:center;font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;}
+    .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .cmp-col{text-align:center;}
+    .cmp-ph{position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:#EEF0F3;display:flex;align-items:center;justify-content:center;color:#C7CBD4;}
+    .cmp-ph.now{outline:2px solid var(--green);outline-offset:-2px;}
+    .cmp-ph img{width:100%;height:100%;object-fit:cover;}
+    .cmp-tag{position:absolute;bottom:8px;left:8px;font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);text-align:left;}
+    .cmp-cap{font-size:12.5px;font-weight:700;color:#6B7280;margin-top:7px;}
+    .cmp-col.now .cmp-cap{color:var(--green);}
+    .cmp-summary{margin-top:14px;background:var(--green-pale);color:var(--green);text-align:center;font-size:13.5px;font-weight:700;padding:11px;border-radius:12px;}
+    .hist-btn{width:100%;margin-top:12px;padding:12px;border-radius:12px;border:1px solid #E5E7EB;background:#F9FAFB;color:#374151;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+    .hist-btn:hover{background:#F3F4F6;}
+
+    .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#1F2937;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:400;}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    .toast.err{background:#DC2626;}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;}
+    .sidebar-overlay.open{display:block;}
+    @media(max-width:768px){
+      body{overflow:auto;}
+      .sidebar{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);transition:transform .25s;z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .menu-btn{display:flex;align-items:center;justify-content:center;}
+      .content{padding:18px 14px 40px;}
+      .page-head h1{font-size:22px;}
+    }
+
+    /* ── Check-in ───────────────────────────────────────────────────────────
+       Una pantalla, en blanco, con todo dentro. Antes esto estaba repartido en
+       tres trozos sueltos dentro de Progreso —que es el HISTORIAL— así que
+       volver a rellenarlo era ir encontrando formularios entre los datos
+       viejos, y cada trozo se guardaba por su cuenta. */
+    .ck-wrap{max-width:640px;margin:0 auto;}
+    .ck-card{background:#fff;border:1px solid #E9EBEF;border-radius:16px;padding:20px;margin-bottom:14px;}
+    .ck-h{font-size:15px;font-weight:800;color:#111827;margin-bottom:3px;}
+    .ck-sub{font-size:12.5px;color:#9CA3AF;margin-bottom:16px;}
+    .ck-op{font-size:11px;font-weight:700;color:#9CA3AF;background:#F3F4F6;padding:2px 8px;border-radius:20px;margin-left:8px;}
+
+    .ck-peso{display:flex;align-items:center;gap:12px;}
+    .ck-peso input{flex:1;min-width:0;padding:15px 16px;border:1.5px solid #E5E7EB;border-radius:12px;
+      font-size:22px;font-weight:800;font-family:inherit;color:#111827;outline:none;text-align:center;}
+    .ck-peso input:focus{border-color:var(--indigo);}
+    .ck-peso span{font-size:15px;font-weight:700;color:#9CA3AF;}
+
+    /* Nada elegido de salida. Un deslizador puesto en 5 es una respuesta que
+       el cliente no ha dado, y llega al coach como si la hubiera dado. */
+    .ck-esc{margin-bottom:18px;}
+    .ck-esc:last-child{margin-bottom:0;}
+    .ck-esc-cab{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;}
+    .ck-esc-cab b{font-size:13.5px;color:#374151;}
+    .ck-esc-cab small{font-size:11px;color:#9CA3AF;margin-left:auto;text-align:right;}
+    .ck-nums{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;}
+    .ck-num{aspect-ratio:1;border:1.5px solid #E5E7EB;background:#fff;border-radius:9px;
+      font-size:12.5px;font-weight:700;color:#6B7280;cursor:pointer;font-family:inherit;
+      display:flex;align-items:center;justify-content:center;padding:0;transition:.12s;}
+    .ck-num:hover{border-color:#C7D2FE;background:#F8FAFF;}
+    .ck-num.on{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+
+    .ck-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .ck-grid label{display:flex;flex-direction:column;gap:6px;font-size:11.5px;font-weight:700;
+      color:#6B7280;text-transform:uppercase;letter-spacing:.5px;}
+    .ck-grid input{padding:12px 14px;border:1.5px solid #E5E7EB;border-radius:10px;
+      font-size:15px;font-family:inherit;color:#111827;outline:none;}
+    .ck-grid input:focus{border-color:var(--indigo);}
+
+    .ck-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .ck-foto{aspect-ratio:3/4;border:2px dashed #E5E7EB;border-radius:12px;background:#FAFBFC;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+      cursor:pointer;color:#9CA3AF;font-size:11.5px;font-weight:600;overflow:hidden;position:relative;
+      transition:.12s;text-align:center;padding:6px;}
+    .ck-foto:hover{border-color:var(--indigo);color:var(--indigo);}
+    .ck-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .ck-foto .quitar{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;
+      background:rgba(17,24,39,.72);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:1;
+      display:flex;align-items:center;justify-content:center;z-index:2;}
+
+    .ck-nota{width:100%;padding:13px 14px;border:1.5px solid #E5E7EB;border-radius:12px;
+      font-size:14px;font-family:inherit;color:#111827;outline:none;resize:vertical;min-height:96px;}
+    .ck-nota:focus{border-color:var(--indigo);}
+
+    .ck-pie{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(248,250,252,0) 0%,var(--gray-bg) 45%);
+      padding:14px 0 4px;}
+    .ck-enviar{width:100%;padding:16px;background:var(--green);color:#fff;border:none;border-radius:14px;
+      font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;transition:background .15s;}
+    .ck-enviar:hover{background:#047857;}
+    .ck-enviar:disabled{opacity:.55;cursor:not-allowed;}
+    .ck-aviso{font-size:12px;color:#9CA3AF;text-align:center;margin-top:9px;}
+
+    .ck-hecho{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:14px;padding:14px 16px;
+      font-size:13.5px;color:#065F46;margin-bottom:14px;line-height:1.5;}
+    .ck-hecho b{display:block;margin-bottom:2px;}
+
+    @media(max-width:560px){
+      .ck-grid{grid-template-columns:1fr;}
+      .ck-nums{gap:3px;}
+      .ck-num{font-size:11px;border-radius:7px;}
+    }
+  </style>
+<script src="js/org-context.js"></script>
+<script src="js/nav-roles.js"></script>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sl-mark" role="img" aria-label="NutriEntrena"></div>
+    <div class="sl-txt"><b><span class="n1">NUTRI</span><span class="n2">ENTRENA</span></b><small>Mi espacio</small></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="client-home.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/></svg>Inicio</a>
+    <a class="nav-item" href="client-calendario.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendario</a>
+    <div class="nav-section">Mi plan</div>
+    <a class="nav-item" href="client-entrena.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M4 12l-1.5 1.5a2.12 2.12 0 0 0 3 3L7 18M17 6l1-1a2.12 2.12 0 0 1 3 3l-1 1"/><path d="m8 8 8 8"/></svg>Entrena</a>
+    <a class="nav-item" href="client-nutricion.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>Nutrición</a>
+    <div class="nav-section">Seguimiento</div>
+    <a class="nav-item active" href="client-progreso.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>Progreso</a>
+    <div class="nav-section">Comunicación</div>
+    <a class="nav-item" href="client-chat.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+      <div class="nav-section">Cuenta</div>
+    <a class="nav-item" href="client-perfil.html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</a>
+</nav>
+  <div class="sidebar-user">
+    <div class="s-avatar" id="sidebarAvatar">C</div>
+    <div class="user-info"><div class="user-name" id="sidebarName">Cargando…</div><div class="user-role">Cliente</div></div>
+    <button class="logout-btn" onclick="logout()" title="Cerrar sesión"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menú">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div>
+      <h1>Check-in</h1>
+      <p id="ckFecha">—</p>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="ck-wrap">
+
+      <!-- Si ya envió uno hoy, se le dice; no se le esconde el formulario. -->
+      <div class="ck-hecho" id="ckYa" style="display:none;">
+        <b>Ya enviaste tu check-in de hoy</b>
+        Si vuelves a enviarlo, se actualizará con lo que escribas ahora.
+      </div>
+
+      <!-- Peso -->
+      <section class="ck-card">
+        <div class="ck-h">Tu peso</div>
+        <div class="ck-sub">Pésate a la misma hora, en ayunas y después de ir al baño.</div>
+        <div class="ck-peso">
+          <input id="ckPeso" type="number" step="0.1" min="0" inputmode="decimal" placeholder="0,0"/>
+          <span>kg</span>
+        </div>
+      </section>
+
+      <!-- Cómo ha ido la semana -->
+      <section class="ck-card">
+        <div class="ck-h">¿Cómo ha ido la semana?</div>
+        <div class="ck-sub">La báscula no cuenta toda la historia. Del 0 al 10.</div>
+        <div id="ckEscalas"></div>
+      </section>
+
+      <!-- Medidas -->
+      <section class="ck-card">
+        <div class="ck-h">Medidas <span class="ck-op">opcional</span></div>
+        <div class="ck-sub">Solo si te las has tomado. Lo que dejes vacío no se envía.</div>
+        <div class="ck-grid" id="ckMedidas"></div>
+      </section>
+
+      <!-- Fotos -->
+      <section class="ck-card">
+        <div class="ck-h">Fotos <span class="ck-op">opcional</span></div>
+        <div class="ck-sub">Misma luz, misma ropa y misma distancia que la última vez.</div>
+        <div class="ck-fotos" id="ckFotos"></div>
+        <input type="file" id="ckFile" accept="image/*" style="display:none;" onchange="ckSubirFoto(this)"/>
+      </section>
+
+      <!-- Comentario -->
+      <section class="ck-card">
+        <div class="ck-h">Cuéntale a tu coach <span class="ck-op">opcional</span></div>
+        <div class="ck-sub">Qué te ha costado, qué ha ido bien, cualquier cosa que deba saber.</div>
+        <textarea class="ck-nota" id="ckNota" placeholder="Esta semana he dormido peor por el trabajo, pero he entrenado los cuatro días…"></textarea>
+      </section>
+
+      <div class="ck-pie">
+        <button class="ck-enviar" id="ckBtn" onclick="ckEnviar()">Enviar check-in</button>
+        <div class="ck-aviso" id="ckAviso">Lo verá tu coach en cuanto lo envíes.</div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div id="toast" class="toast"></div>
+<script>
+const API = 'https://nutrientrena-production.up.railway.app/api';
+const token = localStorage.getItem('token');
+function headers(){ return {'Authorization':'Bearer '+token,'Content-Type':'application/json'}; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function toast(msg, mal){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show'+(mal?' err':'');
+  clearTimeout(el._t); el._t=setTimeout(function(){ el.className='toast'; },3200);
+}
+function logout(){ ['token','refresh_token','role_id'].forEach(function(k){localStorage.removeItem(k);}); location.href='login.html'; }
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+/* ── Lo que se pregunta ─────────────────────────────────────────────────────
+   Las mismas cuatro puntuaciones que el coach ve en su bandeja. NINGUNA viene
+   elegida: un deslizador puesto en 5 de salida es una respuesta que el cliente
+   no ha dado, y al coach le llega como si la hubiera dado. */
+const ESCALAS = [
+  { k:'energy', etq:'Energía',                   ayuda:'0 arrastrándote · 10 a tope' },
+  { k:'effort', etq:'Esfuerzo en los entrenos',  ayuda:'0 muy flojo · 10 al límite' },
+  { k:'hunger', etq:'Hambre',                    ayuda:'0 saciado · 10 con mucha hambre' },
+  { k:'sleep',  etq:'Descanso',                  ayuda:'0 fatal · 10 he dormido genial' }
+];
+const MEDIDAS = [
+  { k:'body_fat',    etq:'% Grasa',       ph:'%'  },
+  { k:'muscle_mass', etq:'Masa muscular', ph:'kg' },
+  { k:'waist',       etq:'Cintura',       ph:'cm' },
+  { k:'chest',       etq:'Pecho',         ph:'cm' },
+  { k:'hips',        etq:'Cadera',        ph:'cm' },
+  { k:'arms',        etq:'Brazos',        ph:'cm' },
+  { k:'legs',        etq:'Piernas',       ph:'cm' }
+];
+const FOTOS = [
+  { k:'frontal', etq:'Frontal' },
+  { k:'lateral', etq:'Lateral' },
+  { k:'espalda', etq:'Espalda' }
+];
+
+var _puntos = {};   // escala → 0..10
+var _fotos  = {};   // frontal/lateral/espalda → url
+var _fotoActiva = null;
+
+function pintarEscalas(){
+  document.getElementById('ckEscalas').innerHTML = ESCALAS.map(function(e){
+    var botones = '';
+    for (var n = 0; n <= 10; n++) {
+      botones += '<button type="button" class="ck-num" data-k="'+e.k+'" data-n="'+n+'" '
+               + 'onclick="ckElegir(\'' + e.k + '\',' + n + ')">' + n + '</button>';
+    }
+    return '<div class="ck-esc">'
+      + '<div class="ck-esc-cab"><b>'+esc(e.etq)+'</b><small>'+esc(e.ayuda)+'</small></div>'
+      + '<div class="ck-nums">'+botones+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+function ckElegir(clave, n){
+  /* Volver a pulsar el mismo número lo quita: si no, una equivocación no se
+     puede deshacer y el cliente manda un dato que no quería mandar. */
+  if (_puntos[clave] === n) delete _puntos[clave]; else _puntos[clave] = n;
+  document.querySelectorAll('.ck-num[data-k="'+clave+'"]').forEach(function(b){
+    b.classList.toggle('on', _puntos[clave] === Number(b.dataset.n));
+  });
+}
+
+function pintarMedidas(){
+  document.getElementById('ckMedidas').innerHTML = MEDIDAS.map(function(m){
+    return '<label>'+esc(m.etq)
+      + '<input id="ck_'+m.k+'" type="number" step="0.1" min="0" inputmode="decimal" placeholder="'+esc(m.ph)+'"></label>';
+  }).join('');
+}
+
+function pintarFotos(){
+  document.getElementById('ckFotos').innerHTML = FOTOS.map(function(f){
+    var url = _fotos[f.k];
+    return '<div class="ck-foto" id="ckf-'+f.k+'" onclick="ckPedirFoto(\''+f.k+'\')">'
+      + (url ? '<img src="'+esc(url)+'" alt="">'
+             + '<button class="quitar" onclick="event.stopPropagation();ckQuitarFoto(\''+f.k+'\')" aria-label="Quitar">&#x2715;</button>'
+             : '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'
+             + esc(f.etq))
+      + '</div>';
+  }).join('');
+}
+
+function ckPedirFoto(clave){ _fotoActiva = clave; document.getElementById('ckFile').click(); }
+function ckQuitarFoto(clave){ delete _fotos[clave]; pintarFotos(); }
+
+async function ckSubirFoto(input){
+  var file = input.files[0];
+  if (!file || !_fotoActiva) return;
+  var clave = _fotoActiva;
+  toast('Subiendo foto…');
+  try{
+    var fd = new FormData(); fd.append('file', file); fd.append('folder','checkins');
+    var up = await fetch(API+'/files/upload', {method:'POST', headers:{Authorization:'Bearer '+token}, body:fd});
+    var ud = await up.json();
+    if(!up.ok || !(ud.data && ud.data.url)) throw new Error(ud.message||'');
+    _fotos[clave] = ud.data.url;
+    pintarFotos();
+    toast('Foto añadida');
+  }catch(e){
+    /* Que se vea el motivo: "no se pudo" a secas deja al cliente probando la
+       misma foto una y otra vez. */
+    toast('No se pudo subir la foto'+(e.message?': '+e.message:''), true);
+  }
+  finally{ input.value=''; _fotoActiva=null; }
+}
+
+/* ── Enviar ─────────────────────────────────────────────────────────────── */
+async function ckEnviar(){
+  var cuerpo = {}, algo = false;
+
+  var peso = parseFloat(document.getElementById('ckPeso').value);
+  if (!isNaN(peso) && peso > 0) { cuerpo.weight = peso; algo = true; }
+
+  ESCALAS.forEach(function(e){
+    if (_puntos[e.k] !== undefined) { cuerpo[e.k] = _puntos[e.k]; algo = true; }
+  });
+  MEDIDAS.forEach(function(m){
+    var v = parseFloat(document.getElementById('ck_'+m.k).value);
+    if (!isNaN(v) && v > 0) { cuerpo[m.k] = v; algo = true; }
+  });
+  FOTOS.forEach(function(f){
+    if (_fotos[f.k]) { cuerpo['photo_'+f.k] = _fotos[f.k]; algo = true; }
+  });
+  var nota = document.getElementById('ckNota').value.trim();
+  if (nota) { cuerpo.notes = nota; algo = true; }
+
+  if (!algo) { toast('Rellena al menos una cosa antes de enviarlo', true); return; }
+
+  var btn = document.getElementById('ckBtn');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try{
+    var r = await fetch(API+'/client/checkin', {method:'POST', headers:headers(), body:JSON.stringify(cuerpo)});
+    if(!r.ok) throw new Error();
+    toast('Check-in enviado a tu coach');
+    /* Se vuelve al inicio: ahí es donde ve que la tarea ya está cumplida.
+       Dejarle en el formulario recién enviado invita a mandarlo dos veces. */
+    setTimeout(function(){ location.href='client-home.html'; }, 900);
+  }catch(e){
+    toast('No se pudo enviar. Inténtalo otra vez.', true);
+    btn.disabled = false; btn.textContent = 'Enviar check-in';
+  }
+}
+
+/* ── Arranque ───────────────────────────────────────────────────────────────
+   El formulario SIEMPRE arranca en blanco: se está registrando lo de hoy, no
+   editando lo de la última vez. Lo anterior se consulta en Progreso. */
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+async function ckArrancar(){
+  var hoy = new Date();
+  document.getElementById('ckFecha').textContent =
+    DIAS[hoy.getDay()] + ', ' + hoy.getDate() + ' de ' + MESES[hoy.getMonth()];
+
+  pintarEscalas(); pintarMedidas(); pintarFotos();
+
+  try{
+    var r = await fetch(API+'/auth/me', {headers:headers()});
+    var d = await r.json(); var u = d.data || d;
+    var nombre = u.name || u.email || 'Cliente';
+    document.getElementById('sidebarName').textContent = nombre;
+    var av = document.getElementById('sidebarAvatar');
+    if (u.photo) { av.innerHTML = '<img src="'+esc(u.photo)+'" alt="">'; av.style.background='transparent'; }
+    else { av.textContent = (nombre.trim()[0]||'C').toUpperCase(); }
+  }catch(e){}
+
+  /* Si ya mandó uno hoy se le avisa, pero no se le rellena el formulario ni se
+     le bloquea: puede haberse dejado las fotos o querer corregir el peso. */
+  try{
+    var rp = await fetch(API+'/client/progress', {headers:headers()});
+    var dp = await rp.json();
+    var ultimo = (dp.data||{}).ultimo_checkin;
+    var hoyIso = new Date().getFullYear()+'-'
+      + String(new Date().getMonth()+1).padStart(2,'0')+'-'
+      + String(new Date().getDate()).padStart(2,'0');
+    if (ultimo && String(ultimo).slice(0,10) === hoyIso) {
+      document.getElementById('ckYa').style.display = 'block';
+    }
+  }catch(e){}
+}
+ckArrancar();
+</script>
+<script src="js/chat-badge.js"></script>
+</body>
+</html>

@@ -114,9 +114,6 @@
     .bar-lbl{font-size:11px;color:#9CA3AF;}
     .chart-empty{color:#9CA3AF;font-size:13px;text-align:center;padding:24px 0;}
 
-    .reg-row{display:flex;gap:10px;margin-top:12px;}
-    .reg-row input{flex:1;padding:12px 14px;border:1px solid #E5E7EB;border-radius:10px;font-size:15px;color:#111;outline:none;font-family:inherit;background:#F9FAFB;}
-    .reg-row input:focus{border-color:var(--indigo);background:#fff;}
     .btn-green{display:inline-flex;align-items:center;gap:6px;padding:12px 18px;border-radius:10px;border:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
     .btn-green:hover{background:#047857;}
     .btn-green:disabled{opacity:.6;cursor:default;}
@@ -153,6 +150,14 @@
       .content{padding:18px 14px 40px;}
       .page-head h1{font-size:22px;}
     }
+    /* Progreso enseña lo registrado; para registrar se va al check-in. */
+    .pg-ir-ck{display:flex;align-items:center;gap:14px;text-decoration:none;
+      background:var(--green);color:#fff;border-radius:14px;padding:15px 18px;margin-bottom:16px;
+      transition:background .15s;}
+    .pg-ir-ck:hover{background:#047857;}
+    .pg-ir-ck b{display:block;font-size:15px;font-weight:800;}
+    .pg-ir-ck span{display:block;font-size:12.5px;opacity:.85;margin-top:2px;}
+    .pg-ir-ck svg{margin-left:auto;flex-shrink:0;}
   </style>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
@@ -192,6 +197,14 @@
   </div>
 
   <div class="content">
+      <a class="pg-ir-ck" href="client-checkin.html">
+        <div>
+          <b>Registrar un check-in</b>
+          <span>Peso, sensaciones, medidas y fotos</span>
+        </div>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+
     <div class="content-inner">
       <div class="page-head"><h1>Mi Progreso</h1><p>Tu evolución</p></div>
 
@@ -211,10 +224,6 @@
           <div id="pgChart"></div>
           <div class="pg-obj" id="pgObj"></div>
         </div>
-        <div class="reg-row">
-          <input id="wInput" type="number" step="0.1" min="0" placeholder="Tu peso (kg)"/>
-          <button class="btn-green" id="wBtn" onclick="registrarPeso()">+ Registrar</button>
-        </div>
       </div>
 
       <!-- Fuerza · resumen 6 semanas -->
@@ -227,22 +236,8 @@
       <div class="card" id="measCard">
         <div class="card-head">
           <div class="card-title">Medidas</div>
-          <button class="btn-indigo" id="measToggle" onclick="toggleMeasForm()">+ Registrar</button>
         </div>
         <div id="pgMeas"></div>
-        <div id="measForm" style="display:none;">
-          <div class="meas-grid">
-            <label>% Grasa<input id="m_body_fat" type="number" step="0.1" min="0" placeholder="—"></label>
-            <label>Masa muscular<input id="m_muscle_mass" type="number" step="0.1" min="0" placeholder="kg"></label>
-            <label>Cintura<input id="m_waist" type="number" step="0.1" min="0" placeholder="cm"></label>
-            <label>Pecho<input id="m_chest" type="number" step="0.1" min="0" placeholder="cm"></label>
-            <label>Cadera<input id="m_hips" type="number" step="0.1" min="0" placeholder="cm"></label>
-            <label>Brazos<input id="m_arms" type="number" step="0.1" min="0" placeholder="cm"></label>
-            <label>Piernas<input id="m_legs" type="number" step="0.1" min="0" placeholder="cm"></label>
-          </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-            <button class="btn-green" id="measBtn" onclick="guardarMedidas()">Guardar medidas</button>
-          </div>
         </div>
       </div>
 
@@ -253,13 +248,8 @@
       <div class="card" id="feelCard">
         <div class="card-head">
           <div class="card-title">Cómo ha ido la semana</div>
-          <button class="btn-indigo" id="feelToggle" onclick="toggleFeelForm()">+ Registrar</button>
         </div>
-        <div id="pgFeel" class="pg-empty">Cuéntale a tu coach cómo te has encontrado: energía, esfuerzo en los entrenos, hambre y descanso.</div>
-        <div id="feelForm" style="display:none;flex-direction:column;gap:14px;margin-top:6px;"></div>
-        <div id="feelActions" style="display:none;justify-content:flex-end;margin-top:12px;">
-          <button class="btn-green" id="feelBtn" onclick="guardarSensaciones()">Guardar</button>
-        </div>
+        <div id="pgFeel" class="pg-empty">Cuando envíes un check-in con tus sensaciones —energía, esfuerzo, hambre y descanso— aparecerán aquí.</div>
       </div>
 
 
@@ -445,7 +435,7 @@
   function renderMeasurements(){
     var list=_data.measurements||[];
     var card=document.getElementById('measCard');
-    if(!list.length){ document.getElementById('pgMeas').innerHTML='<div class="pg-empty">Aún no has registrado medidas. Pulsa «+ Registrar».</div>'; return; }
+    if(!list.length){ document.getElementById('pgMeas').innerHTML='<div class="pg-empty">Aún no has registrado medidas. Las tomas al enviar tu check-in.</div>'; return; }
     // En estas medidas subir es lo deseable; en el resto (cintura, % grasa…) bajar.
     var HIGHER_BETTER = ['muscle_mass','arms','chest','legs'];
     document.getElementById('pgMeas').innerHTML='<div class="pg-meas">'+list.map(function(m){
@@ -484,88 +474,6 @@
     renderSummary(); renderWeightSection(); renderStrength(); renderMeasurements(); renderPhotos();
   }
 
-  function toggleMeasForm(){
-    var f=document.getElementById('measForm'), b=document.getElementById('measToggle');
-    var open = f.style.display==='none';
-    f.style.display = open ? '' : 'none';
-    b.textContent = open ? 'Cancelar' : '+ Registrar';
-  }
-  const MEAS_KEYS=['body_fat','muscle_mass','waist','chest','hips','arms','legs'];
-  async function guardarMedidas(){
-    var body={}, any=false;
-    MEAS_KEYS.forEach(function(k){
-      var v=parseFloat(document.getElementById('m_'+k).value);
-      if(!isNaN(v) && v>0){ body[k]=v; any=true; }
-    });
-    if(!any){ toast('Introduce al menos una medida', true); return; }
-    var btn=document.getElementById('measBtn'); btn.disabled=true; btn.textContent='Guardando…';
-    try{
-      const r=await fetch(API+'/client/checkin',{method:'POST',headers:headers(),body:JSON.stringify(body)});
-      if(!r.ok) throw new Error();
-      MEAS_KEYS.forEach(function(k){ document.getElementById('m_'+k).value=''; });
-      toggleMeasForm();
-      toast('Medidas guardadas');
-      await loadProgress();
-    }catch(e){ toast('No se pudieron guardar', true); }
-    finally{ btn.disabled=false; btn.textContent='Guardar medidas'; }
-  }
-
-  // ── Cómo ha ido la semana ──────────────────────────────────────────────────
-  const FEEL=[
-    {k:'energy', etq:'Energía',  ayuda:'0 arrastrándote · 10 a tope'},
-    {k:'effort', etq:'Esfuerzo en los entrenos', ayuda:'0 muy flojo · 10 al límite'},
-    {k:'hunger', etq:'Hambre',   ayuda:'0 saciado · 10 con mucha hambre'},
-    {k:'sleep',  etq:'Descanso', ayuda:'0 fatal · 10 he dormido genial'}
-  ];
-  function toggleFeelForm(){
-    var f=document.getElementById('feelForm'), a=document.getElementById('feelActions'),
-        b=document.getElementById('feelToggle');
-    var open = f.style.display==='none';
-    if(open && !f.innerHTML){
-      f.innerHTML = FEEL.map(function(e){ return ''
-        + '<div>'
-        +   '<div style="display:flex;align-items:baseline;gap:8px;">'
-        +     '<span style="font-size:12px;font-weight:700;color:#6B7280;">'+e.etq+'</span>'
-        +     '<span id="f-v-'+e.k+'" style="margin-left:auto;font-size:15px;font-weight:800;color:#4F46E5;">5</span>'
-        +   '</div>'
-        +   '<input type="range" id="f_'+e.k+'" min="0" max="10" step="1" value="5" '
-        +     'oninput="document.getElementById(\'f-v-'+e.k+'\').textContent=this.value" '
-        +     'style="width:100%;margin-top:4px;accent-color:#4F46E5;"/>'
-        +   '<div style="font-size:11px;color:#9CA3AF;">'+e.ayuda+'</div>'
-        + '</div>';
-      }).join('');
-    }
-    f.style.display = open ? 'flex' : 'none';
-    a.style.display = open ? 'flex' : 'none';
-    b.textContent = open ? 'Cancelar' : '+ Registrar';
-  }
-  async function guardarSensaciones(){
-    var body={};
-    FEEL.forEach(function(e){ body[e.k]=parseInt(document.getElementById('f_'+e.k).value,10); });
-    var btn=document.getElementById('feelBtn'); btn.disabled=true; btn.textContent='Guardando…';
-    try{
-      const r=await fetch(API+'/client/checkin',{method:'POST',headers:headers(),body:JSON.stringify(body)});
-      if(!r.ok) throw new Error();
-      toggleFeelForm();
-      toast('Enviado a tu coach');
-      await loadProgress();
-    }catch(e){ toast('No se pudo guardar', true); }
-    finally{ btn.disabled=false; btn.textContent='Guardar'; }
-  }
-
-  async function registrarPeso(){
-    var v=parseFloat(document.getElementById('wInput').value);
-    if(!(v>0)){ toast('Indica un peso válido', true); return; }
-    var btn=document.getElementById('wBtn'); btn.disabled=true; btn.textContent='Guardando…';
-    try{
-      const r=await fetch(API+'/client/checkin',{method:'POST',headers:headers(),body:JSON.stringify({weight:v})});
-      if(!r.ok) throw new Error();
-      document.getElementById('wInput').value='';
-      toast('Peso registrado');
-      await loadProgress();
-    }catch(e){ toast('No se pudo registrar', true); }
-    finally{ btn.disabled=false; btn.textContent='+ Registrar'; }
-  }
   function pickPhoto(){ document.getElementById('photoFile').click(); }
   async function uploadPhoto(input){
     var file=input.files[0]; if(!file) return;

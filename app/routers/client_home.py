@@ -420,6 +420,12 @@ def client_progress(db: Session = Depends(get_db), current_user: User = Depends(
 
     return send_response({
         "stats": {"weeks": weeks, "kg_lost": kg_lost, "workouts": workouts},
+        # Cuándo fue el último. La pantalla de check-in lo usa para avisar de
+        # que ya mandó uno hoy —sin bloquearle: puede haberse dejado las fotos—.
+        # Se da la fecha suelta y no el check-in entero: ese formulario arranca
+        # SIEMPRE en blanco, así que sus valores no le hacen falta.
+        "ultimo_checkin": (checks[-1].checkin_date.isoformat()
+                           if checks and checks[-1].checkin_date else None),
         "summary": {
             "peso_inicio": peso_inicio,
             "peso_actual": peso_actual,

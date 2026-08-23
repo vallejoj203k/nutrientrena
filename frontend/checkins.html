@@ -234,7 +234,7 @@
     .review-modal-overlay.open{opacity:1;pointer-events:all;}
     .review-modal{background:#fff;border-radius:20px;width:100%;max-width:680px;overflow:hidden;transform:translateY(20px);transition:transform .25s;margin:auto;}
     .review-modal-overlay.open .review-modal{transform:translateY(0);}
-    .rm-header{background:linear-gradient(115deg,#4F46E5 0%,#7C3AED 32%,#F59E0B 70%,#10B981 100%);padding:22px 24px;color:#fff;position:relative;display:flex;align-items:center;gap:13px;}
+    .rm-header{background:linear-gradient(110deg,#4F46E5 0%,#6366F1 28%,#A855F7 52%,#EC4899 74%,#F59E0B 100%);padding:22px 24px;color:#fff;position:relative;display:flex;align-items:center;gap:13px;}
     .rm-avatar{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.24);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;}
     /* Cada dato vive en su tarjeta y cada tarjeta tiene su propio historial:
        el coach mira una cosa a la vez, no las doce a la vez. */
@@ -287,8 +287,8 @@
     .rm-coach-notes{width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;outline:none;min-height:76px;transition:.15s;color:#111;}
     .rm-coach-notes:focus{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.08);}
     .rm-footer{padding:14px 20px;border-top:1px solid #E5E7EB;display:flex;gap:10px;justify-content:flex-end;align-items:center;}
-    .btn-mark-done{padding:10px 22px;background:#059669;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s;}
-    .btn-mark-done:hover{background:#047857;}
+    .btn-mark-done{padding:10px 22px;background:var(--indigo,#4F46E5);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s;}
+    .btn-mark-done:hover{background:#4338CA;}
     /* Done modal */
     .done-modal-content{text-align:center;padding:36px 28px 28px;}
     .done-modal-icon{font-size:52px;margin-bottom:14px;}
@@ -1755,7 +1755,7 @@ function _revAvatarHtml(f, idx) {
    revés, y pintarlas todas del mismo color obligaría a leer el número. */
 var _REV_METRICAS = [
   { k: 'energy', etq: 'Energía',  icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
-  { k: 'effort', etq: 'Esfuerzo', icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5M3 8v8M6 5v14M18 5v14M21 8v8"/></svg>' },
+  { k: 'effort', etq: 'Esfuerzo', icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.66 5.34a2 2 0 0 1 0 2.83l-1.42 1.41-2.82-2.83 1.41-1.41a2 2 0 0 1 2.83 0z"/><path d="M8.17 15.83l-1.41 1.41a2 2 0 1 1-2.83-2.83l1.41-1.41z"/><path d="m20.5 3.5-1 1M4.5 19.5l-1 1"/></svg>' },
   { k: 'hunger', etq: 'Hambre',   icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7a3 3 0 0 0 6 0V2M6 9v13M18 2c-1.7 0-3 2.2-3 5s1.3 5 3 5v10"/></svg>' },
   { k: 'sleep',  etq: 'Sueño',    icono: '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>' }
 ];
@@ -1767,12 +1767,25 @@ var _REV_MEDIDAS = [
   { k: 'legs',     etq: 'Piernas', suf: ' cm' },
   { k: 'body_fat', etq: 'Grasa',   suf: '%'   }
 ];
+/* Cada métrica tiene SU color, fijo, como en el diseño del cliente: energía
+   ámbar, esfuerzo índigo, hambre verde, descanso violeta. Antes se pintaban
+   como un semáforo según el número —rojo si iba mal, verde si iba bien— y eso
+   es un juicio que la pantalla no tiene por qué hacer: un 4 de hambre puede
+   ser estupendo en definición y malo en volumen, y quien lo sabe es el coach.
+   El color sirve para distinguir las cuatro de un vistazo, no para opinar. */
+var _REV_COLOR_METRICA = {
+  energy: { linea: '#F59E0B', fondo: '#FFFBEB' },
+  effort: { linea: '#4F46E5', fondo: '#EEF2FF' },
+  hunger: { linea: '#10B981', fondo: '#ECFDF5' },
+  sleep:  { linea: '#8B5CF6', fondo: '#F5F3FF' }
+};
 var _REV_FONDO = { '#059669': '#ECFDF5', '#D97706': '#FFFBEB', '#DC2626': '#FEF2F2' };
 
 function _revColorScore(clave, v) {
-  var mal  = clave === 'hunger' ? v >= 8 : v <= 4;
-  var bien = clave === 'hunger' ? v <= 5 : v >= 7;
-  return mal ? '#DC2626' : (bien ? '#059669' : '#D97706');
+  return (_REV_COLOR_METRICA[clave] || {}).linea || '#6B7280';
+}
+function _revFondoScore(clave) {
+  return (_REV_COLOR_METRICA[clave] || {}).fondo || '#F3F4F6';
 }
 
 function _revFotosDe(ci) {
@@ -1790,7 +1803,7 @@ function _revChipsHtml(f) {
     var v     = Number(f[m.k]);
     var color = _revColorScore(m.k, v);
     return '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;' +
-           'color:' + color + ';background:' + _REV_FONDO[color] + ';">' +
+           'color:' + color + ';background:' + _revFondoScore(m.k) + ';">' +
            m.etq + ' ' + v + '</span>';
   });
   if (!chips.length) return '';
@@ -1955,11 +1968,14 @@ function _revPintarModal(ci, found) {
 
   /* Las cuatro puntuaciones que ha contestado el cliente. */
   var scoreHtml = _REV_METRICAS.filter(function(m){ return ci[m.k] != null; }).map(function(m) {
-    var col = _revColorScore(m.k, Number(ci[m.k]));
-    return '<div class="rm-score" style="background:' + _REV_FONDO[col] + ';">' +
+    var col = _revColorScore(m.k);
+    /* El NÚMERO va en negro, como en el diseño. En color competía con el icono
+       y con la barra, y encima daba a entender un juicio —verde bien, rojo
+       mal— que no le toca dar a la pantalla. */
+    return '<div class="rm-score" style="background:' + _revFondoScore(m.k) + ';">' +
       '<div style="color:' + col + ';font-size:14px;line-height:1;">' + m.icono + '</div>' +
-      '<div class="rm-score-val" style="color:' + col + ';margin-top:7px;">' + Number(ci[m.k]) +
-        '<span style="font-size:12px;opacity:.6;">/10</span></div>' +
+      '<div class="rm-score-val" style="margin-top:7px;">' + Number(ci[m.k]) +
+        '<span style="font-size:12px;color:#9CA3AF;font-weight:700;">/10</span></div>' +
       '<div class="rm-score-lbl">' + m.etq + '</div>' +
       '<div class="rm-score-bar" style="background:' + col + ';width:' + (Number(ci[m.k]) * 10) + '%;"></div>' +
     '</div>';

@@ -14,8 +14,8 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--indigo:#4F46E5;--indigo-dark:#4338CA;--indigo-pale:#EEF2FF;--green:#059669;--green-pale:#D1FAE5;--amber:#F59E0B;--red:#DC2626;--gray-bg:#F8FAFC;--sidebar-w:240px;}
-    body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;overflow:hidden;}
-    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    body{font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;background:var(--gray-bg);display:flex;height:100vh;height:100dvh;overflow:hidden;}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E5E7EB;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow-y:auto;}
     .sidebar-logo{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;border-bottom:1px solid #EBEBEB;}
     .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
     .sl-txt{display:flex;flex-direction:column;line-height:1.15;}
@@ -39,7 +39,7 @@
     .logout-btn{background:none;border:none;color:#9CA3AF;cursor:pointer;padding:4px;border-radius:4px;display:flex;}
     .logout-btn:hover{color:#EF4444;}
 
-    .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+    .main{flex:1;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
     .topbar{background:#fff;border-bottom:1px solid #E5E7EB;padding:0 28px;height:64px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
     .menu-btn{display:none;background:none;border:none;cursor:pointer;color:#374151;padding:6px;border-radius:8px;}
     .menu-btn:hover{background:#F3F4F6;}
@@ -92,7 +92,19 @@
       .chat-inner,.composer-inner{padding-left:14px;padding-right:14px;}
       .msg{max-width:82%;}
     }
+    /* iOS: la barra de gestos del iPhone se come el borde de abajo. */
+    @supports(padding:max(0px)){
+      .composer{padding-bottom:max(14px, env(safe-area-inset-bottom));}
+    }
+    /* Un aviso sonoro que no se puede callar se acaba callando cerrando la
+       pestaña, y entonces se pierde el chat entero. */
+    .btn-sonido{margin-left:auto;width:36px;height:36px;border-radius:50%;border:1px solid #E5E7EB;
+      background:#fff;color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;transition:.15s;padding:0;}
+    .btn-sonido:hover{border-color:var(--indigo);color:var(--indigo);}
+    .btn-sonido.mudo{color:#C6CAD1;}
   </style>
+<script src="js/aviso-chat.js"></script>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
 </head>
@@ -136,6 +148,7 @@
       <div class="ch-name" id="coachName">Tu coach</div>
       <div class="ch-status" id="coachStatus"><span class="live"></span> Activo</div>
     </div>
+    <button class="btn-sonido" id="btnSonido" onclick="alternarSonido()" aria-label="Aviso sonoro"></button>
   </div>
 
   <div class="chat-body" id="chatBody">
@@ -219,6 +232,16 @@
       var list=(d.data&&d.data.messages)||[];
       // Solo re-render si cambió el número de mensajes (evita parpadeo).
       if(list.length!==_lastCount){
+        /* Suena solo si lo NUEVO viene del coach, y nunca al abrir la
+           pantalla: entrar en el chat y oír siete pitidos seguidos por el
+           historial es justo lo que no se quiere. */
+        if(!initial && list.length>_lastCount && window.avisoChat){
+          var coachId=(_coach&&_coach.user_id)||null;
+          var nuevos=list.slice(_lastCount);
+          if(nuevos.some(function(m){ return coachId && m.sender_user_id===coachId; })){
+            window.avisoChat.sonar();
+          }
+        }
         _msgs=list; _lastCount=list.length; renderMessages(true);
         markRead();
       }
@@ -272,6 +295,30 @@
       document.getElementById('chatInner').innerHTML='<div class="chat-empty">No se pudo abrir el chat.</div>';
     }
   }
+
+
+/* ── Aviso sonoro ─────────────────────────────────────────────────────────── */
+var _ICONO_SUENA = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+var _ICONO_MUDO  = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+
+function pintarBotonSonido(){
+  var b=document.getElementById('btnSonido');
+  if(!b || !window.avisoChat) return;
+  var mudo=window.avisoChat.silenciado();
+  b.innerHTML = mudo ? _ICONO_MUDO : _ICONO_SUENA;
+  b.classList.toggle('mudo', mudo);
+  b.title = mudo ? 'Avisos en silencio — pulsa para activarlos'
+                 : 'Suena al llegar un mensaje — pulsa para silenciar';
+}
+function alternarSonido(){
+  if(!window.avisoChat) return;
+  var mudo=window.avisoChat.alternar();
+  pintarBotonSonido();
+  /* Al activarlo suena una vez: así se oye a qué volumen va a sonar y, de
+     paso, se comprueba que este dispositivo lo deja sonar. */
+  if(!mudo) window.avisoChat.sonar();
+}
+pintarBotonSonido();
 
   loadProfile(); initChat();
   window.addEventListener('beforeunload', function(){ if(_poll) clearInterval(_poll); });

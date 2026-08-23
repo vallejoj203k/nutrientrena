@@ -98,6 +98,8 @@
 
     .ci-card{background:#FFF7ED;border:1px solid #FCE3BE;border-radius:14px;padding:15px;margin-bottom:12px;}
     .ci-card.done{background:#ECFDF3;border-color:#C6F0D8;}
+    .ci-btn.ghost{background:#fff;color:#374151;border:1px solid #D9DDE3;font-weight:600;}
+    .ci-btn.ghost:hover{border-color:var(--indigo);color:var(--indigo);}
     .ci-top{display:flex;gap:12px;}
     .ci-ico{width:46px;height:46px;border-radius:12px;background:var(--amber);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .ci-card.done .ci-ico{background:var(--green);}
@@ -326,13 +328,15 @@
         + '<span class="ci-tag">'+(t.overdue?'Atrasado':'Pendiente')+'</span></div>'
         + '<div class="ci-txt">Tu coach te pide registrar '+left+' cosa'+(left!==1?'s':'')+':</div>'
         + '<div class="ci-items">'+list+'</div></div></div>'
-        + '<div class="ci-foot">'+coach+'<a class="ci-btn" href="client-progreso.html">Registrar →</a></div></div>';
+        + '<div class="ci-foot">'+coach+'<a class="ci-btn" href="client-checkin.html">Registrar →</a></div></div>';
     }
     if (req.length){
       return '<div class="ci-card done"><div class="ci-top"><div class="ci-ico">'+IC.check.replace('width="18" height="18"','width="22" height="22"')+'</div>'
         + '<div style="flex:1;"><div class="ci-h"><b>'+esc(req[0].title||'Registrar evolución')+'</b><span class="ci-tag">Hecho</span></div>'
         + '<div class="ci-txt">Registraste todo lo que te pidió tu coach. ¡Bien hecho!</div></div></div>'
-        + '<div class="ci-foot">'+coach+'<a class="ci-btn" style="background:var(--green);" href="client-progreso.html">Ver progreso →</a></div></div>';
+        + '<div class="ci-foot">'+coach
+        +   '<a class="ci-btn ghost" href="client-checkin.html">Añadir o corregir</a>'
+        +   '<a class="ci-btn" style="background:var(--green);" href="client-progreso.html">Ver progreso →</a></div></div>';
     }
 
     // Sin petición concreta: check-in semanal genérico
@@ -345,13 +349,15 @@
       return '<div class="ci-card done"><div class="ci-top"><div class="ci-ico">'+IC.check.replace('width="18" height="18"','width="22" height="22"')+'</div>'
         + '<div style="flex:1;"><div class="ci-h"><b>Check-in semanal</b><span class="ci-tag">Hecho</span></div>'
         + '<div class="ci-txt">Ya enviaste tu check-in de esta semana. ¡Bien hecho!</div></div></div>'
-        + '<div class="ci-foot">'+coach+'<a class="ci-btn" style="background:var(--green);" href="client-progreso.html">Ver progreso →</a></div></div>';
+        + '<div class="ci-foot">'+coach
+        +   '<a class="ci-btn ghost" href="client-checkin.html">Añadir o corregir</a>'
+        +   '<a class="ci-btn" style="background:var(--green);" href="client-progreso.html">Ver progreso →</a></div></div>';
     }
     return '<div class="ci-card"><div class="ci-top"><div class="ci-ico">'+IC.scale+'</div>'
       + '<div style="flex:1;"><div class="ci-h"><b>Check-in semanal</b><span class="ci-tag">Pendiente</span></div>'
       + '<div class="ci-txt">Tu coach espera tu reporte. Comparte lo que puedas: peso, fotos, medidas o un comentario.</div>'
       + '<div class="ci-chips">'+chips+'</div></div></div>'
-      + '<div class="ci-foot">'+coach+'<a class="ci-btn" href="client-progreso.html">Hacer check-in →</a></div></div>';
+      + '<div class="ci-foot">'+coach+'<a class="ci-btn" href="client-checkin.html">Hacer check-in →</a></div></div>';
   }
 
   // ── Otras peticiones del coach (rutina, nutrición, formulario, mensaje…) ──

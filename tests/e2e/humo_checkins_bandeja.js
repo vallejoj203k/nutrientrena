@@ -94,27 +94,25 @@ const hoy = () => new Date().toISOString().slice(0, 10);
     { email: `cli.ci.${SUF}@nutrientrena-qa.com`, password: 'Cliente123!' });
   const ctxCli = await b.newContext({ viewport: { width: 1400, height: 950 } }); await rutear(ctxCli);
   const p2 = await ctxCli.newPage(); p2.on('pageerror', e => errs.push('cliente: ' + e));
-  await p2.goto(FRONT + '/client-progreso.html');
+  /* El check-in se rellena en SU pantalla, no en Progreso. Antes estaba
+     partido en tres trozos dentro del historial y cada uno se guardaba por su
+     cuenta; ahora es un formulario y un botón. */
+  await p2.goto(FRONT + '/client-checkin.html');
   await p2.evaluate(t => { localStorage.setItem('token', t); localStorage.setItem('role_id', '6'); }, lgcli.data.token);
-  await p2.goto(FRONT + '/client-progreso.html');
-  await p2.locator('#feelToggle').waitFor({ state: 'visible', timeout: 25000 });
+  await p2.goto(FRONT + '/client-checkin.html');
+  await p2.locator('#ckPeso').waitFor({ state: 'visible', timeout: 25000 });
+  await p2.waitForTimeout(1500);
 
-  await p2.fill('#wInput', '68.4');
-  await p2.click('#wBtn');
-  await p2.waitForTimeout(2000);
-
-  await p2.click('#feelToggle');
-  await p2.locator('#f_energy').waitFor({ state: 'visible', timeout: 15000 });
   ck('las cuatro preguntas están, y solo esas cuatro',
-     (await p2.locator('#feelForm input[type=range]').count()) === 4);
-  await p2.locator('#f_energy').fill('9');
-  await p2.locator('#f_effort').fill('7');
-  await p2.locator('#f_hunger').fill('3');
-  await p2.locator('#f_sleep').fill('8');
-  ck('el número que se ve va siguiendo a la barra',
-     (await p2.textContent('#f-v-energy')) === '9', await p2.textContent('#f-v-energy'));
-  await p2.click('#feelBtn');
-  await p2.waitForTimeout(2500);
+     (await p2.locator('.ck-esc').count()) === 4);
+  await p2.fill('#ckPeso', '68.4');
+  await p2.click('.ck-num[data-k="energy"][data-n="9"]');
+  await p2.click('.ck-num[data-k="effort"][data-n="7"]');
+  await p2.click('.ck-num[data-k="hunger"][data-n="3"]');
+  await p2.click('.ck-num[data-k="sleep"][data-n="8"]');
+  ck('se ve lo que ha elegido', (await p2.locator('.ck-num.on').count()) === 4);
+  await p2.click('#ckBtn');
+  await p2.waitForTimeout(3000);
 
   await ctxCli.close();
 
@@ -248,6 +246,41 @@ const hoy = () => new Date().toISOString().slice(0, 10);
   ck('y las demás tareas se siguen marcando como siempre',
      (await tareaBici.locator('.det-chk').count()) === 1,
      await tareaBici.innerHTML().catch(() => '—'));
+
+  /* ── Los colores del diseño ────────────────────────────────────────────
+     Cada métrica lleva SU color, fijo. Antes se pintaban como un semáforo
+     según el número —rojo si iba mal, verde si iba bien—, y eso es un juicio
+     que la pantalla no tiene por qué hacer: un 4 de hambre puede ser
+     estupendo en definición y malo en volumen, y quien lo sabe es el coach.
+     Se comprueba con un check-in de números BAJOS, que es donde el semáforo
+     se notaba: si volviera, energía saldría en rojo en vez de en ámbar. */
+  await p.goto(FRONT + '/checkins.html');
+  await p.waitForTimeout(4500);
+  /* A estas alturas el check-in ya se marcó como revisado más arriba, así que
+     está en "Revisados hoy", no en "por revisar". Se abre desde ahí: la ventana
+     es la misma. */
+  const verFlojo = p.locator('#revReceivedCards .ci-card').first().locator('.btn-ver')
+    .or(p.locator('#revDoneCards .ci-card').first().locator('button')).first();
+  if (await verFlojo.count()) {
+    await verFlojo.click();
+    await p.locator('#reviewModal.open').waitFor({ state: 'visible', timeout: 15000 });
+    await p.waitForTimeout(3500);
+    const pintado = await p.evaluate(() =>
+      Array.from(document.querySelectorAll('.rm-score')).map(e => ({
+        etq: e.querySelector('.rm-score-lbl').textContent.trim(),
+        barra: getComputedStyle(e.querySelector('.rm-score-bar')).backgroundColor,
+      })));
+    const porEtq = {}; pintado.forEach(x => { porEtq[x.etq] = x.barra; });
+    ck('CADA MÉTRICA CON SU COLOR, NO UN SEMÁFORO',
+       porEtq['Energía'] === 'rgb(245, 158, 11)' && porEtq['Esfuerzo'] === 'rgb(79, 70, 229)' &&
+       porEtq['Hambre'] === 'rgb(16, 185, 129)' && porEtq['Sueño'] === 'rgb(139, 92, 246)', porEtq);
+    ck('y el número en negro, que no opine el color',
+       await p.evaluate(() => getComputedStyle(document.querySelector('.rm-score-val')).color) === 'rgb(0, 0, 0)');
+    ck('el botón principal es el índigo del diseño',
+       await p.evaluate(() => getComputedStyle(document.getElementById('btnMarkDone')).backgroundColor) === 'rgb(79, 70, 229)');
+  } else {
+    ck('había un check-in con el que comprobar los colores', false, 'no se encontró');
+  }
 
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);

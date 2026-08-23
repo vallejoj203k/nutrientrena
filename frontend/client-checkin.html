@@ -352,9 +352,13 @@ const ESCALAS = [
   { k:'hunger', etq:'Hambre',                    ayuda:'0 saciado · 10 con mucha hambre' },
   { k:'sleep',  etq:'Descanso',                  ayuda:'0 fatal · 10 he dormido genial' }
 ];
+/* Solo lo que se mide con una cinta métrica en casa.
+   El % de grasa y la masa muscular NO están a propósito: hacen falta una
+   báscula de bioimpedancia o unos plicómetros, y pedírselos al cliente lleva a
+   una de dos cosas, las dos malas — o los deja vacíos siempre, o se inventa un
+   número que al coach le llega como una medición. Esos dos los sigue anotando
+   el coach desde la ficha del cliente, que es quien tiene el aparato. */
 const MEDIDAS = [
-  { k:'body_fat',    etq:'% Grasa',       ph:'%'  },
-  { k:'muscle_mass', etq:'Masa muscular', ph:'kg' },
   { k:'waist',       etq:'Cintura',       ph:'cm' },
   { k:'chest',       etq:'Pecho',         ph:'cm' },
   { k:'hips',        etq:'Cadera',        ph:'cm' },

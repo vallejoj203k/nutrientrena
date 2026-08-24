@@ -63,10 +63,23 @@ def test_se_puede_mirar_otro_dia(client, seed, admin_headers):
 
 
 def test_la_tira_marca_cual_se_esta_mirando(client, seed, admin_headers):
-    """Sin esto el cliente pulsa un día y nada le dice que cambió."""
+    """Sin esto el cliente pulsa un día y nada le dice que cambió.
+
+    `week.days` solo trae los siete días de la semana que se está mirando
+    —lunes a domingo de ESTA semana, con week_offset por defecto—, así que el
+    día elegido tiene que caer dentro de esa semana o la lista nunca lo va a
+    traer. "Hoy menos dos días" se salía de ahí un lunes o un martes: caía en
+    la semana anterior y la prueba fallaba por fecha, no por el código. Un
+    día cualquiera de esta semana que no sea hoy prueba lo mismo sin ese
+    problema.
+    """
     suf = uuid.uuid4().hex[:8]
     _dc, _hc, _det, h_cli = _monta(client, admin_headers, suf)
-    otro = date.today() - timedelta(days=2)
+    hoy = date.today()
+    lunes = hoy - timedelta(days=hoy.weekday())
+    otro = lunes + timedelta(days=1)
+    if otro == hoy:
+        otro = lunes + timedelta(days=2)
 
     dias = _inicio(client, h_cli, dia=otro.isoformat())["week"]["days"]
     marcados = [x for x in dias if x.get("is_selected")]

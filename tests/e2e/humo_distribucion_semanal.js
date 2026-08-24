@@ -158,6 +158,48 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('Y LLEGA CON LO QUE SE GUARDÓ, no con el ciclo otra vez',
      guardado[6] === '' && guardado[0] === porDefecto[0], guardado);
 
+  /* ── Y desde la BIBLIOTECA, que es el otro sitio donde se asignan dietas ──
+     Aquí se asigna de una en una y no hay ventana de distribución. Arreglarlo
+     sólo en la ficha dejaba este camino igual de roto: el cliente seguía
+     viendo la misma dieta todos los días. Se reportó así. */
+  const cli2 = await (await ctx.request.post(`${API}/api/users`, { headers: Hc, data: {
+    name: 'Cliente Lib', email: `cli.lib.${SUF}@nutrientrena-qa.com`,
+    password: 'Cliente123!', role_id: 6 } })).json();
+  const lgcli2 = await (await ctx.request.post(`${API}/api/auth/login`, {
+    data: { email: `cli.lib.${SUF}@nutrientrena-qa.com`, password: 'Cliente123!' } })).json();
+
+  const pl = await ctx.newPage(); pl.on('pageerror', e => errs.push(String(e)));
+  await pl.goto(FRONT + '/diets.html');
+  await pl.evaluate(t => { localStorage.setItem('token', t); localStorage.setItem('role_id', '5');
+                           localStorage.removeItem('org_context'); }, lgc.data.token);
+  await pl.goto(FRONT + '/diets.html');
+  await pl.waitForTimeout(5000);
+
+  for (const id of [dietas[0], dietas[1]]) {
+    await pl.evaluate(i => openAssign(i, 'x'), id);
+    await pl.waitForTimeout(800);
+    await pl.selectOption('#assignClientSel', cli2.data.id);
+    await pl.evaluate(() => confirmAssign());
+    await pl.waitForTimeout(2500);
+  }
+  ck('la biblioteca avisa de que ha repartido la semana',
+     /repartida por d/i.test(await pl.textContent('body')),
+     (await pl.textContent('body')).slice(0, 0));
+
+  const pc2 = await ctx.newPage(); pc2.on('pageerror', e => errs.push(String(e)));
+  await pc2.goto(FRONT + '/client-nutricion.html');
+  await pc2.evaluate(t => { localStorage.setItem('token', t); localStorage.setItem('role_id', '6'); }, lgcli2.data.token);
+  await pc2.goto(FRONT + '/client-nutricion.html');
+  await pc2.waitForTimeout(4000);
+  const desdeLib = [];
+  for (let i = 0; i < 2; i++) {
+    await pc2.locator('.wday').nth(i).click();
+    await pc2.waitForTimeout(400);
+    desdeLib.push((await pc2.locator('#daybox .meal-nm').allTextContents()).join(' | ') || '(sin comidas)');
+  }
+  ck('ASIGNANDO DESDE LA BIBLIOTECA EL CLIENTE TAMBIÉN COME DISTINTO CADA DÍA',
+     desdeLib[0] !== desdeLib[1] && desdeLib.every(x => x !== '(sin comidas)'), desdeLib);
+
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);
 })();

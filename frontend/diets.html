@@ -3343,8 +3343,14 @@ async function confirmAssign() {
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({ client_id: clientId }),
     });
-    if (!r.ok) { var j = await r.json(); toast(j.message || 'Error al asignar', 'error'); return; }
-    closeAssign(); toast('Dieta asignada', 'success'); loadDiets();
+    var j = await r.json().catch(function(){ return {}; });
+    if (!r.ok) { toast(j.message || 'Error al asignar', 'error'); return; }
+    closeAssign();
+    /* El mensaje viene del servidor porque puede haber hecho algo más que
+       asignar: si el cliente ya tenía otra dieta, se las reparte por días.
+       Decir siempre "Dieta asignada" ocultaría que le ha cambiado la semana. */
+    toast(j.message || 'Dieta asignada', 'success');
+    loadDiets();
   } catch(e) { toast('Error de conexion', 'error'); }
 }
 

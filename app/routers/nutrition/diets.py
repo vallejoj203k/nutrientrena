@@ -945,6 +945,14 @@ def assign_to_client(
         return send_error("Cliente no encontrado")
 
     new_diet = copy_diet_to_user(db, source, client_detail.user_id, current_user.id)
+    # Con dos o más dietas hay que decir qué día come cada una: si no, todas
+    # valen para los siete días y el cliente sólo ve una.
+    from app.routers.weekly_menus import repartir_en_ciclo
+    repartida = repartir_en_ciclo(db, client_detail, current_user.id)
     db.commit()
     db.refresh(new_diet)
-    return send_response(_serialize(new_diet), "Dieta asignada al cliente")
+    return send_response(
+        _serialize(new_diet),
+        # Se dice, porque el coach acaba de cambiarle la semana al cliente.
+        "Dieta asignada y repartida por días" if repartida else "Dieta asignada al cliente",
+    )

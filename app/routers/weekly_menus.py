@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import Optional, Union
+from typing import List, Optional, Union
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -271,6 +271,104 @@ def client_menu(
     data = _serialize(menu)
     data["assigned_at"] = cm.assigned_at
     return send_response(data, "OK")
+
+
+class _ClientWeekDay(BaseModel):
+    day_index: int
+    name: Optional[str] = None
+    diet_id: Optional[str] = None
+
+
+class _ClientWeekBody(BaseModel):
+    name: Optional[str] = None
+    days: List[_ClientWeekDay]
+
+
+@router.put(
+    "/client/{client_id}",
+    summary="Fijar qué dieta come el cliente cada día",
+    description="Reparte por días las dietas que el cliente YA tiene. No copia nada.",
+)
+def set_client_week(
+    client_id: str,
+    body: _ClientWeekBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    """La distribución semanal desde la ficha del cliente.
+
+    Se separa de `POST /{id}/assign` a propósito: aquél parte de una plantilla
+    de la biblioteca y COPIA sus dietas al cliente. Aquí las dietas ya son del
+    cliente —se acaban de asignar— así que volver a copiarlas dejaría el doble
+    de dietas y el coach vería cada una repetida.
+    """
+    from app.core.dependencies import verify_client_access
+    from app.models.client_menu import ClientMenu
+    from app.models.nutrition.diet import Diet
+    from app.models.user import UserDetail
+
+    verify_client_access(client_id, current_user, db)
+    detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
+    if not detail:
+        return send_error("Cliente no encontrado", code=404)
+
+    # La semana se guarda entera: siete días, cada uno una vez. Guardar media
+    # semana dejaría los días que faltan con lo que hubiera antes, y el coach
+    # no tendría forma de saber qué come su cliente el resto de días.
+    idxs = sorted(d.day_index for d in body.days)
+    if idxs != list(range(7)):
+        return send_error("Hay que mandar los siete días, cada uno una vez", code=422)
+
+    # Cada dieta tiene que ser de ESTE cliente. Sin esto se podría apuntar el
+    # menú de un cliente a la dieta de otro, y el cliente vería comida ajena.
+    ids = {d.diet_id for d in body.days if d.diet_id}
+    if ids:
+        propias = {
+            r[0] for r in db.query(Diet.id).filter(
+                Diet.id.in_(ids), Diet.user_id == detail.user_id).all()
+        }
+        if ids - propias:
+            return send_error("Alguna de las dietas no es de este cliente", code=422)
+
+    cm = (
+        db.query(ClientMenu)
+        .filter(ClientMenu.client_user_detail_id == client_id)
+        .order_by(ClientMenu.assigned_at.desc(), ClientMenu.id.desc())
+        .first()
+    )
+    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == cm.menu_id).first() if cm else None
+
+    # Sólo se reescribe el menú si es de este cliente y de nadie más: si otro
+    # cliente lo comparte, cambiarlo aquí le cambiaría la semana también.
+    if menu is not None:
+        compartido = (
+            db.query(ClientMenu)
+            .filter(ClientMenu.menu_id == menu.id,
+                    ClientMenu.client_user_detail_id != client_id)
+            .first()
+        )
+        if compartido:
+            menu = None
+
+    if menu is None:
+        menu = WeeklyMenu(name=body.name or "Plan semanal", coach_id=current_user.id)
+        db.add(menu)
+        db.flush()
+        db.add(ClientMenu(
+            client_user_detail_id=client_id,
+            menu_id=menu.id,
+            assigned_by_user_id=current_user.id,
+        ))
+    elif body.name:
+        menu.name = body.name
+
+    db.query(WeeklyMenuDay).filter(WeeklyMenuDay.menu_id == menu.id).delete()
+    for d in body.days:
+        db.add(WeeklyMenuDay(menu_id=menu.id, day_index=d.day_index,
+                             name=d.name, diet_id=d.diet_id))
+    db.commit()
+    db.refresh(menu)
+    return send_response(_serialize(menu), "Distribución guardada")
 
 
 @router.delete("/client/{client_id}", summary="Quitar el menú semanal asignado a un cliente")

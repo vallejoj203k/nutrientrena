@@ -306,14 +306,23 @@ def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends
                 "is_today": i == today_idx, "has_diet": diet is not None,
                 "kcal": kcal, "protein": prot, "carbs": carb, "fats": fat, "meals": meals,
             })
-        return send_response({"menu": {"name": menu.name}, "week_start": week_start.isoformat(), "days": days}, "OK")
+        return send_response({"menu": {"name": menu.name}, "week_start": week_start.isoformat(),
+                              "plan_semanal": True, "days": days}, "OK")
 
     # 2) Sin menú semanal: usar las dietas que el coach asignó directamente al
     #    cliente (Diet.user_id == cliente). Es el flujo real de client-profile.
     #    La dieta más reciente es el plan activo, mostrado todos los días.
-    diet = db.query(Diet).filter(
+    #
+    #    Ojo con lo que esto significa: si el coach le asignó VARIAS dietas
+    #    sueltas, el cliente solo ve la última, repetida los siete días, y las
+    #    demás no aparecen por ninguna parte. Para comer distinto cada día hace
+    #    falta un menú semanal (camino 1), que es el que reparte una dieta por
+    #    día. Se devuelve `plan_semanal: False` para que la pantalla lo diga en
+    #    vez de dejar al cliente cambiando de día sin ver ningún cambio.
+    dietas = db.query(Diet).filter(
         Diet.user_id == current_user.id
-    ).order_by(Diet.created_at.desc()).first()
+    ).order_by(Diet.created_at.desc()).all()
+    diet = dietas[0] if dietas else None
     if not diet:
         return send_response(empty, "Sin plan asignado")
 
@@ -326,7 +335,15 @@ def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends
             "is_today": i == today_idx, "has_diet": True,
             "kcal": kcal, "protein": prot, "carbs": carb, "fats": fat, "meals": meals,
         })
-    return send_response({"menu": {"name": diet.title}, "week_start": week_start.isoformat(), "days": days}, "OK")
+    return send_response({
+        "menu": {"name": diet.title},
+        "week_start": week_start.isoformat(),
+        "plan_semanal": False,
+        # Cuántas dietas sueltas tiene asignadas. Si son varias, el coach creó
+        # material que el cliente no puede llegar a ver.
+        "dietas_asignadas": len(dietas),
+        "days": days,
+    }, "OK")
 
 
 @router.get("/progress", summary="Progreso del cliente", description="Evolución del cliente: estadísticas, serie de peso y fotos de progreso.")

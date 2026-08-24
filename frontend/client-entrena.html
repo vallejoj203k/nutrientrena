@@ -131,11 +131,16 @@
     .vid-box{position:relative;width:100%;max-width:520px;}
     .vid-frame{width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;}
     .vid-frame iframe,.vid-frame video{width:100%;height:100%;border:none;display:block;}
-    .vid-close{position:absolute;top:-42px;right:0;width:34px;height:34px;border-radius:50%;
-      background:rgba(255,255,255,.12);border:none;color:#fff;cursor:pointer;
+    /* DENTRO del recuadro, no encima. Estaba en `top:-42px`, es decir 42px por
+       encima del vídeo: con el móvil en horizontal el vídeo queda casi pegado
+       al borde de arriba y el botón se salía de la pantalla. Medido: en un
+       667x320 acababa en -28px, invisible e impulsable. Dentro no se sale
+       nunca, y además es donde lo busca la gente. */
+    .vid-close{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;
+      background:rgba(15,17,21,.62);border:none;color:#fff;cursor:pointer;z-index:2;
       display:flex;align-items:center;justify-content:center;}
-    .vid-close:hover{background:rgba(255,255,255,.22);}
-    @media(max-width:520px){ .vid-close{top:-44px;} }
+    .vid-close:hover{background:rgba(15,17,21,.82);}
+    .vid-close:focus-visible{outline:2px solid #fff;outline-offset:2px;}
     .ws-overlay.open{display:flex;}
     .ws-top{background:#fff;border-bottom:1px solid #E5E7EB;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
     .ws-exit{background:none;border:none;cursor:pointer;color:#6B7280;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;font-family:inherit;padding:6px 8px;border-radius:8px;}
@@ -151,6 +156,7 @@
     .ws-ex-head{display:flex;align-items:center;gap:12px;}
     .ws-thumb{width:52px;height:52px;border-radius:12px;background:#F3F4F6;border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative;text-decoration:none;color:#C4C7CF;}
     .ws-thumb[role=button]{cursor:pointer;}
+    .ws-thumb:focus-visible,.ex-media:focus-visible{outline:2px solid var(--indigo);outline-offset:2px;}
     .ws-thumb img{width:100%;height:100%;object-fit:contain;}
     .ws-thumb .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
     .ws-ex-info{flex:1;min-width:0;}
@@ -384,15 +390,54 @@
       return;
     }
     document.getElementById('vidModal').classList.add('open');
+    bloquearFondo(true);
   }
+
+  /* Bloqueo del fondo mientras se ve el vídeo. PRECAUCIÓN PARA iOS, no algo
+     verificado: en este navegador el fondo NO se mueve ni con bloqueo ni sin
+     él —el modal es hermano de `.main`, no descendiente de `.content`, así que
+     el gesto nunca llega a la caja que se desplaza—. Lo comprobé quitándolo a
+     propósito. Se deja porque en iOS Safari el gesto sí puede arrastrar la
+     página de detrás de una capa fija, y eso no se puede reproducir aquí (el
+     mismo tipo de diferencia que obligó al `100dvh` del chat).
+
+     Se tocan body y `.content` porque el que tiene el scroll es el segundo. Y
+     se guarda el valor anterior en vez de vaciarlo al soltar: la sesión de
+     entrenamiento ya pone el body en 'hidden' por su cuenta, y borrarlo aquí
+     le devolvería el scroll a una pantalla que no lo quiere. */
+  var _scrollPrevio = null;
+  function bloquearFondo(si){
+    var cont = document.querySelector('.content');
+    if (si){
+      if (_scrollPrevio) return;            // ya estaba bloqueado
+      _scrollPrevio = { body: document.body.style.overflow,
+                        cont: cont ? cont.style.overflow : '' };
+      document.body.style.overflow = 'hidden';
+      if (cont) cont.style.overflow = 'hidden';
+    } else if (_scrollPrevio){
+      document.body.style.overflow = _scrollPrevio.body;
+      if (cont) cont.style.overflow = _scrollPrevio.cont;
+      _scrollPrevio = null;
+    }
+  }
+
   function closeVideo(){
     document.getElementById('vidModal').classList.remove('open');
     // Vacío para que un vídeo con sonido no siga de fondo con el modal cerrado.
     document.getElementById('vidFrame').innerHTML = '';
+    bloquearFondo(false);
   }
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape' && document.getElementById('vidModal').classList.contains('open')) closeVideo();
   });
+
+  /* Los atributos que hacen que un <div> con role=button se comporte como un
+     botón de verdad: alcanzable con el tabulador y activable con Enter o
+     espacio. La miniatura de la sesión era un <a>, que ya los traía de fábrica;
+     al convertirla en <div> para abrir el modal se perdió sin querer. */
+  function comoBoton(js){
+    return ' tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();' + js + '}"';
+  }
   function exMedia(e){
     var v = e.video_url, img = e.image;
     if (v){
@@ -400,7 +445,9 @@
       if (s.kind !== 'link'){
         var poster = img || s.thumb;
         var inner = poster ? '<img src="' + esc(poster) + '" alt="" loading="lazy">' : DUMBBELL_LG;
-        return '<div class="ex-media' + (poster ? '' : ' placeholder') + '" role="button" title="Ver video" onclick="playVideo(\'' + attr(v) + '\')">' + inner + PLAY + '</div>';
+        var abrir = 'playVideo(\'' + attr(v) + '\')';
+        return '<div class="ex-media' + (poster ? '' : ' placeholder') + '" role="button" title="Ver video"'
+          + ' onclick="' + abrir + '"' + comoBoton(abrir) + '>' + inner + PLAY + '</div>';
       }
       return '<a class="ex-media' + (img ? '' : ' placeholder') + '" href="' + esc(v) + '" target="_blank" rel="noopener" title="Ver video">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : DUMBBELL_LG) + PLAY + '</a>';
     }
@@ -518,7 +565,8 @@
       var th = e.image ? '<img src="' + esc(e.image) + '" alt="">' : (s.thumb ? '<img src="' + esc(s.thumb) + '" alt="">' : DUMBBELL);
       // El botón "en curso" que sacaba al cliente de la app a mitad de la
       // serie. Ahora abre el mismo modal que el plan del día.
-      return '<div class="ws-thumb" role="button" title="Ver ejecución" onclick="playVideo(\'' + attr(e.video_url) + '\')">' + th + '<div class="play"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(17,24,39,.55)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg></div></div>';
+      var abrir = 'playVideo(\'' + attr(e.video_url) + '\')';
+      return '<div class="ws-thumb" role="button" title="Ver ejecución" onclick="' + abrir + '"' + comoBoton(abrir) + '>' + th + '<div class="play"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(17,24,39,.55)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg></div></div>';
     }
     return '<div class="ws-thumb">' + inner + '</div>';
   }

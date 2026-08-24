@@ -147,3 +147,14 @@
     .ex-notes-wrap{display:inline-grid;width:170px;vertical-align:top;}
 .ex-notes-wrap::after{content:attr(data-value) "\00a0";visibility:hidden;white-space:pre-wrap;word-break:break-word;grid-area:1/1;font-size:12px;padding:5px 7px;border:1px solid transparent;pointer-events:none;font-family:inherit;line-height:1.4;}
 .ex-notes-wrap textarea{grid-area:1/1;width:100%;resize:none;overflow:hidden;min-height:29px;font-family:inherit;font-size:12px;line-height:1.4;}
+
+/* Notas del día para el cliente.
+
+   Vivía suelta dentro de rutinas.html, así que la ficha del cliente —que copia
+   la misma maqueta y carga este mismo archivo— se quedaba sin ella: la etiqueta
+   y el recuadro salían descolocados, uno al lado del otro y el textarea con su
+   tamaño de fábrica. Aquí la ven las dos. */
+.day-notes-card{margin-top:18px;background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px 18px;}
+.day-notes-card label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.day-notes-card textarea{width:100%;min-height:92px;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;font-size:13.5px;color:#374151;font-family:inherit;resize:vertical;outline:none;line-height:1.5;}
+.day-notes-card textarea:focus{border-color:#F59E0B;}

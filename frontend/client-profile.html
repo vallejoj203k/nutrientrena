@@ -8541,6 +8541,11 @@ async function confirmAssignDiet() {
     _nutDetailLoaded = false;
     _nutDetail = null;
     _nutActiveDietIdx = 0;
+    /* Al asignar, el servidor reparte las dietas por días si hacía falta. Sin
+       invalidar esto, la pantalla se quedaría con el menú de antes —o sin
+       ninguno— y seguiría enseñando el plan como si fuera el mismo cada día. */
+    _nutMenu = null;
+    _nutMenuLoaded = false;
     closeAssignDietModal();
     _nutSetLoading(copies.length > 1 ? 'Asignando dietas' : 'Asignando dieta', [
       copies.length > 1 ? 'Copiando las dietas al cliente' : 'Copiando la dieta al cliente',
@@ -8563,11 +8568,12 @@ async function confirmAssignDiet() {
     // que es lo lento y no hace falta para ver las dietas ya asignadas.
     if (copies.length) _enviarPdfDietas(copies);
 
-    /* Con más de una dieta hay que decir qué día come cada una. Si no se dice,
-       todas valen para los siete días y el cliente sólo ve una: es el fallo
-       que se reportó («aparece repetido el mismo menú»). Con una sola dieta no
-       hay nada que repartir y no se interrumpe. */
-    if (clientDiets.length > 1 && !_nutMenuDays()) openWeekDistModal('ciclo');
+    /* Con más de una dieta, el servidor ya las ha repartido en ciclo por días.
+       Se enseña el reparto para que el coach lo vea y lo cambie si quiere: es
+       una decisión suya, pero no se le deja sin tomar, que era el fallo
+       reportado («aparece repetido el mismo menú»). Con una sola dieta no hay
+       nada que repartir y no se interrumpe. */
+    if (clientDiets.length > 1) openWeekDistModal();
   } catch { document.getElementById('assignDietError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; if (lbl) lbl.textContent = prev; }
 }

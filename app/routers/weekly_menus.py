@@ -273,6 +273,75 @@ def client_menu(
     return send_response(data, "OK")
 
 
+_DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+
+
+def repartir_en_ciclo(db: Session, client_detail, coach_id: int) -> bool:
+    """Reparte en ciclo por días las dietas sueltas de un cliente.
+
+    Sin esto, asignarle varias dietas a un cliente no reparte nada: las dos o
+    tres valen para los siete días y el cliente sólo ve una. Es lo que se
+    reportó dos veces —«aparece repetido el mismo menú»—, y pasaba desde
+    cualquier sitio donde se asigne una dieta, no sólo desde la ficha.
+
+    Va aquí, en la asignación, y no en la pantalla, porque hay dos sitios que
+    asignan dietas (la ficha del cliente y la biblioteca) y arreglarlo en uno
+    dejaba el otro igual de roto.
+
+    No pisa nada que el coach haya decidido: sólo escribe si el cliente no
+    tiene menú, o si el que tiene es exactamente el ciclo automático anterior
+    a esta dieta —o sea, si nadie lo ha tocado a mano—.
+    """
+    from app.models.client_menu import ClientMenu
+    from app.models.nutrition.diet import Diet
+
+    dietas = (
+        db.query(Diet)
+        .filter(Diet.user_id == client_detail.user_id)
+        .order_by(Diet.created_at.asc(), Diet.id.asc())
+        .all()
+    )
+    # Con una sola dieta no hay nada que repartir: vale para toda la semana.
+    if len(dietas) < 2:
+        return False
+    ciclo = [dietas[i % len(dietas)].id for i in range(7)]
+
+    cm = (
+        db.query(ClientMenu)
+        .filter(ClientMenu.client_user_detail_id == client_detail.id)
+        .order_by(ClientMenu.assigned_at.desc(), ClientMenu.id.desc())
+        .first()
+    )
+    menu = db.query(WeeklyMenu).filter(WeeklyMenu.id == cm.menu_id).first() if cm else None
+
+    if menu is not None:
+        # Otro cliente puede compartir este menú: no se toca.
+        if db.query(ClientMenu).filter(
+                ClientMenu.menu_id == menu.id,
+                ClientMenu.client_user_detail_id != client_detail.id).first():
+            return False
+        por_dia = {d.day_index: d.diet_id for d in menu.days}
+        actual = [por_dia.get(i) for i in range(7)]
+        # ¿Sigue siendo el ciclo que se generó solo, con una dieta menos?
+        if not any(actual == [dietas[i % n].id for i in range(7)]
+                   for n in range(2, len(dietas))):
+            return False
+        db.query(WeeklyMenuDay).filter(WeeklyMenuDay.menu_id == menu.id).delete()
+    else:
+        menu = WeeklyMenu(name="Plan semanal", coach_id=coach_id)
+        db.add(menu)
+        db.flush()
+        db.add(ClientMenu(
+            client_user_detail_id=client_detail.id,
+            menu_id=menu.id,
+            assigned_by_user_id=coach_id,
+        ))
+
+    for i in range(7):
+        db.add(WeeklyMenuDay(menu_id=menu.id, day_index=i, name=_DIAS[i], diet_id=ciclo[i]))
+    return True
+
+
 class _ClientWeekDay(BaseModel):
     day_index: int
     name: Optional[str] = None

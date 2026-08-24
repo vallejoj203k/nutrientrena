@@ -203,6 +203,105 @@ def test_una_dieta_de_la_biblioteca_sin_asignar_tampoco_vale(client, seed, admin
     assert r.status_code == 422, r.text
 
 
+# ── Repartir solo al asignar, desde CUALQUIER sitio ─────────────────────────
+#
+# Lo anterior arreglaba la ficha del cliente. Pero las dietas también se
+# asignan desde la biblioteca (diets.html), una a una, y por ahí el cliente
+# seguía viendo la misma dieta todos los días — que es justo lo que se volvió a
+# reportar. Por eso el reparto se hace en la asignación, no en la pantalla.
+
+def _asignar_por_api(client, h_coach, diet_id, det_cli):
+    r = client.post(f"/api/diets/{diet_id}/assign", headers=h_coach,
+                    json={"client_id": det_cli})
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_ASIGNAR_LA_SEGUNDA_DIETA_YA_REPARTE_LA_SEMANA(client, seed, admin_headers):
+    suf = uuid.uuid4().hex[:8]
+    _dc, h_coach, det_cli, h_cli = _monta(client, admin_headers, suf)
+    a = _dieta_con_comida(client, h_coach, f"Uno {suf}", 1000)
+    b = _dieta_con_comida(client, h_coach, f"Dos {suf}", 2000)
+
+    # Con una sola dieta no hay nada que repartir: vale para toda la semana.
+    _asignar_por_api(client, h_coach, a, det_cli)
+    datos, comidas = _comidas_por_dia(client, h_cli)
+    assert datos["plan_semanal"] is False, datos
+    assert len(set(comidas)) == 1, comidas
+
+    # Con la segunda, sí.
+    j = _asignar_por_api(client, h_coach, b, det_cli)
+    assert "repartida" in j["message"].lower(), j["message"]
+    datos, comidas = _comidas_por_dia(client, h_cli)
+    assert datos["plan_semanal"] is True, datos
+    assert comidas[0] != comidas[1], comidas
+    assert comidas[2] == comidas[0], comidas       # el ciclo vuelve a empezar
+
+
+def test_la_tercera_dieta_ENTRA_en_el_reparto_y_no_se_queda_fuera(client, seed, admin_headers):
+    """El caso de la pantalla, que asigna varias seguidas.
+
+    Si el reparto sólo se hiciera la primera vez, la tercera dieta no comería
+    ningún día y el coach la vería asignada sin que su cliente la probara nunca.
+    """
+    suf = uuid.uuid4().hex[:8]
+    _dc, h_coach, det_cli, h_cli = _monta(client, admin_headers, suf)
+    for n in ('Uno', 'Dos', 'Tres'):
+        _asignar_por_api(
+            client, h_coach, _dieta_con_comida(client, h_coach, f"{n} {suf}", 2000), det_cli)
+
+    _datos, comidas = _comidas_por_dia(client, h_cli)
+    assert len(set(comidas[:3])) == 3, comidas
+    assert comidas[3] == comidas[0], comidas
+
+
+def test_NO_PISA_EL_REPARTO_QUE_EL_COACH_HIZO_A_MANO(client, seed, admin_headers):
+    """Lo que decide el coach manda. Si asignar una dieta más rehiciera el
+    ciclo, le desharía el reparto sin avisar."""
+    suf = uuid.uuid4().hex[:8]
+    _dc, h_coach, det_cli, h_cli = _monta(client, admin_headers, suf)
+    a = _dieta_con_comida(client, h_coach, f"Uno {suf}", 1000)
+    b = _dieta_con_comida(client, h_coach, f"Dos {suf}", 2000)
+    _asignar_por_api(client, h_coach, a, det_cli)
+    _asignar_por_api(client, h_coach, b, det_cli)
+
+    # El coach lo cambia: todo el fin de semana libre.
+    r = client.get(f"/api/diets/client/{det_cli}", headers=h_coach)
+    copias = [d["id"] for g in r.json()["data"] for d in (g.get("diets") or [g]) if d.get("id")]
+    assert len(copias) == 2, copias
+    a_mano = [copias[0]] * 5 + [None, None]
+    assert client.put(f"/api/weekly-menus/client/{det_cli}", headers=h_coach,
+                      json=_semana(a_mano)).status_code == 200
+
+    # Y ahora asigna una tercera.
+    j = _asignar_por_api(
+        client, h_coach, _dieta_con_comida(client, h_coach, f"Tres {suf}", 3000), det_cli)
+    assert "repartida" not in j["message"].lower(), j["message"]
+
+    _datos, comidas = _comidas_por_dia(client, h_cli)
+    assert comidas[5] is None and comidas[6] is None, comidas
+    assert len(set(comidas[:5])) == 1, comidas
+
+
+def test_tampoco_pisa_un_menu_semanal_asignado_de_la_biblioteca(client, seed, admin_headers):
+    suf = uuid.uuid4().hex[:8]
+    _dc, h_coach, det_cli, h_cli = _monta(client, admin_headers, suf)
+    d1 = _dieta_con_comida(client, h_coach, f"Menu lunes {suf}", 1000)
+    menu = client.post("/api/weekly-menus", headers=h_coach, json={
+        "name": f"Semana {suf}",
+        "days": [{"day_index": i, "name": DIAS[i], "diet_id": d1 if i < 2 else None}
+                 for i in range(7)]})
+    assert client.post(f"/api/weekly-menus/{menu.json()['data']['id']}/assign",
+                       headers=h_coach, json={"client_id": det_cli}).status_code == 200
+
+    _asignar_por_api(
+        client, h_coach, _dieta_con_comida(client, h_coach, f"Suelta {suf}", 2000), det_cli)
+
+    _datos, comidas = _comidas_por_dia(client, h_cli)
+    assert comidas[0] is not None and comidas[1] is not None, comidas
+    assert all(c is None for c in comidas[2:]), comidas
+
+
 # ── Que no se pise el menú de otro cliente ──────────────────────────────────
 
 def test_no_reescribe_un_menu_que_comparte_otro_cliente(client, seed, admin_headers):

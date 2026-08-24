@@ -6173,6 +6173,11 @@ function openEntBuilder(dayIdx) {
           training_id: ex.training_id,
           training_name: ex.training_name || '',
           muscle_group_name: ex.muscle_group_name || '',
+          /* Sin esto el constructor pinta el icono genérico de mancuerna en
+             lugar de la foto del ejercicio: el mapeo copia campo a campo y la
+             imagen se quedaba fuera. En rutinas.html sí estaba — el mismo
+             constructor, dos copias del mapeo, una de ellas incompleta. */
+          image: ex.image || null,
           series: ex.series || null,
           repetitions: ex.repetitions || '',
           break_time: ex.break_time || null,

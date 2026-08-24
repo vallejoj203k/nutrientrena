@@ -123,6 +123,19 @@
 
     /* Sesión de entrenamiento en curso */
     .ws-overlay{position:fixed;inset:0;background:#F1F2F5;z-index:500;display:none;flex-direction:column;}
+    /* Por encima de la sesión en curso (500): se abre TAMBIÉN mientras se está
+       entrenando, que es donde vive la captura que motivó esto. */
+    .vid-modal{position:fixed;inset:0;background:rgba(15,17,21,.92);z-index:600;
+      display:none;align-items:center;justify-content:center;padding:16px;}
+    .vid-modal.open{display:flex;}
+    .vid-box{position:relative;width:100%;max-width:520px;}
+    .vid-frame{width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;}
+    .vid-frame iframe,.vid-frame video{width:100%;height:100%;border:none;display:block;}
+    .vid-close{position:absolute;top:-42px;right:0;width:34px;height:34px;border-radius:50%;
+      background:rgba(255,255,255,.12);border:none;color:#fff;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;}
+    .vid-close:hover{background:rgba(255,255,255,.22);}
+    @media(max-width:520px){ .vid-close{top:-44px;} }
     .ws-overlay.open{display:flex;}
     .ws-top{background:#fff;border-bottom:1px solid #E5E7EB;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
     .ws-exit{background:none;border:none;cursor:pointer;color:#6B7280;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;font-family:inherit;padding:6px 8px;border-radius:8px;}
@@ -137,6 +150,7 @@
     .ws-ex{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
     .ws-ex-head{display:flex;align-items:center;gap:12px;}
     .ws-thumb{width:52px;height:52px;border-radius:12px;background:#F3F4F6;border:1px solid #EEF0F3;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative;text-decoration:none;color:#C4C7CF;}
+    .ws-thumb[role=button]{cursor:pointer;}
     .ws-thumb img{width:100%;height:100%;object-fit:contain;}
     .ws-thumb .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
     .ws-ex-info{flex:1;min-width:0;}
@@ -264,6 +278,20 @@
   <div class="ws-body"><div class="ws-inner" id="wsInner"></div></div>
 </div>
 
+<!-- Vídeo de ejecución. El miniatura de la sesión mide 52px — no cabe un
+     reproductor ahí dentro — así que se abre en grande encima de la pantalla
+     en vez de sacar al cliente a una pestaña nueva. Se usa aquí y desde el
+     plan del día, que ya tenía su propio camino "inline" en una tarjeta más
+     grande; los dos acaban aquí para no mantener dos formas de reproducir. -->
+<div class="vid-modal" id="vidModal" onclick="if(event.target===this)closeVideo()">
+  <div class="vid-box">
+    <button class="vid-close" onclick="closeVideo()" aria-label="Cerrar">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="vid-frame" id="vidFrame"></div>
+  </div>
+</div>
+
 <script>
   const API = 'https://nutrientrena-production.up.railway.app/api';
   const token = localStorage.getItem('token');
@@ -330,18 +358,41 @@
     return !!(v.canPlayType('application/vnd.apple.mpegurl') || v.canPlayType('application/x-mpegURL'));
   }
   var PLAY = '<div class="play"><svg width="34" height="34" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(17,24,39,.55)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg></div>';
-  // Reproduce dentro de la propia tarjeta, sin sacar al cliente de la app.
-  function playInline(el, url){
+
+  /* El vídeo se abre en un modal encima de la pantalla, nunca en una pestaña
+     nueva: el cliente puede estar a mitad de una serie, y sacarlo de la app
+     para ver la ejecución le corta el entrenamiento. Un solo camino para las
+     dos miniaturas que lo ofrecen —el plan del día y la sesión en curso—, que
+     antes reproducían cada una a su manera: una dentro de su propia tarjeta
+     (que aquí no cabe: la de la sesión mide 52px) y la otra en pestaña nueva. */
+  function playVideo(url){
     var s = videoSource(url);
-    if (!s) return;
+    var caja = document.getElementById('vidFrame');
+    if (!s || s.kind === 'link'){
+      // Sin forma de incrustarlo (una página de destino cualquiera, no un
+      // vídeo directo): es la única situación donde sigue abriendo aparte,
+      // porque no hay nada que meter en el modal.
+      window.open((s && s.page) || url, '_blank', 'noopener');
+      return;
+    }
     if (s.kind === 'iframe'){
-      el.innerHTML = '<iframe src="' + esc(s.src) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>';
+      caja.innerHTML = '<iframe src="' + esc(s.src) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
     } else if (s.kind === 'file' && (!s.hls || canPlayHls())){
-      el.innerHTML = '<video src="' + esc(s.src) + '" controls autoplay playsinline preload="metadata"></video>';
+      caja.innerHTML = '<video src="' + esc(s.src) + '" controls autoplay playsinline preload="metadata"></video>';
     } else {
       window.open(s.page, '_blank', 'noopener');
+      return;
     }
+    document.getElementById('vidModal').classList.add('open');
   }
+  function closeVideo(){
+    document.getElementById('vidModal').classList.remove('open');
+    // Vacío para que un vídeo con sonido no siga de fondo con el modal cerrado.
+    document.getElementById('vidFrame').innerHTML = '';
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && document.getElementById('vidModal').classList.contains('open')) closeVideo();
+  });
   function exMedia(e){
     var v = e.video_url, img = e.image;
     if (v){
@@ -349,7 +400,7 @@
       if (s.kind !== 'link'){
         var poster = img || s.thumb;
         var inner = poster ? '<img src="' + esc(poster) + '" alt="" loading="lazy">' : DUMBBELL_LG;
-        return '<div class="ex-media' + (poster ? '' : ' placeholder') + '" role="button" title="Ver video" onclick="playInline(this, \'' + attr(v) + '\')">' + inner + PLAY + '</div>';
+        return '<div class="ex-media' + (poster ? '' : ' placeholder') + '" role="button" title="Ver video" onclick="playVideo(\'' + attr(v) + '\')">' + inner + PLAY + '</div>';
       }
       return '<a class="ex-media' + (img ? '' : ' placeholder') + '" href="' + esc(v) + '" target="_blank" rel="noopener" title="Ver video">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : DUMBBELL_LG) + PLAY + '</a>';
     }
@@ -465,7 +516,9 @@
     if (e.video_url){
       var s = videoSource(e.video_url);
       var th = e.image ? '<img src="' + esc(e.image) + '" alt="">' : (s.thumb ? '<img src="' + esc(s.thumb) + '" alt="">' : DUMBBELL);
-      return '<a class="ws-thumb" href="' + esc(s.page) + '" target="_blank" rel="noopener" title="Ver ejecución">' + th + '<div class="play"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(17,24,39,.55)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg></div></a>';
+      // El botón "en curso" que sacaba al cliente de la app a mitad de la
+      // serie. Ahora abre el mismo modal que el plan del día.
+      return '<div class="ws-thumb" role="button" title="Ver ejecución" onclick="playVideo(\'' + attr(e.video_url) + '\')">' + th + '<div class="play"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(17,24,39,.55)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg></div></div>';
     }
     return '<div class="ws-thumb">' + inner + '</div>';
   }

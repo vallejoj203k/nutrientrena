@@ -562,6 +562,25 @@
     .dietpick-food{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#6B7280;}
     .dietpick-food-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .dietpick-food-qty{color:#9CA3AF;flex-shrink:0;}
+    /* Distribución semanal: qué dieta come el cliente cada día */
+    .wdist-sub{font-size:12.5px;color:#6B7280;margin-top:3px;line-height:1.45;}
+    .wdist-count{font-size:11.5px;color:#9CA3AF;margin-top:5px;}
+    .wdist-block-lbl{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;}
+    .wdist-pool{background:#F9FAFB;border:1px solid #EEF0F4;border-radius:12px;padding:14px;margin-bottom:18px;}
+    .wdist-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+    .wdist-chip{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E5E7EB;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;color:#111827;min-width:0;}
+    .wdist-chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .wdist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .wdist-rows{display:flex;flex-direction:column;gap:9px;}
+    .wdist-row{display:flex;align-items:center;gap:11px;}
+    .wdist-day{flex-shrink:0;width:56px;text-align:center;background:#4F46E5;color:#fff;font-size:12px;font-weight:700;border-radius:9px;padding:8px 0;}
+    .wdist-arrow{flex-shrink:0;color:#C7CBD3;font-size:14px;}
+    .wdist-sel{flex:1;min-width:0;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:600;color:#111827;font-family:inherit;background:#fff;outline:none;cursor:pointer;transition:.15s;}
+    .wdist-sel:focus,.wdist-sel:hover{border-color:#4F46E5;}
+    .wdist-sel.vacio{color:#9CA3AF;font-weight:500;}
+    .wdist-reset{background:none;border:none;padding:0;font-size:13px;color:#6B7280;cursor:pointer;font-family:inherit;}
+    .wdist-reset:hover{color:#4F46E5;text-decoration:underline;}
+    @media(max-width:560px){.wdist-chips{grid-template-columns:minmax(0,1fr);}}
     .assign-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #F3F4F6;transition:.12s;border-left:3px solid transparent;}
     .assign-item:last-child{border-bottom:none;}
     .assign-item:hover{background:#F9FAFB;}
@@ -2086,6 +2105,39 @@
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         <span id="assignDietBtnLbl">Asignar dietas</span>
       </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Distribución semanal: qué dieta come el cliente cada día ── -->
+<div class="modal-overlay" id="weekDistOverlay" onclick="if(event.target===this)closeWeekDistModal()">
+  <div class="modal" style="width:660px;max-width:96vw;">
+    <div class="modal-head">
+      <div>
+        <h2>Distribución semanal</h2>
+        <div class="wdist-sub">Decide qué dieta come el cliente cada día. Se reparten en ciclo automáticamente y se repite cada semana; cambia cualquier día si lo necesitas.</div>
+        <div class="wdist-count" id="wdistCount"></div>
+      </div>
+      <button class="modal-close" onclick="closeWeekDistModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="wdist-pool">
+        <div class="wdist-block-lbl">Dietas disponibles</div>
+        <div class="wdist-chips" id="wdistChips"></div>
+      </div>
+      <div class="wdist-block-lbl">Asignación por día</div>
+      <div class="wdist-rows" id="wdistRows"></div>
+      <div id="wdistError" style="color:#DC2626;font-size:12px;margin-top:10px;"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="wdist-reset" onclick="resetWeekDist()">Reiniciar ciclo</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeWeekDistModal()">Cancelar</button>
+        <button class="btn btn-primary" id="wdistSaveBtn" onclick="saveWeekDist()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <span id="wdistSaveLbl">Guardar distribución</span>
+        </button>
       </div>
     </div>
   </div>
@@ -6788,6 +6840,7 @@ function _renderNutUI() {
           <button class="nut-banner-btn" onclick="_downloadNutPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
           <button class="nut-banner-btn" onclick="openAutoDiet()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Generar dieta</button>
           <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
+          ${(menuDays || clientDiets.length > 1) ? `<button class="nut-banner-btn" id="wdistOpenBtn" onclick="openWeekDistModal()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>Distribución semanal</button>` : ''}
           <button class="nut-banner-btn danger" onclick="removeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
         </div>
       </div>
@@ -6834,10 +6887,19 @@ function _renderNutUI() {
           <button class="nut-day-act" onclick="assignDietToDay(${_nutDayIdx})">Cambiar la dieta de este día</button>
           <button class="nut-day-act danger" onclick="clearMenuDay(${_nutDayIdx})">Dejar el día sin dieta</button>
         </div>` : ''}
-        ${(menuDays || clientDiets.length > 1) ? '' : `<div class="nut-same-note">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          Este plan es diario: se repite igual todos los días. Para comidas distintas por día, asígnale un <b>menú semanal</b>.
-        </div>`}
+        ${menuDays ? '' : (clientDiets.length > 1
+          /* Varias dietas sueltas y ningún reparto: el cliente sólo ve una y
+             cambiar de día no le cambia nada. Aquí es donde se nota, así que
+             aquí es donde se dice y se ofrece el arreglo. */
+          ? `<div class="nut-same-note">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Estas ${clientDiets.length} dietas no están repartidas por días: el cliente sólo ve una y todos sus días son iguales.
+              <button class="nut-empty-link" style="margin:0 0 0 4px;" onclick="openWeekDistModal('ciclo')">Repartirlas por días</button></span>
+            </div>`
+          : `<div class="nut-same-note">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              Este plan es diario: se repite igual todos los días. Para comidas distintas por día, asígnale un <b>menú semanal</b>.
+            </div>`)}
         ${(clientData?.pathologies || []).length ? `<div class="nut-patho-note">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span><b>Patologías:</b> ${clientData.pathologies.map(p => esc(p.name)).join(' · ')}. Comprueba que el plan las respeta.</span>
@@ -8500,8 +8562,153 @@ async function confirmAssignDiet() {
     // Igual que con las rutinas: el correo con los PDF va en segundo plano,
     // que es lo lento y no hace falta para ver las dietas ya asignadas.
     if (copies.length) _enviarPdfDietas(copies);
+
+    /* Con más de una dieta hay que decir qué día come cada una. Si no se dice,
+       todas valen para los siete días y el cliente sólo ve una: es el fallo
+       que se reportó («aparece repetido el mismo menú»). Con una sola dieta no
+       hay nada que repartir y no se interrumpe. */
+    if (clientDiets.length > 1 && !_nutMenuDays()) openWeekDistModal('ciclo');
   } catch { document.getElementById('assignDietError').textContent = 'Error de conexión'; }
   finally { btn.disabled = false; if (lbl) lbl.textContent = prev; }
+}
+
+/* ══════════════════════════════════════════════
+   DISTRIBUCIÓN SEMANAL: qué dieta come el cliente cada día
+
+   Asignar varias dietas sueltas no reparte nada: todas valen para los siete
+   días y el cliente acaba viendo sólo una. Era el fallo reportado —«aparece
+   repetido el mismo menú»—. Aquí se dice qué día come cada una, y eso es lo
+   que el panel del cliente lee para enseñar comida distinta cada día.
+══════════════════════════════════════════════ */
+const _WD_COLORS = ['#4F46E5','#10B981','#F59E0B','#8B5CF6','#EC4899','#0EA5E9','#EF4444'];
+let _wdDiets = [];   // las dietas del cliente, en el orden en que se listan
+let _wdDays = [];    // siete ids (o null), uno por día
+
+/* Reparto por defecto: en ciclo. Con 4 dietas, el viernes vuelve a la primera.
+   Es lo que la mayoría quiere y deja los siete días cubiertos de entrada. */
+function _wdCiclo() {
+  return Array.from({ length: 7 }, (_, i) =>
+    _wdDiets.length ? String(_wdDiets[i % _wdDiets.length].id) : null);
+}
+
+function openWeekDistModal(modo) {
+  _wdDiets = (clientDiets || []).filter(d => d && d.id).map(d => ({ ...d, id: String(d.id) }));
+  const menuDays = _nutMenuDays();
+
+  /* Un día del menú puede apuntar a una dieta que no aparece en la lista del
+     cliente. Si se quedara fuera del desplegable, guardar la distribución la
+     borraría sin que nadie lo hubiera pedido. */
+  if (menuDays) {
+    for (let i = 0; i < 7; i++) {
+      const md = menuDays[i];
+      if (md && md.diet_id && !_wdDiets.some(d => d.id === String(md.diet_id)))
+        _wdDiets.push({ id: String(md.diet_id), title: md.diet_title || 'Dieta asignada',
+                        calories: md.calories });
+    }
+  }
+  if (!_wdDiets.length) {
+    showToast('Este cliente no tiene dietas que repartir', 'warning');
+    return;
+  }
+
+  _wdDays = (modo === 'ciclo' || !menuDays)
+    ? _wdCiclo()
+    : Array.from({ length: 7 }, (_, i) =>
+        menuDays[i] && menuDays[i].diet_id ? String(menuDays[i].diet_id) : null);
+
+  document.getElementById('wdistError').textContent = '';
+  document.getElementById('weekDistOverlay').classList.add('open');
+  _wdRender();
+}
+
+function closeWeekDistModal() {
+  document.getElementById('weekDistOverlay').classList.remove('open');
+}
+
+function _wdEtiqueta(d, i) {
+  const k = d.calories ? Math.round(d.calories) + 'kcal' : null;
+  return `Día ${i + 1} · ${d.title || d.name || 'Sin nombre'}${k ? ' · ' + k : ''}`;
+}
+
+function _wdRender() {
+  const c = document.getElementById('wdistCount');
+  if (c) c.textContent = `Nutrición · ${_wdDiets.length} día${_wdDiets.length !== 1 ? 's' : ''} de dieta`;
+
+  document.getElementById('wdistChips').innerHTML = _wdDiets.map((d, i) =>
+    `<div class="wdist-chip" title="${esc(_wdEtiqueta(d, i))}">
+       <span class="wdist-dot" style="background:${_WD_COLORS[i % _WD_COLORS.length]}"></span>
+       <span>${esc(_wdEtiqueta(d, i))}</span>
+     </div>`).join('');
+
+  document.getElementById('wdistRows').innerHTML = _NUT_DAY_ABV.map((abv, i) => {
+    const val = _wdDays[i] || '';
+    const opts = ['<option value="">Sin dieta este día</option>'].concat(
+      _wdDiets.map((d, j) =>
+        `<option value="${esc(d.id)}"${val === d.id ? ' selected' : ''}>${esc(_wdEtiqueta(d, j))}</option>`)
+    ).join('');
+    return `<div class="wdist-row">
+      <span class="wdist-day">${esc(abv)}</span>
+      <span class="wdist-arrow">→</span>
+      <select class="wdist-sel${val ? '' : ' vacio'}" aria-label="Dieta del ${esc(_NUT_DAY_FULL[i])}"
+              onchange="_wdSetDay(${i}, this.value)">${opts}</select>
+    </div>`;
+  }).join('');
+}
+
+function _wdSetDay(i, val) {
+  _wdDays[i] = val || null;
+  _wdRender();
+}
+
+function resetWeekDist() {
+  _wdDays = _wdCiclo();
+  document.getElementById('wdistError').textContent = '';
+  _wdRender();
+}
+
+async function saveWeekDist() {
+  const btn = document.getElementById('wdistSaveBtn');
+  const lbl = document.getElementById('wdistSaveLbl');
+  const err = document.getElementById('wdistError');
+  err.textContent = '';
+
+  /* Una semana entera sin dieta no es una distribución: es dejar al cliente
+     sin comida y sin decírselo. */
+  if (!_wdDays.some(Boolean)) {
+    err.textContent = 'Pon dieta al menos en un día.';
+    return;
+  }
+
+  const prev = lbl.textContent;
+  btn.disabled = true; lbl.textContent = 'Guardando…';
+  try {
+    const r = await fetch(`${API}/weekly-menus/client/${clientId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({
+        // Sin menú previo hay que ponerle nombre; con menú, null lo deja como estaba.
+        name: _nutMenu ? null : 'Plan semanal',
+        days: _NUT_DAY_FULL.map((n, i) => ({ day_index: i, name: n, diet_id: _wdDays[i] || null })),
+      }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      err.textContent = j.message || j.detail || 'No se pudo guardar la distribución';
+      return;
+    }
+    _nutMenu = j.data || null;
+    _nutMenuLoaded = true;
+    _nutDetail = null; _nutDetailLoaded = false;
+    _nutDietCache && Object.keys(_nutDietCache).forEach(k => delete _nutDietCache[k]);
+    closeWeekDistModal();
+    await renderNutricionTab();
+    renderActivePlan();
+    showToast('Distribución semanal guardada', 'success');
+  } catch {
+    err.textContent = 'Error de conexión';
+  } finally {
+    btn.disabled = false; lbl.textContent = prev;
+  }
 }
 
 /* Un único correo con todas las dietas asignadas y sus PDF adjuntos. */

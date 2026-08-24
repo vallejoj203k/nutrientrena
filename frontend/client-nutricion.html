@@ -104,6 +104,10 @@
       .content{padding:18px 14px 40px;}
       .page-head h1{font-size:22px;}
     }
+    /* Aviso de que el plan es el mismo todos los días. Discreto: es una
+       aclaración, no un problema. */
+    .plan-aviso{background:#EEF2FF;border:1px solid #DDE3FF;color:#4338CA;
+      border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.45;margin-bottom:14px;}
   </style>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
@@ -154,6 +158,8 @@
           Lista
         </button>
       </div>
+
+      <div class="plan-aviso" id="planAviso" style="display:none;"></div>
 
       <div class="weekbar" id="weekbar" style="display:none;"></div>
       <div id="daybox"><div class="empty" id="loadingBox">Cargando tu plan nutricional…</div></div>
@@ -253,6 +259,20 @@
         return;
       }
       document.getElementById('menuSub').textContent=data.menu.name || 'Menú semanal personalizado';
+
+      /* Decir la verdad sobre qué tipo de plan es. Cuando el coach asigna una
+         dieta suelta (sin menú semanal), esa misma dieta vale para los siete
+         días — pero la tira de días de arriba invita a pensar que cada uno
+         trae algo distinto, y cambiar de día no cambiaba nada sin explicación.
+         Ahora se dice. */
+      var aviso=document.getElementById('planAviso');
+      if(data.plan_semanal===false){
+        aviso.textContent='Tu coach te ha puesto el mismo plan para todos los días de la semana.';
+        aviso.style.display='';
+      } else {
+        aviso.style.display='none';
+      }
+
       var t=_days.findIndex(function(x){return x.is_today;}); _sel=t>=0?t:0;
       renderWeek(); renderDay();
     }catch(e){

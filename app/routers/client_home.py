@@ -1139,4 +1139,10 @@ def client_chat(db: Session = Depends(get_db), current_user: User = Depends(requ
         db.commit()
         db.refresh(conv)
 
-    return send_response({"conversation_id": conv.id, "coach": coach_info}, "OK")
+    # Si el coach le desactivó el chat, la pantalla tiene que decirlo en vez de
+    # enseñar un cuadro de escribir que no lleva a ninguna parte.
+    return send_response({
+        "conversation_id": conv.id,
+        "coach": coach_info,
+        "chat_enabled": bool(detail.chat_enabled) if detail else True,
+    }, "OK")

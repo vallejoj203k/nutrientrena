@@ -74,6 +74,20 @@
       align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;}
     .adj-file .nm{display:block;font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .adj-file .sz{font-size:11.5px;opacity:.65;}
+    /* Adjuntar, igual que en el panel del coach */
+    .btn-clip{width:42px;height:42px;border-radius:50%;border:1px solid #E5E7EB;background:#fff;
+      color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;transition:.15s;padding:0;}
+    .btn-clip:hover{border-color:var(--indigo);color:var(--indigo);}
+    .btn-clip:disabled{opacity:.5;cursor:progress;}
+    .adj-previo{display:flex;align-items:center;gap:10px;max-width:760px;margin:0 auto 8px;
+      padding:8px 12px;background:#EEF2FF;border-radius:10px;font-size:13px;color:#3730A3;}
+    .adj-previo button{margin-left:auto;background:none;border:none;color:#6B7280;cursor:pointer;
+      font-size:17px;line-height:1;padding:0 4px;}
+    /* Cuando el coach le ha desactivado el chat: se dice, en vez de dejar un
+       cuadro de escribir que no lleva a ninguna parte. */
+    .chat-off{max-width:760px;margin:0 auto;padding:11px 14px;background:#FEF2F2;border:1px solid #FECACA;
+      border-radius:10px;font-size:13px;color:#B91C1C;}
     .msg-time{font-size:10.5px;color:#9CA3AF;margin:3px 3px 0;}
     .chat-empty{text-align:center;color:#9CA3AF;font-size:14px;padding:60px 20px;}
     .chat-empty svg{opacity:.4;margin-bottom:12px;}
@@ -167,7 +181,18 @@
   </div>
 
   <div class="composer">
-    <div class="composer-inner">
+    <div class="adj-previo" id="adjPrevio" style="display:none;">
+      <span id="adjPrevioTxt"></span>
+      <button onclick="quitarAdjunto()" title="Quitar el archivo" aria-label="Quitar el archivo">×</button>
+    </div>
+    <div class="chat-off" id="chatOff" style="display:none;">
+      Tu coach ha desactivado el chat. Sigues viendo lo que te ha escrito, pero no puedes responder por aquí.
+    </div>
+    <div class="composer-inner" id="composerInner">
+      <button class="btn-clip" id="btnClip" onclick="document.getElementById('adjFile').click()" title="Adjuntar imagen o PDF" aria-label="Adjuntar imagen o PDF">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </button>
+      <input type="file" id="adjFile" accept="image/*,application/pdf" style="display:none;" onchange="subirAdjunto(this)"/>
       <input id="msgInput" type="text" placeholder="Escribe a tu coach…" autocomplete="off" onkeydown="if(event.key==='Enter')enviar()"/>
       <button class="send-btn" id="sendBtn" onclick="enviar()" title="Enviar">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
@@ -252,6 +277,23 @@
     if(keepScroll!==false) body.scrollTop=body.scrollHeight;
   }
 
+  /* La cabecera decía "● Activo" en verde SIEMPRE. Nadie comprobaba nada: el
+     coach podía llevar tres días sin conectarse y ahí seguía el puntito. Ahora
+     dice lo único que sabemos de verdad — si el chat está abierto o no—, y si
+     el coach lo ha cerrado se quita el cuadro de escribir en vez de dejar uno
+     que devuelve un error al pulsar Enviar. */
+  function aplicarEstadoChat(activo){
+    var st=document.getElementById('coachStatus');
+    var abierto=activo!==false;
+    st.innerHTML=abierto
+      ? '<span class="live"></span> Chat activo'
+      : 'Chat desactivado por tu coach';
+    document.querySelectorAll('.ch-dot').forEach(function(d){ d.style.display=abierto?'':'none'; });
+    document.getElementById('composerInner').style.display=abierto?'':'none';
+    document.getElementById('chatOff').style.display=abierto?'none':'';
+    if(!abierto) quitarAdjunto();
+  }
+
   function applyCoach(){
     if(!_coach) return;
     document.getElementById('coachName').textContent=_coach.name||'Tu coach';
@@ -290,17 +332,75 @@
     if(window.refreshChatUnread) window.refreshChatUnread();
   }
 
+  /* ── Adjuntar ─────────────────────────────────────────────────────────────
+     El cliente también manda fotos: la comida del día, la báscula, cómo le ha
+     quedado un ejercicio. Antes solo podía recibirlas, y para mandar una tenía
+     que salirse a WhatsApp — que es justo de donde se quiere sacar esto. */
+  var _adjunto=null;
+
+  function quitarAdjunto(){
+    _adjunto=null;
+    document.getElementById('adjPrevio').style.display='none';
+    document.getElementById('adjFile').value='';
+  }
+
+  async function subirAdjunto(input){
+    var f=input.files&&input.files[0];
+    if(!f||!_convId) return;
+    var clip=document.getElementById('btnClip');
+    var previo=document.getElementById('adjPrevio');
+    var txt=document.getElementById('adjPrevioTxt');
+    /* Mientras sube, el clip se bloquea y se dice qué pasa: sin esto se pulsa
+       otra vez y el archivo se manda dos veces. */
+    clip.disabled=true;
+    previo.style.display='flex';
+    txt.textContent='Subiendo '+f.name+'…';
+    try{
+      var fd=new FormData(); fd.append('file',f);
+      const r=await fetch(API+'/chat/conversations/'+_convId+'/attachment',
+        {method:'POST',headers:{Authorization:'Bearer '+token},body:fd});
+      const j=await r.json().catch(function(){return{};});
+      if(!r.ok||!j.data){
+        quitarAdjunto();
+        // El motivo del servidor: casi siempre es el tamaño o el tipo, y eso
+        // el cliente sí puede arreglarlo.
+        toast(j.message||j.detail||'No se pudo subir el archivo', true);
+        return;
+      }
+      _adjunto=j.data;
+      txt.textContent='📎 '+_adjunto.attachment_name+' · '+tamAdj(_adjunto.attachment_size);
+      document.getElementById('msgInput').focus();
+    }catch(e){ quitarAdjunto(); toast('No se pudo subir el archivo', true); }
+    finally{ clip.disabled=false; input.value=''; }
+  }
+
   async function enviar(){
     var inp=document.getElementById('msgInput');
     var txt=(inp.value||'').trim();
-    if(!txt || !_convId) return;
+    if((!txt&&!_adjunto) || !_convId) return;
+    var adj=_adjunto;
     var btn=document.getElementById('sendBtn'); btn.disabled=true;
-    inp.value='';
+    inp.value=''; quitarAdjunto();
     try{
-      const r=await fetch(API+'/chat/conversations/'+_convId+'/messages',{method:'POST',headers:headers(),body:JSON.stringify({content:txt})});
-      if(!r.ok) throw new Error();
+      var cuerpo={content:txt};
+      if(adj){ for(var k in adj) cuerpo[k]=adj[k]; }
+      const r=await fetch(API+'/chat/conversations/'+_convId+'/messages',{method:'POST',headers:headers(),body:JSON.stringify(cuerpo)});
+      if(!r.ok){
+        var je=await r.json().catch(function(){return{};});
+        // El coach puede haberle desactivado el chat mientras escribía: se
+        // dice el motivo, no un "no se pudo enviar" que no explica nada.
+        throw new Error(je.message||je.detail||'');
+      }
       await loadMessages(false);
-    }catch(e){ inp.value=txt; toast('No se pudo enviar', true); }
+    }catch(e){
+      inp.value=txt;
+      _adjunto=adj;
+      if(adj){
+        document.getElementById('adjPrevio').style.display='flex';
+        document.getElementById('adjPrevioTxt').textContent='📎 '+adj.attachment_name;
+      }
+      toast(e.message||'No se pudo enviar', true);
+    }
     finally{ btn.disabled=false; inp.focus(); }
   }
 
@@ -319,6 +419,7 @@
       _convId=(d.data&&d.data.conversation_id)||null;
       _coach=(d.data&&d.data.coach)||null;
       applyCoach();
+      aplicarEstadoChat(d.data&&d.data.chat_enabled);
       if(!_convId){
         document.getElementById('coachStatus').innerHTML='Sin coach asignado';
         document.getElementById('chatInner').innerHTML='<div class="chat-empty">Todavía no tienes un coach asignado.<br>Cuando lo tengas, podrás escribirle por aquí.</div>';

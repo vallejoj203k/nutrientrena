@@ -42,6 +42,9 @@ class ConversationCreate(BaseModel):
     # Nombre viejo de `audience`, de cuando solo lo usaba el admin. Se sigue
     # aceptando para no romper a quien lo mandara.
     target: Optional[str] = None
+    # Qué clase de grupo es: 'equipo' | 'comunidad' | 'seguimiento'. Determina
+    # quién puede estar dentro. Ver TIPOS_GRUPO.
+    tipo: Optional[str] = None
 
 
 class MessageCreate(BaseModel):
@@ -76,6 +79,63 @@ def _chat_apagado(db: Session, user_id: int) -> bool:
         return False
     detail = _user_detail(db, user_id)
     return bool(detail) and detail.chat_enabled is False
+
+
+TIPOS_GRUPO = ("equipo", "comunidad", "seguimiento")
+
+
+def _validar_tipo_grupo(tipo: str, tipo_conv: str, ids: list, yo: int, db: Session) -> Optional[str]:
+    """Comprueba que la gente elegida encaja con la clase de grupo.
+
+    Tres clases, y no son intercambiables:
+
+      · `equipo`      — solo el equipo. Meter a un cliente en el grupo interno
+                        le deja leer cómo se habla de los clientes.
+      · `comunidad`   — el coach con sus clientes: un reto, un grupo de ánimo.
+                        OJO: aquí los clientes SÍ se ven entre ellos, al revés
+                        que en el aviso a todos, que va uno a uno. Es lo que se
+                        pidió para los retos, pero conviene tenerlo escrito.
+      · `seguimiento` — el caso de un cliente con quien lo lleva: hace falta al
+                        menos un cliente y al menos alguien del equipo, o no es
+                        un seguimiento, es otra cosa.
+    """
+    if tipo not in TIPOS_GRUPO:
+        return f"Tipo de grupo no válido. Admitidos: {', '.join(TIPOS_GRUPO)}"
+    if tipo_conv != "group":
+        return "Solo un grupo puede tener tipo"
+
+    otros = [uid for uid in ids if uid != yo]
+    if not otros:
+        return "Elige a quién va el grupo"
+
+    clientes, equipo = [], []
+    for uid in otros:
+        (clientes if CLIENT in _user_role_ids(uid, db) else equipo).append(uid)
+
+    if tipo == "equipo" and clientes:
+        return "Un grupo de equipo no puede llevar clientes dentro"
+    if tipo == "comunidad" and not clientes:
+        return "Una comunidad de clientes necesita al menos un cliente"
+    if tipo == "seguimiento":
+        if not clientes:
+            return "Un seguimiento necesita el cliente al que se hace seguimiento"
+        if not equipo:
+            return "Un seguimiento necesita a alguien del equipo además del cliente"
+    return None
+
+
+def _etiqueta_equipo(db: Session, detalle) -> Optional[str]:
+    """El oficio de un miembro del equipo: "Entrenador", "Nutricionista"…"""
+    if not detalle:
+        return None
+    from app.models.team_member import TeamMember
+    tm = (
+        db.query(TeamMember)
+        .filter(TeamMember.user_detail_id == detalle.id)
+        .order_by(TeamMember.id.desc())
+        .first()
+    )
+    return (tm.role_label or None) if tm else None
 
 
 def _serialize_message(msg: ChatMessage, db: Session) -> dict:
@@ -397,6 +457,10 @@ def listar_contactos(
             "photo": detalle.photo if detalle else None,
             # Para que la pantalla pueda agrupar por rol al elegir.
             "rol": "cliente" if CLIENT in sus_roles else "coach",
+            # Lo que hace cada uno en el equipo ("Entrenador", "Nutricionista"…).
+            # Al montar un grupo de seguimiento se elige por el oficio, no por
+            # el nombre: sin esto hay que acordarse de quién es quién.
+            "etiqueta": _etiqueta_equipo(db, detalle),
         })
     fuera.sort(key=lambda c: (c["rol"], (c["name"] or "").lower()))
     return send_response(fuera, "OK")
@@ -477,6 +541,14 @@ def create_conversation(
             uid for uid in participant_ids if uid != current_user.id and uid not in permitidos]
         if fuera:
             return send_error("Hay personas en la lista que no son de tu cuenta", code=403)
+
+    # Cada clase de grupo admite a unos y no a otros, y conviene comprobarlo
+    # aquí y no solo en la pantalla: quien manda la petición a mano se saltaría
+    # el filtro y metería a un cliente en el grupo interno del equipo.
+    if body.tipo:
+        error = _validar_tipo_grupo(body.tipo, body.type, participant_ids, current_user.id, db)
+        if error:
+            return send_error(error, code=422)
 
     if current_user.id not in participant_ids:
         participant_ids.append(current_user.id)

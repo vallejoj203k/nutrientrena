@@ -185,12 +185,17 @@ def _serialize_conversation(conv: ChatConversation, current_user_id: int, db: Se
                 # ficha sin tener que pedir el cliente aparte.
                 "user_detail_id": detail.id,
                 "chat_enabled": detail.chat_enabled,
+                # Para poder agrupar a la gente del grupo por lo que es y
+                # enseñar su oficio, igual que al montarlo.
+                "rol": "cliente" if CLIENT in _user_role_ids(uid, db) else "coach",
+                "etiqueta": _etiqueta_equipo(db, detail),
             })
         else:
             u = db.query(User).filter(User.id == uid).first()
             if u:
                 participants_info.append({"user_id": uid, "name": u.name, "photo": None,
-                                          "user_detail_id": None, "chat_enabled": None})
+                                          "user_detail_id": None, "chat_enabled": None,
+                                          "rol": "coach", "etiqueta": None})
 
     last_msg = (
         db.query(ChatMessage)
@@ -846,6 +851,38 @@ def _grupo_editable(conv_id: str, current_user, db: Session):
     if conv.created_by_user_id != current_user.id:
         return None, send_error("Solo quien creó el grupo puede cambiar quién está dentro", code=403)
     return conv, None
+
+
+class GrupoRenombrar(BaseModel):
+    name: str
+
+
+@router.patch("/conversations/{conv_id}", summary="Cambiar el nombre del grupo")
+def renombrar_grupo(
+    conv_id: str,
+    body: GrupoRenombrar,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """El nombre del grupo, que hasta ahora solo se ponía al crearlo.
+
+    Un grupo que nació "Reto enero" y sigue en marcha en marzo se queda con un
+    nombre que ya no es verdad, y no había forma de cambiarlo sin rehacerlo y
+    perder la conversación entera.
+    """
+    conv, error = _grupo_editable(conv_id, current_user, db)
+    if error:
+        return error
+    nombre = (body.name or "").strip()
+    # Un grupo sin nombre sale como "Grupo" en la lista, y con tres grupos
+    # todos se llaman igual.
+    if not nombre:
+        return send_error("El grupo necesita un nombre", code=422)
+    conv.name = nombre[:255]
+    conv.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(conv)
+    return send_response(_serialize_conversation(conv, current_user.id, db), "Nombre cambiado")
 
 
 @router.post("/conversations/{conv_id}/participants", summary="Añadir gente al grupo")

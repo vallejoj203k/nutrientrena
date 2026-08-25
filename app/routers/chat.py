@@ -59,6 +59,25 @@ def _user_detail(db: Session, user_id: int) -> Optional[UserDetail]:
     return db.query(UserDetail).filter(UserDetail.user_id == user_id).first()
 
 
+def _chat_apagado(db: Session, user_id: int) -> bool:
+    """Si a este CLIENTE su coach le ha desactivado el chat.
+
+    El interruptor existía en la ficha del cliente pero no lo miraba nadie: el
+    coach lo apagaba, veía "Chat desactivado" y su cliente seguía pudiendo
+    escribirle. Un interruptor que no hace nada es peor que no tenerlo.
+
+    Solo afecta a quien ESCRIBE siendo cliente. El coach sigue pudiendo
+    mandarle cosas: apagarlo es dejar de recibir mensajes suyos, no dejar de
+    poder darle su plan.
+    """
+    es_cliente = db.query(RoleUser).filter(
+        RoleUser.user_id == user_id, RoleUser.role_id == CLIENT).first() is not None
+    if not es_cliente:
+        return False
+    detail = _user_detail(db, user_id)
+    return bool(detail) and detail.chat_enabled is False
+
+
 def _serialize_message(msg: ChatMessage, db: Session) -> dict:
     sender_detail = _user_detail(db, msg.sender_user_id)
     sender_name = ""
@@ -602,6 +621,9 @@ async def send_message_rest(
         return send_error(
             "En este grupo solo escribe quien lo creó. Respóndele por privado.", code=403)
 
+    if _chat_apagado(db, current_user.id):
+        return send_error("Tu coach ha desactivado el chat.", code=403)
+
     texto = (body.content or "").strip()
     # Un mensaje vacío del todo no es un mensaje: sin esto, darle a Enviar sin
     # escribir nada dejaba una burbuja en blanco en la conversación de los dos.
@@ -685,6 +707,8 @@ async def subir_adjunto(
     # difusión los clientes podrían soltar archivos a todos los demás.
     if conv and conv.broadcast and conv.created_by_user_id != current_user.id:
         return send_error("En este grupo solo escribe quien lo creó.", code=403)
+    if _chat_apagado(db, current_user.id):
+        return send_error("Tu coach ha desactivado el chat.", code=403)
 
     if not settings.AWS_BUCKET:
         return send_error("Almacenamiento no configurado", code=500)
@@ -928,6 +952,16 @@ async def websocket_chat(websocket: WebSocket, token: str = Query(...)):
                         "type": "error", "conversation_id": conv_id,
                         "message": "En este grupo solo escribe quien lo creó. "
                                    "Respóndele por privado.",
+                    })
+                    continue
+
+                # La otra puerta de entrada. Comprobarlo solo en REST dejaría
+                # el interruptor abierto por aquí, que es por donde escribe el
+                # panel del coach.
+                if _chat_apagado(db, user_id):
+                    await websocket.send_json({
+                        "type": "error", "conversation_id": conv_id,
+                        "message": "Tu coach ha desactivado el chat.",
                     })
                     continue
 

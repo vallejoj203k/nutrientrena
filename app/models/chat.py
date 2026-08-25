@@ -53,8 +53,18 @@ class ChatMessage(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     conversation_id = Column(String(36), ForeignKey("chat_conversations.id", ondelete="CASCADE"), nullable=False)
     sender_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    content = Column(Text, nullable=False)
+    # Un mensaje puede ser SOLO un archivo, sin texto: obligar a escribir algo
+    # para poder mandar una foto es pedir relleno.
+    content = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Adjuntos: la foto de la comida, el PDF de la dieta. Se guarda el nombre
+    # original porque "a3f9…-2b1c.pdf" no le dice nada a nadie, y el tamaño
+    # para poder avisar antes de que alguien se descargue 8 MB con datos.
+    attachment_url = Column(String(500), nullable=True)
+    attachment_name = Column(String(255), nullable=True)
+    attachment_type = Column(String(100), nullable=True)
+    attachment_size = Column(Integer, nullable=True)
 
     conversation = relationship("ChatConversation", back_populates="messages")
     sender = relationship("User", foreign_keys=[sender_user_id])

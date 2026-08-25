@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, File, Query, UploadFile, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -45,7 +45,12 @@ class ConversationCreate(BaseModel):
 
 
 class MessageCreate(BaseModel):
-    content: str
+    # Un mensaje puede ser solo un archivo, así que el texto no es obligatorio.
+    content: Optional[str] = None
+    attachment_url: Optional[str] = None
+    attachment_name: Optional[str] = None
+    attachment_type: Optional[str] = None
+    attachment_size: Optional[int] = None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -71,6 +76,10 @@ def _serialize_message(msg: ChatMessage, db: Session) -> dict:
         "sender_name": sender_name,
         "sender_photo": sender_photo,
         "created_at": msg.created_at.isoformat() if msg.created_at else None,
+        "attachment_url": msg.attachment_url,
+        "attachment_name": msg.attachment_name,
+        "attachment_type": msg.attachment_type,
+        "attachment_size": msg.attachment_size,
     }
 
 
@@ -93,11 +102,16 @@ def _serialize_conversation(conv: ChatConversation, current_user_id: int, db: Se
                 "user_id": uid,
                 "name": f"{detail.name} {detail.last_name or ''}".strip(),
                 "photo": detail.photo,
+                # Para que el chat pueda decir si está activo y llevar a la
+                # ficha sin tener que pedir el cliente aparte.
+                "user_detail_id": detail.id,
+                "chat_enabled": detail.chat_enabled,
             })
         else:
             u = db.query(User).filter(User.id == uid).first()
             if u:
-                participants_info.append({"user_id": uid, "name": u.name, "photo": None})
+                participants_info.append({"user_id": uid, "name": u.name, "photo": None,
+                                          "user_detail_id": None, "chat_enabled": None})
 
     last_msg = (
         db.query(ChatMessage)
@@ -588,13 +602,23 @@ async def send_message_rest(
         return send_error(
             "En este grupo solo escribe quien lo creó. Respóndele por privado.", code=403)
 
+    texto = (body.content or "").strip()
+    # Un mensaje vacío del todo no es un mensaje: sin esto, darle a Enviar sin
+    # escribir nada dejaba una burbuja en blanco en la conversación de los dos.
+    if not texto and not body.attachment_url:
+        return send_error("El mensaje está vacío", code=422)
+
     now = datetime.utcnow()
     msg = ChatMessage(
         id=str(uuid.uuid4()),
         conversation_id=conv_id,
         sender_user_id=current_user.id,
-        content=body.content,
+        content=texto or None,
         created_at=now,
+        attachment_url=body.attachment_url,
+        attachment_name=body.attachment_name,
+        attachment_type=body.attachment_type,
+        attachment_size=body.attachment_size,
     )
     db.add(msg)
 
@@ -620,6 +644,82 @@ async def send_message_rest(
     )
 
     return send_response(data, "Mensaje enviado")
+
+
+ADJ_TIPOS = {
+    "image/jpeg", "image/png", "image/webp", "image/gif", "image/heic",
+    "application/pdf",
+}
+ADJ_MAX_MB = 10
+
+
+@router.post("/conversations/{conv_id}/attachment",
+             summary="Subir un archivo para mandarlo por el chat")
+async def subir_adjunto(
+    conv_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Sube el archivo y devuelve con qué mandarlo; NO crea el mensaje.
+
+    Va aquí y no en `/files/upload` a propósito: el permiso que hace falta es
+    "estar en esta conversación y poder escribir en ella". Con el subidor
+    general, cualquiera con cuenta podría dejar archivos en el almacén sin que
+    nadie compruebe con quién habla.
+    """
+    import boto3
+    from app.config import settings
+
+    part = (
+        db.query(ChatParticipant)
+        .filter(ChatParticipant.conversation_id == conv_id,
+                ChatParticipant.user_id == current_user.id)
+        .first()
+    )
+    if not part:
+        return send_error("Conversación no encontrada", code=404)
+
+    conv = db.query(ChatConversation).filter(ChatConversation.id == conv_id).first()
+    # Quien no puede escribir tampoco puede adjuntar: si no, en un grupo de
+    # difusión los clientes podrían soltar archivos a todos los demás.
+    if conv and conv.broadcast and conv.created_by_user_id != current_user.id:
+        return send_error("En este grupo solo escribe quien lo creó.", code=403)
+
+    if not settings.AWS_BUCKET:
+        return send_error("Almacenamiento no configurado", code=500)
+    if file.content_type not in ADJ_TIPOS:
+        return send_error("Solo se pueden mandar imágenes (JPG, PNG, WEBP, GIF) o PDF",
+                          code=400)
+
+    contenido = await file.read()
+    if len(contenido) > ADJ_MAX_MB * 1024 * 1024:
+        return send_error(f"El archivo supera los {ADJ_MAX_MB} MB", code=400)
+
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in (file.filename or "") else "bin"
+    key = f"chat/{conv_id}/{uuid.uuid4()}.{ext}"
+    try:
+        r2 = boto3.client(
+            "s3",
+            endpoint_url="https://77925e3b1a6f6513bce155f71f6aa790.r2.cloudflarestorage.com",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name="auto",
+        )
+        r2.put_object(Bucket=settings.AWS_BUCKET, Key=key, Body=contenido,
+                      ContentType=file.content_type,
+                      CacheControl="public, max-age=31536000")
+    except Exception as e:
+        return send_error(f"Error al subir el archivo: {e}", code=500)
+
+    base = (settings.R2_PUBLIC_URL or "").rstrip("/")
+    return send_response({
+        "attachment_url": f"{base}/{key}",
+        # El nombre original, porque "a3f9…-2b1c.pdf" no le dice nada a nadie.
+        "attachment_name": (file.filename or "archivo")[:255],
+        "attachment_type": file.content_type,
+        "attachment_size": len(contenido),
+    }, "Archivo subido")
 
 
 class ParticipantesAdd(BaseModel):

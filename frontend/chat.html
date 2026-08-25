@@ -32,7 +32,32 @@
     .logout-btn:hover{color:#EF4444;}
 
     /* ── Chat layout ── */
-    .chat-layout{flex:1;display:flex;overflow:hidden;}
+    .chat-page{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .chat-page-head{padding:20px 24px 14px;background:var(--bg,#F7F8FA);}
+    .chat-page-head h1{font-size:26px;font-weight:700;color:#111827;letter-spacing:-.4px;}
+    .chat-page-head p{font-size:13.5px;color:#9CA3AF;margin-top:3px;}
+    .chat-layout{flex:1;display:flex;overflow:hidden;padding:0 24px 24px;gap:0;}
+    .chat-layout > .conv-panel{border-radius:14px 0 0 14px;border:1px solid var(--border);border-right:none;}
+    .chat-layout > .msg-panel{border-radius:0 14px 14px 0;border:1px solid var(--border);background:#fff;}
+
+    /* Directos / Grupos: filtran la lista, no crean nada. */
+    .conv-tabs{display:flex;gap:6px;background:#F3F4F6;border-radius:10px;padding:4px;margin-top:10px;}
+    .conv-tab{flex:1;border:none;background:none;padding:7px 10px;border-radius:8px;font-size:13px;
+      font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;transition:.15s;}
+    .conv-tab.sel{background:#fff;color:var(--purple);box-shadow:0 1px 2px rgba(16,24,40,.06);}
+    .conv-tab .n{font-size:11px;color:#9CA3AF;margin-left:4px;}
+    .conv-tab.sel .n{color:var(--purple);}
+
+    /* Estado del chat de ese cliente, y atajo a su ficha. */
+    .msg-head-acts{display:flex;align-items:center;gap:8px;margin-left:auto;}
+    .chip-chat{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;
+      font-size:12.5px;font-weight:600;white-space:nowrap;}
+    .chip-chat.on{background:#ECFDF5;color:#047857;border:1px solid #A7F3D0;}
+    .chip-chat.off{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;}
+    .btn-ficha{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;
+      border:1px solid #E5E7EB;background:#fff;color:var(--purple);font-size:12.5px;font-weight:600;
+      cursor:pointer;font-family:inherit;text-decoration:none;white-space:nowrap;transition:.15s;}
+    .btn-ficha:hover{border-color:var(--purple);background:var(--purple-light);}
 
     /* ── Conversations panel ── */
     .conv-panel{width:300px;min-width:300px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;}
@@ -146,13 +171,35 @@
     .msg-bubble{background:#fff;border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px;font-size:14px;color:#111827;line-height:1.5;word-break:break-word;}
     .msg-row.mine .msg-bubble{background:var(--purple);color:#fff;border:none;border-radius:12px 12px 2px 12px;}
     .msg-time{font-size:10px;color:#9CA3AF;}
+
+    /* Adjuntos: la foto se ve, el PDF se descarga. */
+    .adj-img{display:block;max-width:260px;max-height:280px;border-radius:10px;cursor:pointer;object-fit:cover;}
+    .adj-file{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);
+      border-radius:10px;background:#fff;text-decoration:none;color:#111827;max-width:280px;}
+    .msg-row.mine .adj-file{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff;}
+    .adj-file .ic{width:32px;height:32px;border-radius:8px;background:#FEF2F2;color:#DC2626;display:flex;
+      align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;}
+    .adj-file .nm{font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .adj-file .sz{font-size:11px;opacity:.65;}
+    .adj-bubble{padding:5px;}
+    /* Un clip que no dice si está subiendo parece que no ha hecho nada, y la
+       gente lo pulsa otra vez y manda el archivo dos veces. */
+    .btn-clip{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:#fff;
+      color:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      transition:.15s;padding:0;}
+    .btn-clip:hover{border-color:var(--purple);color:var(--purple);}
+    .btn-clip:disabled{opacity:.5;cursor:progress;}
+    .adj-previo{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:0 20px 8px;
+      background:var(--purple-light);border-radius:10px;font-size:13px;color:#3730A3;}
+    .adj-previo button{margin-left:auto;background:none;border:none;color:#6B7280;cursor:pointer;
+      font-size:16px;line-height:1;padding:0 4px;}
     .typing-indicator{font-size:12px;color:#9CA3AF;font-style:italic;padding:0 20px 8px;}
 
     /* ── Send bar ── */
     .send-bar{padding:14px 20px;border-top:1px solid var(--border);background:#fff;display:flex;gap:10px;align-items:flex-end;}
-    .send-input{flex:1;border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;resize:none;max-height:120px;font-family:inherit;line-height:1.5;}
-    .send-input:focus{border-color:var(--purple);}
-    .send-btn{background:var(--purple);color:#fff;border:none;border-radius:10px;padding:10px 18px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;}
+    .send-input{flex:1;border:1px solid var(--border);border-radius:22px;padding:11px 18px;font-size:14px;outline:none;resize:none;max-height:120px;font-family:inherit;line-height:1.5;background:#F9FAFB;}
+    .send-input:focus{border-color:var(--purple);background:#fff;}
+    .send-btn{background:var(--purple);color:#fff;border:none;border-radius:12px;padding:11px 20px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;}
     .send-btn:hover{background:var(--purple-mid);}
     .send-btn:disabled{opacity:.5;cursor:not-allowed;}
 
@@ -313,6 +360,11 @@
 </div>
 
 <!-- ── Chat layout ─────────────────────────────────────────────────────────── -->
+<div class="chat-page">
+<div class="chat-page-head">
+  <h1>Chat</h1>
+  <p>Conversaciones directas con tus clientes y grupos del equipo.</p>
+</div>
 <div class="chat-layout">
 
   <!-- Conversations panel -->
@@ -373,6 +425,10 @@
 
     <div class="conv-search">
       <input type="text" id="convSearch" placeholder="Buscar conversación…" oninput="filterConvs(this.value)"/>
+      <div class="conv-tabs">
+        <button class="conv-tab sel" id="tabDirectos" onclick="setConvTab('directos')">Directos<span class="n" id="nDirectos"></span></button>
+        <button class="conv-tab" id="tabGrupos" onclick="setConvTab('grupos')">Grupos<span class="n" id="nGrupos"></span></button>
+      </div>
     </div>
     <div class="conv-list" id="convList">
       <div class="conv-empty">Cargando…</div>
@@ -392,13 +448,20 @@
           <div class="msg-header-name" id="msgHeaderName">—</div>
           <div class="msg-header-sub" id="msgHeaderSub">—</div>
         </div>
-        <button class="btn-sonido" id="btnSonido" onclick="alternarSonido()" aria-label="Aviso sonoro"></button>
+        <div class="msg-head-acts" id="msgHeadActs">
+          <!-- Si el coach le desactivó el chat a este cliente, el cliente no
+               puede escribirle. Sin esto el coach escribía y no entendía por
+               qué el otro no contestaba nunca. -->
+          <span class="chip-chat on" id="chipChat" style="display:none;"></span>
+          <a class="btn-ficha" id="btnFicha" style="display:none;">Ver ficha →</a>
+          <button class="btn-sonido" id="btnSonido" onclick="alternarSonido()" aria-label="Aviso sonoro"></button>
         <!-- Quién está en el grupo. Solo en los de a medida: en uno por regla
              la lista la manda la regla y no hay nada que tocar. -->
         <button class="btn-parts" id="btnParts" onclick="alternarParticipantes()" style="display:none;">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
           <span id="btnPartsTxt">Participantes</span>
         </button>
+        </div>
       </div>
       <div class="panel-parts" id="panelParts" style="display:none;">
         <div class="pp-lista" id="ppLista"></div>
@@ -406,7 +469,15 @@
       </div>
       <div class="msg-body" id="msgBody"></div>
       <div class="typing-indicator" id="typingIndicator" style="display:none;"></div>
+      <div class="adj-previo" id="adjPrevio" style="display:none;">
+        <span id="adjPrevioTxt"></span>
+        <button onclick="quitarAdjunto()" title="Quitar el archivo">×</button>
+      </div>
       <div class="send-bar">
+        <button class="btn-clip" id="btnClip" onclick="document.getElementById('adjFile').click()" title="Adjuntar imagen o PDF">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <input type="file" id="adjFile" accept="image/*,application/pdf" style="display:none;" onchange="subirAdjunto(this)"/>
         <textarea class="send-input" id="sendInput" rows="1" placeholder="Escribe un mensaje…"
           onkeydown="onSendKey(event)" oninput="autoGrow(this);sendTyping()"></textarea>
         <button class="send-btn" onclick="sendMessage()">
@@ -416,6 +487,7 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <script>
@@ -590,14 +662,48 @@ function convName(c) {
 }
 function convInitial(c) { const n = convName(c); return ((n && n.trim()[0]) || '?').toUpperCase(); }
 
-function filterConvs(q) {
-  renderConvList(_convs.filter(c => convName(c).toLowerCase().includes(q.toLowerCase())));
+/* Directos y grupos son dos cosas distintas y se mezclaban en una sola lista:
+   con veinte clientes, los grupos del equipo quedaban enterrados. Las pestañas
+   solo filtran lo que ya hay; no crean ni borran nada. */
+let _convTab = 'directos', _convQuery = '';
+
+function esGrupo(c) { return c.type === 'group'; }
+
+function setConvTab(t) {
+  _convTab = t;
+  document.getElementById('tabDirectos').classList.toggle('sel', t === 'directos');
+  document.getElementById('tabGrupos').classList.toggle('sel', t === 'grupos');
+  renderConvList(_convs);
 }
 
-function renderConvList(convs) {
+function filterConvs(q) {
+  _convQuery = q || '';
+  renderConvList(_convs);
+}
+
+/* El filtro se aplica AQUÍ y no en quien llama: hay tres sitios que repintan
+   la lista (abrir una conversación, llegar un mensaje, cargar) y si cada uno
+   filtrara por su cuenta, cualquiera que se olvidara enseñaría de golpe las
+   conversaciones que la pestaña estaba escondiendo. */
+function renderConvList(todas) {
   const el = document.getElementById('convList');
+  const q = _convQuery.toLowerCase();
+
+  const directos = (todas || []).filter(c => !esGrupo(c));
+  const grupos = (todas || []).filter(esGrupo);
+  document.getElementById('nDirectos').textContent = directos.length ? ` ${directos.length}` : '';
+  document.getElementById('nGrupos').textContent = grupos.length ? ` ${grupos.length}` : '';
+  // Sin grupos la pestaña sobra: ocupa sitio y no lleva a ninguna parte.
+  document.getElementById('tabGrupos').style.display = grupos.length ? '' : 'none';
+  if (!grupos.length && _convTab === 'grupos') setConvTab('directos');
+
+  const convs = (_convTab === 'grupos' ? grupos : directos)
+    .filter(c => !q || convName(c).toLowerCase().includes(q));
+
   if (!convs.length) {
-    el.innerHTML = '<div class="conv-empty">Sin conversaciones aún</div>';
+    el.innerHTML = `<div class="conv-empty">${
+      q ? 'Ninguna conversación coincide con la búsqueda'
+        : (_convTab === 'grupos' ? 'Aún no hay grupos' : 'Sin conversaciones aún')}</div>`;
     return;
   }
   el.innerHTML = convs.map(c => {
@@ -607,7 +713,13 @@ function renderConvList(convs) {
     const avatarHtml = photo
       ? `<div class="conv-avatar"><img src="${photo}" alt=""></div>`
       : `<div class="conv-avatar ${isGroup ? 'group' : ''}">${isGroup ? '👥' : initials}</div>`;
-    const lastMsg = c.last_message ? escHtml(c.last_message.content).slice(0, 40) : 'Sin mensajes';
+    /* Un mensaje que es solo un archivo no tiene texto: sin esto la lista
+       ponía "Sin mensajes" en una conversación que sí tenía uno. */
+    const lm = c.last_message;
+    const lastMsg = !lm ? 'Sin mensajes'
+      : (lm.content || '').trim() ? escHtml(lm.content).slice(0, 40)
+      : (lm.attachment_url ? '📎 ' + escHtml(lm.attachment_name || 'Archivo').slice(0, 32)
+                           : 'Sin mensajes');
     const time = c.last_message ? fmtTime(c.last_message.created_at) : '';
     return `<div class="conv-item ${_activeConv?.id === c.id ? 'active' : ''}" onclick="selectConversation('${c.id}')">
       ${avatarHtml}
@@ -642,9 +754,30 @@ async function selectConversation(id) {
   // En un grupo de difusión, quien recibe no sabe cuánta gente hay —ni le sirve
   // ni le corresponde—: el servidor no manda el total y aquí se dice qué es.
   const total = _activeConv.participantes_total;
-  document.getElementById('msgHeaderSub').textContent = !isGroup ? 'Cliente'
+  const otro = others[0] || null;
+  const chatOn = !otro || otro.chat_enabled !== false;
+  document.getElementById('msgHeaderSub').textContent = !isGroup
+    ? (chatOn ? 'Chat activo' : 'Chat desactivado')
     : (total != null ? `${total} participantes`
        : (_activeConv.broadcast ? 'Mensaje de tu coach' : 'Grupo'));
+
+  /* El estado del chat y el atajo a la ficha, solo en las conversaciones con
+     un cliente: en un grupo no hay "un" cliente al que ir. */
+  const chip = document.getElementById('chipChat');
+  const ficha = document.getElementById('btnFicha');
+  if (!isGroup && otro && otro.chat_enabled != null) {
+    chip.style.display = '';
+    chip.className = 'chip-chat ' + (chatOn ? 'on' : 'off');
+    chip.textContent = chatOn ? 'Activado' : 'Desactivado';
+  } else {
+    chip.style.display = 'none';
+  }
+  if (!isGroup && otro && otro.user_detail_id) {
+    ficha.style.display = '';
+    ficha.href = 'client-profile.html?id=' + encodeURIComponent(otro.user_detail_id);
+  } else {
+    ficha.style.display = 'none';
+  }
 
   aplicarDifusion(_activeConv);
   prepararParticipantes(_activeConv);
@@ -686,17 +819,50 @@ function renderMessage(m) {
   const avatarHtml = m.sender_photo
     ? `<div class="msg-bubble-avatar"><img src="${m.sender_photo}" alt=""></div>`
     : `<div class="msg-bubble-avatar">${initials}</div>`;
-  const senderLabel = !isMine && _activeConv?.type === 'group'
-    ? `<div class="msg-sender">${escHtml(m.sender_name || '')}</div>` : '';
+  /* El nombre va también en las conversaciones de uno a uno: con el nombre
+     encima se lee de un vistazo quién dijo qué al repasar la conversación. */
+  const senderLabel = !isMine && m.sender_name
+    ? `<div class="msg-sender">${escHtml((m.sender_name || '').split(' ')[0])}</div>` : '';
+  const texto = (m.content || '').trim();
+  const burbujas = [];
+  if (m.attachment_url) burbujas.push(renderAdjunto(m));
+  if (texto) burbujas.push(`<div class="msg-bubble">${escHtml(texto)}</div>`);
+  // Un mensaje sin nada que enseñar no debería existir, pero si llega uno
+  // antiguo o a medias, mejor una raya que una burbuja vacía sin explicación.
+  if (!burbujas.length) burbujas.push('<div class="msg-bubble" style="opacity:.6;">—</div>');
+
   return `<div class="msg-row ${isMine ? 'mine' : ''}">
     ${!isMine ? avatarHtml : ''}
     <div class="msg-bubble-wrap">
       ${senderLabel}
-      <div class="msg-bubble">${escHtml(m.content)}</div>
+      ${burbujas.join('')}
       <div class="msg-time">${fmtTime(m.created_at)}</div>
     </div>
     ${isMine ? avatarHtml : ''}
   </div>`;
+}
+
+/* La foto se ve en la conversación; lo demás es una ficha para descargar.
+   Enseñar un PDF como "archivo adjunto" sin nombre obliga a bajarlo para
+   saber qué es. */
+function renderAdjunto(m) {
+  const url = m.attachment_url;
+  const nombre = m.attachment_name || 'archivo';
+  const esImg = (m.attachment_type || '').startsWith('image/');
+  if (esImg) {
+    return `<div class="msg-bubble adj-bubble">
+      <a href="${escHtml(url)}" target="_blank" rel="noopener">
+        <img class="adj-img" src="${escHtml(url)}" alt="${escHtml(nombre)}" loading="lazy">
+      </a></div>`;
+  }
+  const ext = (nombre.split('.').pop() || '').toUpperCase().slice(0, 4);
+  return `<a class="adj-file" href="${escHtml(url)}" target="_blank" rel="noopener" download>
+    <span class="ic">${escHtml(ext || 'DOC')}</span>
+    <span style="min-width:0;">
+      <span class="nm" style="display:block;">${escHtml(nombre)}</span>
+      <span class="sz">${_tam(m.attachment_size)}</span>
+    </span>
+  </a>`;
 }
 
 function handleIncomingMessage(msg) {
@@ -728,18 +894,76 @@ function onSendKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 }
 
+/* ── Adjuntos ──────────────────────────────────────────────────────────────
+   El archivo se sube ANTES de mandar el mensaje y se queda esperando: así el
+   usuario ve qué va a mandar y puede quitarlo o escribir un pie de foto. */
+let _adjunto = null;
+
+function _tam(bytes) {
+  if (bytes == null) return '';
+  return bytes < 1024 * 1024 ? Math.round(bytes / 1024) + ' KB'
+                             : (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function quitarAdjunto() {
+  _adjunto = null;
+  document.getElementById('adjPrevio').style.display = 'none';
+  document.getElementById('adjFile').value = '';
+}
+
+async function subirAdjunto(input) {
+  const f = input.files && input.files[0];
+  if (!f || !_activeConv) return;
+  const clip = document.getElementById('btnClip');
+  const previo = document.getElementById('adjPrevio');
+  const txt = document.getElementById('adjPrevioTxt');
+  /* Mientras sube, el clip se bloquea y se dice qué está pasando: sin esto la
+     gente lo pulsa otra vez y acaba mandando el archivo dos veces. */
+  clip.disabled = true;
+  previo.style.display = 'flex';
+  txt.textContent = 'Subiendo ' + f.name + '…';
+  try {
+    const fd = new FormData();
+    fd.append('file', f);
+    const r = await fetch(`${API}/chat/conversations/${_activeConv.id}/attachment`, {
+      method: 'POST', headers: { Authorization: 'Bearer ' + _token }, body: fd,
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.data) {
+      quitarAdjunto();
+      // El motivo del servidor, no un "error" a secas: casi siempre es el
+      // tamaño o el tipo, y eso el usuario sí puede arreglarlo.
+      alert(j.message || j.detail || 'No se pudo subir el archivo');
+      return;
+    }
+    _adjunto = j.data;
+    txt.textContent = '📎 ' + _adjunto.attachment_name + ' · ' + _tam(_adjunto.attachment_size);
+    document.getElementById('sendInput').focus();
+  } catch (e) {
+    quitarAdjunto();
+    alert('No se pudo subir el archivo');
+  } finally {
+    clip.disabled = false;
+    input.value = '';
+  }
+}
+
 async function sendMessage() {
   if (!_activeConv) return;
   const input = document.getElementById('sendInput');
   const content = input.value.trim();
-  if (!content) return;
+  if (!content && !_adjunto) return;
+  const adj = _adjunto;
   input.value = '';
+  quitarAdjunto();
   autoGrow(input);
-  if (_ws && _ws.readyState === WebSocket.OPEN) {
+  /* Con adjunto va siempre por REST: el canal de WebSocket solo lleva texto,
+     y mandarlo por ahí perdería el archivo por el camino sin decir nada. */
+  if (!adj && _ws && _ws.readyState === WebSocket.OPEN) {
     wsSend({ conversation_id: _activeConv.id, content });
   } else {
     const r = await apiFetch(`/chat/conversations/${_activeConv.id}/messages`, {
-      method: 'POST', body: JSON.stringify({ content }),
+      method: 'POST', body: JSON.stringify(Object.assign({ content }, adj || {})),
     });
     if (r.success) handleIncomingMessage(r.data);
   }

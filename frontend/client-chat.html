@@ -65,6 +65,15 @@
     .bubble{padding:11px 15px;border-radius:16px;font-size:14.5px;line-height:1.45;word-wrap:break-word;white-space:pre-wrap;}
     .msg.them .bubble{background:#fff;color:#1F2937;border:1px solid #EAECEF;border-bottom-left-radius:5px;}
     .msg.me .bubble{background:var(--indigo);color:#fff;border-bottom-right-radius:5px;}
+    /* Adjuntos que manda el coach */
+    .adj-img{display:block;max-width:min(260px,72vw);max-height:280px;border-radius:14px;object-fit:cover;}
+    .adj-file{display:inline-flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid #EAECEF;
+      border-radius:14px;background:#fff;text-decoration:none;color:#1F2937;max-width:min(280px,78vw);}
+    .msg.me .adj-file{background:var(--indigo);border-color:transparent;color:#fff;}
+    .adj-file .ic{width:32px;height:32px;border-radius:9px;background:#FEF2F2;color:#DC2626;display:flex;
+      align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;}
+    .adj-file .nm{display:block;font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .adj-file .sz{font-size:11.5px;opacity:.65;}
     .msg-time{font-size:10.5px;color:#9CA3AF;margin:3px 3px 0;}
     .chat-empty{text-align:center;color:#9CA3AF;font-size:14px;padding:60px 20px;}
     .chat-empty svg{opacity:.4;margin-bottom:12px;}
@@ -192,6 +201,27 @@
   }
   function hhmm(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 
+  function tamAdj(b){
+    if(b==null) return '';
+    return b<1048576 ? Math.round(b/1024)+' KB' : (b/1048576).toFixed(1)+' MB';
+  }
+
+  /* La foto se ve aquí mismo; lo demás es una ficha con su nombre para
+     descargar — un "archivo adjunto" sin nombre obliga a bajarlo para saber
+     qué es. Mismo criterio que en el chat del coach. */
+  function adjuntoHtml(m){
+    var url=m.attachment_url, nombre=m.attachment_name||'archivo';
+    if((m.attachment_type||'').indexOf('image/')===0){
+      return '<a href="'+esc(url)+'" target="_blank" rel="noopener">'
+           + '<img class="adj-img" src="'+esc(url)+'" alt="'+esc(nombre)+'" loading="lazy"></a>';
+    }
+    var ext=(nombre.split('.').pop()||'').toUpperCase().slice(0,4);
+    return '<a class="adj-file" href="'+esc(url)+'" target="_blank" rel="noopener" download>'
+         + '<span class="ic">'+esc(ext||'DOC')+'</span>'
+         + '<span style="min-width:0;"><span class="nm">'+esc(nombre)+'</span>'
+         + '<span class="sz">'+tamAdj(m.attachment_size)+'</span></span></a>';
+  }
+
   function renderMessages(keepScroll){
     var box=document.getElementById('chatInner');
     if(!_msgs.length){
@@ -205,9 +235,15 @@
       var dl=dayLabel(d);
       if(dl!==lastDay){ html+='<div class="sep">'+dl+'</div>'; lastDay=dl; }
       var mine=(m.sender_user_id!==coachId);
+      /* El coach puede mandar una foto o el PDF de la dieta. Sin pintarlo, al
+         cliente le llegaba una burbuja vacía: veía que había mensaje nuevo y
+         no había nada dentro. */
+      var texto=(m.content||'').trim();
+      var cuerpo=(m.attachment_url?adjuntoHtml(m):'')+(texto?'<div class="bubble">'+esc(texto)+'</div>':'');
+      if(!cuerpo) cuerpo='<div class="bubble" style="opacity:.6;">—</div>';
       html+='<div class="msg '+(mine?'me':'them')+'">'
         + (mine?'':'<div class="msg-sender">'+esc(m.sender_name||(_coach&&_coach.name)||'Coach')+'</div>')
-        + '<div class="bubble">'+esc(m.content)+'</div>'
+        + cuerpo
         + '<div class="msg-time">'+hhmm(d)+'</div>'
         + '</div>';
     });

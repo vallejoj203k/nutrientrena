@@ -172,6 +172,80 @@ def test_no_se_puede_meter_a_gente_de_otra_cuenta(client, seed, admin_headers):
     assert r.status_code == 403, r.text
 
 
+# ── Gestionar el grupo ya creado ───────────────────────────────────────────
+#
+# El nombre solo se ponía al crearlo. Un grupo que nació "Reto enero" y sigue
+# en marcha en marzo se queda con un nombre que ya no es verdad, y la única
+# salida era rehacerlo y perder la conversación entera.
+
+def test_SE_LE_PUEDE_CAMBIAR_EL_NOMBRE_A_UN_GRUPO(client, seed, admin_headers):
+    suf = uuid.uuid4().hex[:8]
+    h_coach, uid_pro, _c = _monta(client, admin_headers, suf)
+    conv = _crear(client, h_coach, tipo="equipo", name=f"Reto enero {suf}",
+                  participant_user_ids=[uid_pro]).json()["data"]["id"]
+
+    r = client.patch(f"/api/chat/conversations/{conv}", headers=h_coach,
+                     json={"name": f"Reto marzo {suf}"})
+    assert r.status_code == 200, r.text
+    assert r.json()["data"]["name"] == f"Reto marzo {suf}", r.json()["data"]
+
+    # Y se queda cambiado, no solo en la respuesta.
+    convs = client.get("/api/chat/conversations", headers=h_coach).json()["data"]
+    assert [c for c in convs if c["id"] == conv][0]["name"] == f"Reto marzo {suf}"
+
+
+def test_un_nombre_en_blanco_no_vale(client, seed, admin_headers):
+    """Un grupo sin nombre sale como "Grupo" en la lista, y con tres grupos
+    todos se llaman igual."""
+    suf = uuid.uuid4().hex[:8]
+    h_coach, uid_pro, _c = _monta(client, admin_headers, suf)
+    conv = _crear(client, h_coach, tipo="equipo", name=f"Equipo {suf}",
+                  participant_user_ids=[uid_pro]).json()["data"]["id"]
+
+    assert client.patch(f"/api/chat/conversations/{conv}", headers=h_coach,
+                        json={"name": "   "}).status_code == 422
+
+
+def test_SOLO_QUIEN_LO_CREO_LE_CAMBIA_EL_NOMBRE(client, seed, admin_headers):
+    """Es quien reunió a esa gente. Si lo renombrara cualquiera, el grupo
+    cambiaría de nombre en la lista de todos sin que nadie sepa quién."""
+    suf = uuid.uuid4().hex[:8]
+    h_coach, uid_pro, _c = _monta(client, admin_headers, suf)
+    conv = _crear(client, h_coach, tipo="equipo", name=f"Equipo {suf}",
+                  participant_user_ids=[uid_pro]).json()["data"]["id"]
+
+    _h2, _p2, _c2 = _monta(client, admin_headers, uuid.uuid4().hex[:8])
+    r = client.patch(f"/api/chat/conversations/{conv}", headers=_h2,
+                     json={"name": "Mio ahora"})
+    assert r.status_code in (403, 404), r.status_code
+
+
+def test_a_un_grupo_por_regla_no_se_le_cambia_el_nombre_a_mano(client, seed, admin_headers):
+    """Igual que no se le añade gente a mano: lo define la regla."""
+    suf = uuid.uuid4().hex[:8]
+    h_coach, _p, _c = _monta(client, admin_headers, suf)
+    conv = _crear(client, h_coach, audience="mis_clientes",
+                  name=f"Aviso {suf}").json()["data"]["id"]
+
+    r = client.patch(f"/api/chat/conversations/{conv}", headers=h_coach,
+                     json={"name": "Otro nombre"})
+    assert r.status_code == 400, r.text
+
+
+def test_los_participantes_dicen_quien_es_quien(client, seed, admin_headers):
+    """La ventana de gestionar separa equipo de clientes: en un seguimiento hay
+    de los dos y no es lo mismo sacar a la nutricionista que sacar al cliente."""
+    suf = uuid.uuid4().hex[:8]
+    h_coach, uid_pro, clientes = _monta(client, admin_headers, suf)
+    conv = _crear(client, h_coach, tipo="seguimiento", name=f"Seguimiento {suf}",
+                  participant_user_ids=[uid_pro, clientes[0]]).json()["data"]
+
+    por_id = {p["user_id"]: p for p in conv["participants"]}
+    assert por_id[uid_pro]["rol"] == "coach", por_id[uid_pro]
+    assert por_id[uid_pro]["etiqueta"] == "Nutricionista", por_id[uid_pro]
+    assert por_id[clientes[0]]["rol"] == "cliente", por_id[clientes[0]]
+
+
 # ── Lo que la pantalla necesita para pintar la lista ───────────────────────
 
 def test_los_contactos_traen_el_oficio_de_cada_uno(client, seed, admin_headers):

@@ -48,6 +48,54 @@
     .conv-tab .n{font-size:11px;color:#9CA3AF;margin-left:4px;}
     .conv-tab.sel .n{color:var(--purple);}
 
+    /* ── Nuevo grupo ──────────────────────────────────────────────────────
+       El botón vive dentro de la pestaña de Grupos, que es donde se busca. */
+    .btn-nuevo-grupo{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 32px);
+      margin:12px 16px 4px;padding:11px;border:1px dashed #C7CBD3;border-radius:12px;background:#fff;
+      color:var(--purple);font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;}
+    .btn-nuevo-grupo:hover{border-color:var(--purple);background:var(--purple-light);}
+
+    .ng-ov{position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:200;display:none;
+      align-items:center;justify-content:center;padding:20px;}
+    .ng-ov.open{display:flex;}
+    .ng{background:#fff;border-radius:16px;width:470px;max-width:100%;max-height:92vh;
+      display:flex;flex-direction:column;overflow:hidden;}
+    .ng-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 14px;}
+    .ng-head h3{font-size:19px;font-weight:700;color:#111827;}
+    .ng-head button{background:none;border:none;font-size:22px;color:#9CA3AF;cursor:pointer;line-height:1;padding:0 2px;}
+    .ng-body{padding:0 22px 8px;overflow-y:auto;}
+    .ng-lbl{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;}
+    .ng-nombre{width:100%;padding:11px 14px;border:1px solid #E5E7EB;border-radius:10px;font-size:14px;
+      outline:none;font-family:inherit;}
+    .ng-nombre:focus{border-color:var(--purple);}
+    .ng-tipo{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border:1.5px solid #E5E7EB;
+      border-radius:12px;cursor:pointer;margin-bottom:9px;transition:.15s;background:#fff;}
+    .ng-tipo:hover{border-color:#C7CBD3;}
+    .ng-tipo.sel{border-color:var(--purple);background:var(--purple-light);}
+    .ng-tipo .ic{color:var(--purple);flex-shrink:0;margin-top:1px;}
+    .ng-tipo b{display:block;font-size:14px;font-weight:700;color:#111827;}
+    .ng-tipo span{display:block;font-size:12px;color:#6B7280;margin-top:2px;line-height:1.4;}
+    .ng-miembro{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1px solid #E5E7EB;
+      border-radius:12px;margin-bottom:9px;cursor:pointer;}
+    .ng-miembro:hover{border-color:#C7CBD3;}
+    .ng-av{width:34px;height:34px;border-radius:50%;background:var(--purple-light);color:var(--purple);
+      display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;overflow:hidden;}
+    .ng-av img{width:100%;height:100%;object-fit:cover;}
+    .ng-miembro .nm{flex:1;min-width:0;}
+    .ng-miembro .nm b{display:block;font-size:13.5px;font-weight:600;color:#111827;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .ng-miembro .nm span{display:block;font-size:11.5px;color:#9CA3AF;}
+    .ng-miembro input{width:18px;height:18px;accent-color:var(--purple);cursor:pointer;flex-shrink:0;}
+    .ng-vacio{font-size:12.5px;color:#9CA3AF;padding:12px 2px;}
+    .ng-nota{font-size:11.5px;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;
+      border-radius:9px;padding:9px 11px;margin-bottom:10px;line-height:1.45;}
+    .ng-pie{display:flex;gap:10px;padding:14px 22px 20px;}
+    .ng-crear{flex:1;padding:12px;border:none;border-radius:10px;background:var(--purple);color:#fff;
+      font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}
+    .ng-crear:disabled{opacity:.45;cursor:not-allowed;}
+    .ng-cancelar{padding:12px 20px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;
+      color:#374151;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}
+
     /* Estado del chat de ese cliente, y atajo a su ficha. */
     .msg-head-acts{display:flex;align-items:center;gap:8px;margin-left:auto;}
     .chip-chat{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;
@@ -430,6 +478,11 @@
         <button class="conv-tab" id="tabGrupos" onclick="setConvTab('grupos')">Grupos<span class="n" id="nGrupos"></span></button>
       </div>
     </div>
+    <!-- El botón vive en la pestaña de Grupos, que es donde se busca crear uno -->
+    <button class="btn-nuevo-grupo" id="btnNuevoGrupo" onclick="abrirNuevoGrupo()" style="display:none;">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nuevo grupo
+    </button>
     <div class="conv-list" id="convList">
       <div class="conv-empty">Cargando…</div>
     </div>
@@ -488,6 +541,31 @@
     </div>
   </div>
 </div>
+</div>
+
+<!-- ── Nuevo grupo ─────────────────────────────────────────────────────────── -->
+<div class="ng-ov" id="ngOverlay" onclick="if(event.target===this)cerrarNuevoGrupo()">
+  <div class="ng">
+    <div class="ng-head">
+      <h3>Nuevo grupo</h3>
+      <button onclick="cerrarNuevoGrupo()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="ng-body">
+      <div class="ng-lbl">Nombre del grupo</div>
+      <input class="ng-nombre" id="ngNombre" placeholder="Ej: Reto verano 2026" oninput="_ngPie()"/>
+
+      <div class="ng-lbl">Tipo de grupo</div>
+      <div id="ngTipos"></div>
+
+      <div class="ng-lbl" id="ngLblMiembros">Miembros</div>
+      <div id="ngNota"></div>
+      <div id="ngMiembros"></div>
+    </div>
+    <div class="ng-pie">
+      <button class="ng-crear" id="ngCrear" onclick="crearGrupoNuevo()" disabled>Crear grupo</button>
+      <button class="ng-cancelar" onclick="cerrarNuevoGrupo()">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -693,9 +771,14 @@ function renderConvList(todas) {
   const grupos = (todas || []).filter(esGrupo);
   document.getElementById('nDirectos').textContent = directos.length ? ` ${directos.length}` : '';
   document.getElementById('nGrupos').textContent = grupos.length ? ` ${grupos.length}` : '';
-  // Sin grupos la pestaña sobra: ocupa sitio y no lleva a ninguna parte.
-  document.getElementById('tabGrupos').style.display = grupos.length ? '' : 'none';
-  if (!grupos.length && _convTab === 'grupos') setConvTab('directos');
+  /* La pestaña de Grupos se enseña SIEMPRE que se puedan crear: si se
+     escondiera cuando no hay ninguno, no habría por dónde crear el primero. */
+  const puedoCrear = document.getElementById('btnGrp')?.style.display !== 'none';
+  document.getElementById('tabGrupos').style.display = (grupos.length || puedoCrear) ? '' : 'none';
+  if (!grupos.length && !puedoCrear && _convTab === 'grupos') setConvTab('directos');
+  // "Nuevo grupo" vive dentro de esa pestaña, que es donde se busca.
+  document.getElementById('btnNuevoGrupo').style.display =
+    (_convTab === 'grupos' && puedoCrear) ? '' : 'none';
 
   const convs = (_convTab === 'grupos' ? grupos : directos)
     .filter(c => !q || convName(c).toLowerCase().includes(q));
@@ -1105,6 +1188,161 @@ function renderContactos() {
 
 function alternarContacto(id) {
   if (_elegidos.has(id)) _elegidos.delete(id); else _elegidos.add(id);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NUEVO GRUPO
+
+   Tres clases de grupo, y no son intercambiables. La clase decide a quién se
+   puede meter dentro, que es justo lo que antes no se decía: la lista salía
+   entera —equipo y clientes mezclados— y nada impedía meter a un cliente en el
+   grupo interno del equipo.
+
+   Se queda una cuarta, el aviso a todos los clientes, que ya existía y que las
+   tres del diseño no cubren: es la única que mete sola a los clientes nuevos y
+   la única donde los clientes NO se ven entre ellos.
+══════════════════════════════════════════════════════════════════════════ */
+const NG_TIPOS = [
+  { k: 'equipo', t: 'Equipo', d: 'Solo miembros del equipo, sin clientes',
+    ic: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+    quien: 'coach' },
+  { k: 'comunidad', t: 'Comunidad de clientes', d: 'Coach + clientes (retos, grupos de motivación)',
+    ic: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>',
+    quien: 'cliente',
+    /* Los clientes de un reto SÍ se leen entre ellos. Es lo que se pidió, pero
+       no es lo que hace el aviso a todos, y la diferencia no se ve mirando la
+       pantalla: se dice antes de crearlo, no después. */
+    aviso: 'En este grupo tus clientes se leen entre ellos y ven quién más está dentro.' },
+  { k: 'seguimiento', t: 'Seguimiento', d: 'Coach + profesional + cliente específico',
+    ic: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    quien: 'todos',
+    aviso: 'Hace falta el cliente y al menos alguien del equipo.' },
+  { k: 'aviso', t: 'Aviso a todos mis clientes', d: 'Escribes tú, cada uno te responde en privado',
+    ic: '<path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+    quien: 'ninguno',
+    aviso: 'Los clientes nuevos entran solos, y no se ven entre ellos.' },
+];
+
+let _ngTipo = 'equipo', _ngElegidos = new Set();
+
+function _ngDef() { return NG_TIPOS.find(t => t.k === _ngTipo) || NG_TIPOS[0]; }
+
+async function abrirNuevoGrupo() {
+  _ngTipo = 'equipo';
+  _ngElegidos = new Set();
+  document.getElementById('ngNombre').value = '';
+  document.getElementById('ngOverlay').classList.add('open');
+  document.getElementById('ngMiembros').innerHTML = '<div class="ng-vacio">Cargando…</div>';
+  _ngPintarTipos();
+  await cargarContactos();
+  _ngPintarMiembros();
+  document.getElementById('ngNombre').focus();
+}
+
+function cerrarNuevoGrupo() {
+  document.getElementById('ngOverlay').classList.remove('open');
+}
+
+function _ngPintarTipos() {
+  document.getElementById('ngTipos').innerHTML = NG_TIPOS.map(t => `
+    <div class="ng-tipo ${_ngTipo === t.k ? 'sel' : ''}" onclick="ngElegirTipo('${t.k}')">
+      <svg class="ic" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">${t.ic}</svg>
+      <div><b>${escHtml(t.t)}</b><span>${escHtml(t.d)}</span></div>
+    </div>`).join('');
+}
+
+function ngElegirTipo(k) {
+  _ngTipo = k;
+  /* Al cambiar de clase se vacía la selección: lo elegido para un grupo del
+     equipo no vale para una comunidad de clientes, y arrastrarlo metería a
+     gente que no toca sin que se vea. */
+  _ngElegidos = new Set();
+  _ngPintarTipos();
+  _ngPintarMiembros();
+}
+
+function _ngPintarMiembros() {
+  const def = _ngDef();
+  const caja = document.getElementById('ngMiembros');
+  const nota = document.getElementById('ngNota');
+  nota.innerHTML = def.aviso ? `<div class="ng-nota">${escHtml(def.aviso)}</div>` : '';
+
+  // El aviso a todos no lleva lista: la resuelve el servidor cada vez.
+  document.getElementById('ngLblMiembros').style.display = def.quien === 'ninguno' ? 'none' : '';
+  if (def.quien === 'ninguno') { caja.innerHTML = ''; _ngPie(); return; }
+
+  const gente = _contactos.filter(c => def.quien === 'todos' || c.rol === def.quien);
+  if (!gente.length) {
+    caja.innerHTML = `<div class="ng-vacio">${def.quien === 'cliente'
+      ? 'Todavía no tienes clientes con quien montar una comunidad.'
+      : 'Todavía no tienes equipo con quien montar un grupo.'}</div>`;
+    _ngPie();
+    return;
+  }
+  caja.innerHTML = gente.map(c => {
+    const ini = ((c.name || '?').trim()[0] || '?').toUpperCase();
+    // El oficio si lo hay ("Nutricionista"); si no, el correo, que al menos
+    // distingue a dos personas que se llaman igual.
+    const bajo = c.etiqueta || (c.rol === 'cliente' ? 'Cliente' : '') || c.email || '';
+    return `<label class="ng-miembro">
+      <span class="ng-av">${c.photo ? `<img src="${escHtml(c.photo)}" alt="">` : escHtml(ini)}</span>
+      <span class="nm"><b>${escHtml(c.name || '')}</b><span>${escHtml(bajo)}</span></span>
+      <input type="checkbox" ${_ngElegidos.has(c.user_id) ? 'checked' : ''}
+             onchange="ngAlternar(${c.user_id})">
+    </label>`;
+  }).join('');
+  _ngPie();
+}
+
+function ngAlternar(id) {
+  if (_ngElegidos.has(id)) _ngElegidos.delete(id); else _ngElegidos.add(id);
+  _ngPie();
+}
+
+function _ngPie() {
+  const def = _ngDef();
+  const btn = document.getElementById('ngCrear');
+  const n = _ngElegidos.size;
+  if (def.quien === 'ninguno') {
+    btn.textContent = 'Crear aviso';
+    btn.disabled = false;
+    return;
+  }
+  btn.textContent = `Crear grupo (${n} miembro${n !== 1 ? 's' : ''})`;
+  /* Un seguimiento necesita cliente Y alguien del equipo: se comprueba aquí
+     para no dejar pulsar y que el servidor lo rechace después. El servidor lo
+     comprueba igualmente — la pantalla no es la que manda. */
+  if (def.k === 'seguimiento') {
+    const els = _contactos.filter(c => _ngElegidos.has(c.user_id));
+    btn.disabled = !els.some(c => c.rol === 'cliente') || !els.some(c => c.rol === 'coach');
+  } else {
+    btn.disabled = n === 0;
+  }
+}
+
+async function crearGrupoNuevo() {
+  const def = _ngDef();
+  const btn = document.getElementById('ngCrear');
+  const nombre = document.getElementById('ngNombre').value.trim() || null;
+  const prev = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Creando…';
+  try {
+    const body = def.quien === 'ninguno'
+      ? { type: 'group', name: nombre, audience: 'mis_clientes' }
+      : { type: 'group', name: nombre, tipo: def.k, participant_user_ids: [..._ngElegidos] };
+    const r = await apiFetch('/chat/conversations', { method: 'POST', body: JSON.stringify(body) });
+    if (!r.success) {
+      // El motivo del servidor: dice qué falta, no un "error" a secas.
+      alert(r.message || 'No se pudo crear el grupo');
+      return;
+    }
+    cerrarNuevoGrupo();
+    await loadConversations();
+    setConvTab('grupos');
+    selectConversation(r.data.id);
+  } finally {
+    btn.disabled = false; btn.textContent = prev;
+  }
 }
 
 // ── Create conversation ────────────────────────────────────────────────────

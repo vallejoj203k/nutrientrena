@@ -269,8 +269,13 @@ def generate_diet_pdf(diet) -> bytes:
     ]
 
     for food in (diet.foods or []):
+        # El cliente se lleva el PDF impreso a la cocina: si el subtítulo solo
+        # estuviera en la app, ahí abajo pondría "Desayuno" y nada más.
+        titulo = food.name or "Comida"
+        if food.subtitle:
+            titulo += f' <font size="9" color="#E0E7FF">· {food.subtitle}</font>'
         meal_header = Table(
-            [[Paragraph(food.name or "Comida", styles["meal_name"])]],
+            [[Paragraph(titulo, styles["meal_name"])]],
             colWidths=[doc.width],
         )
         meal_header.setStyle(TableStyle([

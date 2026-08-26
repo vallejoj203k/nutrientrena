@@ -844,6 +844,7 @@
     .nut-meal-hdr-left{display:flex;align-items:center;gap:8px;}
     .nut-meal-dot{width:8px;height:8px;border-radius:50%;background:#4F46E5;flex-shrink:0;}
     .nut-meal-name{font-size:13px;font-weight:700;color:#3730A3;}
+    .nut-meal-que{font-size:12.5px;color:#4B5563;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .nut-meal-time{font-size:11px;color:#818CF8;margin-left:2px;}
     .nut-meal-kcal{font-size:13px;font-weight:700;color:#4F46E5;}
     .nut-food-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid #F9FAFB;font-size:13px;}
@@ -3688,7 +3689,8 @@ function renderActivePlan() {
     const mealsHtml = foods.length ? `<div class="apc-meals">
       ${mealsSlice.map(f => {
         const cnt = (f.detail || []).length;
-        return `<div class="apc-meal"><span class="apc-meal-name">${esc(f.name || 'Comida')}</span><span class="apc-meal-cnt">${cnt} alimento${cnt !== 1 ? 's' : ''}</span></div>`;
+        const que = f.subtitle ? ` <span style="color:#9CA3AF;font-weight:400;">· ${esc(f.subtitle)}</span>` : '';
+        return `<div class="apc-meal"><span class="apc-meal-name">${esc(f.name || 'Comida')}${que}</span><span class="apc-meal-cnt">${cnt} alimento${cnt !== 1 ? 's' : ''}</span></div>`;
       }).join('')}
       ${foods.length > MAX_MEALS ? `<div class="apc-more">+${foods.length - MAX_MEALS} más</div>` : ''}
     </div>` : '';
@@ -6916,6 +6918,7 @@ function _renderNutUI() {
               <div class="nut-meal-hdr-left">
                 <div class="nut-meal-dot"></div>
                 <span class="nut-meal-name">${esc(meal.name||'Comida')}</span>
+                ${meal.subtitle?`<span class="nut-meal-que">· ${esc(meal.subtitle)}</span>`:''}
                 ${mTime?`<span class="nut-meal-time">· ${mTime}</span>`:''}
               </div>
               <span class="nut-meal-kcal">${mKcal} kcal</span>
@@ -8471,7 +8474,8 @@ function _dietpickComida(m) {
 
   return `<div class="dietpick-meal-card">
     <div class="dietpick-meal-head">
-      <span class="dietpick-meal-nm">${esc(m.name || 'Comida')}${m.time ? ` <em>· ${esc(m.time)}</em>` : ''}</span>
+      <span class="dietpick-meal-nm">${esc(m.name || 'Comida')}${
+        m.subtitle ? ` <em>· ${esc(m.subtitle)}</em>` : ''}${m.time ? ` <em>· ${esc(m.time)}</em>` : ''}</span>
       ${kcal > 0 ? `<span class="dietpick-meal-kcal">${kcal} kcal</span>` : ''}
     </div>
     ${filas || '<div class="dietpick-food" style="color:#9CA3AF;">Sin alimentos en esta comida.</div>'}

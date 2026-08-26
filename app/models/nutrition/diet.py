@@ -77,6 +77,11 @@ class DietFood(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     diet_id = Column(String(36), ForeignKey("diets.id"), nullable=False)
     name = Column(String(255), nullable=False)
+    # Qué se come, en corto: "Huevos revueltos con aguacate". El nombre dice
+    # CUÁNDO se come ("Desayuno") y se repite en todas las dietas; sin esto el
+    # cliente tiene que abrir la comida y leer la lista de alimentos para
+    # saber qué le toca.
+    subtitle = Column(String(255), nullable=True)
     time = Column(String(10), nullable=True)  # e.g. "08:30"
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

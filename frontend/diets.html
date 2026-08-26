@@ -498,6 +498,12 @@
     .pm2-headmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
     .pm2-name-wrap{display:flex;align-items:center;gap:6px;}
     .pm2-name-inp{border:none;outline:none;font-size:17px;font-weight:800;color:#111827;background:transparent;font-family:inherit;padding:0;min-width:40px;width:auto;max-width:340px;}
+    .pm2-sub-wrap{display:flex;align-items:center;gap:6px;margin-top:5px;max-width:520px;}
+    .pm2-sub-wrap svg{color:#C7CBD3;flex-shrink:0;}
+    .pm2-sub-inp{flex:1;min-width:0;border:1px solid #EEF0F4;border-radius:8px;padding:6px 10px;
+      font-size:13px;color:#374151;font-family:inherit;outline:none;background:#FCFCFD;transition:.15s;}
+    .pm2-sub-inp::placeholder{color:#C7CBD3;}
+    .pm2-sub-inp:focus{border-color:#4F46E5;background:#fff;}
     .pm2-name-inp:focus{border-bottom:2px solid #4F46E5;}
     .pm2-name-inp::placeholder{color:#D1D5DB;}
     .pm2-pencil{color:#C4C8CF;display:flex;flex-shrink:0;pointer-events:none;}
@@ -2204,6 +2210,10 @@ function _pm2CardHTML(meal) {
     +       '<input class="pm2-name-inp" id="msNameInp-' + mid + '" value="' + esc(meal.name) + '" size="' + Math.max(6, (meal.name || '').length + 1) + '" placeholder="Nombre de la comida" oninput="this.size=Math.max(6,this.value.length+1);onActiveMealNameChange(' + mid + ',this.value)">'
     +       '<span class="pm2-pencil"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>'
     +     '</div>'
+    +     '<div class="pm2-sub-wrap">'
+    +       '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h1a2 2 0 0 0 2-2V2"/><path d="M5.5 2v20"/><path d="M17 2a4 4 0 0 0-4 4v5h4v11"/></svg>'
+    +       '<input class="pm2-sub-inp" id="msSubInp-' + mid + '" value="' + esc(meal.subtitle || '') + '" maxlength="255" placeholder="Ej.: ' + esc(_mealEjemplo(meal.name)) + '" oninput="onMealSubtitleChange(' + mid + ',this.value)">'
+    +     '</div>'
     +     '<div class="pm2-meta">'
     +       '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
     +       '<input type="time" class="pm2-time" id="msv2Time-' + mid + '" value="' + esc(meal.time || '') + '" onchange="onMealTimeChange(' + mid + ',this.value)">'
@@ -2292,6 +2302,11 @@ function onMealTimeChange(mid, val) {
   if (meal) meal.time = val || null;
 }
 
+function onMealSubtitleChange(mid, val) {
+  var meal = _meals.find(function(m){ return m.id == mid; });
+  if (meal) meal.subtitle = val;
+}
+
 function updateMealHeaderStats(mid) {
   var meal = _meals.find(function(m){ return m.id == mid; });
   if (!meal) return;
@@ -2354,14 +2369,27 @@ function addNewMeal() {
 // --- Meal management ---
 
 // Nombres y horas por defecto de las comidas (estructura estándar del día)
+/* El `ej` es solo el texto en gris del recuadro vacío: da la idea de qué se
+   espera ahí sin escribir nada por el coach. Un subtítulo puesto por defecto
+   sería una comida que él no ha decidido y que su cliente sí vería. */
 var MEAL_PRESETS = [
-  { name: 'Desayuno', time: '08:00' },
-  { name: 'Media mañana', time: '11:00' },
-  { name: 'Comida', time: '14:00' },
-  { name: 'Merienda', time: '17:30' },
-  { name: 'Cena', time: '21:00' },
-  { name: 'Recena', time: '23:00' },
+  { name: 'Desayuno',     time: '08:00', ej: 'Avena con plátano y claras' },
+  { name: 'Media mañana', time: '11:00', ej: 'Manzana con yogur griego' },
+  { name: 'Comida',       time: '14:00', ej: 'Lentejas con arroz' },
+  { name: 'Merienda',     time: '17:30', ej: 'Tostada de pavo y aguacate' },
+  { name: 'Cena',         time: '21:00', ej: 'Salmón con verduras' },
+  { name: 'Recena',       time: '23:00', ej: 'Requesón con nueces' },
 ];
+
+/* El ejemplo va por el NOMBRE de la comida, no por su posición: si el coach
+   reordena o borra una, el de "Cena" tiene que seguir siendo el de la cena. */
+function _mealEjemplo(nombre) {
+  var n = (nombre || '').toLowerCase().trim();
+  for (var i = 0; i < MEAL_PRESETS.length; i++) {
+    if (MEAL_PRESETS[i].name.toLowerCase() === n) return MEAL_PRESETS[i].ej;
+  }
+  return 'Ej.: qué come en esta comida';
+}
 
 function addMeal(prefill) {
   prefill = prefill || null;
@@ -2374,6 +2402,7 @@ function addMeal(prefill) {
   var meal = {
     id: mid, db_id: (prefill && prefill.id) || null,
     name: (prefill && prefill.name) || defaultName,
+    subtitle: (prefill && prefill.subtitle) || '',
     time: prefill ? (prefill.time || null) : defaultTime,
     rows: [], _collapsed: !hasFoods
   };
@@ -3256,7 +3285,8 @@ async function saveDiet(opts) {
         if (r.db_id) obj.id = r.db_id;
         return obj;
       });
-    var f = { name: mealName, time: meal.time || null, detail: detail };
+    var f = { name: mealName, subtitle: (meal.subtitle || '').trim(),
+              time: meal.time || null, detail: detail };
     if (meal.db_id) f.id = meal.db_id;
     return f;
   // Una comida que ya existe se envía aunque se quede sin alimentos: es lo que

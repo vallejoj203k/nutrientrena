@@ -13,6 +13,7 @@ from app.core.dependencies import (
     verify_client_access, SUPERADMIN, ADMIN, COACH, CLIENT,
 )
 from app.core.responses import send_response, send_error
+from app.core.macros import escalar
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment, Pathology, diet_pathologies_table
 from app.models.nutrition.aliment import Aliment
 from app.schemas.nutrition.diet import DietCreate, DietUpdate, DietOut, DietFoodCreate, DietFoodAlimentCreate
@@ -104,10 +105,10 @@ def _diet_food_totals(diet: Diet):
             al = dfa.aliment
             q = dfa.quantity or 0
             if al and q:
-                k += (al.calories or 0) / 100.0 * q
-                p += (al.proteins or 0) / 100.0 * q
-                c += (al.carbohydrates or 0) / 100.0 * q
-                f += (al.fats or 0) / 100.0 * q
+                k += escalar(al.calories, al, q)
+                p += escalar(al.proteins, al, q)
+                c += escalar(al.carbohydrates, al, q)
+                f += escalar(al.fats, al, q)
     return k, p, c, f
 
 

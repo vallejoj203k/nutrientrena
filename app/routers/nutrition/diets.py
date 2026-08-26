@@ -202,10 +202,17 @@ def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_u
             if not food:
                 continue
             food.name = food_data.name
+            # `None` = "no lo toques"; vacío = "bórralo". Sin distinguirlo, una
+            # edición parcial que no mandara el subtítulo lo borraría sin que
+            # nadie lo hubiera pedido.
+            if food_data.subtitle is not None:
+                food.subtitle = food_data.subtitle.strip()[:255] or None
             if food_data.time is not None:
                 food.time = food_data.time or None
         else:
-            food = DietFood(diet_id=diet_id, name=food_data.name, time=food_data.time)
+            food = DietFood(diet_id=diet_id, name=food_data.name,
+                            subtitle=(food_data.subtitle or "").strip()[:255] or None,
+                            time=food_data.time)
             db.add(food)
             db.flush()
 
@@ -908,6 +915,9 @@ def copy_diet_to_user(db: Session, source: Diet, target_user_id: int, created_us
     foods_data = [
         DietFoodCreate(
             name=food.name,
+            # Sin esto el subtítulo se pierde justo al asignar la dieta: el
+            # coach lo ve en su biblioteca y su cliente no.
+            subtitle=food.subtitle,
             time=food.time,
             detail=[
                 DietFoodAlimentCreate(

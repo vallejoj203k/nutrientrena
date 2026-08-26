@@ -78,6 +78,7 @@
     .meal-ico{width:42px;height:42px;border-radius:12px;background:var(--indigo-pale);color:var(--indigo);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .meal-info{flex:1;min-width:0;}
     .meal-nm{font-size:15px;font-weight:800;color:#111827;}
+    .meal-que{font-size:13.5px;color:#374151;margin-top:2px;line-height:1.35;}
     .meal-sub{font-size:13px;color:#9CA3AF;margin-top:1px;}
     .meal-chev{color:#9CA3AF;flex-shrink:0;transition:transform .2s;}
     .meal-card.open .meal-chev{transform:rotate(180deg);color:var(--indigo);}
@@ -225,7 +226,11 @@
       var chev='<svg class="meal-chev" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
       html+='<div class="meal-card'+(mi===0?' open':'')+'" id="mealc-'+mi+'">'
         +'<div class="meal-head" onclick="toggleMeal('+mi+')"><div class="meal-ico">'+mealIcon(m.name)+'</div>'
-        +'<div class="meal-info"><div class="meal-nm">'+esc(m.name||'Comida')+'</div><div class="meal-sub">'+esc(sub||'')+'</div></div>'+chev+'</div>'
+        /* El subtítulo va DEBAJO del nombre y antes de la hora: es lo que el
+           cliente busca —qué come— y el nombre solo le dice cuándo. */
+        +'<div class="meal-info"><div class="meal-nm">'+esc(m.name||'Comida')+'</div>'
+        +(m.subtitle?'<div class="meal-que">'+esc(m.subtitle)+'</div>':'')
+        +'<div class="meal-sub">'+esc(sub||'')+'</div></div>'+chev+'</div>'
         +'<div class="meal-foods">'+foodsHtml+'</div></div>';
     });
     if(d.has_diet && !(d.meals||[]).length){ html+='<div class="empty">Este día no tiene comidas cargadas.</div>'; }

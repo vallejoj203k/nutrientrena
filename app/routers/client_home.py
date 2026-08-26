@@ -262,7 +262,8 @@ def _diet_meals_macros(diet):
                 "quantity": dfa.quantity,
                 "unit": (al.quantity_unit or "g"),
             })
-        meals.append({"name": food.name, "time": food.time, "kcal": round(mk) if mk else None, "foods": foods})
+        meals.append({"name": food.name, "subtitle": food.subtitle, "time": food.time,
+                      "kcal": round(mk) if mk else None, "foods": foods})
     meals.sort(key=lambda m: m["time"] or "~")
     return meals, kcal, prot, carb, fat
 

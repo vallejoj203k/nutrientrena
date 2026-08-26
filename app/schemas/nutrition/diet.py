@@ -15,6 +15,7 @@ class DietFoodAlimentCreate(BaseModel):
 class DietFoodCreate(BaseModel):
     id: Optional[int] = None
     name: str
+    subtitle: Optional[str] = None
     time: Optional[str] = None
     detail: Optional[List[DietFoodAlimentCreate]] = []
     delete: Optional[bool] = False
@@ -75,6 +76,7 @@ class DietFoodAlimentOut(BaseModel):
 class DietFoodOut(BaseModel):
     id: int
     name: str
+    subtitle: Optional[str] = None
     time: Optional[str] = None
     detail: List[DietFoodAlimentOut] = []
     model_config = {"from_attributes": True}

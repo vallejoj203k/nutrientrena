@@ -179,6 +179,57 @@ DESVINCULAR = [
 ]
 
 
+def inspeccionar(db, alimentos):
+    """Qué son los alimentos que ya hay, para decidir si se pueden tirar.
+
+    Los números del informe dicen CUÁNTOS hay, no QUÉ son. Con 7460 originales
+    frente a 784 en el CSV, la pregunta no es cuántos sino si el CSV es el
+    catálogo entero o solo un trozo — y eso solo se ve mirando los nombres.
+    """
+    print("\n╭─ QUÉ HAY EN LA BASE ─────────────────────────────────────────")
+
+    filas = db.execute(text(
+        "SELECT a.name, a.brand, g.name FROM aliments a "
+        "LEFT JOIN group_foods g ON g.id = a.group_food_id "
+        "WHERE a.parent_id IS NULL ORDER BY a.name LIMIT 25")).fetchall()
+    print("│  Una muestra de los originales:")
+    for n, marca, grupo in filas:
+        print(f"│    {(n or '')[:44]:<44} {(grupo or 'sin categoría')[:22]}")
+
+    print("│")
+    print("│  Por categoría:")
+    for grupo, n in db.execute(text(
+            "SELECT COALESCE(g.name,'(sin categoría)'), COUNT(*) FROM aliments a "
+            "LEFT JOIN group_foods g ON g.id = a.group_food_id "
+            "WHERE a.parent_id IS NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 12")).fetchall():
+        print(f"│    {n:>6}  {grupo}")
+
+    # La pregunta que decide: ¿el CSV es el catálogo entero o un trozo suyo?
+    # Si casi todos sus nombres YA están, es una selección curada de lo que hay
+    # y lo suyo es mezclar, no vaciar.
+    en_base = {(r[0] or "").strip().lower()
+               for r in db.execute(text(
+                   "SELECT name FROM aliments WHERE parent_id IS NULL")).fetchall()}
+    del_csv = {a["nombre"].strip().lower() for a in alimentos}
+    ya_estan = len(del_csv & en_base)
+    print("│")
+    print("├─ ¿EL CSV ES EL CATÁLOGO ENTERO O UN TROZO? ──────────────────")
+    print(f"│  {len(del_csv):>7}  nombres distintos trae el CSV")
+    print(f"│  {ya_estan:>7}  de ellos YA están en la base")
+    print(f"│  {len(del_csv) - ya_estan:>7}  serían nuevos")
+    print(f"│  {len(en_base - del_csv):>7}  hay en la base que el CSV NO trae")
+    print("│")
+    if ya_estan > len(del_csv) * 0.6:
+        print("│  El CSV es en su mayoría gente que ya está: parece una")
+        print("│  selección revisada de lo que hay, no un catálogo nuevo.")
+        print("│  Lo suyo entonces es MEZCLAR (actualizar los que trae y dejar")
+        print("│  el resto), no vaciar. Vaciar tiraría los que no vienen.")
+    else:
+        print("│  El CSV trae sobre todo alimentos que no están: es catálogo")
+        print("│  nuevo, no una revisión del que hay.")
+    print("╰──────────────────────────────────────────────────────────────\n")
+
+
 def _cuenta(db, tabla, donde=""):
     try:
         return db.execute(text(f"SELECT COUNT(*) FROM {tabla} {donde}")).scalar() or 0
@@ -364,6 +415,8 @@ def main():
                     help="Id de la organización dueña. Sin esto, catálogo común.")
     ap.add_argument("--usuario", type=int, default=None,
                     help="Id del usuario que consta como creador.")
+    ap.add_argument("--inspeccionar", action="store_true",
+                    help="Solo mirar qué hay en la base. No toca nada.")
     ap.add_argument("--patron-prueba", action="append", default=None,
                     help="Patrón SQL de correos de prueba. Se puede repetir.")
     args = ap.parse_args()
@@ -373,6 +426,10 @@ def main():
 
     db = SessionLocal()
     try:
+        if args.inspeccionar:
+            inspeccionar(db, alimentos)
+            return 0
+
         informe(db, alimentos, avisos, patrones)
 
         if not args.ejecutar:

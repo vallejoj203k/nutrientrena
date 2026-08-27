@@ -142,13 +142,44 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
   ck('lo marcado del día no se arrastra a la semana',
     (await p.textContent('#lcSub')).includes('0/2 marcados'), await p.textContent('#lcSub'));
 
-  // ── Descargar ────────────────────────────────────────────────────────────
-  const [dl] = await Promise.all([
-    p.waitForEvent('download', { timeout: 15000 }),
-    p.click('.lc-dl.pri'),
-  ]);
-  ck('descargar la semana da un fichero', /lista-compra-semana\.txt$/.test(dl.suggestedFilename()),
-    dl.suggestedFilename());
+  // ── Descargar en los dos formatos ────────────────────────────────────────
+  // Las pestañas ya eligen día o semana; estos botones eligen el FORMATO. El
+  // PDF pasa por el servidor, así que aquí se ve algo que el banco de pruebas
+  // no puede ver: que el endpoint exista, responda y devuelva un PDF.
+  const bajar = async sel => {
+    const [d] = await Promise.all([
+      p.waitForEvent('download', { timeout: 20000 }),
+      p.click(sel),
+    ]);
+    return d;
+  };
+
+  const png = await bajar('.lc-foot .lc-dl:not(.pri)');
+  ck('la imagen se descarga como PNG de la semana',
+    png.suggestedFilename() === 'lista-compra-semana.png', png.suggestedFilename());
+  const rutaPng = await png.path();
+  const bytesPng = require('fs').readFileSync(rutaPng);
+  // Los ocho primeros bytes de todo PNG. Que el fichero exista no dice nada.
+  ck('y es un PNG de verdad',
+    bytesPng.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+    bytesPng.slice(0, 8));
+  ck('con contenido, no un lienzo en blanco de 100 bytes', bytesPng.length > 3000, bytesPng.length);
+
+  const pdf = await bajar('#lcPdf');
+  ck('el PDF se descarga', pdf.suggestedFilename() === 'lista-compra-semana.pdf',
+    pdf.suggestedFilename());
+  const bytesPdf = require('fs').readFileSync(await pdf.path());
+  ck('y es un PDF de verdad', bytesPdf.slice(0, 4).toString() === '%PDF',
+    bytesPdf.slice(0, 8).toString());
+  ck('con la lista dentro, no una página en blanco', bytesPdf.length > 1500, bytesPdf.length);
+
+  // Y el del día se llama distinto: si los dos salieran igual, uno pisaría al
+  // otro en la carpeta de descargas.
+  await p.click('#lcTabDia');
+  await p.waitForTimeout(400);
+  const pdfDia = await bajar('#lcPdf');
+  ck('el del día se llama distinto que el de la semana',
+    pdfDia.suggestedFilename() === 'lista-compra-dia.pdf', pdfDia.suggestedFilename());
 
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);

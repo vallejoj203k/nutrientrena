@@ -8,10 +8,10 @@ Se calcula siempre para el usuario autenticado (ownership implícito: el
 cliente solo obtiene lo suyo).
 """
 from datetime import date, timedelta
-from typing import Optional
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query, Response
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -350,6 +350,55 @@ def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends
         "dietas_asignadas": len(dietas),
         "days": days,
     }, "OK")
+
+
+# ── Lista de la compra en PDF ──────────────────────────────────────────────
+#
+# Este endpoint DIBUJA, no calcula. Las cuentas —juntar el mismo alimento,
+# sumar solo lo que comparte unidad, pasar de gramos a kilos— están en
+# `frontend/js/lista-compra.js` y llegan aquí ya hechas. Rehacerlas en Python
+# daría dos implementaciones que tienen que coincidir, y de esas dos siempre
+# hay una que se queda atrás: el cliente vería una cantidad en la pantalla y
+# otra distinta en el papel que se lleva al supermercado.
+#
+# Lo que llega es lo que el propio cliente acaba de ver en su pantalla y
+# vuelve convertido en PDF para él: no da acceso a nada que no tuviera ya.
+
+class _ItemCompra(BaseModel):
+    nombre: str = Field(max_length=200)
+    cantidad: str = Field(default="", max_length=60)
+
+
+class _GrupoCompra(BaseModel):
+    categoria: str = Field(default="Otros", max_length=120)
+    items: List[_ItemCompra] = []
+
+
+class ListaCompraPDF(BaseModel):
+    titulo: str = Field(default="Lista de la compra", max_length=120)
+    subtitulo: str = Field(default="", max_length=160)
+    grupos: List[_GrupoCompra] = []
+
+
+@router.post("/shopping-list/pdf", summary="Lista de la compra en PDF",
+             description="Convierte en PDF la lista de la compra que el cliente ve en su plan nutricional.")
+def shopping_list_pdf(
+    data: ListaCompraPDF,
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT)),
+):
+    from app.pdf.shopping_list_pdf import generar_lista_compra_pdf
+    try:
+        pdf = generar_lista_compra_pdf(
+            data.titulo, data.subtitulo,
+            [{"categoria": g.categoria,
+              "items": [{"nombre": i.nombre, "cantidad": i.cantidad} for i in g.items]}
+             for g in data.grupos])
+    except Exception as e:
+        return send_error(f"Error generando PDF: {e}", code=500)
+    return Response(
+        content=pdf, media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="lista-compra.pdf"'},
+    )
 
 
 @router.get("/progress", summary="Progreso del cliente", description="Evolución del cliente: estadísticas, serie de peso y fotos de progreso.")

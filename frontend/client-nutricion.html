@@ -229,8 +229,11 @@
     </div>
     <div class="lc-body" id="lcBody"></div>
     <div class="lc-foot">
-      <button class="lc-dl" onclick="lcDescargar('dia')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar día</button>
-      <button class="lc-dl pri" onclick="lcDescargar('semana')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar semana</button>
+      <!-- Las pestañas ya eligen día o semana: repetirlo aquí obligaba a
+           decidir dos veces lo mismo. Estos botones eligen el FORMATO y se
+           llevan lo que se está viendo. -->
+      <button class="lc-dl" onclick="lcDescargar('png')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Imagen</button>
+      <button class="lc-dl pri" id="lcPdf" onclick="lcDescargar('pdf')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button>
     </div>
   </div>
 </div>
@@ -439,18 +442,69 @@
     lcPintar();
   }
 
-  function lcDescargar(cual){
-    var antes=_lcVista; _lcVista=cual;
-    var grupos=_lcGrupos(), titulo='Lista de la compra — '+_lcTitulo();
-    var texto=listaCompra.listaComoTexto(grupos, titulo);
-    _lcVista=antes;
-    if(!listaCompra.contarItems(grupos)){ soon2('No hay nada que descargar.'); return; }
-
+  function _lcBaja(blob, nombre){
     var a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([texto],{type:'text/plain;charset=utf-8'}));
-    a.download='lista-compra-'+(cual==='dia'?'dia':'semana')+'.txt';
+    a.href=URL.createObjectURL(blob);
+    a.download=nombre;
     document.body.appendChild(a); a.click(); a.remove();
+    // Sin revocar, el blob se queda en memoria hasta recargar la página.
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  function _lcNombre(ext){
+    return 'lista-compra-'+(_lcVista==='dia'?'dia':'semana')+'.'+ext;
+  }
+
+  /* Descarga lo que se está viendo, en el formato pedido.
+
+     La IMAGEN se dibuja aquí, en el navegador: es para mandarla por WhatsApp a
+     quien hace la compra, y una foto se ve en la conversación.
+
+     El PDF lo dibuja el servidor con la misma librería que las dietas y las
+     rutinas, para que el papel se parezca al resto de la aplicación. Se le
+     manda la lista YA CALCULADA: si el servidor rehiciera las cuentas habría
+     dos versiones de la misma suma, y tarde o temprano el papel diría una cosa
+     y la pantalla otra. */
+  async function lcDescargar(formato){
+    var grupos=_lcGrupos();
+    if(!listaCompra.contarItems(grupos)){ soon2('No hay nada que descargar.'); return; }
+    var titulo='Lista de la compra';
+    var subtitulo=_lcTitulo()+((_days[0] && _days[0].date)?(' · semana del '+_lcDia(_days[0].date)):'');
+
+    if(formato==='png'){
+      var lienzo=listaCompra.listaComoImagen(grupos, titulo, subtitulo);
+      lienzo.toBlob(function(b){
+        if(!b){ soon2('No se ha podido crear la imagen.'); return; }
+        _lcBaja(b, _lcNombre('png'));
+      }, 'image/png');
+      return;
+    }
+
+    var btn=document.getElementById('lcPdf');
+    var antes=btn?btn.innerHTML:null;
+    if(btn){ btn.disabled=true; btn.textContent='Creando PDF…'; }
+    try{
+      var r=await fetch(API+'/client/shopping-list/pdf',{
+        method:'POST', headers:headers(),
+        body:JSON.stringify({titulo:titulo, subtitulo:subtitulo,
+          grupos:grupos.map(function(g){ return {categoria:g.categoria,
+            items:g.items.map(function(it){ return {nombre:it.nombre,
+              cantidad:listaCompra.formatearCantidad(it.cantidad,it.unidad)}; })}; })}),
+      });
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      _lcBaja(await r.blob(), _lcNombre('pdf'));
+    }catch(e){
+      // Decirlo. Un botón que no hace nada se lee como que la aplicación está
+      // rota, y aquí sigue estando la imagen como alternativa.
+      soon2('No se ha podido crear el PDF. Prueba con la imagen.');
+    }finally{
+      if(btn){ btn.disabled=false; btn.innerHTML=antes; }
+    }
+  }
+
+  function _lcDia(iso){
+    try{ var d=new Date(iso+'T00:00:00');
+      return d.getDate()+'/'+(d.getMonth()+1); }catch(e){ return ''; }
   }
 
   function soon2(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2200); }

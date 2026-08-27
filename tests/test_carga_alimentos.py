@@ -13,6 +13,7 @@ acordado.
   · Y el modo simulacro no puede escribir NADA. Es lo único que separa una
     migración de un accidente.
 """
+import sys
 import uuid
 from datetime import date
 
@@ -251,3 +252,92 @@ def test_una_fila_sin_nombre_no_para_la_carga(client, seed, admin_headers, sesio
     alimentos, avisos = leer_csv(ruta)
     assert len(alimentos) == 1 and alimentos[0]["nombre"].startswith("Manzana")
     assert any("sin nombre" in a for a in avisos), avisos
+
+
+# ── Cómo se comporta cuando algo va mal ────────────────────────────────────
+#
+# Estas no comprueban la carga, sino lo que el script DICE. Un script que se
+# ejecuta a mano contra producción se usa mirando su salida: si miente sobre el
+# estado de los datos, da igual que por dentro esté bien.
+
+def test_COMPROBAR_NO_EXIGE_PASAR_EL_CSV(monkeypatch, tmp_path):
+    """`--csv` era obligatorio hasta para `--verificar`, que no carga nada.
+    Salía un error de uso, no un informe, y desde el otro lado eso parece que
+    el script está roto.
+    """
+    from scripts import limpiar_y_cargar_alimentos as mod
+
+    monkeypatch.setenv("DATABASE_URL", "sqlite:///" + str(tmp_path / "x.db"))
+    monkeypatch.setattr(sys, "argv", ["x", "--verificar"])
+    monkeypatch.setattr(mod, "verificar", lambda db, alimentos: 0)
+    assert mod.main() == 0          # antes: SystemExit(2) de argparse
+
+
+def test_SIN_CSV_NO_DICE_QUE_SE_ESPERABAN_CERO(monkeypatch, capsys, client, seed, sesion):
+    """Sin fichero con el que comparar no hay número esperado. Escribir
+    "(se esperaban 0)" se lee como que la base tenía que estar vacía."""
+    from scripts.limpiar_y_cargar_alimentos import verificar
+
+    verificar(sesion, [])
+    linea = next(ln for ln in capsys.readouterr().out.splitlines()
+                 if "alimentos" in ln)
+    assert "se esperaban" not in linea, linea
+    # La de "sin categoría" SÍ lleva su cero, y ahí es cierto: no puede quedar
+    # ninguno suelto, venga el CSV o no.
+
+
+def test_NO_PODER_CONECTAR_NO_SE_CUENTA_COMO_CERO_ALIMENTOS(monkeypatch, capsys, tmp_path):
+    """El fallo que hizo creer que se había borrado el catálogo entero.
+
+    `_cuenta()` se tragaba cualquier excepción y devolvía None, que se imprime
+    como 0. Con la contraseña mal puesta, la salida era «0 alimentos (se
+    esperaban 784)» — indistinguible de una base vaciada.
+    """
+    from scripts import limpiar_y_cargar_alimentos as mod
+
+    class _SesionRota:
+        def execute(self, *a, **k):
+            raise RuntimeError('(1045, "Access denied for user \'root\'@\'x\'")')
+
+        def rollback(self):
+            pass
+
+        def close(self):
+            pass
+
+    monkeypatch.setenv("DATABASE_URL", "mysql+pymysql://root:mala@h:3306/railway")
+    monkeypatch.setattr(sys, "argv", ["x", "--verificar"])
+    monkeypatch.setattr(mod, "SessionLocal", lambda: _SesionRota())
+
+    assert mod.main() == 1
+    cap = capsys.readouterr()
+    todo = cap.out + cap.err
+    assert "No se ha podido conectar" in todo, todo
+    assert "No se ha leído ni tocado nada" in todo, todo
+    # Y sobre todo: ni una cifra de alimentos, que es lo que asustaba.
+    assert "alimentos" not in todo, todo
+
+
+def test_una_tabla_que_no_existe_si_se_perdona(monkeypatch):
+    """Que es para lo que estaba puesto el `except`: bases sin migrar del todo.
+    Perdonar eso está bien; perdonar TODO era el fallo."""
+    from scripts.limpiar_y_cargar_alimentos import _cuenta
+
+    class _Falta:
+        def execute(self, *a, **k):
+            raise RuntimeError("(1146, \"Table 'railway.recipes' doesn't exist\")")
+
+        def rollback(self):
+            pass
+
+    assert _cuenta(_Falta(), "recipes") is None
+
+    class _Otro:
+        def execute(self, *a, **k):
+            raise RuntimeError("Lost connection to MySQL server during query")
+
+        def rollback(self):
+            pass
+
+    with pytest.raises(RuntimeError):
+        _cuenta(_Otro(), "aliments")

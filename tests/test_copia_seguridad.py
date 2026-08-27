@@ -43,6 +43,17 @@ def test_los_saltos_de_linea_no_parten_la_fila():
     assert "\n" not in _sql("línea1\nlínea2", "sqlite")
 
 
+def test_UNA_FECHA_SUELTA_NO_REVIENTA_EL_VOLCADO():
+    """`datetime` admite separador y `date` no. Con el orden al revés, la
+    primera fila con una fecha suelta —un check-in, una sesión de entreno—
+    tiraba el volcado entero a media copia.
+    """
+    from datetime import date as _d, datetime as _dt, time as _t
+    assert _sql(_d(2026, 8, 26)) == "'2026-08-26'"
+    assert _sql(_dt(2026, 8, 26, 21, 30, 5)) == "'2026-08-26 21:30:05'"
+    assert _sql(_t(21, 30)) == "'21:30:00'"
+
+
 def test_los_vacios_van_como_NULL_no_como_texto():
     """`None` escrito como 'None' convertiría un hueco en la palabra."""
     assert _sql(None) == "NULL"

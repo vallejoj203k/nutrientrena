@@ -54,8 +54,14 @@ def _sql(v, motor="mysql"):
         return "1" if v else "0"
     if isinstance(v, (int, float, Decimal)):
         return str(v)
-    if isinstance(v, (datetime, date, time)):
+    # `datetime` va PRIMERO: es subclase de `date`, y al revés una fecha suelta
+    # entraría por aquí y `date.isoformat()` no admite `sep`. Se me pasó porque
+    # las tablas con fechas sueltas —check-ins, sesiones— estaban vacías en las
+    # pruebas, así que ninguna fila llegaba a esta línea.
+    if isinstance(v, datetime):
         return "'" + v.isoformat(sep=" ") + "'"
+    if isinstance(v, (date, time)):
+        return "'" + v.isoformat() + "'"
     if isinstance(v, (bytes, bytearray)):
         return "0x" + v.hex()
 

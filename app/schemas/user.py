@@ -148,6 +148,9 @@ class UserDetailOut(BaseModel):
     objective_id: Optional[int] = None
     lifecycle_status: Optional[str] = "activo"
     chat_enabled: Optional[bool] = True
+    # Cómo se le programa la nutrición: "semanal" o "calendario". La ficha
+    # del cliente lo necesita para saber qué modo pintar como activo.
+    nutrition_mode: Optional[str] = "semanal"
     defecit: Optional[float] = None
     excedente: Optional[float] = None
     start_date: Optional[datetime] = None

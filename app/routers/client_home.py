@@ -273,6 +273,73 @@ def _diet_meals_macros(diet):
     return meals, kcal, prot, carb, fat
 
 
+
+
+def _semana_del_calendario(db, detail, week_start, today_idx):
+    """La semana del cliente cuando la nutrición se programa día a día.
+
+    Las dietas están puestas en su calendario como tareas de tipo `nutricion`,
+    con `{"diet_id": ...}` dentro de `requirements`. Un día sin tarea es un día
+    sin dieta, y se dice: mejor un hueco visible que el plan de otra semana.
+    """
+    import json
+
+    from app.models.calendar_task import CalendarTask
+    from app.models.nutrition.diet import Diet
+
+    fin = week_start + timedelta(days=6)
+    tareas = db.query(CalendarTask).filter(
+        CalendarTask.client_user_detail_id == detail.id,
+        CalendarTask.task_type == "nutricion",
+        CalendarTask.task_date >= week_start,
+        CalendarTask.task_date <= fin,
+    ).order_by(CalendarTask.task_date.asc(), CalendarTask.id.asc()).all()
+
+    por_dia = {}
+    for t in tareas:
+        try:
+            req = json.loads(t.requirements) if t.requirements else {}
+        except Exception:
+            req = {}
+        did = (req or {}).get("diet_id") if isinstance(req, dict) else None
+        if not did:
+            continue
+        # Si hay varias en el mismo día se queda la primera: dos dietas el mismo
+        # día no significan "come el doble".
+        por_dia.setdefault((t.task_date - week_start).days, (did, t.title))
+
+    days = []
+    cache = {}
+    for i in range(7):
+        did, titulo = por_dia.get(i, (None, None))
+        if did and did not in cache:
+            cache[did] = db.query(Diet).filter(Diet.id == did).first()
+        diet = cache.get(did)
+        if diet:
+            meals, kcal, prot, carb, fat = _diet_meals_macros(diet)
+        else:
+            meals, kcal, prot, carb, fat = [], None, None, None, None
+        days.append({
+            "day_index": i, "label": _DAY_LABELS[i],
+            "name": (titulo or _DAY_NAMES[i]) if diet else _DAY_NAMES[i],
+            "date": (week_start + timedelta(days=i)).isoformat(),
+            "is_today": i == today_idx, "has_diet": diet is not None,
+            "kcal": kcal, "protein": prot, "carbs": carb, "fats": fat, "meals": meals,
+        })
+
+    hay = any(d["has_diet"] for d in days)
+    return {
+        "menu": {"name": "Plan del calendario"} if hay else None,
+        "week_start": week_start.isoformat(),
+        # Cada día trae lo suyo, como un menú semanal: la pantalla no tiene que
+        # avisar de que se repite, porque no se repite.
+        "plan_semanal": True,
+        "nutrition_mode": "calendario",
+        "days": days,
+    }
+
+
+
 @router.get("/nutrition", summary="Nutrición del cliente", description="Plan nutricional (dietas) asignado al cliente autenticado, con totales y comidas por día de la semana.")
 def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, CLIENT))):
     from app.models.client_menu import ClientMenu
@@ -287,6 +354,16 @@ def client_nutrition(db: Session = Depends(get_db), current_user: User = Depends
     today = date.today()
     today_idx = today.weekday()  # 0 = lunes
     week_start = today - timedelta(days=today_idx)
+
+    # 0) ¿Cómo se le programa la nutrición a este cliente?
+    #
+    #    Con el calendario activo, el plan semanal queda EN PAUSA. Eso tiene que
+    #    ser de verdad: si el cliente siguiera viendo el plan semanal, el coach
+    #    estaría programando en el calendario y su cliente comiendo otra cosa,
+    #    sin que ninguno de los dos lo supiera.
+    if (detail.nutrition_mode or "semanal") == "calendario":
+        return send_response(
+            _semana_del_calendario(db, detail, week_start, today_idx), "OK")
 
     # 1) Menú semanal asignado (ClientMenu → WeeklyMenu), si existe: cada día
     #    puede tener su propia dieta.

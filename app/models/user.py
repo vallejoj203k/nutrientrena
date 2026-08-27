@@ -77,6 +77,10 @@ class UserDetail(Base):
     injuries = Column(Text, nullable=True)
     equipment = Column(Text, nullable=True)
     food_preferences = Column(Text, nullable=True)
+    # Cómo se le programa la nutrición: "semanal" (un plan fijo que se repite
+    # cada semana) o "calendario" (día a día, desde su calendario). Solo uno
+    # está activo; el otro NO se borra, queda en pausa y se puede recuperar.
+    nutrition_mode = Column(String(20), nullable=True, default="semanal")
     # Pese al nombre, aquí NO va un código ISO: la migración v0w1x2y3z4a5
     # ("Allow free-text country names") quitó la clave foránea a countries.code
     # y ensanchó la columna a 100. El modelo se había quedado declarando

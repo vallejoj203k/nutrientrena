@@ -233,6 +233,26 @@ def informe(db, alimentos, avisos, patrones):
     if len(pruebas) > 10:
         print(f"│           … y {len(pruebas) - 10} más")
 
+    # ── De dónde salen los alimentos que hay ───────────────────────────────
+    # Si en la base hay MUCHOS más de los que trae el CSV, vaciar y cargar
+    # pierde la diferencia. Conviene saber si esos de más son copias —al
+    # asignar una dieta se clonan alimentos, y esas copias llevan `parent_id`—
+    # o catálogo de verdad que el CSV no incluye.
+    total_al = _cuenta(db, "aliments") or 0
+    if total_al:
+        copias = _cuenta(db, "aliments", "WHERE parent_id IS NOT NULL") or 0
+        de_org = _cuenta(db, "aliments", "WHERE organization_id IS NOT NULL") or 0
+        print("├─ DE DÓNDE SALEN LOS ALIMENTOS DE AHORA ──────────────────────")
+        print(f"│  {total_al:>7}  en la base")
+        print(f"│  {copias:>7}  copias de otro alimento (se clonan al asignar dietas)")
+        print(f"│  {total_al - copias:>7}  originales")
+        print(f"│  {de_org:>7}  de alguna cuenta; {total_al - de_org} del catálogo común")
+        if total_al > len(alimentos) * 1.5:
+            print("│")
+            print(f"│  OJO: el CSV trae {len(alimentos)} y en la base hay {total_al}.")
+            print("│  Vaciar y cargar PIERDE la diferencia. Mira el desglose de")
+            print("│  arriba antes de seguir.")
+
     print("├─ SE VA A CARGAR ─────────────────────────────────────────────")
     grupos = sorted({a["grupo"] for a in alimentos if a["grupo"]})
     con_micros = sum(1 for a in alimentos if a["micros"])

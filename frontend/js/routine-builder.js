@@ -454,17 +454,42 @@ function renderPkGrid(){
   box.innerHTML=items.map((ex,i)=>
     `<div class="pk-card" onclick="pkPick(${i})"><div class="pk-ico">${ex.image?`<img src="${esc(ex.image)}" alt="">`:PK_ICO}</div><div><div class="pk-name">${esc(ex.name)}</div><div class="pk-mg-name">${esc(ex.muscle_group_name||'—')}</div></div></div>`).join('');
 }
-function pkPick(i){const ex=_pkView[i];if(ex)selectExercise(ex.id,ex.name,ex.muscle_group_name||'',ex.image||null);}
+function pkPick(i){const ex=_pkView[i];if(ex)selectExercise(ex.id,ex.name,ex.muscle_group_name||'',ex.image||null,ex);}
 
-function selectExercise(trainingId,name,muscleName,image){
+/* Las series recomendadas del ejercicio, traducidas a lo que espera cada
+   casilla de la rutina.
+
+   Se guardan como texto libre ("3-4", "8-12", "60-90s") porque son una
+   recomendación, y la rutina quiere números en series y descanso. Se coge el
+   primero: de "3-4 series" salen 3, y las repeticiones se copian tal cual
+   porque "8-12" es exactamente lo que el coach escribiría a mano. */
+function _primerNumero(v){
+  const m=String(v==null?'':v).match(/\d+/);
+  return m?parseInt(m[0],10):null;
+}
+function recomendacionDe(t){
+  return {
+    series:_primerNumero(t&&t.rec_series),
+    repetitions:String((t&&t.rec_reps)||'').trim(),
+    break_time:_primerNumero(t&&t.rec_rest),
+  };
+}
+
+function selectExercise(trainingId,name,muscleName,image,training){
   if(pickerTargetBlockIdx===null)return;
   const day=routineData.days_list[selectedDayIdx];const blk=day.blocks[pickerTargetBlockIdx];
+  const rec=recomendacionDe(training);
   if(pickerReplaceEi!==null){
     const ex=blk.exercises[pickerReplaceEi];
     ex.training_id=trainingId;ex.training_name=name;ex.muscle_group_name=muscleName;ex.image=image||null;
+    // Al CAMBIAR el ejercicio solo se rellena lo que esté vacío: si el coach ya
+    // había escrito sus series, son suyas y no las pisa una recomendación.
+    if(ex.series==null||ex.series==='')ex.series=rec.series;
+    if(!ex.repetitions)ex.repetitions=rec.repetitions;
+    if(ex.break_time==null||ex.break_time==='')ex.break_time=rec.break_time;
     pickerReplaceEi=null;
   }else{
-    blk.exercises.push({training_id:trainingId,training_name:name,muscle_group_name:muscleName,image:image||null,series:null,repetitions:'',break_time:null,intensity_type:'',intensity_value:null,notes:'',order_index:blk.exercises.length});
+    blk.exercises.push({training_id:trainingId,training_name:name,muscle_group_name:muscleName,image:image||null,series:rec.series,repetitions:rec.repetitions,break_time:rec.break_time,intensity_type:'',intensity_value:null,notes:'',order_index:blk.exercises.length});
   }
   closePicker();renderBlocks();
 }

@@ -242,16 +242,34 @@ def informe(db, alimentos, avisos, patrones):
     if total_al:
         copias = _cuenta(db, "aliments", "WHERE parent_id IS NOT NULL") or 0
         de_org = _cuenta(db, "aliments", "WHERE organization_id IS NOT NULL") or 0
+        # Copias que ya no usa ninguna dieta. Al meter un alimento en una dieta
+        # se hace una copia suya, pero cuando esa copia deja de usarse nadie la
+        # borra: se queda en la tabla para siempre. No sale en la biblioteca ni
+        # se puede usar — es basura, y suele ser la mayoría de lo que sobra.
+        huerfanas = _cuenta(
+            db, "aliments",
+            "WHERE parent_id IS NOT NULL AND id NOT IN "
+            "(SELECT aliment_id FROM diet_food_aliments)") or 0
+        util = total_al - huerfanas
+
         print("├─ DE DÓNDE SALEN LOS ALIMENTOS DE AHORA ──────────────────────")
         print(f"│  {total_al:>7}  en la base")
-        print(f"│  {copias:>7}  copias de otro alimento (se clonan al asignar dietas)")
-        print(f"│  {total_al - copias:>7}  originales")
+        print(f"│  {huerfanas:>7}  copias sueltas que ya no usa ninguna dieta (basura)")
+        print(f"│  {util:>7}  de verdad, de los cuales:")
+        print(f"│  {copias - huerfanas:>7}    · copias en uso por alguna dieta")
+        print(f"│  {total_al - copias:>7}    · originales del catálogo")
         print(f"│  {de_org:>7}  de alguna cuenta; {total_al - de_org} del catálogo común")
-        if total_al > len(alimentos) * 1.5:
+
+        if util > len(alimentos) * 1.2:
             print("│")
-            print(f"│  OJO: el CSV trae {len(alimentos)} y en la base hay {total_al}.")
-            print("│  Vaciar y cargar PIERDE la diferencia. Mira el desglose de")
-            print("│  arriba antes de seguir.")
+            print(f"│  OJO: quitando la basura quedan {util} y el CSV trae"
+                  f" {len(alimentos)}.")
+            print("│  Vaciar y cargar PIERDE esa diferencia: parece que el CSV")
+            print("│  no trae el catálogo entero. Compruébalo antes de seguir.")
+        elif huerfanas:
+            print("│")
+            print(f"│  Los {huerfanas} de más son basura acumulada, no catálogo.")
+            print("│  Vaciar y cargar se los lleva, que es lo que se quiere.")
 
     print("├─ SE VA A CARGAR ─────────────────────────────────────────────")
     grupos = sorted({a["grupo"] for a in alimentos if a["grupo"]})

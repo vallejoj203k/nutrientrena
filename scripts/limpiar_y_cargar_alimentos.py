@@ -28,7 +28,13 @@ import os
 import sys
 import unicodedata
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, RAIZ)
+
+# El catálogo vive en el repositorio, así que no hay que ir a buscarlo a mano
+# cada vez. Escribir la ruta entera solo para COMPROBAR cómo quedó la base era
+# un trámite sin sentido, y encima uno donde equivocarse.
+CSV_POR_DEFECTO = os.path.join(RAIZ, "datos", "alimentos-catalogo.csv")
 
 from sqlalchemy import text                                    # noqa: E402
 
@@ -260,10 +266,13 @@ def verificar(db, alimentos):
     total = _cuenta(db, "aliments") or 0
     sin_cat = _cuenta(db, "aliments", "WHERE group_food_id IS NULL") or 0
     con_micros = _cuenta(db, "aliment_descriptions") or 0
-    print(f"│  {total:>7}  alimentos           (se esperaban {len(alimentos)})")
+    # Sin CSV no hay contra qué comparar: mejor callarse que decir «se
+    # esperaban 0», que se lee como que la base tenía que estar vacía.
+    esperados = f"           (se esperaban {len(alimentos)})" if alimentos else ""
+    print(f"│  {total:>7}  alimentos{esperados}")
     print(f"│  {sin_cat:>7}  sin categoría       (se esperaban 0)")
     print(f"│  {con_micros:>7}  con micronutrientes")
-    if total != len(alimentos):
+    if alimentos and total != len(alimentos):
         fallos.append(f"hay {total} alimentos y se cargaron {len(alimentos)}")
     if sin_cat:
         fallos.append(f"{sin_cat} alimentos se han quedado sin categoría")
@@ -511,7 +520,8 @@ def cargar(db, alimentos, organization_id, usuario_id):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--csv", required=True, help="El CSV de alimentos")
+    ap.add_argument("--csv", default=None,
+                    help=f"El CSV de alimentos. Por defecto, {CSV_POR_DEFECTO}")
     ap.add_argument("--ejecutar", action="store_true",
                     help="Escribir de verdad. Sin esto solo cuenta.")
     ap.add_argument("--organizacion", default=None,
@@ -536,7 +546,19 @@ def main():
         return 1
 
     patrones = args.patron_prueba or PATRONES_PRUEBA
-    alimentos, avisos = leer_csv(args.csv)
+
+    ruta = args.csv or CSV_POR_DEFECTO
+    if os.path.exists(ruta):
+        alimentos, avisos = leer_csv(ruta)
+    elif args.verificar:
+        # Comprobar cómo quedó la base no necesita el CSV; sin él se pierde
+        # solo el «se esperaban N», no el resto del informe.
+        alimentos, avisos = [], []
+    else:
+        print(f"\nNo encuentro el CSV: {ruta}", file=sys.stderr)
+        print("  Pásalo con --csv RUTA, o déjalo en datos/alimentos-catalogo.csv.\n",
+              file=sys.stderr)
+        return 1
 
     db = SessionLocal()
     try:

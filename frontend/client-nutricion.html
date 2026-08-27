@@ -105,6 +105,47 @@
       .content{padding:18px 14px 40px;}
       .page-head h1{font-size:22px;}
     }
+
+    /* ── Lista de la compra ───────────────────────────────────────────────
+       Se usa de pie en un supermercado, con una mano: renglones altos, texto
+       grande y la casilla donde cae el pulgar. */
+    .lc-back{display:none;position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:500;}
+    .lc-back.open{display:flex;align-items:center;justify-content:center;padding:20px;}
+    .lc-panel{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:calc(100vh - 40px);
+      display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.28);}
+    .lc-head{display:flex;align-items:flex-start;gap:10px;padding:18px 20px 12px;}
+    .lc-head .ico{color:var(--indigo);flex-shrink:0;margin-top:2px;}
+    .lc-head h2{font-size:18px;font-weight:700;color:#111827;line-height:1.2;}
+    .lc-head .sub{font-size:12px;color:#9CA3AF;margin-top:3px;}
+    .lc-x{margin-left:auto;background:#F3F4F6;border:none;width:30px;height:30px;border-radius:50%;
+      cursor:pointer;color:#6B7280;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .lc-x:hover{background:#E5E7EB;}
+    .lc-prog{height:4px;background:#E5E7EB;border-radius:4px;margin:0 20px;overflow:hidden;}
+    .lc-prog i{display:block;height:100%;background:var(--indigo);width:0;transition:width .2s;}
+    .lc-tabs{display:flex;gap:8px;padding:14px 20px 10px;}
+    .lc-tab{flex:1;padding:9px 10px;border-radius:10px;border:1px solid #E5E7EB;background:#F9FAFB;
+      color:#6B7280;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+    .lc-tab.on{background:#fff;border-color:var(--indigo);color:var(--indigo);box-shadow:0 1px 3px rgba(0,0,0,.06);}
+    .lc-body{flex:1;overflow-y:auto;padding:4px 20px 12px;}
+    .lc-cat{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;
+      margin:16px 0 4px;display:flex;align-items:center;gap:7px;}
+    .lc-item{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid #F3F4F6;cursor:pointer;}
+    .lc-item:last-child{border-bottom:none;}
+    .lc-box{width:21px;height:21px;border-radius:50%;border:1.8px solid #D1D5DB;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;color:#fff;}
+    .lc-item.done .lc-box{background:var(--indigo);border-color:var(--indigo);}
+    .lc-nm{flex:1;font-size:14px;color:#111827;font-weight:500;}
+    .lc-item.done .lc-nm{color:#9CA3AF;text-decoration:line-through;}
+    .lc-qty{font-size:13px;color:#6B7280;font-weight:600;white-space:nowrap;}
+    .lc-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid #F3F4F6;}
+    .lc-dl{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 10px;
+      border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+      border:1px solid #E5E7EB;background:#fff;color:#374151;}
+    .lc-dl:hover{background:#F9FAFB;}
+    .lc-dl.pri{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+    .lc-dl.pri:hover{background:var(--indigo-dark);}
+    .lc-vacio{padding:38px 10px;text-align:center;color:#6B7280;font-size:14px;}
+
     /* Aviso de que el plan es el mismo todos los días. Discreto: es una
        aclaración, no un problema. */
     .plan-aviso{background:#EEF2FF;border:1px solid #DDE3FF;color:#4338CA;
@@ -112,6 +153,7 @@
   </style>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
+<script src="js/lista-compra.js"></script>
 </head>
 <body>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -154,7 +196,7 @@
           <h1>Plan Nutricional</h1>
           <p id="menuSub">Menú semanal personalizado</p>
         </div>
-        <button class="btn-list" onclick="soon()">
+        <button class="btn-list" id="btnLista" onclick="abrirLista()">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
           Lista
         </button>
@@ -164,6 +206,31 @@
 
       <div class="weekbar" id="weekbar" style="display:none;"></div>
       <div id="daybox"><div class="empty" id="loadingBox">Cargando tu plan nutricional…</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Lista de la compra -->
+<div class="lc-back" id="lcBack" onclick="if(event.target===this)cerrarLista()">
+  <div class="lc-panel" role="dialog" aria-modal="true" aria-labelledby="lcTitulo">
+    <div class="lc-head">
+      <span class="ico"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span>
+      <div>
+        <h2 id="lcTitulo">Lista de la compra</h2>
+        <div class="sub" id="lcSub">—</div>
+      </div>
+      <button class="lc-x" onclick="cerrarLista()" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="lc-prog"><i id="lcProg"></i></div>
+    <div class="lc-tabs">
+      <button class="lc-tab on" id="lcTabDia" onclick="lcVer('dia')">Día</button>
+      <button class="lc-tab" id="lcTabSemana" onclick="lcVer('semana')">Semana completa</button>
+    </div>
+    <div class="lc-body" id="lcBody"></div>
+    <div class="lc-foot">
+      <button class="lc-dl" onclick="lcDescargar('dia')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar día</button>
+      <button class="lc-dl pri" onclick="lcDescargar('semana')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar semana</button>
     </div>
   </div>
 </div>
@@ -244,7 +311,11 @@
     return (q!==''? q+' ' : '')+u;
   }
   function toggleMeal(mi){ var el=document.getElementById('mealc-'+mi); if(el) el.classList.toggle('open'); }
-  function selectDay(i){ _sel=i; renderWeek(); renderDay(); }
+  function selectDay(i){ _sel=i; renderWeek(); renderDay();
+    // Con la lista abierta, cambiar de día tiene que cambiar la lista:
+    // si no, se compra lo del día anterior.
+    if(document.getElementById('lcBack').classList.contains('open')) lcPintar();
+  }
 
   async function loadProfile(){
     try{ const r=await fetch(API+'/auth/me',{headers:headers()}); const d=await r.json(); const u=d.data||d;
@@ -284,6 +355,108 @@
       document.getElementById('daybox').innerHTML='<div class="empty">No se pudo cargar tu plan nutricional.</div>';
     }
   }
+
+  /* ── Lista de la compra ──────────────────────────────────────────────────
+     Las cuentas viven en js/lista-compra.js: juntar el mismo alimento y sumar
+     lo que se puede sumar tiene bastante más filo del que parece. Aquí solo
+     está la pantalla. */
+  var _lcVista='dia', _lcPlano=[];
+
+  function _lcClave(){
+    // Lo marcado se recuerda por semana y por vista: la lista del lunes y la
+    // de la semana son listas distintas, y la semana que viene es otra compra.
+    var semana=(_days[0] && _days[0].date) || 'x';
+    return 'lista-compra:'+semana+':'+(_lcVista==='dia'?('d'+_sel):'semana');
+  }
+  function _lcMarcados(){
+    try{ return JSON.parse(localStorage.getItem(_lcClave())||'[]'); }catch(e){ return []; }
+  }
+  function _lcGuardar(l){
+    // Si el navegador no deja guardar (modo privado, sitio bloqueado), la
+    // lista tiene que seguir funcionando: solo se pierde el recuerdo.
+    try{ localStorage.setItem(_lcClave(), JSON.stringify(l)); }catch(e){}
+  }
+
+  function _lcGrupos(){
+    return listaCompra.listaDeCompra(_days, _lcVista==='dia' ? _sel : null);
+  }
+  function _lcTitulo(){
+    var d=_days[_sel];
+    return _lcVista==='dia' ? (d && d.name ? d.name : 'Día') : 'Semana completa';
+  }
+
+  function abrirLista(){
+    document.getElementById('lcBack').classList.add('open');
+    lcPintar();
+  }
+  function cerrarLista(){ document.getElementById('lcBack').classList.remove('open'); }
+  function lcVer(v){
+    _lcVista=v;
+    document.getElementById('lcTabDia').classList.toggle('on', v==='dia');
+    document.getElementById('lcTabSemana').classList.toggle('on', v==='semana');
+    lcPintar();
+  }
+
+  function lcPintar(){
+    var grupos=_lcGrupos(), marcados=_lcMarcados(), body=document.getElementById('lcBody');
+    var total=listaCompra.contarItems(grupos), hechos=0;
+
+    document.getElementById('lcTabDia').textContent =
+      _lcVista==='dia' ? ('Día · '+_lcTitulo()) : 'Día';
+
+    if(!total){
+      body.innerHTML='<div class="lc-vacio">No hay alimentos en este plan.<br>Cuando tu coach te asigne un menú, aquí saldrá la compra.</div>';
+      document.getElementById('lcSub').textContent=_lcTitulo()+' · sin alimentos';
+      document.getElementById('lcProg').style.width='0';
+      return;
+    }
+
+    /* El identificador del renglón NO se mete en el onclick: un alimento que
+       se llame "Aceite d'oliva" partiría el atributo. Se guarda la lista
+       aparte y el marcado va por posición. */
+    _lcPlano=[];
+    body.innerHTML=grupos.map(function(g){
+      return '<div class="lc-cat">'+esc(g.categoria)+'</div>'+g.items.map(function(it){
+        var id=it.nombre.toLowerCase()+'|'+it.unidad.toLowerCase();
+        var on=marcados.indexOf(id)>=0; if(on)hechos++;
+        var i=_lcPlano.push(id)-1;
+        return '<div class="lc-item'+(on?' done':'')+'" onclick="lcMarcar('+i+')">'
+          +'<span class="lc-box"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>'
+          +'<span class="lc-nm">'+esc(it.nombre)+'</span>'
+          +'<span class="lc-qty">'+esc(listaCompra.formatearCantidad(it.cantidad,it.unidad))+'</span></div>';
+      }).join('');
+    }).join('');
+
+    document.getElementById('lcSub').textContent=_lcTitulo()+' · '+hechos+'/'+total+' marcados';
+    document.getElementById('lcProg').style.width=(total?Math.round(hechos*100/total):0)+'%';
+  }
+
+  function lcMarcar(pos){
+    var id=_lcPlano[pos]; if(id==null)return;
+    var l=_lcMarcados(), i=l.indexOf(id);
+    if(i>=0) l.splice(i,1); else l.push(id);
+    _lcGuardar(l);
+    lcPintar();
+  }
+
+  function lcDescargar(cual){
+    var antes=_lcVista; _lcVista=cual;
+    var grupos=_lcGrupos(), titulo='Lista de la compra — '+_lcTitulo();
+    var texto=listaCompra.listaComoTexto(grupos, titulo);
+    _lcVista=antes;
+    if(!listaCompra.contarItems(grupos)){ soon2('No hay nada que descargar.'); return; }
+
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([texto],{type:'text/plain;charset=utf-8'}));
+    a.download='lista-compra-'+(cual==='dia'?'dia':'semana')+'.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  function soon2(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2200); }
+
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') cerrarLista(); });
+
   loadProfile(); loadNutrition();
 </script>
 <script src="js/chat-badge.js"></script>

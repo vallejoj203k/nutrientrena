@@ -69,6 +69,56 @@ const { chromium } = require('../_pw');
   ck('un ejercicio sin sinonimos no aparece por "null"',
      JSON.stringify(await buscar('null'))==='[]', await buscar('null'));
 
+  // ── Las series recomendadas del ejercicio llegan a la rutina ──────────────
+  // Estaban guardadas en la ficha y se tiraban al anadirlo: el coach las volvia
+  // a escribir a mano una por una, teniendolas delante en la ficha.
+  await p.evaluate(()=>{
+    _pkTrainings=[
+      {id:9,name:'Remo con banda',muscle_group_name:'Espalda',rec_series:'3',rec_reps:'10',rec_rest:'60'},
+      {id:10,name:'Plancha',muscle_group_name:'Core',rec_series:'3-4',rec_reps:'8-12',rec_rest:'60-90s'},
+      {id:11,name:'Sin recomendar',muscle_group_name:'Core'},
+    ];
+    buildPkGroups(); pickerMgFilter='Espalda';
+  });
+  const anadir=async (idx)=>{
+    await p.evaluate(()=>{document.getElementById('pickerSearch').value='';});
+    await p.evaluate(i=>{openPicker(0);_pkView=_pkTrainings;pkPick(i);}, idx);
+    const day=await p.evaluate(()=>routineData.days_list[selectedDayIdx].blocks[0].exercises);
+    return day[day.length-1];
+  };
+
+  await p.evaluate(()=>selectDay(0));
+  let nuevo=await anadir(0);
+  ck('las series recomendadas llegan a la rutina',
+     nuevo.series===3 && nuevo.repetitions==='10' && nuevo.break_time===60,
+     {series:nuevo.series,reps:nuevo.repetitions,desc:nuevo.break_time});
+
+  nuevo=await anadir(1);
+  // "3-4" y "60-90s" son texto libre; las casillas de la rutina son numericas.
+  ck('un rango se convierte en el primer numero',
+     nuevo.series===3 && nuevo.break_time===60, {series:nuevo.series,desc:nuevo.break_time});
+  ck('las repeticiones se copian tal cual, que ya son un rango',
+     nuevo.repetitions==='8-12', nuevo.repetitions);
+
+  nuevo=await anadir(2);
+  ck('un ejercicio sin recomendaciones entra en blanco, no con "NaN"',
+     nuevo.series===null && nuevo.repetitions==='' && nuevo.break_time===null,
+     {series:nuevo.series,reps:nuevo.repetitions,desc:nuevo.break_time});
+
+  // Y al CAMBIAR un ejercicio no se pisa lo que el coach ya habia escrito.
+  await p.evaluate(()=>{
+    const ex=routineData.days_list[selectedDayIdx].blocks[0].exercises;
+    ex[ex.length-1].series=5; ex[ex.length-1].repetitions='20';
+    openPicker(0, ex.length-1); _pkView=_pkTrainings; pkPick(0);
+  });
+  const cambiado=await p.evaluate(()=>{
+    const ex=routineData.days_list[selectedDayIdx].blocks[0].exercises;
+    return ex[ex.length-1];
+  });
+  ck('al cambiar de ejercicio no se pisan las series que escribio el coach',
+     cambiado.series===5 && cambiado.repetitions==='20', {series:cambiado.series,reps:cambiado.repetitions});
+  ck('pero si rellena lo que estaba vacio', cambiado.break_time===60, cambiado.break_time);
+
   ck('sin errores de JS al final', errs.length===0, errs);
   await b.close(); process.exit(f?1:0);
 })();

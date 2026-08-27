@@ -133,7 +133,12 @@ def search(
     elif org.org_id:
         q = q.filter(or_(Training.organization_id.is_(None), Training.organization_id == org.org_id))
     if search:
-        q = q.filter(Training.name.ilike(f"%{search}%"))
+        # También por los otros nombres, que es para lo único que existen: un
+        # sinónimo que no se busca no le sirve a nadie.
+        q = q.filter(or_(
+            Training.name.ilike(f"%{search}%"),
+            Training.aliases.ilike(f"%{search}%"),
+        ))
     if muscle_group_id:
         q = q.filter(Training.muscle_group_id == muscle_group_id)
     if difficulty:

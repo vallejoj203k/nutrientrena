@@ -5,6 +5,7 @@ from datetime import datetime
 
 class TrainingCreate(BaseModel):
     name: str
+    aliases: Optional[str] = None      # otros nombres, separados por comas
     description: Optional[str] = None
     muscle_group_id: Optional[int] = None
     secondary_muscle_group_id: Optional[int] = None
@@ -24,6 +25,7 @@ class TrainingCreate(BaseModel):
 
 class TrainingUpdate(BaseModel):
     name: Optional[str] = None
+    aliases: Optional[str] = None
     description: Optional[str] = None
     muscle_group_id: Optional[int] = None
     secondary_muscle_group_id: Optional[int] = None
@@ -50,6 +52,7 @@ class TrainingAssignRequest(BaseModel):
 class TrainingOut(BaseModel):
     id: int
     name: str
+    aliases: Optional[str] = None
     description: Optional[str] = None
     muscle_group_id: Optional[int] = None
     muscle_group_name: Optional[str] = None
@@ -97,6 +100,7 @@ class TrainingOut(BaseModel):
         return cls(
             id=t.id,
             name=t.name,
+            aliases=t.aliases,
             description=t.description,
             muscle_group_id=t.muscle_group_id,
             muscle_group_name=t.muscle_group.name if t.muscle_group else None,

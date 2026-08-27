@@ -444,7 +444,10 @@ function renderPkGrid(){
   const box=document.getElementById('pickerResults');
   const q=(document.getElementById('pickerSearch').value||'').trim().toLowerCase();
   let items;
-  if(q){ items=(_pkTrainings||[]).filter(t=>(t.name||'').toLowerCase().includes(q)); renderPkMgs(); }
+  // Este buscador filtra en el navegador, no llama al servidor: si aquí no se
+  // miran los otros nombres, el sinónimo funciona en la página de Ejercicios y
+  // no al montar una rutina, que es donde más se busca.
+  if(q){ items=(_pkTrainings||[]).filter(t=>`${t.name||''} ${t.aliases||''}`.toLowerCase().includes(q)); renderPkMgs(); }
   else { items=(_pkTrainings||[]).filter(t=>(t.muscle_group_name||'Otros')===pickerMgFilter); }
   _pkView=items;
   if(!items.length){box.innerHTML='<div class="picker-empty">No se encontraron ejercicios.</div>';return;}

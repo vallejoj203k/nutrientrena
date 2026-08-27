@@ -294,6 +294,8 @@
     .xf-sec-title{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:18px;}
     .xf-sec-hint{font-weight:500;text-transform:none;letter-spacing:normal;color:#C3C7CF;}
     .xf-req{color:#EF4444;}
+    .xv-aliases{margin:-10px 0 16px;font-size:12.5px;color:#9CA3AF;}
+    .xf-field-hint{margin-top:6px;font-size:12px;line-height:1.45;color:#9CA3AF;}
     .xf-img-row{display:flex;align-items:flex-start;gap:14px;}
     .xf-img-zone{width:104px;height:104px;border:2px dashed #E5E7EB;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#C7CBD4;cursor:pointer;background:#FAFAFA;overflow:hidden;flex-shrink:0;transition:.15s;}
     .xf-img-zone:hover{border-color:var(--indigo);color:var(--indigo);background:#F5F3FF;}
@@ -565,6 +567,11 @@
               <option value="mobility">Movilidad</option>
             </select>
           </div>
+        </div>
+        <div class="form-group">
+          <label>Otros nombres (sinónimos)</label>
+          <input id="ex_aliases" placeholder="Ej: Bench press, Press banca plano"/>
+          <div class="xf-field-hint">Cómo se llama también este ejercicio (en inglés, jerga de gimnasio, variantes). Sepáralos con comas: así se encuentra en el buscador con cualquiera de esos nombres.</div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -1005,6 +1012,7 @@ async function duplicateExercise(id){
     const d=await r.json();const ex=d.data||d;
     const payload={
       name:(ex.name||'Ejercicio')+' (copia)',
+      aliases:ex.aliases||null,
       description:ex.description||null,
       muscle_group_id:ex.muscle_group_id||null,
       secondary_muscle_group_id:ex.secondary_muscle_group_id||null,
@@ -1246,7 +1254,7 @@ async function openExerciseModal(id=null){
   document.getElementById('exerciseModalTitle').textContent=id?'Editar ejercicio':'Nuevo ejercicio';
   document.getElementById('exerciseModalSub').textContent=id?'Modifica los datos del ejercicio':'Añade un ejercicio a tu librería';
   document.getElementById('xfSaveLbl').textContent=id?'Guardar cambios':'Crear ejercicio';
-  ['ex_name','ex_desc','ex_rec_series','ex_rec_reps','ex_rec_rest'].forEach(f=>document.getElementById(f).value='');
+  ['ex_name','ex_aliases','ex_desc','ex_rec_series','ex_rec_reps','ex_rec_rest'].forEach(f=>document.getElementById(f).value='');
   document.getElementById('ex_desc_wrap').dataset.value='';
   _setExVideoPreview(null);
   document.getElementById('ex_type').value='';
@@ -1265,6 +1273,7 @@ async function openExerciseModal(id=null){
       const r=await fetch(`${API}/trainings/${id}/edit`,{headers:authHeaders()});
       const d=await r.json();const ex=d.data||d;
       document.getElementById('ex_name').value=ex.name||'';
+      document.getElementById('ex_aliases').value=ex.aliases||'';
       document.getElementById('ex_desc').value=ex.description||'';
       document.getElementById('ex_desc_wrap').dataset.value=ex.description||'';
       document.getElementById('ex_mg').value=ex.muscle_group_id||'';
@@ -1295,6 +1304,7 @@ async function saveExercise(){
   if(!name){showToast('El nombre es obligatorio','error');return;}
   const payload={
     name,
+    aliases:document.getElementById('ex_aliases').value.trim()||null,
     description:document.getElementById('ex_desc').value.trim()||null,
     muscle_group_id:parseInt(document.getElementById('ex_mg').value)||null,
     secondary_muscle_group_id:_ms2Selected[0]||null,
@@ -1380,6 +1390,7 @@ function renderExerciseView(ex,id){
     <div class="xv-chips">${chips}</div>
     <div class="xv-title">${esc(ex.name||'Ejercicio')}</div>
     ${subParts.length?`<div class="xv-sub">${subParts.map(esc).join(' · ')}</div>`:'<div style="margin-bottom:18px;"></div>'}
+    ${ex.aliases?`<div class="xv-aliases">También: ${esc(ex.aliases)}</div>`:''}
     ${imgHtml}
     ${execHtml}
     ${recHtml}

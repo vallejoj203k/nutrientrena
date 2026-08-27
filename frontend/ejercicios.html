@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <title>ALZUM.io — Ejercicios</title>
   <script src="js/permisos-contenido.js"></script>
+  <script src="js/pasos-ejecucion.js"></script>
   <script>if((localStorage.getItem("role_id")||"")==="6"){location.replace("client-home.html");}</script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -265,6 +266,9 @@
     .xv-sec-label{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin:0 0 10px;}
     .xv-step{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:13.5px;color:#111827;line-height:1.5;}
     .xv-step-num{color:var(--indigo);font-weight:700;flex-shrink:0;}
+    .xv-bullet{display:flex;gap:10px;align-items:flex-start;padding:3px 0 3px 4px;font-size:13.5px;color:#374151;line-height:1.5;}
+    .xv-bullet-dot{color:#9CA3AF;font-weight:700;flex-shrink:0;line-height:1.5;}
+    .xv-step-title{margin:14px 0 6px;font-size:13px;font-weight:700;color:#111827;line-height:1.5;}
     .xv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;}
     .xv-card{border:1px solid #E5E7EB;border-radius:12px;padding:16px 10px;text-align:center;background:#fff;}
     .xv-card svg{color:#9CA3AF;margin-bottom:8px;}
@@ -1372,9 +1376,16 @@ function renderExerciseView(ex,id){
     ${ex.video_url?`<button class="xv-play" onclick="playVideo('${String(ex.video_url).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Ver video</button>`:''}
   </div>`;
 
-  const steps=String(ex.description||'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  // Hacer caso a lo que el autor escribió: sus números, sus viñetas y sus
+  // títulos. Ver frontend/js/pasos-ejecucion.js.
+  const steps=pasosDeEjecucion(ex.description);
+  const pintaPaso=s=>{
+    if(s.tipo==='vineta')return `<div class="xv-bullet"><span class="xv-bullet-dot">·</span><span>${esc(s.texto)}</span></div>`;
+    if(s.tipo==='titulo')return `<div class="xv-step-title">${esc(s.texto)}</div>`;
+    return `<div class="xv-step"><span class="xv-step-num">${s.numero}.</span><span>${esc(s.texto)}</span></div>`;
+  };
   const execHtml=steps.length
-    ?`<div class="xv-sec-label">Ejecución</div>${steps.map((s,i)=>`<div class="xv-step"><span class="xv-step-num">${i+1}.</span><span>${esc(s)}</span></div>`).join('')}`
+    ?`<div class="xv-sec-label">Ejecución</div>${steps.map(pintaPaso).join('')}`
     :'';
 
   const recHtml=(ex.rec_series||ex.rec_reps||ex.rec_rest)

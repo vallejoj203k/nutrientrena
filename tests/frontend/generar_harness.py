@@ -191,3 +191,29 @@ window.__pinta=(datos,nombres)=>{window.__datos=datos;_orgNombres=nombres;_grpCe
 destino6 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'grupos.html')
 open(destino6, 'w').write(grupos)
 print('harness generado en', destino6)
+
+
+# ── Harness de la ejecución de un ejercicio ────────────────────────────────
+# Se saca el pintado de la pantalla real, no una copia: si diverge, la copia
+# pasaría las pruebas mientras la página se rompe.
+ejs = open(os.path.join(RAIZ, 'frontend', 'ejercicios.html')).read()
+csse = '\n'.join(re.findall(r'<style>(.*?)</style>', ejs, re.S))
+a = ejs.index('  // Hacer caso a lo que el autor escribió')
+b = ejs.index("    :'';", ejs.index('const execHtml=', a)) + len("    :'';")
+pintado = ejs[a:b]
+
+pasos = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
+<div id="out"></div>
+<script>%s</script>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+window.__pinta=(texto)=>{
+  const ex={description:texto};
+%s
+  document.getElementById('out').innerHTML=execHtml;
+};
+</script></body></html>""" % (csse, _modulo('pasos-ejecucion.js'), pintado)
+
+destino7 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pasos.html')
+open(destino7, 'w').write(pasos)
+print('harness generado en', destino7)

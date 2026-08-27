@@ -262,6 +262,10 @@ def _diet_meals_macros(diet):
                 "name": al.name,
                 "quantity": dfa.quantity,
                 "unit": (al.quantity_unit or "g"),
+                # Para agrupar la lista de la compra por pasillo. El alimento
+                # de una dieta es una copia del catálogo, pero la copia se
+                # lleva la categoría, así que sale de aquí sin ir al original.
+                "category": (al.group_food.name if al.group_food else None),
             })
         meals.append({"name": food.name, "subtitle": food.subtitle, "time": food.time,
                       "kcal": round(mk) if mk else None, "foods": foods})

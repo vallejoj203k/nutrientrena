@@ -217,3 +217,15 @@ window.__pinta=(texto)=>{
 destino7 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pasos.html')
 open(destino7, 'w').write(pasos)
 print('harness generado en', destino7)
+
+
+# ── Harness de la lista de la compra ───────────────────────────────────────
+# Solo el módulo: las cuentas son lo que puede salir mal, y no necesitan
+# pantalla para comprobarse.
+lista = """<!doctype html><html><head><meta charset="utf-8"></head><body>
+<script>%s</script>
+</body></html>""" % _modulo('lista-compra.js')
+
+destino8 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lista.html')
+open(destino8, 'w').write(lista)
+print('harness generado en', destino8)

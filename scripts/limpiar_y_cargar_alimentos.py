@@ -34,6 +34,22 @@ from sqlalchemy import text                                    # noqa: E402
 
 from app.database import SessionLocal                          # noqa: E402
 
+
+def _contra_que_base():
+    """Host y nombre de la base, sin la contraseña.
+
+    Un script que borra tiene que decir SIEMPRE dónde va a borrar. Y sin
+    DATABASE_URL la aplicación se cae a una base local por defecto: alguien
+    podría lanzar esto creyendo que apunta a producción, ver "Hecho." y no
+    haber tocado nada de lo que creía.
+    """
+    from app.config import SQLALCHEMY_DATABASE_URL
+    url = SQLALCHEMY_DATABASE_URL
+    if "@" in url:
+        esquema, resto = url.split("://", 1)
+        return f"{esquema}://…@{resto.split('@', 1)[1]}"
+    return url
+
 # Correos que usan las pruebas automáticas. Solo este patrón por defecto: los
 # demás dominios que aparecen en el repo (@test.com, @ejemplo.com) pueden ser
 # de tandas viejas o de alguien real, y no se tocan sin confirmarlo.
@@ -230,6 +246,81 @@ def inspeccionar(db, alimentos):
     print("╰──────────────────────────────────────────────────────────────\n")
 
 
+def verificar(db, alimentos):
+    """Comprobar cómo quedó la base después de cargar.
+
+    «Hecho.» no es una comprobación: dice que el script terminó, no que el
+    catálogo esté bien. Lo que importa es que estén los que tenían que estar,
+    con su categoría, y que las kcal salgan.
+    """
+    fallos = []
+    print(f"\nBase de datos: {_contra_que_base()}")
+    print("\n╭─ CÓMO QUEDÓ ────────────────────────────────────────────────")
+
+    total = _cuenta(db, "aliments") or 0
+    sin_cat = _cuenta(db, "aliments", "WHERE group_food_id IS NULL") or 0
+    con_micros = _cuenta(db, "aliment_descriptions") or 0
+    print(f"│  {total:>7}  alimentos           (se esperaban {len(alimentos)})")
+    print(f"│  {sin_cat:>7}  sin categoría       (se esperaban 0)")
+    print(f"│  {con_micros:>7}  con micronutrientes")
+    if total != len(alimentos):
+        fallos.append(f"hay {total} alimentos y se cargaron {len(alimentos)}")
+    if sin_cat:
+        fallos.append(f"{sin_cat} alimentos se han quedado sin categoría")
+
+    print("│")
+    print("│  Categorías:")
+    for nombre, n in db.execute(text(
+            "SELECT COALESCE(g.name,'(ninguna)'), COUNT(*) FROM aliments a "
+            "LEFT JOIN group_foods g ON g.id = a.group_food_id "
+            "GROUP BY 1 ORDER BY 2 DESC")).fetchall():
+        print(f"│    {n:>5}  {nombre}")
+
+    print("│")
+    print("│  Unidades:")
+    for u, n in db.execute(text(
+            "SELECT COALESCE(quantity_unit,'(ninguna)'), COUNT(*) FROM aliments "
+            "GROUP BY 1 ORDER BY 2 DESC")).fetchall():
+        print(f"│    {n:>5}  {u}")
+
+    # Lo viejo tiene que haberse ido: si queda algo, el borrado falló a medias.
+    print("│")
+    print("│  De lo viejo:")
+    for tabla, rotulo in (("diets", "dietas"), ("recipes", "recetas"),
+                          ("routines", "rutinas"), ("weekly_menus", "menús semanales")):
+        n = _cuenta(db, tabla)
+        print(f"│    {n:>5}  {rotulo}")
+        if n:
+            fallos.append(f"quedan {n} {rotulo}")
+
+    # Y que las kcal salgan bien, que es de lo que va todo esto.
+    fila = db.execute(text(
+        "SELECT name, calories, quantity, quantity_unit FROM aliments "
+        "WHERE quantity_unit = 'ud' AND quantity = 1 AND calories > 0 LIMIT 1")).fetchone()
+    if fila:
+        from app.core.macros import escalar
+
+        class _A:
+            pass
+        a = _A()
+        a.quantity = fila[2]
+        dos = escalar(fila[1], a, 2)
+        print("│")
+        print(f"│  Prueba de kcal: {fila[0]} = {fila[1]} kcal por {fila[2]} {fila[3]}")
+        print(f"│    dos unidades -> {dos} kcal  (bien si es {fila[1] * 2})")
+        if abs(dos - fila[1] * 2) > 0.01:
+            fallos.append("las kcal de un alimento por unidad salen mal")
+
+    print("╰──────────────────────────────────────────────────────────────")
+    if fallos:
+        print("\nHAY PROBLEMAS:")
+        for f in fallos:
+            print(f"  · {f}")
+        return 1
+    print("\nTodo cuadra.\n")
+    return 0
+
+
 def _cuenta(db, tabla, donde=""):
     try:
         return db.execute(text(f"SELECT COUNT(*) FROM {tabla} {donde}")).scalar() or 0
@@ -258,6 +349,7 @@ def usuarios_de_prueba(db, patrones):
 # ── Informe ────────────────────────────────────────────────────────────────
 
 def informe(db, alimentos, avisos, patrones):
+    print(f"\nBase de datos: {_contra_que_base()}")
     print("\n╭─ SE VA A BORRAR ─────────────────────────────────────────────")
     total = 0
     for tabla, rotulo in BORRADOS:
@@ -415,17 +507,31 @@ def main():
                     help="Id de la organización dueña. Sin esto, catálogo común.")
     ap.add_argument("--usuario", type=int, default=None,
                     help="Id del usuario que consta como creador.")
+    ap.add_argument("--verificar", action="store_true",
+                    help="Comprobar cómo quedó la base después de cargar.")
     ap.add_argument("--inspeccionar", action="store_true",
                     help="Solo mirar qué hay en la base. No toca nada.")
     ap.add_argument("--patron-prueba", action="append", default=None,
                     help="Patrón SQL de correos de prueba. Se puede repetir.")
     args = ap.parse_args()
 
+    # Sin esto la aplicación se cae a una base local por defecto, y un script
+    # que borra no puede adivinar contra qué trabaja.
+    if not (os.environ.get("DATABASE_URL") or os.environ.get("MYSQL_URL")):
+        print("Falta DATABASE_URL: no está claro contra qué base se trabajaría.",
+              file=sys.stderr)
+        print('  PowerShell: $env:DATABASE_URL="mysql+pymysql://..."', file=sys.stderr)
+        print('  Mac/Linux:  export DATABASE_URL="mysql+pymysql://..."', file=sys.stderr)
+        return 1
+
     patrones = args.patron_prueba or PATRONES_PRUEBA
     alimentos, avisos = leer_csv(args.csv)
 
     db = SessionLocal()
     try:
+        if args.verificar:
+            return verificar(db, alimentos)
+
         if args.inspeccionar:
             inspeccionar(db, alimentos)
             return 0
@@ -438,7 +544,7 @@ def main():
             print("Antes: copia de seguridad. Esto no se deshace.\n")
             return
 
-        print("\nEjecutando…")
+        print(f"\nEjecutando sobre {_contra_que_base()} …")
         bajas = limpiar(db, patrones)
         creadas = cargar(db, alimentos, args.organizacion, args.usuario)
         db.commit()
@@ -455,4 +561,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Con `main()` a secas el código de salida era SIEMPRE 0: una verificación
+    # fallida, o una URL de base sin poner, parecían correctas para cualquier
+    # cosa que llamara al script.
+    sys.exit(main() or 0)

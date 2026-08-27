@@ -156,6 +156,42 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
     (await p.locator('.nmodo.on .nmodo-nm').textContent()).includes('Plan semanal'),
     await p.locator('.nmodo.on .nmodo-nm').textContent());
 
+  // ── El caso que faltaba: un cliente con MENÚ SEMANAL ────────────────────
+  //
+  // Aquí se cayó de verdad. `_nutMenuDays()` devuelve un OBJETO indexado por
+  // día, no un array, y llamarle `.filter` reventaba el pintado entero: la
+  // sección se quedaba en blanco. Solo pasaba con menú asignado — con el
+  // cliente sin dietas y con una dieta suelta funcionaba, que es justo por
+  // donde yo lo había probado.
+  const gf = await (await ctx.request.post(`${API}/api/groupFood`, {
+    headers: H, data: { name: `Aves ${SUF}` } })).json();
+  const al = await (await ctx.request.post(`${API}/api/aliments`, { headers: H, data: {
+    name: `Pollo ${SUF}`, group_food_id: gf.data.id, calories: 120,
+    quantity: 100, quantity_unit: 'g' } })).json();
+  const die = await (await ctx.request.post(`${API}/api/diets`, {
+    headers: H, data: { title: `Plan ${SUF}` } })).json();
+  await ctx.request.put(`${API}/api/diets/${die.data.id}/update`, { headers: H, data: {
+    id: die.data.id, title: `Plan ${SUF}`, foods: [{ name: 'Desayuno', time: '08:00',
+      detail: [{ aliment_id: al.data.id, quantity_calc: 150, order: 0 }] }] } });
+  const menu = await (await ctx.request.post(`${API}/api/weekly-menus`, { headers: H, data: {
+    name: `Menú ${SUF}`,
+    days: [0, 1, 2].map(i => ({ day_index: i, name: null, diet_id: die.data.id })) } })).json();
+  const asg = await ctx.request.post(`${API}/api/weekly-menus/${menu.data.id}/assign`, {
+    headers: H, data: { client_id: cid } });
+  ck('el menú semanal se ha podido asignar', asg.ok(), asg.status());
+
+  await p.goto(`${FRONT}/client-profile.html?id=${cid}`);
+  await p.waitForTimeout(6000);
+  await p.click('#tab-nutricion-btn');
+  await p.waitForTimeout(3500);
+  const conMenu = await p.innerHTML('#nutricionContent');
+  ck('CON MENÚ SEMANAL LA SECCIÓN NO SE QUEDA EN BLANCO',
+    !conMenu.includes('No se ha podido cargar') && conMenu.includes('Plan de alimentación'),
+    conMenu.length);
+  ck('y el contador de dietas cuenta los días del menú',
+    /Plan de alimentación · 3 dietas/.test(conMenu),
+    (conMenu.match(/Plan de alimentación · [^<]*/) || [])[0]);
+
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);
 })();

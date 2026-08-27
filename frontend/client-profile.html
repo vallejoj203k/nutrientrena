@@ -7161,7 +7161,14 @@ function toggleNutCalc() {
 /* La tarjeta del plan. `dentro` es lo que ya se pintaba; aquí solo se le pone
    cabecera y marco, para que las tres secciones se lean igual. */
 function _nutPlanCardHTML(dentro) {
-  const n = _nutMenuDays() ? (_nutMenuDays().filter(d => d && d.diet_id).length) : clientDiets.length;
+  /* `_nutMenuDays()` devuelve un OBJETO indexado por día (0-6), no un array:
+     llamarle `.filter` reventaba el pintado entero y dejaba la sección en
+     blanco. Solo pasaba con menú semanal asignado, que es justo el caso que no
+     probé. */
+  const dias = _nutMenuDays();
+  const n = dias
+    ? Object.values(dias).filter(d => d && d.diet_id).length
+    : clientDiets.length;
   const nombre = (clientData && (clientData.name || '')) || '';
   return `
     <div class="nsec">

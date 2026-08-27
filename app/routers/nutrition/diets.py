@@ -163,6 +163,67 @@ def _clone_aliment(db: Session, source: Aliment) -> Aliment:
     return clone
 
 
+def _limpiar_clones(db: Session, aliment_ids) -> int:
+    """Borra los clones de alimento que ya no usa nadie.
+
+    Meter un alimento en una dieta no apunta al del catálogo: hace una COPIA
+    suya (con `parent_id` al original) y la dieta apunta a la copia. Eso está
+    bien —editar la dieta de un cliente no puede cambiarle las kcal a la
+    biblioteca ni a los demás—. Lo que faltaba era recoger: cuando la copia
+    dejaba de usarse se quedaba en la tabla para siempre. No sale en la
+    biblioteca, no se puede usar, y ahí estaba contando. En la base del cliente
+    había miles.
+
+    Solo se borra lo que cumple TODO:
+
+      · es una copia (tiene `parent_id`) — un alimento del catálogo no se toca
+        jamás por aquí, aunque nadie lo esté usando;
+      · no lo usa ninguna dieta, ninguna receta, y no es padre de otra copia.
+
+    Hay que llamarlo DESPUÉS de que los borrados estén en la sesión: si no, las
+    consultas de abajo siguen viendo las filas que se acaban de quitar y no se
+    limpia nada.
+    """
+    from app.models.nutrition.recipe import RecipeDetail
+    from app.models.nutrition.aliment import AlimentDescription
+
+    ids = {i for i in (aliment_ids or []) if i}
+    if not ids:
+        return 0
+    db.flush()
+
+    borrados = 0
+    for aid in ids:
+        al = db.query(Aliment).filter(Aliment.id == aid).first()
+        if not al or al.parent_id is None:
+            continue
+        en_uso = (
+            db.query(DietFoodAliment).filter(DietFoodAliment.aliment_id == aid).first()
+            or db.query(RecipeDetail).filter(RecipeDetail.aliment_id == aid).first()
+            or db.query(Aliment).filter(Aliment.parent_id == aid).first()
+        )
+        if en_uso:
+            continue
+        db.query(AlimentDescription).filter(
+            AlimentDescription.aliment_id == aid).delete(synchronize_session=False)
+        db.delete(al)
+        borrados += 1
+    if borrados:
+        db.flush()
+    return borrados
+
+
+def _clones_de_dieta(db: Session, diet_id: str) -> list:
+    """Los alimentos a los que apunta una dieta, para poder recogerlos luego."""
+    return [r[0] for r in db.query(DietFoodAliment.aliment_id).filter(
+        DietFoodAliment.diet_id == diet_id).all()]
+
+
+def _clones_de_comida(db: Session, food_id: int) -> list:
+    return [r[0] for r in db.query(DietFoodAliment.aliment_id).filter(
+        DietFoodAliment.diet_food_id == food_id).all()]
+
+
 def _save_pathologies(db: Session, diet_id: str, pathology_ids: list):
     db.execute(
         diet_pathologies_table.delete().where(diet_pathologies_table.c.diet_id == diet_id)
@@ -186,6 +247,9 @@ def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_u
         return
 
     kept_food_ids = set()
+    # Los alimentos que van quedando sueltos por el camino. Se recogen al final,
+    # cuando ya no queda ninguna referencia en la sesión.
+    posibles_huerfanos = []
 
     for food_data in foods_data:
         if food_data.delete and food_data.id:
@@ -193,6 +257,7 @@ def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_u
                 DietFood.id == food_data.id, DietFood.diet_id == diet_id
             ).first()
             if food:
+                posibles_huerfanos += _clones_de_comida(db, food.id)
                 db.delete(food)
             continue
 
@@ -269,6 +334,8 @@ def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_u
                         or str(current_source) == str(aliment_data.aliment_id)
                     )
                     if not unchanged:
+                        # La copia anterior se queda sin quien la use.
+                        posibles_huerfanos.append(dfa.aliment_id)
                         cloned = _clone_aliment(db, source_aliment)
                         cloned.created_user_id = current_user_id
                         dfa.aliment_id = cloned.id
@@ -296,6 +363,7 @@ def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_u
             DietFoodAliment.diet_food_id == food.id
         ).all():
             if orphan.id not in kept_ids:
+                posibles_huerfanos.append(orphan.aliment_id)
                 db.delete(orphan)
 
         kept_food_ids.add(food.id)
@@ -308,7 +376,13 @@ def _save_foods(db: Session, diet_id: str, foods_data: Optional[list], current_u
     # sin alimentos, así que el borrado no se guardaba.
     for orphan_food in db.query(DietFood).filter(DietFood.diet_id == diet_id).all():
         if orphan_food.id not in kept_food_ids:
+            posibles_huerfanos += _clones_de_comida(db, orphan_food.id)
             db.delete(orphan_food)  # cascade borra sus DietFoodAliment
+
+    # Y se recoge. Va al final a propósito: un alimento puede haberse quitado de
+    # una comida y puesto en otra dentro de la misma edición, y borrarlo sobre
+    # la marcha se lo llevaría de donde sí se está usando.
+    _limpiar_clones(db, posibles_huerfanos)
 
 
 @router.get("/findAll", summary="Listar dietas", description="Retorna la biblioteca de dietas: las de la organización del coach y las plantillas de plataforma.")
@@ -880,7 +954,10 @@ def delete(
     # Detach delivery records so the FK doesn't block the delete (history is kept)
     from app.models.plan import PlanDelivery
     db.query(PlanDelivery).filter(PlanDelivery.diet_id == id).update({"diet_id": None})
+    # Las copias de alimento que solo existían para esta dieta se van con ella.
+    huerfanos = _clones_de_dieta(db, id)
     db.delete(diet)
+    _limpiar_clones(db, huerfanos)
     db.commit()
     return send_response(None, "Dieta eliminada")
 

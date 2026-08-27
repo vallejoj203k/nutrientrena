@@ -9,6 +9,11 @@ class Training(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
+    # Otros nombres del mismo ejercicio, separados por comas: el inglés, la
+    # jerga de gimnasio, las variantes. Solo sirven para BUSCAR: el ejercicio se
+    # sigue llamando `name` en todas partes. Sin esto, quien escribe "bench
+    # press" no encuentra el press de banca y acaba creándolo otra vez.
+    aliases = Column(Text, nullable=True)
     description = Column(Text, nullable=True)
     muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id"), nullable=True)
     secondary_muscle_group_id = Column(Integer, ForeignKey("muscle_groups.id"), nullable=True)  # first of the set (back-compat)

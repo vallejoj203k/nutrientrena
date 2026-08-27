@@ -44,6 +44,31 @@ const { chromium } = require('../_pw');
   ck('existe la fila de anadir bloque', await p.locator('#blockAddRow .block-add-btn').count()===4);
   ck('existen las notas del dia', await p.locator('#dayNotes').count()===1);
 
+  // ── El buscador del selector, que filtra en el navegador ──────────────────
+  // No pasa por el servidor, asi que la busqueda por sinonimos hay que
+  // resolverla aqui aparte. Si no, "bench press" encuentra el ejercicio en la
+  // pagina de Ejercicios y no al montar una rutina, que es donde mas se busca.
+  await p.evaluate(()=>{
+    _pkTrainings=[
+      {id:1,name:'Press de banca',muscle_group_name:'Pecho',aliases:'Bench press, Press banca plano'},
+      {id:2,name:'Sentadilla',muscle_group_name:'Pierna',aliases:null},
+    ];
+    buildPkGroups(); pickerMgFilter='Pecho';
+  });
+  const buscar=async q=>{
+    await p.evaluate(v=>{document.getElementById('pickerSearch').value=v;},q);
+    await p.evaluate(()=>renderPkGrid());
+    return await p.evaluate(()=>_pkView.map(t=>t.name));
+  };
+  ck('el selector encuentra por sinonimo',
+     JSON.stringify(await buscar('bench press'))==='["Press de banca"]', await buscar('bench press'));
+  ck('el selector sigue encontrando por el nombre',
+     JSON.stringify(await buscar('Sentadilla'))==='["Sentadilla"]', await buscar('Sentadilla'));
+  // Con `aliases` a null, concatenar sin cuidado deja un "null" que casa con
+  // cualquiera que escriba esa palabra.
+  ck('un ejercicio sin sinonimos no aparece por "null"',
+     JSON.stringify(await buscar('null'))==='[]', await buscar('null'));
+
   ck('sin errores de JS al final', errs.length===0, errs);
   await b.close(); process.exit(f?1:0);
 })();

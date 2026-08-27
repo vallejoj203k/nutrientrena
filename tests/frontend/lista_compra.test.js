@@ -96,6 +96,49 @@ const DIAS = [
   ck('el fichero lleva las categorías y las cantidades',
     txt.includes('CEREALES Y GRANOS') && txt.includes('Avena — 100 g'), txt);
 
+  // ── La imagen ────────────────────────────────────────────────────────────
+  // El PNG es para mandarlo por WhatsApp a quien hace la compra. Lo que puede
+  // salir mal: un lienzo de alto fijo corta las listas largas por abajo, y un
+  // nombre largo se dibuja encima de la cantidad porque en un canvas nada
+  // recorta solo.
+  const img = async (g, t, sub) => p.evaluate(([gg, tt, ss]) => {
+    const c = listaCompra.listaComoImagen(gg, tt, ss);
+    return { w: c.width, h: c.height, datos: c.toDataURL('image/png').slice(0, 22) };
+  }, [g, t, sub]);
+
+  const chica = await img(lunes, 'Lista', 'Lunes');
+  ck('la imagen sale y es un PNG', chica.datos.startsWith('data:image/png'), chica);
+  ck('tiene tamaño de verdad', chica.w > 0 && chica.h > 0, chica);
+
+  // 30 alimentos tienen que ocupar mucho más alto que 3.
+  const largo = [{ categoria: 'Otros', items: Array.from({length: 30}, (_, i) => (
+    { nombre: 'Alimento ' + i, unidad: 'g', cantidad: 100 })) }];
+  const grande = await img(largo, 'Lista', 'Semana');
+  ck('EL LIENZO CRECE CON LA LISTA, NO LA CORTA', grande.h > chica.h * 2,
+    { chica: chica.h, grande: grande.h });
+  ck('el ancho no cambia', grande.w === chica.w, { chica: chica.w, grande: grande.w });
+
+  // Un nombre larguísimo no puede pisar la cantidad. Mirar el ancho del lienzo
+  // NO sirve: es fijo, así que esa comprobación pasaría siempre. Lo que hay que
+  // medir es el recorte.
+  const recorte = await p.evaluate(() => {
+    const c = document.createElement('canvas').getContext('2d');
+    c.font = '500 15px Helvetica, Arial, sans-serif';
+    const largo = 'Pechuga de pollo de corral ecológica fileteada muy fina y sin piel';
+    const corto = 'Avena';
+    return {
+      largo: listaCompra.cortarTexto(c, largo, 300),
+      anchoLargo: c.measureText(listaCompra.cortarTexto(c, largo, 300)).width,
+      corto: listaCompra.cortarTexto(c, corto, 300),
+    };
+  });
+  ck('UN NOMBRE LARGO SE RECORTA PARA NO PISAR LA CANTIDAD',
+    recorte.anchoLargo <= 300 && recorte.largo.endsWith('…'), recorte);
+  ck('y uno que cabe se deja entero', recorte.corto === 'Avena', recorte);
+
+  const vacia = await img([], 'Lista', 'Lunes');
+  ck('una lista vacía también da una imagen', vacia.h > 0 && vacia.datos.startsWith('data:image/png'), vacia);
+
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);
 })();

@@ -216,6 +216,16 @@ class _ChatEnabledRequest(_BaseModel):
     chat_enabled: bool
 
 
+# Los dos modos de programar la nutrición. Se valida contra esta lista y no
+# contra "lo que llegue": un modo mal escrito dejaría al cliente sin plan
+# —ni semanal ni de calendario— y nadie lo notaría hasta que preguntara.
+MODOS_NUTRICION = ("semanal", "calendario")
+
+
+class _NutritionModeRequest(_BaseModel):
+    nutrition_mode: str
+
+
 @router.get("/clients/portfolio", summary="Cartera de clientes", description="Lista enriquecida de los clientes del coach con adherencia (últimos 30 días), programa/fase, último check-in y agregados para las tarjetas de resumen.")
 def clients_portfolio(
     db: Session = Depends(get_db),
@@ -397,6 +407,29 @@ def update_chat_enabled(
     detail.chat_enabled = bool(data.chat_enabled)
     db.commit()
     return send_response({"chat_enabled": detail.chat_enabled}, "Chat actualizado")
+
+
+@router.put("/client/{detail_id}/nutrition-mode",
+            summary="Modo de programación de la nutrición",
+            description="Cambia entre plan semanal recurrente y calendario completo. El modo que se desactiva NO se borra: queda en pausa.")
+def update_nutrition_mode(
+    detail_id: str,
+    data: _NutritionModeRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH)),
+):
+    verify_client_access(detail_id, current_user, db)
+    detail = _get_detail_or_404(db, detail_id)
+    if not detail:
+        return send_error("Cliente no encontrado", code=404)
+    modo = (data.nutrition_mode or "").strip().lower()
+    if modo not in MODOS_NUTRICION:
+        return send_error(f"Modo no válido: {data.nutrition_mode}", code=400)
+    # Solo se guarda cuál manda. Ni las dietas del plan semanal ni las tareas
+    # del calendario se tocan: volver atrás tiene que devolver lo que había.
+    detail.nutrition_mode = modo
+    db.commit()
+    return send_response({"nutrition_mode": detail.nutrition_mode}, "Modo actualizado")
 
 
 # ── Search: staff only ────────────────────────────────────────────────────────

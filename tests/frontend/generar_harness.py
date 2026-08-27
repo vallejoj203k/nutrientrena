@@ -136,17 +136,29 @@ open(destino4, 'w').write(builder)
 print('harness generado en', destino4)
 
 
+def _modulo(nombre):
+    """Un fichero de `frontend/js/`, para incrustarlo en el harness.
+
+    Los harness no tienen servidor: no pueden cargar `<script src>`. Y las
+    páginas ya no llevan la cuenta de macros dentro — está en un módulo
+    compartido con el servidor. Sin incrustarlo aquí, el harness revienta con
+    "macrosAlimento is undefined" mientras la página real funciona.
+    """
+    return open(os.path.join(RAIZ, 'frontend', 'js', nombre)).read()
+
+
 # ── Harness del previo de dietas al asignar ────────────────────────────────
 i = perfil.index('/* Cantidad de una fila y su unidad')
 j = perfil.index('function toggleDietPreview(', i)
 
 prev = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
 <body><div class="dietpick-detail" id="out"></div>
+<script>%s</script>
 <script>
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 %s
 window.__pinta=(m)=>{document.getElementById('out').innerHTML=_dietpickComida(m);};
-</script></body></html>""" % (cssp, perfil[i:j])
+</script></body></html>""" % (cssp, _modulo('macros-alimento.js'), perfil[i:j])
 
 destino5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'preview.html')
 open(destino5, 'w').write(prev)

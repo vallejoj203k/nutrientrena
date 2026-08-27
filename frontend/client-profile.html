@@ -1535,6 +1535,7 @@
 <script src="js/nav-roles.js"></script>
   <!-- El menú de la Librería, en un solo sitio. Estaba copiado en 31 páginas
        y una copia ya se había quedado atrás. -->
+  <script src="js/macros-alimento.js"></script>
   <script src="js/libreria-menu.js"></script>
   <!-- Atajo al panel de plataforma desde la barra del coach. Solo lo ve el
        super-admin; el módulo lo comprueba contra el servidor. -->
@@ -6499,7 +6500,7 @@ function _nutMealTime(name) {
   return '';
 }
 function _nutMealKcal(meal) {
-  return(meal.detail||[]).reduce((s,item)=>{const a=item.aliment||{};return s+(a.calories||0)/100*(item.quantity_calc||0);},0);
+  return(meal.detail||[]).reduce((s,item)=>{const a=item.aliment||{};return s+window.macrosAlimento.escalar(a.calories, a, item.quantity_calc||0);},0);
 }
 function _nutTotalKcal(detail) {
   return(detail.foods||[]).reduce((s,m)=>s+_nutMealKcal(m),0);
@@ -7125,6 +7126,12 @@ async function npSavePersonal(objectiveChanged) {
 let _neMeals = [], _neMealSeq = 0, _neRowSeq = 0, _neActiveMealId = null;
 let _neDeletedMeals = [], _neDietId = null;
 
+/* Escala un macro de una FILA. La porción del alimento la lleva la fila; el
+   cálculo lo hace el módulo compartido, igual que el servidor. */
+function _escFila(valor, row, qty) {
+  return window.macrosAlimento.escalar(valor, { quantity: row && row.porcion }, qty);
+}
+
 function _nutUnitFromAliment(a) {
   if (!a) return 'g';
   const qt = a.quantity_type && (a.quantity_type.description || a.quantity_type.name);
@@ -7147,10 +7154,10 @@ function _nutUnitMult(unit) {
 function _nutCalcMacros(a, qty, unit) {
   const qtyG = (parseFloat(qty) || 0) * _nutUnitMult(unit || 'g');
   return {
-    kcal: ((a?.calories || 0) / 100) * qtyG,
-    prot: ((a?.proteins || 0) / 100) * qtyG,
-    carb: ((a?.carbohydrates || 0) / 100) * qtyG,
-    fat:  ((a?.fats || 0) / 100) * qtyG,
+    kcal: window.macrosAlimento.escalar(a?.calories, a, qtyG),
+    prot: window.macrosAlimento.escalar(a?.proteins, a, qtyG),
+    carb: window.macrosAlimento.escalar(a?.carbohydrates, a, qtyG),
+    fat:  window.macrosAlimento.escalar(a?.fats, a, qtyG),
   };
 }
 
@@ -7200,6 +7207,9 @@ async function openNutEditor(dietId) {
         carbohydrates: item.aliment?.carbohydrates ?? null,
         fats: item.aliment?.fats ?? null,
         calories: item.aliment?.calories ?? null,
+        /* A qué cantidad se refieren esos macros: 100 g, 1 unidad, un cacito
+           de 29 g. `quantity` aquí es lo que come el cliente, otra cosa. */
+        porcion: item.aliment?.quantity ?? null,
         quantity: String(item.quantity_calc ?? item.quantity ?? ''),
         unit: _nutUnitFromAliment(item.aliment),
       })),
@@ -7426,10 +7436,10 @@ function _neFoodRowInner(mid, row) {
   const rid = row.id;
   const qty = parseFloat(row.quantity) || 0;
   const qtyG = qty * _nutUnitMult(row.unit || 'g');
-  const k = Math.round(((row.calories || 0) / 100) * qtyG);
-  const p = Math.round(((row.proteins || 0) / 100) * qtyG * 10) / 10;
-  const c = Math.round(((row.carbohydrates || 0) / 100) * qtyG * 10) / 10;
-  const f = Math.round(((row.fats || 0) / 100) * qtyG * 10) / 10;
+  const k = Math.round(_escFila(row.calories, row, qtyG));
+  const p = Math.round(_escFila(row.proteins, row, qtyG) * 10) / 10;
+  const c = Math.round(_escFila(row.carbohydrates, row, qtyG) * 10) / 10;
+  const f = Math.round(_escFila(row.fats, row, qtyG) * 10) / 10;
   const qtyTxt = qty ? (qty % 1 === 0 ? qty : qty.toFixed(1)) + (row.unit === 'unidad' ? ' ud' : (row.unit || 'g')) : '—';
   const desc = qtyTxt + ' · ' + k + ' kcal · P' + p + 'g · C' + c + 'g · G' + f + 'g';
   const gi = _foodGroupIcon(row.group_food_id, 18);
@@ -7489,8 +7499,8 @@ function neUpdateMealStats(mid) {
     if (!row.aliment_id) return;
     n++;
     const qtyG = (parseFloat(row.quantity) || 0) * _nutUnitMult(row.unit || 'g');
-    k += ((row.calories || 0) / 100) * qtyG; p += ((row.proteins || 0) / 100) * qtyG;
-    c += ((row.carbohydrates || 0) / 100) * qtyG; f += ((row.fats || 0) / 100) * qtyG;
+    k += _escFila(row.calories, row, qtyG); p += _escFila(row.proteins, row, qtyG);
+    c += _escFila(row.carbohydrates, row, qtyG); f += _escFila(row.fats, row, qtyG);
   });
   const ge = id => document.getElementById(id);
   if (ge('neK-' + mid)) ge('neK-' + mid).textContent = Math.round(k);
@@ -7507,8 +7517,8 @@ function neTotals() {
   _neMeals.forEach(meal => meal.rows.forEach(row => {
     if (!row.aliment_id) return;
     const qtyG = (parseFloat(row.quantity) || 0) * _nutUnitMult(row.unit || 'g');
-    k += ((row.calories || 0) / 100) * qtyG; p += ((row.proteins || 0) / 100) * qtyG;
-    c += ((row.carbohydrates || 0) / 100) * qtyG; f += ((row.fats || 0) / 100) * qtyG;
+    k += _escFila(row.calories, row, qtyG); p += _escFila(row.proteins, row, qtyG);
+    c += _escFila(row.carbohydrates, row, qtyG); f += _escFila(row.fats, row, qtyG);
   }));
   return { k, p, c, f };
 }
@@ -7645,10 +7655,11 @@ function fsmRecalcPortion() {
   if (!a) return;
   const qtyG = (_fsmQty || 0) * _nutUnitMult(_nutUnitFromAliment(a));
   const fmt = v => Math.round(v * 10) / 10;
-  document.getElementById('fsmPorK').textContent = Math.round(((a.calories || 0) / 100) * qtyG);
-  document.getElementById('fsmPorP').textContent = fmt(((a.proteins || 0) / 100) * qtyG);
-  document.getElementById('fsmPorC').textContent = fmt(((a.carbohydrates || 0) / 100) * qtyG);
-  document.getElementById('fsmPorF').textContent = fmt(((a.fats || 0) / 100) * qtyG);
+  const esc_ = v => window.macrosAlimento.escalar(v, a, qtyG);
+  document.getElementById('fsmPorK').textContent = Math.round(esc_(a.calories));
+  document.getElementById('fsmPorP').textContent = fmt(esc_(a.proteins));
+  document.getElementById('fsmPorC').textContent = fmt(esc_(a.carbohydrates));
+  document.getElementById('fsmPorF').textContent = fmt(esc_(a.fats));
 }
 function fsmConfirmAdd() {
   const a = _fsmCache[_fsmSelId];
@@ -7663,6 +7674,7 @@ function fsmConfirmAdd() {
     carbohydrates: a.carbohydrates != null ? a.carbohydrates : null,
     fats: a.fats != null ? a.fats : null,
     calories: a.calories != null ? a.calories : null,
+    porcion: a.quantity != null ? a.quantity : null,
     quantity: String(_fsmQty),
     unit: _nutUnitFromAliment(a),
   };
@@ -7776,6 +7788,7 @@ function fsmPick(alimentId) {
     carbohydrates: a.carbohydrates != null ? a.carbohydrates : null,
     fats: a.fats != null ? a.fats : null,
     calories: a.calories != null ? a.calories : null,
+    porcion: a.quantity != null ? a.quantity : null,
     quantity: String(a.quantity != null ? a.quantity : 100),
     unit: _nutUnitFromAliment(a),
   });
@@ -8450,7 +8463,7 @@ function _dietpickKcalFila(dfa) {
   const al = dfa.aliment || {};
   const cant = dfa.quantity != null ? dfa.quantity : al.quantity;
   if (al.calories == null || cant == null) return 0;
-  return al.calories / 100 * cant;
+  return window.macrosAlimento.escalar(al.calories, al, cant);
 }
 
 /* Una comida del previo: cabecera con su total de kcal y debajo sus

@@ -276,6 +276,12 @@ async def import_aliments(
         "nombre": "name",          "name": "name",
         "marca": "brand",          "brand": "brand",
         "grupo_id": "group_food_id", "group_food_id": "group_food_id",
+        # El CSV trae la categoría por NOMBRE ("Frutas"), no por su número:
+        # nadie que prepare un CSV a mano sabe qué id tiene cada grupo.
+        "grupo de alimento": "group_name", "grupo": "group_name",
+        "categoria": "group_name", "categoría": "group_name",
+        "unidad": "quantity_unit", "quantity_unit": "quantity_unit",
+        "momento_sugerido": "meal_moments", "meal_moments": "meal_moments",
         "proteinas": "proteins",   "proteins": "proteins",
         "carbohidratos": "carbohydrates", "carbohydrates": "carbohydrates",
         "grasas": "fats",          "fats": "fats",
@@ -312,6 +318,12 @@ async def import_aliments(
         "vitd": "vitd",   "vitamina_d": "vitd",
         "vite": "vite",   "vitamina_e": "vite",
         "vitk": "vitk",   "vitamina_k": "vitk",
+        # Cabeceras del catálogo exportado (mayúsculas y nombres en inglés).
+        "choline": "calina",
+        "saturatedfat": "saturated_fats",
+        "monounsaturatedfat": "mono_saturated_fats",
+        "polyunsaturatedfat": "poli_saturated_fats",
+        "glycemicindex": "glycemic_index",
     }
 
     DESC_FIELDS = {
@@ -323,25 +335,82 @@ async def import_aliments(
         "mono_saturated_fats", "poli_saturated_fats", "glycemic_index",
     }
 
+    # La unidad de la plataforma es `g`; los CSV suelen traer `gr`. Y aparece
+    # alguna `u` suelta entre las `ud`.
+    UNIDADES = {"gr": "g", "g": "g", "ud": "ud", "u": "ud", "ml": "ml", "tz": "ud"}
+
+    def _grupo_por_nombre(nombre):
+        """El id de la categoría, creándola si no existe.
+
+        Sin esto, un CSV con "Frutas" en la columna de categoría dejaba los 89
+        alimentos sin agrupar, y la biblioteca sale como una lista plana de
+        ochocientos nombres.
+        """
+        from app.models.nutrition.group_food import GroupFood
+        limpio = (nombre or "").strip()
+        if not limpio:
+            return None
+        g = db.query(GroupFood).filter(GroupFood.name == limpio).first()
+        if not g:
+            g = GroupFood(name=limpio)
+            db.add(g)
+            db.flush()
+        return g.id
+
     reader = csv.DictReader(io.StringIO(text))
     created = 0
     errors  = []
 
+    def _tiene_micros(fila):
+        return any((fila.get(k) or "").strip() for k in fila
+                   if k and k.strip().lower() in col_map
+                   and col_map[k.strip().lower()] in DESC_FIELDS)
+
+    # Dos filas con el mismo nombre son la misma cosa metida dos veces. Se
+    # queda la que TIENE micronutrientes: la otra trae solo macros y suele ser
+    # la que metió a mano algún cliente. Mismo criterio que el script de carga
+    # masiva: si cada camino descartara una distinta, el catálogo saldría
+    # diferente según por dónde se cargue.
+    filas, mejor = [], {}
     for i, row in enumerate(reader, start=2):
+        nombre = " ".join((row.get("Nombre") or row.get("nombre") or row.get("name") or "").split())
+        clave = nombre.lower()
+        if not clave:
+            filas.append((i, row))
+            continue
+        previa = mejor.get(clave)
+        if previa is None:
+            mejor[clave] = (i, row)
+        elif _tiene_micros(row) and not _tiene_micros(previa[1]):
+            errors.append(f"Fila {previa[0]}: '{nombre}' repetido, se queda el que trae micronutrientes")
+            mejor[clave] = (i, row)
+        else:
+            errors.append(f"Fila {i}: '{nombre}' ya venía antes en el fichero, se omite")
+    filas += list(mejor.values())
+    filas.sort(key=lambda t: t[0])
+
+    for i, row in filas:
         norm = {
             col_map[k.strip().lower()]: v.strip()
             for k, v in row.items()
             if k and k.strip().lower() in col_map
         }
-        name = norm.get("name")
+        name = " ".join((norm.get("name") or "").split())
         if not name:
             errors.append(f"Fila {i}: columna 'nombre' requerida")
             continue
+        # Muchos vienen en minúscula y en la biblioteca quedan como un renglón
+        # desordenado entre cientos.
+        name = name[:1].upper() + name[1:]
 
+        unidad = (norm.get("quantity_unit") or "").strip().lower()
         aliment = Aliment(
             name=name,
             brand=norm.get("brand") or None,
-            group_food_id=_to_int(norm.get("group_food_id", "")),
+            quantity_unit=UNIDADES.get(unidad, "g"),
+            meal_moments=norm.get("meal_moments") or None,
+            group_food_id=(_to_int(norm.get("group_food_id", ""))
+                           or _grupo_por_nombre(norm.get("group_name"))),
             proteins=_to_float(norm.get("proteins", "")),
             carbohydrates=_to_float(norm.get("carbohydrates", "")),
             fats=_to_float(norm.get("fats", "")),

@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH, CLIENT
 from app.core.responses import send_response, send_error
+from app.core.macros import escalar
 from app.models.user import User, UserDetail, UserParent
 from app.models.routine import Routine
 from app.models.session_log import WorkoutSession
@@ -256,7 +257,7 @@ def _diet_meals_macros(diet):
             if not al:
                 continue
             if al.calories and dfa.quantity:
-                mk += (al.calories / 100.0) * dfa.quantity
+                mk += escalar(al.calories, al, dfa.quantity)
             foods.append({
                 "name": al.name,
                 "quantity": dfa.quantity,

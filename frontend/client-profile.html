@@ -862,6 +862,12 @@
 
     /* ── Nutrición: las tres tarjetas ────────────────────────────────────────
        Modo de programación · Calculadora (plegable) · Plan de alimentación. */
+    .cal-enfoque{display:flex;gap:9px;align-items:flex-start;margin:0 0 12px;padding:11px 13px;
+      background:#EEF2FF;border:1px solid #DDE3FF;border-radius:10px;color:#4338CA;
+      font-size:12.5px;line-height:1.5;}
+    .cal-enfoque svg{flex-shrink:0;margin-top:2px;}
+    .cal-enfoque-link{background:none;border:none;padding:0;margin-left:4px;color:#4F46E5;
+      font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:underline;font-family:inherit;}
     .nsec{background:#fff;border:1px solid #EEF0F3;border-radius:14px;margin-bottom:16px;
       box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden;}
     .nsec-head{display:flex;align-items:flex-start;gap:12px;padding:18px 22px 14px;}
@@ -5696,13 +5702,20 @@ function _calTypeExtraHtml(key) {
 
 async function openCalTaskModal(prefillDate) {
   const dateStr = prefillDate || _isoDate(new Date());
-  _calNewType = 'rutina';
+  /* Llegando desde el modo "Calendario completo" se viene a poner DIETAS. El
+     tipo viene fijado en Nutrición y los demás no se ofrecen: si no, es muy
+     fácil crear una rutina sin querer y acabar con el calendario lleno de
+     tareas que nadie pidió. Se sale del enfoque con el enlace del aviso. */
+  _calNewType = _enfoqueNutricion() ? 'nutricion' : 'rutina';
   const [y, m, d] = dateStr.split('-').map(Number);
   const dateObj = new Date(y, m-1, d);
   const dayName = DAY_NAMES[(dateObj.getDay()+6)%7];
   const dayLabel = `${dayName}, ${d} ${MONTH_NAMES[m-1].slice(0,3)}`;
 
-  const typeRows = _CAL_TYPES.map(t =>
+  const tipos = _enfoqueNutricion()
+    ? _CAL_TYPES.filter(t => t.key === 'nutricion')
+    : _CAL_TYPES;
+  const typeRows = tipos.map(t =>
     `<div class="cal-type-row${t.key===_calNewType?' sel':''}" id="ctr-${t.key}" onclick="_selCalType('${t.key}')">
       <div class="cal-type-dot" style="background:${t.dot};"></div>
       <span class="cal-type-lbl">${t.label}</span>
@@ -5721,6 +5734,11 @@ async function openCalTaskModal(prefillDate) {
       <span class="cal-modal-title">Nueva tarea · ${dayLabel}</span>
       <button class="cal-modal-close" onclick="closeCalTaskModal()">×</button>
     </div>
+    ${_enfoqueNutricion() ? `<div class="cal-enfoque">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+      <span>Estás programando la <b>nutrición</b> día a día.
+      <button class="cal-enfoque-link" onclick="salirEnfoqueNutricion()">Crear otro tipo de tarea</button></span>
+    </div>` : ''}
     <div id="calTypeList">${typeRows}</div>
     <div class="cal-repeat-row">
       <span class="cal-repeat-lbl">¿Repetir esta tarea?</span>
@@ -6806,10 +6824,35 @@ async function _nutLoadDiet(dietId) {
 async function renderNutricionTab() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
+  try {
+    await _renderNutricionTab(el);
+  } catch (e) {
+    /* Si algo revienta a mitad, `el.innerHTML` no llega a asignarse nunca y la
+       sección se queda MUDA: ni contenido, ni error, ni "cargando". Desde el
+       otro lado eso es indistinguible de que la aplicación esté rota, y no deja
+       nada que contar para arreglarlo. Al menos las tarjetas de arriba se
+       pintan, que no dependen de ninguna carga. */
+    console.error('[NUT] no se pudo pintar la sección:', e);
+    let cabecera = '';
+    try { cabecera = _nutModoCardHTML() + _nutCalcCardHTML(_nutEffMacros()); } catch (_) {}
+    el.innerHTML = cabecera + `
+      <div class="nsec"><div class="nsec-head"><div>
+        <div class="nsec-title">No se ha podido cargar el plan de alimentación</div>
+        <div class="nsec-sub">${esc(String(e && e.message || e))}</div>
+      </div></div>
+      <div style="padding:0 22px 22px;">
+        <button class="btn btn-sm" onclick="_nutDetailLoaded=false;renderNutricionTab()">Reintentar</button>
+      </div></div>`;
+  }
+}
 
-  // Qué modo manda. Sin esto la tarjeta pintaría siempre "semanal" activo,
-  // aunque el cliente esté programado por calendario.
-  _nutModo = (clientData && clientData.nutrition_mode) || 'semanal';
+async function _renderNutricionTab(el) {
+
+  // Qué modo manda. `clientData` es el perfil que se cargó al abrir la página:
+  // sirve para saber en qué modo se entra, pero NO puede pisar un cambio hecho
+  // después. Al cambiar de modo se actualizan los dos, así que basta con leerlo
+  // la primera vez.
+  if (_nutModo == null) _nutModo = (clientData && clientData.nutrition_mode) || 'semanal';
 
   await _nutLoadMenu();
   const menuDays = _nutMenuDays();
@@ -7027,7 +7070,7 @@ function _renderNutUI() {
    3. Plan de alimentación — las dietas asignadas, o el hueco para la primera.
    ══════════════════════════════════════════════════════════════════════════ */
 
-var _nutModo = 'semanal';      // lo que dice el servidor
+var _nutModo = null;           // lo que dice el servidor; null = aún sin leer
 var _nutCalcAbierta = false;   // plegada, como en el diseño
 
 function _nutModoCardHTML() {
@@ -7185,6 +7228,9 @@ async function confirmarCambioModo() {
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     _nutModo = modo;
+    // El perfil en memoria también, o el siguiente repintado lo devolvería al
+    // modo viejo leyendo un dato de hace un rato.
+    if (clientData) clientData.nutrition_mode = modo;
     cerrarCambioModo();
     await renderNutricionTab();
     // Con el calendario activo se trabaja EN el calendario: dejar al coach en
@@ -7197,12 +7243,29 @@ async function confirmarCambioModo() {
   }
 }
 
+function salirEnfoqueNutricion() {
+  // El enfoque es una ayuda, no una jaula: quien quiera crear otra cosa tiene
+  // que poder, sin cambiar el modo de programación del cliente.
+  _calSalirEnfoque = true;
+  closeCalTaskModal();
+  openCalTaskModal();
+}
+
 /* El calendario, centrado en la nutrición: se llega aquí para poner dietas, y
-   el tipo de tarea viene puesto para no acabar creando otra cosa sin querer. */
-var _calEnfoqueNutricion = false;
+   el tipo de tarea viene puesto para no acabar creando otra cosa sin querer.
+
+   El enfoque NO se guarda en una variable suelta: se deduce del modo del
+   cliente. Una variable se pierde al recargar la página, y el coach que vuelve
+   al día siguiente se encuentra el calendario como si nada — programando por
+   calendario pero con el formulario ofreciéndole crear rutinas. */
+var _calSalirEnfoque = false;   // solo mientras dure esta visita
+
+function _enfoqueNutricion() {
+  return _nutModo === 'calendario' && !_calSalirEnfoque;
+}
 
 function irAlCalendarioDeNutricion() {
-  _calEnfoqueNutricion = true;
+  _calSalirEnfoque = false;
   showTab('calendario');
   if (typeof renderCalendarioTab === 'function') renderCalendarioTab();
 }

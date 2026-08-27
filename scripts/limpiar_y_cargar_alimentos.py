@@ -322,10 +322,21 @@ def verificar(db, alimentos):
 
 
 def _cuenta(db, tabla, donde=""):
+    """Cuántas filas hay, o None si la tabla no existe.
+
+    Solo se traga el «no existe esa tabla», que pasa en bases viejas. Cualquier
+    otro problema —sobre todo NO PODER CONECTAR— se deja subir: si no, un fallo
+    de conexión se convertía en «0 alimentos», y eso lo lee alguien y cree que
+    se le ha borrado el catálogo entero.
+    """
     try:
         return db.execute(text(f"SELECT COUNT(*) FROM {tabla} {donde}")).scalar() or 0
-    except Exception:
-        return None      # la tabla puede no existir en una base vieja
+    except Exception as e:
+        texto = str(e).lower()
+        if "doesn't exist" in texto or "no such table" in texto or "unknown table" in texto:
+            db.rollback()
+            return None
+        raise
 
 
 def _existe(db, tabla):
@@ -529,6 +540,23 @@ def main():
 
     db = SessionLocal()
     try:
+        # Antes de cualquier cuenta: si no se llega a la base, hay que decirlo
+        # con esas palabras y parar.
+        try:
+            db.execute(text("SELECT 1"))
+        except Exception as e:
+            print(f"\nNo se ha podido conectar a {_contra_que_base()}", file=sys.stderr)
+            detalle = str(e).split("\n")[0]
+            print(f"  {detalle}", file=sys.stderr)
+            if "access denied" in detalle.lower():
+                print("\n  La contraseña no es válida. Revisa que hayas pegado la de",
+                      file=sys.stderr)
+                print("  verdad: en Railway, servicio MySQL -> Variables ->",
+                      file=sys.stderr)
+                print("  MYSQL_PUBLIC_URL.", file=sys.stderr)
+            print("\n  No se ha leído ni tocado nada.\n", file=sys.stderr)
+            return 1
+
         if args.verificar:
             return verificar(db, alimentos)
 
@@ -554,7 +582,11 @@ def main():
         print("Hecho.\n")
     except Exception:
         db.rollback()
-        print("\nERROR: no se ha guardado nada, la base queda como estaba.\n")
+        # Solo tiene sentido decirlo si se estaba escribiendo. En un simulacro o
+        # una verificación no había nada que guardar, y el mensaje confunde.
+        if args.ejecutar:
+            print("\nERROR: no se ha guardado nada, la base queda como estaba.\n",
+                  file=sys.stderr)
         raise
     finally:
         db.close()

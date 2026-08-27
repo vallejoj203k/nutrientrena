@@ -113,6 +113,49 @@ const PROD = 'https://nutrientrena-production.up.railway.app';
     (await p.locator('.nmodo.on .nmodo-nm').textContent()).includes('Calendario'),
     await p.locator('.nmodo.on .nmodo-nm').textContent());
 
+  // ── Al llegar al calendario, el tipo viene fijado en Nutrición ───────────
+  await p.evaluate(() => { showTab('calendario'); renderCalendarioTab(); });
+  await p.waitForTimeout(2000);
+  await p.evaluate(() => openCalTaskModal());
+  await p.waitForTimeout(1200);
+  ck('el aviso dice que se está programando la nutrición',
+    await p.locator('.cal-enfoque').count() === 1);
+  const tipos = await p.$$eval('#calTypeList .cal-type-lbl', ns => ns.map(n => n.textContent.trim()));
+  ck('SOLO SE OFRECE NUTRICIÓN, no se puede crear otra cosa sin querer',
+    tipos.length === 1 && /nutric/i.test(tipos[0]), tipos);
+  ck('y el tipo elegido ya es nutrición',
+    await p.evaluate(() => _calNewType) === 'nutricion', await p.evaluate(() => _calNewType));
+
+  // Pero es una ayuda, no una jaula.
+  await p.click('.cal-enfoque-link');
+  await p.waitForTimeout(1000);
+  const todos = await p.$$eval('#calTypeList .cal-type-lbl', ns => ns.map(n => n.textContent.trim()));
+  ck('se puede salir del enfoque y crear otro tipo', todos.length > 1, todos);
+  await p.evaluate(() => closeCalTaskModal());
+
+  // ── Volver a semanal, que es donde estaba el fallo ───────────────────────
+  // `renderNutricionTab` releía el modo de `clientData`, que es el perfil de
+  // cuando se abrió la página: al repintar volvía al modo viejo.
+  await p.evaluate(() => { showTab('nutricion'); renderNutricionTab(); });
+  await p.waitForTimeout(2000);
+  ck('tras ir y volver del calendario, el modo NO se revierte solo',
+    (await p.locator('.nmodo.on .nmodo-nm').textContent()).includes('Calendario'),
+    await p.locator('.nmodo.on .nmodo-nm').textContent());
+
+  await p.evaluate(() => pedirCambioModo('semanal'));
+  await p.waitForTimeout(600);
+  ck('se puede volver al plan semanal', await p.locator('#cmodoBack.open').count() === 1);
+  await p.click('#cmodoOk');
+  await p.waitForTimeout(2500);
+  await p.click('#tab-nutricion-btn');
+  await p.waitForTimeout(2500);
+  const dentro = (await p.innerHTML('#nutricionContent')).length;
+  // El fallo reportado: la sección se quedaba en blanco al volver.
+  ck('LA SECCIÓN NO SE QUEDA EN BLANCO AL VOLVER', dentro > 2000, dentro);
+  ck('y el plan semanal vuelve a salir como activo',
+    (await p.locator('.nmodo.on .nmodo-nm').textContent()).includes('Plan semanal'),
+    await p.locator('.nmodo.on .nmodo-nm').textContent());
+
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close(); process.exit(f ? 1 : 0);
 })();

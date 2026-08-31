@@ -38,6 +38,7 @@ CSV_POR_DEFECTO = os.path.join(RAIZ, "datos", "alimentos-catalogo.csv")
 
 from sqlalchemy import text                                    # noqa: E402
 
+from app.core.momentos import booleano, momentos_a_claves     # noqa: E402
 from app.database import SessionLocal                          # noqa: E402
 
 
@@ -70,6 +71,7 @@ COL = {
     "cantidad": "Cantidad", "unidad": "Unidad", "calorias": "Calorias",
     "proteinas": "Proteinas", "carbohidratos": "Carbohidratos", "grasas": "Grasas",
     "momento": "momento_sugerido", "micros": "tiene_micros", "comments": "comments",
+    "generador": "usar_en_generador",
 }
 
 # Micronutrientes: cabecera del CSV -> columna de aliment_descriptions.
@@ -141,7 +143,12 @@ def leer_csv(ruta):
             "proteinas": _num(f.get(COL["proteinas"])),
             "carbohidratos": _num(f.get(COL["carbohidratos"])),
             "grasas": _num(f.get(COL["grasas"])),
-            "momento": (f.get(COL["momento"], "") or "").strip() or None,
+            # Del vocabulario del fichero al de la pantalla: los chips del
+            # formulario comparan claves cortas, no las etiquetas largas.
+            "momento": momentos_a_claves(f.get(COL["momento"])),
+            # Ausente en ficheros viejos: entonces el alimento SÍ se usa,
+            # que es como se comportaba el generador antes de la columna.
+            "generador": booleano(f.get(COL["generador"]), por_defecto=True),
             "comments": (f.get(COL["comments"], "") or "").strip() or None,
             "tiene_micros": f.get(COL["micros"], "") == "True",
             "micros": {d: _num(f.get(c)) for c, d in MICROS.items()
@@ -500,13 +507,15 @@ def cargar(db, alimentos, organization_id, usuario_id):
         db.execute(text(
             "INSERT INTO aliments (id, group_food_id, brand, name, quantity, quantity_unit,"
             " proteins, carbohydrates, fats, calories, comments, meal_moments,"
+            " use_in_generator,"
             " organization_id, created_user_id, created_at, updated_at) "
             "VALUES (:id, :g, :marca, :nombre, :cant, :uni, :p, :c, :gr, :k, :com, :mom,"
-            " :org, :usr, :t, :t)"), {
+            " :gen, :org, :usr, :t, :t)"), {
             "id": aid, "g": grupos.get(_clave(a["grupo"] or "")), "marca": a["marca"],
             "nombre": a["nombre"], "cant": a["cantidad"], "uni": a["unidad"],
             "p": a["proteinas"], "c": a["carbohidratos"], "gr": a["grasas"],
             "k": a["calorias"], "com": a["comments"], "mom": a["momento"],
+            "gen": a["generador"],
             "org": organization_id, "usr": usuario_id, "t": ahora})
 
         if a["micros"]:

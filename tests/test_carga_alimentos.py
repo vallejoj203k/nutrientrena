@@ -187,7 +187,9 @@ def test_carga_los_alimentos_con_su_categoria_y_sus_micros(client, seed, admin_h
 
     avena = sesion.query(Aliment).filter(Aliment.name.like(f"Avena {suf}%")).first()
     assert avena.brand == "Hacendado", avena.brand
-    assert avena.meal_moments == "Desayuno", avena.meal_moments
+    # Se guarda la CLAVE, no la etiqueta: es la que comparan los chips del
+    # formulario. Con "Desayuno" el dato entra y el chip sale sin marcar.
+    assert avena.meal_moments == "desayuno", avena.meal_moments
     desc = sesion.query(AlimentDescription).filter(
         AlimentDescription.aliment_id == avena.id).first()
     assert desc is not None and desc.fiber == 10.6 and desc.iron == 4.7

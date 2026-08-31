@@ -34,6 +34,36 @@ from sqlalchemy.orm import sessionmaker
 TEST_DB_URL = "sqlite:///./test_nutrientrena.db"
 
 
+@pytest.fixture(autouse=True)
+def _no_estrechar_el_generador():
+    """Ninguna prueba deja alimentos marcados como "usar al generar dietas".
+
+    En cuanto hay UNO marcado, `_catalogo_generador` deja de devolver el
+    catálogo entero y se queda solo con los marcados. Dos alimentos de prueba
+    olvidados dejan al generador sin proteína ni carbohidrato — y el fallo sale
+    en OTRO fichero, donde parece un fallo del generador y no lo es. Se limpia
+    aquí, para todas, en vez de acordarse fichero a fichero.
+    """
+    yield
+    from app.database import SessionLocal
+    db = SessionLocal()
+    try:
+        from app.models.nutrition.aliment import Aliment
+        db.query(Aliment).filter(Aliment.use_in_generator.is_(True)).update(
+            {"use_in_generator": False}, synchronize_session=False)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        # Las pruebas que no tocan la base corren antes de que exista la tabla.
+        # Cualquier OTRO problema se deja subir: una limpieza que falla en
+        # silencio es exactamente lo que ha traído hasta aquí.
+        t = str(e).lower()
+        if "no such table" not in t and "doesn't exist" not in t:
+            raise
+    finally:
+        db.close()
+
+
 @pytest.fixture(scope="session")
 def engine():
     import app.models  # registers all SQLAlchemy models with Base.metadata  # noqa: F401

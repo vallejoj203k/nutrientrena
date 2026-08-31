@@ -14,6 +14,7 @@ from app.core.dependencies import (
     SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL,
 )
 from app.core.responses import send_response, send_error
+from app.core.momentos import booleano, momentos_a_claves
 from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
 from app.config import settings
@@ -282,6 +283,7 @@ async def import_aliments(
         "categoria": "group_name", "categoría": "group_name",
         "unidad": "quantity_unit", "quantity_unit": "quantity_unit",
         "momento_sugerido": "meal_moments", "meal_moments": "meal_moments",
+        "usar_en_generador": "use_in_generator", "use_in_generator": "use_in_generator",
         "proteinas": "proteins",   "proteins": "proteins",
         "carbohidratos": "carbohydrates", "carbohydrates": "carbohydrates",
         "grasas": "fats",          "fats": "fats",
@@ -408,7 +410,13 @@ async def import_aliments(
             name=name,
             brand=norm.get("brand") or None,
             quantity_unit=UNIDADES.get(unidad, "g"),
-            meal_moments=norm.get("meal_moments") or None,
+            # Del vocabulario del fichero al de la pantalla. Guardando la
+            # etiqueta larga tal cual, el dato entra pero los chips del
+            # formulario no se marcan: ellos comparan las claves cortas.
+            meal_moments=momentos_a_claves(norm.get("meal_moments")),
+            # `bool("False")` es True, que es exactamente el fallo que se
+            # esperaría aquí: marcaría los 160 que el cliente dejó fuera.
+            use_in_generator=booleano(norm.get("use_in_generator"), por_defecto=False),
             group_food_id=(_to_int(norm.get("group_food_id", ""))
                            or _grupo_por_nombre(norm.get("group_name"))),
             proteins=_to_float(norm.get("proteins", "")),

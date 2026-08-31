@@ -127,7 +127,9 @@ def test_los_micronutrientes_siguen_entrando(client, seed, admin_headers):
         f"1,Avena {suf},Cereales {suf},Hacendado,100,gr,389,16.9,66.3,6.9,10.6,54,4.7,,1.2,True,False,Desayuno,\n"])
     al = _buscar(f"Avena {suf}%")
     assert al.brand == "Hacendado", al.brand
-    assert al.meal_moments == "Desayuno", al.meal_moments
+    # Se guarda la CLAVE, no la etiqueta: es la que comparan los tres chips del
+    # formulario. Guardando "Desayuno" el dato entra y el chip no se marca.
+    assert al.meal_moments == "desayuno", al.meal_moments
 
     db = SessionLocal()
     try:

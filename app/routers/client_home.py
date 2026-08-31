@@ -769,8 +769,13 @@ class _SessionExerciseBody(BaseModel):
 
 class _WorkoutSessionBody(BaseModel):
     routine_id: Optional[int] = None
+    day_name: Optional[str] = Field(default=None, max_length=255)
     duration_min: Optional[int] = None
     rpe: Optional[float] = None
+    # Cómo se ha sentido, de 1 a 5. Opcional: si prefiere no decirlo, se queda
+    # vacío, y la ficha del coach enseña un hueco en vez de inventarse un
+    # "normal" que el cliente nunca dio.
+    mood: Optional[int] = Field(default=None, ge=1, le=5)
     notes: Optional[str] = None
     exercises: Optional[list[_SessionExerciseBody]] = None
 
@@ -785,9 +790,11 @@ def client_workout_session(body: _WorkoutSessionBody, db: Session = Depends(get_
     session = WorkoutSession(
         client_user_detail_id=detail.id,
         routine_id=body.routine_id,
+        day_name=body.day_name,
         session_date=date.today(),
         duration_min=body.duration_min,
         rpe=body.rpe,
+        mood=body.mood,
         notes=body.notes,
     )
     db.add(session)

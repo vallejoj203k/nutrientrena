@@ -10,9 +10,17 @@ class WorkoutSession(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     client_user_detail_id = Column(String(36), ForeignKey("user_details.id"), nullable=False)
     routine_id = Column(Integer, ForeignKey("routines.id"), nullable=True)
+    # Qué día de la rutina fue ("Día 4"), copiado como texto. Es lo que se
+    # lee en el historial; con solo `routine_id` la columna diría el nombre
+    # de la rutina entera, que es el mismo en las cincuenta sesiones.
+    day_name = Column(String(255), nullable=True)
     session_date = Column(Date, nullable=False)
     duration_min = Column(Integer, nullable=True)
     rpe = Column(Float, nullable=True)
+    # Cómo se ha sentido, de 1 (fatal) a 5 (genial). Lo marca el cliente al
+    # terminar y es OPCIONAL: las sesiones de antes no lo tienen y las de ahora
+    # tampoco si prefiere no decirlo. Vacío es vacío, no "normal".
+    mood = Column(Integer, nullable=True)
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

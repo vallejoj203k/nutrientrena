@@ -195,6 +195,33 @@
       .content{padding:18px 14px 40px;}
       .page-head h1{font-size:22px;}
     }
+    /* ── Cómo ha ido el entreno ─────────────────────────────────────────
+       Se pregunta al terminar, que es cuando se sabe. Contestar es opcional:
+       "Guardar" sin elegir cara guarda la sesión sin ánimo. */
+    .fin-back{display:none;position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:1200;}
+    .fin-back.open{display:flex;align-items:center;justify-content:center;padding:20px;}
+    .fin{background:#fff;border-radius:20px;width:100%;max-width:380px;padding:28px 24px 20px;text-align:center;
+      box-shadow:0 24px 64px rgba(0,0,0,.3);}
+    .fin-ok{width:52px;height:52px;border-radius:50%;background:#ECFDF5;color:#059669;
+      display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+    .fin h3{font-size:19px;font-weight:800;color:#111827;margin-bottom:5px;}
+    .fin-sub{font-size:13.5px;color:#6B7280;margin-bottom:20px;}
+    .fin-sub b{color:#111827;font-variant-numeric:tabular-nums;}
+    .fin-q{font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;}
+    .fin-caras{display:flex;justify-content:center;gap:8px;margin-bottom:6px;}
+    .fin-cara{width:52px;height:52px;border-radius:14px;border:1.5px solid #E5E7EB;background:#fff;
+      font-size:25px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:.15s;padding:0;}
+    .fin-cara:hover{border-color:#C7D2FE;transform:translateY(-2px);}
+    .fin-cara.sel{border-color:#4F46E5;background:#EEF2FF;transform:translateY(-2px);}
+    .fin-cara:focus-visible{outline:2px solid #4F46E5;outline-offset:2px;}
+    .fin-opt{font-size:11.5px;color:#9CA3AF;margin-bottom:20px;}
+    .fin-botones{display:flex;gap:10px;}
+    .fin-b{flex:1;padding:13px 10px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;
+      font-family:inherit;border:1px solid #E5E7EB;background:#fff;color:#374151;}
+    .fin-b:hover{background:#F9FAFB;}
+    .fin-b.pri{background:#4F46E5;border-color:#4F46E5;color:#fff;}
+    .fin-b.pri:hover{background:#4338CA;}
   </style>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
@@ -274,6 +301,28 @@
 </div>
 
 <!-- Sesión de entrenamiento en curso -->
+<!-- Cómo ha ido el entreno -->
+<div class="fin-back" id="finBack" onclick="if(event.target===this)finCerrar(false)">
+  <div class="fin" role="dialog" aria-modal="true" aria-labelledby="finTitulo">
+    <div class="fin-ok"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h3 id="finTitulo">Entrenamiento terminado</h3>
+    <div class="fin-sub">Duración: <b id="finTiempo">—</b></div>
+    <div class="fin-q">¿Cómo te has sentido?</div>
+    <div class="fin-caras">
+      <button type="button" class="fin-cara" data-n="1" onclick="finCara(1)" aria-label="Fatal">😣</button>
+      <button type="button" class="fin-cara" data-n="2" onclick="finCara(2)" aria-label="Regular">😕</button>
+      <button type="button" class="fin-cara" data-n="3" onclick="finCara(3)" aria-label="Normal">😐</button>
+      <button type="button" class="fin-cara" data-n="4" onclick="finCara(4)" aria-label="Bien">🙂</button>
+      <button type="button" class="fin-cara" data-n="5" onclick="finCara(5)" aria-label="Genial">😄</button>
+    </div>
+    <div class="fin-opt">Puedes guardar sin responder</div>
+    <div class="fin-botones">
+      <button class="fin-b" onclick="finCerrar(false)">Cancelar</button>
+      <button class="fin-b pri" onclick="finCerrar(true)">Guardar entreno</button>
+    </div>
+  </div>
+</div>
+
 <div class="ws-overlay" id="wsOverlay">
   <div class="ws-top">
     <button class="ws-exit" onclick="exitWorkout()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Salir</button>
@@ -680,7 +729,11 @@
     _ws.exercises.forEach(function(e){ e.sets.forEach(function(s){ if (s.done && s.rpe !== '' && !isNaN(parseFloat(s.rpe))) rpes.push(parseFloat(s.rpe)); }); });
     var avgRpe = rpes.length ? Math.round((rpes.reduce(function(a,b){return a+b;},0) / rpes.length) * 10) / 10 : null;
     var notes = _ws.exercises.filter(function(e){ return (e.note || '').trim(); }).map(function(e){ return e.name + ': ' + e.note.trim(); }).join(' | ') || null;
-    if (!confirm('¿Terminar el entrenamiento? Se registrará en tu progreso.')) return;
+    /* Antes era un `confirm` del navegador. Se cambia por una ventana propia
+       porque además de confirmar hay que preguntar cómo ha ido: el ánimo solo
+       se puede recoger aquí, recién terminado, y ningún dato lo sustituye. */
+    var animo = await _preguntarFin(elapsedSec);
+    if (animo === null) return;              // ha cancelado
     // Detalle: se guardan las series con algún dato (marcada, reps o kg)
     var num = function(v){ var n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? null : n; };
     var exercises = _ws.exercises.map(function(e){
@@ -694,7 +747,9 @@
           .map(function(s){ return { reps: String(s.reps || '').trim() || null, weight: num(s.kg), rpe: num(s.rpe), done: !!s.done }; })
       };
     }).filter(function(e){ return e.sets.length || e.notes; });
-    var body = { routine_id: _ws.routineId, duration_min: durationMin, rpe: avgRpe, notes: notes, exercises: exercises };
+    var body = { routine_id: _ws.routineId, day_name: _ws.dayName || null,
+                 duration_min: durationMin, rpe: avgRpe,
+                 mood: animo || null, notes: notes, exercises: exercises };
     var btn = document.querySelector('.ws-terminar'); if (btn){ btn.disabled = true; btn.textContent = 'Guardando…'; }
     var ok = false;
     try{
@@ -704,7 +759,29 @@
     if (btn){ btn.disabled = false; btn.textContent = 'Terminar'; }
     if (!ok){ alert('No se pudo guardar el entrenamiento. Revisa tu conexión e inténtalo otra vez.'); return; }
     _wsClose();
-    alert('¡Entrenamiento completado! Duración: ' + _fmtTime(elapsedSec));
+  }
+
+  /* Cómo ha ido. Devuelve 1-5, 0 si prefiere no decirlo, o null si cancela.
+     Preguntarlo aquí y no después es lo único que hace que se conteste: media
+     hora más tarde nadie se acuerda de cómo se sentía. */
+  var _finResolver = null;
+  function _preguntarFin(segundos){
+    document.getElementById('finTiempo').textContent = _fmtTime(segundos);
+    document.querySelectorAll('.fin-cara').forEach(function(b){ b.classList.remove('sel'); });
+    _finElegido = 0;
+    document.getElementById('finBack').classList.add('open');
+    return new Promise(function(res){ _finResolver = res; });
+  }
+  var _finElegido = 0;
+  function finCara(n){
+    _finElegido = (_finElegido === n) ? 0 : n;   // volver a pulsar la quita
+    document.querySelectorAll('.fin-cara').forEach(function(b){
+      b.classList.toggle('sel', parseInt(b.dataset.n, 10) === _finElegido);
+    });
+  }
+  function finCerrar(guardar){
+    document.getElementById('finBack').classList.remove('open');
+    if (_finResolver){ _finResolver(guardar ? _finElegido : null); _finResolver = null; }
   }
 
   async function loadProfile(){

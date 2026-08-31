@@ -1544,6 +1544,107 @@
 .pg-stab:hover{color:#111;}
 .pg-stab.active{color:#4F46E5;font-weight:700;border-bottom-color:#4F46E5;}
 .pg-subpane{padding:0;}
+
+/* ── Progreso · Sesiones ────────────────────────────────────────────────────
+   Se lee de un vistazo: las cifras arriba, el volumen por semana, y la tabla
+   agrupada por mes. El estado va en forma y en color, no solo en color. */
+.se-cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:16px 0 0;}
+.se-cifra{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.se-cifra-h{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;}
+.se-cifra-v{font-size:26px;font-weight:800;color:#111827;line-height:1.1;margin-top:9px;font-variant-numeric:tabular-nums;}
+.se-cifra-v.ind{color:#4F46E5;}
+.se-cifra-l{font-size:11.5px;color:#9CA3AF;margin-top:4px;}
+
+.se-card{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:20px 22px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.se-card-h{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;}
+.se-card-t{font-size:14.5px;font-weight:700;color:#111827;}
+.se-card-s{font-size:12.5px;color:#9CA3AF;margin-top:3px;}
+.se-card-n{margin-left:auto;font-size:12px;color:#9CA3AF;white-space:nowrap;}
+
+.se-bars{display:flex;align-items:flex-end;gap:8px;height:140px;padding-bottom:2px;}
+/* La columna tiene que ocupar TODO el alto: el `height:%` de la barra se
+   resuelve contra su padre, y si el padre mide lo que mide el numerito, un
+   100% son 21 píxeles y todas las barras salen planas. */
+.se-bar-w{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;
+  align-items:center;gap:6px;min-width:0;}
+.se-bar{width:100%;background:#6366F1;border-radius:7px 7px 3px 3px;min-height:3px;transition:.2s;flex-shrink:0;}
+.se-bar-w:hover .se-bar{background:#4F46E5;}
+.se-bar-n{font-size:10.5px;color:#9CA3AF;font-variant-numeric:tabular-nums;}
+
+.se-filtros{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:12px 14px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.se-buscar{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;border:1px solid #E5E7EB;border-radius:10px;padding:8px 12px;}
+.se-buscar svg{color:#9CA3AF;flex-shrink:0;}
+.se-buscar input{flex:1;border:none;outline:none;font-size:13px;font-family:inherit;background:none;color:#111827;min-width:0;}
+.se-grupo{display:flex;gap:3px;background:#F3F4F6;border-radius:10px;padding:3px;}
+.se-gb{padding:6px 13px;border:none;background:none;border-radius:8px;font-size:12.5px;font-weight:600;color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.se-gb.on{background:#4F46E5;color:#fff;}
+.se-grupo.amb .se-gb.on{background:#F59E0B;color:#fff;}
+
+.se-mes{background:#fff;border:1px solid #EEF0F3;border-radius:14px;margin-top:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.se-mes-h{display:flex;align-items:center;gap:10px;padding:15px 20px;cursor:pointer;user-select:none;}
+.se-mes-h:hover{background:#FAFBFC;}
+.se-mes-chev{color:#9CA3AF;transition:transform .18s;flex-shrink:0;}
+.se-mes.cerrado .se-mes-chev{transform:rotate(-90deg);}
+.se-mes-t{font-size:14px;font-weight:700;color:#111827;}
+.se-mes-s{font-size:12.5px;color:#9CA3AF;}
+.se-mes-n{margin-left:auto;font-size:12px;color:#9CA3AF;white-space:nowrap;}
+.se-mes.cerrado .se-tabla-w{display:none;}
+
+.se-tabla-w{overflow-x:auto;}
+.se-tabla{width:100%;border-collapse:collapse;min-width:900px;}
+.se-tabla th{text-align:left;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;border-top:1px solid #F3F4F6;border-bottom:1px solid #F3F4F6;background:#FCFCFD;white-space:nowrap;}
+.se-tabla td{padding:13px 14px;border-bottom:1px solid #F6F7F9;font-size:13px;color:#374151;vertical-align:middle;}
+.se-tabla tr:last-child td{border-bottom:none;}
+.se-tabla tr.saltada td{background:#FFFCFC;}
+.se-num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.se-f-d{font-weight:600;color:#111827;white-space:nowrap;}
+.se-f-s{font-size:11.5px;color:#9CA3AF;margin-top:2px;white-space:nowrap;}
+.se-s-n{font-weight:600;color:#111827;}
+.se-s-e{font-size:11.5px;color:#9CA3AF;margin-top:2px;}
+
+.se-est{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;}
+.se-est::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.se-est.completada{background:#EEF2FF;color:#4338CA;}
+.se-est.parcial{background:#FEF3C7;color:#92400E;}
+.se-est.saltada{background:#FEE2E2;color:#B91C1C;}
+
+.se-series{min-width:64px;}
+.se-series-n{font-size:12.5px;color:#374151;text-align:center;font-variant-numeric:tabular-nums;}
+.se-series-b{height:3px;border-radius:3px;background:#EEF0F3;margin-top:4px;overflow:hidden;}
+.se-series-b i{display:block;height:100%;background:#4F46E5;}
+.se-series-b.parcial i{background:#F59E0B;}
+.se-mood{font-size:17px;line-height:1;}
+.se-mood.vacio{color:#D1D5DB;font-size:13px;}
+.se-ver{color:#4F46E5;font-size:12.5px;font-weight:600;background:none;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;padding:0;}
+.se-ver:hover{text-decoration:underline;}
+.se-vacio{padding:44px 20px;text-align:center;color:#9CA3AF;font-size:13.5px;}
+
+.sed-back{display:none;position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:900;}
+.sed-back.open{display:flex;align-items:center;justify-content:center;padding:20px;}
+.sed-panel{background:#fff;border-radius:16px;width:100%;max-width:620px;max-height:calc(100vh - 40px);
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.28);}
+.sed-head{display:flex;align-items:flex-start;gap:12px;padding:20px 22px 14px;border-bottom:1px solid #F3F4F6;}
+.sed-tit{font-size:16.5px;font-weight:700;color:#111827;}
+.sed-s{font-size:12.5px;color:#9CA3AF;margin-top:4px;}
+.sed-x{margin-left:auto;background:#F3F4F6;border:none;width:30px;height:30px;border-radius:50%;
+  cursor:pointer;color:#6B7280;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sed-x:hover{background:#E5E7EB;}
+.sed-body{flex:1;overflow-y:auto;padding:8px 22px 20px;}
+.sed-ex{margin-top:16px;}
+.sed-ex-h{display:flex;align-items:baseline;gap:9px;margin-bottom:7px;}
+.sed-ex-n{font-size:14px;font-weight:700;color:#111827;}
+.sed-ex-m{font-size:11.5px;color:#9CA3AF;}
+table.sed-t{width:100%;border-collapse:collapse;}
+table.sed-t th{text-align:left;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;
+  letter-spacing:.6px;padding:6px 10px;border-bottom:1px solid #F3F4F6;}
+table.sed-t td{padding:9px 10px;border-bottom:1px solid #F9FAFB;font-size:13px;color:#374151;}
+table.sed-t tr.nohecha td{color:#9CA3AF;}
+.sed-ok{font-size:11.5px;font-weight:600;color:#059669;}
+.sed-no{font-size:11.5px;color:#9CA3AF;}
+.sed-nota{margin-top:8px;font-size:12.5px;color:#6B7280;background:#F9FAFB;border-radius:8px;padding:9px 12px;line-height:1.5;}
+.sed-nota.gen{margin-top:16px;}
+
+
 .pg-placeholder{padding:40px 24px;text-align:center;color:#9CA3AF;font-size:13px;}
 .pg-stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 24px 0;}
 .pg-stat-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;}
@@ -2332,6 +2433,20 @@
       <button class="btn btn-ghost" onclick="closeBizModal()">Cancelar</button>
       <button class="btn btn-primary" id="bizSaveBtn" onclick="saveBiz()">Guardar cambios</button>
     </div>
+  </div>
+</div>
+
+<!-- Detalle de una sesión de entreno -->
+<div class="sed-back" id="seDetBack" onclick="if(event.target===this)cerrarSeDetalle()">
+  <div class="sed-panel" role="dialog" aria-modal="true" aria-labelledby="seDetTitulo">
+    <div class="sed-head">
+      <div>
+        <div class="sed-tit" id="seDetTitulo">Sesión</div>
+        <div class="sed-s" id="seDetSub"></div>
+      </div>
+      <button class="sed-x" onclick="cerrarSeDetalle()" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="sed-body" id="seDetCuerpo"></div>
   </div>
 </div>
 
@@ -4132,12 +4247,293 @@ function renderProgresoTab() {
   _renderPgCheckins();
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Progreso · Sesiones
+
+   El historial de entrenos del cliente. Las cuentas —tonelaje, adherencia,
+   qué se saltó— las hace el servidor en una sola llamada: para saber lo
+   SALTADO hay que cruzar las sesiones con el calendario, y eso no se resuelve
+   a base de peticiones sueltas desde aquí.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _seDatos = null, _seCargando = false;
+var _seBusca = '', _seEstado = 'todas', _seRango = '3m', _seCerrados = {};
+
+var SE_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+// De 1 (fatal) a 5 (genial), como lo marca el cliente al terminar.
+var SE_CARAS = {1:'😣', 2:'😕', 3:'😐', 4:'🙂', 5:'😄'};
+
+async function _renderPgSesiones() {
+  const el = document.getElementById('pg-pane-sesiones');
+  if (!el) return;
+  if (_seDatos) { _sePinta(); return; }
+  if (_seCargando) return;
+  _seCargando = true;
+  el.innerHTML = '<div class="se-vacio">Cargando sesiones…</div>';
+  try {
+    const r = await fetch(`${API}/session-logs/client/${clientId}/historial`, { headers: h() });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    _seDatos = (await r.json()).data || {};
+    _sePinta();
+  } catch (e) {
+    /* Decirlo. Un panel vacío se lee como "este cliente no ha entrenado
+       nunca", que es una afirmación muy distinta de "no he podido cargarlo". */
+    el.innerHTML = `<div class="se-vacio">No se ha podido cargar el historial de sesiones.<br>
+      <button class="se-ver" style="margin-top:10px;" onclick="_seDatos=null;_renderPgSesiones()">Reintentar</button></div>`;
+  } finally { _seCargando = false; }
+}
+
+function _seFmt(n) { return (n == null) ? '—' : Number(n).toLocaleString('es-ES'); }
+
+/* Las que pasan los filtros de arriba. */
+function _seFiltradas() {
+  const q = _seBusca.trim().toLowerCase();
+  const desde = _seDesde();
+  return (_seDatos.sesiones || []).filter(f => {
+    if (_seEstado !== 'todas' && f.estado !== _seEstado) return false;
+    if (desde && f.fecha && f.fecha < desde) return false;
+    if (!q) return true;
+    return `${f.sesion || ''} ${f.enfoque || ''}`.toLowerCase().includes(q);
+  });
+}
+
+function _seDesde() {
+  if (_seRango === 'todo') return null;
+  const d = new Date();
+  d.setDate(d.getDate() - (_seRango === '4s' ? 28 : 90));
+  return d.toISOString().slice(0, 10);
+}
+
+function _sePinta() {
+  const el = document.getElementById('pg-pane-sesiones');
+  if (!el || !_seDatos) return;
+  const r = _seDatos.resumen || {};
+  const filas = _seFiltradas();
+
+  const ICO = {
+    act: '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    up:  '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+    rel: '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    pes: '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11v11h-11z"/><path d="M2 9v6M22 9v6"/></svg>',
+    fue: '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>',
+  };
+  const cifra = (ico, tit, val, sub, ind) =>
+    `<div class="se-cifra"><div class="se-cifra-h">${ico}${tit}</div>
+      <div class="se-cifra-v${ind ? ' ind' : ''}">${val}</div>
+      <div class="se-cifra-l">${sub}</div></div>`;
+
+  const cifras = `<div class="se-cifras">
+    ${cifra(ICO.act, 'Sesiones', _seFmt(r.sesiones), r.programadas ? `de ${r.programadas} programadas` : 'registradas', true)}
+    ${cifra(ICO.up, 'Adherencia', r.adherencia == null ? '—' : r.adherencia + ' %',
+            r.adherencia == null ? 'sin nada programado' : `${r.saltadas} saltada${r.saltadas === 1 ? '' : 's'}`, true)}
+    ${cifra(ICO.rel, 'Duración media', r.duracion_media == null ? '—' : r.duracion_media + ' min', 'cronómetro real')}
+    ${cifra(ICO.pes, 'Tonelaje', r.tonelaje_total ? Math.round(r.tonelaje_total / 1000) + ' t' : '—', 'volumen acumulado')}
+    ${cifra(ICO.fue, 'RPE medio', r.rpe_medio == null ? '—' : r.rpe_medio,
+            r.racha_semanas ? `racha ${r.racha_semanas} sem` : 'sin racha')}
+  </div>`;
+
+  const vol = _seDatos.volumen_semanal || [];
+  const maxVol = Math.max(1, ...vol.map(v => v.tonelaje || 0));
+  const grafico = vol.length ? `<div class="se-card">
+    <div class="se-card-h"><div>
+      <div class="se-card-t">Volumen por semana</div>
+      <div class="se-card-s">Tonelaje total levantado en cada semana del programa</div>
+    </div><span class="se-card-n">${vol.length} semana${vol.length === 1 ? '' : 's'}</span></div>
+    <div class="se-bars">${vol.map(v => `
+      <div class="se-bar-w" title="Semana ${v.semana}: ${_seFmt(Math.round(v.tonelaje))} kg">
+        <div class="se-bar" style="height:${Math.max(3, Math.round((v.tonelaje || 0) / maxVol * 100))}%;"></div>
+        <span class="se-bar-n">${v.semana}</span>
+      </div>`).join('')}</div></div>` : '';
+
+  const gb = (grupo, val, txt, actual) =>
+    `<button class="se-gb${actual === val ? ' on' : ''}" onclick="_seFiltro('${grupo}','${val}')">${txt}</button>`;
+  const filtros = `<div class="se-filtros">
+    <label class="se-buscar">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar por día, enfoque o ejercicio…" value="${esc(_seBusca)}"
+             oninput="_seFiltro('busca', this.value)">
+    </label>
+    <div class="se-grupo">
+      ${gb('estado', 'todas', 'Todas', _seEstado)}
+      ${gb('estado', 'completada', 'Completada', _seEstado)}
+      ${gb('estado', 'parcial', 'Parcial', _seEstado)}
+      ${gb('estado', 'saltada', 'Saltada', _seEstado)}
+    </div>
+    <div class="se-grupo amb">
+      ${gb('rango', '4s', '4 sem', _seRango)}
+      ${gb('rango', '3m', '3 meses', _seRango)}
+      ${gb('rango', 'todo', 'Todo', _seRango)}
+    </div>
+  </div>`;
+
+  el.innerHTML = cifras + grafico + filtros + _seMeses(filas);
+}
+
+/* Agrupadas por mes, de lo más reciente a lo más antiguo. */
+function _seMeses(filas) {
+  if (!filas.length) {
+    const hay = (_seDatos.sesiones || []).length;
+    return `<div class="se-card"><div class="se-vacio">${hay
+      ? 'Ninguna sesión coincide con los filtros.'
+      : 'Todavía no hay sesiones registradas.'}</div></div>`;
+  }
+  const meses = [], porMes = {};
+  filas.forEach(f => {
+    const k = (f.fecha || '').slice(0, 7);
+    if (!porMes[k]) { porMes[k] = []; meses.push(k); }
+    porMes[k].push(f);
+  });
+
+  return meses.map(k => {
+    const g = porMes[k];
+    const [a, m] = k.split('-');
+    const entrenadas = g.filter(f => f.estado !== 'saltada').length;
+    const durs = g.map(f => f.duracion_min).filter(Boolean);
+    const media = durs.length ? Math.round(durs.reduce((x, y) => x + y, 0) / durs.length) : null;
+    const cerrado = _seCerrados[k] ? ' cerrado' : '';
+    return `<div class="se-mes${cerrado}" id="se-mes-${k}">
+      <div class="se-mes-h" onclick="_seMes('${k}')">
+        <svg class="se-mes-chev" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        <span class="se-mes-t">${SE_MESES[parseInt(m, 10) - 1]} de ${a}</span>
+        <span class="se-mes-s">${entrenadas} entrenada${entrenadas === 1 ? '' : 's'} · ${g.length} programada${g.length === 1 ? '' : 's'}</span>
+        ${media ? `<span class="se-mes-n">${media} min media</span>` : ''}
+      </div>
+      <div class="se-tabla-w"><table class="se-tabla">
+        <thead><tr>
+          <th>Fecha</th><th>Sesión</th><th>Estado</th>
+          <th class="se-num">Duración</th><th style="text-align:center;">Series</th>
+          <th class="se-num">Tonelaje</th><th class="se-num">RPE</th>
+          <th style="text-align:center;">Ánimo</th><th></th>
+        </tr></thead>
+        <tbody>${g.map(_seFila).join('')}</tbody>
+      </table></div></div>`;
+  }).join('');
+}
+
+function _seFila(f) {
+  const d = f.fecha ? new Date(f.fecha + 'T00:00:00') : null;
+  const dia = d ? `${String(d.getDate()).padStart(2, '0')} ${SE_MESES[d.getMonth()].slice(0, 3).toLowerCase()}` : '—';
+  const sub = [f.semana ? `Sem ${f.semana}` : null, f.hora].filter(Boolean).join(' · ') || '—';
+  const prev = f.series_previstas;
+  const pct = prev ? Math.round(f.series_hechas * 100 / prev) : 0;
+  const parcial = f.estado === 'parcial' ? ' parcial' : '';
+  return `<tr class="${f.estado}">
+    <td><div class="se-f-d">${dia}</div><div class="se-f-s">${esc(sub)}</div></td>
+    <td><div class="se-s-n">${esc(f.sesion || 'Entreno')}</div>
+        ${f.enfoque ? `<div class="se-s-e">${esc(f.enfoque)}</div>` : ''}</td>
+    <td><span class="se-est ${f.estado}">${f.estado[0].toUpperCase() + f.estado.slice(1)}</span></td>
+    <td class="se-num">${f.duracion_min ? f.duracion_min + ' min' : '—'}</td>
+    <td class="se-series">
+      <div class="se-series-n">${f.series_hechas}${prev ? '/' + prev : ''}</div>
+      ${prev ? `<div class="se-series-b${parcial}"><i style="width:${pct}%"></i></div>` : ''}
+    </td>
+    <td class="se-num">${f.tonelaje ? _seFmt(Math.round(f.tonelaje)) + ' kg' : '—'}</td>
+    <td class="se-num">${f.rpe == null ? '—' : f.rpe}</td>
+    <td style="text-align:center;">${f.mood ? `<span class="se-mood">${SE_CARAS[f.mood] || ''}</span>`
+        : '<span class="se-mood vacio">—</span>'}</td>
+    <td style="text-align:right;">${f.id
+      ? `<button class="se-ver" onclick="_seDetalle(${f.id})">Ver detalle →</button>` : ''}</td>
+  </tr>`;
+}
+
+function _seFiltro(cual, valor) {
+  if (cual === 'busca') {
+    _seBusca = valor;
+    // Solo se repintan las tablas. Repintar la barra entera le quitaría el
+    // foco a quien está escribiendo y se perdería la letra siguiente.
+    _seRepintaTablas();
+    return;
+  }
+  if (cual === 'estado') _seEstado = valor;
+  if (cual === 'rango') _seRango = valor;
+  _sePinta();
+}
+
+function _seRepintaTablas() {
+  const el = document.getElementById('pg-pane-sesiones');
+  if (!el) return;
+  el.querySelectorAll('.se-mes, .se-card .se-vacio').forEach(n => {
+    const cont = n.classList.contains('se-mes') ? n : n.closest('.se-card');
+    if (cont) cont.remove();
+  });
+  el.insertAdjacentHTML('beforeend', _seMeses(_seFiltradas()));
+}
+
+function _seMes(k) {
+  _seCerrados[k] = !_seCerrados[k];
+  const n = document.getElementById('se-mes-' + k);
+  if (n) n.classList.toggle('cerrado', !!_seCerrados[k]);
+}
+
+/* El detalle de una sesión: los ejercicios y sus series, tal y como el
+   cliente los marcó. Se pide al abrirlo — el historial trae los totales, no
+   las series de las cincuenta sesiones. */
+async function _seDetalle(id) {
+  const f = (_seDatos.sesiones || []).find(x => x.id === id);
+  document.getElementById('seDetBack').classList.add('open');
+  document.getElementById('seDetTitulo').textContent = (f && f.sesion) || 'Sesión';
+  document.getElementById('seDetSub').textContent = '';
+  document.getElementById('seDetCuerpo').innerHTML = '<div class="se-vacio">Cargando…</div>';
+  try {
+    const r = await fetch(`${API}/session-logs/client/${clientId}`, { headers: h() });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const s = ((await r.json()).data || []).find(x => x.id === id);
+    if (!s) throw new Error('no está');
+    _seDetallePinta(s, f);
+  } catch (e) {
+    document.getElementById('seDetCuerpo').innerHTML =
+      '<div class="se-vacio">No se ha podido cargar el detalle de esta sesión.</div>';
+  }
+}
+
+function _seDetallePinta(s, f) {
+  const d = s.session_date ? new Date(s.session_date + 'T00:00:00') : null;
+  const fecha = d ? `${d.getDate()} de ${SE_MESES[d.getMonth()].toLowerCase()} de ${d.getFullYear()}` : '';
+  document.getElementById('seDetSub').textContent =
+    [fecha, s.duration_min ? s.duration_min + ' min' : null,
+     f && f.tonelaje ? Math.round(f.tonelaje).toLocaleString('es-ES') + ' kg' : null,
+     s.rpe != null ? 'RPE ' + s.rpe : null,
+     s.mood ? SE_CARAS[s.mood] : null].filter(Boolean).join(' · ');
+
+  const ejercicios = s.exercises || [];
+  document.getElementById('seDetCuerpo').innerHTML = ejercicios.length ? ejercicios.map(ex => `
+    <div class="sed-ex">
+      <div class="sed-ex-h">
+        <span class="sed-ex-n">${esc(ex.name || 'Ejercicio')}</span>
+        ${ex.muscle_group_name ? `<span class="sed-ex-m">${esc(ex.muscle_group_name)}</span>` : ''}
+      </div>
+      <table class="sed-t"><thead><tr>
+        <th>Serie</th><th class="se-num">Reps</th><th class="se-num">Peso</th><th class="se-num">RPE</th><th></th>
+      </tr></thead><tbody>
+        ${(ex.sets || []).map(st => `<tr class="${st.done ? '' : 'nohecha'}">
+          <td>${st.set_number}</td>
+          <td class="se-num">${esc(st.reps || '—')}</td>
+          <td class="se-num">${st.weight == null ? '—' : st.weight + ' kg'}</td>
+          <td class="se-num">${st.rpe == null ? '—' : st.rpe}</td>
+          <td style="text-align:right;">${st.done
+            ? '<span class="sed-ok">Hecha</span>'
+            : '<span class="sed-no">Sin marcar</span>'}</td>
+        </tr>`).join('')}
+      </tbody></table>
+      ${ex.notes ? `<div class="sed-nota">${esc(ex.notes)}</div>` : ''}
+    </div>`).join('') + (s.notes ? `<div class="sed-nota gen">${esc(s.notes)}</div>` : '')
+    : '<div class="se-vacio">Esta sesión no tiene ejercicios registrados.</div>';
+}
+
+function cerrarSeDetalle() {
+  document.getElementById('seDetBack').classList.remove('open');
+}
+
 function showProgresoSubtab(name, btn) {
   document.querySelectorAll('.pg-stab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.pg-subpane').forEach(p => p.style.display = 'none');
   if (btn) btn.classList.add('active');
   const pane = document.getElementById('pg-pane-' + name);
   if (pane) pane.style.display = '';
+  // Se carga al abrirla, no al entrar en Progreso: son dos consultas que la
+  // mayoría de las visitas no llega a mirar.
+  if (name === 'sesiones') _renderPgSesiones();
 }
 
 function _renderPgResumen() {

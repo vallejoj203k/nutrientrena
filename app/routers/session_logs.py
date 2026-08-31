@@ -18,6 +18,7 @@ class SessionCreate(BaseModel):
     session_date: date
     duration_min: Optional[int] = None
     rpe: Optional[float] = None
+    mood: Optional[int] = None
     notes: Optional[str] = None
 
 
@@ -26,6 +27,7 @@ class SessionUpdate(BaseModel):
     session_date: Optional[date] = None
     duration_min: Optional[int] = None
     rpe: Optional[float] = None
+    mood: Optional[int] = None
     notes: Optional[str] = None
 
 
@@ -53,8 +55,10 @@ def _out(s: WorkoutSession) -> dict:
         "routine_id": s.routine_id,
         "routine_name": s.routine.name if s.routine else None,
         "session_date": s.session_date.isoformat() if s.session_date else None,
+        "day_name": s.day_name,
         "duration_min": s.duration_min,
         "rpe": s.rpe,
+        "mood": s.mood,
         "notes": s.notes,
         "created_at": s.created_at.isoformat() if s.created_at else None,
         "exercises": exercises,
@@ -120,3 +124,160 @@ def delete_session(
     db.delete(s)
     db.commit()
     return send_response(None, "Sesión eliminada")
+
+
+# ── La pantalla de Sesiones del coach ──────────────────────────────────────
+#
+# Una sola llamada con todo lo que esa pantalla enseña: las cinco cifras de
+# arriba, el volumen por semana y la tabla. Se calcula aquí y no en el
+# navegador porque hay que cruzar las sesiones con el CALENDARIO —lo que el
+# coach programó— para saber qué se saltó, y eso son dos consultas que no
+# tiene sentido resolver a base de peticiones sueltas.
+
+@router.get("/client/{client_user_detail_id}/historial",
+            summary="Historial de sesiones con sus cifras",
+            description="Sesiones registradas y días programados sin registrar, con tonelaje, adherencia y volumen por semana.")
+def historial(
+    client_user_detail_id: str,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    import json as _json
+
+    from app.core.entrenos import (
+        estado as _estado, racha_semanas, semana_del_programa, series, tonelaje,
+    )
+    from app.models.calendar_task import CalendarTask
+    from app.models.routine import Routine, RoutineDay
+    from app.models.user import UserDetail
+
+    detalle = db.query(UserDetail).filter(UserDetail.id == client_user_detail_id).first()
+    if not detalle:
+        return send_error("Cliente no encontrado", code=404)
+    # `start_date` se guarda como fecha y hora; las sesiones, como fecha suelta.
+    # Restarlas sin igualar el tipo revienta con "can't subtract datetime from
+    # date", y justo en el cliente que sí tiene fecha de inicio.
+    inicio = getattr(detalle, "start_date", None)
+    if isinstance(inicio, datetime):
+        inicio = inicio.date()
+
+    sesiones = (db.query(WorkoutSession)
+                .filter(WorkoutSession.client_user_detail_id == client_user_detail_id)
+                .order_by(WorkoutSession.session_date.desc(), WorkoutSession.id.desc())
+                .all())
+
+    # Lo PROGRAMADO: las tareas de rutina de su calendario.
+    tareas = (db.query(CalendarTask)
+              .filter(CalendarTask.client_user_detail_id == client_user_detail_id,
+                      CalendarTask.task_type == "rutina")
+              .order_by(CalendarTask.task_date.desc())
+              .all())
+
+    # Cuántas series lleva cada día de rutina: es contra eso que una sesión
+    # está completa o a medias. Sin este dato, "completada" solo diría que el
+    # cliente marcó todo lo que él mismo apuntó.
+    previstas_por_dia = {}
+    for rid, did, nombre, desc in db.query(
+            RoutineDay.routine_id, RoutineDay.id, RoutineDay.day_name, RoutineDay.description).all():
+        previstas_por_dia[did] = {"routine_id": rid, "nombre": nombre, "desc": desc}
+
+    def _nombre_dia(t):
+        """Lo que se lee en la columna SESIÓN: "Día 4" y su enfoque."""
+        try:
+            req = _json.loads(t.requirements) if t and t.requirements else {}
+        except Exception:
+            req = {}
+        did = (req or {}).get("routine_day_id") if isinstance(req, dict) else None
+        d = previstas_por_dia.get(did) if did else None
+        if d:
+            return d["nombre"], d["desc"]
+        return (t.title if t else None), None
+
+    # Un día con sesión registrada no es un día saltado.
+    dias_con_sesion = {s.session_date for s in sesiones if s.session_date}
+
+    filas = []
+    for s in sesiones:
+        hechas, registradas = series(s)
+        # El día concreto si se guardó; si no, la rutina. Lo segundo repite
+        # el mismo texto en todas las filas, pero es mejor que "Entreno".
+        nombre = s.day_name or (s.routine.name if s.routine else None)
+        filas.append({
+            "id": s.id,
+            "fecha": s.session_date.isoformat() if s.session_date else None,
+            "semana": semana_del_programa(s.session_date, inicio),
+            "hora": s.created_at.strftime("%H:%M") if s.created_at else None,
+            "sesion": nombre or "Entreno",
+            "enfoque": ", ".join(sorted({e.muscle_group_name for e in (s.exercises or [])
+                                         if e.muscle_group_name})) or None,
+            "estado": _estado(hechas, registradas),
+            "duracion_min": s.duration_min,
+            "series_hechas": hechas,
+            "series_previstas": registradas,
+            "tonelaje": tonelaje(s),
+            "rpe": s.rpe,
+            "mood": s.mood,
+            "registrada": True,
+        })
+
+    # Y los días que se programaron y no se registraron: las saltadas.
+    for t in tareas:
+        if t.task_date in dias_con_sesion:
+            continue
+        if t.task_date > date.today():
+            continue          # lo que aún no ha llegado no está saltado
+        nombre, enfoque = _nombre_dia(t)
+        filas.append({
+            "id": None,
+            "fecha": t.task_date.isoformat(),
+            "semana": semana_del_programa(t.task_date, inicio),
+            "hora": None,
+            "sesion": nombre or "Entreno",
+            "enfoque": enfoque,
+            "estado": "saltada",
+            "duracion_min": None,
+            "series_hechas": 0,
+            "series_previstas": None,
+            "tonelaje": None,
+            "rpe": None,
+            "mood": None,
+            "registrada": False,
+        })
+
+    filas.sort(key=lambda f: f["fecha"] or "", reverse=True)
+
+    hechas_n = len([f for f in filas if f["estado"] != "saltada"])
+    programadas = len(filas)
+    saltadas = programadas - hechas_n
+    duraciones = [f["duracion_min"] for f in filas if f["duracion_min"]]
+    rpes = [f["rpe"] for f in filas if f["rpe"] is not None]
+
+    # Volumen por semana del programa. Sin fecha de inicio no hay semanas del
+    # programa que valgan, y se dice en vez de inventarse una.
+    volumen = []
+    if inicio:
+        por_semana = {}
+        for f in filas:
+            if f["semana"] and f["tonelaje"]:
+                por_semana[f["semana"]] = por_semana.get(f["semana"], 0) + f["tonelaje"]
+        if por_semana:
+            volumen = [{"semana": n, "tonelaje": round(por_semana.get(n, 0), 1)}
+                       for n in range(1, max(por_semana) + 1)]
+
+    return send_response({
+        "inicio": inicio.isoformat() if inicio else None,
+        "resumen": {
+            "sesiones": hechas_n,
+            "programadas": programadas,
+            "saltadas": saltadas,
+            # Sin nada programado no hay adherencia que calcular: 100% con cero
+            # sesiones sería una nota excelente por no haber hecho nada.
+            "adherencia": round(hechas_n * 100 / programadas) if programadas else None,
+            "duracion_media": round(sum(duraciones) / len(duraciones)) if duraciones else None,
+            "tonelaje_total": round(sum(f["tonelaje"] or 0 for f in filas), 1),
+            "rpe_medio": round(sum(rpes) / len(rpes), 1) if rpes else None,
+            "racha_semanas": racha_semanas([s.session_date for s in sesiones]),
+        },
+        "volumen_semanal": volumen,
+        "sesiones": filas,
+    }, "OK")

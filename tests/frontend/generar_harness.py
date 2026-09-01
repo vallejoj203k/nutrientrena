@@ -229,3 +229,48 @@ lista = """<!doctype html><html><head><meta charset="utf-8"></head><body>
 destino8 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lista.html')
 open(destino8, 'w').write(lista)
 print('harness generado en', destino8)
+
+
+# ── Harness del Resumen de Progreso ────────────────────────────────────────
+# El alto de la gráfica es lo que se comprueba, y el alto solo existe cuando
+# hay una pantalla midiendo: en el código fuente no se ve. Por eso se saca la
+# página real con su CSS y se mide con el navegador.
+a = perfil.index('function _renderPgResumen() {')
+b = perfil.index('/* ══', perfil.index('function _buildLatestCiSection()'))
+resumen_js = perfil[a:b]
+
+resumen = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0">
+<div id="marco" style="width:1400px">
+  <div class="pg-subtabs-bar">
+    <button class="pg-stab active" onclick="showProgresoSubtab('resumen',this)">Resumen</button>
+    <button class="pg-stab" onclick="showProgresoSubtab('fuerza',this)">Fuerza</button>
+    <button class="pg-stab" onclick="showProgresoSubtab('checkins',this)">Check-ins</button>
+  </div>
+  <div id="pg-pane-resumen" class="pg-subpane"></div>
+  <div id="pg-pane-fuerza" class="pg-subpane" style="display:none">fuerza</div>
+  <div id="pg-pane-checkins" class="pg-subpane" style="display:none">checkins</div>
+</div>
+<script>
+const API='http://x'; const clientId=1;
+function h(){return{};}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function openTargetModal(){window.__metas=true;}
+function showProgresoSubtab(name,btn){
+  document.querySelectorAll('.pg-stab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pg-subpane').forEach(p=>p.style.display='none');
+  if(btn) btn.classList.add('active');
+  const pane=document.getElementById('pg-pane-'+name); if(pane) pane.style.display='';
+}
+var checkins=[], clientData={}, _target=null, clientRoutines=[];
+var _fzDatos=null, _fzCargando=false;
+%s
+window.__pinta=(ck,cd,tg,fz)=>{
+  checkins=ck; clientData=cd||{}; _target=tg; _fzDatos=(fz===undefined?[]:fz);
+  _resFzError=false; _renderPgResumen();
+};
+</script></body></html>""" % (cssp, resumen_js)
+
+destino9 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resumen.html')
+open(destino9, 'w').write(resumen)
+print('harness generado en', destino9)

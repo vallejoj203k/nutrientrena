@@ -1619,6 +1619,42 @@
 .se-ver:hover{text-decoration:underline;}
 .se-vacio{padding:44px 20px;text-align:center;color:#9CA3AF;font-size:13.5px;}
 
+/* ── Progreso · Fotos ───────────────────────────────────────────────────────
+   Dos fotos lado a lado y sus fechas. Lo que importa es que se comparen dos
+   tomas del MISMO ángulo: cualquier otra cosa no es una comparación. */
+.ft-cab{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:18px 22px;margin-top:16px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ft-cab-t{font-size:15px;font-weight:700;color:#111827;}
+.ft-cab-s{font-size:12.5px;color:#9CA3AF;margin-top:3px;}
+.ft-angulos{margin-left:auto;display:flex;gap:3px;background:#F3F4F6;border-radius:10px;padding:3px;}
+.ft-ang{padding:7px 15px;border:none;background:none;border-radius:8px;font-size:12.5px;font-weight:600;
+  color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.ft-ang.on{background:#4F46E5;color:#fff;}
+.ft-ang:disabled{opacity:.4;cursor:not-allowed;}
+
+.ft-par{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start;}
+.ft-lado{background:#fff;border:1px solid #EEF0F3;border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ft-h{display:flex;align-items:center;gap:10px;padding:14px 18px;flex-wrap:wrap;}
+.ft-et{font-size:9.5px;font-weight:800;letter-spacing:.6px;padding:3px 8px;border-radius:5px;}
+.ft-et.ini{background:#F3F4F6;color:#4A5568;}
+.ft-et.act{background:#EEF2FF;color:#4338CA;}
+.ft-t{font-size:13.5px;font-weight:700;color:#111827;}
+.ft-sel{margin-left:auto;border:1px solid #E5E7EB;border-radius:9px;padding:6px 10px;font-size:12.5px;
+  font-family:inherit;color:#111827;background:#fff;cursor:pointer;font-variant-numeric:tabular-nums;}
+.ft-sel:focus{outline:2px solid #4F46E5;outline-offset:1px;}
+.ft-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:#F6F7F9;}
+.ft-pie{display:flex;align-items:baseline;gap:10px;padding:12px 18px;border-top:1px solid #F3F4F6;
+  font-size:12.5px;color:#9CA3AF;flex-wrap:wrap;}
+.ft-pie b{color:#111827;font-variant-numeric:tabular-nums;}
+.ft-pie .dif{margin-left:auto;font-weight:700;}
+.ft-pie .dif.baja{color:#059669;} .ft-pie .dif.sube{color:#D97706;}
+.ft-hueco{aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;text-align:center;
+  background:#FAFBFC;color:#9CA3AF;font-size:13px;padding:24px;line-height:1.6;}
+
+@media(max-width:820px){ .ft-par{grid-template-columns:1fr;} }
+
+
 /* ── Progreso · Check-ins ───────────────────────────────────────────────────
    Un acordeón: la fila dice lo justo para escanear la lista —fecha, nota y
    peso— y al abrirla salen las cuatro sensaciones, las medidas y las fotos. */
@@ -4899,6 +4935,126 @@ function _fzPintaLista() {
 function _fzElige(nombre) { _fzSel = nombre; _fzAbierta = null; _fzPinta(); }
 function _fzAbre(fecha) { _fzAbierta = (_fzAbierta === fecha) ? null : fecha; _fzPinta(); }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Progreso · Fotos
+
+   La comparativa. Dos tomas del MISMO ángulo, cada una con su fecha: comparar
+   un frente con una espalda no compara nada, así que el ángulo manda sobre las
+   dos fotos a la vez.
+
+   Los tres ángulos son los que ya guarda el check-in: `photo_url` es el
+   frente, `photo2` el lateral y `photo3` la espalda.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var FT_ANGULOS = [
+  { clave: 'frente',  campo: 'photo_url', etiqueta: 'Frente' },
+  { clave: 'lateral', campo: 'photo2',    etiqueta: 'Lateral' },
+  { clave: 'espalda', campo: 'photo3',    etiqueta: 'Espalda' },
+];
+var _ftAngulo = 'frente', _ftIni = null, _ftAct = null;
+
+/* Las tomas que tienen foto EN ESTE ángulo, de la más antigua a la más nueva.
+   Ofrecer una fecha sin foto en el ángulo elegido deja un hueco donde debería
+   haber una comparación. */
+function _ftTomas(angulo) {
+  const campo = (FT_ANGULOS.find(a => a.clave === angulo) || FT_ANGULOS[0]).campo;
+  return (checkins || [])
+    .filter(c => c[campo])
+    .map(c => ({
+      fecha: (c.checkin_date || c.created_at || '').slice(0, 10),
+      url: c[campo],
+      peso: c.weight == null ? null : Number(c.weight),
+    }))
+    .filter(t => t.fecha)
+    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+function _renderPgFotos() {
+  const el = document.getElementById('pg-pane-fotos');
+  if (!el) return;
+
+  // Cuántas hay en total y cuántas tomas: una toma es un check-in con al menos
+  // una foto, tenga uno, dos o los tres ángulos.
+  let total = 0;
+  const conFoto = (checkins || []).filter(c => {
+    const n = FT_ANGULOS.filter(a => c[a.campo]).length;
+    total += n;
+    return n > 0;
+  });
+
+  if (!conFoto.length) {
+    el.innerHTML = '<div class="pg-placeholder">Todavía no ha enviado fotos de progreso.</div>';
+    return;
+  }
+
+  const tomas = _ftTomas(_ftAngulo);
+  // Al cambiar de ángulo, la fecha elegida puede no tener foto en el nuevo.
+  // Se reajusta a los extremos en vez de dejar el hueco.
+  if (!tomas.some(t => t.fecha === _ftIni)) _ftIni = tomas.length ? tomas[0].fecha : null;
+  if (!tomas.some(t => t.fecha === _ftAct)) _ftAct = tomas.length ? tomas[tomas.length - 1].fecha : null;
+
+  const frecuencia = _ckFrecuencia(conFoto);
+  const cada = { 'frecuencia diaria': 'casi a diario', 'frecuencia semanal': 'cada semana aprox.',
+                 'frecuencia quincenal': 'cada 2 semanas aprox.', 'frecuencia mensual': 'cada mes aprox.' };
+
+  el.innerHTML = `
+    <div class="ft-cab">
+      <div>
+        <div class="ft-cab-t">Comparativa fotográfica</div>
+        <div class="ft-cab-s">${total} foto${total === 1 ? '' : 's'} ·
+          ${conFoto.length} toma${conFoto.length === 1 ? '' : 's'}${
+          frecuencia ? ' · ' + (cada[frecuencia] || frecuencia) : ''}</div>
+      </div>
+      <div class="ft-angulos">${FT_ANGULOS.map(a => {
+        const hay = _ftTomas(a.clave).length;
+        return `<button class="ft-ang${_ftAngulo === a.clave ? ' on' : ''}"
+          ${hay ? '' : 'disabled title="No hay fotos de este ángulo"'}
+          onclick="_ftAng('${a.clave}')">${a.etiqueta}</button>`;
+      }).join('')}</div>
+    </div>
+    ${tomas.length ? `<div class="ft-par">
+      ${_ftLado('ini', 'Foto inicial', _ftIni, tomas)}
+      ${_ftLado('act', 'Foto actual', _ftAct, tomas)}
+    </div>` : `<div class="ft-cab"><div class="ft-cab-s">
+        No hay fotos de este ángulo. Prueba con otro.</div></div>`}`;
+}
+
+function _ftLado(cual, titulo, fecha, tomas) {
+  const t = tomas.find(x => x.fecha === fecha);
+  // El peso de la OTRA foto, para poder decir cuánto ha cambiado entre las dos.
+  const otra = tomas.find(x => x.fecha === (cual === 'ini' ? _ftAct : _ftIni));
+  let dif = '';
+  if (cual === 'act' && t && otra && t.peso != null && otra.peso != null) {
+    const n = t.peso - otra.peso;
+    dif = `<span class="dif ${n < 0 ? 'baja' : (n > 0 ? 'sube' : '')}">${
+      (n > 0 ? '+' : '') + n.toFixed(1)} kg entre las dos</span>`;
+  }
+  return `<div class="ft-lado">
+    <div class="ft-h">
+      <span class="ft-et ${cual}">${cual === 'ini' ? 'INICIO' : 'ACTUAL'}</span>
+      <span class="ft-t">${titulo}</span>
+      <select class="ft-sel" onchange="_ftFecha('${cual}', this.value)"
+              aria-label="Fecha de la ${titulo.toLowerCase()}">
+        ${tomas.map(x => `<option value="${x.fecha}"${x.fecha === fecha ? ' selected' : ''}>${x.fecha}</option>`).join('')}
+      </select>
+    </div>
+    ${t ? `<img class="ft-img" src="${esc(t.url)}" alt="${titulo} del ${t.fecha}"
+            onclick="window.open('${esc(t.url)}','_blank')">`
+        : '<div class="ft-hueco">No hay foto de este ángulo en esa fecha.</div>'}
+    <div class="ft-pie">
+      <span>${t ? t.fecha : '—'}</span>
+      ${t && t.peso != null ? `<span>· <b>${t.peso} kg</b></span>` : ''}
+      ${dif}
+    </div>
+  </div>`;
+}
+
+function _ftAng(clave) { _ftAngulo = clave; _renderPgFotos(); }
+function _ftFecha(cual, fecha) {
+  if (cual === 'ini') _ftIni = fecha; else _ftAct = fecha;
+  _renderPgFotos();
+}
+
 function showProgresoSubtab(name, btn) {
   document.querySelectorAll('.pg-stab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.pg-subpane').forEach(p => p.style.display = 'none');
@@ -4909,6 +5065,7 @@ function showProgresoSubtab(name, btn) {
   // mayoría de las visitas no llega a mirar.
   if (name === 'sesiones') _renderPgSesiones();
   if (name === 'fuerza') _renderPgFuerza();
+  if (name === 'fotos') _renderPgFotos();
 }
 
 function _renderPgResumen() {

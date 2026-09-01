@@ -37,6 +37,12 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 
+# Las copias de seguridad. `scripts/copia_seguridad.py` las deja en la raiz del
+# proyecto, que es donde se ejecuta, y dentro va la base ENTERA: usuarios,
+# correos, chat, contratos. Un `git add -A` distraido las subiria al
+# repositorio, y de ahi ya no se quitan.
+copia-*.sql
+
 # Distribution / packaging
 dist/
 build/

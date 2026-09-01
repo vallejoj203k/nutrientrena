@@ -198,6 +198,48 @@
     /* ── Cómo ha ido el entreno ─────────────────────────────────────────
        Se pregunta al terminar, que es cuando se sabe. Contestar es opcional:
        "Guardar" sin elegir cara guarda la sesión sin ánimo. */
+    /* La hoja del RPE: sube desde abajo, como en el móvil.
+
+       Está aquí porque "RPE" no le dice nada a quien entrena: es jerga de
+       entrenador. El cliente tenía una casilla pidiéndole un número del 1 al
+       10 sin explicar de qué, así que o la dejaba vacía o ponía cualquier
+       cosa, y el coach recibía un dato inventado. Se pregunta por lo que la
+       persona sí sabe —cuántas repeticiones más habría podido hacer— y el
+       número sale de ahí. */
+    .rpe-back{position:fixed;inset:0;background:rgba(17,24,39,0);z-index:1300;
+      display:flex;align-items:flex-end;justify-content:center;
+      visibility:hidden;transition:background .22s,visibility 0s .22s;}
+    .rpe-back.open{background:rgba(17,24,39,.5);visibility:visible;transition:background .22s;}
+    .rpe-hoja{width:100%;max-width:460px;background:#fff;border-radius:20px 20px 0 0;
+      padding:8px 18px calc(20px + env(safe-area-inset-bottom));
+      transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+      max-height:88vh;overflow-y:auto;}
+    .rpe-back.open .rpe-hoja{transform:translateY(0);}
+    .rpe-asa{width:38px;height:4px;border-radius:2px;background:#E5E7EB;margin:0 auto 14px;}
+    .rpe-tit{font-size:17px;font-weight:800;color:#111827;}
+    .rpe-sub{font-size:13px;color:#6B7280;line-height:1.5;margin:5px 0 16px;}
+    .rpe-opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+      padding:11px 13px;margin-bottom:8px;border:1.5px solid #E5E7EB;border-radius:14px;
+      background:#fff;cursor:pointer;font-family:inherit;transition:.15s;}
+    .rpe-opt:hover{border-color:#C7D2FE;background:#FAFAFF;}
+    .rpe-opt.sel{border-color:#4F46E5;background:#EEF2FF;}
+    .rpe-opt:focus-visible{outline:2px solid #4F46E5;outline-offset:2px;}
+    .rpe-n{flex-shrink:0;width:40px;height:40px;border-radius:12px;display:flex;
+      align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;}
+    .rpe-txt b{display:block;font-size:14px;font-weight:700;color:#111827;}
+    .rpe-txt span{display:block;font-size:12px;color:#6B7280;margin-top:1px;}
+    .rpe-quitar{width:100%;margin-top:4px;padding:12px;border-radius:12px;border:1px solid #E5E7EB;
+      background:#fff;color:#6B7280;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+    .rpe-quitar:hover{background:#F9FAFB;color:#374151;}
+    /* El botón que abre la hoja, en la casilla de la serie. */
+    .ws-rpe{width:56px;padding:9px 4px;border:1px solid #E5E7EB;border-radius:9px;font-size:14px;
+      font-weight:700;text-align:center;color:#111;font-family:inherit;background:#F9FAFB;cursor:pointer;}
+    .ws-rpe.vacio{color:#9CA3AF;}
+    .ws-set.done .ws-rpe{background:#ECFDF5;border-color:#A7F3D0;}
+    .ws-ayuda{border:none;background:none;padding:0 0 0 3px;color:#9CA3AF;cursor:pointer;
+      font-family:inherit;font-size:10px;font-weight:800;}
+    .ws-ayuda:hover{color:#4F46E5;}
+
     .fin-back{display:none;position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:1200;}
     .fin-back.open{display:flex;align-items:center;justify-content:center;padding:20px;}
     .fin{background:#fff;border-radius:20px;width:100%;max-width:380px;padding:28px 24px 20px;text-align:center;
@@ -302,6 +344,18 @@
 
 <!-- Sesión de entrenamiento en curso -->
 <!-- Cómo ha ido el entreno -->
+<!-- Cuánto te ha costado. Sube desde abajo al tocar la casilla de RPE. -->
+<div class="rpe-back" id="rpeBack" onclick="if(event.target===this)cerrarRPE()">
+  <div class="rpe-hoja" role="dialog" aria-modal="true" aria-labelledby="rpeTit">
+    <div class="rpe-asa"></div>
+    <div class="rpe-tit" id="rpeTit">¿Cuánto te ha costado?</div>
+    <div class="rpe-sub">Es el <b>RPE</b>: el esfuerzo de la serie. Piensa en cuántas
+      repeticiones más habrías podido hacer antes de no poder con otra.</div>
+    <div id="rpeOpts"></div>
+    <button class="rpe-quitar" id="rpeQuitar" onclick="elegirRPE('')">Dejarlo sin marcar</button>
+  </div>
+</div>
+
 <div class="fin-back" id="finBack" onclick="if(event.target===this)finCerrar(false)">
   <div class="fin" role="dialog" aria-modal="true" aria-labelledby="finTitulo">
     <div class="fin-ok"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -687,7 +741,8 @@
           + '<td class="ws-prev">' + prevText(e, si) + '</td>'
           + '<td><input class="ws-in" inputmode="numeric" value="' + esc(s.reps) + '" placeholder="' + esc(e.target || '—') + '" onchange="wsSet(' + ei + ',' + si + ',\'reps\',this.value)"></td>'
           + '<td><input class="ws-in" inputmode="decimal" value="' + esc(s.kg) + '" placeholder="kg" onchange="wsSet(' + ei + ',' + si + ',\'kg\',this.value)"></td>'
-          + '<td><input class="ws-in" inputmode="decimal" value="' + esc(s.rpe) + '" placeholder="—" onchange="wsSet(' + ei + ',' + si + ',\'rpe\',this.value)"></td>'
+          + '<td><button class="ws-rpe' + (s.rpe === '' ? ' vacio' : '') + '" onclick="abrirRPE(' + ei + ',' + si + ')"'
+          + ' aria-label="Cuánto te ha costado esta serie">' + (s.rpe === '' ? '—' : esc(s.rpe)) + '</button></td>'
           + '<td><button class="ws-check' + (s.done ? ' done' : '') + '" onclick="wsToggle(' + ei + ',' + si + ')" title="Marcar serie"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button></td>'
           + '</tr>';
       }).join('');
@@ -697,11 +752,65 @@
         + '<button class="ws-note-btn" onclick="wsNote(' + ei + ')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Añadir nota</button>'
         + '<textarea class="ws-note-ta' + (e.noteOpen ? ' show' : '') + '" id="wsNote-' + ei + '" placeholder="Escribe una nota para este ejercicio…" oninput="_ws.exercises[' + ei + '].note=this.value">' + esc(e.note) + '</textarea>'
         + (e.rest ? '<div class="ws-rest"><span>✋ Descanso entre series</span><span class="rest-t"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M9 2h6"/></svg>' + esc(e.rest) + 's</span></div>' : '')
-        + '<table class="ws-tbl"><thead><tr><th>Serie</th><th>Anterior</th><th>Reps</th><th>Kg</th><th>RPE</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>'
+        + '<table class="ws-tbl"><thead><tr><th>Serie</th><th>Anterior</th><th>Reps</th><th>Kg</th><th>RPE<button class="ws-ayuda" onclick="abrirRPE()" aria-label="Qué es el RPE">?</button></th><th></th></tr></thead><tbody>' + rows + '</tbody></table>'
         + '<button class="ws-addset" onclick="wsAddSet(' + ei + ')">+ Añadir serie</button>'
         + '</div>';
     }).join('');
   }
+  /* La escala, en el idioma de quien entrena.
+
+     El número que se guarda es el RPE de siempre —el coach lo lee como tal, y
+     el RIR de la pantalla de Fuerza sale de él con 10 menos el RPE—, pero al
+     cliente no se le pregunta por el número: se le pregunta por lo que sí
+     sabe, cuántas repeticiones más le quedaban. Es la misma escala dicha al
+     derecho. */
+  var RPE_ESCALA = [
+    { n: '10', c: '#DC2626', t: 'Al fallo',        d: 'No podía hacer ni una más' },
+    { n: '9',  c: '#EA580C', t: 'Casi al límite',  d: 'Me quedaba 1 repetición' },
+    { n: '8',  c: '#D97706', t: 'Duro',            d: 'Me quedaban 2' },
+    { n: '7',  c: '#16A34A', t: 'Exigente',        d: 'Me quedaban 3' },
+    { n: '6',  c: '#0EA5E9', t: 'Cómodo',          d: 'Me quedaban 4 o más' },
+    { n: '5',  c: '#6B7280', t: 'Muy suave',       d: 'Calentamiento o técnica' },
+  ];
+
+  var _rpeEn = null;   // {ei, si} — a qué serie se le está poniendo, si a alguna
+
+  /* Sin argumentos abre solo la explicación, desde el "?" de la cabecera: se
+     puede entender qué es el RPE sin tener que tocar una serie. */
+  function abrirRPE(ei, si){
+    _rpeEn = (ei == null) ? null : { ei: ei, si: si };
+    var actual = _rpeEn ? String(_ws.exercises[ei].sets[si].rpe || '') : '';
+    document.getElementById('rpeOpts').innerHTML = RPE_ESCALA.map(function(o){
+      return '<button class="rpe-opt' + (o.n === actual ? ' sel' : '') + '"'
+        + (_rpeEn ? ' onclick="elegirRPE(\'' + o.n + '\')"' : ' disabled style="cursor:default"')
+        + '><span class="rpe-n" style="background:' + o.c + '">' + o.n + '</span>'
+        + '<span class="rpe-txt"><b>' + esc(o.t) + '</b><span>' + esc(o.d) + '</span></span></button>';
+    }).join('');
+    // Desde el "?" no hay nada que quitar: no se está editando ninguna serie.
+    document.getElementById('rpeQuitar').style.display = _rpeEn ? '' : 'none';
+    document.getElementById('rpeBack').classList.add('open');
+  }
+
+  function cerrarRPE(){
+    _rpeEn = null;
+    document.getElementById('rpeBack').classList.remove('open');
+  }
+
+  function elegirRPE(valor){
+    if (_rpeEn){
+      wsSet(_rpeEn.ei, _rpeEn.si, 'rpe', valor);
+      cerrarRPE();
+      renderWorkout();
+      return;
+    }
+    cerrarRPE();
+  }
+
+  // La tecla de escape cierra la hoja, como el gesto de deslizarla hacia abajo.
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && document.getElementById('rpeBack').classList.contains('open')) cerrarRPE();
+  });
+
   function wsSet(ei, si, field, val){ _ws.exercises[ei].sets[si][field] = val; }
   function wsToggle(ei, si){ _ws.exercises[ei].sets[si].done = !_ws.exercises[ei].sets[si].done; renderWorkout(); }
   function wsAddSet(ei){ _ws.exercises[ei].sets.push({ reps:'', kg:'', rpe:'', done:false }); renderWorkout(); }

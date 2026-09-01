@@ -348,3 +348,31 @@ document.getElementById('askSi').onclick = borrarFoto;
 destino11 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fotos.html')
 open(destino11, 'w').write(fotos)
 print('harness generado en', destino11)
+
+
+# ── Harness de la hoja del RPE ─────────────────────────────────────────────
+# Se extrae de client-entrena.html el pintado de la sesion y la hoja, tal
+# cual: lo que hay que comprobar es que el numero que se guarda sigue siendo
+# el RPE de siempre aunque al cliente se le pregunte por repeticiones.
+ent = open(os.path.join(RAIZ, 'frontend', 'client-entrena.html')).read()
+csse2 = '\n'.join(re.findall(r'<style>(.*?)</style>', ent, re.S))
+a = ent.index('  function prevText(e, si){')
+b = ent.index('  function wsToggle(ei, si){')
+codigo_ws = ent[a:b]
+hoja_html = _bloque(ent, '<div class="rpe-back" id="rpeBack"')
+
+rpe = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
+<div id="wsInner"></div>
+%s
+<script>
+function esc(s){ if(s==null)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var _ws=null;
+function _wsThumb(e){ return '<div class="ws-thumb"></div>'; }
+%s
+window.__pinta=(ex)=>{_ws={exercises:ex};renderWorkout();};
+window.__series=()=>_ws.exercises.map(e=>e.sets.map(s=>s.rpe));
+</script></body></html>""" % (csse2, hoja_html, codigo_ws)
+
+destino12 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rpe.html')
+open(destino12, 'w').write(rpe)
+print('harness generado en', destino12)

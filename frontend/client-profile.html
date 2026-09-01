@@ -1619,6 +1619,63 @@
 .se-ver:hover{text-decoration:underline;}
 .se-vacio{padding:44px 20px;text-align:center;color:#9CA3AF;font-size:13.5px;}
 
+/* ── Progreso · Check-ins ───────────────────────────────────────────────────
+   Un acordeón: la fila dice lo justo para escanear la lista —fecha, nota y
+   peso— y al abrirla salen las cuatro sensaciones, las medidas y las fotos. */
+.ck-cab{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:18px 22px;margin-top:16px;
+  display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ck-cab-t{font-size:15px;font-weight:700;color:#111827;}
+.ck-cab-s{font-size:12.5px;color:#9CA3AF;margin-top:3px;}
+.ck-cab-d{margin-left:auto;display:flex;gap:22px;align-items:baseline;}
+.ck-cab-k{font-size:11.5px;color:#9CA3AF;}
+.ck-cab-v{font-size:13.5px;font-weight:700;color:#111827;margin-left:5px;}
+.ck-cab-v.baja{color:#059669;} .ck-cab-v.sube{color:#D97706;}
+
+.ck-item{background:#fff;border:1px solid #EEF0F3;border-radius:14px;margin-top:12px;overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ck-h{display:flex;align-items:center;gap:13px;padding:15px 20px;cursor:pointer;}
+.ck-h:hover{background:#FAFBFC;}
+.ck-ico{width:34px;height:34px;border-radius:10px;background:#EEF2FF;color:#4F46E5;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ck-f{font-size:14px;font-weight:700;color:#111827;}
+.ck-n{font-size:12.5px;color:#9CA3AF;margin-top:2px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;max-width:52ch;}
+.ck-p{margin-left:auto;text-align:right;white-space:nowrap;}
+.ck-p b{font-size:14.5px;font-weight:700;color:#111827;font-variant-numeric:tabular-nums;}
+.ck-p div{font-size:12px;font-weight:600;margin-top:2px;}
+.ck-p div.baja{color:#059669;} .ck-p div.sube{color:#D97706;} .ck-p div.igual{color:#9CA3AF;}
+.ck-chev{color:#9CA3AF;transition:transform .18s;flex-shrink:0;margin-left:4px;}
+.ck-item.abierto .ck-chev{transform:rotate(180deg);}
+.ck-cuerpo{display:none;padding:0 20px 20px;}
+.ck-item.abierto .ck-cuerpo{display:block;}
+
+.ck-tipos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.ck-tipo{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  padding:4px 9px;border-radius:20px;background:#F3F4F6;color:#4A5568;}
+.ck-tipo.med{background:#EEF2FF;color:#4338CA;}
+.ck-tipo.fot{background:#F5F3FF;color:#6D28D9;}
+.ck-tipo.sen{background:#ECFDF5;color:#047857;}
+.ck-tipo.rev{background:#FEF3C7;color:#92400E;}
+
+.ck-notas{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.ck-nota{border:1px solid #EEF0F3;border-radius:12px;padding:16px;text-align:center;}
+.ck-nota-i{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  margin:0 auto 10px;}
+.ck-nota-v{font-size:23px;font-weight:800;color:#111827;line-height:1;}
+.ck-nota-v span{font-size:13px;font-weight:600;color:#9CA3AF;}
+.ck-nota-l{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-top:8px;}
+
+.ck-bloque{border:1px solid #EEF0F3;border-radius:12px;padding:14px 16px;margin-top:12px;}
+.ck-bloque-t{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;
+  margin-bottom:8px;}
+.ck-cita{font-size:14px;color:#374151;font-style:italic;line-height:1.6;}
+.ck-medidas{display:flex;flex-wrap:wrap;gap:8px 20px;}
+.ck-medida{font-size:13px;color:#374151;}
+.ck-medida b{color:#111827;font-variant-numeric:tabular-nums;}
+.ck-fotos{display:flex;flex-wrap:wrap;gap:10px;}
+.ck-fotos img{width:104px;height:104px;object-fit:cover;border-radius:10px;border:1px solid #EEF0F3;cursor:pointer;}
+
+
 /* ── Progreso · Fuerza ──────────────────────────────────────────────────────
    Una lista de ejercicios a la izquierda y, del elegido, sus cifras, su curva
    y el historial. La métrica del gráfico se cambia arriba: son los mismos
@@ -5105,33 +5162,167 @@ function _buildLatestCiSection() {
   </div>`;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Progreso · Check-ins
+
+   Un acordeón. La fila cerrada dice lo justo para recorrer la lista —fecha,
+   la nota y el peso con su cambio— y al abrirla salen las cuatro sensaciones,
+   las medidas y las fotos, si las mandó.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _ckAbierto = null;
+
+/* Qué mandó en este check-in. No es un campo guardado: se lee de lo que trae,
+   que es lo único que no puede mentir. Un "tipo" elegido a mano diría
+   "completo" en un check-in al que le falta la mitad. */
+function _ckTipos(ck) {
+  const t = [];
+  if (ck.weight != null) t.push({ c: '', n: 'Peso' });
+  if ([ck.energy, ck.effort, ck.hunger, ck.sleep].some(v => v != null))
+    t.push({ c: 'sen', n: 'Sensaciones' });
+  if ([ck.waist, ck.chest, ck.hips, ck.arms, ck.legs, ck.body_fat, ck.muscle_mass]
+      .some(v => v != null)) t.push({ c: 'med', n: 'Medidas' });
+  const fotos = [ck.photo_url, ck.photo2, ck.photo3].filter(Boolean).length;
+  if (fotos) t.push({ c: 'fot', n: `${fotos} foto${fotos === 1 ? '' : 's'}` });
+  if (ck.reviewed_at) t.push({ c: 'rev', n: 'Revisado' });
+  return t;
+}
+
+function _ckDelta(v) {
+  if (v == null) return { txt: '—', c: 'igual' };
+  const n = Number(v);
+  return {
+    txt: (n > 0 ? '+' : '') + n.toFixed(1) + ' kg',
+    c: n < 0 ? 'baja' : (n > 0 ? 'sube' : 'igual'),
+  };
+}
+
 function _renderPgCheckins() {
   const el = document.getElementById('pg-pane-checkins');
   if (!el) return;
-  const ckData = checkins || [];
-  if (!ckData.length) { el.innerHTML = '<div class="pg-placeholder">Sin check-ins registrados.</div>'; return; }
-  el.innerHTML = `<div style="overflow-x:auto;padding:16px 24px;">
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead><tr style="color:#9CA3AF;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB;">
-        <th style="text-align:left;padding:8px;">Fecha</th>
-        <th style="text-align:center;padding:8px;">Peso</th>
-        <th style="text-align:center;padding:8px;">Cambio</th>
-        <th style="text-align:center;padding:8px;">Grasa</th>
-        <th style="text-align:left;padding:8px;">Notas</th>
-      </tr></thead>
-      <tbody>${ckData.map(ck => {
-        const d = new Date(ck.checkin_date||ck.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
-        const delta = ck.weight_progress;
-        return `<tr style="border-bottom:1px solid #F3F4F6;">
-          <td style="padding:9px 8px;">${d}</td>
-          <td style="padding:9px 8px;text-align:center;font-weight:700;">${ck.weight ? ck.weight + ' kg' : '—'}</td>
-          <td style="padding:9px 8px;text-align:center;">${delta != null ? `<span style="font-weight:600;color:${delta < 0 ? '#16A34A' : delta > 0 ? '#D97706' : '#6B7280'};">${delta > 0 ? '+' : ''}${Number(delta).toFixed(1)} kg</span>` : '—'}</td>
-          <td style="padding:9px 8px;text-align:center;">${ck.body_fat != null ? ck.body_fat + '%' : '—'}</td>
-          <td style="padding:9px 8px;color:#6B7280;font-size:12px;">${esc(ck.notes||'')}</td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>
+  const cks = checkins || [];
+  if (!cks.length) {
+    el.innerHTML = '<div class="pg-placeholder">Todavía no ha enviado ningún check-in.</div>';
+    return;
+  }
+
+  // Vienen del más reciente al más antiguo. El cambio de cada uno es contra el
+  // ANTERIOR en el tiempo, que en esta lista es el siguiente de la fila.
+  const pesos = cks.map(c => (c.weight == null ? null : Number(c.weight)));
+  const actual = pesos.find(p => p != null);
+  const conPeso = pesos.filter(p => p != null);
+  // "Δ 6 sem" del prototipo: contra el check-in más antiguo que se enseña, no
+  // contra el peso inicial de la ficha — es lo que hay en pantalla.
+  const deltaRango = conPeso.length >= 2 ? conPeso[0] - conPeso[conPeso.length - 1] : null;
+  const dr = _ckDelta(deltaRango);
+
+  el.innerHTML = `
+    <div class="ck-cab">
+      <div>
+        <div class="ck-cab-t">Historial de check-ins</div>
+        <div class="ck-cab-s">${cks.length} entrada${cks.length === 1 ? '' : 's'}${
+          _ckFrecuencia(cks) ? ' · ' + _ckFrecuencia(cks) : ''}</div>
+      </div>
+      <div class="ck-cab-d">
+        ${actual != null ? `<span class="ck-cab-k">Peso actual<b class="ck-cab-v">${actual} kg</b></span>` : ''}
+        ${deltaRango != null ? `<span class="ck-cab-k">Δ ${cks.length} check-ins<b class="ck-cab-v ${dr.c}">${dr.txt}</b></span>` : ''}
+      </div>
+    </div>
+    ${cks.map((ck, i) => _ckItem(ck, pesos[i + 1] == null ? null : pesos[i] - pesos[i + 1])).join('')}`;
+}
+
+/* Cada cuánto los manda, mirando el hueco típico entre uno y otro. */
+function _ckFrecuencia(cks) {
+  const fechas = cks.map(c => c.checkin_date || c.created_at).filter(Boolean)
+    .map(f => new Date(f)).sort((a, b) => a - b);
+  if (fechas.length < 2) return '';
+  const huecos = [];
+  for (let i = 1; i < fechas.length; i++) huecos.push((fechas[i] - fechas[i - 1]) / 86400000);
+  huecos.sort((a, b) => a - b);
+  const medio = huecos[Math.floor(huecos.length / 2)];
+  if (medio <= 2) return 'frecuencia diaria';
+  if (medio <= 10) return 'frecuencia semanal';
+  if (medio <= 20) return 'frecuencia quincenal';
+  return 'frecuencia mensual';
+}
+
+function _ckItem(ck, delta) {
+  const id = ck.id;
+  const f = new Date((ck.checkin_date || ck.created_at) + (String(ck.checkin_date || '').length === 10 ? 'T00:00:00' : ''));
+  const fecha = isNaN(f) ? '—' : f.toLocaleDateString('es-ES',
+    { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '');
+  const d = _ckDelta(delta);
+  const abierto = _ckAbierto === id;
+  return `<div class="ck-item${abierto ? ' abierto' : ''}" id="ck-${id}">
+    <div class="ck-h" onclick="_ckAbre('${id}')">
+      <span class="ck-ico"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+      <div style="min-width:0;">
+        <div class="ck-f">${fecha}</div>
+        ${ck.notes ? `<div class="ck-n">${esc(ck.notes)}</div>` : ''}
+      </div>
+      <div class="ck-p">
+        <b>${ck.weight != null ? ck.weight + ' kg' : '—'}</b>
+        <div class="${d.c}">${d.txt}</div>
+      </div>
+      <svg class="ck-chev" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="ck-cuerpo">${abierto ? _ckDetalle(ck) : ''}</div>
   </div>`;
+}
+
+/* El contenido solo se construye al abrir: con cien check-ins, montar todos
+   los detalles de golpe es trabajo que nadie va a mirar. */
+function _ckDetalle(ck) {
+  const NOTA = (v, l, bg, col, ico) => `
+    <div class="ck-nota">
+      <div class="ck-nota-i" style="background:${bg};color:${col};">${ico}</div>
+      <div class="ck-nota-v">${v == null ? '—' : v}<span>${v == null ? '' : '/10'}</span></div>
+      <div class="ck-nota-l">${l}</div>
+    </div>`;
+  const I = {
+    energia: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    esfuerzo: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11v11h-11z"/><path d="M2 9v6M22 9v6"/></svg>',
+    hambre: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>',
+    sueno: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  };
+
+  const tipos = _ckTipos(ck);
+  const haySensaciones = [ck.energy, ck.effort, ck.hunger, ck.sleep].some(v => v != null);
+
+  const medidas = [
+    ['Cintura', ck.waist, 'cm'], ['Pecho', ck.chest, 'cm'], ['Cadera', ck.hips, 'cm'],
+    ['Brazos', ck.arms, 'cm'], ['Piernas', ck.legs, 'cm'],
+    ['% grasa', ck.body_fat, '%'], ['Masa muscular', ck.muscle_mass, 'kg'],
+  ].filter(m => m[1] != null);
+
+  const fotos = [ck.photo_url, ck.photo2, ck.photo3].filter(Boolean);
+
+  return `
+    ${tipos.length ? `<div class="ck-tipos">${tipos.map(t =>
+      `<span class="ck-tipo ${t.c}">${t.n}</span>`).join('')}</div>` : ''}
+    ${haySensaciones ? `<div class="ck-notas">
+      ${NOTA(ck.energy, 'Energía', '#EEF2FF', '#4F46E5', I.energia)}
+      ${NOTA(ck.effort, 'Esfuerzo', '#EEF2FF', '#4F46E5', I.esfuerzo)}
+      ${NOTA(ck.hunger, 'Hambre', '#FEF3C7', '#D97706', I.hambre)}
+      ${NOTA(ck.sleep, 'Sueño', '#EEF2FF', '#4F46E5', I.sueno)}
+    </div>` : ''}
+    ${ck.notes ? `<div class="ck-bloque"><div class="ck-bloque-t">Nota del cliente</div>
+      <div class="ck-cita">“${esc(ck.notes)}”</div></div>` : ''}
+    ${medidas.length ? `<div class="ck-bloque"><div class="ck-bloque-t">Medidas</div>
+      <div class="ck-medidas">${medidas.map(m =>
+        `<span class="ck-medida">${m[0]}: <b>${m[1]} ${m[2]}</b></span>`).join('')}</div></div>` : ''}
+    ${fotos.length ? `<div class="ck-bloque"><div class="ck-bloque-t">Fotos</div>
+      <div class="ck-fotos">${fotos.map(u =>
+        `<img src="${esc(u)}" alt="Foto del check-in" onclick="window.open('${esc(u)}','_blank')">`).join('')}</div></div>` : ''}
+    ${ck.coach_notes ? `<div class="ck-bloque"><div class="ck-bloque-t">Tu respuesta</div>
+      <div class="ck-cita">“${esc(ck.coach_notes)}”</div></div>` : ''}
+    ${!haySensaciones && !ck.notes && !medidas.length && !fotos.length
+      ? '<div class="se-vacio">Este check-in solo trae el peso.</div>' : ''}`;
+}
+
+function _ckAbre(id) {
+  _ckAbierto = (_ckAbierto === id) ? null : id;
+  _renderPgCheckins();
 }
 
 /* ── Assign form ── */

@@ -89,6 +89,34 @@ async def upload_file(
     )
 
 
+def borrar_del_almacen(url: str) -> bool:
+    """Borra de R2 el fichero al que apunta esa URL pública.
+
+    Se usa cuando alguien borra algo suyo —una foto de progreso, por ejemplo—.
+    Desenlazarla de la base y dejar el fichero colgando significaría que la
+    foto sigue estando ahí para quien tenga el enlace, y una foto de progreso
+    es de lo más privado que guarda la aplicación: "borrada" tiene que querer
+    decir borrada.
+
+    Solo toca ficheros NUESTROS: si la URL no cuelga del bucket, no se hace
+    nada. Y no levanta excepciones — quien la llama ya ha quitado la
+    referencia, y que el almacén no conteste no puede deshacer eso.
+    """
+    base = (settings.R2_PUBLIC_URL or "").rstrip("/")
+    if not url or not base or not settings.AWS_BUCKET:
+        return False
+    if not url.startswith(base + "/"):
+        return False
+    key = url[len(base) + 1:].split("?")[0]
+    if not key:
+        return False
+    try:
+        _get_r2_client().delete_object(Bucket=settings.AWS_BUCKET, Key=key)
+        return True
+    except Exception:
+        return False
+
+
 @router.delete("/delete", summary="Eliminar archivo", description="Elimina un archivo de Cloudflare R2 usando su key.")
 def delete_file(key: str, _=Depends(require_role_ids(SUPERADMIN, ADMIN, SETTER, CLOSER, COACH))):
     """Elimina un archivo de R2 por su key."""

@@ -301,3 +301,50 @@ window.__previo=(d)=>{
 destino10 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'unidades.html')
 open(destino10, 'w').write(unidades)
 print('harness generado en', destino10)
+
+
+# ── Harness de las fotos de progreso del cliente ───────────────────────────
+# Se saca el pintado y el borrado de client-progreso.html tal cual: lo que hay
+# que comprobar es que el boton aparece, que pregunta antes y que pide el
+# borrado del angulo correcto.
+prg = open(os.path.join(RAIZ, 'frontend', 'client-progreso.html')).read()
+cssg = '\n'.join(re.findall(r'<style>(.*?)</style>', prg, re.S))
+a = prg.index('  function setTab(t){')
+b = prg.index('  function render(){')
+pinta = prg[a:b]
+# Se ancla en la variable, no en el comentario: el mismo texto encabeza el
+# bloque de CSS, y buscando el comentario se extraia media pagina.
+c = prg.rindex('/*', 0, prg.index('  var _porBorrar = null;'))
+d = prg.index("  function pickPhoto(){")
+borra = prg[c:d]
+dialogo = _bloque(prg, '<div class="ask-back" id="askBack">')
+
+fotos = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
+<button class="ptab sel" id="tab-frontal"></button>
+<button class="ptab" id="tab-lateral"></button>
+<button class="ptab" id="tab-espalda"></button>
+<div id="photos"></div>
+%s
+<div class="toast" id="toast"></div>
+<script>
+const API='http://x';
+function headers(){return{'Content-Type':'application/json'};}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;');}
+function fmtDate(d){return String(d||'');}
+function toast(m,e){window.__toast=m;window.__err=!!e;}
+var _tab='frontal', _data={};
+window.__llamadas=[];
+window.fetch=function(url,opt){
+  window.__llamadas.push({url:url,metodo:(opt&&opt.metodo)||(opt&&opt.method)||'GET'});
+  return Promise.resolve({ok:!window.__falla, json:()=>Promise.resolve({})});
+};
+async function loadProgress(){ window.__recargado=(window.__recargado||0)+1; }
+%s
+%s
+window.__pinta=(datos,tab)=>{_data=datos;_tab=tab||'frontal';renderPhotos();};
+document.getElementById('askSi').onclick = borrarFoto;
+</script></body></html>""" % (cssg, dialogo, pinta, borra)
+
+destino11 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fotos.html')
+open(destino11, 'w').write(fotos)
+print('harness generado en', destino11)

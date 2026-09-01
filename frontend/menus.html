@@ -835,6 +835,7 @@
 <!-- Antes de los scripts de la página: envuelve fetch para mandar el contexto
      de organización en todas las llamadas. Esta página se lo había quedado sin
      él, así que era la única de la librería que ignoraba el "segundo sombrero". -->
+<script src="js/macros-alimento.js"></script>
 <script src="js/org-context.js"></script>
 <script>
 const API = 'https://nutrientrena-production.up.railway.app/api';
@@ -1210,12 +1211,14 @@ function _renderDayDetail(el, i, sel, d) {
     const rows = (meal.detail || []).map(item => {
       const al = item.aliment || {};
       const qty = parseFloat(item.quantity) || 0;
-      const f = macro => Math.round(((macro || 0) / 100) * qty);
+      // Por la porción del alimento, no entre 100 a ciegas: un Big Mac son 590
+      // kcal por UNIDAD, y dividido entre 100 salían 5,9 en esta misma tabla.
+      const f = macro => Math.round(window.macrosAlimento.escalar(macro, al, qty));
       const kcal = f(al.calories); mealKcal += kcal;
-      const isUd = al.quantity_type && ((al.quantity_type.description || al.quantity_type.name) === 'Unidad');
+      const unidad = window.macrosAlimento.unidadDe(al);
       return `<tr>
         <td class="strong">${esc(al.name || 'Alimento')}</td>
-        <td class="num">${qty}${isUd ? ' ud' : ' g'}</td>
+        <td class="num">${qty} ${unidad}</td>
         <td class="num strong">${kcal}</td>
         <td class="num">${f(al.proteins)}g</td>
         <td class="num">${f(al.carbohydrates)}g</td>

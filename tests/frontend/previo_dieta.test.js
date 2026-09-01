@@ -15,7 +15,10 @@ const { chromium } = require('../_pw');
   ck('sale la cabecera de la comida', t.includes('Desayuno') && t.includes('· 07:00'), t);
   ck('AHORA se ven los alimentos', await p.locator('.dietpick-food').count()===3, await p.locator('.dietpick-food').count());
   ck('sale el nombre del alimento', t.includes('Huevo entero, cocido, frito'));
-  ck('la cantidad va a la derecha con unidad', t.includes('100 gr') && t.includes('10 gr') && t.includes('50 gr'), t);
+  // "g", no "gr": la unidad sale del mismo sitio en todas las pantallas, y el
+  // catalogo y el editor la escriben asi. Dos formas de escribirla se leen como
+  // dos unidades distintas.
+  ck('la cantidad va a la derecha con unidad', t.includes('100 g') && t.includes('10 g') && t.includes('50 g'), t);
   // 196 + 88.4 + 50.5 = 334.9 -> 335
   ck('kcal TOTAL de la comida', (await p.textContent('.dietpick-meal-kcal')) === '335 kcal', await p.textContent('.dietpick-meal-kcal'));
   ck('ya no hay kcal por alimento', await p.locator('.dietpick-food-kcal').count()===0);

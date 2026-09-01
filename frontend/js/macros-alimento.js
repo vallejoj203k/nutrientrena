@@ -37,5 +37,38 @@
     return v / porcionDe(al) * c;
   }
 
-  global.macrosAlimento = { porcionDe: porcionDe, escalar: escalar };
+  /* Diccionario de unidades. La misma unidad viene escrita de varias formas
+     según de dónde salga el alimento: el catálogo guarda `g`, los ficheros del
+     cliente traían `gr`, y los alimentos antiguos la llevan en la relación
+     `quantity_type` con la etiqueta larga ("Unidad"). Son la misma cosa. */
+  var ALIAS = {
+    g: 'g', gr: 'g', gramo: 'g', gramos: 'g',
+    ud: 'ud', u: 'ud', uds: 'ud', unidad: 'ud', unidades: 'ud',
+    tz: 'ud', taza: 'ud',
+    ml: 'ml', mililitro: 'ml', mililitros: 'ml',
+    l: 'l', litro: 'l', kg: 'kg', oz: 'oz'
+  };
+
+  /* La unidad de un alimento, para ENSEÑARLA.
+
+     Existe porque estaba deducida a mano en seis pantallas y no todas miraban
+     lo mismo: algunas solo preguntaban por `quantity_type`, que los alimentos
+     del catálogo nuevo no tienen. Cuando esa comprobación fallaba no se
+     quedaban sin unidad —habría cantado—, sino que caían en "g" por defecto, y
+     así un Big Mac aparecía como "1 g" en el previo de la dieta mientras el
+     editor, dos clics más allá, decía "1 ud" con las 590 kcal correctas.
+
+     Se mira primero `quantity_type`, que es donde la tienen los alimentos
+     antiguos, y luego `quantity_unit`, que es donde la guarda el catálogo. */
+  function unidadDe(al) {
+    if (!al) return 'g';
+    var qt = al.quantity_type && (al.quantity_type.description || al.quantity_type.name);
+    var u = String(qt || al.quantity_unit || '').trim().toLowerCase();
+    if (!u) return 'g';
+    return ALIAS[u] || u;
+  }
+
+  global.macrosAlimento = {
+    porcionDe: porcionDe, escalar: escalar, unidadDe: unidadDe
+  };
 })(window);

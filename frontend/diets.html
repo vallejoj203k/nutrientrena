@@ -1797,7 +1797,7 @@ async function openDietPreview(id) {
         var al = item.aliment || {};
         var qty = parseFloat(item.quantity) || 0;
         var itemKcal = Math.round(window.macrosAlimento.escalar(al.calories, al, qty));
-        var unit = (al.quantity_type && ((al.quantity_type.description || al.quantity_type.name) === 'Unidad')) ? ' ud' : 'g';
+        var unit = ' ' + window.macrosAlimento.unidadDe(al);
         return '<div class="dpp-food-row"><span class="dpp-food-name">' + esc(al.name || 'Alimento') + ' · ' + qty + unit + '</span><span class="dpp-food-kcal">' + itemKcal + ' kcal</span></div>';
       }).join('');
       var timeChip = meal.time ? '<span class="dpp-meal-time"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + esc(String(meal.time).slice(0,5)) + '</span>' : '';

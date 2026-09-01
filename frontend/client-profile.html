@@ -9964,10 +9964,7 @@ function _dietpickCantidad(dfa) {
   const al = dfa.aliment || {};
   const cant = dfa.quantity != null ? dfa.quantity : al.quantity;
   if (cant == null) return null;
-  let unidad = (al.quantity_type && (al.quantity_type.description || al.quantity_type.name))
-    || al.quantity_unit || 'g';
-  if (unidad === 'g') unidad = 'gr';
-  return `${cant} ${unidad}`;
+  return `${cant} ${window.macrosAlimento.unidadDe(al)}`;
 }
 
 /* kcal de una fila: macros por 100 reescalados a su cantidad. Misma fórmula

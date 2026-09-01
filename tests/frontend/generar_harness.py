@@ -407,6 +407,23 @@ menu = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></he
 </div>
 <script>%s</script>
 <script>
+/* Como lo hace ejercicios.html: se fabrica el menu y se cuelga del body. */
+window.__suelto=(btn)=>{
+  var m=document.createElement('div');
+  m.className='row-menu';
+  m.style.cssText='position:fixed;background:#fff;border:1px solid #E5E7EB;border-radius:10px;'+
+    'box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:300;min-width:170px;overflow:hidden;';
+  // Con los estilos EN LÍNEA que pone ejercicios.html: sin ellos los botones
+  // salen de 7 px, el menú entero cabe en cualquier hueco y la prueba no
+  // distingue nada.
+  var est='display:flex;align-items:center;gap:8px;width:100%%;padding:10px 14px;'+
+    'font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;';
+  m.innerHTML=['Editar','Ver video','Duplicar','Archivar','Eliminar'].map(function(t){
+    return '<button class="lib-menu-item" style="'+est+'">'+t+'</button>';
+  }).join('');
+  document.body.appendChild(m);
+  menuFila.suelto(m, btn);
+};
 window.__soloUna=()=>{
   var c=document.getElementById('cuerpo');
   Array.prototype.slice.call(c.rows,1).forEach(function(r){c.removeChild(r);});

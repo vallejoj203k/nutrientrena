@@ -26,8 +26,9 @@
   var HUECO = 4;      // separación entre el botón y el menú
   var MARGEN = 8;     // aire mínimo contra el borde de la ventana
   var _abierto = null;
+  var _suelto = null;
 
-  function _colocar(dd, btn) {
+  function colocar(dd, btn) {
     var r = btn.getBoundingClientRect();
     dd.style.position = 'fixed';
     var alto = dd.offsetHeight, ancho = dd.offsetWidth;
@@ -49,7 +50,22 @@
   function cerrar() {
     var abiertos = document.querySelectorAll('.lib-menu-dd.open');
     Array.prototype.forEach.call(abiertos, function (d) { d.classList.remove('open'); });
+    if (_suelto) {
+      if (_suelto.parentNode) _suelto.parentNode.removeChild(_suelto);
+      _suelto = null;
+    }
     _abierto = null;
+  }
+
+  /* Un menú que la pantalla se ha fabricado y ha colgado del `body`, en vez
+     del que ya está en la fila. Es el caso de Ejercicios, que arma el suyo
+     según lo que el coach puede hacer con ese ejercicio. Se coloca igual
+     —incluido abrirse hacia arriba cuando abajo no cabe, que era justo lo
+     que le pasaba en la última fila— y se cierra por los mismos caminos. */
+  function suelto(el, btn) {
+    cerrar();
+    colocar(el, btn);
+    _suelto = el;
   }
 
   function abrir(e, btn) {
@@ -60,7 +76,7 @@
     cerrar();
     if (estaba) return;                       // segundo clic: se cierra
     dd.classList.add('open');
-    _colocar(dd, btn);
+    colocar(dd, btn);
     _abierto = { dd: dd, btn: btn };
   }
 
@@ -70,10 +86,10 @@
   /* Al desplazar, el menú se cierra. Está anclado a una fila que se está
      moviendo, y un menú flotando sobre otra fila señalaría a la dieta
      equivocada — el peor final posible para un menú que borra cosas. */
-  document.addEventListener('scroll', function () { if (_abierto) cerrar(); }, true);
-  global.addEventListener('resize', function () { if (_abierto) cerrar(); });
+  document.addEventListener('scroll', function () { if (_abierto || _suelto) cerrar(); }, true);
+  global.addEventListener('resize', function () { if (_abierto || _suelto) cerrar(); });
 
-  global.menuFila = { abrir: abrir, cerrar: cerrar };
+  global.menuFila = { abrir: abrir, cerrar: cerrar, colocar: colocar, suelto: suelto };
 
   /* Las pantallas llamaban a estas dos por su nombre de siempre. Se dejan
      apuntando aquí para no tener que tocar cada `onclick` de cada fila. */

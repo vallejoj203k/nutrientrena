@@ -100,6 +100,33 @@ const { chromium } = require('../_pw');
   await p.evaluate(() => { const w = document.getElementById('wrap'); w.scrollTop = 300; w.dispatchEvent(new Event('scroll')); });
   ck('al desplazar la tabla se cierra', await p.locator('.lib-menu-dd.open').count() === 0);
 
+  // ── El menu que se fabrica al vuelo (ejercicios.html) ────────────────────
+  // Es el mismo fallo por otro camino: ese menu ya usaba `position:fixed`,
+  // pero se ponia SIEMPRE debajo del boton, asi que en la ultima fila caia
+  // fuera de la ventana. Lo colocaba la pantalla; ahora lo coloca el modulo.
+  await p.reload();
+  await p.evaluate(() => { const w = document.getElementById('wrap'); w.scrollTop = w.scrollHeight; });
+  // El desplazamiento cierra los menús, y su evento llega en el hueco entre
+  // una llamada y la siguiente: hay que dejarlo pasar antes de abrir uno.
+  await p.waitForTimeout(120);
+  await p.evaluate(() => __suelto(document.querySelectorAll('.mas-btn')[document.querySelectorAll('.mas-btn').length - 1]));
+  const suelto = await p.evaluate(() => {
+    const m = document.querySelector('.row-menu');
+    const r = m.getBoundingClientRect();
+    const items = Array.from(m.querySelectorAll('.lib-menu-item'));
+    const tapados = items.filter(it => {
+      const ri = it.getBoundingClientRect();
+      const en = document.elementFromPoint(ri.left + ri.width / 2, ri.top + ri.height / 2);
+      return !(en && m.contains(en));
+    });
+    return { dentro: r.bottom <= window.innerHeight && r.top >= 0,
+             tapados: tapados.length, bottom: Math.round(r.bottom) };
+  });
+  ck('el menu suelto de la ultima fila cabe en la ventana', suelto.dentro, suelto);
+  ck('y se ve entero', suelto.tapados === 0, suelto);
+  await p.mouse.click(600, 300);
+  ck('y se cierra al tocar fuera', await p.locator('.row-menu').count() === 0);
+
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close();
   process.exit(f ? 1 : 0);

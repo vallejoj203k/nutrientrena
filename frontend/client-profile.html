@@ -1619,6 +1619,74 @@
 .se-ver:hover{text-decoration:underline;}
 .se-vacio{padding:44px 20px;text-align:center;color:#9CA3AF;font-size:13.5px;}
 
+/* ── Progreso · Fuerza ──────────────────────────────────────────────────────
+   Una lista de ejercicios a la izquierda y, del elegido, sus cifras, su curva
+   y el historial. La métrica del gráfico se cambia arriba: son los mismos
+   datos mirados de otra forma, y cambiar de métrica no vuelve a pedir nada. */
+.fz-barra{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#fff;border:1px solid #EEF0F3;
+  border-radius:14px;padding:12px 14px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.fz-layout{display:grid;grid-template-columns:290px 1fr;gap:16px;margin-top:16px;align-items:start;}
+.fz-lista{background:#fff;border:1px solid #EEF0F3;border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);max-height:620px;overflow-y:auto;}
+.fz-ej{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:13px 16px;cursor:pointer;
+  border-bottom:1px solid #F6F7F9;border-left:3px solid transparent;}
+.fz-ej:last-child{border-bottom:none;}
+.fz-ej:hover{background:#FAFBFC;}
+.fz-ej.sel{background:#F5F5FF;border-left-color:#4F46E5;}
+.fz-ej-n{font-size:13.5px;font-weight:700;color:#111827;}
+.fz-ej-v{font-size:13.5px;font-weight:700;color:#111827;text-align:right;white-space:nowrap;}
+.fz-ej-g{font-size:11.5px;color:#9CA3AF;}
+.fz-ej-p{font-size:11.5px;font-weight:700;text-align:right;white-space:nowrap;}
+.fz-ej-p.sube{color:#059669;} .fz-ej-p.baja{color:#DC2626;} .fz-ej-p.igual{color:#9CA3AF;}
+.fz-tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.5px;padding:1px 5px;
+  border-radius:4px;background:#EEF2FF;color:#4F46E5;vertical-align:middle;margin-left:5px;}
+
+.fz-panel{background:#fff;border:1px solid #EEF0F3;border-radius:14px;padding:22px 24px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);min-width:0;}
+.fz-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+.fz-h-n{font-size:19px;font-weight:800;color:#111827;display:flex;align-items:center;gap:8px;}
+.fz-h-s{font-size:12.5px;color:#9CA3AF;margin-top:4px;}
+.fz-h-v{margin-left:auto;text-align:right;}
+.fz-h-v b{font-size:27px;font-weight:800;color:#4F46E5;line-height:1;font-variant-numeric:tabular-nums;}
+.fz-h-v div{font-size:11.5px;font-weight:700;margin-top:5px;}
+
+.fz-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:18px;}
+.fz-kpi{border:1px solid #EEF0F3;border-radius:11px;padding:13px 15px;}
+.fz-kpi-l{font-size:9.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;}
+.fz-kpi-v{font-size:17px;font-weight:800;color:#111827;margin-top:5px;font-variant-numeric:tabular-nums;}
+.fz-kpi-v.ind{color:#4F46E5;} .fz-kpi-v.amb{color:#D97706;}
+
+.fz-graf{margin-top:22px;}
+.fz-graf svg{width:100%;height:230px;display:block;overflow:visible;}
+.fz-vacio{padding:40px 20px;text-align:center;color:#9CA3AF;font-size:13.5px;}
+
+.fz-hist-t{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;
+  margin:24px 0 10px;display:flex;align-items:baseline;}
+.fz-hist-t span{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;font-size:11.5px;}
+.fz-tabla-w{overflow-x:auto;}
+.fz-tabla{width:100%;border-collapse:collapse;min-width:700px;}
+.fz-tabla th{text-align:right;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;
+  letter-spacing:.6px;padding:9px 12px;border-top:1px solid #F3F4F6;border-bottom:1px solid #F3F4F6;background:#FCFCFD;}
+.fz-tabla th:first-child{text-align:left;}
+.fz-tabla td{padding:11px 12px;border-bottom:1px solid #F6F7F9;font-size:13px;color:#374151;
+  text-align:right;font-variant-numeric:tabular-nums;}
+.fz-tabla td:first-child{text-align:left;font-weight:600;color:#111827;}
+.fz-tabla tr.fila{cursor:pointer;}
+.fz-tabla tr.fila:hover{background:#FAFBFC;}
+.fz-tabla .fz-rm{color:#D97706;font-weight:600;}
+.fz-tabla .fz-az{color:#4F46E5;}
+.fz-chev{display:inline-block;transition:transform .18s;color:#9CA3AF;}
+.fz-tabla tr.fila.abierta .fz-chev{transform:rotate(180deg);}
+.fz-series{background:#FBFBFD;}
+.fz-series td{padding:0;border-bottom:1px solid #F6F7F9;}
+.fz-series-in{padding:10px 14px 12px;display:flex;flex-wrap:wrap;gap:8px;}
+.fz-serie{border:1px solid #EEF0F3;border-radius:9px;padding:7px 11px;background:#fff;font-size:12px;color:#374151;}
+.fz-serie b{color:#111827;}
+.fz-serie span{color:#9CA3AF;}
+
+@media(max-width:900px){ .fz-layout{grid-template-columns:1fr;} .fz-lista{max-height:320px;} }
+
+
 .sed-back{display:none;position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:900;}
 .sed-back.open{display:flex;align-items:center;justify-content:center;padding:20px;}
 .sed-panel{background:#fff;border-radius:16px;width:100%;max-width:620px;max-height:calc(100vh - 40px);
@@ -4525,6 +4593,255 @@ function cerrarSeDetalle() {
   document.getElementById('seDetBack').classList.remove('open');
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Progreso · Fuerza
+
+   El servidor manda las CINCO métricas de cada sesión —peso top, 1RM, volumen,
+   repeticiones y RIR—, así que cambiar de métrica aquí no vuelve a pedir nada:
+   son los mismos datos mirados de otra forma.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _fzDatos = null, _fzCargando = false;
+var _fzSel = null, _fzMetrica = 'peso', _fzRango = '6s', _fzBusca = '', _fzAbierta = null;
+
+var FZ_METRICAS = {
+  peso:   {etiqueta:'Peso top',  campo:'peso_top', unidad:'kg'},
+  rm1:    {etiqueta:'1RM est.',  campo:'rm1',      unidad:'kg'},
+  volumen:{etiqueta:'Volumen',   campo:'volumen',  unidad:'kg'},
+  reps:   {etiqueta:'Reps top',  campo:'reps_top', unidad:''},
+  rir:    {etiqueta:'RIR',       campo:'rir',      unidad:''},
+};
+var FZ_RANGOS = {'6s':42, '3m':90, '6m':180, '1a':365, 'todo':null};
+
+async function _renderPgFuerza() {
+  const el = document.getElementById('pg-pane-fuerza');
+  if (!el) return;
+  if (_fzDatos) { _fzPinta(); return; }
+  if (_fzCargando) return;
+  _fzCargando = true;
+  el.innerHTML = '<div class="fz-vacio">Cargando…</div>';
+  try {
+    const r = await fetch(`${API}/session-logs/client/${clientId}/fuerza`, { headers: h() });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    _fzDatos = ((await r.json()).data || {}).ejercicios || [];
+    _fzPinta();
+  } catch (e) {
+    el.innerHTML = `<div class="fz-vacio">No se ha podido cargar el progreso de fuerza.<br>
+      <button class="se-ver" style="margin-top:10px;" onclick="_fzDatos=null;_renderPgFuerza()">Reintentar</button></div>`;
+  } finally { _fzCargando = false; }
+}
+
+/* Las sesiones del ejercicio que caen dentro del rango elegido. */
+function _fzEnRango(ej) {
+  const dias = FZ_RANGOS[_fzRango];
+  if (!dias) return ej.sesiones;
+  const d = new Date(); d.setDate(d.getDate() - dias);
+  const desde = d.toISOString().slice(0, 10);
+  return ej.sesiones.filter(f => f.fecha >= desde);
+}
+
+/* Un ejercicio de tiempo no tiene peso ni 1RM: su métrica es el tiempo, y las
+   demás se quedan en blanco en vez de enseñar ceros que nadie ha levantado. */
+function _fzValor(ej, f) {
+  if (ej.tipo === 'tiempo') return f.segundos;
+  return f[FZ_METRICAS[_fzMetrica].campo];
+}
+
+function _fzUnidad(ej) {
+  return ej.tipo === 'tiempo' ? '' : FZ_METRICAS[_fzMetrica].unidad;
+}
+
+function _fzNum(v, dec) {
+  if (v == null) return '—';
+  return Number(v).toLocaleString('es-ES', { maximumFractionDigits: dec == null ? 1 : dec });
+}
+
+function _fzMmss(seg) {
+  if (seg == null) return '—';
+  const s = Math.round(seg);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/* La mejora dentro del RANGO, no de toda la historia: es lo que se está
+   mirando, y decir "+150%" cuando el rango son seis semanas confundiría. */
+function _fzMejora(ej) {
+  const fs = _fzEnRango(ej).map(f => _fzValor(ej, f)).filter(v => v != null);
+  if (fs.length < 2 || !fs[0]) return null;
+  return Math.round((fs[fs.length - 1] - fs[0]) / Math.abs(fs[0]) * 100);
+}
+
+function _fzPinta() {
+  const el = document.getElementById('pg-pane-fuerza');
+  if (!el) return;
+  if (!_fzDatos.length) {
+    el.innerHTML = '<div class="fz-vacio">Todavía no hay entrenos con series registradas.</div>';
+    return;
+  }
+  const q = _fzBusca.trim().toLowerCase();
+  const lista = _fzDatos.filter(e =>
+    !q || `${e.nombre} ${e.grupo || ''}`.toLowerCase().includes(q));
+  if (_fzSel == null || !lista.some(e => e.nombre === _fzSel)) {
+    _fzSel = lista.length ? lista[0].nombre : null;
+  }
+  const ej = _fzDatos.find(e => e.nombre === _fzSel);
+
+  const gb = (grupo, val, txt, actual) =>
+    `<button class="se-gb${actual === val ? ' on' : ''}" onclick="_fzFiltro('${grupo}','${val}')">${txt}</button>`;
+
+  el.innerHTML = `
+    <div class="fz-barra">
+      <label class="se-buscar">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar ejercicio o grupo muscular…" value="${esc(_fzBusca)}"
+               oninput="_fzFiltro('busca', this.value)">
+      </label>
+      <div class="se-grupo">
+        ${Object.keys(FZ_METRICAS).map(k => gb('metrica', k, FZ_METRICAS[k].etiqueta, _fzMetrica)).join('')}
+      </div>
+      <div class="se-grupo amb">
+        ${gb('rango', '6s', '6 sem', _fzRango)}${gb('rango', '3m', '3 m', _fzRango)}
+        ${gb('rango', '6m', '6 m', _fzRango)}${gb('rango', '1a', '1 año', _fzRango)}
+        ${gb('rango', 'todo', 'Todo', _fzRango)}
+      </div>
+    </div>
+    <div class="fz-layout">
+      <div class="fz-lista">${lista.length ? lista.map(_fzItem).join('')
+        : '<div class="fz-vacio">Ningún ejercicio coincide.</div>'}</div>
+      <div class="fz-panel">${ej ? _fzDetalle(ej) : '<div class="fz-vacio">Elige un ejercicio.</div>'}</div>
+    </div>`;
+}
+
+function _fzItem(ej) {
+  const m = _fzMejora(ej);
+  const clase = m == null ? 'igual' : (m > 0 ? 'sube' : (m < 0 ? 'baja' : 'igual'));
+  const valor = ej.tipo === 'tiempo' ? _fzMmss(ej.mejor_tiempo)
+    : (ej.pr_peso != null ? _fzNum(ej.pr_peso) + 'kg' : '—');
+  return `<div class="fz-ej${ej.nombre === _fzSel ? ' sel' : ''}" onclick="_fzElige('${esc(ej.nombre).replace(/'/g, "\\'")}')">
+    <div class="fz-ej-n">${esc(ej.nombre)}${ej.tipo === 'tiempo' ? '<span class="fz-tag">T</span>' : ''}</div>
+    <div class="fz-ej-v">${valor}</div>
+    <div class="fz-ej-g">${esc(ej.grupo || '—')} · ${ej.n_sesiones} ses.</div>
+    <div class="fz-ej-p ${clase}">${m == null ? '' : (m > 0 ? '+' : '') + m + '%'}</div>
+  </div>`;
+}
+
+function _fzDetalle(ej) {
+  const fs = _fzEnRango(ej);
+  const m = _fzMejora(ej);
+  const clase = m == null ? 'igual' : (m > 0 ? 'sube' : (m < 0 ? 'baja' : 'igual'));
+  const ultimo = fs.length ? _fzValor(ej, fs[fs.length - 1]) : null;
+  const valGrande = ej.tipo === 'tiempo' ? _fzMmss(ultimo)
+    : (ultimo == null ? '—' : _fzNum(ultimo) + (_fzUnidad(ej) ? ' ' + _fzUnidad(ej) : ''));
+
+  const kpi = (l, v, c) => `<div class="fz-kpi"><div class="fz-kpi-l">${l}</div>
+    <div class="fz-kpi-v${c ? ' ' + c : ''}">${v}</div></div>`;
+
+  return `
+    <div class="fz-head">
+      <div>
+        <div class="fz-h-n">${esc(ej.nombre)}
+          <span class="fz-tag">${ej.tipo === 'tiempo' ? 'TIEMPO' : 'PESO + REPS'}</span></div>
+        <div class="fz-h-s">${esc(ej.grupo || '—')} · ${ej.n_sesiones} sesiones · métrica:
+          ${ej.tipo === 'tiempo' ? 'Tiempo' : FZ_METRICAS[_fzMetrica].etiqueta}</div>
+      </div>
+      <div class="fz-h-v"><b>${valGrande}</b>
+        <div class="fz-ej-p ${clase}">${m == null ? 'sin comparación en el rango'
+          : ((m > 0 ? '+' : '') + m + '% vs inicio del rango')}</div></div>
+    </div>
+    <div class="fz-kpis">
+      ${kpi('PR peso', ej.pr_peso == null ? '—' : _fzNum(ej.pr_peso) + ' kg', 'ind')}
+      ${kpi('1RM est.', ej.rm1_max == null ? '—' : _fzNum(ej.rm1_max) + ' kg', 'amb')}
+      ${kpi('Reps máx.', ej.reps_max == null ? '—' : ej.reps_max)}
+      ${kpi('Volumen últ.', ej.volumen_ultimo == null ? '—' : _fzNum(ej.volumen_ultimo, 0) + ' kg')}
+      ${kpi('RIR promedio', ej.rir_medio == null ? '—' : ej.rir_medio, 'ind')}
+    </div>
+    <div class="fz-graf">${_fzGrafico(ej, fs)}</div>
+    <div class="fz-hist-t">Historial de sesiones
+      <span>Pulsa una fila para ver sus series</span></div>
+    <div class="fz-tabla-w"><table class="fz-tabla">
+      <thead><tr><th>Fecha</th><th>Series</th><th>Peso top</th><th>Reps</th>
+        <th>1RM est.</th><th>Volumen</th><th>RIR</th><th>Desc.</th><th></th></tr></thead>
+      <tbody>${fs.length ? fs.slice().reverse().map((f, i) => _fzFila(ej, f, i)).join('')
+        : '<tr><td colspan="9" style="text-align:center;color:#9CA3AF;padding:26px;">Sin sesiones en este rango.</td></tr>'}
+      </tbody></table></div>`;
+}
+
+function _fzFila(ej, f, i) {
+  const abierta = _fzAbierta === f.fecha;
+  const series = (f.detalle || []).map(d =>
+    `<div class="fz-serie"><b>${d.serie}.</b> ${esc(d.reps || '—')}
+      ${d.peso != null ? '× <b>' + _fzNum(d.peso) + ' kg</b>' : ''}
+      ${d.rpe != null ? '<span>· RPE ' + d.rpe + '</span>' : ''}</div>`).join('');
+  return `<tr class="fila${abierta ? ' abierta' : ''}" onclick="_fzAbre('${f.fecha}')">
+      <td>${f.fecha}</td>
+      <td class="fz-az">${f.series}</td>
+      <td>${f.peso_top == null ? (f.tiempo || '—') : _fzNum(f.peso_top) + ' kg'}</td>
+      <td class="fz-az">${f.reps_top == null ? '—' : f.reps_top}</td>
+      <td class="fz-rm">${f.rm1 == null ? '—' : _fzNum(f.rm1) + ' kg'}</td>
+      <td>${f.volumen == null ? '—' : _fzNum(f.volumen, 0) + ' kg'}</td>
+      <td class="fz-az">${f.rir == null ? '—' : f.rir}</td>
+      <td title="Descanso previsto en la rutina, no medido">${f.descanso_s == null ? '—' : f.descanso_s + 's'}</td>
+      <td><span class="fz-chev">▾</span></td>
+    </tr>
+    ${abierta ? `<tr class="fz-series"><td colspan="9"><div class="fz-series-in">${
+      series || '<span style="color:#9CA3AF;font-size:12.5px;">Sin series registradas.</span>'}</div></td></tr>` : ''}`;
+}
+
+/* El gráfico se dibuja a mano en SVG: son seis puntos y una línea, y meter una
+   librería entera para esto pesaría más que la pantalla. */
+function _fzGrafico(ej, fs) {
+  const pts = fs.map(f => ({ x: f.fecha, y: _fzValor(ej, f) })).filter(p => p.y != null);
+  if (pts.length < 2) return '<div class="fz-vacio">Hacen falta al menos dos sesiones en el rango para dibujar la evolución.</div>';
+
+  const W = 800, H = 200, mx = 42, my = 26;
+  const ys = pts.map(p => p.y);
+  let min = Math.min(...ys), max = Math.max(...ys);
+  if (min === max) { min -= 1; max += 1; }      // una línea plana no puede dividir por cero
+  const px = i => mx + (W - mx * 2) * (pts.length === 1 ? 0.5 : i / (pts.length - 1));
+  const py = v => my + (H - my * 2) * (1 - (v - min) / (max - min));
+
+  const linea = pts.map((p, i) => `${i ? 'L' : 'M'}${px(i).toFixed(1)},${py(p.y).toFixed(1)}`).join(' ');
+  const area = `${linea} L${px(pts.length - 1).toFixed(1)},${H - my} L${px(0).toFixed(1)},${H - my} Z`;
+  const fmt = v => ej.tipo === 'tiempo' ? _fzMmss(v) : _fzNum(v);
+
+  return `<svg viewBox="0 0 ${W} ${H + 22}" preserveAspectRatio="none" role="img"
+       aria-label="Evolución de ${esc(ej.nombre)}">
+    <defs><linearGradient id="fzg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4F46E5" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/></linearGradient></defs>
+    <line x1="${mx}" y1="${my}" x2="${W - mx}" y2="${my}" stroke="#F3F4F6"/>
+    <line x1="${mx}" y1="${(my + H - my) / 2}" x2="${W - mx}" y2="${(my + H - my) / 2}" stroke="#F3F4F6"/>
+    <path d="${area}" fill="url(#fzg)"/>
+    <path d="${linea}" fill="none" stroke="#4F46E5" stroke-width="2.5"
+          stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map((p, i) => `
+      <circle cx="${px(i).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="4.5" fill="#4F46E5"/>
+      <text x="${px(i).toFixed(1)}" y="${(py(p.y) - 12).toFixed(1)}" text-anchor="middle"
+            font-size="11" fill="#374151" font-weight="600">${fmt(p.y)}</text>
+      <text x="${px(i).toFixed(1)}" y="${H + 12}" text-anchor="middle"
+            font-size="10" fill="#9CA3AF">${p.x.slice(5)}</text>`).join('')}
+  </svg>`;
+}
+
+function _fzFiltro(cual, valor) {
+  if (cual === 'busca') { _fzBusca = valor; _fzPintaLista(); return; }
+  if (cual === 'metrica') _fzMetrica = valor;
+  if (cual === 'rango') _fzRango = valor;
+  _fzPinta();
+}
+
+/* Al escribir solo se repinta la lista: repintar la barra le quitaría el foco
+   a quien está escribiendo y se perdería la letra siguiente. */
+function _fzPintaLista() {
+  const q = _fzBusca.trim().toLowerCase();
+  const lista = _fzDatos.filter(e => !q || `${e.nombre} ${e.grupo || ''}`.toLowerCase().includes(q));
+  const cont = document.querySelector('#pg-pane-fuerza .fz-lista');
+  if (cont) cont.innerHTML = lista.length ? lista.map(_fzItem).join('')
+    : '<div class="fz-vacio">Ningún ejercicio coincide.</div>';
+}
+
+function _fzElige(nombre) { _fzSel = nombre; _fzAbierta = null; _fzPinta(); }
+function _fzAbre(fecha) { _fzAbierta = (_fzAbierta === fecha) ? null : fecha; _fzPinta(); }
+
 function showProgresoSubtab(name, btn) {
   document.querySelectorAll('.pg-stab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.pg-subpane').forEach(p => p.style.display = 'none');
@@ -4534,6 +4851,7 @@ function showProgresoSubtab(name, btn) {
   // Se carga al abrirla, no al entrar en Progreso: son dos consultas que la
   // mayoría de las visitas no llega a mirar.
   if (name === 'sesiones') _renderPgSesiones();
+  if (name === 'fuerza') _renderPgFuerza();
 }
 
 function _renderPgResumen() {

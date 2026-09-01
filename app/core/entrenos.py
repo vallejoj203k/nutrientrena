@@ -108,3 +108,76 @@ def racha_semanas(fechas, hoy=None):
         racha += 1
         semana -= timedelta(days=7)
     return racha
+
+
+# ── Fuerza: lo que se calcula por ejercicio ────────────────────────────────
+
+def rm_estimado(peso, reps):
+    """1RM estimado por la fórmula de Epley: peso × (1 + reps/30).
+
+    Es la que cuadra con los números del prototipo del cliente —77,5 kg a 6
+    repeticiones dan 93 kg, y así en las seis filas—, así que es la que se usa
+    y no otra: dos fórmulas distintas dan cifras distintas para el mismo
+    levantamiento, y el coach compara con lo que ya tenía anotado.
+
+    Una serie por tiempo no tiene 1RM: devuelve None.
+    """
+    if peso is None or not reps:
+        return None
+    try:
+        return round(float(peso) * (1 + float(reps) / 30), 1)
+    except (TypeError, ValueError):
+        return None
+
+
+def rir_de_rpe(rpe):
+    """Repeticiones en recámara, del esfuerzo percibido: RIR = 10 − RPE.
+
+    No es un dato aparte: el cliente marca RPE al entrenar y son dos formas de
+    decir lo mismo. Un RPE de 8,5 son 1,5 repeticiones en recámara, que es
+    justo el "RIR promedio" del prototipo.
+    """
+    if rpe is None:
+        return None
+    try:
+        return round(max(0.0, 10 - float(rpe)), 1)
+    except (TypeError, ValueError):
+        return None
+
+
+def es_por_tiempo(sets):
+    """Si el ejercicio se mide en segundos y no en repeticiones.
+
+    Una plancha no tiene peso top ni 1RM; enseñarle "0 kg" al coach sería
+    decirle que el cliente no levantó nada, cuando lo que pasa es que ahí no
+    se levanta.
+    """
+    marcadas = [s for s in (sets or []) if s.done]
+    if not marcadas:
+        return False
+    return all(repeticiones(s.reps) is None for s in marcadas)
+
+
+def segundos(texto):
+    """Los segundos de una serie por tiempo: "40s" -> 40, "1 min" -> 60."""
+    t = str(texto or "").strip().lower()
+    if not t:
+        return None
+    m = _PRIMER_NUMERO.search(t)
+    if not m:
+        return None
+    try:
+        n = float(m.group(0).replace(",", "."))
+    except ValueError:
+        return None
+    if re.search(r"\d\s*(min|m|')", t):
+        return n * 60
+    return n
+
+
+def mmss(total):
+    """135 segundos -> "2:15", que es como se lee un tiempo."""
+    if total is None:
+        return None
+    total = int(round(total))
+    return f"{total // 60}:{total % 60:02d}"

@@ -5,11 +5,13 @@
    cualquier cosa — y un número inventado es peor que un hueco, porque el
    coach no puede distinguirlo de uno real.
 
-   Ahora se le pregunta por lo que sí sabe: cuántas repeticiones más habría
-   podido hacer. Lo que hay que comprobar es que ese cambio es solo de
-   lenguaje: el número que se guarda tiene que seguir siendo el RPE de
-   siempre, porque el coach lo lee como tal y el RIR de la pantalla de Fuerza
-   sale de él con 10 − RPE.
+   Ahora se le dice cuántas repeticiones le quedaban, que es lo que sí sabe.
+   Lo que hay que comprobar es que ese cambio es solo de lenguaje: el número
+   que se guarda tiene que seguir siendo el RPE de siempre, porque el coach lo
+   lee como tal y el RIR de la pantalla de Fuerza sale de él con 10 − RPE.
+
+   Y que nada se guarda hasta pulsar el botón: la barra se mueve mientras se
+   busca el valor, y cada roce no puede ser una respuesta.
 */
 const { chromium } = require('../_pw');
 
@@ -18,114 +20,152 @@ const EJ = () => ([
     { reps: '10', kg: '60', rpe: '', done: false },
     { reps: '8', kg: '65', rpe: '8', done: true }] },
   { name: 'Remo', target: '12', rest: 60, note: '', sets: [
-    { reps: '12', kg: '40', rpe: '', done: false }] },
+    { reps: '', kg: '', rpe: '', done: false }] },
 ]);
 
 (async () => {
   const b = await chromium.launch();
   const p = await b.newPage();
-  await p.setViewportSize({ width: 420, height: 780 });
+  await p.setViewportSize({ width: 420, height: 820 });
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto('file://' + __dirname + '/rpe.html');
   let f = 0;
   const ck = (n, c, x) => { console.log((c ? 'OK   ' : 'FALLO ') + n + (c ? '' : ' -> ' + JSON.stringify(x))); if (!c) f++; };
   const abierta = () => p.evaluate(() => document.getElementById('rpeBack').classList.contains('open'));
+  const series = () => p.evaluate(() => __series());
+  const val = () => p.textContent('#rpeVal');
+
+  /* Abrir la hoja y ESPERAR a que termine de subir. La hoja entra con una
+     transición, así que medirla antes de que llegue arriba da coordenadas de
+     donde ya no está: el arrastre caía fuera de la barra y la prueba fallaba
+     una vez de cada tantas, que es peor que fallar siempre. */
+  async function abrir(n){
+    await p.locator('.ws-rpe').nth(n).click();
+    await p.waitForFunction(() => {
+      const t = getComputedStyle(document.querySelector('.rpe-hoja')).transform;
+      return t === 'none' || /matrix\(1, 0, 0, 1, 0, 0\)/.test(t);
+    });
+  }
 
   await p.evaluate(e => __pinta(e), EJ());
 
   // ── La casilla ya no pide un número a pelo ───────────────────────────────
   ck('la casilla de RPE es un boton', await p.locator('.ws-rpe').count() === 3,
     await p.locator('.ws-rpe').count());
-  ck('ya no queda un campo donde teclear el numero',
-    await p.locator('input.ws-in').count() === 6, await p.locator('input.ws-in').count());
   const textos = await p.$$eval('.ws-rpe', ns => ns.map(n => n.textContent.trim()));
   ck('sin marcar se ve una raya, no un cero', textos[0] === '—', textos);
   ck('y lo ya marcado se sigue viendo', textos[1] === '8', textos);
 
-  // ── Se abre y explica ────────────────────────────────────────────────────
+  // ── Se abre y dice de qué serie habla ────────────────────────────────────
   ck('la hoja empieza cerrada', !(await abierta()));
-  await p.locator('.ws-rpe').first().click();
+  await abrir(0);
   ck('tocar la casilla abre la hoja', await abierta());
+  ck('dice de que serie se trata',
+    (await p.textContent('#rpeSerie')).replace(/\s+/g, ' ').trim() === 'Serie 1 · 10 reps × 60kg',
+    await p.textContent('#rpeSerie'));
 
-  const hoja = await p.textContent('.rpe-hoja');
-  ck('pregunta en cristiano', hoja.includes('¿Cuánto te ha costado?'), hoja);
-  ck('y explica que eso es el RPE', hoja.includes('RPE'), hoja);
-  ck('habla de repeticiones, que es lo que la persona sabe',
-    hoja.includes('repeticiones'), hoja);
+  // ── Los tres textos van juntos ───────────────────────────────────────────
+  ck('sin valor previo arranca en 7.5', (await val()) === '7.5', await val());
+  ck('con su etiqueta', (await p.textContent('#rpeEti')) === 'Exigente', await p.textContent('#rpeEti'));
+  // Es la definición: RIR = 10 − RPE. Un 7,5 son 2-3 repeticiones de margen.
+  ck('y con lo que de verdad se pregunta',
+    (await p.textContent('#rpeDesc')) === 'Te quedan 2-3 reps por hacer',
+    await p.textContent('#rpeDesc'));
 
-  const opts = await p.$$eval('.rpe-opt', ns => ns.map(n => ({
-    n: n.querySelector('.rpe-n').textContent.trim(),
-    t: n.querySelector('.rpe-txt b').textContent.trim(),
-    d: n.querySelector('.rpe-txt span').textContent.trim(),
-  })));
-  ck('la escala va de mas duro a mas suave',
-    opts.map(o => o.n).join(',') === '10,9,8,7,6,5', opts.map(o => o.n));
-  ck('el 10 es el fallo', opts[0].d.includes('ni una más'), opts[0]);
-  // Es la definición: RIR = 10 − RPE. Un 9 son 1 repetición en recámara.
-  ck('el 9 dice UNA repeticion de margen', /\b1 repetici/.test(opts[1].d), opts[1]);
-  ck('el 8 dice DOS', opts[2].d.includes('2'), opts[2]);
-  ck('el 7 dice TRES', opts[3].d.includes('3'), opts[3]);
+  // ── La barra ─────────────────────────────────────────────────────────────
+  const barra = await p.evaluate(() => {
+    const r = document.getElementById('rpeRango');
+    return { tipo: r.type, min: r.min, max: r.max, paso: r.step, v: r.value };
+  });
+  ck('es una barra deslizable de verdad', barra.tipo === 'range', barra);
+  ck('de 6 a 10, de medio en medio',
+    barra.min === '6' && barra.max === '10' && barra.paso === '0.5', barra);
+  ck('y arranca donde marca el numero', barra.v === '7.5', barra);
 
-  // ── Elegir guarda el número de siempre ───────────────────────────────────
-  await p.locator('.rpe-opt').nth(2).click();          // "Duro" → 8
-  ck('la hoja se cierra al elegir', !(await abierta()));
-  let series = await p.evaluate(() => __series());
-  ck('SE GUARDA EL NUMERO DE RPE, no otra cosa', series[0][0] === '8', series);
-  ck('y no toca las demas series', series[0][1] === '8' && series[1][0] === '', series);
-  ck('la casilla lo enseña', (await p.$$eval('.ws-rpe', ns => ns[0].textContent.trim())) === '8');
+  // Arrastrar con el teclado es la misma barra: dos pasos suben un punto.
+  await p.focus('#rpeRango');
+  await p.keyboard.press('ArrowRight');
+  await p.keyboard.press('ArrowRight');
+  ck('moverla cambia el numero', (await val()) === '8.5', await val());
+  ck('y el texto la sigue', (await p.textContent('#rpeEti')) === 'Duro',
+    await p.textContent('#rpeEti'));
+  ck('y la descripcion tambien',
+    (await p.textContent('#rpeDesc')) === 'Te quedan 1-2 reps por hacer',
+    await p.textContent('#rpeDesc'));
 
-  // Cada casilla es la suya: la del segundo ejercicio no puede escribir en la
-  // del primero.
-  await p.locator('.ws-rpe').nth(2).click();
-  await p.locator('.rpe-opt').first().click();          // 10
-  series = await p.evaluate(() => __series());
+  // Un arrastre de verdad con el ratón, extremo a extremo.
+  const caja = await p.locator('#rpeRango').boundingBox();
+  await p.mouse.move(caja.x + caja.width / 2, caja.y + caja.height / 2);
+  await p.mouse.down();
+  await p.mouse.move(caja.x + caja.width, caja.y + caja.height / 2, { steps: 8 });
+  await p.mouse.up();
+  ck('arrastrando hasta el final se llega al 10', (await val()) === '10', await val());
+  ck('que es el fallo', (await p.textContent('#rpeEti')) === 'Al fallo');
+  await p.mouse.move(caja.x + caja.width / 2, caja.y + caja.height / 2);
+  await p.mouse.down(); await p.mouse.move(caja.x, caja.y + caja.height / 2, { steps: 8 }); await p.mouse.up();
+  ck('y hasta el principio, al 6', (await val()) === '6', await val());
+
+  // ── Los botones de abajo dicen lo mismo que la barra ─────────────────────
+  const chips = await p.$$eval('.rpe-chip', ns => ns.map(n => n.textContent.trim()));
+  ck('estan los nueve valores', chips.join(',') === '6,6.5,7,7.5,8,8.5,9,9.5,10', chips);
+  await p.locator('.rpe-chip').nth(3).click();          // 7.5
+  ck('tocar un numero lo elige', (await val()) === '7.5', await val());
+  ck('y lo marca', await p.$$eval('.rpe-chip', ns => ns.findIndex(n => n.classList.contains('sel'))) === 3,
+    await p.$$eval('.rpe-chip', ns => ns.map(n => n.className)));
+  ck('la barra se mueve con el',
+    await p.evaluate(() => document.getElementById('rpeRango').value) === '7.5');
+
+  // ── Nada se guarda hasta pulsar el boton ─────────────────────────────────
+  ck('MOVER LA BARRA NO GUARDA NADA', (await series())[0][0] === '', await series());
+  await p.click('.rpe-guardar');
+  ck('la hoja se cierra al guardar', !(await abierta()));
+  ck('SE GUARDA EL NUMERO DE RPE, no otra cosa', (await series())[0][0] === '7.5', await series());
+  ck('y no toca las demas series',
+    (await series())[0][1] === '8' && (await series())[1][0] === '', await series());
+  ck('la casilla lo enseña', (await p.$$eval('.ws-rpe', ns => ns[0].textContent.trim())) === '7.5');
+
+  // Cerrar sin guardar deja la serie como estaba.
+  await abrir(0);
+  await p.locator('.rpe-chip').last().click();          // 10
+  await p.click('.rpe-x');
+  ck('la X cierra sin guardar', !(await abierta()) && (await series())[0][0] === '7.5', await series());
+
+  await abrir(0);
+  await p.locator('.rpe-chip').last().click();
+  await p.keyboard.press('Escape');
+  ck('escape tampoco guarda', (await series())[0][0] === '7.5', await series());
+
+  await abrir(0);
+  await p.locator('.rpe-chip').last().click();
+  await p.mouse.click(210, 40);                          // fuera de la hoja
+  ck('ni tocar fuera', !(await abierta()) && (await series())[0][0] === '7.5', await series());
+
+  // ── Lo ya puesto sale como estaba ────────────────────────────────────────
+  await abrir(1);                                        // esa serie tiene un 8
+  ck('abre en el valor que ya tenia', (await val()) === '8', await val());
+  ck('y con ese marcado',
+    await p.$$eval('.rpe-chip', ns => ns.findIndex(n => n.classList.contains('sel'))) === 4);
+  await p.click('.rpe-x');
+
+  // Cada casilla es la suya: la del segundo ejercicio no escribe en la primera.
+  await abrir(2);
+  ck('una serie sin datos lo dice con interrogantes',
+    (await p.textContent('#rpeSerie')).includes('? reps × ?kg'), await p.textContent('#rpeSerie'));
+  await p.locator('.rpe-chip').first().click();          // 6
+  await p.click('.rpe-guardar');
   ck('cada casilla escribe en su propia serie',
-    series[1][0] === '10' && series[0][0] === '8', series);
-
-  // ── Lo ya puesto sale marcado ────────────────────────────────────────────
-  await p.locator('.ws-rpe').nth(1).click();           // esa serie tiene un 8
-  ck('la opcion actual sale marcada',
-    (await p.$$eval('.rpe-opt', ns => ns.findIndex(n => n.classList.contains('sel')))) === 2,
-    await p.$$eval('.rpe-opt', ns => ns.map(n => n.className)));
-
-  // ── Se puede dejar sin marcar ────────────────────────────────────────────
-  await p.click('#rpeQuitar');
-  series = await p.evaluate(() => __series());
-  ck('se puede quitar lo puesto', series[0][1] === '', series);
-
-  // ── Cerrar sin elegir no cambia nada ─────────────────────────────────────
-  await p.locator('.ws-rpe').first().click();
-  await p.mouse.click(210, 60);                        // fuera de la hoja
-  ck('tocar fuera cierra la hoja', !(await abierta()));
-  ck('y no cambia el valor', (await p.evaluate(() => __series()))[0][0] === '8');
-
-  await p.locator('.ws-rpe').first().click();
-  await p.keyboard.press('Escape');
-  ck('escape tambien cierra', !(await abierta()));
-  ck('sin tocar el valor', (await p.evaluate(() => __series()))[0][0] === '8');
-
-  // ── El "?" de la cabecera explica sin editar nada ────────────────────────
-  await p.locator('.ws-ayuda').first().click();
-  ck('el "?" abre la explicacion', await abierta());
-  ck('pero ahi no se elige nada',
-    await p.evaluate(() => Array.from(document.querySelectorAll('.rpe-opt')).every(o => o.disabled)));
-  ck('ni se ofrece quitar un valor que no se esta editando',
-    await p.evaluate(() => document.getElementById('rpeQuitar').style.display === 'none'));
-  await p.keyboard.press('Escape');
-  ck('y el entreno sigue igual',
-    JSON.stringify(await p.evaluate(() => __series())) === JSON.stringify([['8', ''], ['10']]),
-    await p.evaluate(() => __series()));
+    (await series())[1][0] === '6' && (await series())[0][0] === '7.5', await series());
 
   // ── Sube desde abajo ─────────────────────────────────────────────────────
   // No es un adorno: una hoja que aparece de golpe en mitad de la pantalla no
   // se lee como algo que se pueda cerrar deslizando.
-  const caja = await p.evaluate(() => {
-    const h = document.querySelector('.rpe-hoja'), s = getComputedStyle(h);
+  const forma = await p.evaluate(() => {
+    const h = document.querySelector('.rpe-hoja');
     return { abajo: getComputedStyle(document.querySelector('.rpe-back')).alignItems,
-             mueve: s.transitionProperty.includes('transform') };
+             mueve: getComputedStyle(h).transitionProperty.includes('transform') };
   });
-  ck('la hoja se ancla abajo', caja.abajo === 'flex-end', caja);
-  ck('y entra deslizandose', caja.mueve, caja);
+  ck('la hoja se ancla abajo', forma.abajo === 'flex-end', forma);
+  ck('y entra deslizandose', forma.mueve, forma);
 
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close();

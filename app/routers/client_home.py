@@ -519,7 +519,10 @@ def client_progress(db: Session = Depends(get_db), current_user: User = Depends(
         for c in checks:
             url = getattr(c, attr, None)
             if url:
-                out.append({"date": c.checkin_date.isoformat(), "url": url, "weight": c.weight})
+                # El id va porque sin él la foto no se puede borrar: la pantalla
+                # tendría la imagen pero no sabría a qué check-in pertenece.
+                out.append({"id": c.id, "date": c.checkin_date.isoformat(),
+                            "url": url, "weight": c.weight})
         return out
     frontal, lateral, espalda = _photos("photo_url"), _photos("photo2"), _photos("photo3")
 
@@ -720,6 +723,104 @@ def client_checkin(body: _ClientCheckinBody, db: Session = Depends(get_db), curr
         "checkin_date": ck.checkin_date.isoformat(),
         "tasks_completed": completed,
     }, "Check-in guardado")
+
+
+# El ángulo, como lo llama la pantalla, y la columna donde vive de verdad.
+# `photo_url`/`photo2`/`photo3` son nombres heredados que no dicen nada; el
+# cliente ve "frontal", "lateral" y "espalda".
+FOTOS = {"frontal": "photo_url", "lateral": "photo2", "espalda": "photo3"}
+
+
+@router.delete("/checkin/{checkin_id}/foto/{angulo}", summary="Borrar una foto de progreso (cliente)",
+               description="Quita la foto de ese ángulo del check-in. Si el check-in se queda sin nada más, se borra entero.")
+def borrar_foto_checkin(
+    checkin_id: str, angulo: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role_ids(CLIENT)),
+):
+    """Deshacer una foto subida por error.
+
+    Hacía falta porque no había vuelta atrás: el POST de check-in solo escribe
+    los campos que LLEGAN, así que mandar la foto vacía no la borraba, la
+    ignoraba. Una foto equivocada se quedaba en el progreso del cliente y en la
+    bandeja del coach para siempre.
+    """
+    from app.models.checkin import WeeklyCheckin
+
+    campo = FOTOS.get((angulo or "").lower())
+    if not campo:
+        return send_error("Ángulo desconocido. Usa frontal, lateral o espalda.", code=400)
+
+    detail = _client_detail(db, current_user)
+    if not detail:
+        return send_error("Perfil de cliente no encontrado")
+
+    ck = db.query(WeeklyCheckin).filter(
+        WeeklyCheckin.id == checkin_id,
+        # Un cliente solo borra lo suyo. Sin esta condición, cambiando el número
+        # de la URL se borrarían las fotos de otra persona.
+        WeeklyCheckin.client_user_detail_id == detail.id,
+    ).first()
+    if not ck:
+        return send_error("Check-in no encontrado", code=404)
+
+    url = getattr(ck, campo, None)
+    if not url:
+        # Ya no está. No es un error: dos clics seguidos no deben dar un fallo.
+        return send_response({"borrada": False, "checkin_borrado": False}, "Esa foto ya no estaba")
+
+    setattr(ck, campo, None)
+
+    # Si el check-in existía SOLO para llevar esa foto, se va con ella. Dejarlo
+    # vacío pondría un check-in en blanco en el historial del cliente y en la
+    # bandeja del coach, que es justo lo que el cliente quería deshacer.
+    campos = ["weight", "body_fat", "muscle_mass", "waist", "chest", "hips",
+              "arms", "legs", "notes", "energy", "effort", "hunger", "sleep",
+              *FOTOS.values()]
+    vacio = all(getattr(ck, f, None) in (None, "") for f in campos)
+
+    _desmarcar_tareas(db, detail, ck, borrado=vacio)
+    if vacio:
+        db.delete(ck)
+    db.commit()
+
+    # El fichero, después de soltar la referencia: si el almacén no contesta,
+    # la foto ya ha dejado de verse igualmente.
+    from app.routers.files import borrar_del_almacen
+    borrar_del_almacen(url)
+
+    return send_response({"borrada": True, "checkin_borrado": vacio}, "Foto eliminada")
+
+
+def _desmarcar_tareas(db: Session, detail, checkin, borrado: bool) -> None:
+    """Revisa las tareas que se dieron por hechas gracias a este check-in.
+
+    Una tarea de check-in se marca sola cuando están todas las cosas que pedía.
+    Si el cliente quita la foto, esa tarea ya no está cumplida, y dejarla en
+    verde le diría que no tiene nada pendiente cuando sí lo tiene.
+    """
+    from app.models.calendar_task import CalendarTask
+
+    dia = checkin.checkin_date
+    wk_start = dia - timedelta(days=dia.weekday())
+    tasks = db.query(CalendarTask).filter(
+        CalendarTask.client_user_detail_id == detail.id,
+        CalendarTask.task_type == "checkin",
+        CalendarTask.done == True,  # noqa: E712
+        CalendarTask.task_date >= wk_start,
+        CalendarTask.task_date <= wk_start + timedelta(days=6),
+    ).all()
+
+    for t in tasks:
+        items = (_task_requirements(t).get("items")) or ["peso"]
+        estado = None if borrado else checkin
+        if not all(_item_done(estado, it) for it in items):
+            t.done = False
+            t.done_at = None
+        # La referencia se suelta siempre que el check-in desaparezca: apuntaría
+        # a una fila que ya no existe.
+        if borrado and t.checkin_id == checkin.id:
+            t.checkin_id = None
 
 
 def _autocomplete_checkin_tasks(db: Session, detail, checkin) -> list:

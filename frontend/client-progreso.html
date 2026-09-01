@@ -130,11 +130,32 @@
     .cmp-ph.now{outline:2px solid var(--green);outline-offset:-2px;}
     .cmp-ph img{width:100%;height:100%;object-fit:cover;}
     .cmp-tag{position:absolute;bottom:8px;left:8px;font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);text-align:left;}
+    .cmp-una{grid-template-columns:1fr;max-width:50%;}
     .cmp-cap{font-size:12.5px;font-weight:700;color:#6B7280;margin-top:7px;}
     .cmp-col.now .cmp-cap{color:var(--green);}
     .cmp-summary{margin-top:14px;background:var(--green-pale);color:var(--green);text-align:center;font-size:13.5px;font-weight:700;padding:11px;border-radius:12px;}
     .hist-btn{width:100%;margin-top:12px;padding:12px;border-radius:12px;border:1px solid #E5E7EB;background:#F9FAFB;color:#374151;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;}
     .hist-btn:hover{background:#F3F4F6;}
+
+    /* Quitar una foto subida por error. Va sobre la propia foto, pequeño y
+       discreto: es una salida de emergencia, no una acción de cada día. */
+    .cmp-del{position:absolute;top:7px;right:7px;width:26px;height:26px;border:none;border-radius:50%;
+      background:rgba(17,24,39,.62);color:#fff;font-size:14px;line-height:1;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s;}
+    .cmp-del:hover{background:#DC2626;}
+    .cmp-del:disabled{opacity:.5;cursor:default;}
+
+    .ask-back{display:none;position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:500;
+      align-items:center;justify-content:center;padding:20px;}
+    .ask-back.open{display:flex;}
+    .ask{background:#fff;border-radius:16px;padding:22px;max-width:340px;width:100%;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);}
+    .ask h3{margin:0 0 8px;font-size:16.5px;color:#111827;}
+    .ask p{margin:0 0 18px;font-size:13.5px;color:#6B7280;line-height:1.5;}
+    .ask-btns{display:flex;gap:9px;}
+    .ask-btns button{flex:1;padding:11px;border-radius:11px;font-size:13.5px;font-weight:700;
+      cursor:pointer;font-family:inherit;border:1px solid #E5E7EB;background:#fff;color:#374151;}
+    .ask-btns .si{background:#DC2626;border-color:#DC2626;color:#fff;}
 
     .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#1F2937;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:400;}
     .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
@@ -266,6 +287,17 @@
         </div>
         <div id="photos"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="ask-back" id="askBack">
+  <div class="ask">
+    <h3>Quitar esta foto</h3>
+    <p id="askTxt">La foto se borra y no se puede recuperar. Puedes subir otra cuando quieras.</p>
+    <div class="ask-btns">
+      <button onclick="cerrarAsk()">Cancelar</button>
+      <button class="si" id="askSi">Quitar foto</button>
     </div>
   </div>
 </div>
@@ -461,9 +493,20 @@
     }
     var start=ph[0], now=ph[ph.length-1];
     function ph_html(p, isNow){
-      return '<div class="cmp-col'+(isNow?' now':'')+'"><div class="cmp-ph'+(isNow?' now':'')+'"><img src="'+esc(p.url)+'" alt=""><div class="cmp-tag">'+fmtDate(p.date)+(p.weight!=null?'<br>'+p.weight+' kg':'')+'</div></div><div class="cmp-cap">'+(isNow?'Ahora':'Inicio')+'</div></div>';
+      // El botón de quitar solo si sabemos a qué check-in pertenece: sin id no
+      // hay a quién pedirle que la borre, y un botón que no puede funcionar es
+      // peor que no tenerlo.
+      var quitar = p.id ? '<button class="cmp-del" title="Quitar esta foto" aria-label="Quitar esta foto"'
+        + ' onclick="pedirBorrarFoto(\''+esc(p.id)+'\')">&times;</button>' : '';
+      return '<div class="cmp-col'+(isNow?' now':'')+'"><div class="cmp-ph'+(isNow?' now':'')+'"><img src="'+esc(p.url)+'" alt="">'+quitar+'<div class="cmp-tag">'+fmtDate(p.date)+(p.weight!=null?'<br>'+p.weight+' kg':'')+'</div></div><div class="cmp-cap">'+(isNow?'Ahora':'Inicio')+'</div></div>';
     }
-    var html='<div class="cmp-lbl">Inicio vs Ahora</div><div class="cmp">'+ph_html(start,false)+ph_html(now,true)+'</div>';
+    // Con una sola foto no hay comparación que hacer: enseñarla dos veces,
+    // como "Inicio" y como "Ahora", fingía un antes y un después que no existe
+    // y ponía dos botones de quitar sobre la misma foto.
+    var una = ph.length === 1;
+    var html = una
+      ? '<div class="cmp-lbl">Tu primera foto ' + esc(_tab) + '</div><div class="cmp cmp-una">' + ph_html(now, true) + '</div>'
+      : '<div class="cmp-lbl">Inicio vs Ahora</div><div class="cmp">'+ph_html(start,false)+ph_html(now,true)+'</div>';
     if(_data.weight && _data.weight.delta!=null && (_data.stats.weeks)){
       html+='<div class="cmp-summary">'+(_data.weight.delta>0?'+':'')+_data.weight.delta+' kg · '+_data.stats.weeks+' semanas</div>';
     }
@@ -473,6 +516,40 @@
   function render(){
     renderSummary(); renderWeightSection(); renderStrength(); renderMeasurements(); renderPhotos();
   }
+
+  /* Quitar una foto subida por error.
+
+     Se pregunta antes porque no hay deshacer: la foto se borra tambien del
+     almacen, que es lo que "borrada" tiene que significar cuando hablamos de
+     una foto de progreso. */
+  var _porBorrar = null;
+  function pedirBorrarFoto(id){
+    _porBorrar = id;
+    document.getElementById('askBack').classList.add('open');
+  }
+  function cerrarAsk(){
+    _porBorrar = null;
+    document.getElementById('askBack').classList.remove('open');
+  }
+  async function borrarFoto(){
+    if(!_porBorrar) return;
+    var id = _porBorrar, btn = document.getElementById('askSi');
+    btn.disabled = true; btn.textContent = 'Quitando…';
+    try{
+      var r = await fetch(API+'/client/checkin/'+id+'/foto/'+_tab,
+        {method:'DELETE', headers:headers()});
+      if(!r.ok) throw new Error();
+      cerrarAsk();
+      toast('Foto quitada');
+      await loadProgress();
+    }catch(e){
+      toast('No se pudo quitar la foto', true);
+    }finally{
+      btn.disabled = false; btn.textContent = 'Quitar foto';
+    }
+  }
+
+  document.getElementById('askSi').onclick = borrarFoto;
 
   function pickPhoto(){ document.getElementById('photoFile').click(); }
   async function uploadPhoto(input){

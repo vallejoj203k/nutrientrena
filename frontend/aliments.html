@@ -77,7 +77,7 @@
     .lib-menu-wrap{position:relative;display:inline-flex;}
     .lib-icon-btn{width:30px;height:30px;border:none;background:none;border-radius:7px;cursor:pointer;color:#9CA3AF;display:inline-flex;align-items:center;justify-content:center;transition:.15s;}
     .lib-icon-btn:hover{background:#F3F4F6;color:#374151;}
-    .lib-menu-dd{position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--lib-border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;min-width:160px;overflow:hidden;display:none;}
+    .lib-menu-dd{position:fixed;z-index:900;background:#fff;border:1px solid var(--lib-border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:160px;overflow:hidden;display:none;}
     .lib-menu-dd.open{display:block;}
     .lib-menu-item{display:flex;align-items:center;gap:9px;padding:10px 14px;font-size:13px;color:#374151;cursor:pointer;transition:.12s;}
     .lib-menu-item:hover{background:#F9FAFB;}
@@ -314,6 +314,7 @@
     .moment-chip:hover{border-color:#C7D2FE;}
     .moment-chip.sel{border-color:#4F46E5;background:#EEF2FF;color:#4F46E5;font-weight:700;}
 </style>
+<script src="js/menu-fila.js"></script>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
   <!-- El menú del panel de plataforma. Va en la cabecera a propósito: esconde
@@ -963,15 +964,8 @@ function renderTable(items) {
   }).join('');
 }
 
-function toggleRowMenu(e, btn) {
-  e.stopPropagation();
-  const dd = btn.nextElementSibling;
-  const wasOpen = dd.classList.contains('open');
-  closeRowMenus();
-  if (!wasOpen) dd.classList.add('open');
-}
-function closeRowMenus() { document.querySelectorAll('.lib-menu-dd.open').forEach(d => d.classList.remove('open')); }
-document.addEventListener('click', closeRowMenus);
+/* El menú de "…" de la fila vive en js/menu-fila.js: era el mismo código
+   en cuatro pantallas, y el mismo fallo en las cuatro. */
 
 function renderPagination() {
   const from = Math.min((currentPage - 1) * 20 + 1, totalItems);

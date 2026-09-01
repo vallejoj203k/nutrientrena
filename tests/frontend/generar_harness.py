@@ -376,3 +376,60 @@ window.__series=()=>_ws.exercises.map(e=>e.sets.map(s=>s.rpe));
 destino12 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rpe.html')
 open(destino12, 'w').write(rpe)
 print('harness generado en', destino12)
+
+
+# ── Harness del menú de "…" de la fila ─────────────────────────────────────
+# Se monta la tabla REAL con su CSS real, porque el fallo no estaba en el
+# menú sino en el `overflow` de la tabla que lo contenía: con una tabla de
+# mentira no se reproduciria.
+dts3 = open(os.path.join(RAIZ, 'frontend', 'diets.html')).read()
+cssm = '\n'.join(re.findall(r'<style>(.*?)</style>', dts3, re.S))
+
+filas = ''.join(["""<tr class="fila"><td class="lib-td-name">Dieta %d</td>
+  <td class="lib-actions">
+    <button class="lib-btn-assign">Asignar</button>
+    <div class="lib-menu-wrap">
+      <button class="lib-icon-btn mas-btn" onclick="menuFila.abrir(event,this)">...</button>
+      <div class="lib-menu-dd">
+        <div class="lib-menu-item">Editar</div>
+        <div class="lib-menu-item">Duplicar</div>
+        <div class="lib-menu-item danger">Eliminar</div>
+      </div>
+    </div>
+  </td></tr>""" % i for i in range(1, 31)])
+
+menu = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0">
+<div class="main" style="height:100vh">
+  <div class="lib-table-wrap" id="wrap">
+    <table class="lib-table"><tbody id="cuerpo">%s</tbody></table>
+  </div>
+</div>
+<script>%s</script>
+<script>
+/* Como lo hace ejercicios.html: se fabrica el menu y se cuelga del body. */
+window.__suelto=(btn)=>{
+  var m=document.createElement('div');
+  m.className='row-menu';
+  m.style.cssText='position:fixed;background:#fff;border:1px solid #E5E7EB;border-radius:10px;'+
+    'box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:300;min-width:170px;overflow:hidden;';
+  // Con los estilos EN LÍNEA que pone ejercicios.html: sin ellos los botones
+  // salen de 7 px, el menú entero cabe en cualquier hueco y la prueba no
+  // distingue nada.
+  var est='display:flex;align-items:center;gap:8px;width:100%%;padding:10px 14px;'+
+    'font-size:13px;color:#374151;background:none;border:none;cursor:pointer;text-align:left;';
+  m.innerHTML=['Editar','Ver video','Duplicar','Archivar','Eliminar'].map(function(t){
+    return '<button class="lib-menu-item" style="'+est+'">'+t+'</button>';
+  }).join('');
+  document.body.appendChild(m);
+  menuFila.suelto(m, btn);
+};
+window.__soloUna=()=>{
+  var c=document.getElementById('cuerpo');
+  Array.prototype.slice.call(c.rows,1).forEach(function(r){c.removeChild(r);});
+};
+</script></body></html>""" % (cssm, filas, _modulo('menu-fila.js'))
+
+destino13 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'menu.html')
+open(destino13, 'w').write(menu)
+print('harness generado en', destino13)

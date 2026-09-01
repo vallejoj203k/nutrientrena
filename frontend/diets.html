@@ -130,7 +130,7 @@
     .lib-icon-btn{width:30px;height:30px;border:none;background:none;border-radius:7px;cursor:pointer;color:#9CA3AF;display:inline-flex;align-items:center;justify-content:center;transition:.15s;position:relative;}
     .lib-icon-btn:hover{background:#F3F4F6;color:#374151;}
     .lib-menu-wrap{position:relative;display:inline-flex;}
-    .lib-menu-dd{position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--lib-border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:200;min-width:160px;overflow:hidden;display:none;}
+    .lib-menu-dd{position:fixed;z-index:900;background:#fff;border:1px solid var(--lib-border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:160px;overflow:hidden;display:none;}
     .lib-menu-dd.open{display:block;}
     .btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
     .btn-primary{background:var(--indigo);color:#fff;}
@@ -834,6 +834,7 @@
     .sl-mark{width:40px;height:40px;border-radius:9px;background:url('logo.webp') no-repeat 50% 41%;background-size:210px;flex-shrink:0;}
     .sl-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0;}
 </style>
+<script src="js/menu-fila.js"></script>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
   <!-- El menú del panel de plataforma. Va en la cabecera a propósito: esconde
@@ -1701,15 +1702,8 @@ function dietRow(d) {
     + '</tr>';
 }
 
-function toggleRowMenu(e, btn) {
-  e.stopPropagation();
-  var dd = btn.nextElementSibling;
-  var wasOpen = dd.classList.contains('open');
-  closeRowMenus();
-  if (!wasOpen) dd.classList.add('open');
-}
-function closeRowMenus() { document.querySelectorAll('.lib-menu-dd.open').forEach(function(d){ d.classList.remove('open'); }); }
-document.addEventListener('click', function(){ closeRowMenus(); });
+/* El menú de "…" de la fila vive en js/menu-fila.js: era el mismo código
+   en cuatro pantallas, y el mismo fallo en las cuatro. */
 
 function dietCard(d) {
   var _rid = parseInt(localStorage.getItem('role_id') || '0');

@@ -274,3 +274,30 @@ window.__pinta=(ck,cd,tg,fz)=>{
 destino9 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resumen.html')
 open(destino9, 'w').write(resumen)
 print('harness generado en', destino9)
+
+
+# ── Harness de la unidad del alimento y del previo de la dieta ─────────────
+# El previo se saca de diets.html tal cual, no copiado: el fallo era
+# justamente que esa pantalla deducía la unidad por su cuenta y de forma
+# distinta al editor que hay dos clics más allá.
+dts2 = open(os.path.join(RAIZ, 'frontend', 'diets.html')).read()
+# `dppMeals` se pinta en tres sitios de la pagina; el que interesa es el que
+# lleva la unidad, asi que se ancla ahi y se retrocede hasta su principio.
+ancla = dts2.index("var itemKcal = Math.round(window.macrosAlimento.escalar(al.calories, al, qty));")
+i = dts2.rindex("document.getElementById('dppMeals').innerHTML =", 0, ancla)
+j = dts2.index("    var title = esc(d.title || '');", ancla)
+pinta_previo = dts2[i:j]
+
+unidades = """<!doctype html><html><head><meta charset="utf-8"></head><body>
+<div id="dppMeals"></div>
+<script>%s</script>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+window.__previo=(d)=>{
+%s
+};
+</script></body></html>""" % (_modulo('macros-alimento.js'), pinta_previo)
+
+destino10 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'unidades.html')
+open(destino10, 'w').write(unidades)
+print('harness generado en', destino10)

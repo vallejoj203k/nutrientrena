@@ -281,3 +281,123 @@ def historial(
         "volumen_semanal": volumen,
         "sesiones": filas,
     }, "OK")
+
+
+# ── Progreso · Fuerza ──────────────────────────────────────────────────────
+#
+# Un renglón por ejercicio y sesión, con todo lo que la pantalla puede pedir:
+# peso top, 1RM estimado, volumen, repeticiones y RIR. Se devuelven las CINCO
+# métricas juntas y no la elegida, porque cambiar de métrica en la pantalla no
+# debería costar una ida y vuelta al servidor: son los mismos datos mirados de
+# otra forma.
+
+@router.get("/client/{client_user_detail_id}/fuerza",
+            summary="Progreso de fuerza por ejercicio",
+            description="Historial por ejercicio: peso top, 1RM estimado, volumen, repeticiones y RIR de cada sesión.")
+def fuerza(
+    client_user_detail_id: str,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH)),
+):
+    from app.core.entrenos import (
+        es_por_tiempo, mmss, repeticiones, rir_de_rpe, rm_estimado, segundos,
+    )
+    from app.models.routine import RoutineDayDetail
+    from app.models.session_log import WorkoutSessionExercise
+    from app.models.user import UserDetail
+
+    if not db.query(UserDetail).filter(UserDetail.id == client_user_detail_id).first():
+        return send_error("Cliente no encontrado", code=404)
+
+    sesiones = (db.query(WorkoutSession)
+                .filter(WorkoutSession.client_user_detail_id == client_user_detail_id)
+                .order_by(WorkoutSession.session_date.asc())
+                .all())
+
+    # El descanso PRESCRITO, el que el coach puso al montar la rutina. No es lo
+    # que el cliente descansó de verdad —eso no se mide— y la pantalla lo dice.
+    descansos = {}
+    for tid, seg in db.query(RoutineDayDetail.training_id, RoutineDayDetail.break_time)\
+            .filter(RoutineDayDetail.training_id.isnot(None),
+                    RoutineDayDetail.break_time.isnot(None)).all():
+        descansos.setdefault(tid, seg)
+
+    por_ejercicio = {}
+    for s in sesiones:
+        for ex in (s.exercises or []):
+            nombre = (ex.name or "").strip()
+            if not nombre:
+                continue
+            marcadas = [st for st in (ex.sets or []) if st.done]
+            if not marcadas:
+                continue
+
+            clave = nombre.lower()
+            e = por_ejercicio.setdefault(clave, {
+                "nombre": nombre,
+                "grupo": ex.muscle_group_name,
+                "tipo": "tiempo" if es_por_tiempo(ex.sets) else "peso_reps",
+                "sesiones": [],
+            })
+
+            if e["tipo"] == "tiempo":
+                mejor = max((segundos(st.reps) or 0) for st in marcadas)
+                fila = {"peso_top": None, "reps_top": None, "rm1": None,
+                        "volumen": None, "segundos": mejor, "tiempo": mmss(mejor)}
+            else:
+                # El peso top es el más pesado que MOVIÓ; las repeticiones que
+                # se enseñan son las de esa serie, no las de la más larga: son
+                # las dos cifras del mismo levantamiento.
+                con_peso = [st for st in marcadas if st.weight is not None]
+                if not con_peso:
+                    continue
+                top = max(con_peso, key=lambda st: float(st.weight))
+                reps_top = repeticiones(top.reps)
+                vol = sum(float(st.weight) * (repeticiones(st.reps) or 0) for st in con_peso)
+                fila = {
+                    "peso_top": round(float(top.weight), 1),
+                    "reps_top": int(reps_top) if reps_top else None,
+                    "rm1": rm_estimado(top.weight, reps_top),
+                    "volumen": round(vol, 1),
+                    "segundos": None, "tiempo": None,
+                }
+
+            rpes = [st.rpe for st in marcadas if st.rpe is not None]
+            fila.update({
+                "fecha": s.session_date.isoformat() if s.session_date else None,
+                "series": len(marcadas),
+                "rir": rir_de_rpe(sum(rpes) / len(rpes)) if rpes else None,
+                "descanso_s": descansos.get(ex.training_id),
+                "detalle": [{
+                    "serie": st.set_number,
+                    "reps": st.reps,
+                    "peso": st.weight,
+                    "rpe": st.rpe,
+                } for st in sorted(marcadas, key=lambda x: x.set_number or 0)],
+            })
+            e["sesiones"].append(fila)
+
+    salida = []
+    for e in por_ejercicio.values():
+        fs = e["sesiones"]
+        if not fs:
+            continue
+        pesos = [f["peso_top"] for f in fs if f["peso_top"] is not None]
+        rms = [f["rm1"] for f in fs if f["rm1"] is not None]
+        reps = [f["reps_top"] for f in fs if f["reps_top"] is not None]
+        rirs = [f["rir"] for f in fs if f["rir"] is not None]
+        tiempos = [f["segundos"] for f in fs if f["segundos"] is not None]
+        salida.append({
+            **e,
+            "n_sesiones": len(fs),
+            "pr_peso": max(pesos) if pesos else None,
+            "rm1_max": max(rms) if rms else None,
+            "reps_max": max(reps) if reps else None,
+            "volumen_ultimo": fs[-1]["volumen"],
+            "rir_medio": round(sum(rirs) / len(rirs), 1) if rirs else None,
+            "mejor_tiempo": max(tiempos) if tiempos else None,
+        })
+
+    # Los que más veces se han entrenado, primero: son los que el coach mira.
+    salida.sort(key=lambda e: (-e["n_sesiones"], e["nombre"]))
+    return send_response({"ejercicios": salida}, "OK")

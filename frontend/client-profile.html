@@ -851,6 +851,59 @@
     .nmeal-f-sub{display:block;font-size:11.5px;color:#9CA3AF;margin-top:2px;}
     @media(max-width:640px){ .nplan-stats{grid-template-columns:repeat(2,1fr);} }
 
+    /* El plan de entrenamiento, como el diseño: cabecera blanca con sus
+       acciones, la tira del plan, y el carril con la distribución semanal. */
+    .eplan-head{display:flex;align-items:flex-start;gap:14px;padding:18px 22px 16px;flex-wrap:wrap;}
+    .eplan-t{font-size:16.5px;font-weight:800;color:#111827;}
+    .eplan-s{font-size:12.5px;color:#9CA3AF;margin-top:3px;}
+    .eplan-acts{margin-left:auto;display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+    .eplan-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:10px;
+      border:1px solid #E5E7EB;background:#fff;color:#374151;font-size:12.5px;font-weight:700;
+      cursor:pointer;font-family:inherit;transition:.15s;}
+    .eplan-btn:hover{background:#F9FAFB;border-color:#C7D2FE;color:#4F46E5;}
+    .eplan-btn.pri{background:#4F46E5;border-color:#4F46E5;color:#fff;}
+    .eplan-btn.pri:hover{background:#4338CA;color:#fff;}
+    .eplan-btn.solo{padding:9px 11px;}
+    .eplan-btn.solo:hover{color:#DC2626;border-color:#FECACA;background:#FEF2F2;}
+    .eplan-tira{display:flex;align-items:center;gap:11px;flex-wrap:wrap;
+      padding:12px 22px;border-top:1px solid #F3F4F6;border-bottom:1px solid #F3F4F6;}
+    .eplan-pill{background:#EEF2FF;color:#4F46E5;font-size:12px;font-weight:700;
+      padding:5px 12px;border-radius:20px;}
+    .eplan-meta{font-size:12.5px;color:#6B7280;}
+    .eplan-der{margin-left:auto;font-size:12.5px;color:#9CA3AF;}
+    .eplan-der b{color:#111827;font-weight:800;}
+    .eplan-layout{display:flex;gap:0;align-items:flex-start;}
+    .eplan-carril{width:250px;flex-shrink:0;border-right:1px solid #F3F4F6;padding:8px 0 14px;}
+    .eplan-panel{flex:1;min-width:0;padding:18px 22px 22px;}
+    /* Los días de entreno, como tarjetas con su flecha. */
+    .eday{display:flex;align-items:center;gap:10px;margin:0 12px 8px;padding:11px 13px;
+      border:1.5px solid #E9EBF2;border-radius:12px;background:#fff;cursor:pointer;transition:.15s;}
+    .eday:hover{border-color:#C7D2FE;}
+    .eday.sel{border-color:#4F46E5;background:#F5F6FE;}
+    .eday-abv{font-size:10px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;}
+    .eday.sel .eday-abv{color:#4F46E5;}
+    .eday-nm{font-size:14px;font-weight:700;color:#111827;margin-top:1px;}
+    .eday.descanso .eday-nm{color:#C4C7CF;}
+    .eday-chev{margin-left:auto;color:#C4C7CF;flex-shrink:0;}
+    .eday.sel .eday-chev{color:#4F46E5;}
+    /* La tabla del día. */
+    .eday-h{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+    .eday-h-t{font-size:17px;font-weight:800;color:#111827;}
+    .eday-h-s{font-size:12.5px;color:#9CA3AF;margin-top:2px;}
+    table.eex{width:100%;border-collapse:collapse;}
+    table.eex th{font-size:11.5px;font-weight:700;color:#6B7280;padding:9px 12px;text-align:center;
+      background:#F8F9FB;border-bottom:1px solid #EEF0F4;}
+    table.eex th:first-child{text-align:left;}
+    table.eex td{padding:13px 12px;font-size:13.5px;color:#374151;text-align:center;
+      border-bottom:1px solid #F5F6F8;}
+    table.eex td:first-child{text-align:left;}
+    table.eex tr:last-child td{border-bottom:none;}
+    .eex-nm{font-size:14px;font-weight:600;color:#111827;}
+    .eex-mg{font-size:11.5px;color:#9CA3AF;margin-top:1px;}
+    .eex-num{font-weight:700;color:#111827;}
+    .eex-no{color:#D1D5DB;}
+    @media(max-width:900px){ .eplan-layout{flex-direction:column;} .eplan-carril{width:100%;border-right:none;border-bottom:1px solid #F3F4F6;} }
+
     .nut-dist{margin:8px 10px 4px;border:1px solid #E9EBF2;border-radius:12px;overflow:hidden;background:#fff;}
     .nut-dist-head{display:flex;align-items:center;justify-content:space-between;gap:6px;
       padding:9px 11px 7px;}
@@ -7340,6 +7393,31 @@ async function renderEntrenamientoTab() {
   _renderEntTrainingUI();
 }
 
+/* Los días de la semana, para el carril y para el PDF. */
+var ENT_ABV  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+var ENT_FULL = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+/* En qué día de la semana cae cada día de la rutina.
+
+   Sale de `weekday`, que es un dato: el coach dice que su Día 3 es el jueves.
+   Cuando no está —todas las rutinas de antes— se cae al orden, que es lo que
+   se hacía siempre; pero el orden no sabe decir "los miércoles descanso", así
+   que en cuanto alguien reparta los días de verdad, manda `weekday`. */
+function _entReparto(days) {
+  const porDia = {};
+  const hayDato = days.some(d => d.weekday != null);
+  days.forEach((d, i) => {
+    const wd = hayDato ? d.weekday : i;
+    if (wd == null || wd < 0 || wd > 6) return;
+    if (porDia[wd] == null) porDia[wd] = i;   // dos días en la misma fecha: el primero
+  });
+  return porDia;
+}
+
+function _entEsDescanso(day) {
+  return (day.blocks || []).reduce((s, b) => s + (b.exercises || []).length, 0) === 0;
+}
+
 function _renderEntTrainingUI() {
   const el = document.getElementById('entrenamientoContent');
   if (!el || !clientRoutines.length) return;
@@ -7350,53 +7428,50 @@ function _renderEntTrainingUI() {
   const totalEx = days.reduce((s, d) => s + (d.blocks || []).reduce((bs, b) => bs + (b.exercises || []).length, 0), 0);
   if (_entSelectedDay >= days.length) _entSelectedDay = 0;
 
-  const chips = [r.training, r.days ? `${r.days} días/sem` : '', r.time ? `${r.time} min/sesión` : ''].filter(Boolean).join(' · ');
-  const assignedDate = r.assigned_at || r.created_at;
-  let dateLabel = '';
-  if (assignedDate) {
-    const d = new Date(assignedDate);
-    const MONTHS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    dateLabel = `Asignado el ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  const chips = [r.training, r.days ? `${r.days} días/sem` : '',
+                 r.weeks ? `${r.weeks} semanas` : '',
+                 r.time ? `~${r.time} min/sesión` : ''].filter(Boolean).join(' · ');
+  const asignado = r.assigned_at || r.created_at;
+  let fecha = '';
+  if (asignado) {
+    const d = new Date(asignado);
+    const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    fecha = `Asignado el ${d.getDate()} ${MESES[d.getMonth()]}`;
   }
 
   el.innerHTML = _entModoCardHTML() + `
-    <!-- PLAN ACTIVO BANNER -->
-    <div style="background:linear-gradient(135deg,#7C3AED 0%,#4F46E5 100%);border-radius:16px;padding:22px 28px;margin-bottom:16px;color:#fff;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;opacity:.65;margin-bottom:10px;">PLAN ACTIVO${dateLabel ? ` · ${dateLabel}` : ''}</div>
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <div>
-          <h2 style="font-size:26px;font-weight:900;margin:0 0 4px;line-height:1.1;">${esc(r.name)}</h2>
-          <p style="margin:0;opacity:.75;font-size:13px;">${chips}</p>
-          <div class="plan-btn-row">
-            <button class="nut-banner-btn" onclick="_downloadEntPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
-            <button class="nut-banner-btn" onclick="changeEntPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
-            <button class="nut-banner-btn danger" onclick="removeEntPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
-          </div>
+    <div class="nsec" style="padding:0;">
+      <div class="eplan-head">
+        <div style="min-width:0;">
+          <div class="eplan-t">Plan de entrenamiento</div>
+          <div class="eplan-s">${[fecha, 'vista previa de solo lectura'].filter(Boolean).join(' · ')}</div>
         </div>
-        <div style="display:flex;gap:10px;flex-shrink:0;">
-          ${r.days ? `<div style="text-align:center;background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;min-width:60px;">
-            <div style="font-size:22px;font-weight:900;line-height:1;">${r.days}</div>
-            <div style="font-size:10px;opacity:.65;margin-top:3px;white-space:nowrap;">días/sem</div>
-          </div>` : ''}
-          <div style="text-align:center;background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;min-width:60px;">
-            <div style="font-size:22px;font-weight:900;line-height:1;">${totalEx}</div>
-            <div style="font-size:10px;opacity:.65;margin-top:3px;white-space:nowrap;">ejercicios</div>
-          </div>
+        <div class="eplan-acts">
+          <button class="eplan-btn pri" onclick="openEntBuilder(${_entSelectedDay})">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Abrir editor</button>
+          <button class="eplan-btn" onclick="_downloadEntPdf(event)">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            PDF</button>
+          <button class="eplan-btn" onclick="changeEntPlan()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Cambiar plan</button>
+          <button class="eplan-btn solo" onclick="removeEntPlan()" title="Eliminar el plan" aria-label="Eliminar el plan">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
         </div>
       </div>
+      <div class="eplan-tira">
+        <span class="eplan-pill">${esc(r.name || 'Rutina')}</span>
+        ${chips ? `<span class="eplan-meta">${esc(chips)}</span>` : ''}
+        <span class="eplan-der"><b>${totalEx}</b> ejercicios</span>
+      </div>
+      ${days.length ? `<div class="eplan-layout">
+        <div class="eplan-carril" id="entSidebar">${_renderEntSidebar(days)}</div>
+        <div class="eplan-panel" id="entDayContent">${_renderEntDayContent(days[_entSelectedDay], _entSelectedDay)}</div>
+      </div>` : '<div class="pg-placeholder">Esta rutina no tiene días configurados.</div>'}
     </div>
 
-    <!-- DAY VIEW -->
-    ${days.length ? `<div style="display:flex;gap:12px;align-items:flex-start;">
-      <div id="entSidebar" style="width:160px;flex-shrink:0;background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
-        ${_renderEntSidebar(days)}
-      </div>
-      <div id="entDayContent" style="flex:1;min-width:0;">
-        ${_renderEntDayContent(days[_entSelectedDay], _entSelectedDay)}
-      </div>
-    </div>` : '<p style="color:#9CA3AF;font-size:13px;">Esta rutina no tiene días configurados.</p>'}
-
-    <!-- SESSION HISTORY -->
     <div class="card" style="margin-top:16px;">
       <div class="card-head">
         <span class="card-title">Historial de sesiones</span>
@@ -7408,85 +7483,129 @@ function _renderEntTrainingUI() {
   loadSessions();
 }
 
+/* El carril: qué toca cada día de la semana, y la lista de días de entreno.
+
+   Las dos, como en Nutrición. Solo los días de entreno no dicen qué se hace
+   el jueves; solo el reparto no dice cuántos días tiene la rutina ni cómo se
+   llaman. */
 function _renderEntSidebar(days) {
-  const DAY_ABR = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
-  return `<div style="padding:8px 14px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #F3F4F6;">Días de entreno</div>` +
-    days.map((day, i) => {
-      const label = day.label || day.name || `Día ${i+1}`;
-      const exCount = (day.blocks || []).reduce((s, b) => s + (b.exercises || []).length, 0);
-      const isRest = exCount === 0;
-      const isSel = i === _entSelectedDay;
-      return `<div onclick="selectEntDay(${i})" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #F9FAFB;background:${isSel?'#F5F3FF':'#fff'};border-left:3px solid ${isSel?'#7C3AED':'transparent'};transition:.1s;">
-        <div style="font-size:9px;font-weight:700;color:${isSel?'#7C3AED':'#9CA3AF'};text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px;">${DAY_ABR[i]||''}</div>
-        <div style="font-size:13px;font-weight:700;color:${isSel?'#7C3AED':isRest?'#D1D5DB':'#374151'};">${esc(label)}</div>
-        ${!isRest?`<div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${exCount} ejercicio${exCount!==1?'s':''}</div>`:''}
-      </div>`;
-    }).join('');
+  const porDia = _entReparto(days);
+
+  const filas = ENT_ABV.map((abv, wd) => {
+    const i = porDia[wd];
+    const day = i != null ? days[i] : null;
+    const descanso = !day || _entEsDescanso(day);
+    const et = day && !descanso
+      ? `Día ${i + 1} · ${day.day_name || day.label || 'Entreno'}`
+      : 'Descanso';
+    const sel = day && i === _entSelectedDay;
+    return `<div class="nut-dist-row${sel ? ' sel' : ''}${descanso ? ' vacio' : ''}"
+        ${day ? `onclick="selectEntDay(${i})"` : ''} title="${esc(et)}">
+      <span class="nut-dist-abv">${abv}</span>
+      <span class="nut-dist-fl">→</span>
+      <span class="nut-dist-lbl">${esc(et)}</span>
+    </div>`;
+  }).join('');
+
+  const tarjetas = days.map((day, i) => {
+    const nombre = day.day_name || day.label || `Día ${i + 1}`;
+    const descanso = _entEsDescanso(day);
+    // La abreviatura sale del reparto, no del orden: si el Día 3 es el jueves,
+    // aquí pone JUE aunque sea el tercero de la lista.
+    const wd = Object.keys(porDia).find(k => porDia[k] === i);
+    const abv = wd != null ? ENT_ABV[wd].toUpperCase() : '';
+    return `<div class="eday${i === _entSelectedDay ? ' sel' : ''}${descanso ? ' descanso' : ''}"
+        onclick="selectEntDay(${i})">
+      <div style="min-width:0;">
+        ${abv ? `<div class="eday-abv">${abv}</div>` : ''}
+        <div class="eday-nm">${esc(descanso ? 'Descanso' : nombre)}</div>
+      </div>
+      <svg class="eday-chev" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="nut-dist">
+      <div class="nut-dist-head">
+        <span class="nut-dist-t">Distribución semanal</span>
+        <button class="nut-dist-edit" onclick="event.stopPropagation();openEntBuilder(${_entSelectedDay})"
+                title="Editar la rutina" aria-label="Editar la rutina">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+      ${filas}
+    </div>
+    <div class="nut-side-head">Días de entreno</div>
+    ${tarjetas}`;
 }
 
 function _renderEntDayContent(day, idx) {
-  const DAY_ABR = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
-  if (!day) return '<p style="color:#9CA3AF;font-size:13px;">Selecciona un día.</p>';
+  if (!day) return '<div class="pg-placeholder">Selecciona un día.</div>';
   const blocks = day.blocks || [];
   const allEx = blocks.flatMap(b => b.exercises || []);
-  const label = day.label || day.name || `Día ${idx+1}`;
-  const dayAbr = DAY_ABR[idx] || '';
+  const nombre = day.day_name || day.label || `Día ${idx + 1}`;
 
-  const textBlocksHtml = blocks
+  const porDia = _entReparto(clientRoutines[0] ? (clientRoutines[0].days_list || []) : []);
+  const wd = Object.keys(porDia).find(k => porDia[k] === idx);
+  const abv = wd != null ? ENT_ABV[wd] : '';
+
+  const textos = blocks
     .filter(b => b.block_type === 'text' && b.content)
-    .map(b => `<div style="margin:12px 20px 0;padding:10px 14px;background:#F9FAFB;border-left:3px solid #7C3AED;border-radius:6px;font-size:13px;color:#374151;white-space:pre-wrap;">${esc(b.content)}</div>`)
+    .map(b => `<div style="margin-bottom:12px;padding:10px 14px;background:#F9FAFB;border-left:3px solid #4F46E5;border-radius:6px;font-size:13px;color:#374151;white-space:pre-wrap;">${esc(b.content)}</div>`)
     .join('');
 
-  if (!allEx.length && !textBlocksHtml) {
-    return `<div class="card" style="padding:40px;text-align:center;color:#9CA3AF;">
-      <p style="font-size:14px;font-weight:600;color:#374151;margin:0 0 4px;">${dayAbr} · Descanso</p>
-      <p style="font-size:12px;margin:0;">Sin ejercicios programados</p>
-    </div>`;
-  }
-
-  const rows = allEx.map(ex => {
-    const inten = ex.intensity_value
-      ? `<span style="background:#EEF2FF;color:#4F46E5;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;">${ex.intensity_value}${ex.intensity_type==='RPE'?' RPE':'%'}</span>`
-      : '<span style="color:#D1D5DB;">—</span>';
-    return `<tr style="border-top:1px solid #F3F4F6;">
-      <td style="padding:12px 20px;">
-        <div style="font-weight:600;color:#111;">${esc(ex.training_name||ex.name||'—')}</div>
-        ${ex.muscle_group_name?`<div style="font-size:11px;color:#9CA3AF;margin-top:1px;">${esc(ex.muscle_group_name)}</div>`:''}
-      </td>
-      <td style="text-align:center;padding:12px;font-weight:600;">${ex.series||'—'}</td>
-      <td style="text-align:center;padding:12px;font-weight:600;">${ex.repetitions||'—'}</td>
-      <td style="text-align:center;padding:12px;">${inten}</td>
-      <td style="text-align:center;padding:12px;color:#6B7280;">${ex.break_time?ex.break_time+'"':'—'}</td>
-      <td style="padding:12px;color:#6B7280;font-size:12px;max-width:160px;">${ex.notes?esc(ex.notes):'<span style="color:#D1D5DB;">—</span>'}</td>
-    </tr>`;
-  }).join('');
-
-  return `<div class="card">
-    <div style="padding:16px 20px 12px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <h4 style="font-size:16px;font-weight:800;color:#111;margin:0 0 2px;">${dayAbr} · ${esc(label)}</h4>
-        <p style="font-size:12px;color:#9CA3AF;margin:0;">${allEx.length} ejercicio${allEx.length!==1?'s':''}</p>
+  const cabecera = `<div class="eday-h">
+      <div style="min-width:0;">
+        <div class="eday-h-t">${abv ? esc(abv) + ' · ' : ''}${esc(nombre)}</div>
+        <div class="eday-h-s">${allEx.length} ejercicio${allEx.length !== 1 ? 's' : ''}${
+          clientRoutines[0] && clientRoutines[0].time ? ` · ~${clientRoutines[0].time} min` : ''}</div>
       </div>
-      <button onclick="openEntBuilder(${idx})" style="display:flex;align-items:center;gap:6px;border:1.5px solid #7C3AED;color:#7C3AED;background:#fff;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;flex-shrink:0;">
+      <button class="eplan-btn" style="margin-left:auto;" onclick="openEntBuilder(${idx})">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Editar este día
       </button>
-    </div>
-    ${textBlocksHtml}
-    ${allEx.length ? `<div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <thead><tr style="background:#F9FAFB;">
-          <th style="text-align:left;padding:9px 20px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Ejercicio</th>
-          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Series</th>
-          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Reps</th>
-          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Intensidad</th>
-          <th style="text-align:center;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Descanso</th>
-          <th style="text-align:left;padding:9px 12px;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;">Nota</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>` : '<div style="padding-bottom:16px;"></div>'}
-  </div>`;
+    </div>`;
+
+  if (!allEx.length) {
+    return cabecera + textos + `<div class="pg-placeholder" style="padding:34px 20px;">
+      Día de descanso · sin ejercicios programados</div>`;
+  }
+
+  /* La intensidad va en la columna de Nota, como en el diseño: son las dos
+     cosas que el coach escribe a mano para ese ejercicio, y separarlas dejaba
+     dos columnas medio vacías. */
+  const filas = allEx.map(ex => {
+    const inten = ex.intensity_value != null && ex.intensity_value !== ''
+      ? `${ex.intensity_type === 'RPE' ? 'RPE ' : ''}${ex.intensity_value}${ex.intensity_type === 'RPE' ? '' : '%'}`
+      : '';
+    const nota = [inten, ex.notes || ''].filter(Boolean).join(' · ');
+    return `<tr>
+      <td>
+        <div class="eex-nm">${esc(ex.training_name || ex.name || '—')}</div>
+        ${ex.muscle_group_name ? `<div class="eex-mg">${esc(ex.muscle_group_name)}</div>` : ''}
+      </td>
+      <td class="eex-num">${ex.series || '<span class="eex-no">—</span>'}</td>
+      <td class="eex-num">${esc(String(ex.repetitions || '')) || '<span class="eex-no">—</span>'}</td>
+      <td>${ex.break_time ? _entDescanso(ex.break_time) : '<span class="eex-no">—</span>'}</td>
+      <td>${nota ? esc(nota) : '<span class="eex-no">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  return cabecera + textos + `
+    <table class="eex">
+      <thead><tr><th>Ejercicio</th><th>Series</th><th>Reps</th><th>Descanso</th><th>Nota</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>`;
+}
+
+/* 120 segundos son 2', no 120": por encima de dos minutos obliga a dividir
+   mentalmente en mitad de la serie. El minuto justo se queda en 60", que es
+   como lo dice el diseño y como lo lee cualquiera. */
+function _entDescanso(seg) {
+  const n = parseInt(seg, 10);
+  if (!isFinite(n) || n <= 0) return '—';
+  if (n >= 120 && n % 60 === 0) return `${n / 60}'`;
+  return `${n}"`;
 }
 
 function selectEntDay(idx) {

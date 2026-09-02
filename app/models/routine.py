@@ -52,6 +52,10 @@ class RoutineDay(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     routine_id = Column(Integer, ForeignKey("routines.id"), nullable=False)
     day_name = Column(String(255), nullable=True)
+    # Qué día de la semana toca: 0 = lunes … 6 = domingo. Nulo = sin asignar.
+    # Antes se deducía del orden, y así no hay forma de decir "los miércoles
+    # descanso": con cuatro días salían lunes a jueves seguidos.
+    weekday = Column(Integer, nullable=True)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

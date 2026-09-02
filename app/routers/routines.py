@@ -140,6 +140,7 @@ def _serialize_day(day: RoutineDay) -> dict:
     return {
         "id": day.id,
         "day_name": day.day_name,
+        "weekday": day.weekday,
         "description": day.description,
         "blocks": blocks,
     }
@@ -158,6 +159,7 @@ def _create_days(db: Session, routine_id: int, days_data: list):
         day = RoutineDay(
             routine_id=routine_id,
             day_name=day_data.day_name,
+            weekday=day_data.weekday,
             description=day_data.content_html,
         )
         db.add(day)
@@ -180,6 +182,7 @@ def _create_days_v2(db: Session, routine_id: int, days_data: list):
         day = RoutineDay(
             routine_id=routine_id,
             day_name=day_data.day_name,
+            weekday=day_data.weekday,
             description=day_data.description or day_data.content_html,
         )
         db.add(day)
@@ -228,6 +231,7 @@ def _clone_days(db: Session, source: Routine, new_routine_id: int):
         new_day = RoutineDay(
             routine_id=new_routine_id,
             day_name=day.day_name,
+            weekday=day.weekday,
             description=day.description,
         )
         db.add(new_day)
@@ -590,7 +594,8 @@ def clone_to_client(
     db.flush()
 
     for day in source.days_list:
-        new_day = RoutineDay(routine_id=new_routine.id, day_name=day.day_name, description=day.description)
+        new_day = RoutineDay(routine_id=new_routine.id, day_name=day.day_name,
+                             weekday=day.weekday, description=day.description)
         db.add(new_day)
         db.flush()
 

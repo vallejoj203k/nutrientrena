@@ -577,3 +577,37 @@ destino16 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plan.html'
 open(destino16, 'w').write(
     plan % (cssp, _modulo('macros-alimento.js'), descarga, totales, hero, comidas))
 print('harness generado en', destino16)
+
+
+# ── Harness del plan de entrenamiento ──────────────────────────────────────
+# El carril y la tabla del día, sacados de client-profile.html. Lo que hay que
+# comprobar es el REPARTO: qué día de la semana toca cada día de la rutina.
+a = perfil.index('/* Los días de la semana, para el carril y para el PDF. */')
+b = perfil.index('function selectEntDay(')
+ent = perfil[a:b]
+
+entre = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0;background:#F8FAFC">
+<div id="entrenamientoContent" style="padding:16px;max-width:1100px"></div>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var clientRoutines=[], clientData={}, _entSelectedDay=0, _entModo='semanal';
+window.__acciones=[];
+function _entModoCardHTML(){return '';}
+function loadSessions(){}
+function openSessionModal(){}
+function openEntBuilder(i){window.__acciones.push('editor:'+i);}
+function _downloadEntPdf(){window.__acciones.push('pdf');}
+function changeEntPlan(){window.__acciones.push('cambiar');}
+function removeEntPlan(){window.__acciones.push('borrar');}
+function selectEntDay(i){_entSelectedDay=i;_renderEntTrainingUI();}
+%s
+window.__pinta=(rutina,sel)=>{
+  clientRoutines=[rutina]; _entSelectedDay=sel||0; window.__acciones=[];
+  _renderEntTrainingUI();
+};
+</script></body></html>""" % (cssp, ent)
+
+destino17 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'entreno.html')
+open(destino17, 'w').write(entre)
+print('harness generado en', destino17)

@@ -13,6 +13,7 @@ class RoutineDayDetailCreate(BaseModel):
 
 class RoutineDayCreate(BaseModel):
     day_name: Optional[str] = None
+    weekday: Optional[int] = None
     content_html: Optional[str] = None  # maps to description in DB
     details: Optional[List[RoutineDayDetailCreate]] = []
 
@@ -102,6 +103,7 @@ class RoutineDayDetailOut(BaseModel):
 class RoutineDayOut(BaseModel):
     id: int
     day_name: Optional[str] = None
+    weekday: Optional[int] = None
     content_html: Optional[str] = None  # alias for description
     details: List[RoutineDayDetailOut] = []
 
@@ -112,6 +114,7 @@ class RoutineDayOut(BaseModel):
         return cls(
             id=day.id,
             day_name=day.day_name,
+            weekday=getattr(day, 'weekday', None),
             content_html=day.description,
             details=[RoutineDayDetailOut.model_validate(d) for d in day.details],
         )
@@ -157,6 +160,7 @@ class BlockCreate(BaseModel):
 
 class RoutineDayCreateV2(BaseModel):
     day_name: Optional[str] = None
+    weekday: Optional[int] = None
     description: Optional[str] = None
     blocks: List[BlockCreate] = []
     # Keep old fields for backward compat
@@ -219,6 +223,7 @@ class BlockOut(BaseModel):
 class RoutineDayOutV2(BaseModel):
     id: int
     day_name: Optional[str] = None
+    weekday: Optional[int] = None
     description: Optional[str] = None
     blocks: List[BlockOut] = []
     model_config = {"from_attributes": True}

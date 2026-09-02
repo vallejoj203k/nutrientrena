@@ -42,3 +42,39 @@ def escalar(valor: Optional[float], aliment, cantidad: Optional[float]) -> float
         return float(valor) / porcion_de(aliment) * float(cantidad)
     except (TypeError, ValueError):
         return 0.0
+
+
+# La misma unidad viene escrita de varias formas según de dónde salga el
+# alimento: el catálogo guarda `g`, los ficheros del cliente traían `gr`, y los
+# alimentos antiguos la llevan en la relación `quantity_type` con la etiqueta
+# larga ("Unidad"). Son la misma cosa. Es el gemelo de `unidadDe` en
+# `frontend/js/macros-alimento.js`.
+_ALIAS = {
+    "g": "g", "gr": "g", "gramo": "g", "gramos": "g",
+    "ud": "ud", "u": "ud", "uds": "ud", "unidad": "ud", "unidades": "ud",
+    "tz": "ud", "taza": "ud",
+    "ml": "ml", "mililitro": "ml", "mililitros": "ml",
+    "l": "l", "litro": "l", "kg": "kg", "oz": "oz",
+}
+
+
+def unidad_de(aliment) -> str:
+    """La unidad de un alimento, para ENSEÑARLA.
+
+    Sin esto cada pantalla la deducía por su cuenta y el PDF ponía "g" a todo:
+    un huevo salía como "2 g" con las kcal de dos unidades enteras. Se mira
+    primero `quantity_type`, que es donde la tienen los alimentos antiguos, y
+    luego `quantity_unit`, que es donde la guarda el catálogo.
+    """
+    if aliment is None:
+        return "g"
+    qt = getattr(aliment, "quantity_type", None)
+    texto = None
+    if qt is not None:
+        texto = getattr(qt, "description", None) or getattr(qt, "name", None)
+    if not texto:
+        texto = getattr(aliment, "quantity_unit", None)
+    u = str(texto or "").strip().lower()
+    if not u:
+        return "g"
+    return _ALIAS.get(u, u)

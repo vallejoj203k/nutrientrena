@@ -1,20 +1,20 @@
 id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidratos,Grasas,Fibra,vitA,vitB1,vitB2,vitB3,vitB5,vitB6,vitB9,vitB12,vitC,vitD,vitE,vitK,choline,calcium,copper,iron,magnesium,manganese,phosphorus,potassium,selenium,sodium,zinc,water,cholesterol,saturatedFat,monoUnsaturatedFat,polyUnsaturatedFat,glycemicIndex,tiene_micros,es_duplicado,momento_sugerido,comments,usar_en_generador
 ,Aceite de linaza,Aceites y grasas,,100,gr,900.0,0.0,0.0,100.0,,,,,,,,,,,,17.5,,200.0,,,,,,,,,,,,,9.4,20.2,66.0,,False,False,,0.0 | Fuente: base original de Alzum.,True
 ,Aceite de pescado,Aceites y grasas,,100,gr,900.0,0.0,0.0,100.0,,,,,,,,,,,,,,,,,,,,,,,,,,485.0,19.9,29.0,40.3,,False,False,,0.0 | Fuente: base original de Alzum.,True
-,Aceite oliva virgen extra (hacendado),Aceites y grasas,hacendado,100,gr,824.0,0.0,0.0,91.6,,,,,,,,,,,,,,,,,,,,,,,,,,,13.7,,6.4,,False,False,,Fuente: base original de Alzum.,True
+,Aceite oliva virgen extra,Aceites y grasas,Hacendado,100,gr,824.0,0.0,0.0,91.6,,,,,,,,,,,,,,,,,,,,,,,,,,,13.7,,6.4,,False,False,,Fuente: base original de Alzum.,True
 ,Aceite vegetal de algodón,Aceites y grasas,,100,gr,900.0,0.0,0.0,100.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
-,Bonito albo aceite de oliva,Aceites y grasas,,100,gr,385.0,22.0,0.0,33.0,,,,,10.0,,,,,,,,,,,,,,,170.0,,,0.7,,,,,,,,True,False,,Fuente: base original de Alzum.,True
-,Coconut oil organic ( Raw C ),Aceites y grasas,Raw C,100,gr,823.0,0.0,0.0,91.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Bonito aceite de oliva,Pescados,Albo,100,gr,385.0,22.0,0.0,33.0,,,,,10.0,,,,,,,,,,,,,,,170.0,,,0.7,,,,,,,,True,False,,Fuente: base original de Alzum.,True
+,Coconut oil organic,Aceites y grasas,Raw C,100,gr,823.0,0.0,0.0,91.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Manteca vegetal,Aceites y grasas,,100,gr,895.5,0.0,0.0,99.5,,,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
 ,Mantequilla ajo y hierbas (Mailand ),Aceites y grasas,,100,gr,710.0,0.0,2.0,79.0,,,,,,,,,,,,,,,,,,,,,,,0.9,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Mantequilla de Oliva ( Olive Grove ),Aceites y grasas,,100,gr,530.0,0.0,0.0,60.0,,,,,,,,,,,,,,,,,,,,,,,0.3,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Mantequilla light (mercadona),Aceites y grasas,mercadona,100,gr,372.0,0.2,0.5,41.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Sardinas Aceite girasol Hacendado,Aceites y grasas,Hacendado,100,gr,333.0,19.2,1.1,28.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Sardinilla aceite oliva (hacendado),Aceites y grasas,hacendado,100,gr,213.0,19.0,0.0,15.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,aceite oleico gourmet,Aceites y grasas,,100,gr,828.0,0.0,0.0,92.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,caballa albo aceite de oliva,Aceites y grasas,,100,gr,346.0,19.0,0.0,30.0,,,,,,,,,,,,,,,,,,,,,,,0.8,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,ghee bio & keto,Aceites y grasas,,100,gr,895.5,0.0,0.0,99.8,,,,,,,,,,,,,,,,,,,,,,,,,,,62.5,,,,False,False,,Fuente: base original de Alzum.,True
-,mantequilla de cacahuete (> 90%),Aceites y grasas,,100,gr,632.11,25.1,19.6,50.4,6.0,,73.0,105.0,13.4,1.1,543.0,74.0,,,,9.0,0.6,63.0,43.0,473.0,1.9,154.0,1.5,358.0,649.0,5.6,17.0,2.9,1.8,,10.3,23.7,13.9,9.2,True,False,,40.0 | Fuente: base original de Alzum.,True
+,Mantequilla light,Aceites y grasas,Hacendado,100,gr,372.0,0.2,0.5,41.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Sardinas Aceite girasol,Pescados,Hacendado,100,gr,333.0,19.2,1.1,28.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Sardinilla aceite oliva,Pescados,Hacendado,100,gr,213.0,19.0,0.0,15.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Aceite oleico gourmet,Aceites y grasas,,100,gr,828.0,0.0,0.0,92.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Caballa aceite de oliva,Pescados,Albo,100,gr,346.0,19.0,0.0,30.0,,,,,,,,,,,,,,,,,,,,,,,0.8,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Ghee bio & keto,Aceites y grasas,,100,gr,895.5,0.0,0.0,99.8,,,,,,,,,,,,,,,,,,,,,,,,,,,62.5,,,,False,False,,Fuente: base original de Alzum.,True
+,Mantequilla de cacahuete (> 90%),Aceites y grasas,,100,gr,632.11,25.1,19.6,50.4,6.0,,73.0,105.0,13.4,1.1,543.0,74.0,,,,9.0,0.6,63.0,43.0,473.0,1.9,154.0,1.5,358.0,649.0,5.6,17.0,2.9,1.8,,10.3,23.7,13.9,9.2,True,False,,40.0 | Fuente: base original de Alzum.,True
 ,Soja texturizada (proteína vegetal),Alternativas vegetales,,100,gr,320.0,51.0,19.0,0.5,17.0,,,,,,,,,,,,,,,,,,,,,,,,,,0.1,0.1,0.3,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Carne de avestruz,Aves,,100,gr,109.08,22.9,0.0,2.0,,,205.0,302.0,4.9,1.2,537.0,8.0,5.2,,,200.0,,,5.0,142.0,2.7,23.0,18.0,221.0,322.0,36.6,90.0,3.9,75.6,65.0,0.6,0.6,0.4,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Contramuslo de pollo con piel,Aves,,100,gr,156.0,18.0,0.0,9.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
@@ -26,32 +26,31 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,KFC Pechuga,Aves,,1,ud,320.0,36.0,13.0,14.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Muslo de pavo,Aves,,100,gr,102.73,20.4,0.0,2.4,,,50.0,210.0,2.7,1.2,370.0,11.0,0.4,,,,,,10.0,143.0,1.8,22.0,27.0,172.0,254.0,28.6,71.0,3.0,76.6,84.0,0.8,0.5,0.7,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Muslo de pollo,Aves,,100,gr,114.81,20.1,0.0,3.8,,61.0,79.0,193.0,6.1,1.2,330.0,10.0,0.4,,5.0,320.0,2.9,61.8,11.0,64.0,1.0,23.0,21.0,167.0,229.0,13.5,86.0,2.1,76.1,80.0,1.0,1.2,1.0,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,Pavo a tacos (hacendado),Aves,hacendado,100,gr,118.0,20.7,0.0,3.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Pavo a tacos,Aves,Hacendado,100,gr,118.0,20.7,0.0,3.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Pechuga de pavo,Aves,,100,gr,104.25,24.6,0.0,0.7,,,41.0,118.0,6.3,717.0,580.0,8.0,0.5,,,,,,10.0,116.0,1.2,28.0,21.0,206.0,293.0,24.4,49.0,1.2,74.1,62.0,0.2,0.1,0.2,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Pechuga de pollo,Aves,,100,gr,108.23,22.0,0.0,1.8,,30.0,64.0,100.0,10.4,1.4,749.0,4.0,0.2,1.2,5.0,190.0,0.2,73.4,5.0,27.0,370.0,26.0,15.0,210.0,370.0,32.0,116.0,580.0,75.8,64.0,0.6,0.8,0.4,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,alitas de pollo,Aves,,100,gr,217.0,18.0,0.0,16.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,pavo fiambre (hacendado),Aves,hacendado,100,gr,78.0,17.8,0.6,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,pollo troceado hacendado,Aves,Hacendado,100,gr,189.0,19.0,0.7,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,tiras de pollo (hacendado),Aves,hacendado,100,gr,107.0,23.4,0.6,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Alpro Coconut natural - sin azúcar añadida,"Azúcares, siropes y edulcorantes",Natura,100,gr,83.0,0.6,5.0,6.0,0.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Alitas de pollo,Aves,,100,gr,217.0,18.0,0.0,16.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Pavo fiambre,Embutidos y charcutería,Hacendado,100,gr,78.0,17.8,0.6,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Pollo troceado,Aves,Hacendado,100,gr,189.0,19.0,0.7,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Tiras de pollo,Aves,Hacendado,100,gr,107.0,23.4,0.6,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Coconut natural - sin azúcar añadida,Alternativas vegetales,Alpro,100,gr,83.0,0.6,5.0,6.0,0.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Azúcar,"Azúcares, siropes y edulcorantes",,100,gr,392.84,0.1,98.1,0.0,,,,,110.0,132.0,41.0,1.0,,,,,,2.3,83.0,47.0,710.0,9.0,64.0,4.0,133.0,1.2,28.0,30.0,1.3,,,,,97.0,True,False,"Desayuno, Media mañana / merienda",60.0 | Fuente: base original de Alzum.,True
 ,Edulcorante,"Azúcares, siropes y edulcorantes",,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,False
-,Froot Loops Bajo en azucar,"Azúcares, siropes y edulcorantes",,100,gr,272.0,6.0,53.0,4.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Miel de Romero (hacendado),"Azúcares, siropes y edulcorantes",hacendado,100,gr,333.0,0.5,83.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Froot Loops Bajo en azúcar,"Azúcares, siropes y edulcorantes",,100,gr,272.0,6.0,53.0,4.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Miel de Romero,"Azúcares, siropes y edulcorantes",Hacendado,100,gr,333.0,0.5,83.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Miel de abeja,"Azúcares, siropes y edulcorantes",,100,gr,342.4,0.0,85.6,0.0,,,,,,,,,,1.3,,,,,26.0,,0.4,,,10.0,,,,0.2,14.1,,,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
 ,Sirope Maple,"Azúcares, siropes y edulcorantes",,100,gr,300.0,0.0,70.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Stevia,"Azúcares, siropes y edulcorantes",,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Té sin azúcar,"Azúcares, siropes y edulcorantes",,100,gr,0.92,0.1,0.2,0.0,,,,,,,,,,,,,,,3.0,,0.2,,,1.0,,,,,99.6,,,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
-,dextrosa (glucosa),"Azúcares, siropes y edulcorantes",,100,gr,400.0,0.0,100.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,100.0,False,False,"Desayuno, Media mañana / merienda",100.0 | Fuente: base original de Alzum.,True
+,Té sin azúcar,Bebidas no alcohólicas,,100,gr,0.92,0.1,0.2,0.0,,,,,,,,,,,,,,,3.0,,0.2,,,1.0,,,,,99.6,,,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
+,Dextrosa (glucosa),"Azúcares, siropes y edulcorantes",,100,gr,400.0,0.0,100.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,100.0,False,False,"Desayuno, Media mañana / merienda",100.0 | Fuente: base original de Alzum.,True
 ,Chicha de jora,Bebidas alcohólicas,,100,gr,27.5,0.4,5.8,0.3,,,,,,,,,,2.4,,,,,22.0,,1.8,,,18.0,,,,,93.2,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,False
 ,Agua con gas,Bebidas no alcohólicas,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
-,Agua de coco,Bebidas no alcohólicas,,100,gr,16.1,0.7,3.1,0.1,,,,,,,,,,0.8,,,,,21.0,,,,,7.0,,,,0.1,95.5,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
 ,Bio Ginger Shot,Bebidas no alcohólicas,,1,ud,52.5,0.8,11.9,0.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Café con leche,Bebidas no alcohólicas,,100,gr,22.0,1.5,2.5,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Café con leche (con azúcar),Bebidas no alcohólicas,,1,tz,70.78,1.6,12.2,1.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Café con leche sin azúcar,Bebidas no alcohólicas,,1,tz,31.0,1.6,2.4,1.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Café molido,Bebidas no alcohólicas,,100,gr,357.0,14.3,57.1,14.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Café sin azucar,Bebidas no alcohólicas,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Café sin azúcar,Bebidas no alcohólicas,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Coca Cola,Bebidas no alcohólicas,,100,gr,42.0,0.0,10.5,0.0,,,,,,,,,,,,,,,,,,,,,,,,,89.5,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
 ,Hielo,Bebidas no alcohólicas,,1,ud,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Inca Kola,Bebidas no alcohólicas,,100,gr,44.0,0.0,11.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,89.0,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
@@ -60,54 +59,53 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Té Chai,Bebidas no alcohólicas,,100,gr,64.0,0.9,11.4,1.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Té negro (bolsita),Bebidas no alcohólicas,,1,ud,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Té verde,Bebidas no alcohólicas,,100,gr,1.0,0.0,0.2,0.1,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,jugo de Naranja,Bebidas no alcohólicas,,100,gr,36.6,0.5,8.2,0.2,,,,,,,,,,42.0,,,,,31.0,,0.2,,,9.0,,,,0.1,90.7,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,jugo de piña,Bebidas no alcohólicas,,100,gr,54.0,0.4,12.9,0.1,0.2,5.0,58.0,21.0,199.0,56.0,100.0,18.0,,10.0,,20.0,0.3,3.3,13.0,69.0,310.0,12.0,504.0,8.0,130.0,0.1,2.0,110.0,86.4,,,,,10.0,True,False,,46.0 | Fuente: base original de Alzum.,True
-,jugo de uva,Bebidas no alcohólicas,,100,gr,61.73,0.4,14.8,0.1,0.2,8.0,17.0,15.0,133.0,48.0,32.0,,,100.0,,,0.4,3.2,11.0,18.0,250.0,10.0,239.0,14.0,104.0,,5.0,70.0,84.5,,,,,14.2,True,False,,55.0 | Fuente: base original de Alzum.,True
-,Cacao en polvo,"Bollería, repostería y galletas",,100,gr,433.3,19.6,57.9,13.7,33.2,,78.0,241.0,2.2,254.0,118.0,32.0,,,,100.0,2.5,12.0,128.0,3.8,13.9,499.0,3.8,734.0,1.5,14.3,21.0,6.8,3.0,,8.1,4.6,0.4,1.8,True,False,"Desayuno, Media mañana / merienda",20.0 | Fuente: base original de Alzum.,True
-,Cacao en polvo Opti-Start (Nesquik),"Bollería, repostería y galletas",Opti-Start,14,gr,50.0,0.6,11.0,0.4,0.9,114.0,0.2,0.4,,,0.3,,0.3,6.7,1.5,0.8,,,3.9,,2.1,39.0,,27.0,112.0,,28.0,1.1,,,0.2,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
-,Cacao instantáneo (Hacendado),"Bollería, repostería y galletas",Hacendado,100,gr,368.0,4.9,80.0,2.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Jugo de Naranja,Bebidas no alcohólicas,,100,gr,36.6,0.5,8.2,0.2,,,,,,,,,,42.0,,,,,31.0,,0.2,,,9.0,,,,0.1,90.7,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
+,Jugo de piña,Bebidas no alcohólicas,,100,gr,54.0,0.4,12.9,0.1,0.2,5.0,58.0,21.0,199.0,56.0,100.0,18.0,,10.0,,20.0,0.3,3.3,13.0,69.0,310.0,12.0,504.0,8.0,130.0,0.1,2.0,110.0,86.4,,,,,10.0,True,False,,46.0 | Fuente: base original de Alzum.,True
+,Jugo de uva,Bebidas no alcohólicas,,100,gr,61.73,0.4,14.8,0.1,0.2,8.0,17.0,15.0,133.0,48.0,32.0,,,100.0,,,0.4,3.2,11.0,18.0,250.0,10.0,239.0,14.0,104.0,,5.0,70.0,84.5,,,,,14.2,True,False,,55.0 | Fuente: base original de Alzum.,True
+,Cacao en polvo,"Azúcares, siropes y edulcorantes",,100,gr,433.3,19.6,57.9,13.7,33.2,,78.0,241.0,2.2,254.0,118.0,32.0,,,,100.0,2.5,12.0,128.0,3.8,13.9,499.0,3.8,734.0,1.5,14.3,21.0,6.8,3.0,,8.1,4.6,0.4,1.8,True,False,"Desayuno, Media mañana / merienda",20.0 | Fuente: base original de Alzum.,True
+,Cacao en polvo Opti-Start,"Bollería, repostería y galletas",Nesquik,14,gr,50.0,0.6,11.0,0.4,0.9,114.0,0.2,0.4,,,0.3,,0.3,6.7,1.5,0.8,,,3.9,,2.1,39.0,,27.0,112.0,,28.0,1.1,,,0.2,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
+,Cacao instantáneo,"Azúcares, siropes y edulcorantes",Hacendado,100,gr,368.0,4.9,80.0,2.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Cacao nibs,"Bollería, repostería y galletas",,100,gr,480.0,9.2,42.4,44.8,13.4,,,,,,,,,,,,,,,,0.7,1.5,,,8.7,,0.1,,,,,,,,True,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Cacao puro 100% desgrasado en polvo,"Bollería, repostería y galletas",,100,gr,321.0,27.0,12.0,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,6.8,,,,False,False,"Desayuno, Media mañana / merienda",Sin azúcares añadidos | Fuente: base original de Alzum.,True
 ,Chancay (bizcocho),"Bollería, repostería y galletas",,100,gr,354.9,8.8,64.4,6.9,,,,,,,,,,,,,,,47.0,,1.0,,,108.0,,,,,19.4,,,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
-,Choco gotas hacendado,"Bollería, repostería y galletas",Hacendado,100,gr,501.0,6.0,59.0,25.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Chocolate 99% (Hacendado),"Bollería, repostería y galletas",Hacendado,100,gr,610.0,15.0,8.0,54.0,16.0,,,,,,,,,,,,,,,,,,,,,,0.2,,,,34.0,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Choco gotas,"Bollería, repostería y galletas",Hacendado,100,gr,501.0,6.0,59.0,25.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Chocolate 99%,"Bollería, repostería y galletas",Hacendado,100,gr,610.0,15.0,8.0,54.0,16.0,,,,,,,,,,,,,,,,,,,,,,0.2,,,,34.0,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Chocolate oscuro 45-59% de cacao,"Bollería, repostería y galletas",,100,gr,545.72,4.9,61.2,31.3,7.0,50.0,25.0,50.0,725.0,297.0,42.0,,0.2,,,540.0,8.1,,56.0,1.0,8.0,146.0,1.4,206.0,559.0,3.0,24.0,2.0,1.0,8.0,18.5,9.5,1.1,47.9,True,False,"Desayuno, Media mañana / merienda",30.0 | Fuente: base original de Alzum.,True
 ,Chocolate oscuro 60-69% de cacao,"Bollería, repostería y galletas",,100,gr,578.95,6.1,52.4,38.3,8.0,50.0,32.0,49.0,838.0,300.0,34.0,,0.2,,,590.0,7.2,,62.0,1.2,6.3,176.0,1.3,260.0,567.0,8.4,10.0,2.7,1.3,6.0,22.0,11.5,1.2,36.7,True,False,"Desayuno, Media mañana / merienda",30.0 | Fuente: base original de Alzum.,True
 ,Chocolate oscuro 70-85% de cacao,"Bollería, repostería y galletas",,100,gr,598.43,7.8,45.9,42.6,10.9,39.0,34.0,78.0,1.1,418.0,38.0,,0.3,,,590.0,7.3,,73.0,1.8,11.9,228.0,1.9,308.0,715.0,6.8,20.0,3.3,1.4,3.0,24.5,12.8,1.3,24.0,True,False,"Desayuno, Media mañana / merienda",30.0 | Fuente: base original de Alzum.,True
 ,Croissant,"Bollería, repostería y galletas",,100,gr,406.0,8.0,46.0,21.0,,,,,,,,,,,,,,,,,,,,,0.1,,0.4,,,,12.0,6.0,1.1,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Galleta de vainilla (Dulce),"Bollería, repostería y galletas",,100,gr,437.9,6.0,74.9,12.7,,,,,,,,,,,,,,,22.0,,0.6,,,665.0,,,,0.6,4.8,,,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
 ,Galletas Crackers de salvado sin sal,"Bollería, repostería y galletas",,30,gr,130.5,3.5,19.0,4.5,0.9,,,,,,,,,,,,,,,,,,,,,,25.0,,,,,,,,False,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
-,Galletas maría,"Bollería, repostería y galletas",,100,gr,414.0,7.0,76.0,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,brownies,"Bollería, repostería y galletas",,100,gr,421.5,4.8,63.9,16.3,2.1,69.0,255.0,210.0,1.7,547.0,35.0,47.0,0.1,,,150.0,6.5,10.0,29.0,224.0,2.3,31.0,128.0,101.0,149.0,6.3,312.0,720.0,13.6,17.0,4.2,9.0,2.3,36.6,True,False,"Desayuno, Media mañana / merienda",43.0 | Fuente: base original de Alzum.,True
-,chocolate Special K de Kellogg (cereales),"Bollería, repostería y galletas",Kellogg,100,gr,407.07,5.7,83.3,5.7,3.4,2.4,1.7,1.9,22.6,551.0,2.3,452.0,6.8,67.7,129.0,260.0,1.2,14.4,41.0,200.0,26.1,46.0,1.2,127.0,242.0,18.2,581.0,1.2,3.0,4.0,4.9,0.1,0.1,30.3,True,False,"Desayuno, Media mañana / merienda",69.0 | Fuente: base original de Alzum.,True
-,pastel de salmon,"Bollería, repostería y galletas",,100,gr,265.0,10.1,17.0,17.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Brownies,"Bollería, repostería y galletas",,100,gr,421.5,4.8,63.9,16.3,2.1,69.0,255.0,210.0,1.7,547.0,35.0,47.0,0.1,,,150.0,6.5,10.0,29.0,224.0,2.3,31.0,128.0,101.0,149.0,6.3,312.0,720.0,13.6,17.0,4.2,9.0,2.3,36.6,True,False,"Desayuno, Media mañana / merienda",43.0 | Fuente: base original de Alzum.,True
+,Chocolate Special K de (cereales,"Bollería, repostería y galletas",Kellogg,100,gr,407.07,5.7,83.3,5.7,3.4,2.4,1.7,1.9,22.6,551.0,2.3,452.0,6.8,67.7,129.0,260.0,1.2,14.4,41.0,200.0,26.1,46.0,1.2,127.0,242.0,18.2,581.0,1.2,3.0,4.0,4.9,0.1,0.1,30.3,True,False,"Desayuno, Media mañana / merienda",69.0 | Fuente: base original de Alzum.,True
+,Pastel de salmón,Pescados,,100,gr,265.0,10.1,17.0,17.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Albóndigas,Carnes y productos cárnicos,,100,gr,197.0,21.0,8.0,9.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Albóndigas (Meatprotein),Carnes y productos cárnicos,Meatprotein,100,gr,121.8,18.8,2.2,4.2,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Albóndigas,Carnes y productos cárnicos,Meatprotein,100,gr,121.8,18.8,2.2,4.2,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Bazo de Res,Carnes y productos cárnicos,,100,gr,86.4,18.9,0.0,1.2,,,,,,,,,,10.1,,,,,7.0,,28.7,,,161.0,,,,2.1,78.1,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,CARNE DE CONEJO EXTRA,Carnes y productos cárnicos,,100,gr,130.86,20.7,0.0,5.3,,,,,,,0.4,,7.0,,,,,,,,,,,259.0,404.0,9.0,0.1,,,,2.0,1.3,2.0,,True,False,Comida / cena,15.53 mg de NIACINA | Fuente: base original de Alzum.,True
-,Cabecera de lomo (mercadona),Carnes y productos cárnicos,mercadona,100,gr,270.0,31.0,0.5,16.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Carne de conejo extra,Carnes y productos cárnicos,,100,gr,130.86,20.7,0.0,5.3,,,,,,,0.4,,7.0,,,,,,,,,,,259.0,404.0,9.0,0.1,,,,2.0,1.3,2.0,,True,False,Comida / cena,15.53 mg de NIACINA | Fuente: base original de Alzum.,True
+,Cabecera de lomo,Carnes y productos cárnicos,Hacendado,100,gr,270.0,31.0,0.5,16.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Cabezas de lomo cerdo,Carnes y productos cárnicos,,100,gr,211.0,19.0,0.0,15.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Carne Vacuno Mercadona,Carnes y productos cárnicos,Mercadona,100,gr,182.0,17.0,1.0,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Carne Vacuno,Carnes y productos cárnicos,Hacendado,100,gr,182.0,17.0,1.0,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Carne de vaca molida en lata,Carnes y productos cárnicos,,100,gr,227.0,22.0,1.0,15.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Carne picada vacuno MERCADONA,Carnes y productos cárnicos,Mercadona,100,gr,182.0,17.0,0.9,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Carne picada vacuno,Carnes y productos cárnicos,Hacendado,100,gr,182.0,17.0,0.9,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Carne pulpa de Res,Carnes y productos cárnicos,,100,gr,99.6,21.3,0.0,1.6,,,,,,,,,,,,,,,16.0,,3.4,,,208.0,,,,4.3,75.9,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Cerdo,Carnes y productos cárnicos,,100,gr,193.9,14.4,0.1,15.1,,,,,,,,,,0.6,,,,,12.0,,1.3,,,238.0,,,,1.7,69.2,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Chicharrón de cerdo (Cocido),Carnes y productos cárnicos,,100,gr,597.8,11.3,0.0,61.4,,,,,,,,,,,,,,,40.0,,,,,227.0,,,,,22.6,,,,,,False,False,Comida / cena,0 | Fuente: base original de Alzum.,True
+,Chicharrón de cerdo (Cocido),Embutidos y charcutería,,100,gr,597.8,11.3,0.0,61.4,,,,,,,,,,,,,,,40.0,,,,,227.0,,,,,22.6,,,,,,False,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Chuletón de ternera (corte graso),Carnes y productos cárnicos,,100,gr,222.0,20.0,0.0,15.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Chuletón de ternera (corte magro),Carnes y productos cárnicos,,100,gr,166.0,22.0,0.0,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Cinta de lomo Cerdo,Carnes y productos cárnicos,,100,gr,178.0,20.5,1.5,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,3.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Corazón de res,Carnes y productos cárnicos,,100,gr,98.46,16.6,0.1,3.5,,,,,,,,,,3.6,,,,,6.0,,3.6,,,209.0,,,,1.7,77.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Cordero magra,Carnes y productos cárnicos,,100,gr,136.98,20.9,0.0,5.9,,,130.0,230.0,6.5,660.0,170.0,24.0,2.2,,,190.0,,,12.0,128.0,1.9,27.0,24.0,190.0,276.0,23.6,68.0,3.2,72.6,66.0,2.1,2.4,0.5,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Costilla de cerdo,Carnes y productos cárnicos,,100,gr,395.0,28.9,0.0,30.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Costilla de res,Carnes y productos cárnicos,,100,gr,254.0,19.0,0.0,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Costilla de res,Carnes y productos cárnicos,,100,gr,254.0,19.0,0.0,19.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,"[Corregido: el registro original era incoherente.] Grasa 8 -> 19,8 g para cuadrar con sus 254 kcal. Fuente: base original de Alzum.",True
 ,Entrecot de vaca,Carnes y productos cárnicos,,100,gr,153.0,20.0,0.0,7.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Ganso sin piel,Carnes y productos cárnicos,,100,gr,155.17,22.8,0.0,7.1,,40.0,129.0,377.0,4.3,2.0,640.0,31.0,0.5,7.2,,,,,13.0,306.0,2.6,24.0,24.0,312.0,420.0,16.8,87.0,2.3,68.3,84.0,2.8,1.9,0.9,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Hamburguesa barbacoa (Meatproteim),Carnes y productos cárnicos,,100,gr,124.0,21.6,2.9,2.7,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Hamburguesa boletus (Meatprotein),Carnes y productos cárnicos,Meatprotein,100,gr,93.0,18.0,0.5,2.1,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Hamburguesa boletus,Carnes y productos cárnicos,Meatprotein,100,gr,93.0,18.0,0.5,2.1,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Hamburguesa gruesa vacuno,Carnes y productos cárnicos,,100,gr,153.0,19.0,0.5,8.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Hamburguesa ibérico (Meatprotein),Carnes y productos cárnicos,Meatprotein,100,gr,121.0,22.2,2.1,2.7,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Hamburguesa mejicana (Meatprotein),Carnes y productos cárnicos,Meatprotein,100,gr,117.0,21.8,2.1,2.6,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.7,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Hamburguesa ternera (Meatprotein),Carnes y productos cárnicos,Meatprotein,100,gr,121.0,22.2,2.1,2.7,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Hamburguesa ibérico,Carnes y productos cárnicos,Meatprotein,100,gr,121.0,22.2,2.1,2.7,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Hamburguesa mejicana,Carnes y productos cárnicos,Meatprotein,100,gr,117.0,21.8,2.1,2.6,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.7,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Hamburguesa ternera,Carnes y productos cárnicos,Meatprotein,100,gr,121.0,22.2,2.1,2.7,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Hígado de Res,Carnes y productos cárnicos,,100,gr,134.6,20.0,3.3,4.6,,,,,,,,,,19.5,,,,,13.0,,5.4,,,166.0,,,,4.0,70.8,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Hígado de ganso,Carnes y productos cárnicos,,100,gr,129.28,16.4,6.3,4.3,,31.0,562.0,892.0,6.5,6.2,760.0,738.0,54.0,4.5,,,,,43.0,7.5,30.5,24.0,,261.0,230.0,68.1,140.0,3.1,71.8,515.0,1.6,0.8,0.3,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Lomo bajo de ternera,Carnes y productos cárnicos,,100,gr,161.0,20.0,0.5,8.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
@@ -119,32 +117,29 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Relleno,Carnes y productos cárnicos,,100,gr,115.4,14.4,3.2,5.0,,,,,,,,,,3.4,,,,,63.0,,16.9,,,41.0,,,,1.3,75.5,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Riñón de res,Carnes y productos cárnicos,,100,gr,87.66,15.1,0.3,2.9,,,,,,,,,,9.9,,,,,17.0,,6.8,,,132.0,,,,1.9,79.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Rosbif,Carnes y productos cárnicos,,100,gr,170.0,20.0,0.0,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Secreto iberico,Carnes y productos cárnicos,,100,gr,225.0,22.0,0.0,14.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Secreto ibérico,Carnes y productos cárnicos,,100,gr,225.0,22.0,0.0,14.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Sesos de Carnero,Carnes y productos cárnicos,,100,gr,110.2,10.0,0.0,7.8,,,,,,,,,,11.4,,,,,7.0,,2.7,,,252.0,,,,1.2,79.1,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Solomillo cerdo,Carnes y productos cárnicos,,100,gr,103.0,18.0,0.5,3.0,,,,,,,,,,,,,,,,,,,,,,,1.2,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Solomillo de ternera (res),Carnes y productos cárnicos,,100,gr,162.0,22.0,0.0,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Ternera (hacendado),Carnes y productos cárnicos,hacendado,100,gr,161.0,22.0,0.6,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Ternera,Carnes y productos cárnicos,Hacendado,100,gr,161.0,22.0,0.6,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Ternera magra,Carnes y productos cárnicos,,100,gr,110.74,20.2,0.0,3.3,,,70.0,260.0,9.1,1.4,560.0,14.0,1.2,,,260.0,,,17.0,100.0,750.0,25.0,29.0,211.0,324.0,8.8,91.0,2.5,74.9,80.0,1.0,1.1,0.3,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,"caballo, delgado",Carnes y productos cárnicos,,100,gr,126.96,21.4,0.0,4.6,,,130.0,100.0,4.6,,380.0,,3.0,1.0,,,,,6.0,144.0,3.8,24.0,19.0,221.0,360.0,10.1,53.0,2.9,72.6,52.0,1.4,1.6,0.7,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,carne de res magra,Carnes y productos cárnicos,,100,gr,135.51,21.6,0.0,5.5,,,66.0,108.0,6.7,638.0,604.0,13.0,1.1,,,300.0,1.2,90.1,24.0,73.0,1.6,23.0,13.0,202.0,340.0,26.4,55.0,3.9,72.1,33.0,2.1,2.0,0.2,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,carrillada cerdo (hacendado),Carnes y productos cárnicos,hacendado,100,gr,127.0,20.2,0.0,6.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,ciervos,Carnes y productos cárnicos,,100,gr,113.62,23.0,0.0,2.4,,,220.0,480.0,6.4,,370.0,4.0,6.3,,,200.0,1.1,,5.0,253.0,3.4,23.0,41.0,202.0,318.0,9.7,51.0,2.1,73.6,85.0,1.0,0.7,0.5,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,Arroz (Vanguardia),Cereales y granos,Vanguardia,50,gr,176.0,4.0,40.0,0.0,0.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Arroz Basmati (hacendado),Cereales y granos,hacendado,100,gr,355.0,9.0,78.0,0.6,1.0,,,,,,,,,,,,,,,,,,,,,,0.6,,,,0.2,,,,False,False,Comida / cena,Arroz Basmati (hacendado) | Fuente: base original de Alzum.,True
-,Arroz aromatico Basmati (hacendado),Cereales y granos,hacendado,100,gr,198.0,5.0,40.0,2.0,1.0,,,,,,,,,,,,,,,,,,,,,,0.6,,,,0.2,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,"Caballo, delgado",Carnes y productos cárnicos,,100,gr,126.96,21.4,0.0,4.6,,,130.0,100.0,4.6,,380.0,,3.0,1.0,,,,,6.0,144.0,3.8,24.0,19.0,221.0,360.0,10.1,53.0,2.9,72.6,52.0,1.4,1.6,0.7,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
+,Carne de res magra,Carnes y productos cárnicos,,100,gr,135.51,21.6,0.0,5.5,,,66.0,108.0,6.7,638.0,604.0,13.0,1.1,,,300.0,1.2,90.1,24.0,73.0,1.6,23.0,13.0,202.0,340.0,26.4,55.0,3.9,72.1,33.0,2.1,2.0,0.2,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
+,Carrillada cerdo,Carnes y productos cárnicos,Hacendado,100,gr,127.0,20.2,0.0,6.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Ciervos,Carnes y productos cárnicos,,100,gr,113.62,23.0,0.0,2.4,,,220.0,480.0,6.4,,370.0,4.0,6.3,,,200.0,1.1,,5.0,253.0,3.4,23.0,41.0,202.0,318.0,9.7,51.0,2.1,73.6,85.0,1.0,0.7,0.5,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
+,Arroz,Cereales y granos,Vanguardia,50,gr,176.0,4.0,40.0,0.0,0.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,0 | Fuente: base original de Alzum.,True
+,Arroz Basmati,Cereales y granos,Hacendado,100,gr,355.0,9.0,78.0,0.6,1.0,,,,,,,,,,,,,,,,,,,,,,0.6,,,,0.2,,,,False,False,Comida / cena,Arroz Basmati (hacendado) | Fuente: base original de Alzum.,True
 ,Arroz blanco corriente,Cereales y granos,,100,gr,347.9,7.8,77.6,0.7,,,,,,,,,,0.9,,,,,6.0,,1.0,,,134.0,,,,1.5,13.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Arroz cocido,Cereales y granos,,100,gr,111.3,2.4,25.2,0.1,,,,,,,,,,,,,,,11.0,,0.3,,,30.0,,,,0.4,72.2,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Arroz redondo,Cereales y granos,,100,gr,342.0,6.8,74.0,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Avena Brüggen,Cereales y granos,Bruggen,100,gr,375.0,14.0,59.0,7.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Avena,Cereales y granos,Brüggen,100,gr,375.0,14.0,59.0,7.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Avena en polvo,Cereales y granos,,100,gr,387.9,8.5,70.7,7.9,8.8,,692.0,125.0,1.5,201.0,125.0,32.0,,,,700.0,3.0,,55.0,437.0,4.0,144.0,4.0,452.0,371.0,34.0,30.0,3.2,2.8,,1.3,3.3,3.3,0.8,True,False,,65.0 | Fuente: base original de Alzum.,True
 ,Avena instantánea,Cereales y granos,,100,gr,93.52,2.5,18.2,1.2,1.9,,,,,,,,,,,,,,,,,,,,78.0,,122.0,,,,0.2,0.4,0.4,,False,False,,0 | Fuente: base original de Alzum.,True
 ,Avena sin gluten,Cereales y granos,,100,gr,349.0,10.7,55.7,7.1,9.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Copos finos integrales | Fuente: base original de Alzum.,True
 ,Cebada,Cereales y granos,,100,gr,360.96,9.9,77.7,1.2,15.6,22.0,191.0,114.0,4.6,282.0,260.0,23.0,,,,20.0,2.2,37.8,29.0,420.0,2.5,79.0,1.3,221.0,280.0,37.7,9.0,2.1,10.1,,0.2,0.1,0.6,0.8,True,True,Comida / cena,30.0 | Fuente: base original de Alzum.,False
 ,Cereal All Bran Original (Kellogs),Cereales y granos,,100,gr,396.25,12.5,72.5,6.3,22.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Cereales Integrales (Mercado Central),Cereales y granos,,100,gr,391.64,7.2,83.0,3.4,5.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
-,Cereales frutos rojos (Hacendado),Cereales y granos,Hacendado,100,gr,383.0,8.2,81.0,1.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Corn flakes (Hacendado),Cereales y granos,Hacendado,100,gr,378.0,6.3,84.0,1.1,,,,,,,1.2,,,,,,,,,,7.0,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Especial K de Kellogg bayas rojas (cereal),Cereales y granos,Kellogg,100,gr,381.0,12.4,80.6,1.0,3.2,2.4,1.7,2.0,22.6,475.0,2.3,452.0,6.8,67.7,,15.3,0.6,21.8,60.0,170.0,26.2,39.0,1.4,162.0,242.0,13.0,710.0,1.6,3.0,,0.2,0.2,0.6,32.2,True,False,Comida / cena,71.0 | Fuente: base original de Alzum.,True
+,Cereales Integrales,Cereales y granos,Mercado Central,100,gr,391.64,7.2,83.0,3.4,5.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
+,Cereales frutos rojos,Cereales y granos,Hacendado,100,gr,383.0,8.2,81.0,1.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Corn flakes,Cereales y granos,Hacendado,100,gr,378.0,6.3,84.0,1.1,,,,,,,1.2,,,,,,,,,,7.0,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Especial K de bayas rojas (cereal,Cereales y granos,Kellogg,100,gr,381.0,12.4,80.6,1.0,3.2,2.4,1.7,2.0,22.6,475.0,2.3,452.0,6.8,67.7,,15.3,0.6,21.8,60.0,170.0,26.2,39.0,1.4,162.0,242.0,13.0,710.0,1.6,3.0,,0.2,0.2,0.6,32.2,True,False,Comida / cena,71.0 | Fuente: base original de Alzum.,True
 ,Granola,Cereales y granos,,100,gr,422.0,10.0,74.0,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Havrekuddar protein naturell febraco fullkorn 69% 400gr,Cereales y granos,,100,gr,380.0,21.0,56.0,5.6,6.5,,,,,,,,,,,,,,,,,,,,,,0.8,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Hojuelas de Quinua,Cereales y granos,,100,gr,381.7,8.5,78.6,3.7,,,,,,,,,,,,,,,114.0,,4.7,,,60.0,,,,,7.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
@@ -152,48 +147,47 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Maíz dulce,Cereales y granos,,100,gr,69.0,2.3,8.6,2.1,3.4,,,,,,,,,,,,,,,,,,,,,,0.4,,,,0.4,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Palomitas de maíz,Cereales y granos,,100,gr,601.35,7.3,45.1,43.6,8.1,154.0,134.0,57.0,1.2,230.0,109.0,25.0,,300.0,,2.4,4.1,12.6,4.0,162.0,2.0,79.0,629.0,199.0,182.0,2.2,1.1,3.1,1.2,,6.8,9.8,23.2,0.5,True,False,Comida / cena,60.0 | Fuente: base original de Alzum.,True
 ,Quick oats ( golden vale ),Cereales y granos,,100,gr,397.0,12.8,56.5,10.6,11.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Quinoa blanca y roja hacendado,Cereales y granos,Hacendado,100,gr,125.0,4.5,19.6,2.2,4.1,,,,,,,,,,,,,,,,,,,,,,0.3,,,,0.3,,,0.7,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Quinoa blanca y roja,Cereales y granos,Hacendado,100,gr,125.0,4.5,19.6,2.2,4.1,,,,,,,,,,,,,,,,,,,,,,0.3,,,,0.3,,,0.7,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Quinoa tricolor,Cereales y granos,,100,gr,353.0,14.0,57.0,6.1,7.0,,,,,,,,,,,,,,,,,0.2,,0.5,0.6,,,,,,,,,,True,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Quinua,Cereales y granos,,100,gr,373.0,13.6,66.6,5.8,,,,,,,,,,0.5,,,,,56.0,,7.5,,,242.0,,,,3.3,11.5,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Quinua cocida,Cereales y granos,,100,gr,88.1,2.8,16.3,1.3,,,,,,,,,,,,,,,27.0,,1.6,,,61.0,,,,,79.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Rolled oats ( golden vale),Cereales y granos,,100,gr,397.0,11.7,58.6,10.3,10.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Special K de Kellogg (cereales),Cereales y granos,Kellogg,100,gr,387.95,22.5,71.0,1.6,2.4,2.5,1.7,1.9,23.0,,6.4,1.3,19.5,67.7,,15.3,0.5,31.0,30.0,200.0,27.0,62.0,2.8,219.0,196.0,54.9,721.0,2.9,3.0,,0.4,0.4,0.8,12.9,True,False,,70.0 | Fuente: base original de Alzum.,True
+,Special K de (cereales,Cereales y granos,Kellogg,100,gr,387.95,22.5,71.0,1.6,2.4,2.5,1.7,1.9,23.0,,6.4,1.3,19.5,67.7,,15.3,0.5,31.0,30.0,200.0,27.0,62.0,2.8,219.0,196.0,54.9,721.0,2.9,3.0,,0.4,0.4,0.8,12.9,True,False,,70.0 | Fuente: base original de Alzum.,True
 ,Sémola de Quinua,Cereales y granos,,100,gr,389.5,19.5,53.8,10.7,,,,,,,,,,,,,,,76.0,,3.6,,,,,,,3.3,12.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Tortas de arroz,Cereales y granos,,100,gr,384.0,8.2,81.5,2.8,4.2,,61.0,165.0,7.8,1.0,150.0,21.0,,,,1.2,1.9,32.1,11.0,445.0,1.5,131.0,3.7,360.0,290.0,24.6,326.0,3.0,5.8,,0.6,1.0,1.0,0.9,True,False,Comida / cena,82.0 | Fuente: base original de Alzum.,True
-,Tortas de arroz integral Biocentury,Cereales y granos,,100,gr,387.0,8.0,81.3,4.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Tortilla Trigo (Hacendado),Cereales y granos,Hacendado,100,gr,294.0,8.0,53.0,5.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Tortitas Maíz (Hacendado),Cereales y granos,Hacendado,100,gr,368.0,7.5,80.0,1.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Tortas de arroz integral,Cereales y granos,Biocentury,100,gr,387.0,8.0,81.3,4.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Tortilla Trigo,Cereales y granos,Hacendado,100,gr,294.0,8.0,53.0,5.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Tortitas Maíz,Cereales y granos,Hacendado,100,gr,368.0,7.5,80.0,1.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Totopos,Cereales y granos,,100,gr,503.64,7.8,65.6,23.4,5.3,3.0,15.0,100.0,1.3,1.2,213.0,20.0,0.4,,,4.3,20.9,19.4,174.0,523.0,2.3,146.0,,200.0,215.0,6.7,421.0,2.5,1.9,,2.8,6.8,11.2,1.0,True,False,Comida / cena,64.0 | Fuente: base original de Alzum.,True
 ,Weetabix,Cereales y granos,,100,gr,362.0,12.0,69.0,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,alforfón,Cereales y granos,,100,gr,369.6,13.3,71.5,3.4,10.0,,101.0,425.0,7.0,1.2,210.0,30.0,,,,,,,18.0,1.1,2.2,231.0,1.3,347.0,460.0,8.3,1.0,2.4,9.8,,0.7,1.0,1.0,,True,False,Comida / cena,53.0 | Fuente: base original de Alzum.,True
-,almidón de maíz ceroso,Cereales y granos,,100,gr,352.0,0.0,88.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,80.0 | Fuente: base original de Alzum.,True
-,amaranto,Cereales y granos,,100,gr,371.0,14.0,65.0,7.0,9.3,,,,,,,,,,,,,,,,,,,,366.0,,21.0,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,centeno,Cereales y granos,,100,gr,359.47,10.3,75.9,1.6,15.1,11.0,316.0,251.0,4.3,1.5,294.0,38.0,,,,850.0,5.9,30.4,24.0,367.0,2.6,110.0,2.6,332.0,510.0,13.9,2.0,2.7,10.6,,0.2,0.2,0.8,1.0,True,False,Comida / cena,34.0 | Fuente: base original de Alzum.,True
-,kiwicha o achis,Cereales y granos,,100,gr,387.0,12.8,69.1,6.6,,,,,,,,,,1.3,,,,,236.0,,7.3,,,453.0,,,,2.7,9.2,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,maltodextrina,Cereales y granos,,100,gr,400.0,0.0,100.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,95.0 | Fuente: base original de Alzum.,True
-,tortas de palomitas de maíz,Cereales y granos,,100,gr,387.1,9.7,80.1,3.1,2.9,72.0,75.0,178.0,6.0,434.0,181.0,18.0,,,,290.0,1.1,22.4,9.0,569.0,1.9,159.0,985.0,277.0,327.0,9.9,288.0,4.0,5.0,,0.5,0.9,1.4,0.7,True,False,Comida / cena,65.0 | Fuente: base original de Alzum.,True
-,vitargo,Cereales y granos,,100,gr,368.0,0.0,92.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,110.0 | Fuente: base original de Alzum.,True
-,Bacon (La selva),Embutidos y charcutería,La selva,100,gr,349.0,14.9,1.0,31.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
+,Alforfón,Cereales y granos,,100,gr,369.6,13.3,71.5,3.4,10.0,,101.0,425.0,7.0,1.2,210.0,30.0,,,,,,,18.0,1.1,2.2,231.0,1.3,347.0,460.0,8.3,1.0,2.4,9.8,,0.7,1.0,1.0,,True,False,Comida / cena,53.0 | Fuente: base original de Alzum.,True
+,Almidón de maíz ceroso,Cereales y granos,,100,gr,352.0,0.0,88.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,80.0 | Fuente: base original de Alzum.,True
+,Amaranto,Cereales y granos,,100,gr,371.0,14.0,65.0,7.0,9.3,,,,,,,,,,,,,,,,,,,,366.0,,21.0,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Centeno,Cereales y granos,,100,gr,359.47,10.3,75.9,1.6,15.1,11.0,316.0,251.0,4.3,1.5,294.0,38.0,,,,850.0,5.9,30.4,24.0,367.0,2.6,110.0,2.6,332.0,510.0,13.9,2.0,2.7,10.6,,0.2,0.2,0.8,1.0,True,False,Comida / cena,34.0 | Fuente: base original de Alzum.,True
+,Kiwicha o achis,Cereales y granos,,100,gr,387.0,12.8,69.1,6.6,,,,,,,,,,1.3,,,,,236.0,,7.3,,,453.0,,,,2.7,9.2,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
+,Maltodextrina,"Azúcares, siropes y edulcorantes",,100,gr,400.0,0.0,100.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,95.0 | Fuente: base original de Alzum.,True
+,Tortas de palomitas de maíz,Cereales y granos,,100,gr,387.1,9.7,80.1,3.1,2.9,72.0,75.0,178.0,6.0,434.0,181.0,18.0,,,,290.0,1.1,22.4,9.0,569.0,1.9,159.0,985.0,277.0,327.0,9.9,288.0,4.0,5.0,,0.5,0.9,1.4,0.7,True,False,Comida / cena,65.0 | Fuente: base original de Alzum.,True
+,Vitargo,Cereales y granos,,100,gr,368.0,0.0,92.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,110.0 | Fuente: base original de Alzum.,True
+,Bacon,Embutidos y charcutería,La Selva,100,gr,349.0,14.9,1.0,31.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
 ,Cecina,Embutidos y charcutería,,100,gr,152.9,31.1,2.8,1.9,,,65.0,163.0,5.2,566.0,386.0,10.0,1.6,,1.0,380.0,1.3,,8.0,74.0,2.4,19.0,17.0,181.0,235.0,32.4,2.8,4.9,53.8,79.0,1.0,0.8,0.1,2.7,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
 ,Chicharrón de prensa,Embutidos y charcutería,,100,gr,430.4,23.9,0.0,37.2,,,,,,,,,,1.4,,,,,60.0,,2.2,,,119.0,,,,,29.9,,,,,,True,False,"Desayuno, Comida / cena",0 | Fuente: base original de Alzum.,True
-,Hamburguesa chorizo (Meatprotein),Embutidos y charcutería,Meatprotein,100,gr,122.0,22.3,2.1,2.7,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
+,Hamburguesa chorizo,Embutidos y charcutería,Meatprotein,100,gr,122.0,22.3,2.1,2.7,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,0.8,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
 ,Hot Dog,Embutidos y charcutería,,100,gr,361.1,11.0,2.1,34.3,,,,,,,,,,,,,,,76.0,,1.3,,,202.0,,,,2.0,49.4,,,,,,True,False,"Desayuno, Comida / cena",0 | Fuente: base original de Alzum.,True
-,Jamon Serrano Lidl,Embutidos y charcutería,Lidl,100,gr,235.0,29.0,0.0,13.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Jamonada,Embutidos y charcutería,,100,gr,339.5,15.7,2.8,29.5,,,,,,,,,,,,,,,85.0,,1.5,,,211.0,,,,1.9,49.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Jamón Cocido Natural (Hacendado),Embutidos y charcutería,Hacendado,100,gr,102.0,19.0,0.9,2.5,,,,,,,,,,,,,,,,,,,,,,,1.9,,,,,,,,False,False,,Jamón 90% | Fuente: base original de Alzum.,True
-,Jamón Serrano Jamcal,Embutidos y charcutería,,100,gr,272.0,29.8,1.0,12.8,,,,,,,,,,,,,,,,,,,,,,,,,,,6.4,,,,False,False,,Mercadona | Fuente: base original de Alzum.,True
+,Jamón Cocido Natural,Embutidos y charcutería,Hacendado,100,gr,102.0,19.0,0.9,2.5,,,,,,,,,,,,,,,,,,,,,,,1.9,,,,,,,,False,False,,Jamón 90% | Fuente: base original de Alzum.,True
+,Jamón Jamcal,Embutidos y charcutería,Serrano,100,gr,272.0,29.8,1.0,12.8,,,,,,,,,,,,,,,,,,,,,,,,,,,6.4,,,,False,False,,Mercadona | Fuente: base original de Alzum.,True
 ,Jamón del país,Embutidos y charcutería,,100,gr,336.4,24.7,0.0,26.4,,,,,,,,,,,,,,,48.0,,2.1,,,177.0,,,,1.9,47.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Jamón tacos (Incarlopsa),Embutidos y charcutería,,100,gr,234.0,33.7,1.0,10.6,,,,,,,,,,,,,,,,,,,,,,,3.6,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Lomo Back bacon,Embutidos y charcutería,,100,gr,139.0,18.0,2.0,7.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
-,Lomo Embuchado Mercadona,Embutidos y charcutería,Mercadona,100,gr,199.0,38.0,0.5,5.0,,,,,,,,,,,,,,,,,,,,,,,3.0,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
+,Lomo Embuchado,Embutidos y charcutería,Hacendado,100,gr,199.0,38.0,0.5,5.0,,,,,,,,,,,,,,,,,,,,,,,3.0,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
 ,Paté,Embutidos y charcutería,,100,gr,496.2,10.9,1.1,49.8,,,,,,,,,,,,,,,57.0,,7.1,,,289.0,,,,0.9,35.0,,,,,,True,False,"Desayuno, Comida / cena",0 | Fuente: base original de Alzum.,True
 ,Paté de foie gras,Embutidos y charcutería,,100,gr,458.84,11.4,4.7,43.8,,3.3,88.0,299.0,2.5,1.2,60.0,60.0,9.4,2.0,,,,,70.0,400.0,5.5,13.0,120.0,200.0,138.0,44.0,697.0,920.0,37.0,150.0,14.5,25.6,0.8,,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
 ,Salchicha blanca chica,Embutidos y charcutería,,100,gr,444.8,12.0,2.0,43.2,,,,,,,,,,2.3,,,,,22.0,,3.2,,,114.0,,,,1.8,40.1,,,,,,True,False,"Desayuno, Comida / cena",0 | Fuente: base original de Alzum.,True
 ,Salchicha blanca grande,Embutidos y charcutería,,100,gr,359.1,13.6,3.5,32.3,,,,,,,,,,2.5,,,,,76.0,,1.2,,,142.0,,,,1.8,47.9,,,,,,True,False,"Desayuno, Comida / cena",0 | Fuente: base original de Alzum.,True
-,"jamón (cerdo), en rodajas",Embutidos y charcutería,,100,gr,116.2,21.0,1.0,3.2,,44.0,514.0,218.0,7.4,841.0,506.0,1.0,0.4,,37.0,220.0,,82.3,6.0,271.0,940.0,22.0,26.0,322.0,364.0,37.0,1.2,2.1,71.1,57.0,1.0,1.3,0.4,1.1,True,False,,0.0 | Fuente: base original de Alzum.,True
-,jamón de pavo en rodajas,Embutidos y charcutería,,100,gr,124.32,19.6,2.9,3.8,,,50.0,250.0,3.5,,230.0,6.0,0.3,,2.0,390.0,,59.1,5.0,110.0,1.4,20.0,,304.0,299.0,37.0,1.0,2.4,72.0,67.0,1.1,0.9,1.1,,True,False,,0.0 | Fuente: base original de Alzum.,True
-,paté de hígado,Embutidos y charcutería,,100,gr,314.8,14.2,1.5,28.0,,3.3,30.0,600.0,3.3,1.2,60.0,60.0,3.2,2.0,,,,,70.0,400.0,5.5,13.0,120.0,200.0,138.0,41.6,697.0,2.9,53.9,255.0,9.6,12.4,3.2,,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
-,salchichas de hígado,Embutidos y charcutería,,100,gr,321.7,14.1,2.2,28.5,,27.7,272.0,1.0,4.3,3.0,190.0,30.0,13.5,,,,,,26.0,240.0,6.4,12.0,155.0,230.0,170.0,58.0,860.0,2.3,52.1,158.0,10.6,13.3,2.6,,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
+,"Jamón (cerdo), en rodajas",Embutidos y charcutería,,100,gr,116.2,21.0,1.0,3.2,,44.0,514.0,218.0,7.4,841.0,506.0,1.0,0.4,,37.0,220.0,,82.3,6.0,271.0,940.0,22.0,26.0,322.0,364.0,37.0,1.2,2.1,71.1,57.0,1.0,1.3,0.4,1.1,True,False,,0.0 | Fuente: base original de Alzum.,True
+,Jamón de pavo en rodajas,Embutidos y charcutería,,100,gr,124.32,19.6,2.9,3.8,,,50.0,250.0,3.5,,230.0,6.0,0.3,,2.0,390.0,,59.1,5.0,110.0,1.4,20.0,,304.0,299.0,37.0,1.0,2.4,72.0,67.0,1.1,0.9,1.1,,True,False,,0.0 | Fuente: base original de Alzum.,True
+,Paté de hígado,Embutidos y charcutería,,100,gr,314.8,14.2,1.5,28.0,,3.3,30.0,600.0,3.3,1.2,60.0,60.0,3.2,2.0,,,,,70.0,400.0,5.5,13.0,120.0,200.0,138.0,41.6,697.0,2.9,53.9,255.0,9.6,12.4,3.2,,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
+,Salchichas de hígado,Embutidos y charcutería,,100,gr,321.7,14.1,2.2,28.5,,27.7,272.0,1.0,4.3,3.0,190.0,30.0,13.5,,,,,,26.0,240.0,6.4,12.0,155.0,230.0,170.0,58.0,860.0,2.3,52.1,158.0,10.6,13.3,2.6,,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
 ,Ají amarillo molido fresco sin sal,Especias y hierbas,,100,gr,59.7,1.9,9.2,1.7,,,,,,,,,,16.2,,,,,97.0,,3.5,,,47.0,,,,,60.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
 ,Ají colorado molido,Especias y hierbas,,100,gr,49.4,2.1,8.0,1.0,,,,,,,,,,19.2,,,,,130.0,,5.0,,,54.0,,,,0.3,72.6,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
 ,Ají de mesa,Especias y hierbas,,100,gr,46.8,1.8,7.2,1.2,,,,,,,,,,104.4,,,,,77.0,,1.3,,,23.0,,,,,89.1,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
@@ -204,15 +198,14 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Culantro,Especias y hierbas,,100,gr,52.9,3.3,7.0,1.3,,,,,,,,,,37.2,,,,,259.0,,5.3,,,63.0,,,,0.5,85.6,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
 ,Cúrcuma en polvo,Especias y hierbas,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
 ,Hierbabuena,Especias y hierbas,,100,gr,49.4,3.1,7.0,1.0,,,,,,,,,,2.0,,,,,206.0,,9.1,,,70.0,,,,1.1,86.7,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
-,Mantequilla con sal,Especias y hierbas,,100,gr,733.63,0.9,0.1,81.1,,,,,,,,,,,,,,,24.0,,,,,24.0,,,,0.1,15.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
+,Mantequilla con sal,Aceites y grasas,,100,gr,733.63,0.9,0.1,81.1,,,,,,,,,,,,,,,24.0,,,,,24.0,,,,0.1,15.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
 ,Pimienta,Especias y hierbas,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
-,Sal,Especias y hierbas,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
 ,Tomillo,Especias y hierbas,,100,gr,276.0,9.1,63.9,7.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
 ,Una pizca de comino,Especias y hierbas,,100,gr,1.0,1.0,1.0,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
-,hoja de menta,Especias y hierbas,,100,gr,44.0,3.3,8.4,0.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
+,Hoja de menta,Especias y hierbas,,100,gr,44.0,3.3,8.4,0.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,False
 ,Aceitunas,Frutas,,100,gr,124.52,0.8,6.3,10.7,3.2,403.0,3.0,,37.0,15.0,9.0,,,900.0,,1.7,1.4,10.3,88.0,251.0,3.3,4.0,20.0,3.0,8.0,0.9,872.0,220.0,80.0,,1.4,7.9,0.9,,True,False,"Media mañana / merienda, Comida / cena",15.0 | Fuente: base original de Alzum.,True
 ,Aceitunas negras,Frutas,,100,gr,331.6,2.2,30.3,22.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Media mañana / merienda, Comida / cena",0 | Fuente: base original de Alzum.,True
-,Aceitunas negras Aldi,Frutas,Aldi,100,gr,134.0,0.5,0.0,14.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Media mañana / merienda, Comida / cena",Fuente: base original de Alzum.,True
+,Aceitunas negras,Frutas,Aldi,100,gr,134.0,0.5,0.0,14.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Media mañana / merienda, Comida / cena",Fuente: base original de Alzum.,True
 ,Aguaje,Frutas,,100,gr,307.5,2.3,18.1,25.1,,,,,,,,,,,,,,,74.0,,0.7,,,27.0,,,,,53.6,,,,,,True,False,,0 | Fuente: base original de Alzum.,False
 ,Albaricoques secos,Frutas,,100,gr,268.71,3.4,62.6,0.5,7.3,3.6,15.0,74.0,2.6,516.0,143.0,10.0,,1.0,,4.3,3.1,13.9,55.0,343.0,2.7,32.0,235.0,71.0,1.2,2.2,10.0,390.0,30.9,,,0.1,0.1,53.4,True,False,,31.0 | Fuente: base original de Alzum.,True
 ,Banano,Frutas,,100,gr,100.0,1.0,22.0,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
@@ -221,25 +214,21 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Coco,Frutas,,100,gr,375.65,3.3,15.2,33.5,9.0,,66.0,20.0,540.0,300.0,54.0,26.0,,3.3,,240.0,0.2,12.1,14.0,435.0,2.4,32.0,1.5,113.0,356.0,10.1,20.0,1.1,47.0,,29.7,1.4,0.4,6.2,True,True,,45.0 | Fuente: base original de Alzum.,False
 ,Cocona,Frutas,,100,gr,46.7,0.9,9.2,0.7,,,,,,,,,,4.5,,,,,16.0,,1.5,,,30.0,,,,,88.5,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Duraznos,Frutas,,100,gr,44.05,0.9,9.5,0.3,1.5,326.0,24.0,31.0,806.0,153.0,25.0,4.0,,6.6,,730.0,2.6,6.1,6.0,68.0,250.0,9.0,61.0,20.0,190.0,0.1,,170.0,88.9,,,0.1,0.1,8.4,True,False,,42.0 | Fuente: base original de Alzum.,True
-,Dátil seco,Frutas,,100,gr,314.0,2.2,71.0,0.4,8.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Fresa,Frutas,,100,gr,45.6,0.7,8.9,0.8,,,,,,,,,,42.0,,,,,37.0,,1.2,,,28.0,,,,0.1,89.1,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Fresas,Frutas,,100,gr,36.1,0.7,7.7,0.3,2.0,12.0,24.0,22.0,386.0,125.0,47.0,24.0,,58.8,,290.0,2.2,5.7,16.0,48.0,410.0,13.0,386.0,24.0,153.0,0.4,1.0,140.0,91.0,,,,0.2,4.9,True,False,,40.0 | Fuente: base original de Alzum.,True
-,Frutos rojos (Mercadona),Frutas,Mercadona,100,gr,49.0,1.0,7.4,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Frutos rojos,Frutas,Hacendado,100,gr,49.0,1.0,7.4,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Guanábana,Frutas,,100,gr,62.6,0.9,14.3,0.2,,,,,,,,,,19.0,,,,,38.0,,0.7,,,43.0,,,,0.1,84.0,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Harina de Lúcuma,Frutas,,100,gr,365.6,4.0,82.0,2.4,,,,,,,,,,11.6,,,,,92.0,,4.6,,,186.0,,,,,9.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Harina de coco,Frutas,,100,gr,385.0,19.0,18.1,17.9,37.8,,,,,,,,,,,,,,,,,,,,,,0.1,,,,16.9,,,,False,False,,Fuente: base original de Alzum.,True
+,Harina de Lúcuma,Cereales y granos,,100,gr,365.6,4.0,82.0,2.4,,,,,,,,,,11.6,,,,,92.0,,4.6,,,186.0,,,,,9.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
+,Harina de coco,Frutos secos y semillas,,100,gr,385.0,19.0,18.1,17.9,37.8,,,,,,,,,,,,,,,,,,,,,,0.1,,,,16.9,,,,False,False,,Fuente: base original de Alzum.,True
 ,Higo negro,Frutas,,100,gr,84.1,0.9,19.9,0.1,,,,,,,,,,2.9,,,,,58.0,,0.8,,,43.0,,,,0.2,78.0,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Jalapeños,Frutas,,100,gr,29.0,0.9,6.5,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Lúcuma,Frutas,,100,gr,110.5,1.5,25.0,0.5,,,,,,,,,,2.2,,,,,16.0,,0.4,,,26.0,,,,,72.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Mandarina pequeña,Frutas,,1,ud,37.0,0.5,9.3,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Melocotones secos,Frutas,,100,gr,266.6,3.6,61.3,0.8,8.2,2.2,2.0,212.0,4.4,564.0,67.0,,,4.8,,190.0,15.7,12.7,28.0,364.0,4.1,42.0,305.0,119.0,996.0,0.5,7.0,570.0,31.8,,0.1,0.3,0.4,41.7,True,False,,35.0 | Fuente: base original de Alzum.,True
 ,Melón enano,Frutas,,100,gr,21.8,0.6,4.4,0.2,,,,,,,,,,15.3,,,,,23.0,,0.4,,,3.0,,,,,94.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Mermelada Light fresa (mercadona),Frutas,mercadona,100,gr,38.0,0.6,10.4,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Mermelada de durazno,Frutas,,100,gr,206.1,0.6,50.7,0.1,,,,,,,,,,,,,,,8.0,,1.4,,,13.0,,,,,48.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Mermelada de fresa 0%(Hacendado),Frutas,Hacendado,100,gr,38.0,0.6,10.4,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Mermelada de melocoton 0%(Hacendado),Frutas,Hacendado,100,gr,38.0,0.6,9.5,0.0,1.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Mermelada de durazno,"Azúcares, siropes y edulcorantes",,100,gr,206.1,0.6,50.7,0.1,,,,,,,,,,,,,,,8.0,,1.4,,,13.0,,,,,48.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
+,Mermelada de fresa 0%,"Azúcares, siropes y edulcorantes",Hacendado,100,gr,38.0,0.6,10.4,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Mermelada de melocotón 0%,"Azúcares, siropes y edulcorantes",Hacendado,100,gr,38.0,0.6,9.5,0.0,1.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Naranja de Huando,Frutas,,100,gr,50.2,1.2,10.9,0.2,,,,,,,,,,43.9,,,,,30.0,,0.1,,,17.0,,,,0.1,87.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Pacae  ó Guaba,Frutas,,100,gr,62.5,0.6,14.8,0.1,,,,,,,,,,1.4,,,,,14.0,,0.4,,,30.0,,,,,84.1,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
+,Pacae ó Guaba,Frutas,,100,gr,62.5,0.6,14.8,0.1,,,,,,,,,,1.4,,,,,14.0,,0.4,,,30.0,,,,,84.1,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Palta,Frutas,,100,gr,141.7,1.7,5.6,12.5,,,,,,,,,,6.8,,,,,30.0,,0.6,,,67.0,,,,0.6,79.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Pasas sin pepas,Frutas,,100,gr,268.4,2.4,63.8,0.4,,,,,,,,,,2.3,,,,,64.0,,3.7,,,91.0,,,,0.2,31.6,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Piña enlatada,Frutas,,100,gr,65.27,0.5,15.6,0.1,1.3,50.0,102.0,21.0,284.0,,75.0,5.0,,9.4,,20.0,0.7,5.5,16.0,107.0,280.0,15.0,,7.0,124.0,0.4,1.0,100.0,83.5,,,,,14.3,True,False,,49.0 | Fuente: base original de Alzum.,True
@@ -251,128 +240,120 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Tuna,Frutas,,100,gr,64.8,0.8,15.4,0.0,,,,,,,,,,19.5,,,,,16.0,,0.3,,,26.0,,,,0.1,82.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Uvas,Frutas,,100,gr,76.72,0.7,18.1,0.2,0.9,66.0,69.0,70.0,188.0,50.0,86.0,2.0,,10.8,,190.0,14.6,5.6,10.0,127.0,360.0,7.0,71.0,20.0,191.0,0.1,2.0,70.0,80.5,,0.1,,,15.5,True,False,,46.0 | Fuente: base original de Alzum.,True
 ,Uvas pasas,Frutas,,100,gr,300.0,0.0,80.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Yogurt fresa (danone vitalinea),Frutas,danone vitalinea,100,gr,52.0,4.0,7.3,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Yogur fresa,Lácteos,Vitalinea,100,gr,52.0,4.0,7.3,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Zapote,Frutas,,100,gr,81.5,0.9,18.8,0.3,,,,,,,,,,8.9,,,,,22.0,,1.8,,,17.0,,,,,79.7,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,ciruelas secas,Frutas,,100,gr,267.66,2.2,63.9,0.4,7.1,781.0,51.0,186.0,1.9,422.0,205.0,4.0,,600.0,,430.0,59.5,10.1,43.0,281.0,930.0,41.0,299.0,69.0,732.0,0.3,2.0,440.0,30.9,,0.1,0.1,0.1,38.1,True,False,,40.0 | Fuente: base original de Alzum.,True
-,harina de Plátano,Frutas,,100,gr,334.4,3.1,79.6,0.4,,,,,,,,,,1.3,,,,,29.0,,3.9,,,104.0,,,,0.6,14.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,lichis secos,Frutas,,100,gr,308.8,3.8,70.7,1.2,4.6,,10.0,570.0,3.1,,90.0,12.0,,183.0,,310.0,1.6,12.7,33.0,631.0,1.7,42.0,234.0,181.0,1.1,1.3,3.0,280.0,22.3,,0.3,0.3,0.4,66.1,True,False,,60.0 | Fuente: base original de Alzum.,True
-,manzanas jugo,Frutas,,100,gr,46.77,0.1,11.3,0.1,0.2,1.0,21.0,17.0,73.0,49.0,18.0,,,900.0,,10.0,,1.8,8.0,12.0,120.0,5.0,74.0,7.0,101.0,0.1,4.0,20.0,88.2,,,,,9.6,True,False,,42.0 | Fuente: base original de Alzum.,True
-,Almendra natural,Frutos secos y semillas,Natura,100,gr,602.0,25.3,5.4,50.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Ciruelas secas,Frutas,,100,gr,267.66,2.2,63.9,0.4,7.1,781.0,51.0,186.0,1.9,422.0,205.0,4.0,,600.0,,430.0,59.5,10.1,43.0,281.0,930.0,41.0,299.0,69.0,732.0,0.3,2.0,440.0,30.9,,0.1,0.1,0.1,38.1,True,False,,40.0 | Fuente: base original de Alzum.,True
+,Harina de Plátano,Cereales y granos,,100,gr,334.4,3.1,79.6,0.4,,,,,,,,,,1.3,,,,,29.0,,3.9,,,104.0,,,,0.6,14.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
+,Lichis secos,Frutas,,100,gr,308.8,3.8,70.7,1.2,4.6,,10.0,570.0,3.1,,90.0,12.0,,183.0,,310.0,1.6,12.7,33.0,631.0,1.7,42.0,234.0,181.0,1.1,1.3,3.0,280.0,22.3,,0.3,0.3,0.4,66.1,True,False,,60.0 | Fuente: base original de Alzum.,True
+,Manzanas jugo,Frutas,,100,gr,46.77,0.1,11.3,0.1,0.2,1.0,21.0,17.0,73.0,49.0,18.0,,,900.0,,10.0,,1.8,8.0,12.0,120.0,5.0,74.0,7.0,101.0,0.1,4.0,20.0,88.2,,,,,9.6,True,False,,42.0 | Fuente: base original de Alzum.,True
+,Almendra natural,Frutos secos y semillas,,100,gr,602.0,25.3,5.4,50.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Almendras,Frutos secos y semillas,,100,gr,616.34,21.2,21.7,49.4,12.2,1.0,211.0,1.0,3.4,469.0,143.0,50.0,,,,26.2,,52.1,264.0,996.0,3.7,268.0,2.3,484.0,705.0,2.5,1.0,3.1,4.7,,3.7,30.9,12.1,3.9,True,True,,15.0 | Fuente: base original de Alzum.,False
-,Almond Butter ( Mayver`s ),Frutos secos y semillas,Mayver`s,100,gr,596.0,22.0,7.5,52.6,11.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Almond Butter,Frutos secos y semillas,Mayver's,100,gr,596.0,22.0,7.5,52.6,11.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Anacardos,Frutos secos y semillas,,100,gr,588.29,18.2,30.2,43.9,3.3,,423.0,58.0,1.1,864.0,417.0,25.0,,500.0,,900.0,34.1,,37.0,2.2,6.7,292.0,1.7,593.0,660.0,19.9,12.0,5.8,5.2,,7.8,23.8,7.8,5.9,True,False,,25.0 | Fuente: base original de Alzum.,True
 ,Avellanas,Frutos secos y semillas,,100,gr,673.35,15.0,16.7,60.8,9.7,20.0,643.0,113.0,1.8,918.0,563.0,113.0,,6.3,,15.0,14.2,45.6,114.0,1.7,4.7,163.0,6.2,290.0,680.0,2.4,,2.5,5.3,,4.5,45.7,7.9,4.3,True,True,,15.0 | Fuente: base original de Alzum.,False
 ,Castaña peruana (Nuez de Brasil),Frutos secos y semillas,,100,gr,708.7,14.3,14.6,65.9,,,,,,,,,,2.7,,,,,170.0,,2.1,,,850.0,,,,4.1,1.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Coco deshidratado,Frutos secos y semillas,,100,gr,754.0,9.0,23.0,66.0,16.0,,,,,,,,,,,,,,,,,,,,,,0.1,,,,57.0,,,,False,False,,Fuente: base original de Alzum.,True
 ,Crema de almendras,Frutos secos y semillas,,100,gr,614.0,21.0,18.8,55.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Crema de cacahuete crunchy (Hacendado),Frutos secos y semillas,Hacendado,100,gr,618.0,30.0,7.0,50.0,9.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Flax - linaza ( Red tractor ),Frutos secos y semillas,Red tractor,100,gr,533.0,18.3,1.6,42.2,13.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Crema de cacahuete crunchy,Frutos secos y semillas,Hacendado,100,gr,618.0,30.0,7.0,50.0,9.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Flax - linaza,Frutos secos y semillas,Red Tractor,100,gr,533.0,18.3,1.6,42.2,13.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Frutos secos MIX,Frutos secos y semillas,,100,gr,515.0,16.0,36.0,31.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Harina de almendras,Frutos secos y semillas,,100,gr,630.0,21.0,6.9,56.0,7.4,,,,,,,,,,,,,,,,,,,,,,,,,,4.2,,,,False,False,,Fuente: base original de Alzum.,True
 ,Harina de avellanas,Frutos secos y semillas,,100,gr,628.0,15.0,16.7,60.8,9.7,,,,,,,,,,,,,,,,,,,,,,,,,,4.4,45.0,7.9,,False,False,,Fuente: base original de Alzum.,True
-,Leche de Almendras zero hacendado,Frutos secos y semillas,Hacendado,100,gr,16.0,0.5,0.0,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,0.3,,,,False,False,,Fuente: base original de Alzum.,True
-,Leche de almendras,Frutos secos y semillas,,100,gr,17.0,0.6,0.6,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Leche de Almendras zero,Alternativas vegetales,Hacendado,100,gr,16.0,0.5,0.0,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,0.3,,,,False,False,,Fuente: base original de Alzum.,True
+,Leche de almendras,Alternativas vegetales,,100,gr,17.0,0.6,0.6,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Maní tostado,Frutos secos y semillas,,100,gr,627.7,23.7,21.5,49.7,8.0,,438.0,98.0,13.5,1.4,256.0,145.0,,,,6.9,,55.3,54.0,671.0,2.3,176.0,2.1,358.0,658.0,7.5,6.0,3.3,1.6,,6.9,24.6,15.7,4.2,True,True,,18.0 | Fuente: base original de Alzum.,False
-,Mermelada de avellanas y cacao ( Nutella),Frutos secos y semillas,,20,gr,105.5,1.2,11.0,6.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
+,Mermelada de avellanas y cacao,"Azúcares, siropes y edulcorantes",Nutella,20,gr,105.5,1.2,11.0,6.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
 ,Muesli frutas secas y nueces,Frutos secos y semillas,,100,gr,394.1,9.7,77.8,4.9,7.3,546.0,910.0,1.0,12.2,4.6,1.2,243.0,3.7,,,7.2,2.9,22.6,,390.0,8.8,78.0,2.2,243.0,486.0,17.3,231.0,3.7,5.8,,0.8,2.4,1.3,31.0,True,False,,60.0 | Fuente: base original de Alzum.,True
 ,Nueces,Frutos secos y semillas,,100,gr,702.65,15.2,13.7,65.2,6.7,20.0,341.0,150.0,1.1,570.0,537.0,98.0,,1.3,,700.0,2.7,39.2,98.0,1.6,2.9,158.0,3.4,346.0,441.0,4.9,2.0,3.1,4.1,,6.1,8.9,47.2,2.6,True,True,,15.0 | Fuente: base original de Alzum.,False
 ,Nueces pacanas,Frutos secos y semillas,,100,gr,739.85,9.2,13.9,72.0,9.6,56.0,660.0,130.0,1.2,863.0,210.0,22.0,,1.1,,1.4,3.5,40.5,70.0,1.2,2.5,121.0,4.5,277.0,410.0,3.8,,4.5,3.5,,6.2,40.8,21.6,4.0,True,False,,20.0 | Fuente: base original de Alzum.,True
-,Nuez de Brasil natural (Hacendado),Frutos secos y semillas,Hacendado,100,gr,674.0,16.7,5.1,63.4,8.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Nuez de Brasil natural,Frutos secos y semillas,Hacendado,100,gr,674.0,16.7,5.1,63.4,8.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Nuez de macadamia,Frutos secos y semillas,,100,gr,758.0,8.6,5.8,77.0,6.3,,,,,,,,,,,,,,,,,120.0,,222.0,,,,,,,13.0,62.0,,,False,False,,Fuente: base original de Alzum.,True
-,Nuez natural pelada (Hacendado),Frutos secos y semillas,Hacendado,100,gr,716.0,17.0,2.2,70.0,6.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Nuez natural pelada,Frutos secos y semillas,Hacendado,100,gr,716.0,17.0,2.2,70.0,6.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Oblea rellena de mani (Misky),Frutos secos y semillas,,25,gr,98.8,2.2,18.0,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
-,Pan Fibra y Sésamo Hacendado,Frutos secos y semillas,Hacendado,100,gr,391.0,13.0,60.1,7.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,cada panecillo son 9.6 gr | Fuente: base original de Alzum.,True
-,Pan crackers sesamo (hacendado),Frutos secos y semillas,hacendado,100,gr,391.0,13.0,60.1,7.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan de fibra y sésamo (Hacendado),Frutos secos y semillas,Hacendado,100,gr,391.0,13.0,60.1,7.6,24.7,,,,,,,,,,,,,,,,,,,,,,1.1,,,,,,,,False,False,,Alto contenido en fibra. 100% Harina integral centeno | Fuente: base original de Alzum.,True
-,Pipa de girasol natural (Hacendado),Frutos secos y semillas,Hacendado,100,gr,602.0,26.0,3.8,51.0,13.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan de fibra y sésamo,Pan y pasta,Hacendado,100,gr,391.0,13.0,60.1,7.6,24.7,,,,,,,,,,,,,,,,,,,,,,1.1,,,,,,,,False,False,,Alto contenido en fibra. 100% Harina integral centeno | Fuente: base original de Alzum.,True
+,Pipa de girasol natural,Frutos secos y semillas,Hacendado,100,gr,602.0,26.0,3.8,51.0,13.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Pipas calabaza tostadas,Frutos secos y semillas,,100,gr,574.0,29.8,14.7,49.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Pistachos,Frutos secos y semillas,,100,gr,599.63,20.3,27.5,45.4,10.3,415.0,870.0,160.0,1.3,520.0,1.7,51.0,,5.6,,2.3,,,105.0,1.3,3.9,121.0,1.2,490.0,1.0,7.0,1.0,2.2,3.9,,5.6,23.8,13.7,7.7,True,False,,15.0 | Fuente: base original de Alzum.,True
 ,Pistachos salados,Frutos secos y semillas,,100,gr,606.25,21.4,26.8,46.0,10.3,262.0,840.0,158.0,1.4,513.0,1.3,50.0,,2.3,,1.9,13.2,71.4,110.0,1.3,4.2,120.0,1.3,485.0,1.0,9.3,405.0,2.3,2.0,,5.6,24.2,13.9,7.8,True,False,,15.0 | Fuente: base original de Alzum.,True
-,Semillas de cardamomo,Frutos secos y semillas,,100,gr,311.0,10.8,68.5,6.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Semillas de chía,Frutos secos y semillas,,100,gr,444.0,21.2,4.5,31.1,31.4,,,,,,,,,,,,,,,,,,,,,,,,,,3.8,,,,False,False,,Fuente: base original de Alzum.,True
 ,Semillas secas cacao,Frutos secos y semillas,,100,gr,603.5,12.0,34.7,46.3,,,,,,,,,,3.0,,,,,106.0,,3.6,,,537.0,,,,,3.6,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,almonds ( coles ),Frutos secos y semillas,,100,gr,622.0,24.5,3.5,54.9,11.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,cashews ( coles),Frutos secos y semillas,,100,gr,582.0,20.4,19.1,46.0,7.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,castaño,Frutos secos y semillas,,100,gr,194.45,1.6,44.2,1.3,,26.0,144.0,16.0,1.1,476.0,352.0,58.0,,40.2,,,,,19.0,418.0,940.0,30.0,336.0,38.0,484.0,,2.0,490.0,52.0,,0.2,0.4,0.5,,True,False,,60.0 | Fuente: base original de Alzum.,True
-,semillas de lino,Frutos secos y semillas,,100,gr,568.12,18.3,28.9,42.2,27.3,,1.6,161.0,3.1,985.0,473.0,87.0,,600.0,,310.0,4.3,78.7,255.0,1.2,5.7,392.0,2.5,642.0,813.0,25.4,30.0,4.3,7.0,,3.7,7.5,28.7,1.6,True,False,,35.0 | Fuente: base original de Alzum.,True
-,walnuts ( coles ),Frutos secos y semillas,,100,gr,713.0,16.1,2.6,70.6,6.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Claras de huevo pasteurizadas Mercadona,Huevos,Mercadona,100,gr,50.0,11.0,0.4,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
+,Almonds ( coles ),Frutos secos y semillas,,100,gr,622.0,24.5,3.5,54.9,11.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Cashews ( coles),Frutos secos y semillas,,100,gr,582.0,20.4,19.1,46.0,7.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Castaño,Frutos secos y semillas,,100,gr,194.45,1.6,44.2,1.3,,26.0,144.0,16.0,1.1,476.0,352.0,58.0,,40.2,,,,,19.0,418.0,940.0,30.0,336.0,38.0,484.0,,2.0,490.0,52.0,,0.2,0.4,0.5,,True,False,,60.0 | Fuente: base original de Alzum.,True
+,Semillas de lino,Frutos secos y semillas,,100,gr,568.12,18.3,28.9,42.2,27.3,,1.6,161.0,3.1,985.0,473.0,87.0,,600.0,,310.0,4.3,78.7,255.0,1.2,5.7,392.0,2.5,642.0,813.0,25.4,30.0,4.3,7.0,,3.7,7.5,28.7,1.6,True,False,,35.0 | Fuente: base original de Alzum.,True
+,Walnuts ( coles ),Frutos secos y semillas,,100,gr,713.0,16.1,2.6,70.6,6.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Claras de huevo pasteurizadas,Huevos,Hacendado,100,gr,50.0,11.0,0.4,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
 ,Huevo Extra grande (XL),Huevos,,1,ud,104.0,9.0,0.5,7.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
 ,Huevo Grande (L),Huevos,,1,ud,74.0,6.3,0.4,5.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Fuente: base original de Alzum.,True
 ,Huevo Mediano,Huevos,,1,ud,68.0,5.5,0.5,4.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Comida / cena",Huevo mediano | Fuente: base original de Alzum.,True
 ,Huevos revueltos,Huevos,,100,gr,134.8,12.9,1.9,8.4,,,,,,,,,,2.5,,,,,30.0,,1.1,,,192.0,,,,1.1,75.9,,,,,,True,False,"Desayuno, Comida / cena",0 | Fuente: base original de Alzum.,True
-,clara,Huevos,,100,gr,48.05,10.9,0.7,0.2,,,4.0,439.0,105.0,190.0,5.0,4.0,0.1,,,,,1.1,7.0,23.0,80.0,11.0,11.0,15.0,163.0,20.0,166.0,30.0,87.6,,,,,0.7,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
-,huevos,Huevos,,100,gr,142.86,12.6,0.8,9.9,,487.0,69.0,478.0,70.0,1.4,143.0,47.0,1.3,,50.0,970.0,0.3,251.1,53.0,102.0,1.8,12.0,38.0,191.0,134.0,31.7,140.0,1.1,75.8,423.0,3.1,3.8,1.4,0.8,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
-,yema,Huevos,,100,gr,316.66,15.9,3.6,26.5,,1.4,176.0,528.0,24.0,3.0,350.0,146.0,2.0,,133.0,2.6,0.7,682.3,129.0,77.0,2.7,5.0,55.0,390.0,109.0,56.0,48.0,2.3,52.3,1.2,9.6,11.7,4.2,0.6,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
+,Clara,Huevos,,100,gr,48.05,10.9,0.7,0.2,,,4.0,439.0,105.0,190.0,5.0,4.0,0.1,,,,,1.1,7.0,23.0,80.0,11.0,11.0,15.0,163.0,20.0,166.0,30.0,87.6,,,,,0.7,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
+,Huevos,Huevos,,100,gr,142.86,12.6,0.8,9.9,,487.0,69.0,478.0,70.0,1.4,143.0,47.0,1.3,,50.0,970.0,0.3,251.1,53.0,102.0,1.8,12.0,38.0,191.0,134.0,31.7,140.0,1.1,75.8,423.0,3.1,3.8,1.4,0.8,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
+,Yema,Huevos,,100,gr,316.66,15.9,3.6,26.5,,1.4,176.0,528.0,24.0,3.0,350.0,146.0,2.0,,133.0,2.6,0.7,682.3,129.0,77.0,2.7,5.0,55.0,390.0,109.0,56.0,48.0,2.3,52.3,1.2,9.6,11.7,4.2,0.6,True,False,"Desayuno, Comida / cena",0.0 | Fuente: base original de Alzum.,True
 ,Arveja,Legumbres,,100,gr,109.0,7.1,18.8,0.6,,,,,,,,,,22.3,,,,,27.0,,1.7,,,134.0,,,,1.2,72.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Frejol,Legumbres,,100,gr,71.94,16.4,0.0,0.7,,70.0,31.0,45.0,1.5,51.0,52.0,26.0,0.4,,,1.2,0.7,,9.0,75.0,1.0,17.0,50.0,107.0,167.0,66.7,72.0,230.0,75.7,60.0,,0.2,0.1,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Frijol amarillo,Legumbres,,100,gr,341.9,21.1,61.0,1.5,,,,,,,,,,3.5,,,,,94.0,,9.7,,,455.0,,,,2.8,12.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Frijol cocido,Legumbres,,100,gr,94.0,5.1,17.5,0.4,,,,,,,,,,,,,,,46.0,,1.4,,,75.0,,,,1.4,75.8,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Frijol shimpe fresco,Legumbres,,100,gr,52.1,3.7,9.1,0.1,,,,,,,,,,1.0,,,,,46.0,,1.4,,,78.0,,,,,86.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Frijoles Negros Cocidos,Legumbres,,100,gr,132.0,8.9,23.7,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Frijoles refritos (natura),Legumbres,natura,100,gr,154.0,6.2,12.3,7.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Frijoles refritos,Legumbres,Natura,100,gr,154.0,6.2,12.3,7.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Frijolito chino germinado,Legumbres,,100,gr,51.1,4.5,6.7,0.7,,,,,,,,,,15.4,,,,,22.0,,0.8,,,261.0,,,,,87.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Garbanzo cocido,Legumbres,,100,gr,101.8,2.5,18.9,1.8,,,,,,,,,,,,,,,54.0,,1.2,,,60.0,,,,1.5,75.9,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Garbanzo cocido bote (hacendado),Legumbres,hacendado,100,gr,90.0,5.5,9.5,2.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Garbanzo cocido bote,Legumbres,Hacendado,100,gr,90.0,5.5,9.5,2.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Garbanzos cocidos,Legumbres,,100,gr,119.0,9.0,17.0,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Guisantes Extra Hacendado,Legumbres,Hacendado,100,gr,59.0,4.0,10.0,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Guisantes Extra,Legumbres,Hacendado,100,gr,59.0,4.0,10.0,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Habas frescas,Legumbres,,100,gr,156.0,11.3,25.9,0.8,,,,,,,,,,28.5,,,,,31.0,,2.0,,,137.0,,,,0.6,60.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Harina de Arveja,Legumbres,,100,gr,353.9,21.6,64.4,1.1,,,,,,,,,,1.5,,,,,102.0,,5.5,,,351.0,,,,,10.1,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Harina de garbanzo (Hacendado),Legumbres,Hacendado,100,gr,342.0,20.0,57.0,6.5,11.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Hummus,Legumbres,,100,gr,300.0,6.0,9.0,25.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Judía verde plana (Hacendado),Legumbres,Hacendado,100,gr,39.0,1.9,6.1,0.1,3.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Harina de garbanzo,Legumbres,Hacendado,100,gr,342.0,20.0,57.0,6.5,11.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Hummus,Salsas y condimentos,,100,gr,300.0,6.0,9.0,25.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Judía verde plana,Legumbres,Hacendado,100,gr,39.0,1.9,6.1,0.1,3.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Judías (legumbres),Legumbres,,100,gr,347.0,21.0,63.0,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Judías blancas cocidas,Legumbres,,100,gr,110.0,16.0,34.0,1.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Lenteja cocida,Legumbres,,114,gr,114.0,9.0,19.5,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Lenteja pardina (hacendado),Legumbres,hacendado,100,gr,81.0,5.7,11.2,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Judías blancas cocidas,Legumbres,,100,gr,110.0,8,17,0.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,[Corregido: el registro original era incoherente.] Los macros eran de judía seca; reescalados a peso cocido. Fuente: base original de Alzum.,True
+,Lentejas cocidas,Legumbres,,114,gr,114.0,9.0,19.5,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Lenteja pardina,Legumbres,Hacendado,100,gr,81.0,5.7,11.2,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Lentejas chicas,Legumbres,,100,gr,343.4,22.6,61.0,1.0,,,,,,,,,,5.5,,,,,73.0,,7.6,,,375.0,,,,4.8,13.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Lentejas cocidas,Legumbres,,100,gr,99.7,6.4,18.3,0.1,,,,,,,,,,,,,,,43.0,,1.7,,,80.0,,,,1.3,74.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Lentejas grandes,Legumbres,,100,gr,346.7,23.2,61.0,1.1,,,,,,,,,,4.4,,,,,71.0,,4.8,,,263.0,,,,4.8,12.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Pallar seco,Legumbres,,100,gr,338.0,20.4,61.4,1.2,,,,,,,,,,7.5,,,,,70.0,,6.7,,,318.0,,,,2.8,11.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Pasta de lenteja roja (hacendado),Legumbres,hacendado,100,gr,334.0,26.0,50.0,1.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Pasta de lenteja roja,Pan y pasta,Hacendado,100,gr,334.0,26.0,50.0,1.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Soja,Legumbres,,100,gr,446.06,36.5,30.2,19.9,9.3,22.0,874.0,870.0,1.6,793.0,377.0,375.0,,6.0,,850.0,47.0,115.9,277.0,1.7,15.7,280.0,2.5,704.0,1.8,17.8,2.0,4.9,8.5,,2.9,4.4,11.3,7.3,True,False,Comida / cena,18.0 | Fuente: base original de Alzum.,True
-,Tortitas legumbres (Hacendado),Legumbres,Hacendado,100,gr,366.0,25.0,55.0,3.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,True,Comida / cena,unos 7 gr cada tortita | Fuente: base original de Alzum.,False
-,frijol pinto,Legumbres,,100,gr,346.95,21.4,62.6,1.2,15.5,,713.0,212.0,1.2,785.0,474.0,525.0,,6.3,,210.0,5.6,66.2,113.0,893.0,5.1,176.0,1.1,411.0,1.4,27.9,12.0,2.3,11.3,,0.2,0.2,0.4,2.1,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
-,frijoles blancos,Legumbres,,100,gr,342.17,23.4,60.3,0.9,15.2,,437.0,146.0,479.0,732.0,318.0,388.0,,,,210.0,5.6,66.2,240.0,984.0,10.4,190.0,1.8,301.0,1.8,12.8,16.0,3.7,11.3,,0.2,0.1,0.4,2.1,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
-,frijoles pequeños blancos,Legumbres,,100,gr,344.06,21.1,62.3,1.2,24.9,,743.0,207.0,1.3,729.0,439.0,386.0,,,,,,,173.0,635.0,7.7,183.0,1.3,445.0,1.5,12.8,12.0,2.8,11.7,,0.3,0.1,0.5,,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
-,habas,Legumbres,,100,gr,345.57,21.5,63.4,0.7,19.0,,507.0,202.0,1.5,1.4,512.0,395.0,,,,720.0,6.0,96.7,81.0,740.0,7.5,224.0,1.7,385.0,1.7,7.2,18.0,2.8,10.2,,0.2,0.1,0.3,8.5,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
-,mungo granos,Legumbres,,100,gr,351.56,25.2,59.0,1.6,18.3,23.0,273.0,254.0,1.4,906.0,281.0,216.0,,,,,,,138.0,981.0,7.6,267.0,1.5,379.0,983.0,8.2,38.0,3.4,10.8,,0.1,0.1,1.1,,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
+,Tortitas legumbres,Legumbres,Hacendado,100,gr,366.0,25.0,55.0,3.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,True,Comida / cena,unos 7 gr cada tortita | Fuente: base original de Alzum.,False
+,Frijol pinto,Legumbres,,100,gr,346.95,21.4,62.6,1.2,15.5,,713.0,212.0,1.2,785.0,474.0,525.0,,6.3,,210.0,5.6,66.2,113.0,893.0,5.1,176.0,1.1,411.0,1.4,27.9,12.0,2.3,11.3,,0.2,0.2,0.4,2.1,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
+,Frijoles blancos,Legumbres,,100,gr,342.17,23.4,60.3,0.9,15.2,,437.0,146.0,479.0,732.0,318.0,388.0,,,,210.0,5.6,66.2,240.0,984.0,10.4,190.0,1.8,301.0,1.8,12.8,16.0,3.7,11.3,,0.2,0.1,0.4,2.1,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
+,Frijoles pequeños blancos,Legumbres,,100,gr,344.06,21.1,62.3,1.2,24.9,,743.0,207.0,1.3,729.0,439.0,386.0,,,,,,,173.0,635.0,7.7,183.0,1.3,445.0,1.5,12.8,12.0,2.8,11.7,,0.3,0.1,0.5,,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
+,Habas,Legumbres,,100,gr,345.57,21.5,63.4,0.7,19.0,,507.0,202.0,1.5,1.4,512.0,395.0,,,,720.0,6.0,96.7,81.0,740.0,7.5,224.0,1.7,385.0,1.7,7.2,18.0,2.8,10.2,,0.2,0.1,0.3,8.5,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
+,Mungo granos,Legumbres,,100,gr,351.56,25.2,59.0,1.6,18.3,23.0,273.0,254.0,1.4,906.0,281.0,216.0,,,,,,,138.0,981.0,7.6,267.0,1.5,379.0,983.0,8.2,38.0,3.4,10.8,,0.1,0.1,1.1,,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
 ,Actimel 0%,Lácteos,,100,gr,33.0,3.0,3.6,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Burrata (Mercadona),Lácteos,Mercadona,100,gr,243.0,14.0,1.7,20.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Burrata,Lácteos,Hacendado,100,gr,243.0,14.0,1.7,20.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Colacao 0%,Lácteos,,100,gr,324.0,12.0,44.0,6.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Crema de leche,Lácteos,,100,gr,167.0,0.0,6.7,16.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,GoPro (Danone),Lácteos,Danone,100,gr,58.0,8.3,5.3,0.4,,,,,,,,,,,,,,,171.0,,,,,,,,,,,,0.2,,,,False,False,,Fuente: base original de Alzum.,True
-,Kefir cabra/oveja 0%,Lácteos,,100,gr,35.0,4.5,3.7,0.0,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,GoPro,Lácteos,Danone,100,gr,58.0,8.3,5.3,0.4,,,,,,,,,,,,,,,171.0,,,,,,,,,,,,0.2,,,,False,False,,Fuente: base original de Alzum.,True
+,Kéfir cabra/oveja 0%,Lácteos,,100,gr,35.0,4.5,3.7,0.0,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Leche condensada,Lácteos,,100,gr,329.2,7.9,53.7,9.2,,,,,,,,,,,,,,,276.0,,0.1,,,107.0,,,,0.9,27.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Leche de coco (Hacendado),Lácteos,Hacendado,100,gr,165.0,0.5,2.9,17.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Leche desnatada (Hacendado),Lácteos,Hacendado,100,gr,35.0,3.2,4.9,0.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Leche de coco,Alternativas vegetales,Hacendado,100,gr,165.0,0.5,2.9,17.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Leche desnatada,Lácteos,Hacendado,100,gr,35.0,3.2,4.9,0.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Leche en polvo descremada,Lácteos,,100,gr,359.49,36.2,52.0,0.8,,,,,,,,,,6.8,,,,,1257.0,,1.2,,,968.0,,,,4.1,3.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Leche en polvo entera,Lácteos,,100,gr,487.3,27.0,36.1,26.1,,,,,,,,,,9.0,,,,,848.0,,0.2,,,888.0,,,,3.3,3.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Leche entera,Lácteos,,100,gr,63.0,3.1,4.7,3.5,,,,,,,,,,,,,,,,,,,,,,,,,88.7,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Leche entera Asturiana,Lácteos,Asturiana,100,gr,63.0,3.1,4.6,3.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Leche evaporada descremada,Lácteos,,100,gr,78.5,7.1,10.5,0.9,,,,,,,,,,13.0,,,,,,,,,,,,,,,80.0,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
 ,Leche fresca de vaca,Lácteos,,100,gr,63.5,3.1,4.9,3.5,,,,,,,,,,0.5,,,,,106.0,,1.3,,,94.0,,,,0.4,87.8,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Leche semi sin lactosa (hacendado),Lácteos,hacendado,100,gr,44.0,3.0,4.6,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Mozzarella light hacendado,Lácteos,Hacendado,100,gr,153.0,17.0,1.0,0.9,,,,,,,,,,,,,,,,,,,,,,,0.6,,,,6.0,,,0.8,False,False,,Fuente: base original de Alzum.,True
-,Nata de Montar (hacendado),Lácteos,hacendado,100,gr,335.0,2.0,3.1,35.0,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Nata ligera (Hacendado),Lácteos,Hacendado,100,gr,163.0,2.0,5.0,15.0,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,10.0,,,,False,False,,Fuente: base original de Alzum.,True
-,Nesquik,Lácteos,,100,gr,386.0,5.1,78.0,3.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Philadelphia - queso para montar,Lácteos,,100,gr,342.0,6.0,4.1,34.0,,,,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,,False,False,,Fuente: base original de Alzum.,True
-,Queso Azul Hacendado,Lácteos,Hacendado,100,gr,341.0,20.0,0.5,29.0,,,,,,,,,,,,,,,,,,,,,,,,,,,18.0,,,,False,False,,Fuente: base original de Alzum.,True
+,Leche semi sin lactosa,Lácteos,Hacendado,100,gr,44.0,3.0,4.6,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Mozzarella light,Lácteos,Hacendado,100,gr,153.0,17.0,1.0,9.3,,,,,,,,,,,,,,,,,,,,,,,0.6,,,,6.0,,,0.8,False,False,,"[Corregido: el registro original era incoherente.] Grasa 0,9 -> 9,3 g (las saturadas ya eran 6 g). Fuente: base original de Alzum.",True
+,Nata de Montar,Lácteos,Hacendado,100,gr,335.0,2.0,3.1,35.0,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Nata ligera,Lácteos,Hacendado,100,gr,163.0,2.0,5.0,15.0,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,10.0,,,,False,False,,Fuente: base original de Alzum.,True
+,Nesquik,"Azúcares, siropes y edulcorantes",Nesquik,100,gr,386.0,5.1,78.0,3.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso para montar,Lácteos,Philadelphia,100,gr,342.0,6.0,4.1,34.0,,,,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso Azul,Lácteos,Hacendado,100,gr,341.0,20.0,0.5,29.0,,,,,,,,,,,,,,,,,,,,,,,,,,,18.0,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso Port Salut Light (La Serenísima),Lácteos,,100,gr,218.0,27.0,0.5,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
 ,Queso Rancheo CARRANCO,Lácteos,,100,gr,227.0,18.0,1.8,22.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso cabra lonchas,Lácteos,,100,gr,389.0,20.0,0.7,34.0,,,,,,,,,,,,,,,,,,,,,,,,,,,24.0,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso cottage,Lácteos,,100,gr,96.7,11.1,3.4,4.3,,140.0,27.0,163.0,99.0,557.0,46.0,12.0,0.4,,3.0,80.0,,18.4,83.0,29.0,70.0,8.0,2.0,159.0,104.0,9.7,364.0,400.0,79.8,17.0,1.7,0.8,0.1,2.7,True,False,,30.0 | Fuente: base original de Alzum.,True
 ,Queso cottage sin grasa,Lácteos,,100,gr,70.61,10.3,6.7,0.3,,8.0,23.0,226.0,144.0,446.0,16.0,9.0,0.5,,,10.0,,17.9,86.0,30.0,150.0,11.0,22.0,190.0,137.0,9.4,330.0,470.0,81.0,7.0,0.2,0.1,,1.9,True,False,,30.0 | Fuente: base original de Alzum.,True
-,Queso curado Entrepinares (mercadona),Lácteos,mercadona,100,gr,418.0,24.0,1.7,35.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Queso de oveja (Entrepinares),Lácteos,,100,gr,374.0,21.0,0.6,32.0,,,,,,,,,,,,,,,,,,,,,,,1.4,,,,22.0,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso curado,Lácteos,Entrepinares,100,gr,418.0,24.0,1.7,35.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso de oveja,Lácteos,Entrepinares,100,gr,374.0,21.0,0.6,32.0,,,,,,,,,,,,,,,,,,,,,,,1.4,,,,22.0,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso de untar,Lácteos,,100,gr,290.0,16.0,8.7,21.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Queso fresco batido (hacendado),Lácteos,hacendado,100,gr,46.0,8.0,3.5,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Queso fresco batido 0% (Hacendado),Lácteos,Hacendado,100,gr,46.0,8.0,3.5,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Queso fresco burgos desnatado (Hacendado),Lácteos,Hacendado,100,gr,68.0,12.3,4.4,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso fresco batido 0%,Lácteos,Hacendado,100,gr,46.0,8.0,3.5,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso fresco burgos desnatado,Lácteos,Hacendado,100,gr,68.0,12.3,4.4,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso fresco cabra (el faro),Lácteos,,100,gr,298.0,19.8,1.1,23.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso fresco de vaca,Lácteos,,100,gr,264.1,17.5,3.3,20.1,,,,,,,,,,,,,,,783.0,,1.3,,,375.0,,,,,55.0,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Queso fresco vaca (Mercadona),Lácteos,Mercadona,100,gr,170.0,11.8,5.4,11.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso fresco vaca,Lácteos,Hacendado,100,gr,170.0,11.8,5.4,11.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso lonchas light,Lácteos,,100,gr,187.0,16.0,10.0,9.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso manchego,Lácteos,,100,gr,435.0,2.0,0.0,37.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso mantecoso,Lácteos,,100,gr,395.2,28.0,3.3,30.0,,,,,,,,,,,,,,,1076.0,,1.5,,,517.0,,,,,33.5,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
@@ -380,88 +361,86 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Queso parmesano duro,Lácteos,,100,gr,436.3,39.1,1.8,30.3,,,,,,,,,,,,,,,1260.0,,0.6,,,393.0,,,,2.8,22.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Queso parmesano rallado,Lácteos,,100,gr,402.0,32.0,0.0,30.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Queso port salut light (sancor),Lácteos,,100,gr,208.0,25.0,0.0,12.0,,400.0,,,,,,,,,3.3,,,,700.0,,,,,,,,,,,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Queso semicurado Entrepinares (mercadona),Lácteos,mercadona,100,gr,422.0,24.0,0.6,36.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Queso viejo tostado (entrepinares),Lácteos,,100,gr,474.0,27.0,1.5,40.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,YOGUR DE CABRA,Lácteos,,100,gr,77.0,4.1,4.2,4.9,,,,,,,,,,,,,,,143.0,,,,,,,,0.1,,,,3.4,,,4.2,False,False,,Fuente: base original de Alzum.,True
-,YOGURT GRIEGO HACENDADO,Lácteos,Hacendado,125,gr,176.0,5.0,14.0,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso semicurado,Lácteos,Entrepinares,100,gr,422.0,24.0,0.6,36.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Queso viejo tostado,Lácteos,Entrepinares,100,gr,474.0,27.0,1.5,40.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Yogur de cabra,Lácteos,,100,gr,77.0,4.1,4.2,4.9,,,,,,,,,,,,,,,143.0,,,,,,,,0.1,,,,3.4,,,4.2,False,False,,Fuente: base original de Alzum.,True
+,Yogur GRIEGO,Lácteos,Hacendado,125,gr,176.0,5.0,14.0,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Yogur de frutilla (Ser),Lácteos,,200,ml,60.4,6.2,8.9,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,0 | Fuente: base original de Alzum.,True
 ,Yogur frutado leche descremada,Lácteos,,100,gr,95.4,4.4,19.0,0.2,,,,,,,,,,0.7,,,,,152.0,,0.1,,,119.0,,,,0.7,75.4,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Yogur griego Stracciatella (Milbona),Lácteos,,100,gr,148.0,2.4,15.4,8.2,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,5.4,,,,False,False,,Fuente: base original de Alzum.,True
-,Yogur natural,Lácteos,Natura,100,gr,61.77,3.5,4.7,3.3,,,,,,,,,,0.5,,,,,121.0,,0.1,,,95.0,,,,0.6,87.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Yogur natural con coco (Alpro),Lácteos,Alpro,100,gr,55.0,3.9,2.3,3.0,0.8,,,,,,,,,,,,,,,,,,,,,,0.3,,,,1.1,,,,False,False,,Fuente: base original de Alzum.,True
-,Yogur proteico (Mercadona),Lácteos,Mercadona,100,gr,52.0,10.0,3.1,0.5,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.1,,,,False,False,,Fuente: base original de Alzum.,True
+,Yogur natural,Lácteos,,100,gr,61.77,3.5,4.7,3.3,,,,,,,,,,0.5,,,,,121.0,,0.1,,,95.0,,,,0.6,87.9,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
+,Yogur natural con coco,Lácteos,Alpro,100,gr,55.0,3.9,2.3,3.0,0.8,,,,,,,,,,,,,,,,,,,,,,0.3,,,,1.1,,,,False,False,,Fuente: base original de Alzum.,True
+,Yogur proteico,Lácteos,Hacendado,100,gr,52.0,10.0,3.1,0.5,,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.1,,,,False,False,,Fuente: base original de Alzum.,True
 ,Yogur sin grasa,Lácteos,,100,gr,55.26,5.7,7.7,0.2,,7.0,48.0,234.0,124.0,641.0,53.0,12.0,0.6,900.0,,,0.2,15.2,199.0,15.0,90.0,19.0,5.0,157.0,255.0,3.6,77.0,970.0,85.2,2.0,0.1,,,7.7,True,False,,30.0 | Fuente: base original de Alzum.,True
-,Yogur soja (Mercadona),Lácteos,Mercadona,100,gr,43.0,4.6,0.0,2.7,0.3,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.4,,,,False,False,,Fuente: base original de Alzum.,True
-,Yogurt natural leche descremada,Lácteos,Natura,100,gr,55.26,5.7,7.7,0.2,,,,,,,,,,0.9,,,,,199.0,,0.1,,,157.0,,,,1.0,85.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,lactosa,Lácteos,,100,gr,400.0,0.0,100.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,100.0,False,False,,45.0 | Fuente: base original de Alzum.,True
-,leche condensada ( nestle ),Lácteos,nestle,100,gr,325.0,7.5,55.0,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,leche sin grasa (desnatada),Lácteos,,100,gr,34.04,3.4,5.0,0.1,,15.0,45.0,182.0,94.0,357.0,37.0,5.0,0.5,,,10.0,,15.6,122.0,13.0,30.0,11.0,3.0,101.0,156.0,3.1,42.0,420.0,90.8,2.0,0.1,,,5.1,True,False,,33.0 | Fuente: base original de Alzum.,True
-,nachos con queso,Lácteos,,100,gr,311.73,8.1,32.2,16.8,,495.0,170.0,330.0,1.4,1.2,180.0,9.0,0.7,1.1,,,,26.4,241.0,124.0,1.1,49.0,198.0,244.0,152.0,13.9,722.0,1.6,40.5,16.0,6.9,7.1,2.0,,True,False,,55.0 | Fuente: base original de Alzum.,True
-,"quark, sin grasa (requesón, queso fresco)",Lácteos,,100,gr,62.7,12.0,3.0,0.3,,41.0,21.0,165.0,128.0,215.0,68.0,12.0,1.0,,,10.0,,,61.0,28.0,140.0,5.0,3.0,134.0,86.0,9.0,406.0,380.0,81.0,7.0,0.3,,,3.0,True,False,,30.0 | Fuente: base original de Alzum.,True
-,"queso cottage, 1% de grasa",Lácteos,,100,gr,69.62,12.4,2.7,1.0,,41.0,21.0,165.0,128.0,215.0,68.0,12.0,0.6,,,10.0,0.1,17.5,61.0,28.0,140.0,5.0,3.0,134.0,86.0,9.0,406.0,380.0,82.5,4.0,0.6,0.3,,2.7,True,False,,30.0 | Fuente: base original de Alzum.,True
-,"queso mozarella, la grasa",Lácteos,,100,gr,298.59,22.2,2.2,22.4,,676.0,30.0,283.0,104.0,141.0,37.0,7.0,2.3,,16.0,190.0,2.3,15.4,505.0,11.0,440.0,20.0,30.0,354.0,76.0,17.0,627.0,2.9,50.0,79.0,13.2,6.6,0.8,1.0,True,False,,0.0 | Fuente: base original de Alzum.,True
+,Yogur soja,Lácteos,Hacendado,100,gr,43.0,4.6,0.0,2.7,0.3,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.4,,,,False,False,,Fuente: base original de Alzum.,True
+,Yogur natural leche descremada,Lácteos,,100,gr,55.26,5.7,7.7,0.2,,,,,,,,,,0.9,,,,,199.0,,0.1,,,157.0,,,,1.0,85.2,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
+,Lactosa,Lácteos,,100,gr,400.0,0.0,100.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,100.0,False,False,,45.0 | Fuente: base original de Alzum.,True
+,Leche condensada,Lácteos,Nestlé,100,gr,325.0,7.5,55.0,8.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Leche sin grasa (desnatada),Lácteos,,100,gr,34.04,3.4,5.0,0.1,,15.0,45.0,182.0,94.0,357.0,37.0,5.0,0.5,,,10.0,,15.6,122.0,13.0,30.0,11.0,3.0,101.0,156.0,3.1,42.0,420.0,90.8,2.0,0.1,,,5.1,True,False,,33.0 | Fuente: base original de Alzum.,True
+,Nachos con queso,Lácteos,,100,gr,311.73,8.1,32.2,16.8,,495.0,170.0,330.0,1.4,1.2,180.0,9.0,0.7,1.1,,,,26.4,241.0,124.0,1.1,49.0,198.0,244.0,152.0,13.9,722.0,1.6,40.5,16.0,6.9,7.1,2.0,,True,False,,55.0 | Fuente: base original de Alzum.,True
+,"Quark, sin grasa (requesón, queso fresco)",Lácteos,,100,gr,62.7,12.0,3.0,0.3,,41.0,21.0,165.0,128.0,215.0,68.0,12.0,1.0,,,10.0,,,61.0,28.0,140.0,5.0,3.0,134.0,86.0,9.0,406.0,380.0,81.0,7.0,0.3,,,3.0,True,False,,30.0 | Fuente: base original de Alzum.,True
+,"Queso cottage, 1% de grasa",Lácteos,,100,gr,69.62,12.4,2.7,1.0,,41.0,21.0,165.0,128.0,215.0,68.0,12.0,0.6,,,10.0,0.1,17.5,61.0,28.0,140.0,5.0,3.0,134.0,86.0,9.0,406.0,380.0,82.5,4.0,0.6,0.3,,2.7,True,False,,30.0 | Fuente: base original de Alzum.,True
+,"Queso mozarella, la grasa",Lácteos,,100,gr,298.59,22.2,2.2,22.4,,676.0,30.0,283.0,104.0,141.0,37.0,7.0,2.3,,16.0,190.0,2.3,15.4,505.0,11.0,440.0,20.0,30.0,354.0,76.0,17.0,627.0,2.9,50.0,79.0,13.2,6.6,0.8,1.0,True,False,,0.0 | Fuente: base original de Alzum.,True
 ,"Calamar (Inkfish, sepia)","Mariscos, crustáceos y moluscos",,100,gr,87.06,15.6,3.1,1.4,,33.0,20.0,412.0,2.2,500.0,56.0,5.0,1.3,4.7,,1.2,,65.0,32.0,1.9,680.0,33.0,35.0,221.0,246.0,44.8,44.0,1.5,78.6,233.0,0.4,0.1,0.5,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Calamar índico,"Mariscos, crustáceos y moluscos",,100,gr,76.0,16.0,0.5,1.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Camarones,"Mariscos, crustáceos y moluscos",,100,gr,100.45,20.3,0.9,1.7,,180.0,28.0,34.0,2.6,276.0,104.0,3.0,1.2,2.0,,1.1,,80.9,52.0,264.0,2.4,37.0,50.0,205.0,185.0,38.0,148.0,1.1,75.9,152.0,0.3,0.3,0.7,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Cangrejo en lata,"Mariscos, crustáceos y moluscos",,100,gr,93.15,20.5,0.0,1.2,,7.0,80.0,84.0,1.4,360.0,150.0,43.0,0.5,2.7,,1.8,0.1,33.6,101.0,760.0,840.0,39.0,190.0,260.0,374.0,31.8,333.0,4.0,76.2,89.0,0.3,0.2,0.4,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,Crema de marisco (Hacendado),"Mariscos, crustáceos y moluscos",Hacendado,100,gr,36.0,1.8,3.7,1.6,0.5,,,,,,,,,,,,,,,,,,,,,,0.8,,,,0.3,,,,False,False,Comida / cena,Platos de cuchara | Fuente: base original de Alzum.,True
-,Langostino cocido MERCADONA,"Mariscos, crustáceos y moluscos",Mercadona,100,gr,98.0,22.2,0.5,1.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Crema de marisco,"Mariscos, crustáceos y moluscos",Hacendado,100,gr,36.0,1.8,3.7,1.6,0.5,,,,,,,,,,,,,,,,,,,,,,0.8,,,,0.3,,,,False,False,Comida / cena,Platos de cuchara | Fuente: base original de Alzum.,True
+,Langostino cocido,"Mariscos, crustáceos y moluscos",Hacendado,100,gr,98.0,22.2,0.5,1.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Langostino congelado (pescanova),"Mariscos, crustáceos y moluscos",,100,gr,68.0,14.0,0.0,1.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Navajas al natural,"Mariscos, crustáceos y moluscos",Natura,100,gr,96.0,18.2,2.3,1.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,"calamar frito (Inkfish, sepia)","Mariscos, crustáceos y moluscos",,100,gr,170.24,17.9,7.8,7.5,,35.0,56.0,458.0,2.6,510.0,58.0,14.0,1.2,4.2,,,,,39.0,2.1,1.0,38.0,70.0,251.0,279.0,51.8,306.0,1.7,64.5,260.0,1.9,2.7,2.1,,True,False,Comida / cena,20.0 | Fuente: base original de Alzum.,True
-,cangrejo,"Mariscos, crustáceos y moluscos",,100,gr,82.12,18.1,0.0,1.1,,5.0,80.0,40.0,2.7,350.0,150.0,44.0,9.0,3.0,,,,,89.0,669.0,740.0,34.0,150.0,229.0,329.0,37.4,293.0,3.5,79.0,78.0,0.2,0.2,0.4,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
+,Navajas al natural,"Mariscos, crustáceos y moluscos",,100,gr,96.0,18.2,2.3,1.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,"Calamar frito (Inkfish, sepia)","Mariscos, crustáceos y moluscos",,100,gr,170.24,17.9,7.8,7.5,,35.0,56.0,458.0,2.6,510.0,58.0,14.0,1.2,4.2,,,,,39.0,2.1,1.0,38.0,70.0,251.0,279.0,51.8,306.0,1.7,64.5,260.0,1.9,2.7,2.1,,True,False,Comida / cena,20.0 | Fuente: base original de Alzum.,True
+,Cangrejo,"Mariscos, crustáceos y moluscos",,100,gr,82.12,18.1,0.0,1.1,,5.0,80.0,40.0,2.7,350.0,150.0,44.0,9.0,3.0,,,,,89.0,669.0,740.0,34.0,150.0,229.0,329.0,37.4,293.0,3.5,79.0,78.0,0.2,0.2,0.4,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Arepa de maíz,Pan y pasta,,100,gr,158.0,3.0,35.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,arepa goya | Fuente: base original de Alzum.,True
-,Arepa de maíz blanco El dorado,Pan y pasta,El Dorado,100,gr,125.0,3.3,28.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Arepa de maíz blanco,Pan y pasta,El Dorado,100,gr,125.0,3.3,28.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Coditos cocidos,Pan y pasta,,100,gr,155.0,5.5,32.5,1.0,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Espaguetis Integral Hacendado,Pan y pasta,Hacendado,100,gr,345.0,13.5,62.0,2.4,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Fajitas Old el paso,Pan y pasta,Old El Paso,100,gr,227.0,6.7,41.1,36.0,1.5,,,,,,,,,,,,,,,,,,,,,,2.1,,,,0.8,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Espaguetis Integral,Pan y pasta,Hacendado,100,gr,345.0,13.5,62.0,2.4,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Fajitas,Pan y pasta,Old El Paso,100,gr,227.0,6.7,41.1,3.6,1.5,,,,,,,,,,,,,,,,,,,,,,2.1,,,,0.8,,,,False,False,Comida / cena,"[Corregido: el registro original era incoherente.] Grasa 36 -> 3,6 g (coma desplazada). Fuente: base original de Alzum.",True
 ,Fideo crudo,Pan y pasta,,100,gr,350.2,9.4,77.7,0.2,,,,,,,,,,,,,,,24.0,,5.5,,,150.0,,,,1.3,12.1,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Fideo tallarín,Pan y pasta,,100,gr,317.3,9.5,69.6,0.1,,,,,,,,,,,,,,,40.0,,5.5,,,137.0,,,,1.3,20.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Harina de Habas,Pan y pasta,,100,gr,352.7,24.3,59.6,1.9,,,,,,,,,,4.7,,,,,67.0,,6.7,,,393.0,,,,3.1,11.9,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Harina de Quinua,Pan y pasta,,100,gr,348.2,9.1,72.1,2.6,,,,,,,,,,,,,,,181.0,,3.7,,,61.0,,,,,13.7,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Harina de trigo,Pan y pasta,,100,gr,357.1,10.3,74.7,1.9,,,,,,,,,,4.8,,,,,36.0,,3.9,,,314.0,,,,3.0,11.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Harina de trigo sarraceno,Pan y pasta,,100,gr,360.74,12.6,70.6,3.1,10.0,,417.0,190.0,6.2,440.0,582.0,54.0,,,,320.0,7.0,54.2,41.0,515.0,4.1,251.0,2.0,337.0,577.0,5.7,11.0,3.1,11.2,,0.7,0.9,0.9,2.6,True,False,Comida / cena,55.0 | Fuente: base original de Alzum.,True
-,Macarron pluma (la isleña),Pan y pasta,,100,gr,344.0,12.0,68.0,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Macarrón pluma (la isleña),Pan y pasta,,100,gr,344.0,12.0,68.0,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Obleas,Pan y pasta,,100,gr,443.8,6.6,72.4,14.2,3.4,12.0,203.0,266.0,2.9,381.0,51.0,61.0,0.1,,,720.0,2.4,14.6,31.0,463.0,4.0,53.0,696.0,132.0,210.0,5.7,580.0,1.1,4.5,2.0,4.2,4.9,4.2,29.7,True,False,Comida / cena,75.0 | Fuente: base original de Alzum.,True
-,Pan 100% integral (Hacendado),Pan y pasta,Hacendado,100,gr,230.0,10.0,38.0,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan Baguete mercadona,Pan y pasta,Mercadona,100,gr,281.0,9.4,61.1,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan Pita,Pan y pasta,,100,gr,270.0,9.1,55.7,1.2,2.2,,267.0,97.0,2.1,397.0,34.0,24.0,,,,,,,86.0,168.0,1.4,26.0,481.0,97.0,120.0,,536.0,840.0,32.1,,0.2,0.1,0.5,,True,False,,65.0 | Fuente: base original de Alzum.,True
-,Pan bimbo oroweat,Pan y pasta,,100,gr,245.0,12.0,37.0,4.0,6.0,,,,,,,,,,,,,,,,,,,,,,1.0,,,,0.7,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan 100% integral,Pan y pasta,Hacendado,100,gr,230.0,10.0,38.0,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan Baguete,Pan y pasta,Hacendado,100,gr,281.0,9.4,61.1,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan,Pan y pasta,Bimbo,100,gr,245.0,12.0,37.0,4.0,6.0,,,,,,,,,,,,,,,,,,,,,,1.0,,,,0.7,,,,False,False,,Fuente: base original de Alzum.,True
 ,Pan blanco,Pan y pasta,,100,gr,262.61,7.6,50.6,3.3,2.4,,455.0,331.0,4.4,203.0,84.0,111.0,,,,220.0,3.1,14.6,151.0,253.0,3.7,23.0,478.0,99.0,100.0,17.3,681.0,740.0,36.4,,0.7,0.7,1.4,4.3,True,False,,74.0 | Fuente: base original de Alzum.,True
 ,Pan blanco sin corteza,Pan y pasta,,100,gr,223.0,8.3,41.0,2.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan de cebada (Serrano),Pan y pasta,,100,gr,295.4,7.2,66.2,0.2,,,,,,,,,,,,,,,60.0,,6.5,,,224.0,,,,,24.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
+,Pan de cebada,Pan y pasta,Serrano,100,gr,295.4,7.2,66.2,0.2,,,,,,,,,,,,,,,60.0,,6.5,,,224.0,,,,,24.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Pan de labranza,Pan y pasta,,100,gr,328.3,9.6,71.8,0.3,,,,,,,,,,1.0,,,,,40.0,,1.6,,,107.0,,,,,17.3,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
 ,Pan de molde,Pan y pasta,,100,gr,326.5,6.8,69.2,2.5,,,,,,,,,,,,,,,13.0,,0.4,,,60.0,,,,0.7,20.8,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Pan de molde (La Santiagueña),Pan y pasta,,50,gr,122.0,4.1,21.0,2.4,1.4,,,,,,,,,,,,,,,,,,,,,,296.0,,,,0.2,,,,False,False,,0 | Fuente: base original de Alzum.,True
-,Pan de molde con corteza (mercadona),Pan y pasta,mercadona,100,gr,252.0,10.7,37.9,4.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan de molde integral,Pan y pasta,,100,gr,236.0,10.0,40.0,2.8,5.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,El horno (Aldi) | Fuente: base original de Alzum.,True
-,Pan de molde sin corteza (mercadona),Pan y pasta,mercadona,100,gr,224.0,9.6,34.0,4.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan de molde,Pan y pasta,La Santiagueña,50,gr,122.0,4.1,21.0,2.4,1.4,,,,,,,,,,,,,,,,,,,,,,296.0,,,,0.2,,,,False,False,,0 | Fuente: base original de Alzum.,True
+,Pan de molde con corteza,Pan y pasta,Hacendado,100,gr,252.0,10.7,37.9,4.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan de molde sin corteza,Pan y pasta,Hacendado,100,gr,224.0,9.6,34.0,4.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Pan francés,Pan y pasta,,100,gr,287.0,8.4,62.9,0.2,,,,,,,,,,1.0,,,,,35.0,,1.0,,,101.0,,,,0.7,27.0,,,,,,True,False,,0 | Fuente: base original de Alzum.,True
-,Pan integral clasic (Carrefour),Pan y pasta,,100,gr,237.0,10.0,40.0,2.8,5.7,,,,,,,,,,,,,,,,,,,,,,1.2,,,,0.7,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan molde sin corteza - hacendado integral (Unidad),Pan y pasta,Hacendado,1,gr,54.0,2.4,8.5,1.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan integral clasic,Pan y pasta,Carrefour,100,gr,237.0,10.0,40.0,2.8,5.7,,,,,,,,,,,,,,,,,,,,,,1.2,,,,0.7,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan molde sin corteza - integral (Unidad,Pan y pasta,Hacendado,1,gr,54.0,2.4,8.5,1.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Pan multi-grano,Pan y pasta,,100,gr,264.87,13.4,43.3,4.2,7.4,,279.0,131.0,4.0,336.0,263.0,75.0,,100.0,,370.0,1.4,26.5,103.0,282.0,2.5,78.0,2.0,228.0,230.0,32.9,420.0,1.7,36.9,,0.9,0.8,1.9,6.4,True,False,,60.0 | Fuente: base original de Alzum.,True
-,Pan realfooding,Pan y pasta,,100,gr,250.0,12.0,40.0,0.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Pan cristallino | Fuente: base original de Alzum.,True
+,Pan,Pan y pasta,Realfooding,100,gr,250.0,12.0,40.0,0.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Pan cristallino | Fuente: base original de Alzum.,True
 ,Pan tajado,Pan y pasta,,1,ud,63.0,2.1,11.1,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan tostado doble fibra (bimbo),Pan y pasta,,100,gr,437.0,13.3,80.0,6.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,Pan tostado integral Espelta Hacendado,Pan y pasta,Hacendado,100,gr,384.0,17.5,60.4,6.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan tostado doble fibra,Pan y pasta,Bimbo,100,gr,437.0,13.3,80.0,6.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Pan tostado integral Espelta,Pan y pasta,Hacendado,100,gr,384.0,17.5,60.4,6.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Pasta cocida,Pan y pasta,,100,gr,178.0,6.1,34.8,1.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Picos integrales (hacendado),Pan y pasta,hacendado,100,gr,405.0,11.6,73.5,6.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Pita carrefour,Pan y pasta,,100,gr,257.0,10.0,47.0,1.8,5.3,,,,,,,,,,,,,,,,,,,,,,1.0,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Sazonador fajitas Tex Mex (Hacendado),Pan y pasta,Hacendado,100,gr,264.0,3.3,58.5,1.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Picos integrales,Pan y pasta,Hacendado,100,gr,405.0,11.6,73.5,6.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Pita,Pan y pasta,Carrefour,100,gr,257.0,10.0,47.0,1.8,5.3,,,,,,,,,,,,,,,,,,,,,,1.0,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Sazonador fajitas Tex Mex,Pan y pasta,Hacendado,100,gr,264.0,3.3,58.5,1.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Soft tortilla wraps fullkorn 370gr,Pan y pasta,,100,gr,289.0,9.3,46.3,6.0,,,,,,,,,,,,,,,,,,,,,,,1.0,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Tortilla de harina (mission),Pan y pasta,,100,gr,286.0,8.2,53.1,6.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Tostadas de Arroz Integral Inflado,Pan y pasta,,100,gr,375.0,8.3,83.3,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,cuscús,Pan y pasta,,100,gr,366.52,12.8,77.4,0.6,5.0,,163.0,78.0,3.5,1.2,110.0,20.0,,,,,,,24.0,247.0,1.1,44.0,780.0,170.0,166.0,,10.0,830.0,8.6,,0.1,0.1,0.3,,True,False,Comida / cena,62.0 | Fuente: base original de Alzum.,True
-,pan campeon del mundo (hacendado),Pan y pasta,hacendado,100,gr,241.0,8.3,36.0,5.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
-,panqueques,Pan y pasta,,100,gr,190.1,5.2,36.7,2.5,1.3,32.0,211.0,217.0,1.7,243.0,91.0,37.0,0.2,200.0,,,,19.2,126.0,94.0,1.6,20.0,272.0,334.0,175.0,13.5,628.0,390.0,53.0,12.0,0.5,0.9,0.8,,True,False,Comida / cena,70.0 | Fuente: base original de Alzum.,True
-,ñoquis,Pan y pasta,,100,gr,174.0,4.5,37.6,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Atun claro al natural (mercadona),Pescados,mercadona,100,gr,116.0,25.2,1.2,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Atún al natural (hacendado),Pescados,hacendado,100,gr,79.0,18.0,0.5,0.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Cuscús,Pan y pasta,,100,gr,366.52,12.8,77.4,0.6,5.0,,163.0,78.0,3.5,1.2,110.0,20.0,,,,,,,24.0,247.0,1.1,44.0,780.0,170.0,166.0,,10.0,830.0,8.6,,0.1,0.1,0.3,,True,False,Comida / cena,62.0 | Fuente: base original de Alzum.,True
+,Pan campeon del mundo,Pan y pasta,Hacendado,100,gr,241.0,8.3,36.0,5.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Panqueques,Pan y pasta,,100,gr,190.1,5.2,36.7,2.5,1.3,32.0,211.0,217.0,1.7,243.0,91.0,37.0,0.2,200.0,,,,19.2,126.0,94.0,1.6,20.0,272.0,334.0,175.0,13.5,628.0,390.0,53.0,12.0,0.5,0.9,0.8,,True,False,Comida / cena,70.0 | Fuente: base original de Alzum.,True
+,Ñoquis,Pan y pasta,,100,gr,174.0,4.5,37.6,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Atún claro al natural,Pescados,Hacendado,100,gr,116.0,25.2,1.2,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Atún al natural,Pescados,Hacendado,100,gr,79.0,18.0,0.5,0.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Atún enlatado en agua,Pescados,,100,gr,121.21,23.6,0.0,3.0,,19.0,8.0,44.0,5.8,124.0,217.0,2.0,1.2,,,,,,14.0,39.0,970.0,33.0,19.0,217.0,237.0,65.7,50.0,480.0,74.0,42.0,0.8,0.8,1.1,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,False
 ,Atún rojo,Pescados,,100,gr,137.42,23.3,0.0,4.9,,2.2,241.0,251.0,8.7,1.1,455.0,2.0,9.4,,227.0,1.0,,65.0,8.0,86.0,1.0,50.0,15.0,254.0,252.0,36.5,39.0,600.0,68.1,38.0,1.3,1.6,1.4,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Bacalao,Pescados,,100,gr,77.27,17.8,0.0,0.7,,40.0,76.0,65.0,2.1,153.0,245.0,7.0,0.9,1.0,36.0,640.0,0.1,65.2,16.0,28.0,380.0,32.0,15.0,203.0,413.0,33.1,54.0,450.0,81.2,43.0,0.1,0.1,0.2,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,Bonito Hacendado,Pescados,Hacendado,100,gr,192.0,25.0,0.6,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Filetes de merluza del cabo (Hacendado),Pescados,Hacendado,100,gr,82.0,18.0,0.5,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Bonito,Pescados,Hacendado,100,gr,192.0,25.0,0.6,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Filetes de merluza del cabo,Pescados,Hacendado,100,gr,82.0,18.0,0.5,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Lomos de Atún,Pescados,,100,gr,89.0,20.0,1.3,0.6,,,,,,,,,,,,,,,,,,,,,,,0.8,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Medallones de Merluza,Pescados,,100,gr,82.0,18.0,0.5,1.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Merluza a la plancha,Pescados,,100,gr,132.0,21.4,0.4,4.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
@@ -485,76 +464,76 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Pescado tramboyo,Pescados,,100,gr,164.0,32.9,0.0,3.6,,,,,,,,,,,,,,,,,,,,,,,,,44.8,,,,,,False,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Pescado trucha,Pescados,,100,gr,130.6,20.5,0.0,5.4,,,,,,,,,,5.9,,,,,49.0,,1.9,,,217.0,,,,,72.5,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Pota,Pescados,,100,gr,100.0,19.6,0.0,2.4,,,,,,,,,,,,,,,105.0,,0.7,,,311.0,,,,,76.5,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Solomillos Atun,Pescados,,100,gr,119.0,22.0,0.0,3.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Solomillos atún,Pescados,,100,gr,119.0,22.0,0.0,3.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Tilapia,Pescados,,100,gr,95.62,20.1,0.0,1.7,,,41.0,63.0,3.9,487.0,162.0,24.0,1.6,,124.0,400.0,1.4,42.5,10.0,75.0,560.0,27.0,37.0,170.0,302.0,41.8,52.0,330.0,78.1,50.0,0.8,0.7,0.5,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,eglefino,Pescados,,100,gr,82.12,18.9,0.0,0.7,,57.0,35.0,37.0,3.8,127.0,300.0,12.0,1.2,,24.0,390.0,0.1,65.0,33.0,26.0,1.1,39.0,25.0,188.0,311.0,30.2,68.0,370.0,79.9,57.0,0.1,0.1,0.2,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,hipogloso,Pescados,,100,gr,103.85,20.8,0.0,2.3,,157.0,60.0,75.0,5.8,329.0,344.0,12.0,1.2,,229.0,850.0,0.1,61.8,47.0,27.0,840.0,83.0,15.0,222.0,450.0,36.5,54.0,420.0,77.9,32.0,0.3,0.8,0.7,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
-,pescado blanco,Pescados,,100,gr,129.1,19.1,0.0,5.9,,120.0,140.0,120.0,3.0,750.0,300.0,15.0,1.0,,478.0,200.0,0.1,65.0,26.0,72.0,370.0,33.0,67.0,270.0,317.0,12.6,51.0,990.0,72.8,60.0,0.9,2.0,2.1,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
+,Eglefino,Pescados,,100,gr,82.12,18.9,0.0,0.7,,57.0,35.0,37.0,3.8,127.0,300.0,12.0,1.2,,24.0,390.0,0.1,65.0,33.0,26.0,1.1,39.0,25.0,188.0,311.0,30.2,68.0,370.0,79.9,57.0,0.1,0.1,0.2,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
+,Hipogloso,Pescados,,100,gr,103.85,20.8,0.0,2.3,,157.0,60.0,75.0,5.8,329.0,344.0,12.0,1.2,,229.0,850.0,0.1,61.8,47.0,27.0,840.0,83.0,15.0,222.0,450.0,36.5,54.0,420.0,77.9,32.0,0.3,0.8,0.7,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
+,Pescado blanco,Pescados,,100,gr,129.1,19.1,0.0,5.9,,120.0,140.0,120.0,3.0,750.0,300.0,15.0,1.0,,478.0,200.0,0.1,65.0,26.0,72.0,370.0,33.0,67.0,270.0,317.0,12.6,51.0,990.0,72.8,60.0,0.9,2.0,2.1,,True,False,Comida / cena,0.0 | Fuente: base original de Alzum.,True
 ,Big Mac,Platos preparados,,1,ud,590.0,25.0,46.0,34.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Cocido casero,Platos preparados,,100,gr,131.0,5.6,7.0,8.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,KFC Pierna,Platos preparados,,1,ud,120.0,11.0,3.0,7.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,McDonalds Papitas medianas,Platos preparados,,1,ud,320.0,5.0,43.0,15.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Yogurt natural sin gluten (linesa mercadona),Productos para alimentación especial,linesa mercadona,100,gr,38.0,4.2,4.8,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
+,Yogur natural sin gluten,Lácteos,Hacendado,100,gr,38.0,4.2,4.8,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,,Fuente: base original de Alzum.,True
 ,Chucrut,Salsas y condimentos,,100,gr,22.0,1.5,1.9,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Mayonesa,Salsas y condimentos,,100,gr,680.0,1.0,0.6,75.0,,,,,,,,,,,,,,,,,,,,,,,0.6,,,,12.0,17.0,45.0,,False,False,Comida / cena,Mayonesa genérica | Fuente: base original de Alzum.,True
-,Mayonesa (Hacendado),Salsas y condimentos,Hacendado,100,gr,599.0,0.7,2.6,65.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Mermelada frutilla,Salsas y condimentos,,100,gr,241.0,0.4,59.4,0.2,,,,,,,,,,,,,,,40.0,,1.2,,,13.0,,,,,39.7,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Mostaza Dijon (hacendado),Salsas y condimentos,hacendado,100,gr,149.0,7.2,1.8,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Mayonesa,Salsas y condimentos,Hacendado,100,gr,599.0,0.7,2.6,65.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Mermelada frutilla,"Azúcares, siropes y edulcorantes",,100,gr,241.0,0.4,59.4,0.2,,,,,,,,,,,,,,,40.0,,1.2,,,13.0,,,,,39.7,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
+,Mostaza Dijon,Salsas y condimentos,Hacendado,100,gr,149.0,7.2,1.8,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Salsa de Tomate,Salsas y condimentos,,100,gr,27.9,1.5,3.9,0.7,,,,,,,,,,,,,,,117.0,,3.0,,,64.0,,,,0.2,75.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Sazonador Burritos (Hacendado),Salsas y condimentos,Hacendado,100,gr,268.0,14.2,39.6,3.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Sazonador Burritos,Salsas y condimentos,Hacendado,100,gr,268.0,14.2,39.6,3.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Teriyaki ( masterfood ),Salsas y condimentos,,100,gr,180.0,0.2,40.8,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Champiñones laminados bote hacendado,"Setas, hongos y algas",Hacendado,100,gr,21.0,2.8,1.5,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Champiñones laminados bote,"Setas, hongos y algas",Hacendado,100,gr,21.0,2.8,1.5,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Tortitas de legumbre,Snacks y aperitivos,,100,gr,366.0,25.0,55.0,3.1,,,,,,,,,,,,,,,,,,,,,,,1.7,,,,0.7,,,,False,False,Media mañana / merienda,Fuente: base original de Alzum.,True
 ,"Aminoácidos, BCAA's",Suplementos deportivos,,100,gr,400.0,100.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",0.0 | Fuente: base original de Alzum.,True
 ,"Aminoácidos, EAA",Suplementos deportivos,,100,gr,400.0,100.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",0.0 | Fuente: base original de Alzum.,True
-,Avena MAX PROTEIN,Suplementos deportivos,Max Protein,100,gr,356.8,11.1,57.4,5.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Barra snack Prozis- caramel,Suplementos deportivos,Prozis,100,gr,402.0,30.0,39.0,13.0,4.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Barra wafer Prozis vainilla,Suplementos deportivos,Prozis,100,gr,532.0,31.0,25.0,36.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Brownie (prozis),Suplementos deportivos,prozis,100,gr,426.4,5.4,53.0,21.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Avena,Suplementos deportivos,Max Protein,100,gr,356.8,11.1,57.4,5.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Barra snack - caramel,Suplementos deportivos,Prozis,100,gr,402.0,30.0,39.0,13.0,4.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Barra wafer vainilla,Suplementos deportivos,Prozis,100,gr,532.0,31.0,25.0,36.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Brownie,Suplementos deportivos,Prozis,100,gr,426.4,5.4,53.0,21.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,CENTRUM,Suplementos deportivos,,1,u,0.0,0.0,0.0,0.0,,2.0,1.4,1.6,,,2.0,,1.0,60.0,,14.9,30.0,,,2.0,14.0,100.0,2.5,125.0,40.0,25.0,,15.0,,,,,,,True,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
-,Crema de cacahuete (prozis),Suplementos deportivos,prozis,100,gr,630.0,26.0,11.0,52.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,F-1 Herbalife,Suplementos deportivos,Herbalife,100,gr,222.0,35.0,31.0,10.0,16.0,1180.0,,,,,1.6,,,104.0,7.3,17.0,110.0,,390.0,1.7,21.0,431.0,3.1,890.0,1420.0,81.0,,11.0,,,1.6,2.2,5.5,,True,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,F-3 Herbalife,Suplementos deportivos,Herbalife,100,gr,385.0,83.0,3.7,4.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Krispees prozis,Suplementos deportivos,Prozis,100,gr,397.0,26.0,46.0,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,MEGAPLEX GAINER,Suplementos deportivos,,100,gr,1050.0,44.0,220.0,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",SON 3.5 COPAS | Fuente: base original de Alzum.,True
-,Oatmeal Prozis - proteina,Suplementos deportivos,Prozis,100,gr,378.0,30.0,48.0,6.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Oatmeal banana Prozis,Suplementos deportivos,Prozis,100,gr,372.0,31.0,45.0,5.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,PROTEIN PANCAKES PROZIS,Suplementos deportivos,Prozis,100,gr,364.0,55.0,23.0,4.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,PROTEINA cookies and cream Prozis,Suplementos deportivos,Prozis,100,gr,371.0,73.0,5.4,6.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Pan prozis,Suplementos deportivos,Prozis,100,gr,245.0,17.0,17.0,9.0,14.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Peanut Butter crunchy Prozis,Suplementos deportivos,Prozis,100,gr,616.0,25.0,15.0,49.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Protein snack toffee Prozis,Suplementos deportivos,Prozis,100,gr,402.0,30.0,39.0,13.0,4.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Proteina Hidro whey isolate de Prozis,Suplementos deportivos,Prozis,100,gr,402.0,90.0,2.9,3.4,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,2.0,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Proteina WHEY Decathlon,Suplementos deportivos,,100,gr,361.0,70.0,14.0,3.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Proteina Xtreme Whey White Chocolate Prozis,Suplementos deportivos,Prozis,100,gr,402.0,71.0,13.0,7.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,Proteína Prozis Chocolate,Suplementos deportivos,Prozis,100,gr,385.8,81.0,3.3,5.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Crema de cacahuete,Frutos secos y semillas,Prozis,100,gr,630.0,26.0,11.0,52.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,F-1,Suplementos deportivos,Herbalife,100,gr,222.0,35.0,31.0,1.8,16.0,1180.0,,,,,1.6,,,104.0,7.3,17.0,110.0,,390.0,1.7,21.0,431.0,3.1,890.0,1420.0,81.0,,11.0,,,,,,,True,False,"Desayuno, Media mañana / merienda","Desglose de ácidos grasos vaciado: era incompatible con la grasa total corregida. [Corregido: el registro original era incoherente.] Grasa 10 -> 1,8 g para cuadrar con sus 222 kcal. Fuente: base original de Alzum.",True
+,F-3,Suplementos deportivos,Herbalife,100,gr,385.0,83.0,3.7,4.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Krispees,Suplementos deportivos,Prozis,100,gr,397.0,26.0,46.0,10.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Megaplex gainer,Suplementos deportivos,,100,gr,396.2,16.6,83.0,0.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda","Reescalado a 100 g. El registro original daba los valores por 3,5 cazos (265 g). | SON 3.5 COPAS | Fuente: base original de Alzum.",True
+,Oatmeal - proteína,Suplementos deportivos,Prozis,100,gr,378.0,30.0,48.0,6.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Oatmeal banana,Suplementos deportivos,Prozis,100,gr,372.0,31.0,45.0,5.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Protein pancakes,Suplementos deportivos,Prozis,100,gr,364.0,55.0,23.0,4.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Proteína cookies and cream,Suplementos deportivos,Prozis,100,gr,371.0,73.0,5.4,6.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Pan,Pan y pasta,Prozis,100,gr,245.0,17.0,17.0,9.0,14.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Peanut Butter crunchy,Suplementos deportivos,Prozis,100,gr,616.0,25.0,15.0,49.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Protein snack toffee,Suplementos deportivos,Prozis,100,gr,402.0,30.0,39.0,13.0,4.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Proteína Hidro whey isolate de,Suplementos deportivos,Prozis,100,gr,402.0,90.0,2.9,3.4,,,,,,,,,,,,,,,,,,,,,,,0.2,,,,2.0,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Proteína WHEY,Suplementos deportivos,Decathlon,100,gr,361.0,70.0,14.0,3.7,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Proteína Xtreme Whey White Chocolate,Suplementos deportivos,Prozis,100,gr,402.0,71.0,13.0,7.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Proteína Chocolate,Suplementos deportivos,Prozis,100,gr,385.8,81.0,3.3,5.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Proteína Whey Isolada Vainilla (ON),Suplementos deportivos,,29,gr,117.0,24.0,3.0,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",0 | Fuente: base original de Alzum.,True
 ,Proteína whey,Suplementos deportivos,,100,gr,368.0,71.0,6.0,6.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Rebuild Strength,Suplementos deportivos,,100,gr,380.0,51.0,36.0,3.0,,,,,,,,,,160.0,,9.1,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Whey Isolate Zero,Suplementos deportivos,,100,gr,353.0,82.0,4.0,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,billion prozis blanco,Suplementos deportivos,Prozis,100,gr,445.0,21.0,47.0,18.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
-,creatina,Suplementos deportivos,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",0.0 | Fuente: base original de Alzum.,True
-,nacho chips prozis,Suplementos deportivos,Prozis,100,gr,346.0,45.0,20.0,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Billion blanco,Suplementos deportivos,Prozis,100,gr,445.0,21.0,47.0,18.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
+,Creatina,Suplementos deportivos,,100,gr,0.0,0.0,0.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",0.0 | Fuente: base original de Alzum.,True
+,Nacho chips,Suplementos deportivos,Prozis,100,gr,346.0,45.0,20.0,11.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,"Desayuno, Media mañana / merienda",Fuente: base original de Alzum.,True
 ,Camote,Tubérculos y raíces,,100,gr,87.21,1.6,20.1,0.1,3.0,14.2,78.0,61.0,557.0,800.0,209.0,11.0,,2.4,,260.0,1.8,12.3,30.0,151.0,610.0,25.0,258.0,47.0,337.0,0.6,55.0,300.0,77.3,,,,,4.2,True,False,Comida / cena,61.0 | Fuente: base original de Alzum.,True
 ,Camote amarillo,Tubérculos y raíces,,100,gr,117.0,1.2,27.6,0.2,,,,,,,,,,10.0,,,,,41.0,,0.8,,,31.0,,,,0.3,69.9,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Camote blanco,Tubérculos y raíces,,100,gr,120.9,1.7,28.3,0.1,,,,,,,,,,12.9,,,,,26.0,,2.5,,,33.0,,,,,68.8,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Camote morado,Tubérculos y raíces,,100,gr,111.1,1.4,25.7,0.3,,,,,,,,,,13.6,,,,,36.0,,1.4,,,40.0,,,,,71.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Harina de Camote,Tubérculos y raíces,,100,gr,353.7,2.1,84.3,0.9,,,,,,,,,,7.9,,,,,153.0,,5.7,,,99.0,,,,0.3,9.9,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Harina de Yuca,Tubérculos y raíces,,100,gr,334.9,1.7,80.9,0.5,,,,,,,,,,13.6,,,,,155.0,,5.3,,,110.0,,,,,14.3,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,KFC Pure de papa,Tubérculos y raíces,,1,ud,120.0,2.0,19.0,4.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,KFC puré de papa,Tubérculos y raíces,,1,ud,120.0,2.0,19.0,4.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Maca (Tubérculo seco),Tubérculos y raíces,,100,gr,326.8,11.8,66.3,1.6,,,,,,,,,,2.5,,,,,247.0,,14.7,,,183.0,,,,,15.3,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Olluco sin cáscara,Tubérculos y raíces,,100,gr,62.5,1.1,14.3,0.1,,,,,,,,,,11.5,,,,,3.0,,1.1,,,28.0,,,,,83.7,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Papa,Tubérculos y raíces,,100,gr,78.77,2.0,17.5,0.1,2.2,2.0,80.0,32.0,1.1,296.0,295.0,16.0,,19.7,,10.0,1.9,12.1,12.0,108.0,780.0,23.0,153.0,57.0,421.0,0.3,6.0,290.0,79.3,,,,,0.8,True,False,Comida / cena,85.0 | Fuente: base original de Alzum.,True
 ,Papa amarilla sin cáscara,Tubérculos y raíces,,100,gr,104.8,2.0,23.3,0.4,,,,,,,,,,9.0,,,,,6.0,,0.4,,,52.0,,,,0.3,73.2,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Papa cocida,Tubérculos y raíces,,100,gr,80.0,2.0,18.0,2.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Puré patatas copos (Carrefour),Tubérculos y raíces,,100,gr,360.0,7.7,77.0,0.6,8.0,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.3,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Puré patatas copos,Tubérculos y raíces,Carrefour,100,gr,360.0,7.7,77.0,0.6,8.0,,,,,,,,,,,,,,,,,,,,,,0.1,,,,0.3,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Remolacha raíz,Tubérculos y raíces,,100,gr,46.21,1.6,9.6,0.2,,,,,,,,,,4.9,,,,,16.0,,0.8,,,40.0,,,,0.4,87.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Yuca amarilla fresca sin cáscara,Tubérculos y raíces,,100,gr,160.6,0.6,39.1,0.2,,,,,,,,,,36.3,,,,,35.0,,0.4,,,62.0,,,,0.2,59.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Yuca asada,Tubérculos y raíces,,100,gr,182.7,0.6,44.4,0.3,,,,,,,,,,22.9,,,,,29.0,,0.2,,,69.0,,,,0.2,53.7,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Yuca blanca fresca sin cáscara,Tubérculos y raíces,,100,gr,162.2,0.8,39.3,0.2,,,,,,,,,,30.7,,,,,25.0,,0.5,,,52.0,,,,0.2,58.9,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Yuca blanca sancochada,Tubérculos y raíces,,100,gr,149.4,0.5,36.4,0.2,,,,,,,,,,22.7,,,,,26.0,,0.2,,,60.0,,,,0.2,62.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Zanahoria amarilla sin cáscara,Tubérculos y raíces,,100,gr,43.7,0.6,9.2,0.5,,,,,,,,,,17.4,,,,,33.0,,0.5,,,16.0,,,,0.2,89.0,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,patatas fritas (merienda),Tubérculos y raíces,,100,gr,557.08,6.6,50.8,36.4,4.4,,63.0,230.0,4.2,4.3,723.0,75.0,,18.6,,6.7,22.1,12.1,24.0,398.0,1.6,70.0,664.0,155.0,1.6,8.1,525.0,2.4,2.3,,4.0,16.0,16.0,0.4,True,False,Comida / cena,56.0 | Fuente: base original de Alzum.,True
+,Patatas fritas (merienda),Tubérculos y raíces,,100,gr,557.08,6.6,50.8,36.4,4.4,,63.0,230.0,4.2,4.3,723.0,75.0,,18.6,,6.7,22.1,12.1,24.0,398.0,1.6,70.0,664.0,155.0,1.6,8.1,525.0,2.4,2.3,,4.0,16.0,16.0,0.4,True,False,Comida / cena,56.0 | Fuente: base original de Alzum.,True
 ,Ñame (batata),Tubérculos y raíces,,100,gr,119.17,1.5,27.9,0.2,4.1,138.0,112.0,32.0,552.0,314.0,293.0,23.0,,17.1,,350.0,2.3,16.5,17.0,178.0,540.0,21.0,397.0,55.0,816.0,0.7,9.0,240.0,69.6,,,,0.1,0.5,True,False,Comida / cena,50.0 | Fuente: base original de Alzum.,True
 ,Acelgas,Verduras y hortalizas,,100,gr,28.0,1.9,4.0,0.2,1.2,335.2,,,,,,,,35.0,,,,,105.0,,3.3,76.0,,,378.0,0.9,150.0,,92.0,,,,,,True,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Ajo sin cáscara,Verduras y hortalizas,,100,gr,151.2,5.6,30.4,0.8,,,,,,,,,,9.1,,,,,94.0,,1.7,,,180.0,,,,1.2,61.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
@@ -570,19 +549,19 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Cebollita china,Verduras y hortalizas,,100,gr,42.8,2.3,7.5,0.4,,,,,,,,,,10.5,,,,,141.0,,1.1,,,61.0,,,,0.5,88.7,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Col blanca,Verduras y hortalizas,,100,gr,27.1,1.3,4.8,0.3,,,,,,,,,,31.4,,,,,46.0,,0.4,,,46.0,,,,0.2,93.1,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Col roja,Verduras y hortalizas,,100,gr,36.64,1.4,7.4,0.2,2.1,1.1,64.0,69.0,418.0,147.0,209.0,18.0,,57.0,,110.0,38.2,17.1,45.0,17.0,800.0,16.0,243.0,30.0,243.0,0.6,27.0,220.0,90.4,,,,0.1,3.8,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
-,Crema de verduras,Verduras y hortalizas,,100,gr,64.0,2.1,6.3,3.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,ENSALADA 4 ESTACIONES HACENDADO,Verduras y hortalizas,Hacendado,100,gr,17.0,0.9,2.0,0.5,2.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Ensalada gourmet (hacendado),Verduras y hortalizas,hacendado,100,gr,26.0,1.4,3.1,0.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Ensalada lechuga hacendado,Verduras y hortalizas,Hacendado,100,gr,22.0,1.2,2.9,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Solo lechuga | Fuente: base original de Alzum.,True
-,Esparrago delgado (hacendado),Verduras y hortalizas,hacendado,100,gr,15.0,1.3,1.6,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Crema de verduras,Platos preparados,,100,gr,64.0,2.1,6.3,3.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Ensalada 4 estaciones,Verduras y hortalizas,Hacendado,100,gr,17.0,0.9,2.0,0.5,2.4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Ensalada gourmet,Verduras y hortalizas,Hacendado,100,gr,26.0,1.4,3.1,0.3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Ensalada lechuga,Verduras y hortalizas,Hacendado,100,gr,22.0,1.2,2.9,0.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Solo lechuga | Fuente: base original de Alzum.,True
+,Espárrago delgado,Verduras y hortalizas,Hacendado,100,gr,15.0,1.3,1.6,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Espárragos,Verduras y hortalizas,,100,gr,29.0,2.2,4.6,0.2,,,,,,,,,,8.0,,,,,35.0,,1.2,,,35.0,,,,0.5,92.3,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Espárragos trigueros,Verduras y hortalizas,,100,gr,21.0,2.3,2.0,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Gazpacho realfooding,Verduras y hortalizas,,100,gr,56.0,1.9,2.4,4.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Guacamole,Verduras y hortalizas,,100,gr,148.0,0.0,6.0,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Guacamole Hacendado,Verduras y hortalizas,Hacendado,100,gr,149.0,1.9,2.0,13.7,5.0,,,,,,,,,,,,,,,,,,,,,,,,,,3.8,,,,False,False,Comida / cena,10 gr cada cucharada aproximadamente | Fuente: base original de Alzum.,True
+,Gazpacho,Platos preparados,Realfooding,100,gr,56.0,1.9,2.4,4.6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Guacamole,Salsas y condimentos,,100,gr,148.0,0.0,6.0,12.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Guacamole,Salsas y condimentos,Hacendado,100,gr,149.0,1.9,2.0,13.7,5.0,,,,,,,,,,,,,,,,,,,,,,,,,,3.8,,,,False,False,Comida / cena,10 gr cada cucharada aproximadamente | Fuente: base original de Alzum.,True
 ,Habichuelas (verdura),Verduras y hortalizas,,100,gr,27.0,1.6,6.1,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Huacatay,Verduras y hortalizas,,100,gr,62.4,5.0,8.8,0.8,,,,,,,,,,17.1,,,,,412.0,,8.7,,,79.0,,,,,83.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Judias verdes redondas (Ybarra),Verduras y hortalizas,,100,gr,16.0,0.7,2.6,0.5,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,En conserva | Fuente: base original de Alzum.,True
+,Judías verdes redondas (Ybarra),Verduras y hortalizas,,100,gr,16.0,0.7,2.6,0.5,1.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,En conserva | Fuente: base original de Alzum.,True
 ,Lechuga americana,Verduras y hortalizas,,100,gr,12.9,0.6,2.4,0.1,,,,,,,,,,1.5,,,,,52.0,,0.1,,,20.0,,,,0.2,96.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Lechuga larga,Verduras y hortalizas,,100,gr,23.4,1.5,3.9,0.2,,,,,,,,,,14.5,,,,,64.0,,1.6,,,63.0,,,,0.2,93.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Okra,Verduras y hortalizas,,100,gr,37.02,2.0,7.0,0.1,3.2,375.0,200.0,60.0,1.0,245.0,215.0,88.0,,21.1,,360.0,53.0,12.3,81.0,94.0,800.0,57.0,990.0,63.0,303.0,0.7,8.0,600.0,90.2,,,,,1.2,True,False,Comida / cena,35.0 | Fuente: base original de Alzum.,True
@@ -590,9 +569,9 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Pimiento,Verduras y hortalizas,,100,gr,41.3,1.5,7.7,0.5,,,,,,,,,,108.3,,,,,12.0,,0.5,,,24.0,,,,0.3,89.6,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Pimiento amarillo,Verduras y hortalizas,,100,gr,31.17,1.0,6.3,0.2,0.9,200.0,28.0,25.0,890.0,168.0,168.0,26.0,,183.5,,,,,11.0,107.0,460.0,12.0,117.0,24.0,212.0,0.3,2.0,170.0,92.0,,,,,,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
 ,Pimientos de padron,Verduras y hortalizas,,100,gr,24.0,0.7,4.6,0.8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,Pipa de calabaza natural (Hacendado),Verduras y hortalizas,Hacendado,100,gr,583.0,35.0,1.6,48.0,5.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Pipa de calabaza natural,Verduras y hortalizas,Hacendado,100,gr,583.0,35.0,1.6,48.0,5.5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Poro sin hojas,Verduras y hortalizas,,100,gr,48.4,2.7,7.6,0.8,,,,,,,,,,8.6,,,,,78.0,,0.7,,,50.0,,,,0.1,87.8,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,Pure de verduras,Verduras y hortalizas,,100,gr,81.0,2.0,12.6,2.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Puré de verduras,Verduras y hortalizas,,100,gr,81.0,2.0,12.6,2.9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
 ,Rabanitos,Verduras y hortalizas,,100,gr,15.7,0.8,2.9,0.1,,,,,,,,,,18.6,,,,,36.0,,1.0,,,29.0,,,,0.3,95.1,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Rocoto fresco,Verduras y hortalizas,,100,gr,42.1,1.2,8.2,0.5,,,,,,,,,,14.9,,,,,6.0,,0.5,,,22.0,,,,,89.5,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Salteado Verduras,Verduras y hortalizas,,100,gr,34.0,2.0,5.0,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
@@ -602,20 +581,19 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Vainitas,Verduras y hortalizas,,100,gr,44.7,2.4,8.1,0.3,,,,,,,,,,9.6,,,,,88.0,,1.4,,,49.0,,,,0.2,88.2,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Zapallo italiano,Verduras y hortalizas,,100,gr,17.0,0.9,2.9,0.2,,,,,,,,,,26.2,,,,,27.0,,0.3,,,34.0,,,,,95.4,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
 ,Zapallo loche,Verduras y hortalizas,,100,gr,91.7,1.6,21.1,0.1,,,,,,,,,,2.6,,,,,20.0,,1.2,,,57.0,,,,0.2,75.7,,,,,,True,False,Comida / cena,0 | Fuente: base original de Alzum.,True
-,calabaza de verano,Verduras y hortalizas,,100,gr,19.86,1.2,3.4,0.2,1.1,200.0,48.0,142.0,487.0,155.0,218.0,29.0,,17.0,,120.0,3.0,6.7,15.0,51.0,350.0,17.0,175.0,38.0,262.0,0.2,2.0,290.0,94.6,,,,0.1,2.2,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
-,chalotes,Verduras y hortalizas,,100,gr,78.1,2.5,16.8,0.1,,1.2,60.0,20.0,200.0,290.0,345.0,34.0,,8.0,,,,,37.0,88.0,1.2,21.0,292.0,60.0,334.0,1.2,12.0,400.0,79.8,,,,,,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
-,col,Verduras y hortalizas,,100,gr,29.22,1.3,5.8,0.1,2.5,98.0,61.0,40.0,234.0,212.0,124.0,43.0,,36.6,,150.0,76.0,10.7,40.0,19.0,470.0,12.0,160.0,26.0,170.0,0.3,18.0,180.0,92.2,,,,,3.2,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
-,espinaca baby,Verduras y hortalizas,,100,gr,18.0,3.6,0.8,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,jitomate rojo,Verduras y hortalizas,,100,gr,23.0,1.0,3.5,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,lechuga roja,Verduras y hortalizas,,100,gr,16.34,1.3,2.3,0.2,0.9,7.5,64.0,77.0,321.0,144.0,100.0,36.0,,3.7,,150.0,140.3,11.8,33.0,28.0,1.2,12.0,203.0,28.0,187.0,1.5,25.0,200.0,95.6,,,,,0.5,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
-,lechuga verde,Verduras y hortalizas,,100,gr,17.95,1.4,2.8,0.2,1.3,7.4,70.0,80.0,375.0,134.0,90.0,38.0,,18.0,,290.0,173.6,13.4,36.0,29.0,860.0,13.0,250.0,29.0,194.0,0.6,28.0,180.0,95.1,,,,0.1,0.8,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
-,pimiento rojo dulce,Verduras y hortalizas,,100,gr,26.0,1.0,6.0,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,pisto de verduras,Verduras y hortalizas,,100,gr,120.0,3.2,19.8,2.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,verduras hacendado.congelada | Fuente: base original de Alzum.,True
-,soja verde,Verduras y hortalizas,,100,gr,157.2,13.0,11.1,6.8,4.2,180.0,435.0,175.0,1.7,147.0,65.0,165.0,,29.0,,,,,197.0,128.0,3.6,65.0,547.0,194.0,620.0,1.5,15.0,990.0,67.5,,0.8,1.3,3.2,,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
-,"soya, germinados",Verduras y hortalizas,,100,gr,150.94,13.1,9.6,6.7,1.1,11.0,340.0,118.0,1.1,929.0,176.0,172.0,,15.3,,,,,67.0,427.0,2.1,72.0,702.0,164.0,484.0,0.6,14.0,1.2,69.1,,0.9,1.5,3.8,,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
-,tomate triturado,Verduras y hortalizas,,100,gr,26.0,0.8,5.1,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
-,tomates en lata,Verduras y hortalizas,,100,gr,20.29,0.8,4.0,0.1,1.0,117.0,45.0,55.0,712.0,118.0,111.0,8.0,,9.3,,680.0,2.9,7.0,31.0,69.0,970.0,11.0,77.0,19.0,188.0,0.1,10.0,140.0,94.3,,,,0.1,2.4,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
-,zucchini (calabacín),Verduras y hortalizas,,100,gr,20.16,1.2,3.1,0.3,1.0,200.0,45.0,94.0,451.0,204.0,163.0,24.0,,17.9,,120.0,4.3,9.5,16.0,53.0,370.0,18.0,177.0,38.0,261.0,0.2,8.0,320.0,94.8,,0.1,,0.1,2.5,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
+,Calabaza de verano,Verduras y hortalizas,,100,gr,19.86,1.2,3.4,0.2,1.1,200.0,48.0,142.0,487.0,155.0,218.0,29.0,,17.0,,120.0,3.0,6.7,15.0,51.0,350.0,17.0,175.0,38.0,262.0,0.2,2.0,290.0,94.6,,,,0.1,2.2,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
+,Chalotes,Verduras y hortalizas,,100,gr,78.1,2.5,16.8,0.1,,1.2,60.0,20.0,200.0,290.0,345.0,34.0,,8.0,,,,,37.0,88.0,1.2,21.0,292.0,60.0,334.0,1.2,12.0,400.0,79.8,,,,,,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
+,Espinaca baby,Verduras y hortalizas,,100,gr,18.0,3.6,0.8,0.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Jitomate rojo,Verduras y hortalizas,,100,gr,23.0,1.0,3.5,0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Lechuga roja,Verduras y hortalizas,,100,gr,16.34,1.3,2.3,0.2,0.9,7.5,64.0,77.0,321.0,144.0,100.0,36.0,,3.7,,150.0,140.3,11.8,33.0,28.0,1.2,12.0,203.0,28.0,187.0,1.5,25.0,200.0,95.6,,,,,0.5,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
+,Lechuga verde,Verduras y hortalizas,,100,gr,17.95,1.4,2.8,0.2,1.3,7.4,70.0,80.0,375.0,134.0,90.0,38.0,,18.0,,290.0,173.6,13.4,36.0,29.0,860.0,13.0,250.0,29.0,194.0,0.6,28.0,180.0,95.1,,,,0.1,0.8,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
+,Pimiento rojo dulce,Verduras y hortalizas,,100,gr,26.0,1.0,6.0,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Pisto de verduras,Verduras y hortalizas,,100,gr,120.0,3.2,19.8,2.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,verduras hacendado.congelada | Fuente: base original de Alzum.,True
+,Soja verde,Verduras y hortalizas,,100,gr,157.2,13.0,11.1,6.8,4.2,180.0,435.0,175.0,1.7,147.0,65.0,165.0,,29.0,,,,,197.0,128.0,3.6,65.0,547.0,194.0,620.0,1.5,15.0,990.0,67.5,,0.8,1.3,3.2,,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
+,"Soya, germinados",Verduras y hortalizas,,100,gr,150.94,13.1,9.6,6.7,1.1,11.0,340.0,118.0,1.1,929.0,176.0,172.0,,15.3,,,,,67.0,427.0,2.1,72.0,702.0,164.0,484.0,0.6,14.0,1.2,69.1,,0.9,1.5,3.8,,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
+,Tomate triturado,Verduras y hortalizas,,100,gr,26.0,0.8,5.1,0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,False,False,Comida / cena,Fuente: base original de Alzum.,True
+,Tomates en lata,Verduras y hortalizas,,100,gr,20.29,0.8,4.0,0.1,1.0,117.0,45.0,55.0,712.0,118.0,111.0,8.0,,9.3,,680.0,2.9,7.0,31.0,69.0,970.0,11.0,77.0,19.0,188.0,0.1,10.0,140.0,94.3,,,,0.1,2.4,True,False,Comida / cena,30.0 | Fuente: base original de Alzum.,True
+,Zucchini (calabacín),Verduras y hortalizas,,100,gr,20.16,1.2,3.1,0.3,1.0,200.0,45.0,94.0,451.0,204.0,163.0,24.0,,17.9,,120.0,4.3,9.5,16.0,53.0,370.0,18.0,177.0,38.0,261.0,0.2,8.0,320.0,94.8,,0.1,,0.1,2.5,True,False,Comida / cena,15.0 | Fuente: base original de Alzum.,True
 ,Almendrado,"Bollería, repostería y galletas",,100,gr,431,9,57,18.1,2,0.3,0.1,0.3,0.9,,0.02,12,0,0,0,12.4,,,69,,1.9,75,,204,260,,75,1,13.9,0,1.5,12.4,3.4,,True,False,"Desayuno, Media mañana / merienda","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Arroz blanco,Cereales y granos,,100,gr,381,7,86,0.9,0.2,0,0.05,0.03,3.1,,0.3,20,0,0,0,0.3,,,10,,0.5,13,,100,110,7,6,0.2,5.9,0,0.21,0.23,0.32,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Arroz blanco de cocción rápida,Cereales y granos,,100,gr,349,6.9,78.2,0.61,1.4,0,0.22,0.06,3.4,,0.38,19,0,0,0,0.07,,,34,,1.4,46,,130,135,,3,1.8,12.9,0,0.15,0.17,0.2,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -727,7 +705,7 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Sobaos,"Bollería, repostería y galletas",,100,gr,432,8.8,56.3,19.1,,150,0.05,0.08,1.5,,0.06,8,0,0,1.23,0,,,40,,1,19,,91,78,9.1,178,0.6,15.8,225,7.64,8.51,2,,True,False,"Desayuno, Media mañana / merienda","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Suizo,"Bollería, repostería y galletas",,100,gr,404,9.9,40.5,21.9,2.6,230,0.35,0.27,2.2,,0.29,22,0.36,0,0.76,0.72,,,43,,1.5,17,,160,201,16.2,495,0.4,25.1,190,13.5,6.3,1.1,,True,False,"Desayuno, Media mañana / merienda","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Tartas,"Bollería, repostería y galletas",,100,gr,402,5.2,49.2,20.2,1.2,190,0.03,0.08,1.5,,,6,0,0,1,,,,48,,1.2,16,,,,,,0.4,24.2,,7.38,6.25,1.21,,True,True,"Desayuno, Media mañana / merienda","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). Sinónimo de ""Pasteles y otros dulces"" en el libro.",False
-,Tortas de aceite (tipo Inés Rosales),"Bollería, repostería y galletas",,100,gr,496,6.5,67.8,22,0.7,0,,,,,,,0,0,0,,,,,,,,,,,,800,,0.8,0,3,17.6,1.3,,False,False,"Desayuno, Media mañana / merienda","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Tortas de aceite (tipo Inés Rosales),Aceites y grasas,,100,gr,496,6.5,67.8,22,0.7,0,,,,,,,0,0,0,,,,,,,,,,,,800,,0.8,0,3,17.6,1.3,,False,False,"Desayuno, Media mañana / merienda","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Tortilla de maíz para tacos,Pan y pasta,,100,gr,218,5.7,44.6,2.85,6.3,0,0.094,0.065,1.498,,0.219,5,0,0,0,,,,81,,1.23,72,,314,186,,45,1.31,45.9,0,0.453,0.692,1.419,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Tortilla de trigo para tacos,Pan y pasta,,100,gr,312,8.29,51.35,7.75,3.1,0,0.54,0.27,3.57,,0.05,168,0,0,0,,,,129,,3.43,22,,124,155,,636,0.54,30.2,0,1.89,3.89,1.58,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Trigo, gluten para preparar seitán",Alternativas vegetales,,100,gr,371,75.2,13.2,1.85,0.6,0,0,0,0,,0,0,0,0,0,0,,,142,,5.2,25,,260,100,39.7,29,0.85,8.2,0,0.272,0.156,0.81,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -768,7 +746,7 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Nata montada,Lácteos,,100,gr,331,2.1,10.1,31.4,0,420,0.01,0.1,0.51,,0.01,0,0.2,0,0.2,0.7,,,80,,0.3,5,,57,92,1,35,,56.4,100,17.9,8.1,0.76,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Natillas,Postres y helados,,100,gr,120,3.8,16.8,4.2,0,42,0.05,0.21,1,,0.06,5,0.5,1,0.03,0.1,,,140,,0.1,14,,99,160,2.7,81,0.4,75.2,16,2.51,1.33,0.11,,True,False,"Media mañana / merienda, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Natillas de chocolate,Postres y helados,,100,gr,135,3.6,20.6,4.2,,33.3,,0.16,,,0.16,4.1,0.25,,0.18,,,,117,,0.69,23,,104,215,2.7,64,0.37,71.6,110,1.95,1.33,0.37,,True,False,"Media mañana / merienda, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Petit-suisse natural azucarado,Lácteos,,100,gr,120,7.3,13.7,4,0,29,0.03,0.18,2.9,,0.05,4,0.3,0,0.12,0.12,,,120,,0.1,11,,75,112,4,39,0.2,75,11,2.5,1.1,0.1,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Petit-suisse natural azucarado,"Azúcares, siropes y edulcorantes",,100,gr,120,7.3,13.7,4,0,29,0.03,0.18,2.9,,0.05,4,0.3,0,0.12,0.12,,,120,,0.1,11,,75,112,4,39,0.2,75,11,2.5,1.1,0.1,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso azul,Lácteos,,100,gr,353,21.1,0,29.8,0,290,0.043,0.5,3.5,,0.18,40,0.59,0,0.23,0.77,,,526,,0.2,39,,362,128,2,787,4.1,49.1,88,17.6,8.2,0.77,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso brie,Lácteos,,100,gr,320,19.3,0.1,26.9,0,320,0.04,0.43,0.4,,0.15,58,1.2,0,0.2,0.84,,,540,,0.8,27,,390,100,14.5,700,2.2,53.7,100,16.87,7.8,0.8,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso Camembert,Lácteos,,100,gr,285,21,0.1,22.3,0,362,0.045,0.6,6.2,,0.25,44,2.8,0,0.28,0.5,,,570,,0.2,17,,350,110,2.6,669,3.1,56.6,62,12.9,6.5,0.54,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -792,7 +770,7 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Queso Idiazábal,Lácteos,,100,gr,443,23.3,0,38.9,0,437,0.03,0.3,7.2,,0.1,20,1.5,0,0.25,0.62,,,757,,0.5,21,,522,77,1.6,443,2.5,37.8,90,26.6,9.2,1,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso Mahón,Lácteos,,100,gr,411,26.9,0,33.7,0,388,0.03,0.3,0.1,,0.1,20,1.5,0,0.25,0.62,,,559,,0.4,21,,478,143,,1274,3.1,31.7,90,20.02,10.3,1.5,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso manchego curado,Lácteos,,100,gr,420,32,1,32,0,344,0.03,0.3,8.2,,0.08,20,1.5,0,0.27,0.8,,,1200,,0.6,50,,560,100,1.6,670,4,35,74.4,17.88,6.99,1,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Queso manchego en aceite,Lácteos,,100,gr,470,26.5,0,40.5,0,436,0.03,0.3,0.1,,0.1,20,1.5,0,0.25,0.62,,,579,,0.64,20,,801,82,,707,3.12,33,90,24.48,12.54,1.21,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Queso manchego en aceite,Aceites y grasas,,100,gr,470,26.5,0,40.5,0,436,0.03,0.3,0.1,,0.1,20,1.5,0,0.25,0.62,,,579,,0.64,20,,801,82,,707,3.12,33,90,24.48,12.54,1.21,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso manchego tierno,Lácteos,,100,gr,333,26,0,25.4,0,238,0.02,0.3,5.2,,0.2,20,1.4,0,0.23,0.6,,,470,,0.9,28,,520,100,1.6,670,3,48.6,70,14.19,5.55,0.8,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso manchego semicurado,Lácteos,,100,gr,376,29,0.5,28.7,0,238,0.03,0.3,6.7,,0.2,20,1.5,0,0.23,0.6,,,835,,0.8,39,,520,100,1.6,670,3.5,41.8,87.8,16.04,6.27,0.9,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Queso Mozzarella,Lácteos,,100,gr,223,19.5,0,16.1,0,184,0.03,0.27,0.14,,0.6,10,,0,,,,,632,,0.2,24,,428,67,14.5,373,,64.4,78,8.67,4.01,0.4,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1102,7 +1080,7 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,"Pistacho tostado, salado, con cáscara",Frutos secos y semillas,,100,gr,616,18,12.6,53,8.5,23.3,0.59,0.2,1.3,,0.26,97,0,0,0,5.2,,,135,,7,158,,500,1050,,650,1.2,7.9,0,6.7,35.7,8,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Sésamo, semilla de ajonjolí",Frutos secos y semillas,,100,gr,614,18.2,0.9,58,7.9,1,0.93,0.17,5,,0.75,97,0,0,0,2.53,,,670,,10.4,370,,720,570,51.9,20,5.3,15,0,8.3,21.7,25.5,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Tahine o pasta de sésamo,Salsas y condimentos,,100,gr,642,17.4,21.5,53,4.7,3,1.59,0.12,5.64,,0.15,98,0,4.2,0,,,,141,,4.42,95,,790,459,34.4,35,4.62,3,0,7.423,20.016,23.232,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Beicon o panceta ahumada,Carnes y productos cárnicos,,100,gr,301,16,0.5,26.1,0,0,0.85,0.24,10.2,,0.3,2,0.83,0,0,0.3,,,8,,1,16,,177,256,,1400,1.2,57.4,57,9.8,12.1,3,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Beicon o panceta ahumada,Embutidos y charcutería,,100,gr,301,16,0.5,26.1,0,0,0.85,0.24,10.2,,0.3,2,0.83,0,0,0.3,,,8,,1,16,,177,256,,1400,1.2,57.4,57,9.8,12.1,3,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cerdo, carne magra",Carnes y productos cárnicos,,100,gr,155,20,0,8.3,0,0,0.89,0.2,8.7,,0.45,5,3,0,0,0,,,8,,1.5,22,,170,370,14,76,2.5,71.7,69,2.68,3.47,1.27,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cerdo, carne semigrasa",Carnes y productos cárnicos,,100,gr,273,16.6,0,23,0,0,0.7,0.2,7.6,,0.33,4,2,0,0,0.01,,,8,,1.3,18,,170,370,14,,1.8,60.4,72,7.43,9.62,3.51,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cerdo, chuleta",Carnes y productos cárnicos,,100,gr,327,15.4,0,29.5,0,0,0.57,0.14,7.2,,0.29,3,2,0,0,0.01,,,8,,0.8,17,,170,370,14,76,1.6,55.1,72,9.52,12.33,4.51,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1110,7 +1088,7 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,"Cerdo, lomo (9% grasa)",Carnes y productos cárnicos,,100,gr,152,18,0,8.85,0,0,0.76,0.22,4,,0.37,3,0.63,0,0,0.1,,,9,,0.9,20,,151,212,,63,2.4,73.2,64.5,3.28,4,1.15,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cerdo, paletilla",Carnes y productos cárnicos,,100,gr,349,21.5,0,29.2,0,0,0.65,0.15,8.8,,,0,0,0,0,,,,13,,1.8,18,,160,270,14,,2.3,49.3,69,9.43,12.21,4.47,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cerdo, solomillo",Carnes y productos cárnicos,,100,gr,130,21,0,5.1,0,0,1,0.26,4.3,,0.45,4,0.7,0,0,0.1,,,8,,1.2,25,,230,420,,53,1.6,73.9,72,2.05,2.37,0.44,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Panceta,Carnes y productos cárnicos,,100,gr,469,12.5,0,46.6,0,0,0.32,0.12,4.2,,0.27,1.5,0,0,0,0.08,,,6,,0.9,13,,108,160,4,680,1.5,40.9,57,15.04,19.59,7.13,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Panceta,Embutidos y charcutería,,100,gr,469,12.5,0,46.6,0,0,0.32,0.12,4.2,,0.27,1.5,0,0,0,0.08,,,6,,0.9,13,,108,160,4,680,1.5,40.9,57,15.04,19.59,7.13,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Tocino,Carnes y productos cárnicos,,100,gr,673,8.4,0,71,0,0,,,1.3,,,0,0,0,0,0.03,,,6,,0.7,5,,177,75,1,560,0.4,20.6,57,22.92,29.86,10.86,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cordero, chuleta",Carnes y productos cárnicos,,100,gr,225,18,0,17,0,0,0.09,0.16,10,,0.22,3,1,0,0,0.1,,,9,,1.9,16,,170,230,1,61,2.1,65,78,7.89,5.89,0.91,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cordero, otras piezas",Carnes y productos cárnicos,,100,gr,357,15.6,0,32.7,0,0,0.08,0.16,7.4,,0.17,3,1,0,0,0.26,,,7,,1.2,18,,194,260,1,68,3.3,51.7,78,15.17,11.33,1.76,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1134,7 +1112,6 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,"Pavo, sin piel",Aves,,100,gr,109,21.9,0,2.4,0,0,0.09,0.17,6.8,,0.46,11,1.5,0,0,0,,,14,,1,24,,210,300,,72,1.7,75.7,65,0.8,0.6,0.7,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Perdiz,Aves,,100,gr,106,23,0,1.6,0,0,0.13,0.17,6.9,,0.67,,,,,,,,46,,7.7,36,,179,175,16.6,40,,75.4,43.8,,,,,True,True,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). Sinónimo de ""Codorniz"" en el libro.",False
 ,Pollo,Aves,,100,gr,167,20,0,9.7,0,0,0.1,0.15,10.4,,0.3,10,0,0,0,,,,13,,1.1,22,,198,248,6,64,1,70.3,110,2.63,4.37,1.82,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,"Pollo, pechuga",Aves,,100,gr,112,21.8,0,2.8,0,0,0.1,0.15,14,,0.42,12,0,0,0,0.1,,,14,,1,23,,130,320,7,81,0.7,75.4,69,0.76,1.26,0.52,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Ballena, carne de",Carnes y productos cárnicos,,100,gr,123,23.2,0,3.38,0,24,0.04,0.23,4.7,,,,,,,,,,12.2,,4.2,,,153,300,,100,,73.4,,,,,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Caballo, carne de",Carnes y productos cárnicos,,100,gr,93,21,0,1,0,0,0.07,0.1,8.2,,,,,0,,,,,12,,7,23,,200,332,3,44,6,78,,0.32,0.25,0.13,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Cabrito,Carnes y productos cárnicos,,100,gr,113,19.3,0,4,0,,0.32,0.1,6,,,,,,,,,,9,,0.9,,,220,385,1,82,,76.7,56,1.2,1.76,0.31,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1163,12 +1140,12 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Fuet,Embutidos y charcutería,,100,gr,400,30.2,0,31,0,0,0.57,0.2,4.2,,0.32,4,2.5,0,0,0,,,11,,1,26,,153,280,,1180,2.3,38.8,84.4,10.61,14.02,4.71,,True,False,"Desayuno, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Jamón cocido (York, dulce, etc.)",Embutidos y charcutería,,100,gr,175,18.4,1,10.8,0,0,0.46,0.18,3.2,,0.2,0,0,0,0,0.08,,,9.6,,2.1,17.5,,92,270,8,970,2.8,69.8,45,3.49,4.49,1.65,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Jamón ibérico,Embutidos y charcutería,,100,gr,254,30.5,0,14.7,0,0,0.75,0.22,11.8,,0.22,0,0,0,0,0.08,,,35,,1.8,18,,158,153,,1110,2.3,54.8,69,4.98,5.76,1.08,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Jamón serrano,Embutidos y charcutería,,100,gr,241,31,0,13,0,0,0.57,0.25,6.7,,0.41,0,0,0,0,0.08,,,12.7,,2.3,17.1,,180,160,,1110,2.2,56,70,4.4,5.09,1.26,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Jamón serrano magro,Embutidos y charcutería,,100,gr,163,30.5,0,4.5,0,0,0.75,0.22,11.8,,0.22,0,0,0,0,0.08,,,35,,1.8,18,,158,160,,1110,2.3,65,69,1.52,1.76,0.33,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,"Kebab, cordero",Carnes y productos cárnicos,,100,gr,150,13.5,2.7,9.34,0.63,22.5,0.079,0.148,3.71,,0.182,8.61,0.93,11.7,0,0.497,,,15.8,,1.34,19.5,,109,240,1.37,147,0.87,72.8,39.6,3.12,3.41,0.946,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,"Kebab, mezcla de carnes",Carnes y productos cárnicos,,100,gr,209,19.3,1.72,13.8,0.33,13.8,0.058,0.172,4.09,,0.318,11.5,0.98,9.5,0.03,0.65,,,10.9,,1.4,21.4,,162,273,8.36,247,1.01,63.4,49.6,4.97,5.19,1.06,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,"Kebab, pollo",Carnes y productos cárnicos,,100,gr,201,19.7,1.13,13,0.34,14.8,0.054,0.131,5.12,,0.326,9.43,0.56,9.5,0.06,0.643,,,14,,0.1,22.2,,151,239,9.76,257,0.85,64.2,59.6,2.28,6.91,2.79,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,"Kebab, ternera",Carnes y productos cárnicos,,100,gr,217,18.9,2.24,14.6,0.33,12.7,0.062,0.212,3.02,,0.315,14.2,1.39,9.5,0,0.656,,,7.8,,1.8,21,,172,307,7.02,237,1.17,62.6,42.8,3,8.09,2.15,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Jamón,Embutidos y charcutería,Serrano,100,gr,241,31,0,13,0,0,0.57,0.25,6.7,,0.41,0,0,0,0,0.08,,,12.7,,2.3,17.1,,180,160,,1110,2.2,56,70,4.4,5.09,1.26,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Jamón magro,Embutidos y charcutería,Serrano,100,gr,163,30.5,0,4.5,0,0,0.75,0.22,11.8,,0.22,0,0,0,0,0.08,,,35,,1.8,18,,158,160,,1110,2.3,65,69,1.52,1.76,0.33,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,"Kebab, cordero",Embutidos y charcutería,,100,gr,150,13.5,2.7,9.34,0.63,22.5,0.079,0.148,3.71,,0.182,8.61,0.93,11.7,0,0.497,,,15.8,,1.34,19.5,,109,240,1.37,147,0.87,72.8,39.6,3.12,3.41,0.946,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,"Kebab, mezcla de carnes",Embutidos y charcutería,,100,gr,209,19.3,1.72,13.8,0.33,13.8,0.058,0.172,4.09,,0.318,11.5,0.98,9.5,0.03,0.65,,,10.9,,1.4,21.4,,162,273,8.36,247,1.01,63.4,49.6,4.97,5.19,1.06,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,"Kebab, pollo",Embutidos y charcutería,,100,gr,201,19.7,1.13,13,0.34,14.8,0.054,0.131,5.12,,0.326,9.43,0.56,9.5,0.06,0.643,,,14,,0.1,22.2,,151,239,9.76,257,0.85,64.2,59.6,2.28,6.91,2.79,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,"Kebab, ternera",Embutidos y charcutería,,100,gr,217,18.9,2.24,14.6,0.33,12.7,0.062,0.212,3.02,,0.315,14.2,1.39,9.5,0,0.656,,,7.8,,1.8,21,,172,307,7.02,237,1.17,62.6,42.8,3,8.09,2.15,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Lacón,Embutidos y charcutería,,100,gr,349,21.5,0,29.2,0,0,0.65,0.15,8.8,,,0,0,0,0,,,,13,,1.8,18,,160,270,,965,2.3,49.3,69,9.43,12.21,4.47,,True,True,"Desayuno, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). Sinónimo de ""Cerdo, paletilla"" en el libro.",False
 ,Lomo embuchado,Embutidos y charcutería,,100,gr,386,50,0,20.7,0,0,0.8,0.25,12,,,5,2,0,0,,,,20,,3.7,20,,180,230,,1470,2.6,29.3,69,6.68,8.65,3.17,,True,False,"Desayuno, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Morcilla,Embutidos y charcutería,,100,gr,446,19.5,3,39.5,0,0.01,0.08,0.1,1,,0.04,5,0.4,0,0.01,0.2,,,11,,14,20,,80,210,11.8,1060,,38,70,15.08,16.52,5.59,,True,False,"Desayuno, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1277,7 +1254,7 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Caballa y otros pescados en escabeche,Pescados,,100,gr,171,15,0.8,12,0,50,0.04,0.1,15.9,,0.42,10,3,0,20,0.55,,,21,,1,20,,244,275,30,875,1,72.2,80,2.91,4.63,2.93,,True,True,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). Sinónimo de ""Atún en escabeche"" en el libro.",False
 ,Sardinas en aceite,Pescados,,100,gr,224,22.2,0,15,0,50,0.03,0.28,8.2,,0.48,8,28,0,7,0.3,,,400,,3.2,52,,341,430,50,650,3,62.8,100,2.44,6.81,5.3,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Sardinas en escabeche,Pescados,,100,gr,131,15,0.8,7.5,0,58,0.11,0.34,5.9,,0.96,7,26,0,7,1.6,,,30,,0.9,26,,280,260,30,760,0.4,76.7,100,2.64,1.8,2.28,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Sardinas en salsa de tomate,Pescados,,100,gr,260,16.8,0.5,21.2,0,18,0.03,0.23,4.3,,0.21,18,10.3,0.5,9.8,1.4,,,390,,3.1,43,,370,376,,570,,61.5,85,3.2,4.9,13.1,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Sardinas en salsa de tomate,Salsas y condimentos,,100,gr,260,16.8,0.5,21.2,0,18,0.03,0.23,4.3,,0.21,18,10.3,0.5,9.8,1.4,,,390,,3.1,43,,370,376,,570,,61.5,85,3.2,4.9,13.1,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Almejas y similares, en conserva, al natural","Mariscos, crustáceos y moluscos",,100,gr,47,10.7,0,0.5,0,250,0.04,0.14,4.1,,0.03,12.8,0,,0,0.37,,,128,,24,51,,204,43,45,3520,1.3,88.8,40,0.05,0.03,0.13,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Berberechos y similares, en conserva, al natural","Mariscos, crustáceos y moluscos",,100,gr,47,10.7,0,0.5,0,250,0.04,0.14,4.1,,0.03,12.8,0,,0,0.37,,,128,,24,51,,204,43,45,3520,1.3,88.8,40,0.05,0.03,0.13,,True,True,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). Sinónimo de ""Almejas y similares, en conserva, al natural"" en el libro.",False
 ,Calamares y similares en conserva,"Mariscos, crustáceos y moluscos",,100,gr,88,17,0.5,2,0,70,0.07,0.14,3.6,,0.03,3.4,1.3,0,0,0.82,,,78,,1.7,36,,185,93,44.8,425,1.2,80.5,200,0.52,0.15,0.74,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1346,7 +1323,7 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Alioli,Salsas y condimentos,,100,gr,796,0.5,2.8,86.9,0.1,0,0.02,0,0.03,,0.04,1,0,0,0,10.5,,,2,,0.1,7,,16,52,0.2,565,0.1,9.7,0,12.6,61.7,8.7,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Ajo en polvo,Especias y hierbas,,100,gr,331,16.6,72.7,0.73,9,0,0.435,0.141,0.796,,1.654,47,0,1.2,0,0.67,,,79,,5.7,77,,414,1193,23.9,60,2.99,6.45,0,0.249,0.115,0.178,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",False
 ,Azafrán,Especias y hierbas,,100,gr,345,11.4,61.5,5.9,,,,,,,,0,0,0,0,,,,110,,11.1,,,250,1720,5.6,150,,21.2,0,,,,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",False
-,Caldo en cubitos,Salsas y condimentos,,100,gr,207,20.2,,14,,,,,,,,,,,,,,,40,,1.2,32,,240,490,27.6,14560,0.8,65.8,,6.6,4.8,0.2,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). No proponer al generar dietas.",False
+,Caldo en cubitos,Platos preparados,,100,gr,207,20.2,,14,,,,,,,,,,,,,,,40,,1.2,32,,240,490,27.6,14560,0.8,65.8,,6.6,4.8,0.2,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). No proponer al generar dietas.",False
 ,Canela molida,Especias y hierbas,,100,gr,44,3.9,,3.2,,25.8,0.08,0.14,1.3,,0.25,29,0,28.5,0,0.01,,,1228,,38.1,55.6,,61.4,500,15,26.3,1.97,92.9,0,0.65,0.48,0.53,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",False
 ,"Cardamomo, semillas",Especias y hierbas,,100,gr,433,10.8,68.5,6.7,28,0,0.198,0.182,1.102,,0.23,,0,21,0,0,,,383,,13.97,229,,178,1119,,18,7.47,8.3,0,0.68,0.87,0.43,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",False
 ,Cebolla deshidratada en copos,Especias y hierbas,,100,gr,391,9,83.3,0.46,9.2,1,0.5,0.1,0.99,,1.6,166,0,75,0,0.18,,,257,,1.55,92,,303,1622,5,21,1.89,3.9,0,0.078,0.064,0.18,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",False
@@ -1407,12 +1384,12 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Vinagre de sidra,Salsas y condimentos,,100,gr,4,0,0.9,0,0,0,0,0,0,,0,0,0,0,0,0,,,7,,0.2,5,,8,73,0.1,5,0.04,93.8,0,0,0,0,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide). No proponer al generar dietas.",False
 ,Albóndigas preparadas enlatadas,Platos preparados,,100,gr,305,13.2,10.6,23.2,0.27,20,0.06,0.17,4.9,,,11,0.8,0,0.2,,,,24,,2.1,13,,,,,,2.49,52.7,,,,,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Arroz tres delicias crudo congelado,Platos preparados,,100,gr,125,3.4,22.6,1.6,3.5,82.6,0.17,0.14,4.1,,0.06,7.4,1.3,1.1,0,0.23,,,12.3,,0.93,34.3,,183,129,9.1,534,0.41,69,9,0.41,0.48,0.43,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Calamares a la romana congelados,Platos preparados,,100,gr,121,5.7,6.4,7.9,0.6,7.4,0.15,2.2,6.3,,0.08,12.1,11.4,0,0.1,1.8,,,40.2,,0.8,28.2,,184,120,41,642,0.3,79.4,145,0.78,1.6,3.1,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Calamares a la romana congelados,"Mariscos, crustáceos y moluscos",,100,gr,121,5.7,6.4,7.9,0.6,7.4,0.15,2.2,6.3,,0.08,12.1,11.4,0,0.1,1.8,,,40.2,,0.8,28.2,,184,120,41,642,0.3,79.4,145,0.78,1.6,3.1,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Caldo de carne,Platos preparados,,100,gr,7,1.1,0.04,0.22,0,0,0.002,0.021,0.78,,0.01,2,0.07,0,0,0,,,6,,0.17,2,,13,54,0.7,372,0,97.6,0,0.11,0.09,0.01,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Caldo de pescado,Platos preparados,,100,gr,15,2,0.4,0.6,0,1,0,0.03,1.37,,0.01,4,0.1,0,0,0.15,,,30,,0.21,1,,30,86,0.7,318,0.1,96,0,0.133,0.108,0.245,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Caldo de pollo,Platos preparados,,100,gr,5,0.4,0.4,0.21,0,0,0.001,0.01,0.505,,0.005,0,0.04,7,0,0,,,6,,0.2,1,,13,80,0,366,0.07,97.8,0,0.029,0.045,0.021,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Caldo de verduras,Platos preparados,,100,gr,31,0.9,4.9,0.79,0.3,71,0.022,0.019,0.374,,0.023,4,0,0.6,0,0.58,,,10,,0.44,3,,14,86,1.8,338,0.19,92.4,0,0.12,0.34,0.295,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Canelones de carne congelados,Platos preparados,,100,gr,132,6.2,13.5,5.4,2.2,37,0.22,0.32,6.3,,0.14,43.2,7.2,0,0.2,0.87,,,154,,2.2,29.9,,109,203,17.3,539,0.5,72.7,30,1.9,1.5,1,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Canelones de carne congelados,Pan y pasta,,100,gr,132,6.2,13.5,5.4,2.2,37,0.22,0.32,6.3,,0.14,43.2,7.2,0,0.2,0.87,,,154,,2.2,29.9,,109,203,17.3,539,0.5,72.7,30,1.9,1.5,1,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Carne empanada y pasteles de carne,Platos preparados,,100,gr,142,19,3.5,5.8,0.13,18,0.06,0.22,7.2,,,9,1.9,0,0.19,,,,13,,2.1,16,,,,,,3.43,71.6,,,,,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Cremas desecadas (espárragos, champiñón, etc.)",Platos preparados,,100,gr,382,10.3,61.6,9.4,5,35.4,0.03,0.02,6,,0.28,1,2.4,0,0,0.17,,,24.3,,2.2,32.3,,93.2,207,3.5,319,1.1,13.7,,,,,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Croquetas congeladas,Platos preparados,,100,gr,116,8.1,4.5,7.3,0.14,76,0.05,0.17,3.7,,,8.9,0.35,1.5,0.22,,,,84,,0.5,16,,,,,,0.51,80,,2.16,2.92,1.53,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1420,13 +1397,13 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Fabada en conserva,Platos preparados,,100,gr,173,6.1,13.4,8.8,7.8,24.1,0.12,0.1,9.3,,0.1,56.6,10.6,0,0,0.35,,,118,,7.8,174,,310,1170,16.1,490,0.6,63.9,20,3.1,3.4,0.77,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Hamburguesa cocinada,Platos preparados,,100,gr,253,15.2,5.3,19,2.5,0.57,0.04,0.21,6.5,,0.27,12,1,0,0,0.18,,,23,,2.5,17,,107,270,,310,3.2,60.5,59,8.9,7.55,0.68,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Hojaldre congelado,Platos preparados,,100,gr,391,5.7,36.4,24,0,0,0.19,0.04,2.1,,0.05,16,0,0,0,,,,58,,0.9,12,,,70,,181,0.4,31,,10.78,9.36,3.04,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Lasaña de carne con bechamel,Platos preparados,,100,gr,139,6.3,10.3,7.95,0.75,102,0.05,0.09,1.25,,0.08,8.78,0.42,1.64,0.12,0.86,,,85.4,,0.69,13.3,,92.8,159,,514,0.91,74.7,20.81,3.17,3.31,1.12,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Lasaña de carne con bechamel,Pan y pasta,,100,gr,139,6.3,10.3,7.95,0.75,102,0.05,0.09,1.25,,0.08,8.78,0.42,1.64,0.12,0.86,,,85.4,,0.69,13.3,,92.8,159,,514,0.91,74.7,20.81,3.17,3.31,1.12,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Nachos,Snacks y aperitivos,,100,gr,374,5.2,36.4,22.2,3.8,1,0.125,0.134,0.91,,0.178,13,0,0,0,12.38,,,89,,1.12,52,,283,182,3.4,335,1.15,34.3,4,4.699,12.715,2.58,,True,False,Media mañana / merienda,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Patatas prefritas congeladas,Platos preparados,,100,gr,423,6.8,66.8,14.1,1,0,0.18,0.1,3.8,,0.18,10,0,6,0,0.1,,,25,,1.9,86,,120,710,2,29,0.6,11.3,,6.4,7.37,0.29,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Pescado empanado y pasteles de pescado,Platos preparados,,100,gr,182,12.6,16.1,7.5,0,0,0.09,0.06,3.5,,,15,1,0,0,,,,44.3,,0.7,18,,168,,,,0.4,63.8,,1.16,1.96,3.38,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Pescado empanado y pasteles de pescado,Pescados,,100,gr,182,12.6,16.1,7.5,0,0,0.09,0.06,3.5,,,15,1,0,0,,,,44.3,,0.7,18,,168,,,,0.4,63.8,,1.16,1.96,3.38,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Pizza cocinada,Platos preparados,,100,gr,244,9.4,24.8,11.5,1.8,107,0.11,0.14,3,,0.09,24,0.3,3,0.1,1.27,,,240,,1.1,19,,172,150,4,570,1.2,52.5,20,5.08,3.64,0.97,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Pizza precocinada congelada,Platos preparados,,100,gr,209,9.4,24.8,7.6,1.8,107,0.11,0.14,3,,0.09,24,0.3,3,0.1,1.27,,,240,,1.1,19,,172,150,4,570,1.2,56.4,20,2.25,2.69,1.99,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Pollo empanado congelado,Platos preparados,,100,gr,242,18,13.5,12.7,0.7,0,0.12,0.06,8.6,,0.53,13.1,0,0,0,0.1,,,13,,0.9,23,,273,320,16.3,420,0.9,55.1,36,2.1,5.3,4.7,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Pollo empanado congelado,Aves,,100,gr,242,18,13.5,12.7,0.7,0,0.12,0.06,8.6,,0.53,13.1,0,0,0,0.1,,,13,,0.9,23,,273,320,16.3,420,0.9,55.1,36,2.1,5.3,4.7,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Rollitos de primavera congelados,Platos preparados,,100,gr,146,5.8,5.8,10.5,2.6,1.2,0.16,0.16,0.15,,0.26,8,0.38,0,0,0.02,,,27,,1.4,16,,107,122,6.4,335,0.9,75.3,35,4,4.8,1.2,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Rollitos de primavera fritos,Platos preparados,,100,gr,146,5.8,5.8,10.5,2.6,1.23,0.16,0.16,2.14,,0.15,8.05,0.38,0.35,0,0.02,,,27,,1.4,16,,107,122,6.4,335,0.94,75.3,35,4,4.84,1.2,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,San Jacobo congelado,Platos preparados,,100,gr,246,4.1,25.2,13.3,2.6,11.4,0.42,0.17,4.9,,0.11,12,13.4,0,0.7,0.67,,,31.1,,1,20.8,,187,214,10.2,493,0.3,52.9,31,2.5,4.2,5.6,,True,False,Comida / cena,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
@@ -1442,6 +1419,24 @@ id,Nombre,Grupo de alimento,Marca,Cantidad,Unidad,Calorias,Proteinas,Carbohidrat
 ,Maíz en grano para hacer palomitas,Snacks y aperitivos,,100,gr,404,10.9,74,4.31,12.7,,0.317,0.047,1.6,,0.288,62,0,,0,4.06,,,5,,3.04,123,,299,274,0,7,2.75,10.6,0,0.64,0.992,2.476,,True,False,Media mañana / merienda,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Palomitas de maíz, con aceite y sal",Snacks y aperitivos,,100,gr,533,9,47.4,32,10,20,0.13,0.14,1.6,,0.21,17,0,0,0,11,,,10,,2.8,108,,250,225,,884,1.7,1.6,0,5.49,16.79,8.27,,True,False,Media mañana / merienda,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,"Palomitas de maíz, sin aceite, sin sal",Snacks y aperitivos,,100,gr,367,12,62.9,4.2,15,20,0.2,0.2,2,,0.26,23,0,0,0,11,,,10,,2.7,106,,300,301,11,4,1.7,5.9,0,0.6,1.1,1.9,,True,False,,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Pan de gambas,Snacks y aperitivos,,100,gr,529,2,59,31.2,7.4,10.33,0.05,0.05,0.05,,0.05,5.1,0.22,,0.2,4.3,,,46,,1.4,15.5,,42,41.5,3,876,1,3.5,13,11.4,17.1,1.42,,True,False,Media mañana / merienda,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
+,Pan de gambas,Pan y pasta,,100,gr,529,2,59,31.2,7.4,10.33,0.05,0.05,0.05,,0.05,5.1,0.22,,0.2,4.3,,,46,,1.4,15.5,,42,41.5,3,876,1,3.5,13,11.4,17.1,1.42,,True,False,Media mañana / merienda,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
 ,Patatas fritas de bolsa,Snacks y aperitivos,,100,gr,472,6.8,66.8,19.5,1,0,0.18,0.1,3.8,,0.18,10,0,6,0,0.1,,,25,,1.9,86,,152,410,2,800,0.6,5.9,,8.79,8.22,1.97,,True,False,Media mañana / merienda,"Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",True
-,Pepinillos en vinagre,Snacks y aperitivos,,100,gr,27,1.7,4.5,0,1.2,10.3,0.003,0.022,0.2,,0.38,6,0,1,0,0.16,,,30,,1.6,11,,30,110,0,960,0.3,92.6,0,0,0,0,,True,False,"Media mañana / merienda, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",False
+,Pepinillos en vinagre,Salsas y condimentos,,100,gr,27,1.7,4.5,0,1.2,10.3,0.003,0.022,0.2,,0.38,6,0,1,0,0.16,,,30,,1.6,11,,30,110,0,960,0.3,92.6,0,0,0,0,,True,False,"Media mañana / merienda, Comida / cena","Fuente: Moreiras y cols., Tablas de composición de alimentos (Pirámide).",False
+,Presa ibérica de bellota,Carnes y productos cárnicos,,100,gr,228,19.5,0,16.7,0,,2.9,0.24,4.87,,0.33,,7.19,,,,,,,,1.61,,,199,267,10.6,67.3,4.01,62.1,57.3,5.81,9.08,1.03,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Presa ibérica de cebo,Carnes y productos cárnicos,,100,gr,156,18.4,0,9.08,0,,1.71,0.2,4.22,,0.27,,6.21,,,,,,,,1.61,,,192,287,11.6,54.4,3.76,67.9,66.8,3.37,4.7,0.49,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Pluma ibérica de bellota,Carnes y productos cárnicos,,100,gr,235,17.8,0,18.2,0,,2.94,0.27,6.13,,0.32,,6.11,,,,,,,,1.06,,,204,264,8.87,65.7,4.0,68.4,58.9,6.56,9.43,1.36,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Pluma ibérica de cebo,Carnes y productos cárnicos,,100,gr,198,17.9,0,14.9,0,,1.92,0.15,4.44,,0.21,,5.73,,,,,,,,1.05,,,192,280,9.11,58.4,3.62,58.3,62.5,5.74,7.68,0.8,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Secreto ibérico de bellota,Carnes y productos cárnicos,,100,gr,257,18.2,0,20.5,0,,2.65,0.15,4.69,,0.35,,6.69,,,,,,,,1.73,,,194,221,7.62,57.2,1.85,57.8,60.1,6.94,11.1,1.52,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Secreto ibérico de cebo,Carnes y productos cárnicos,,100,gr,220,18.2,0,16.9,0,,4.11,0.14,3.58,,0.29,,5.03,,,,,,,,1.72,,,170,251,7.56,56.4,1.76,57.1,56.8,6.46,8.92,0.76,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Solomillo ibérico de bellota,Carnes y productos cárnicos,,100,gr,158,22.8,0,7.38,0,,3.7,0.21,7.37,,0.29,,11.6,,,,,,,,1.69,,,240,314,18.6,60.1,1.99,66.1,70.5,2.65,3.9,0.48,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Solomillo ibérico de cebo,Carnes y productos cárnicos,,100,gr,127,22.2,0,5.49,0,,4.24,0.22,6.19,,0.37,,8.06,,,,,,,,1.65,,,234,317,20.3,67.6,2.26,71.1,69.4,2.29,2.87,0.35,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Lomo ibérico fresco de bellota,Carnes y productos cárnicos,,100,gr,171,20.7,0,9.81,0,,3.26,0.23,7.38,,0.24,,5.85,,,,,,,,1.36,,,307,260,11.7,75.4,1.79,64.0,58.2,3.58,5.6,0.65,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas. Perfil lipídico recalculado desde los porcentajes del estudio: su tabla en g/100g sumaba más que la grasa total.",True
+,Lomo ibérico fresco de cebo,Carnes y productos cárnicos,,100,gr,154,21.5,0,8.4,0,,3.51,0.16,6.98,,0.2,,3.79,,,,,,,,1.3,,,241,274,8.4,74.1,1.6,67.5,59.7,3.11,4.53,0.37,,True,False,Comida / cena,"Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Caña de lomo ibérica de bellota,Embutidos y charcutería,,100,gr,318,37.5,0.62,18.4,0,,1.74,0.17,9.14,,0.61,,4.95,,,,,,,,1.86,,,325,487,19.5,1409,2.29,41.5,87.8,6.41,10.2,0.99,,True,False,"Desayuno, Comida / cena","Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Caña de lomo ibérica de cebo,Embutidos y charcutería,,100,gr,280,39.3,0.63,14.9,0,,1.28,0.16,8.25,,0.56,,11.3,,,,,,,,1.77,,,307,606,12.9,1225,2.88,40.9,89.4,5.08,8.13,0.92,,True,False,"Desayuno, Comida / cena","Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Paleta ibérica de bellota,Embutidos y charcutería,,100,gr,376,27.1,0,29.7,0,,0.36,0.31,4.07,,0.25,,13.0,,,,,,,,1.97,,,205,482,10.6,1977,3.63,27.5,78.1,10.4,15.7,2.27,,True,False,"Desayuno, Comida / cena","Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Paleta ibérica de cebo,Embutidos y charcutería,,100,gr,343,27.6,0,25.8,0,,0.64,0.23,4.18,,0.25,,14.0,,,,,,,,2.37,,,188,450,12.2,1585,5.27,34.4,78.3,8.79,14.1,1.73,,True,False,"Desayuno, Comida / cena","Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Jamón ibérico de bellota,Embutidos y charcutería,,100,gr,295,29.8,0,19.5,0,,0.35,0.26,5.15,,0.36,,16.1,,,,,,,,1.93,,,200,522,11.9,1743,3.16,37.0,73.2,5.94,10.9,1.71,,True,False,"Desayuno, Comida / cena","Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Jamón ibérico de cebo,Embutidos y charcutería,,100,gr,302,32.4,0,19.3,0,,0.45,0.24,5.44,,0.37,,13.5,,,,,,,,1.7,,,222,537,12.0,1623,3.59,38.5,67.4,6.58,10.2,1.66,,True,False,"Desayuno, Comida / cena","Fuente: Estudio nutricional SIPA, Universidad de Extremadura para ASICI (2020), 160 muestras analizadas.",True
+,Kale crudo,Verduras y hortalizas,,100,gr,49,4.28,5.15,0.9,3.6,500,0.11,0.13,1.0,0.09,0.27,141,0,120,0,1.5,705,0.8,150,1.5,1.5,47,0.66,92,491,0.9,38,0.56,84.0,0,0.09,0.07,0.34,,True,False,Comida / cena,"Fuente: USDA FoodData Central. Hidratos expresados como carbohidrato disponible (fibra aparte), igual criterio que el resto de la base.",True
+,Kale cocido,Verduras y hortalizas,,100,gr,28,1.9,3.6,0.4,2.0,681,0.05,0.07,0.5,0.05,0.14,13,0,41,0,0.85,817,0.4,72,0.16,0.9,18,0.42,28,228,0.9,23,0.24,91.2,0,0.05,0.03,0.19,,True,False,Comida / cena,"Fuente: USDA FoodData Central. Hidratos expresados como carbohidrato disponible (fibra aparte), igual criterio que el resto de la base.",True

@@ -7535,10 +7535,21 @@ function _downloadEntPdf(ev) {
 }
 
 function _downloadNutPdf(ev) {
-  const d = clientDiets[0];
-  if (!d || !d.id) { showToast('Sin dieta asignada', 'error'); return; }
-  const name = (d.title || 'dieta').replace(/\s+/g, '_').toLowerCase();
-  _downloadPlanPdf(`${API}/diets/${d.id}/pdf`, `${name}.pdf`, ev?.currentTarget);
+  /* La dieta que se está VIENDO, igual que el botón de editar. Cogiendo
+     siempre `clientDiets[0]`, mirando el jueves y pulsando PDF se descargaba
+     la dieta del lunes — con su nombre y todo, así que nada cantaba hasta
+     leerla. */
+  const menuDays = _nutMenuDays();
+  const mirandoDia = !!menuDays && _nutFoco !== 'dieta';
+  const id = mirandoDia
+    ? (menuDays[_nutDayIdx] || {}).diet_id
+    : (clientDiets[_nutActiveDietIdx] || clientDiets[0] || {}).id;
+  if (!id) { showToast('Sin dieta asignada', 'error'); return; }
+  const titulo = (_nutDetail && String(_nutDetail.id) === String(id) && _nutDetail.title)
+    || (clientDiets.find(d => String(d.id) === String(id)) || {}).title
+    || 'dieta';
+  const name = titulo.replace(/\s+/g, '_').toLowerCase();
+  _downloadPlanPdf(`${API}/diets/${id}/pdf`, `${name}.pdf`, ev?.currentTarget);
 }
 
 /* ══════════════════════════════════════════════

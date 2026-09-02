@@ -94,12 +94,16 @@ const DIETA = {
   // ── Los botones ──────────────────────────────────────────────────────────
   const btns = await p.$$eval('.nplan-hero-btn', ns => ns.map(n => n.textContent.trim()));
   ck('estan editar, PDF y borrar', btns.length === 3 && btns[0] === 'Editar' && btns[1] === 'PDF', btns);
+  // El de PDF pasa por la funcion de verdad, asi que necesita una dieta a la
+  // que apuntar: sin ella avisa, que es lo correcto pero no lo que se mide aqui.
+  await p.evaluate(() => __estado(null, 'dieta', 0, [{ id: 'd1', title: 'Recomposicion' }]));
   await p.locator('.nplan-hero-btn').nth(0).click();
   await p.locator('.nplan-hero-btn').nth(1).click();
   await p.locator('.nplan-hero-btn').nth(2).click();
+  const hechas = await p.evaluate(() => window.__acciones);
   ck('y hacen lo que dicen',
-    (await p.evaluate(() => window.__acciones)).join() === 'editar,pdf,borrar',
-    await p.evaluate(() => window.__acciones));
+    hechas.length === 3 && hechas[0] === 'editar'
+    && hechas[1].startsWith('pdf:') && hechas[2] === 'borrar', hechas);
 
   // ── Mirando un día del menú semanal ──────────────────────────────────────
   await p.evaluate(d => __pinta(d, true, 'Martes'), DIETA);
@@ -123,6 +127,35 @@ const DIETA = {
     { name: '<b>x</b>', detail: [{ quantity_calc: 1, aliment: { name: '<i>y</i>', calories: 1, quantity: 1 } }] }] }));
   const html = await p.innerHTML('#plan');
   ck('escapa el HTML', html.includes('&lt;img') && html.includes('&lt;i&gt;y'), html.slice(0, 200));
+
+  // ── El PDF, de la dieta que se esta VIENDO ───────────────────────────────
+  // Cogiendo siempre la primera, mirando el jueves y pulsando PDF se
+  // descargaba la del lunes -- con su nombre y todo, asi que nada cantaba
+  // hasta abrirla.
+  const DIETAS = [{ id: 'd1', title: 'Recomposicion' }, { id: 'd2', title: 'Deficit' },
+                  { id: 'd3', title: 'Volumen' }];
+  const pdf = () => p.evaluate(() => {
+    _downloadNutPdf(null);
+    return (window.__acciones.find(a => a.startsWith('pdf:')) || '');
+  });
+
+  // Menu semanal: el jueves tiene la tercera dieta.
+  await p.evaluate(d => __estado({ 0: { diet_id: 'd1' }, 3: { diet_id: 'd3' } }, 'dia', 3, d), DIETAS);
+  let r = await pdf();
+  ck('LA DEL DIA QUE SE MIRA, no la primera', r.includes('/diets/d3/pdf'), r);
+  ck('y el fichero se llama como ella', r.includes('volumen.pdf'), r);
+
+  // Sin menu, la elegida en el carril.
+  await p.evaluate(d => __estado(null, 'dieta', 0, d), DIETAS);
+  await p.evaluate(() => { _nutActiveDietIdx = 1; });
+  r = await pdf();
+  ck('sin menu, la elegida en el carril', r.includes('/diets/d2/pdf'), r);
+
+  // Sin dieta ninguna, se dice en vez de pedir un PDF de nada.
+  await p.evaluate(() => __estado(null, 'dieta', 0, []));
+  await p.evaluate(() => { _nutActiveDietIdx = 0; });
+  r = await p.evaluate(() => { _downloadNutPdf(null); return window.__acciones.join(); });
+  ck('sin dieta no se pide nada', !r.includes('pdf:') && r.includes('toast:'), r);
 
   ck('sin errores de JS', errs.length === 0, errs);
   await b.close();

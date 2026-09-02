@@ -545,10 +545,20 @@ var _HORAS={'Desayuno':'08:00','Media mañana':'11:00','Comida':'14:00'};
 function _nutMealTime(n){return _HORAS[n]||'';}
 window.__acciones=[];
 function openNutEditor(){window.__acciones.push('editar');}
-function _downloadNutPdf(){window.__acciones.push('pdf');}
+const API='http://x';
+var _nutMenuVeces=null, _nutFoco='dia', _nutDayIdx=0, _nutActiveDietIdx=0;
+var clientDiets=[], _nutDetail=null, _nutMenu=null;
+function _nutMenuDays(){return _nutMenuVeces;}
+function showToast(m,t){window.__acciones.push('toast:'+m);}
+function _downloadPlanPdf(url,fichero){window.__acciones.push('pdf:'+url+'|'+fichero);}
+%s
 function removeNutPlan(){window.__acciones.push('borrar');}
 %s
 %s
+window.__estado=(menu,foco,dia,dietas,det)=>{
+  _nutMenuVeces=menu; _nutFoco=foco||'dia'; _nutDayIdx=dia||0;
+  clientDiets=dietas||[]; _nutDetail=det||null; window.__acciones=[];
+};
 window.__pinta=(det,mirandoDia,dayName)=>{
   window.__acciones=[];
   const totalKcal=Math.round(_nutTotalKcal(det))||Math.round(det.calories||0);
@@ -559,6 +569,11 @@ window.__pinta=(det,mirandoDia,dayName)=>{
 };
 </script></body></html>"""
 
+d0 = perfil.index('function _downloadNutPdf(ev) {')
+d1 = perfil.index('\n}\n', d0) + 3
+descarga = perfil[d0:d1]
+
 destino16 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plan.html')
-open(destino16, 'w').write(plan % (cssp, _modulo('macros-alimento.js'), totales, hero, comidas))
+open(destino16, 'w').write(
+    plan % (cssp, _modulo('macros-alimento.js'), descarga, totales, hero, comidas))
 print('harness generado en', destino16)

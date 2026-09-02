@@ -516,3 +516,49 @@ window.__pinta=(dietas, dias, foco, idx)=>{
 destino15 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'distribucion.html')
 open(destino15, 'w').write(dist)
 print('harness generado en', destino15)
+
+
+# ── Harness del panel del plan (cabecera + comidas) ────────────────────────
+# Se saca de client-profile.html el pintado del plan tal cual, para poder
+# comprobar las cifras, las unidades de cada fila y a dónde llevan los botones.
+# Ojo: "Planificador de macros" aparece tambien en el CSS, mucho antes. Se
+# busca DESPUES de la funcion, o el corte sale vacio.
+a = perfil.index('function _nutTotalesDe(detail) {')
+b = perfil.index('let _nutPlanner = null;', a)
+totales = perfil[a:b]
+a2 = perfil.index('/* La cabecera del plan: el degradado')
+b2 = perfil.index('function _renderNutUI() {')
+hero = perfil[a2:b2]
+c = perfil.index("        }).join('')}</div>")
+c0 = perfil.rindex('foods.map(meal=>{', 0, c)
+comidas = perfil[c0:c]
+
+plan = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0;background:#F8FAFC"><div id="plan" style="padding:18px;max-width:900px"></div>
+<script>%s</script>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _nutMealKcal(meal){return (meal.detail||[]).reduce((s,i)=>{const a=i.aliment||{};
+  return s+window.macrosAlimento.escalar(a.calories,a,i.quantity_calc||0);},0);}
+function _nutTotalKcal(d){return (d.foods||[]).reduce((s,m)=>s+_nutMealKcal(m),0);}
+var _HORAS={'Desayuno':'08:00','Media mañana':'11:00','Comida':'14:00'};
+function _nutMealTime(n){return _HORAS[n]||'';}
+window.__acciones=[];
+function openNutEditor(){window.__acciones.push('editar');}
+function _downloadNutPdf(){window.__acciones.push('pdf');}
+function removeNutPlan(){window.__acciones.push('borrar');}
+%s
+%s
+window.__pinta=(det,mirandoDia,dayName)=>{
+  window.__acciones=[];
+  const totalKcal=Math.round(_nutTotalKcal(det))||Math.round(det.calories||0);
+  const foods=det.foods||[];
+  document.getElementById('plan').innerHTML=
+    _nutHeroHTML(det,{mirandoDia:!!mirandoDia,dayName:dayName||'Lunes',dayHasDiet:true,totalKcal})
+    + '<div class="nut-meals-area">' + %s}).join('') + '</div>';
+};
+</script></body></html>"""
+
+destino16 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plan.html')
+open(destino16, 'w').write(plan % (cssp, _modulo('macros-alimento.js'), totales, hero, comidas))
+print('harness generado en', destino16)

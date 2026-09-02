@@ -791,19 +791,11 @@
     .bld-dup-btn:hover{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF;}
     /* ── Nutrition Tab ── */
     .nut-banner{background:linear-gradient(135deg,#4F46E5,#3730A3);border-radius:14px;padding:20px 24px;color:#fff;display:flex;align-items:center;gap:20px;margin-bottom:16px;}
-    .nut-banner-left{flex:1;min-width:0;}
-    .nut-banner-badge{font-size:10px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.75);text-transform:uppercase;margin-bottom:4px;}
-    .nut-banner-title{font-size:22px;font-weight:800;line-height:1.2;}
-    .nut-banner-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;}
     .nut-banner-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 12px;font-size:12px;color:#fff;font-weight:700;cursor:pointer;transition:.15s;}
     .nut-banner-btn:hover{background:rgba(255,255,255,.3);}
     .nut-banner-btn.danger{background:rgba(220,38,38,.35);border-color:rgba(255,255,255,.25);}
     .nut-banner-btn.danger:hover{background:rgba(220,38,38,.55);}
     .plan-btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
-    .nut-banner-stats{display:flex;gap:10px;flex-shrink:0;}
-    .nut-stat-chip{background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;text-align:center;min-width:68px;}
-    .nut-stat-chip-val{font-size:18px;font-weight:800;}
-    .nut-stat-chip-lbl{font-size:10px;color:rgba(255,255,255,.75);white-space:nowrap;}
     .nut-layout{display:flex;background:#fff;border-radius:14px;border:1px solid #E5E7EB;overflow:visible;}
     .nut-day-side{width:175px;flex-shrink:0;border-right:1px solid #E5E7EB;padding:6px 0;}
     .nut-day-item{display:flex;flex-direction:column;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;gap:1px;}
@@ -819,6 +811,46 @@
        siete días y sin él, la lista de dietas. Enseñar solo una mitad obliga a
        recordar la otra: con los días no se sabe cuántas dietas hay ni cómo se
        llaman, y con las dietas no se sabe qué come el cliente el jueves. */
+    /* El plan, como en el diseño: una cabecera en degradado con las cuatro
+       cifras del día, y cada comida como una tabla con su unidad. */
+    .nplan-hero{background:linear-gradient(120deg,#5B5BE6 0%,#7C7CF0 100%);border-radius:16px;
+      padding:22px 26px 18px;margin-bottom:18px;color:#fff;}
+    .nplan-hero-top{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+    .nplan-hero-eye{font-size:10px;font-weight:800;letter-spacing:1.4px;opacity:.7;text-transform:uppercase;}
+    .nplan-hero-t{font-size:26px;font-weight:800;line-height:1.2;margin-top:7px;}
+    .nplan-hero-s{font-size:13px;opacity:.82;margin-top:5px;}
+    .nplan-hero-acts{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+    .nplan-hero-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border:none;
+      border-radius:9px;background:rgba(255,255,255,.18);color:#fff;font-size:12.5px;font-weight:700;
+      cursor:pointer;font-family:inherit;transition:background .15s;}
+    .nplan-hero-btn:hover{background:rgba(255,255,255,.3);}
+    .nplan-hero-btn.solo{padding:8px 10px;}
+    .nplan-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:rgba(255,255,255,.94);
+      border-radius:12px;padding:16px 10px;margin-top:18px;}
+    .nplan-stat{text-align:center;}
+    .nplan-stat-v{font-size:26px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;}
+    .nplan-stat-l{font-size:9.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;
+      letter-spacing:.8px;margin-top:4px;}
+
+    .nmeal{margin-bottom:16px;}
+    .nmeal-top{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+    .nmeal-pill{background:var(--indigo,#4F46E5);color:#fff;font-size:12px;font-weight:700;
+      padding:5px 13px;border-radius:20px;}
+    .nmeal-time{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:#9CA3AF;}
+    .nmeal-sub{font-size:12.5px;color:#9CA3AF;}
+    .nmeal-kcal{margin-left:auto;font-size:13px;font-weight:700;color:var(--indigo,#4F46E5);}
+    table.nmeal-t{width:100%;border-collapse:collapse;border:1px solid #EEF0F4;border-radius:12px;
+      overflow:hidden;background:#fff;}
+    table.nmeal-t th{background:#F8F9FB;font-size:9.5px;font-weight:700;color:#9CA3AF;
+      text-transform:uppercase;letter-spacing:.7px;padding:9px 16px;text-align:left;}
+    table.nmeal-t th.num,table.nmeal-t td.num{text-align:right;}
+    table.nmeal-t th.uni,table.nmeal-t td.uni{text-align:right;width:80px;}
+    table.nmeal-t td{padding:12px 16px;font-size:14px;color:#111827;border-top:1px solid #F3F4F6;}
+    table.nmeal-t td.uni{color:#9CA3AF;font-size:13px;}
+    table.nmeal-t td.num{font-variant-numeric:tabular-nums;}
+    .nmeal-f-sub{display:block;font-size:11.5px;color:#9CA3AF;margin-top:2px;}
+    @media(max-width:640px){ .nplan-stats{grid-template-columns:repeat(2,1fr);} }
+
     .nut-dist{margin:8px 10px 4px;border:1px solid #E9EBF2;border-radius:12px;overflow:hidden;background:#fff;}
     .nut-dist-head{display:flex;align-items:center;justify-content:space-between;gap:6px;
       padding:9px 11px 7px;}
@@ -7813,6 +7845,21 @@ function _nutMealTime(name) {
 function _nutMealKcal(meal) {
   return(meal.detail||[]).reduce((s,item)=>{const a=item.aliment||{};return s+window.macrosAlimento.escalar(a.calories, a, item.quantity_calc||0);},0);
 }
+/* Proteínas, carbohidratos y grasas del día, sumando sus comidas.
+
+   Se calculan igual que las kcal —por la porción de cada alimento— y no se
+   leen de `detail`, que guarda lo que se escribió al crear la dieta. Si un
+   alimento cambia de cantidad, las kcal se moverían y los macros no: la
+   cabecera diría 2100 kcal con los gramos de otro plan. */
+function _nutTotalesDe(detail) {
+  const suma = (campo) => (detail.foods || []).reduce((s, m) =>
+    s + (m.detail || []).reduce((t, item) => {
+      const a = item.aliment || {};
+      return t + window.macrosAlimento.escalar(a[campo], a, item.quantity_calc || 0);
+    }, 0), 0);
+  return { p: suma('proteins'), c: suma('carbohydrates'), g: suma('fats') };
+}
+
 function _nutTotalKcal(detail) {
   return(detail.foods||[]).reduce((s,m)=>s+_nutMealKcal(m),0);
 }
@@ -8207,6 +8254,50 @@ function _nutCarrilHTML(menuDays) {
     <button class="nut-diet-add" onclick="openAssignDietModal()">+ Añadir dieta</button>`;
 }
 
+/* La cabecera del plan: el degradado con las cuatro cifras del día.
+
+   Habla de LO QUE SE ESTÁ MIRANDO. Con menú semanal eso es el día y su dieta;
+   sin él, la dieta. Poner siempre el nombre del menú dejaba una cabecera que
+   decía "Menú semanal · 2100kcal" con las comidas del martes debajo. */
+function _nutHeroHTML(det, o) {
+  const { mirandoDia, dayName, dayHasDiet, totalKcal } = o;
+  const mealCount = (det.foods || []).length;
+  const tot = _nutTotalesDe(det);
+  const tituloPlan = det.title || (mirandoDia ? dayName : 'Plan nutricional');
+  const subPlan = [
+    det.diet_type || det.type_food?.name || null,
+    mealCount ? `${mealCount} comida${mealCount !== 1 ? 's' : ''}/día` : null,
+    mirandoDia ? dayName : null,
+  ].filter(Boolean).join(' · ') || 'Plan nutricional';
+  return `
+    <div class="nplan-hero">
+      <div class="nplan-hero-top">
+        <div style="min-width:0;">
+          <div class="nplan-hero-eye">Plan de alimentación</div>
+          <div class="nplan-hero-t">${esc(tituloPlan)}${totalKcal ? ` · ${totalKcal}kcal` : ''}</div>
+          <div class="nplan-hero-s">${esc(subPlan)}</div>
+        </div>
+        <div class="nplan-hero-acts">
+          ${dayHasDiet ? `<button class="nplan-hero-btn" onclick="openNutEditor()" title="${mirandoDia ? 'Editar este día' : 'Editar la dieta'}">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar</button>` : ''}
+          <button class="nplan-hero-btn" onclick="_downloadNutPdf(event)" title="Descargar el plan en PDF">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            PDF</button>
+          <button class="nplan-hero-btn solo" onclick="removeNutPlan()" title="Eliminar el plan" aria-label="Eliminar el plan">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="nplan-stats">
+        <div class="nplan-stat"><div class="nplan-stat-v" style="color:#4F46E5;">${totalKcal}</div><div class="nplan-stat-l">Calorías</div></div>
+        <div class="nplan-stat"><div class="nplan-stat-v" style="color:#4F46E5;">${Math.round(tot.p)}</div><div class="nplan-stat-l">Proteínas</div></div>
+        <div class="nplan-stat"><div class="nplan-stat-v" style="color:#F59E0B;">${Math.round(tot.c)}</div><div class="nplan-stat-l">Carbohidratos</div></div>
+        <div class="nplan-stat"><div class="nplan-stat-v" style="color:#111827;">${Math.round(tot.g)}</div><div class="nplan-stat-l">Grasas</div></div>
+      </div>
+    </div>`;
+}
+
 function _renderNutUI() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
@@ -8224,33 +8315,14 @@ function _renderNutUI() {
      "Jueves": el panel enseñaría una cosa y se llamaría de otra. */
   const mirandoDia = !!menuDays && _nutFoco !== 'dieta';
   const dayHasDiet = !mirandoDia || !!(menuDays[_nutDayIdx] && menuDays[_nutDayIdx].diet_id);
-
   const foods = dayHasDiet ? (det.foods || []) : [];
   const mealCount = foods.length;
 
+
+
   el.innerHTML = _nutModoCardHTML() + _nutCalcCardHTML(macros) + _nutPlanCardHTML(`
     <div class="nplan-body">
-    <div class="nut-banner">
-      <div class="nut-banner-left">
-        <div class="nut-banner-badge">Plan Activo</div>
-        <div class="nut-banner-title">${esc(menuDays ? (_nutMenu.name || 'Menú semanal') : (det.title || 'Plan nutricional'))}</div>
-        <div class="nut-banner-sub">${menuDays
-          ? 'Menú semanal · un plan por día'
-          : (clientDiets.length > 1 ? `${clientDiets.length} dietas asignadas · ` : 'Plan diario · ') + esc(det.diet_type || det.type_food?.name || 'Personalizado')}</div>
-        <div class="plan-btn-row">
-          <button class="nut-banner-btn" onclick="_downloadNutPdf(event)"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
-          <button class="nut-banner-btn" onclick="openAutoDiet()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Generar dieta</button>
-          <button class="nut-banner-btn" onclick="changeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Cambiar plan</button>
-          ${(menuDays || clientDiets.length > 1) ? `<button class="nut-banner-btn" id="wdistOpenBtn" onclick="openWeekDistModal()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>Distribución semanal</button>` : ''}
-          <button class="nut-banner-btn danger" onclick="removeNutPlan()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>Eliminar plan</button>
-        </div>
-      </div>
-      <div class="nut-banner-stats">
-        <div class="nut-stat-chip"><div class="nut-stat-chip-val">${mealCount}</div><div class="nut-stat-chip-lbl">comidas/día</div></div>
-        <div class="nut-stat-chip"><div class="nut-stat-chip-val">${totalKcal}</div><div class="nut-stat-chip-lbl">kcal/día</div></div>
-        <div class="nut-stat-chip"><div class="nut-stat-chip-val">${Math.round((macros&&macros.p)||det.detail?.proteins||0)}g</div><div class="nut-stat-chip-lbl">proteína</div></div>
-      </div>
-    </div>
+    ${_nutHeroHTML(det, { mirandoDia, dayName, dayHasDiet, totalKcal })}
     <div class="nut-layout">
       <div class="nut-day-side">${_nutCarrilHTML(menuDays)}</div>
       <div class="nut-meal-panel">
@@ -8289,25 +8361,34 @@ function _renderNutUI() {
           <div>El ${dayName.toLowerCase()} no tiene dieta en este menú.</div>
           <button class="nut-empty-link" onclick="assignDietToDay(${_nutDayIdx})">Asignar una dieta a este día</button>
         </div>` : foods.map(meal=>{
-          const mKcal=Math.round(_nutMealKcal(meal));
-          const mTime=_nutMealTime(meal.name);
-          return`<div class="nut-meal-card">
-            <div class="nut-meal-hdr">
-              <div class="nut-meal-hdr-left">
-                <div class="nut-meal-dot"></div>
-                <span class="nut-meal-name">${esc(meal.name||'Comida')}</span>
-                ${meal.subtitle?`<span class="nut-meal-que">· ${esc(meal.subtitle)}</span>`:''}
-                ${mTime?`<span class="nut-meal-time">· ${mTime}</span>`:''}
-              </div>
-              <span class="nut-meal-kcal">${mKcal} kcal</span>
+          const mKcal = Math.round(_nutMealKcal(meal));
+          const mTime = _nutMealTime(meal.name);
+          const filas = (meal.detail||[]).map(item=>{
+            const a = item.aliment || {};
+            const qty = Math.round(item.quantity_calc || 0);
+            // La unidad, del alimento. Antes ponía "g" a todo: un huevo salía
+            // como "1 g" con las kcal de una unidad entera.
+            const uni = window.macrosAlimento.unidadDe(a);
+            const sub = item.subtitle || a.brand || '';
+            return `<tr>
+              <td>${esc(a.name || item.aliment_id || 'Alimento')}${sub ? `<span class="nmeal-f-sub">${esc(sub)}</span>` : ''}</td>
+              <td class="num">${qty}</td>
+              <td class="uni">${esc(uni)}</td>
+            </tr>`;
+          }).join('');
+          return `<div class="nmeal">
+            <div class="nmeal-top">
+              <span class="nmeal-pill">${esc(meal.name || 'Comida')}</span>
+              ${mTime ? `<span class="nmeal-time"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${mTime}</span>` : ''}
+              ${meal.subtitle ? `<span class="nmeal-sub">· ${esc(meal.subtitle)}</span>` : ''}
+              <span class="nmeal-kcal">${mKcal} kcal</span>
             </div>
-            ${(meal.detail||[]).map(item=>{
-              const a=item.aliment||{};
-              const qty=Math.round(item.quantity_calc||0);
-              return`<div class="nut-food-row"><span class="nut-food-name">${esc(a.name||item.aliment_id||'Alimento')}</span><span class="nut-food-qty">${qty} g</span></div>`;
-            }).join('')}
+            <table class="nmeal-t">
+              <thead><tr><th>Producto</th><th class="num">Cantidad</th><th class="uni">Unidad</th></tr></thead>
+              <tbody>${filas || '<tr><td colspan="3" style="color:#9CA3AF;font-size:13px;">Sin alimentos en esta comida</td></tr>'}</tbody>
+            </table>
           </div>`;
-        }).join('')}</div>
+                }).join('')}</div>
       </div>
     </div>
     </div>
@@ -9874,12 +9955,6 @@ let _assignReplaceRoutineId = null;
 // Día del menú semanal al que se está asignando dieta (null = plan general).
 let _assignMenuDayIdx = null;
 
-function changeNutPlan() {
-  const menuDays = _nutMenuDays();
-  if (menuDays) { assignDietToDay(_nutDayIdx); return; }
-  _assignReplaceDietId = clientDiets[0]?.id || null;
-  openAssignDietModal();
-}
 
 /* ── Días del menú semanal: asignar o quitar la dieta de un día ── */
 function assignDietToDay(idx) {

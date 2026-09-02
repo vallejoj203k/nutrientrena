@@ -26,23 +26,7 @@ TEXT_MID     = HexColor("#374151")
 WHITE        = white
 
 
-def _num(v):
-    """80.0 se escribe 80, y 0.5 se queda en 0.5."""
-    try:
-        f = float(v)
-    except (TypeError, ValueError):
-        return "\u2014"
-    return str(int(f)) if f == int(f) else str(round(f, 2))
-
-
-def _txt(v) -> str:
-    """Texto para reportlab, que interpreta `< >` como etiquetas.
-
-    Sin esto, un alimento llamado "Yogur <2% MG>" no sale mal: DESAPARECE, y
-    el PDF se entrega con una línea menos sin que nada avise.
-    """
-    return (str(v or "")
-            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+from app.pdf.comun import num as _num, quien_de as _quien, txt as _txt  # noqa: E402
 
 
 def _styles():
@@ -182,40 +166,6 @@ def _styles():
             textColor=INDIGO,
         ),
     }
-
-
-def _quien(diet):
-    """El cliente de la dieta y su coach, para la cabecera.
-
-    Va aquí y no en el router porque el PDF se genera desde tres sitios; si
-    cada uno tuviera que pasarlos, el que se olvidara sacaría un plan sin
-    nombre y nadie lo notaría hasta tenerlo impreso. Si algo falla se
-    devuelven vacíos: un PDF sin nombre es peor que ninguno, pero un PDF que
-    no se genera es todavía peor.
-    """
-    cliente = coach = ""
-    try:
-        u = getattr(diet, "user", None)
-        if u is not None:
-            cliente = (getattr(u, "name", "") or "").strip()
-        from sqlalchemy.orm import object_session
-        ses = object_session(diet)
-        if ses is not None and u is not None:
-            from app.models.user import User, UserDetail, UserParent
-            det = ses.query(UserDetail).filter(UserDetail.user_id == u.id).first()
-            if det is not None:
-                if not cliente:
-                    cliente = (f"{det.name or ''} {det.last_name or ''}").strip()
-                lazo = ses.query(UserParent).filter(
-                    UserParent.user_detail_id == det.id).first()
-                if lazo is not None:
-                    pa = ses.query(UserDetail).filter(
-                        UserDetail.id == lazo.parent_user_detail_id).first()
-                    if pa is not None:
-                        coach = (f"{pa.name or ''} {pa.last_name or ''}").strip()
-    except Exception:
-        pass
-    return cliente, coach
 
 
 def _hero(diet, kcal, n_comidas, doc_width, styles):

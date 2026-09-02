@@ -107,6 +107,112 @@ THUMB_W   = 3.0 * cm
 THUMB_H   = 1.7 * cm  # ~16:9
 
 
+from app.pdf.comun import descanso as _descanso, num as _num, quien_de as _quien, txt as _txt  # noqa: E402
+
+# Los días de la semana, para el reparto. Es la misma lista que la pantalla.
+DIAS_SEMANA = ["Lunes", "Martes", "Mi\u00e9rcoles", "Jueves", "Viernes", "S\u00e1bado", "Domingo"]
+
+
+def _estilos_plan():
+    return {
+        "eye": ParagraphStyle("Eye", fontName="Helvetica-Bold", fontSize=8,
+                              textColor=HexColor("#C7D2FE"), leading=11),
+        "tit": ParagraphStyle("Tit", fontName="Helvetica-Bold", fontSize=19,
+                              textColor=WHITE, leading=23),
+        "sub": ParagraphStyle("Sub", fontName="Helvetica", fontSize=9.5,
+                              textColor=HexColor("#DDE1FB"), leading=13),
+        "quien": ParagraphStyle("Quien", fontName="Helvetica-Bold", fontSize=11,
+                                textColor=WHITE, alignment=TA_RIGHT, leading=14),
+        "coach": ParagraphStyle("Coach", fontName="Helvetica", fontSize=8.5,
+                                textColor=HexColor("#DDE1FB"), alignment=TA_RIGHT, leading=12),
+        "pill": ParagraphStyle("Pill", fontName="Helvetica-Bold", fontSize=8.5,
+                               textColor=WHITE, alignment=TA_RIGHT),
+        "dia": ParagraphStyle("Dia", fontName="Helvetica-Bold", fontSize=15,
+                              textColor=TEXT_DARK, leading=19),
+        "dia_sub": ParagraphStyle("DiaSub", fontName="Helvetica", fontSize=9,
+                                  textColor=GRAY_TEXT, leading=12),
+        "dia_tag": ParagraphStyle("DiaTag", fontName="Helvetica-Bold", fontSize=7.5,
+                                  textColor=INDIGO, alignment=TA_CENTER),
+        "th": ParagraphStyle("Th", fontName="Helvetica-Bold", fontSize=7,
+                             textColor=WHITE, alignment=TA_CENTER),
+        "th_l": ParagraphStyle("ThL", fontName="Helvetica-Bold", fontSize=7,
+                               textColor=WHITE, alignment=TA_LEFT),
+        "ex": ParagraphStyle("Ex", fontName="Helvetica-Bold", fontSize=9.5,
+                             textColor=TEXT_DARK, leading=12),
+        "mg": ParagraphStyle("Mg", fontName="Helvetica", fontSize=8,
+                             textColor=GRAY_TEXT, leading=11),
+        "celda": ParagraphStyle("Celda", fontName="Helvetica-Bold", fontSize=9.5,
+                                textColor=TEXT_DARK, alignment=TA_CENTER),
+        "celda_g": ParagraphStyle("CeldaG", fontName="Helvetica", fontSize=9.5,
+                                  textColor=GRAY_TEXT, alignment=TA_CENTER),
+        "inten": ParagraphStyle("Inten", fontName="Helvetica-Bold", fontSize=9,
+                                textColor=INDIGO, alignment=TA_CENTER),
+    }
+
+
+def _hero_rutina(routine, n_ejercicios, doc_width, e):
+    """La cabecera: quién, qué plan y cuánto."""
+    sub = " \u00b7 ".join([x for x in [
+        routine.training,
+        f"{routine.days} d\u00edas/semana" if routine.days else None,
+        f"{n_ejercicios} ejercicios" if n_ejercicios else None,
+    ] if x])
+
+    izq = [Paragraph("PLAN DE ENTRENAMIENTO", e["eye"]), Spacer(1, 3),
+           Paragraph(_txt(routine.name or "Rutina"), e["tit"])]
+    if sub:
+        izq += [Spacer(1, 2), Paragraph(_txt(sub), e["sub"])]
+
+    cliente, coach = _quien(routine)
+    der = []
+    if cliente:
+        der.append(Paragraph(_txt(cliente), e["quien"]))
+    if coach:
+        der.append(Paragraph("Coach \u00b7 " + _txt(coach), e["coach"]))
+    der.append(Spacer(1, 5))
+    pill = Table([[Paragraph("Alzum.io", e["pill"])]], colWidths=[2.1 * cm])
+    pill.setStyle(TableStyle([
+        ("BACKGROUND",    (0, 0), (-1, -1), HexColor("#6F72E8")),
+        ("TOPPADDING",    (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 9),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 9),
+    ]))
+    der.append(Table([[pill]], style=TableStyle([
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ])))
+
+    tbl = Table([[izq, der]], colWidths=[doc_width * 0.62, doc_width * 0.38])
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND",    (0, 0), (-1, -1), INDIGO_MID),
+        ("VALIGN",        (0, 0), (0, 0), "MIDDLE"),
+        ("VALIGN",        (1, 0), (1, 0), "TOP"),
+        ("TOPPADDING",    (0, 0), (-1, -1), 18),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 18),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 20),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 20),
+    ]))
+    return tbl
+
+
+def _reparto(days):
+    """En qué día de la semana cae cada día de la rutina.
+
+    Igual que la pantalla: manda `weekday` si alguien lo ha repartido, y si no
+    se cae al orden, que es lo que se hacía siempre.
+    """
+    hay = any(getattr(d, "weekday", None) is not None for d in days)
+    fuera = {}
+    for i, d in enumerate(days):
+        wd = getattr(d, "weekday", None) if hay else i
+        if wd is None or not (0 <= wd <= 6):
+            continue
+        fuera.setdefault(i, wd)
+    return fuera
+
+
 def _fetch_image(url: str):
     """Download image and return a ReportLab Image flowable, or None."""
     if not url:
@@ -146,263 +252,152 @@ def _fetch_image(url: str):
         return None
 
 
-def _fetch_video_thumbnail(url: str):
-    """Return a small (16:9) Image flowable for YouTube/Vimeo thumbnails, or None."""
-    thumb_url = None
-
-    m = re.search(r'(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([^&\s?]+)', url)
-    if m:
-        thumb_url = f"https://img.youtube.com/vi/{m.group(1)}/mqdefault.jpg"
-    else:
-        m = re.search(r'vimeo\.com/(?:video/)?(\d+)', url)
-        if m:
-            try:
-                req = urllib.request.Request(
-                    f"https://vimeo.com/api/oembed.json?url=https://vimeo.com/{m.group(1)}",
-                    headers={"User-Agent": "Alzum.io/1.0"},
-                )
-                ctx = ssl.create_default_context()
-                with urllib.request.urlopen(req, timeout=8, context=ctx) as resp:
-                    thumb_url = _json.loads(resp.read()).get("thumbnail_url")
-            except Exception:
-                pass
-
-    if not thumb_url:
-        return None
-    try:
-        req = urllib.request.Request(thumb_url, headers={"User-Agent": "Alzum.io/1.0"})
-        ctx = ssl.create_default_context()
-        with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
-            data = resp.read()
-        img = Image(io.BytesIO(data), width=THUMB_W, height=THUMB_H)
-        img.hAlign = "LEFT"
-        return img
-    except Exception as e:
-        print(f"PDF video thumbnail error ({url}): {e}")
-        return None
-
-
-def _header_table(title, doc_width, styles):
-    """Banner superior con branding Alzum.io y nombre de la rutina."""
-    brand_cell = Paragraph("<b>Alzum</b><font color='#818CF8'>.io</font>", ParagraphStyle(
-        "BrandInline",
-        fontName="Helvetica-Bold",
-        fontSize=22,
-        textColor=WHITE,
-    ))
-    type_cell  = Paragraph("Plan de Entrenamiento", styles["doc_type"])
-    title_cell = Paragraph(title or "Rutina", styles["subtitle"])
-
-    tbl = Table(
-        [[brand_cell, title_cell], ["", type_cell]],
-        colWidths=[doc_width * 0.45, doc_width * 0.55],
-    )
-    tbl.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, -1), INDIGO),
-        ("TOPPADDING",    (0, 0), (-1, -1), 16),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 16),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 18),
-        ("RIGHTPADDING",  (0, 0), (-1, -1), 18),
-        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
-        ("SPAN",          (0, 0), (0, 1)),
-    ]))
-    return tbl
-
-
-def _section_header(text, styles):
-    """Título de sección con barra izquierda de color."""
-    tbl = Table(
-        [[Paragraph(text, styles["section"])]],
-        colWidths=None,
-    )
-    tbl.setStyle(TableStyle([
-        ("LEFTPADDING",   (0, 0), (-1, -1), 10),
-        ("TOPPADDING",    (0, 0), (-1, -1), 2),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-        ("LINEBEFORE",    (0, 0), (-1, -1), 3, INDIGO),
-    ]))
-    return tbl
-
-
-def _info_table(routine, styles, doc_width):
-    """Tarjeta con info general de la rutina."""
-    rows = []
-    if routine.training:
-        rows.append([Paragraph("Tipo de entrenamiento", styles["info_label"]),
-                     Paragraph(routine.training,         styles["info_value"])])
-    if routine.days:
-        rows.append([Paragraph("Días por semana",       styles["info_label"]),
-                     Paragraph(str(routine.days),        styles["info_value"])])
-    if routine.time:
-        rows.append([Paragraph("Duración por sesión",   styles["info_label"]),
-                     Paragraph(f"{routine.time} min",   styles["info_value"])])
-    if routine.training_level and routine.training_level.description:
-        rows.append([Paragraph("Nivel",                 styles["info_label"]),
-                     Paragraph(routine.training_level.description, styles["info_value"])])
-    if routine.gender and routine.gender.description:
-        rows.append([Paragraph("Género",                styles["info_label"]),
-                     Paragraph(routine.gender.description, styles["info_value"])])
-
-    if not rows:
-        return None
-
-    col_label = 5 * cm
-    tbl = Table(rows, colWidths=[col_label, doc_width - col_label])
-    tbl.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, -1), GRAY_BG),
-        ("TOPPADDING",    (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 12),
-        ("LINEBELOW",     (0, 0), (-1, -2), 0.3, GRAY_BORDER),
-        ("BOX",           (0, 0), (-1, -1), 0.5, GRAY_BORDER),
-    ]))
-    return tbl
-
-
 def generate_routine_pdf(routine) -> bytes:
     """Recibe un objeto Routine (con relaciones cargadas) y devuelve bytes PDF."""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=1.8 * cm,
-        rightMargin=1.8 * cm,
-        topMargin=1.8 * cm,
-        bottomMargin=2 * cm,
+        buffer, pagesize=A4,
+        leftMargin=1.6 * cm, rightMargin=1.6 * cm,
+        topMargin=1.5 * cm, bottomMargin=1.8 * cm,
     )
-
     styles = _styles()
+    e = _estilos_plan()
     story = []
 
-    # ── Header ───────────────────────────────────────────────────────────────
-    story.append(_header_table(routine.name, doc.width, styles))
+    dias = list(routine.days_list or [])
+
+    def _ejercicios_de(day):
+        todos = list(day.details or [])
+        for bloque in (day.blocks or []):
+            todos.extend(bloque.exercises or [])
+        todos.sort(key=lambda d: d.order_index or 0)
+        return todos
+
+    total = sum(len(_ejercicios_de(d)) for d in dias)
+    story.append(_hero_rutina(routine, total, doc.width, e))
     story.append(Spacer(1, 0.6 * cm))
 
-    # ── Info general ──────────────────────────────────────────────────────────
-    info_tbl = _info_table(routine, styles, doc.width)
-    if info_tbl:
-        story.append(info_tbl)
-        story.append(Spacer(1, 0.5 * cm))
+    reparto = _reparto(dias)
+    # La columna de la imagen solo si algún ejercicio la tiene: vacía se lleva
+    # dos centímetros de ancho a cambio de nada.
+    hay_fotos = any((d.training.image if d.training else None)
+                    for day in dias for d in _ejercicios_de(day))
+    img_col = (IMG_SIZE + 0.25 * cm) if hay_fotos else 0
+    resto = doc.width - img_col
+    col_w = [c for c in
+             [img_col, resto * 0.40, resto * 0.13, resto * 0.15, resto * 0.17, resto * 0.15]
+             if c]
 
-    # ── Programa de entrenamiento ─────────────────────────────────────────────
-    story.append(_section_header("Programa de entrenamiento", styles))
-    story.append(Spacer(1, 0.2 * cm))
+    for i, day in enumerate(dias):
+        ejercicios = _ejercicios_de(day)
+        nombre = day.day_name or f"D\u00eda {i + 1}"
+        wd = reparto.get(i)
+        # El título es el DÍA DE LA SEMANA, que es cuando el cliente entrena;
+        # el nombre de la sesión va debajo y en la etiqueta.
+        titulo = DIAS_SEMANA[wd] if wd is not None else nombre
+        if ejercicios:
+            sub = " \u00b7 ".join([x for x in [
+                nombre if wd is not None else None,
+                f"{len(ejercicios)} ejercicio" + ("s" if len(ejercicios) != 1 else ""),
+                f"~{routine.time} min" if routine.time else None,
+            ] if x])
+        else:
+            # Un día de descanso no tiene ejercicios ni dura 45 minutos.
+            sub = "Sin entreno programado"
 
-    # col widths: img | ejercicio | músculo | series | reps | descanso
-    img_col = IMG_SIZE + 0.2 * cm
-    remaining = doc.width - img_col
-    col_w = [
-        img_col,
-        remaining * 0.30,
-        remaining * 0.22,
-        remaining * 0.12,
-        remaining * 0.18,
-        remaining * 0.18,
-    ]
-
-    for day in (routine.days_list or []):
-        day_header = Table(
-            [[Paragraph(day.day_name or "Día", styles["day_name"])]],
-            colWidths=[doc.width],
-        )
-        day_header.setStyle(TableStyle([
-            ("BACKGROUND",    (0, 0), (-1, -1), INDIGO),
-            ("TOPPADDING",    (0, 0), (-1, -1), 7),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-            ("LEFTPADDING",   (0, 0), (-1, -1), 12),
+        etiqueta = Table([[Paragraph(_txt(nombre.upper()), e["dia_tag"])]], colWidths=[2.9 * cm])
+        etiqueta.setStyle(TableStyle([
+            ("BACKGROUND",    (0, 0), (-1, -1), INDIGO_PALE),
+            ("TOPPADDING",    (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ]))
+        cabecera = Table(
+            [[[Paragraph(_txt(titulo), e["dia"]), Spacer(1, 2), Paragraph(_txt(sub), e["dia_sub"])],
+              etiqueta]],
+            colWidths=[doc.width * 0.7, doc.width * 0.3])
+        cabecera.setStyle(TableStyle([
+            ("VALIGN",       (0, 0), (-1, -1), "MIDDLE"),
+            ("ALIGN",        (1, 0), (1, 0), "RIGHT"),
+            ("LEFTPADDING",  (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ("LINEBELOW",    (0, 0), (-1, -1), 1.2, INDIGO),
         ]))
 
-        rows = [[
-            Paragraph("<b>Img</b>",          styles["body"]),
-            Paragraph("<b>Ejercicio</b>",    styles["body"]),
-            Paragraph("<b>Músculo</b>",      styles["body"]),
-            Paragraph("<b>Series</b>",       styles["body"]),
-            Paragraph("<b>Reps</b>",         styles["body"]),
-            Paragraph("<b>Descanso</b>",     styles["body"]),
-        ]]
-
-        all_details = list(day.details or [])
-        for block in (day.blocks or []):
-            all_details.extend(block.exercises or [])
-        all_details.sort(key=lambda d: d.order_index or 0)
-
-        for detail in all_details:
-            training      = detail.training
-            exercise_name = training.name if training else "—"
-            muscle_name   = (
-                detail.muscle_group.name
-                if detail.muscle_group
-                else (training.muscle_group.name
-                      if training and training.muscle_group
-                      else "—")
-            )
-            img_cell  = _fetch_image(training.image if training else None) or Paragraph("—", styles["body"])
-            video_url = training.video_url if training else None
-            name_cell = [Paragraph(_html.escape(exercise_name), styles["body"])]
-            if video_url:
-                vesc  = _html.escape(video_url)
-                thumb = _fetch_video_thumbnail(video_url)
-                if thumb:
-                    name_cell.append(Spacer(1, 3))
-                    name_cell.append(thumb)
-                name_cell.append(Spacer(1, 2))
-                name_cell.append(Paragraph(
-                    f'<a href="{vesc}" color="#6366F1"><font size="7">&#9654; ver video</font></a>',
-                    styles["body"],
-                ))
-            rows.append([
-                img_cell,
-                name_cell,
-                Paragraph(muscle_name,                 styles["body"]),
-                Paragraph(str(detail.series or "—"),   styles["body"]),
-                Paragraph(str(detail.repetitions or "—"), styles["body"]),
-                Paragraph(str(detail.break_time or "—"),  styles["body"]),
-            ])
-
-        # Día con solo descripción libre
-        if len(rows) == 1 and not all_details and day.description:
-            rows.append([
-                "",
-                Paragraph(day.description, styles["body"]),
-                "", "", "", "",
-            ])
-            exercise_tbl = Table(rows, colWidths=col_w)
-            exercise_tbl.setStyle(TableStyle([
-                ("BACKGROUND",    (0, 0), (-1, 0), INDIGO_PALE),
-                ("TEXTCOLOR",     (0, 0), (-1, 0), INDIGO),
-                ("SPAN",          (1, 1), (-1, 1)),
-                ("FONTSIZE",      (0, 0), (-1, -1), 8),
-                ("GRID",          (0, 0), (-1, -1), 0.3, GRAY_BORDER),
-                ("TOPPADDING",    (0, 0), (-1, -1), 5),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-                ("LEFTPADDING",   (0, 0), (-1, -1), 7),
-                ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        if not ejercicios:
+            # Un día de descanso se dice, no se deja en blanco: en blanco
+            # parece que el PDF salió mal.
+            vacio = Table([[Paragraph(
+                _txt(day.description or "D\u00eda de descanso"), styles["body"])]],
+                colWidths=[doc.width])
+            vacio.setStyle(TableStyle([
+                ("BACKGROUND",    (0, 0), (-1, -1), GRAY_BG),
+                ("BOX",           (0, 0), (-1, -1), 0.7, GRAY_BORDER),
+                ("TOPPADDING",    (0, 0), (-1, -1), 12),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+                ("LEFTPADDING",   (0, 0), (-1, -1), 14),
             ]))
-        else:
-            n = len(rows)
-            row_bgs = []
-            for i in range(1, n):
-                row_bgs.append(("BACKGROUND", (0, i), (-1, i), WHITE if i % 2 else GRAY_BG))
+            story.append(KeepTogether([cabecera, Spacer(1, 0.25 * cm), vacio, Spacer(1, 0.5 * cm)]))
+            continue
 
-            exercise_tbl = Table(
-                rows,
-                colWidths=col_w,
-            )
-            exercise_tbl.setStyle(TableStyle([
-                ("BACKGROUND",    (0, 0), (-1, 0), INDIGO_PALE),
-                ("TEXTCOLOR",     (0, 0), (-1, 0), INDIGO),
-                ("FONTSIZE",      (0, 0), (-1, -1), 8),
-                ("GRID",          (0, 0), (-1, -1), 0.3, GRAY_BORDER),
-                ("TOPPADDING",    (0, 0), (-1, -1), 4),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ("LEFTPADDING",   (0, 0), (-1, -1), 7),
-                ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
-            ] + row_bgs))
+        cab = ([Paragraph("", e["th"])] if hay_fotos else []) + [
+            Paragraph("EJERCICIO", e["th_l"]),
+            Paragraph("SERIES", e["th"]),
+            Paragraph("REPS", e["th"]),
+            Paragraph("INTENSIDAD", e["th"]),
+            Paragraph("DESCANSO", e["th"]),
+        ]
+        filas = [cab]
 
-        story.append(KeepTogether([day_header, exercise_tbl, Spacer(1, 0.35 * cm)]))
+        for d in ejercicios:
+            tr = d.training
+            nombre_ex = tr.name if tr else "\u2014"
+            musculo = (d.muscle_group.name if d.muscle_group
+                       else (tr.muscle_group.name if tr and tr.muscle_group else None))
+            celda = [Paragraph(_txt(nombre_ex), e["ex"])]
+            if musculo:
+                celda.append(Paragraph(_txt(musculo), e["mg"]))
+            video = tr.video_url if tr else None
+            if video:
+                celda.append(Spacer(1, 2))
+                celda.append(Paragraph(
+                    f'<a href="{_txt(video)}" color="#4F46E5"><font size="8"><u>Ver v\u00eddeo</u></font></a>',
+                    styles["body"]))
 
-    # ── Footer ────────────────────────────────────────────────────────────────
-    story.append(Spacer(1, 0.4 * cm))
+            if d.intensity_value is not None:
+                marca = ("RPE " + _num(d.intensity_value)) if (d.intensity_type or "").upper() == "RPE" \
+                    else _num(d.intensity_value) + "%"
+                inten = Paragraph(marca, e["inten"])
+            else:
+                inten = Paragraph("\u2014", e["celda_g"])
+
+            filas.append(([_fetch_image(tr.image if tr else None) or ""] if hay_fotos else []) + [
+                celda,
+                Paragraph(str(d.series) if d.series else "\u2014", e["celda"]),
+                Paragraph(_txt(d.repetitions) or "\u2014", e["celda"]),
+                inten,
+                Paragraph(_descanso(d.break_time), e["celda_g"]),
+            ])
+
+        tabla = Table(filas, colWidths=col_w, repeatRows=1)
+        tabla.setStyle(TableStyle([
+            ("BACKGROUND",    (0, 0), (-1, 0), INDIGO_MID),
+            ("TOPPADDING",    (0, 0), (-1, 0), 8),
+            ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+            ("LINEBELOW",     (0, 1), (-1, -2), 0.5, HexColor("#F1F2F6")),
+            ("BOX",           (0, 0), (-1, -1), 0.7, GRAY_BORDER),
+            ("TOPPADDING",    (0, 1), (-1, -1), 9),
+            ("BOTTOMPADDING", (0, 1), (-1, -1), 9),
+            ("LEFTPADDING",   (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING",  (0, 0), (-1, -1), 10),
+            ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ]))
+        story.append(KeepTogether([cabecera, Spacer(1, 0.25 * cm), tabla, Spacer(1, 0.55 * cm)]))
+
+    if not dias:
+        story.append(Paragraph("Esta rutina no tiene d\u00edas configurados.", styles["body"]))
+
+    story.append(Spacer(1, 0.3 * cm))
     story.append(HRFlowable(width="100%", thickness=0.5, color=GRAY_BORDER))
     story.append(Spacer(1, 0.2 * cm))
     story.append(Paragraph("Generado por Alzum.io", styles["footer"]))

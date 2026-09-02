@@ -6876,18 +6876,21 @@ function _calTypeExtraHtml(key) {
 
 async function openCalTaskModal(prefillDate) {
   const dateStr = prefillDate || _isoDate(new Date());
-  /* Llegando desde el modo "Calendario completo" se viene a poner DIETAS. El
-     tipo viene fijado en Nutrición y los demás no se ofrecen: si no, es muy
-     fácil crear una rutina sin querer y acabar con el calendario lleno de
-     tareas que nadie pidió. Se sale del enfoque con el enlace del aviso. */
-  _calNewType = _enfoqueNutricion() ? 'nutricion' : 'rutina';
+  /* Llegando desde el modo "Calendario completo" se viene a poner una cosa
+     concreta: dietas si lo que está en calendario es la nutrición, rutinas si
+     es el entrenamiento. El tipo viene fijado y los demás no se ofrecen: si
+     no, es muy fácil crear otra cosa sin querer y acabar con el calendario
+     lleno de tareas que nadie pidió. Se sale del enfoque con el enlace del
+     aviso. */
+  const enfoque = _enfoqueCalendario();
+  _calNewType = enfoque || 'rutina';
   const [y, m, d] = dateStr.split('-').map(Number);
   const dateObj = new Date(y, m-1, d);
   const dayName = DAY_NAMES[(dateObj.getDay()+6)%7];
   const dayLabel = `${dayName}, ${d} ${MONTH_NAMES[m-1].slice(0,3)}`;
 
-  const tipos = _enfoqueNutricion()
-    ? _CAL_TYPES.filter(t => t.key === 'nutricion')
+  const tipos = enfoque
+    ? _CAL_TYPES.filter(t => t.key === enfoque)
     : _CAL_TYPES;
   const typeRows = tipos.map(t =>
     `<div class="cal-type-row${t.key===_calNewType?' sel':''}" id="ctr-${t.key}" onclick="_selCalType('${t.key}')">
@@ -6908,9 +6911,11 @@ async function openCalTaskModal(prefillDate) {
       <span class="cal-modal-title">Nueva tarea · ${dayLabel}</span>
       <button class="cal-modal-close" onclick="closeCalTaskModal()">×</button>
     </div>
-    ${_enfoqueNutricion() ? `<div class="cal-enfoque">
-      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
-      <span>Estás programando la <b>nutrición</b> día a día.
+    ${enfoque ? `<div class="cal-enfoque">
+      ${enfoque === 'nutricion'
+        ? '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>'
+        : '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/></svg>'}
+      <span>Estás programando ${enfoque === 'nutricion' ? 'la <b>nutrición</b>' : 'el <b>entrenamiento</b>'} día a día.
       <button class="cal-enfoque-link" onclick="salirEnfoqueNutricion()">Crear otro tipo de tarea</button></span>
     </div>` : ''}
     <div id="calTypeList">${typeRows}</div>
@@ -7238,8 +7243,14 @@ async function renderEntrenamientoTab() {
   const el = document.getElementById('entrenamientoContent');
   if (!el) return;
 
+  // Qué modo manda. `clientData` es el perfil que se cargó al abrir la página:
+  // sirve para saber en qué modo se entra, pero NO puede pisar un cambio hecho
+  // después. Al cambiar de modo se actualizan los dos, así que basta con
+  // leerlo la primera vez.
+  if (_entModo == null) _entModo = (clientData && clientData.training_mode) || 'semanal';
+
   if (!clientRoutines.length) {
-    el.innerHTML = `<div class="card" style="padding:48px;text-align:center;">
+    el.innerHTML = _entModoCardHTML() + `<div class="card" style="padding:48px;text-align:center;">
       <div style="margin-bottom:16px;color:#D1D5DB;"><svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h1.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3"/><path d="M21 9.5h-1.5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1H21"/></svg></div>
       <p style="font-size:15px;font-weight:700;color:#374151;margin:0 0 6px;">Sin plan de entrenamiento</p>
       <p style="font-size:13px;color:#9CA3AF;margin:0 0 20px;">Asigna un plan de tu librería para comenzar</p>
@@ -7275,6 +7286,7 @@ async function renderEntrenamientoTab() {
 function _renderEntTrainingUI() {
   const el = document.getElementById('entrenamientoContent');
   if (!el || !clientRoutines.length) return;
+  if (_entModo == null) _entModo = (clientData && clientData.training_mode) || 'semanal';
 
   const r = clientRoutines[0];
   const days = r.days_list || [];
@@ -7290,7 +7302,7 @@ function _renderEntTrainingUI() {
     dateLabel = `Asignado el ${d.getDate()} ${MONTHS[d.getMonth()]}`;
   }
 
-  el.innerHTML = `
+  el.innerHTML = _entModoCardHTML() + `
     <!-- PLAN ACTIVO BANNER -->
     <div style="background:linear-gradient(135deg,#7C3AED 0%,#4F46E5 100%);border-radius:16px;padding:22px 28px;margin-bottom:16px;color:#fff;">
       <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;opacity:.65;margin-bottom:10px;">PLAN ACTIVO${dateLabel ? ` · ${dateLabel}` : ''}</div>
@@ -8245,10 +8257,44 @@ function _renderNutUI() {
    ══════════════════════════════════════════════════════════════════════════ */
 
 var _nutModo = null;           // lo que dice el servidor; null = aún sin leer
+var _entModo = null;           // el del entrenamiento, que va por su cuenta
 var _nutCalcAbierta = false;   // plegada, como en el diseño
 
-function _nutModoCardHTML() {
-  const cal = _nutModo === 'calendario';
+/* Las dos áreas que se programan de una de dos formas. Van por separado a
+   propósito: un coach puede tener la nutrición cerrada en un plan semanal y
+   los entrenos día a día. Un solo interruptor para las dos le obligaría a
+   llevarlas igual. */
+var MODOS = {
+  nutricion: {
+    titulo: 'Modo de programación · Nutrición',
+    semanalDesc: 'Un plan fijo que se repite cada semana.',
+    calendarioDesc: 'Programa día a día desde el calendario del cliente.',
+    ruta: 'nutrition-mode', campo: 'nutrition_mode',
+    aviso: {
+      calendario: 'Vas a pasar a Calendario completo. Tu plan semanal recurrente actual quedará en pausa (no se borra) mientras el calendario esté activo. Puedes volver a él cuando quieras.',
+      semanal: 'Vas a volver al Plan semanal recurrente. Lo que tengas programado en el calendario quedará en pausa (no se borra) mientras el plan semanal esté activo. Puedes volver a él cuando quieras.',
+    },
+  },
+  entrenamiento: {
+    titulo: 'Modo de programación · Entrenamiento',
+    semanalDesc: 'Un plan fijo que se repite cada semana.',
+    calendarioDesc: 'Programa día a día desde el calendario del cliente.',
+    ruta: 'training-mode', campo: 'training_mode',
+    aviso: {
+      calendario: 'Vas a pasar a Calendario completo. Tu plan semanal recurrente actual quedará en pausa (no se borra) mientras el calendario esté activo. Puedes volver a él cuando quieras.',
+      semanal: 'Vas a volver al Plan semanal recurrente. Lo que tengas programado en el calendario quedará en pausa (no se borra) mientras el plan semanal esté activo. Puedes volver a él cuando quieras.',
+    },
+  },
+};
+
+function _modoDe(area) { return area === 'entrenamiento' ? _entModo : _nutModo; }
+
+/* La tarjeta del selector. Es la misma en las dos secciones y por eso está
+   una sola vez: dos copias con los mismos radios y los mismos textos acaban
+   diciendo cosas distintas en cuanto una se toca. */
+function _modoCardHTML(area) {
+  const cfg = MODOS[area];
+  const cal = _modoDe(area) === 'calendario';
   const tag = (activo) => activo
     ? '<span class="nmodo-tag act"><i></i>Activo</span>'
     : '<span class="nmodo-tag pau"><i></i>En pausa</span>';
@@ -8256,34 +8302,37 @@ function _nutModoCardHTML() {
     <div class="nsec">
       <div class="nsec-head" style="padding-bottom:6px;">
         <div>
-          <div class="nsec-title">Modo de programación · Nutrición</div>
+          <div class="nsec-title">${cfg.titulo}</div>
           <div class="nsec-sub">Cambiar de modo no borra nada: el otro modo queda en pausa.</div>
         </div>
       </div>
       <div class="nmodos">
-        <div class="nmodo${cal ? '' : ' on'}" onclick="pedirCambioModo('semanal')">
+        <div class="nmodo${cal ? '' : ' on'}" onclick="pedirCambioModo('semanal','${area}')">
           <span class="nmodo-radio"></span>
           <div style="flex:1;min-width:0;">
             <div class="nmodo-nm">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
               Plan semanal recurrente${tag(!cal)}
             </div>
-            <div class="nmodo-desc">Un plan fijo que se repite cada semana.</div>
+            <div class="nmodo-desc">${cfg.semanalDesc}</div>
           </div>
         </div>
-        <div class="nmodo${cal ? ' on' : ''}" onclick="pedirCambioModo('calendario')">
+        <div class="nmodo${cal ? ' on' : ''}" onclick="pedirCambioModo('calendario','${area}')">
           <span class="nmodo-radio"></span>
           <div style="flex:1;min-width:0;">
             <div class="nmodo-nm">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
               Calendario completo${tag(cal)}
             </div>
-            <div class="nmodo-desc">Programa día a día desde el calendario del cliente.</div>
+            <div class="nmodo-desc">${cfg.calendarioDesc}</div>
           </div>
         </div>
       </div>
     </div>`;
 }
+
+function _nutModoCardHTML() { return _modoCardHTML('nutricion'); }
+function _entModoCardHTML() { return _modoCardHTML('entrenamiento'); }
 
 /* La calculadora, con el resumen en la cabecera para que plegada siga
    diciendo algo. Un desplegable que no adelanta nada obliga a abrirlo solo
@@ -8375,16 +8424,14 @@ function _nutPlanVacioHTML() {
 
 /* ── Cambiar de modo ─────────────────────────────────────────────────────── */
 
-var _modoPedido = null;
+var _modoPedido = null;        // {modo, area}
 
-function pedirCambioModo(modo) {
-  if (modo === _nutModo) return;          // ya está en ese modo
-  _modoPedido = modo;
-  const cal = modo === 'calendario';
+function pedirCambioModo(modo, area) {
+  area = area || 'nutricion';
+  if (modo === _modoDe(area)) return;      // ya está en ese modo
+  _modoPedido = { modo: modo, area: area };
   document.getElementById('cmodoTitulo').textContent = 'Cambiar modo de programación';
-  document.getElementById('cmodoTexto').textContent = cal
-    ? 'Vas a pasar a Calendario completo. Tu plan semanal recurrente actual quedará en pausa (no se borra) mientras el calendario esté activo. Puedes volver a él cuando quieras.'
-    : 'Vas a volver al Plan semanal recurrente. Lo que tengas programado en el calendario quedará en pausa (no se borra) mientras el plan semanal esté activo. Puedes volver a él cuando quieras.';
+  document.getElementById('cmodoTexto').textContent = MODOS[area].aviso[modo];
   document.getElementById('cmodoBack').classList.add('open');
 }
 
@@ -8394,29 +8441,31 @@ function cerrarCambioModo() {
 }
 
 async function confirmarCambioModo() {
-  const modo = _modoPedido;
-  if (!modo) return;
+  if (!_modoPedido) return;
+  const { modo, area } = _modoPedido;
+  const cfg = MODOS[area];
   const btn = document.getElementById('cmodoOk');
   const antes = btn ? btn.textContent : null;
   if (btn) { btn.disabled = true; btn.textContent = 'Cambiando…'; }
   try {
     // `h()` solo lleva el token: sin Content-Type el cuerpo llega sin declarar
     // y el servidor responde 422 sin que se note nada raro en la pantalla.
-    const r = await fetch(`${API}/users/client/${clientId}/nutrition-mode`, {
+    const r = await fetch(`${API}/users/client/${clientId}/${cfg.ruta}`, {
       method: 'PUT',
       headers: { ...h(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nutrition_mode: modo }),
+      body: JSON.stringify({ [cfg.campo]: modo }),
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    _nutModo = modo;
+    if (area === 'entrenamiento') _entModo = modo; else _nutModo = modo;
     // El perfil en memoria también, o el siguiente repintado lo devolvería al
     // modo viejo leyendo un dato de hace un rato.
-    if (clientData) clientData.nutrition_mode = modo;
+    if (clientData) clientData[cfg.campo] = modo;
     cerrarCambioModo();
-    await renderNutricionTab();
+    if (area === 'entrenamiento') await renderEntrenamientoTab();
+    else await renderNutricionTab();
     // Con el calendario activo se trabaja EN el calendario: dejar al coach en
     // una pantalla que ya no manda es dejarlo programando en el sitio pausado.
-    if (modo === 'calendario') irAlCalendarioDeNutricion();
+    if (modo === 'calendario') irAlCalendarioDe(area);
   } catch (e) {
     showToast('No se ha podido cambiar el modo. Inténtalo de nuevo.', 'error');
   } finally {
@@ -8432,24 +8481,40 @@ function salirEnfoqueNutricion() {
   openCalTaskModal();
 }
 
-/* El calendario, centrado en la nutrición: se llega aquí para poner dietas, y
-   el tipo de tarea viene puesto para no acabar creando otra cosa sin querer.
+/* El calendario, centrado en lo que se venía a hacer: se llega aquí para poner
+   dietas o para poner rutinas, y el tipo de tarea viene puesto para no acabar
+   creando otra cosa sin querer.
 
    El enfoque NO se guarda en una variable suelta: se deduce del modo del
    cliente. Una variable se pierde al recargar la página, y el coach que vuelve
    al día siguiente se encuentra el calendario como si nada — programando por
-   calendario pero con el formulario ofreciéndole crear rutinas. */
+   calendario pero con el formulario ofreciéndole crear cualquier cosa. */
 var _calSalirEnfoque = false;   // solo mientras dure esta visita
 
-function _enfoqueNutricion() {
-  return _nutModo === 'calendario' && !_calSalirEnfoque;
+/* Qué tipo de tarea viene fijado, o null si no hay enfoque.
+
+   Con las DOS áreas en calendario no se fija ninguno: fijar una de las dos
+   sería elegir por el coach, y la que quedara fuera se volvería incómoda de
+   programar justo cuando más se usa. */
+function _enfoqueCalendario() {
+  if (_calSalirEnfoque) return null;
+  const nut = _nutModo === 'calendario';
+  const ent = _entModo === 'calendario';
+  if (nut && !ent) return 'nutricion';
+  if (ent && !nut) return 'rutina';
+  return null;
 }
 
-function irAlCalendarioDeNutricion() {
+// El nombre viejo, que usa el aviso del propio calendario.
+function _enfoqueNutricion() { return _enfoqueCalendario() === 'nutricion'; }
+
+function irAlCalendarioDe(area) {
   _calSalirEnfoque = false;
   showTab('calendario');
   if (typeof renderCalendarioTab === 'function') renderCalendarioTab();
 }
+
+function irAlCalendarioDeNutricion() { irAlCalendarioDe('nutricion'); }
 
 /* Re-renderiza solo el planificador (funciona con o sin dieta asignada) */
 function _npRerender() {

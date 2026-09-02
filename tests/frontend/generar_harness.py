@@ -433,3 +433,49 @@ window.__soloUna=()=>{
 destino13 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'menu.html')
 open(destino13, 'w').write(menu)
 print('harness generado en', destino13)
+
+
+# ── Harness del selector de modo de programación ───────────────────────────
+# Se saca de client-profile.html el selector y el cambio de modo tal cual. Lo
+# que hay que comprobar es que las dos areas (nutricion y entrenamiento) son
+# independientes, y eso solo se ve ejecutando el codigo de verdad.
+a = perfil.index('var _nutModo = null;')
+b = perfil.index('/* La calculadora, con el resumen en la cabecera')
+tarjetas = perfil[a:b]
+c = perfil.index('/* \u2500\u2500 Cambiar de modo \u2500')
+d = perfil.index('/* Re-renderiza solo el planificador')
+cambio = perfil[c:d]
+modal = _bloque(perfil, '<div class="cmodo-back" id="cmodoBack"')
+
+modos = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
+<div id="nutricionContent"></div>
+<div id="entrenamientoContent"></div>
+%s
+<script>
+const API='http://x'; const clientId='cli-1';
+function h(){return{};}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function showToast(m,t){window.__toast=m;window.__toastTipo=t;}
+function showTab(n){window.__pestana=n;}
+function renderCalendarioTab(){window.__calendario=(window.__calendario||0)+1;}
+async function renderNutricionTab(){document.getElementById('nutricionContent').innerHTML=_nutModoCardHTML();}
+async function renderEntrenamientoTab(){document.getElementById('entrenamientoContent').innerHTML=_entModoCardHTML();}
+var clientData={};
+window.__puestas=[];
+window.fetch=function(url,opt){
+  window.__puestas.push({url:url, metodo:opt&&opt.method, cuerpo:opt&&opt.cuerpo||opt&&opt.body});
+  return Promise.resolve({ok:!window.__falla, json:()=>Promise.resolve({})});
+};
+%s
+%s
+window.__pinta=(nut,ent)=>{
+  _nutModo=nut; _entModo=ent; _calSalirEnfoque=false; window.__puestas=[];
+  document.getElementById('nutricionContent').innerHTML=_nutModoCardHTML();
+  document.getElementById('entrenamientoContent').innerHTML=_entModoCardHTML();
+};
+window.__modos=()=>({nut:_nutModo, ent:_entModo});
+</script></body></html>""" % (cssp, modal, tarjetas, cambio)
+
+destino14 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'modos.html')
+open(destino14, 'w').write(modos)
+print('harness generado en', destino14)

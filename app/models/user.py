@@ -81,6 +81,10 @@ class UserDetail(Base):
     # cada semana) o "calendario" (día a día, desde su calendario). Solo uno
     # está activo; el otro NO se borra, queda en pausa y se puede recuperar.
     nutrition_mode = Column(String(20), nullable=True, default="semanal")
+    # Lo mismo para los entrenos, y en su propia columna: un coach puede tener
+    # la nutrición cerrada en un plan fijo y los entrenos día a día, o al
+    # revés. Compartir el interruptor le obligaría a llevar las dos igual.
+    training_mode = Column(String(20), nullable=True, default="semanal")
     # Pese al nombre, aquí NO va un código ISO: la migración v0w1x2y3z4a5
     # ("Allow free-text country names") quitó la clave foránea a countries.code
     # y ensanchó la columna a 100. El modelo se había quedado declarando

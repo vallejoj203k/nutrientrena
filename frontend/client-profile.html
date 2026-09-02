@@ -813,6 +813,31 @@
     .nut-day-item.sel .nut-day-abv{color:#4F46E5;}
     .nut-day-name{font-size:13px;font-weight:600;color:#111827;}
     .nut-day-meta{font-size:11px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    /* Distribución semanal: qué dieta le toca cada día, en el carril.
+
+       Antes el carril era una cosa O la otra: con menú semanal salían los
+       siete días y sin él, la lista de dietas. Enseñar solo una mitad obliga a
+       recordar la otra: con los días no se sabe cuántas dietas hay ni cómo se
+       llaman, y con las dietas no se sabe qué come el cliente el jueves. */
+    .nut-dist{margin:8px 10px 4px;border:1px solid #E9EBF2;border-radius:12px;overflow:hidden;background:#fff;}
+    .nut-dist-head{display:flex;align-items:center;justify-content:space-between;gap:6px;
+      padding:9px 11px 7px;}
+    .nut-dist-t{font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;}
+    .nut-dist-edit{border:none;background:none;padding:2px;cursor:pointer;color:#C4C7CF;
+      display:inline-flex;line-height:0;}
+    .nut-dist-edit:hover{color:var(--indigo,#4F46E5);}
+    .nut-dist-row{display:flex;align-items:center;gap:7px;padding:4px 11px;cursor:pointer;
+      border-left:3px solid transparent;}
+    .nut-dist-row:hover{background:#F9FAFB;}
+    .nut-dist-row.sel{background:#EEF2FF;border-left-color:#4F46E5;}
+    .nut-dist-row:last-child{padding-bottom:9px;}
+    .nut-dist-abv{flex-shrink:0;width:30px;text-align:center;padding:2px 0;border-radius:6px;
+      background:#EEF2FF;color:#4F46E5;font-size:10px;font-weight:800;}
+    .nut-dist-row.vacio .nut-dist-abv{background:#F3F4F6;color:#9CA3AF;}
+    .nut-dist-fl{flex-shrink:0;color:#C4C7CF;font-size:11px;}
+    .nut-dist-lbl{font-size:11.5px;color:#4B5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .nut-dist-row.vacio .nut-dist-lbl{color:#C4C7CF;font-style:italic;}
+    .nut-diet-sub{font-size:11px;color:#6B7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .nut-side-head{padding:12px 14px 8px;font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;}
     .nut-diet-item{display:flex;flex-direction:column;gap:2px;margin:0 10px 8px;padding:11px 13px;border:1.5px solid #E9EBF2;border-radius:11px;cursor:pointer;background:#fff;transition:.15s;}
     .nut-diet-item:hover{border-color:#C7D2FE;}
@@ -8120,6 +8145,68 @@ function _nutNormalize(det) {
   return det;
 }
 
+/* El carril de la izquierda: la distribución semanal y las dietas del plan.
+
+   Antes era una cosa O la otra —con menú semanal, los siete días; sin él, la
+   lista de dietas—. Enseñar solo una mitad obliga a recordar la otra: mirando
+   los días no se sabe cuántas dietas hay ni cómo se llaman, y mirando las
+   dietas no se sabe qué come el cliente el jueves. Van las dos. */
+function _nutCarrilHTML(menuDays) {
+  const dietas = clientDiets || [];
+
+  // La etiqueta de un día: la MISMA que usa el modal de distribución, para que
+  // el carril y el modal no llamen distinto a la misma dieta.
+  const etiquetaDe = (md) => {
+    if (!md || !md.diet_id) return null;
+    const i = dietas.findIndex(d => String(d.id) === String(md.diet_id));
+    if (i >= 0) return _wdEtiqueta(dietas[i], i);
+    // Un día puede apuntar a una dieta que ya no está en la lista del cliente.
+    // Se dice lo que se sabe de ella en vez de fingir que el día está libre.
+    return md.diet_title || 'Dieta asignada';
+  };
+
+  const filas = _NUT_DAY_ABV.map((abv, i) => {
+    const et = menuDays ? etiquetaDe(menuDays[i]) : null;
+    const sel = menuDays && _nutFoco !== 'dieta' && _nutDayIdx === i;
+    // Sin distribución guardada, tocar un día lleva a ponerla. Un día que no
+    // hace nada al pulsarlo parece estropeado.
+    const accion = menuDays ? `selectNutDay(${i})` : 'openWeekDistModal()';
+    return `<div class="nut-dist-row${sel ? ' sel' : ''}${et ? '' : ' vacio'}" onclick="${accion}"
+        title="${et ? esc(et) : 'Sin dieta este día'}">
+      <span class="nut-dist-abv">${abv}</span>
+      <span class="nut-dist-fl">→</span>
+      <span class="nut-dist-lbl">${et ? esc(et) : 'Sin asignar'}</span>
+    </div>`;
+  }).join('');
+
+  const tarjetas = dietas.map((d, i) => {
+    const n = (d.foods || []).length;
+    const k = d.calories ? Math.round(d.calories) : null;
+    const meta = [n ? n + ' comida' + (n !== 1 ? 's' : '') : '', k ? k + ' kcal' : ''].filter(Boolean).join(' · ');
+    const sel = _nutFoco === 'dieta' && _nutActiveDietIdx === i;
+    return `<div class="nut-diet-item${sel ? ' sel' : ''}" onclick="selectNutDiet(${i})">
+      <span class="nut-diet-name">Día ${i + 1}</span>
+      <span class="nut-diet-sub">${esc(d.title || 'Dieta sin nombre')}${k ? ' · ' + k + 'kcal' : ''}</span>
+      ${meta ? `<span class="nut-diet-meta">${meta}</span>` : ''}
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="nut-dist">
+      <div class="nut-dist-head">
+        <span class="nut-dist-t">Distribución semanal</span>
+        <button class="nut-dist-edit" onclick="event.stopPropagation();openWeekDistModal()"
+                title="Editar la distribución" aria-label="Editar la distribución">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+      ${filas}
+    </div>
+    <div class="nut-side-head">Dietas del plan</div>
+    ${tarjetas}
+    <button class="nut-diet-add" onclick="openAssignDietModal()">+ Añadir dieta</button>`;
+}
+
 function _renderNutUI() {
   const el = document.getElementById('nutricionContent');
   if (!el) return;
@@ -8132,7 +8219,11 @@ function _renderNutUI() {
   // días de descanso arbitrarios.
   const menuDays = _nutMenuDays();
   const dayName = _NUT_DAY_FULL[_nutDayIdx];
-  const dayHasDiet = !menuDays || !!(menuDays[_nutDayIdx] && menuDays[_nutDayIdx].diet_id);
+  /* Con las dos listas a la vez hay que saber QUÉ se está mirando. Sin esto,
+     pulsar una dieta cargaba sus comidas pero la cabecera seguía diciendo
+     "Jueves": el panel enseñaría una cosa y se llamaría de otra. */
+  const mirandoDia = !!menuDays && _nutFoco !== 'dieta';
+  const dayHasDiet = !mirandoDia || !!(menuDays[_nutDayIdx] && menuDays[_nutDayIdx].diet_id);
 
   const foods = dayHasDiet ? (det.foods || []) : [];
   const mealCount = foods.length;
@@ -8161,39 +8252,18 @@ function _renderNutUI() {
       </div>
     </div>
     <div class="nut-layout">
-      <div class="nut-day-side">${menuDays
-        ? _NUT_DAY_ABV.map((abv,i)=>{
-            const md = menuDays[i];
-            const empty = !(md && md.diet_id);
-            return`<div class="nut-day-item${_nutDayIdx===i?' sel':''}${empty?' empty':''}" onclick="selectNutDay(${i})">
-              <span class="nut-day-abv">${abv}</span>
-              <span class="nut-day-name">${_NUT_DAY_FULL[i]}</span>
-              <span class="nut-day-meta">${empty ? 'Sin dieta' : esc(md.diet_title || 'Dieta asignada')}</span>
-            </div>`;
-          }).join('')
-        // Sin menú semanal el carril lista las dietas asignadas por su nombre:
-        // los días no aportaban nada porque el plan se repetía igual en todos.
-        : `<div class="nut-side-head">Plan activo</div>` + clientDiets.map((d,i)=>{
-            const n = (d.foods || []).length;
-            const k = d.calories ? Math.round(d.calories) : null;
-            const meta = [n ? n + ' comida' + (n!==1?'s':'') : '', k ? k + ' kcal' : ''].filter(Boolean).join(' · ');
-            return`<div class="nut-diet-item${_nutActiveDietIdx===i?' sel':''}" onclick="selectNutDiet(${i})">
-              <span class="nut-diet-name">${esc(d.title || 'Dieta sin nombre')}</span>
-              ${meta ? `<span class="nut-diet-meta">${meta}</span>` : ''}
-            </div>`;
-          }).join('') + `<button class="nut-diet-add" onclick="openAssignDietModal()">+ Añadir dieta</button>`
-      }</div>
+      <div class="nut-day-side">${_nutCarrilHTML(menuDays)}</div>
       <div class="nut-meal-panel">
         <div class="nut-meal-ph">
           <div>
-            <div class="nut-meal-day-title">${esc(menuDays ? dayName : (det.title || 'Plan nutricional'))}</div>
+            <div class="nut-meal-day-title">${esc(mirandoDia ? dayName : (det.title || 'Plan nutricional'))}</div>
             <div class="nut-meal-day-sub">${dayHasDiet ? (mealCount+' comidas · '+totalKcal+' kcal') : 'Sin dieta asignada este día'}</div>
           </div>
           ${dayHasDiet
-            ? `<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>${menuDays ? 'Editar este día' : 'Editar dieta'}</button>`
+            ? `<button class="nut-edit-btn" onclick="openNutEditor()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>${mirandoDia ? 'Editar este día' : 'Editar dieta'}</button>`
             : `<button class="nut-edit-btn" onclick="assignDietToDay(${_nutDayIdx})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Asignar dieta a este día</button>`}
         </div>
-        ${menuDays && dayHasDiet ? `<div class="nut-day-actions">
+        ${mirandoDia && dayHasDiet ? `<div class="nut-day-actions">
           <button class="nut-day-act" onclick="assignDietToDay(${_nutDayIdx})">Cambiar la dieta de este día</button>
           <button class="nut-day-act danger" onclick="clearMenuDay(${_nutDayIdx})">Dejar el día sin dieta</button>
         </div>` : ''}
@@ -8256,6 +8326,7 @@ function _renderNutUI() {
    3. Plan de alimentación — las dietas asignadas, o el hueco para la primera.
    ══════════════════════════════════════════════════════════════════════════ */
 
+var _nutFoco = 'dia';          // qué manda en el panel: 'dia' o 'dieta'
 var _nutModo = null;           // lo que dice el servidor; null = aún sin leer
 var _entModo = null;           // el del entrenamiento, que va por su cuenta
 var _nutCalcAbierta = false;   // plegada, como en el diseño
@@ -8644,6 +8715,7 @@ function _npPlannerHTML(macros) {
 // Selecciona una de las dietas asignadas (carril sin menú semanal).
 async function selectNutDiet(i) {
   if (!clientDiets[i]) return;
+  _nutFoco = 'dieta';
   _nutActiveDietIdx = i;
   _nutDetail = await _nutLoadDiet(clientDiets[i].id);
   if (_nutDetail && !_nutDetail.diet_type) _nutDetail.diet_type = clientDiets[i].diet_type || null;
@@ -8652,6 +8724,7 @@ async function selectNutDiet(i) {
 }
 
 async function selectNutDay(idx) {
+  _nutFoco = 'dia';
   _nutDayIdx = idx;
   const menuDays = _nutMenuDays();
   if (menuDays) {

@@ -479,3 +479,40 @@ window.__modos=()=>({nut:_nutModo, ent:_entModo});
 destino14 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'modos.html')
 open(destino14, 'w').write(modos)
 print('harness generado en', destino14)
+
+
+# ── Harness del carril de la distribución semanal ──────────────────────────
+# Se saca de client-profile.html el carril y la etiqueta del modal, tal cual:
+# el punto de todo esto es que las dos llamen igual a la misma dieta, y con
+# una copia eso no se comprueba.
+a = perfil.index('/* El carril de la izquierda: la distribución semanal')
+b = perfil.index('function _renderNutUI() {')
+carril = perfil[a:b]
+c = perfil.index('function _wdEtiqueta(d, i) {')
+d = perfil.index('\n}\n', c) + 3
+etiqueta = perfil[c:d]
+
+dist = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head><body>
+<div class="nut-day-side" id="carril" style="width:175px"></div>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+const _NUT_DAY_ABV  = ['LUN','MAR','MI\u00c9','JUE','VIE','S\u00c1B','DOM'];
+var clientDiets=[], _nutFoco='dia', _nutDayIdx=0, _nutActiveDietIdx=0;
+window.__clicks=[];
+function selectNutDay(i){window.__clicks.push('dia:'+i);}
+function selectNutDiet(i){window.__clicks.push('dieta:'+i);}
+function openWeekDistModal(){window.__clicks.push('distribucion');}
+function openAssignDietModal(){window.__clicks.push('anadir');}
+%s
+%s
+window.__pinta=(dietas, dias, foco, idx)=>{
+  clientDiets=dietas; _nutFoco=foco||'dia';
+  if(foco==='dieta') _nutActiveDietIdx=idx||0; else _nutDayIdx=idx||0;
+  window.__clicks=[];
+  document.getElementById('carril').innerHTML=_nutCarrilHTML(dias);
+};
+</script></body></html>""" % (cssp, etiqueta, carril)
+
+destino15 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'distribucion.html')
+open(destino15, 'w').write(dist)
+print('harness generado en', destino15)

@@ -216,6 +216,63 @@ def test_DE_DOS_REPETIDOS_SE_QUEDA_EL_QUE_TRAE_MICRONUTRIENTES(client, seed, adm
     assert len(guardado) == 1 and guardado[0].calories == 616.0
 
 
+def test_EL_GENERICO_Y_EL_DE_MARCA_NO_SON_EL_MISMO_ALIMENTO(client, seed, admin_headers, sesion, tmp_path):
+    """Comparar solo el nombre se comia quince alimentos del catalogo.
+
+    El cliente saco las marcas de los nombres —"Bonito (hacendado)" pasó a
+    llamarse "Bonito" con marca "Hacendado"—, asi que el generico y el de
+    marca se llaman igual siendo cosas distintas: la avena genérica son 361
+    kcal, la de Brüggen 375 y la de Max Protein 356,8.
+
+    Y no cantaba. La carga terminaba con un "Hecho." y quince alimentos menos
+    de los que el cliente habia revisado uno a uno.
+    """
+    suf = uuid.uuid4().hex[:8]
+    ruta = _csv(tmp_path, [
+        f"1,Avena {suf},Cereales y granos,Brüggen,100,gr,375.0,14.0,59.0,7.0,,,,,False,False,,\n",
+        f"2,Avena {suf},Suplementos deportivos,Max Protein,100,gr,356.8,11.1,57.4,5.7,,,,,False,False,,\n",
+        f"3,Avena {suf},Cereales y granos,,100,gr,361.0,11.7,59.8,7.1,10.6,0.0,54.0,4.7,True,False,,\n",
+    ])
+    alimentos, avisos = leer_csv(ruta)
+    assert len(alimentos) == 3, f"se han perdido alimentos: {[a['calorias'] for a in alimentos]}"
+    assert sorted(a["calorias"] for a in alimentos) == [356.8, 361.0, 375.0], alimentos
+    assert not avisos, avisos
+
+    limpiar(sesion, [])
+    cargar(sesion, alimentos, None, None)
+    sesion.commit()
+    guardados = sesion.query(Aliment).filter(Aliment.name.like(f"Avena {suf}%")).all()
+    assert len(guardados) == 3, [(g.name, g.brand) for g in guardados]
+    assert {g.brand for g in guardados} == {"Brüggen", "Max Protein", None}
+
+
+def test_pero_la_misma_marca_dos_veces_si_es_la_misma(client, seed, admin_headers, sesion, tmp_path):
+    """Aflojar la regla no puede dejar pasar las copias de verdad: mismo
+    nombre y misma marca siguen siendo una sola fila, y se queda la que trae
+    micronutrientes."""
+    suf = uuid.uuid4().hex[:8]
+    ruta = _csv(tmp_path, [
+        f"1,Bonito {suf},Pescados,Hacendado,100,gr,192.0,25.0,0.6,10.0,,,,,False,False,,\n",
+        f"2,Bonito {suf},Pescados,hacendado ,100,gr,190.0,24.0,0.5,9.0,1.2,0.0,20.0,1.1,True,False,,\n",
+    ])
+    alimentos, avisos = leer_csv(ruta)
+    assert len(alimentos) == 1, alimentos
+    assert alimentos[0]["calorias"] == 190.0, "no se ha quedado el que trae micros"
+    assert any("repetido" in a for a in avisos), avisos
+
+
+def test_el_aviso_del_repetido_dice_de_que_marca_habla(client, seed, admin_headers, sesion, tmp_path):
+    """Con quince avisos que solo dicen "repetido 'Pan'" no hay forma de saber
+    cuál de los tres panes se ha ido."""
+    suf = uuid.uuid4().hex[:8]
+    ruta = _csv(tmp_path, [
+        f"1,Pan {suf},Pan y pasta,Bimbo,100,gr,245.0,12.0,37.0,4.0,,,,,False,False,,\n",
+        f"2,Pan {suf},Pan y pasta,Bimbo,100,gr,250.0,12.0,40.0,0.6,,,,,False,False,,\n",
+    ])
+    _al, avisos = leer_csv(ruta)
+    assert any("Bimbo" in a for a in avisos), avisos
+
+
 def test_el_repetido_se_descarta_en_cualquier_orden(client, seed, admin_headers, sesion, tmp_path):
     """Si el bueno viene primero, tampoco lo pisa el malo."""
     suf = uuid.uuid4().hex[:8]

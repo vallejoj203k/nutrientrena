@@ -155,22 +155,32 @@ def leer_csv(ruta):
                        if _num(f.get(c)) is not None},
         })
 
-    # De dos filas con el mismo nombre se queda la que TIENE micronutrientes:
-    # la otra trae solo macros y es la que metió a mano algún cliente. Si las
-    # dos empatan, la primera. Son los 19 nombres repetidos del CSV.
+    # Dos filas son la MISMA sólo si coinciden nombre y MARCA. El nombre a
+    # secas no vale: el cliente sacó las marcas de los nombres —"Bonito
+    # (hacendado)" pasó a llamarse "Bonito" con marca "Hacendado"—, así que el
+    # genérico y el de marca se llaman igual siendo alimentos distintos, con
+    # macros distintos. Comparando sólo el nombre se descartaban quince: entre
+    # ellos las dos avenas de marca, que se perdían enteras a favor de la
+    # genérica. Y no cantaba: la carga terminaba bien, con quince alimentos
+    # menos de los que el cliente había revisado uno a uno.
+    #
+    # Cuando sí coinciden las dos cosas, se queda la que TIENE
+    # micronutrientes: la otra trae sólo macros y es la que metió a mano algún
+    # cliente. Si empatan, la primera.
     mejor, orden = {}, []
     for x in brutos:
-        k = _clave(x["nombre"])
+        k = (_clave(x["nombre"]), _clave(x["marca"]))
         if k not in mejor:
             mejor[k] = x
             orden.append(k)
         else:
             previo = mejor[k]
+            de = f"'{x['nombre']}'" + (f" ({x['marca']})" if x["marca"] else " sin marca")
             if x["tiene_micros"] and not previo["tiene_micros"]:
                 mejor[k] = x
-                avisos.append(f"repetido '{x['nombre']}': se queda el que trae micronutrientes")
+                avisos.append(f"repetido {de}: se queda el que trae micronutrientes")
             else:
-                avisos.append(f"repetido '{x['nombre']}': se descarta la copia")
+                avisos.append(f"repetido {de}: se descarta la copia")
 
     return [mejor[k] for k in orden], avisos
 

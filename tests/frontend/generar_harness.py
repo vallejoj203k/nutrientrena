@@ -850,6 +850,8 @@ receta = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></
   <div class="fv-header"><input class="fv-name" placeholder="Nombre de la receta..."></div>
   %s
 </div>
+<!-- La cuenta de macros vive en el modulo compartido, como en la pagina. -->
+<script>%s</script>
 <script>
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 var _ingrRows=[];
@@ -863,7 +865,7 @@ window.__pinta=(n)=>{
     quantity:200, calories:139, proteins:6.4, carbohydrates:5.4, fats:10.2, fiber:0});
   renderIngrTable(); recalcMacros();
 };
-</script></body></html>""" % (cssr, cuerpo, tabla)
+</script></body></html>""" % (cssr, cuerpo, _modulo('macros-alimento.js'), tabla)
 
 destino22 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receta.html')
 open(destino22, 'w').write(receta)

@@ -697,3 +697,73 @@ window.__estado=()=>({angulo:_ftAngulo, ini:_ftIni, act:_ftAct, filtro:_ftHistFi
 destino19 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fotoscoach.html')
 open(destino19, 'w').write(fotos)
 print('harness generado en', destino19)
+
+
+# ── Harness de las tarjetas de partida del plan de comidas ─────────────────
+# Se saca de diets.html el `goToStep` de verdad, el `clearForm` de verdad y las
+# líneas que cargan las comidas de una dieta guardada: el fallo estaba en la
+# decisión de cuándo inventar comidas, y eso solo se ve ejecutándola.
+dts4 = open(os.path.join(RAIZ, 'frontend', 'diets.html')).read()
+
+i = dts4.index('function goToStep(n) {')
+j = dts4.index('\n}\n', dts4.index('renderMealsBoard();', i)) + 3
+goto = dts4[i:j]
+
+i = dts4.index('function clearForm() {')
+j = dts4.index('\n}\n', i) + 3
+clear = dts4[i:j]
+
+# Lo que hace openForm con una dieta que ya existe.
+# Se corta por `_restoreDistribution()`, que está con arreglo y sin él: si el
+# corte dependiera de la línea que arregla el fallo, quitar el arreglo rompería
+# el generador en vez de hacer fallar la prueba, y la prueba no valdría nada.
+i = dts4.index("      _meals = []; _mealSeq = 0; _rowSeq = 0;\n"
+               "      document.getElementById('mealsContainer')")
+j = dts4.index('_restoreDistribution();', i)
+cargar = dts4[i:j]
+
+comidas = """<!doctype html><html><head><meta charset="utf-8"></head><body>
+<div id="dpStep1"></div><div id="dpStep2"></div>
+<div id="step1Btn"></div><div id="step2Btn"></div>
+<span id="mealCountVal">5</span>
+<div id="mealsContainer"></div><div id="pm2List"></div><div id="pathoBody"></div>
+<div id="pathoArrow"></div>
+<input id="f_title"><input id="f_calories"><input id="f_proteins"><input id="f_carbs">
+<input id="f_fats"><input id="f_fiber"><input id="f_deficit"><input id="f_surplus">
+<select id="f_type"></select><select id="f_style"></select><textarea id="f_notes"></textarea>
+<script>
+var _meals=[], _mealSeq=0, _rowSeq=0, _refClientId=null, _activeMealId=null;
+var _pm2Sembrado=false;
+/* Pintar la tarjeta no es lo que se comprueba aqui; que se cree, si. */
+function addMeal(food){
+  _meals.push({id:++_mealSeq, name:(food&&food.name)||'Comida',
+               db_id:(food&&food.id)||null,
+               rows:((food&&food.detail)||[]).map(function(){return {aliment_id:'x'};})});
+}
+function renderMealsBoard(){}
+function saveAllMealDOMState(){}
+function setGoalMode(){}
+function _renderPathoGrid(){}
+function updateDistPanel(){}
+function recalcTotalMacros(){}
+function updatePreview(){}
+function renderMealSidebar(){}
+function _restoreDistribution(){}
+%s
+%s
+
+/* removeMeal, tal cual la pagina pero sin el confirm ni el DOM de la tarjeta. */
+function quitarComida(mid){
+  if (_activeMealId == mid) _activeMealId = null;
+  _meals = _meals.filter(function(m){ return m.id != mid; });
+}
+
+window.__nueva=()=>{ clearForm(); };
+window.__abrirGuardada=(foods)=>{ clearForm(); (function(d){ %s })({foods:foods}); };
+window.__comidas=()=>_meals.map(m=>({nombre:m.name, db_id:m.db_id, filas:m.rows.length}));
+window.__quitar=(i)=>quitarComida(_meals[i].id);
+</script></body></html>""" % (goto, clear, cargar)
+
+destino20 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'comidas.html')
+open(destino20, 'w').write(comidas)
+print('harness generado en', destino20)

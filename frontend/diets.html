@@ -1379,6 +1379,8 @@ if (!token) location.href = 'login.html';
 
 let allDiets = [], editingId = null, assigningId = null;
 let _meals = [], _mealSeq = 0, _rowSeq = 0, _acTimers = {}, _macroCache = {};
+// Si ya se pusieron las tarjetas de partida del plan de comidas.
+let _pm2Sembrado = false;
 var _dietTypes = [];
 let allClients = [], _refClientId = null;
 let _activeMealId = null;
@@ -1866,6 +1868,8 @@ async function openForm(id) {
       _meals = []; _mealSeq = 0; _rowSeq = 0;
       document.getElementById('mealsContainer').innerHTML = '';
       (d.foods || []).forEach(function(food){ addMeal(food); });
+      // Las comidas de una dieta guardada son las suyas: no se le añaden más.
+      _pm2Sembrado = true;
       _restoreDistribution();
     } catch(e) { toast('Error al cargar la dieta', 'error'); return; }
   }
@@ -1899,9 +1903,18 @@ function goToStep(n) {
     s1.classList.remove('active'); s1.classList.add('slide-back');
     s2.classList.remove('slide-back'); s2.classList.add('active');
     b1.classList.remove('active'); b2.classList.add('active');
-    // Auto-create meals based on stepper
-    var targetCount = parseInt(document.getElementById('mealCountVal').textContent) || 3;
-    while (_meals.length < targetCount) addMeal();
+    /* Tarjetas de partida, y SOLO una vez por dieta abierta.
+       Antes se rellenaba hasta cinco cada vez que se entraba al plan. Con una
+       dieta de cuatro comidas eso ponía una quinta vacía, y al borrar una
+       comida volvía a aparecer al instante: parecía que el borrado no se
+       guardaba, cuando lo que pasaba es que el editor la inventaba de nuevo.
+       Una comida vacía y sin id no se envía al guardar, así que la de verdad
+       sí se había ido. */
+    if (!_pm2Sembrado) {
+      _pm2Sembrado = true;
+      var targetCount = parseInt(document.getElementById('mealCountVal').textContent) || 3;
+      while (_meals.length < targetCount) addMeal();
+    }
     renderMealsBoard();
   } else {
     saveAllMealDOMState();
@@ -2036,6 +2049,7 @@ function clearForm() {
   setGoalMode('libre');
   document.getElementById('mealsContainer').innerHTML = '';
   _meals = []; _mealSeq = 0; _rowSeq = 0; _refClientId = null; _activeMealId = null;
+  _pm2Sembrado = false;
   _renderPathoGrid([]);
   var pathoBody = document.getElementById('pathoBody');
   if (pathoBody) { pathoBody.classList.remove('open'); }

@@ -111,18 +111,22 @@ def test_LA_COPIA_LLEVA_LA_FICHA_ENTERA_NO_SOLO_LA_FIBRA(client, seed, admin_hea
     assert (ficha.fiber, ficha.sodium, ficha.iron) == (3.3, 12, 6.7)
 
 
-def test_la_ficha_de_la_copia_es_suya_no_la_del_catalogo(client, seed, admin_headers):
-    """Editar el catálogo no cambia las dietas ya montadas; con la ficha
-    tiene que pasar lo mismo, si no la fibra de una dieta cambiaría sola."""
+def test_la_ficha_de_la_copia_es_UNA_FILA_SUYA(client, seed, admin_headers):
+    """La copia no comparte la ficha del catálogo: tiene la suya.
+
+    Es lo que permite que un valor puesto a mano en una dieta sobreviva a una
+    corrección del catálogo (tests/test_correccion_alimento.py). Corregir el
+    catálogo sí baja a las copias fieles, pero cada una es una fila aparte, no
+    un puntero a la del catálogo.
+    """
     suf = uuid.uuid4().hex[:8]
     h, _d, _hc = _monta(client, admin_headers, suf)
     original = _alimento(client, h, f"Muesli {suf}", fibra=8.0)
     dieta = _dieta_con(client, h, suf, original)
 
-    r = client.put(f"/api/aliments/{original}/update", headers=h, json={"description": {"fiber": 1.0}})
-    assert r.status_code == 200, r.text
-    assert _ficha(original).fiber == 1.0
-    assert _ficha(_copia_de(dieta)["aliment_id"]).fiber == 8.0
+    copia = _copia_de(dieta)["aliment_id"]
+    assert _ficha(copia) is not None
+    assert _ficha(copia).id != _ficha(original).id, "comparten la misma fila"
 
 
 # ── Las copias que ya existían ─────────────────────────────────────────────

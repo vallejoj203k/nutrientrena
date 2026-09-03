@@ -54,6 +54,88 @@ def _usda_query(name: str) -> str:
     return short or name[:80]
 
 
+# Lo que una dieta copia del alimento del catálogo. La ficha de micros va
+# aparte, columna a columna.
+CAMPOS_COPIADOS = (
+    "group_food_id", "brand", "name", "quantity", "quantity_unit",
+    "quantity_type_id", "proteins", "carbohydrates", "fats", "calories",
+    "comments",
+)
+
+CAMPOS_FICHA = tuple(
+    c.name for c in AlimentDescription.__table__.columns
+    if c.name not in ("id", "aliment_id")
+)
+
+
+def _copias_de(db: Session, aliment_id: str, tope: int = 5000) -> list:
+    """Las copias de un alimento, y las copias de esas copias.
+
+    Meter un alimento en una dieta guarda una copia suya; duplicar o asignar
+    esa dieta copia la copia. Una corrección del catálogo tiene que llegar a
+    toda la cadena, no solo al primer escalón.
+    """
+    copias, frontera, vistos = [], [aliment_id], {aliment_id}
+    while frontera and len(copias) < tope:
+        siguiente = []
+        for i in range(0, len(frontera), 500):
+            for hijo in db.query(Aliment).filter(
+                    Aliment.parent_id.in_(frontera[i:i + 500])).all():
+                if hijo.id in vistos:
+                    continue
+                vistos.add(hijo.id)
+                copias.append(hijo)
+                siguiente.append(hijo.id)
+        frontera = siguiente
+    return copias
+
+
+def propagar_a_las_copias(db: Session, obj: Aliment, antes: dict, antes_ficha: dict) -> int:
+    """Lleva la corrección del catálogo a los alimentos de las dietas.
+
+    Corregir un alimento se veía en la biblioteca y en ningún otro sitio: las
+    dietas ya montadas seguían con el dato viejo, y el coach no tenía forma de
+    arreglarlas salvo rehacerlas. Como esas copias las hace el sistema y nadie
+    las edita a mano, la corrección baja a todas.
+
+    Con una excepción: solo se toca lo que en la copia sigue igual que estaba
+    en el catálogo ANTES del cambio. Una copia que ya diga otra cosa es que
+    alguien la puso así, y eso no se pisa. Se compara campo a campo, que es lo
+    que permite corregir las kcal sin tocar un nombre que alguien cambió.
+
+    Devuelve cuántas copias han cambiado.
+    """
+    if not antes and not antes_ficha:
+        return 0
+
+    tocadas = 0
+    for copia in _copias_de(db, obj.id):
+        cambiada = False
+
+        for campo, viejo in antes.items():
+            if getattr(copia, campo) == viejo:
+                setattr(copia, campo, getattr(obj, campo))
+                cambiada = True
+
+        if antes_ficha and obj.description:
+            ficha = copia.description
+            if ficha is None:
+                # No tenía ficha: se le da la del catálogo entera. Es lo que
+                # habría tenido de haberse copiado hoy.
+                copia.description = AlimentDescription(**{
+                    c: getattr(obj.description, c) for c in CAMPOS_FICHA})
+                cambiada = True
+            else:
+                for campo, viejo in antes_ficha.items():
+                    if getattr(ficha, campo) == viejo:
+                        setattr(ficha, campo, getattr(obj.description, campo))
+                        cambiada = True
+
+        if cambiada:
+            tocadas += 1
+    return tocadas
+
+
 def _upsert_description(db: Session, aliment_id: str, desc_data: dict):
     """Create or update the AlimentDescription row for a given aliment."""
     existing = db.query(AlimentDescription).filter(AlimentDescription.aliment_id == aliment_id).first()
@@ -222,14 +304,30 @@ def updated(
     if motivo:
         return send_error(motivo, code=403)
 
-    for f, v in data.model_dump(exclude_unset=True, exclude={"description"}).items():
+    # Cómo estaba lo que se va a cambiar: es lo que dice qué copias siguen
+    # siendo fieles al catálogo y pueden recibir la corrección.
+    cambios = data.model_dump(exclude_unset=True, exclude={"description"})
+    antes = {f: getattr(obj, f) for f in cambios if f in CAMPOS_COPIADOS}
+
+    for f, v in cambios.items():
         setattr(obj, f, v)
     obj.updated_user_id = current_user.id
+    antes = {f: v for f, v in antes.items() if v != getattr(obj, f)}
 
+    antes_ficha = {}
     if data.description is not None:
         desc_data = data.description.model_dump(exclude_unset=True)
         if desc_data:
+            ficha = db.query(AlimentDescription).filter(
+                AlimentDescription.aliment_id == obj.id).first()
+            antes_ficha = {f: (getattr(ficha, f) if ficha else None) for f in desc_data}
             _upsert_description(db, obj.id, desc_data)
+            db.flush()
+            db.refresh(obj)
+            antes_ficha = {f: v for f, v in antes_ficha.items()
+                           if v != getattr(obj.description, f)}
+
+    propagar_a_las_copias(db, obj, antes, antes_ficha)
 
     db.commit()
     db.refresh(obj)

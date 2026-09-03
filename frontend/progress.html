@@ -43,6 +43,11 @@
 
     /* ── Content ── */
     .content{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px;}
+    /* Las tarjetas no se encogen. En una columna flex con scroll, un hijo que
+       recorta (`overflow:hidden`, que es lo que redondea las esquinas) puede
+       comprimirse por debajo de su contenido en vez de alargar el scroll: la
+       tarjeta se queda corta y lo de abajo desaparece. */
+    .content > *{flex-shrink:0;}
 
     /* ── Toolbar ── */
     .toolbar{background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:16px 20px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}

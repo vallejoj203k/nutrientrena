@@ -666,3 +666,34 @@ window.__reset=(msgs,activo)=>{
 destino18 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chatficha.html')
 open(destino18, 'w').write(chat)
 print('harness generado en', destino18)
+
+
+# ── Harness de Progreso · Fotos ────────────────────────────────────────────
+# Se saca de client-profile.html el pintado entero de la pestaña. Lo que hay
+# que comprobar es el reparto de las tomas por fecha y a dónde lleva cada
+# clic, y eso solo se ve ejecutando el código de verdad.
+a = perfil.index('var FT_ANGULOS = [')
+b = perfil.index('function showProgresoSubtab(')
+fotos_js = perfil[a:b]
+
+fotos = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0;background:#F8FAFC">
+<div id="pg-pane-fotos" style="padding:16px;max-width:1100px"></div>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var checkins=[];
+/* La frecuencia sale del módulo de check-ins, que aquí no hace falta. */
+function _ckFrecuencia(){return 'frecuencia quincenal';}
+%s
+window.__pinta=(cks)=>{
+  checkins=cks; _ftAngulo='frente'; _ftIni=null; _ftAct=null; _ftHistFiltro='todos';
+  _renderPgFotos();
+};
+window.__estado=()=>({angulo:_ftAngulo, ini:_ftIni, act:_ftAct, filtro:_ftHistFiltro});
+</script></body></html>""" % (cssp, fotos_js)
+
+# `fotos.html` ya lo usa el banco de la pantalla del cliente; este es el de la
+# ficha del coach y necesita su propio nombre o uno pisa al otro.
+destino19 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fotoscoach.html')
+open(destino19, 'w').write(fotos)
+print('harness generado en', destino19)

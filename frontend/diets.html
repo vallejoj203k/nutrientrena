@@ -1780,6 +1780,16 @@ async function openDietPreview(id) {
   try {
     var r = await fetch(API + '/diets/' + id + '/edit', { headers: { Authorization: 'Bearer ' + token } });
     var j = await r.json(); var d = j.data || j;
+    // Un fallo se dice. Antes se seguía pintando con lo que había —guiones en
+    // todas las cifras y "0 comidas/día"— y parecía una dieta vacía en vez de
+    // una dieta que no se ha podido leer.
+    if (!r.ok || !d || !d.id) {
+      document.getElementById('dppTitle').textContent = 'No se ha podido abrir';
+      document.getElementById('dppMeals').innerHTML =
+        '<div style="text-align:center;padding:24px;color:#9CA3AF;">'
+        + esc(j.message || j.detail || 'Error al cargar la dieta') + '</div>';
+      return;
+    }
     var det = d.detail || {};
     var kcal = d.calories ? Math.round(d.calories) : '—';
     var prot = det.proteins != null ? Math.round(det.proteins) + 'g' : '—';

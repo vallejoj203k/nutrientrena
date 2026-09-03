@@ -901,3 +901,53 @@ window.__pinta=(r)=>{ _lastRecipes=[r]; openRecipePreview(r.id); };
 destino23 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'detalle-receta.html')
 open(destino23, 'w').write(detalle)
 print('harness generado en', destino23)
+
+
+# ── Harness del formulario de receta: etiquetas y opciones clínicas ────────
+# Se saca de recipes.html el markup del formulario y su lógica de verdad: lo
+# que se comprueba es qué se marca, qué se guarda y qué se recupera al abrir
+# una receta ya escrita.
+rcp3 = open(os.path.join(RAIZ, 'frontend', 'recipes.html')).read()
+cssr3 = '\n'.join(re.findall(r'<style>(.*?)</style>', rcp3, re.S))
+
+i = rcp3.index('        <div class="sec-card">\n          <div class="sec-card-head">Etiquetas y notas</div>')
+j = rcp3.index('      </div>\n      <div class="fv-sidebar">', i)
+tarjetas = rcp3[i:j]
+
+i = rcp3.index('        <div class="sb-card">\n          <div class="sb-title">Dificultad</div>')
+j = rcp3.index('<div id="fFormError"', i)
+lateral = rcp3[i:j]
+
+i = rcp3.index('var RCP_TAGS = [')
+j = rcp3.index('function _ingMac(row){')
+logica = rcp3[i:j]
+
+form = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0"><div class="fv-main">%s</div><div class="fv-sidebar">%s</div>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var API='http://x';
+function headers(){return {};}
+/* El catálogo de patologías, como lo devuelve /pathologies/findAll. */
+var __PATOS=[{id:1,name:'Celiaquía',grupo:'Intolerancias'},
+             {id:2,name:'Intolerancia a la lactosa',grupo:'Intolerancias'},
+             {id:3,name:'SII / FODMAP',grupo:'Digestivo'},
+             {id:4,name:'Diabetes tipo 2',grupo:'Metabólico'},
+             {id:5,name:'Hipertensión',grupo:'Cardiovascular'},
+             {id:9,name:'Algo raro',grupo:'Grupo inventado'}];
+window.fetch=async()=>({json:async()=>({data:__PATOS})});
+%s
+window.__abre=(r)=>{
+  rcpCargaEtiquetas(r||null);
+  document.getElementById('fNotes').value=(r&&r.notes)||'';
+  document.getElementById('fDifficulty').value=(r&&r.difficulty)||'facil';
+  document.getElementById('fGI').value=(r&&r.glycemic_index)||'';
+  document.getElementById('fNa').value=(r&&r.sodium_level)||'';
+  document.getElementById('fFiber').value=(r&&r.fiber!=null)?r.fiber:'';
+};
+window.__sel=()=>JSON.parse(JSON.stringify(_rcpSel));
+</script></body></html>""" % (cssr3, tarjetas, lateral, logica)
+
+destino24 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'form-receta.html')
+open(destino24, 'w').write(form)
+print('harness generado en', destino24)

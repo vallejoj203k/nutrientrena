@@ -378,6 +378,15 @@ def filter_clients_by_role(all_clients: list, current_user, db: Session) -> list
 # Vive aquí y no en cada router porque la regla es la misma para rutinas y
 # para dietas, y ya hay demasiadas copias de esta lógica repartidas.
 
+def _dueno(obj):
+    """De quién es esto. Las recetas lo llaman `instructor_id` y el resto
+    `user_id`; la regla de quién puede tocarlo es la misma."""
+    for campo in ("user_id", "instructor_id"):
+        if hasattr(obj, campo):
+            return getattr(obj, campo)
+    return None
+
+
 def es_de_plataforma(obj, db: Session) -> bool:
     """Si esto es del catálogo común, y no de una cuenta concreta.
 
@@ -388,12 +397,13 @@ def es_de_plataforma(obj, db: Session) -> bool:
     """
     if obj.organization_id is not None:
         return False
-    if getattr(obj, "user_id", None) is None:
+    dueno = _dueno(obj)
+    if dueno is None:
         return True
     from app.models.user import RoleUser
 
     roles = {r.role_id for r in db.query(RoleUser).filter(
-        RoleUser.user_id == obj.user_id).all()}
+        RoleUser.user_id == dueno).all()}
     return bool(roles & {SUPERADMIN, ADMIN, EDITOR_CONTENIDO_GLOBAL})
 
 
@@ -411,18 +421,19 @@ def bloqueado_para_ver(obj, org, current_user, db: Session,
     3. El catálogo de plataforma lo ve todo el mundo: sale en su Librería.
     4. Y lo de la propia organización, o todo si es superadmin/admin.
     """
-    if getattr(obj, "user_id", None) == current_user.id:
+    dueno = _dueno(obj)
+    if dueno == current_user.id:
         return None
 
-    if getattr(obj, "user_id", None) is not None:
+    if dueno is not None:
         from app.models.user import RoleUser, UserDetail
 
         es_cliente = db.query(RoleUser).filter(
-            RoleUser.user_id == obj.user_id, RoleUser.role_id == CLIENT
+            RoleUser.user_id == dueno, RoleUser.role_id == CLIENT
         ).first() is not None
         if es_cliente:
             detalle = db.query(UserDetail).filter(
-                UserDetail.user_id == obj.user_id).first()
+                UserDetail.user_id == dueno).first()
             if not detalle:
                 return f"No tienes acceso a {que}"
             verify_client_access(detalle.id, current_user, db)  # lanza 403 si no toca
@@ -436,6 +447,38 @@ def bloqueado_para_ver(obj, org, current_user, db: Session,
     if getattr(org, "solo_plataforma", False):
         return f"No tienes acceso a {que}"
 
+    if org.org_id is None and org.is_owner:
+        return None
+    if obj.organization_id is not None and obj.organization_id == org.org_id:
+        return None
+    return f"No tienes acceso a {que}"
+
+
+def bloqueado_para_editar(obj, org, current_user, db: Session, roles=None,
+                          que: str = "este contenido"):
+    """Si hay que impedir CAMBIAR o BORRAR esto, el motivo; si no, None.
+
+    Ver es una cosa y tocar es otra: el catálogo de plataforma lo abre
+    cualquiera (`bloqueado_para_ver`) pero solo lo mantiene la plataforma.
+
+      1. Lo suyo, siempre — salvo que ya sea catálogo común, que deja de ser
+         de quien lo escribió.
+      2. El catálogo, solo la plataforma o quien edita contenido global.
+      3. Y lo demás, la propia organización.
+    """
+    dueno = _dueno(obj)
+    plataforma = es_de_plataforma(obj, db)
+
+    if dueno == current_user.id and not plataforma:
+        return None
+
+    if plataforma:
+        if (org.org_id is None and org.is_owner) or EDITOR_CONTENIDO_GLOBAL in (roles or []):
+            return None
+        return f"No tienes acceso a {que}"
+
+    if getattr(org, "solo_plataforma", False):
+        return f"No tienes acceso a {que}"
     if org.org_id is None and org.is_owner:
         return None
     if obj.organization_id is not None and obj.organization_id == org.org_id:

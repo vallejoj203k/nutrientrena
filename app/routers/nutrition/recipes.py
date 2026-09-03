@@ -8,9 +8,11 @@ from app.core.dependencies import (
     EDITOR_CONTENIDO_GLOBAL,
     require_role_ids, get_current_user, get_org_context, OrgContext,
     verify_client_access, SUPERADMIN, ADMIN, COACH,
+    bloqueado_para_editar, _user_role_ids,
 )
 from app.core.responses import send_response, send_error
-from app.models.nutrition.recipe import Recipe, RecipeDetail
+from app.models.nutrition.recipe import Recipe, RecipeDetail, recipe_pathologies_table
+from app.models.nutrition.diet import Pathology
 from app.schemas.nutrition.recipe import RecipeCreate, RecipeUpdate, RecipeOut, RecipeAssignRequest
 
 router = APIRouter(prefix="/recipes", tags=["Nutrition - Recipes"])
@@ -22,7 +24,41 @@ def _con_alimentos(q):
     La receta los necesita para decir de qué ingrediente habla; sin esto sería
     una consulta por ingrediente y por receta.
     """
-    return q.options(selectinload(Recipe.details).selectinload(RecipeDetail.aliment))
+    return q.options(
+        selectinload(Recipe.details).selectinload(RecipeDetail.aliment),
+        # `pathologies` es lazy="noload": sin esto llegaría vacío siempre.
+        selectinload(Recipe.pathologies),
+    )
+
+
+def _save_pathologies(db: Session, recipe_id: int, pathology_ids):
+    """Las patologías para las que vale la receta. `None` = no tocarlas."""
+    if pathology_ids is None:
+        return
+    db.execute(recipe_pathologies_table.delete().where(
+        recipe_pathologies_table.c.recipe_id == recipe_id))
+    for pid in pathology_ids:
+        db.execute(recipe_pathologies_table.insert().values(
+            recipe_id=recipe_id, pathology_id=pid))
+
+
+def _bloqueada(recipe, org, current_user, db: Session):
+    """Quién puede cambiar o borrar esta receta.
+
+    Antes solo miraba `organization_id IS NULL` y lo daba por catálogo de
+    plataforma. Con eso, un coach SIN organización —que crea justo con NULL— no
+    podía editar sus propias recetas, y en cambio cualquier coach podía editar
+    las de OTRA organización, que sí tienen id.
+    """
+    return bloqueado_para_editar(recipe, org, current_user, db,
+                                 roles=_user_role_ids(current_user.id, db),
+                                 que="esta receta")
+
+
+def _serializar(db: Session, recipe_id: int) -> dict:
+    """La receta entera, con sus ingredientes y sus patologías cargados."""
+    db.expire_all()
+    return RecipeOut.model_validate(_get_or_404(db, recipe_id)).model_dump()
 
 
 def _get_or_404(db: Session, recipe_id: int):
@@ -103,7 +139,7 @@ def create(
     current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
-    recipe_data = data.model_dump(exclude={"details"})
+    recipe_data = data.model_dump(exclude={"details", "pathology_ids"})
     recipe_data["instructor_id"] = current_user.id
     recipe_data["organization_id"] = org.org_id
     recipe = Recipe(**recipe_data)
@@ -111,9 +147,9 @@ def create(
     db.flush()
     for detail in (data.details or []):
         db.add(RecipeDetail(recipe_id=recipe.id, **detail.model_dump()))
+    _save_pathologies(db, recipe.id, data.pathology_ids or [])
     db.commit()
-    db.refresh(recipe)
-    return send_response(RecipeOut.model_validate(recipe).model_dump(), "Receta creada")
+    return send_response(_serializar(db, recipe.id), "Receta creada")
 
 
 @router.get("/{id}/edit", summary="Ver receta", description="Retorna el detalle completo de una receta con sus ingredientes.")
@@ -128,14 +164,15 @@ def edit(id: int, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPE
 def delete(
     id: int,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     recipe = _get_or_404(db, id)
     if not recipe:
         return send_error("Receta no encontrada")
-    if recipe.organization_id is None and not org.is_owner:
-        return send_error("No puedes eliminar recetas de la plataforma", code=403)
+    motivo = _bloqueada(recipe, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
     recipe.state = 0
     db.commit()
     return send_response(None, "Receta eliminada")
@@ -146,20 +183,22 @@ def updated(
     id: int,
     data: RecipeUpdate,
     db: Session = Depends(get_db),
-    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
     recipe = _get_or_404(db, id)
     if not recipe:
         return send_error("Receta no encontrada")
-    if recipe.organization_id is None and not org.is_owner:
-        return send_error("No puedes editar recetas de la plataforma", code=403)
-    for f, v in data.model_dump(exclude_unset=True, exclude={"details"}).items():
+    motivo = _bloqueada(recipe, org, current_user, db)
+    if motivo:
+        return send_error(motivo, code=403)
+    for f, v in data.model_dump(exclude_unset=True,
+                                exclude={"details", "pathology_ids"}).items():
         setattr(recipe, f, v)
+    _save_pathologies(db, recipe.id, data.pathology_ids)
     if data.details is not None:
         db.query(RecipeDetail).filter(RecipeDetail.recipe_id == recipe.id).delete()
         for detail in data.details:
             db.add(RecipeDetail(recipe_id=recipe.id, **detail.model_dump()))
     db.commit()
-    db.refresh(recipe)
-    return send_response(RecipeOut.model_validate(recipe).model_dump(), "Receta actualizada")
+    return send_response(_serializar(db, recipe.id), "Receta actualizada")

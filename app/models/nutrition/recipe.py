@@ -1,7 +1,17 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
+
+
+# Las mismas patologías que las dietas: un solo catálogo, no dos listas
+# parecidas que acaban diciendo cosas distintas.
+recipe_pathologies_table = Table(
+    'recipe_pathologies', Base.metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('recipe_id', Integer, ForeignKey('recipes.id', ondelete='CASCADE'), nullable=False),
+    Column('pathology_id', Integer, ForeignKey('pathologies.id', ondelete='CASCADE'), nullable=False),
+)
 
 
 class Recipe(Base):
@@ -23,6 +33,19 @@ class Recipe(Base):
     prep_time = Column(Integer, nullable=True)
     image = Column(String(500), nullable=True)
     meal_type = Column(String(100), nullable=True)
+    # Etiquetas libres ("Alta proteína", "Meal prep"...) y notas del
+    # nutricionista, separadas de la preparación: una cosa son los pasos y otra
+    # las variaciones y sustituciones.
+    tags = Column(String(500), nullable=True)
+    notes = Column(Text, nullable=True)
+    difficulty = Column(String(20), nullable=True)
+    # Lo clínico: qué alérgenos NO lleva, a qué estilo pertenece y cómo queda
+    # de índice glucémico, sodio y fibra.
+    allergen_free = Column(String(500), nullable=True)
+    diet_styles = Column(String(500), nullable=True)
+    glycemic_index = Column(String(20), nullable=True)
+    sodium_level = Column(String(20), nullable=True)
+    fiber = Column(Float, nullable=True)
     state = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -30,6 +53,7 @@ class Recipe(Base):
     instructor = relationship("User")
     category = relationship("ParameterDetail", foreign_keys=[category_id])
     details = relationship("RecipeDetail", back_populates="recipe", cascade="all, delete-orphan")
+    pathologies = relationship("Pathology", secondary=recipe_pathologies_table, lazy="noload")
 
 
 class RecipeDetail(Base):

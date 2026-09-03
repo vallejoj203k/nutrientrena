@@ -1803,6 +1803,48 @@
 .ft-pie b{color:#111827;font-variant-numeric:tabular-nums;}
 .ft-pie .dif{margin-left:auto;font-weight:700;}
 .ft-pie .dif.baja{color:#059669;} .ft-pie .dif.sube{color:#D97706;}
+/* La etiqueta y la fecha van SOBRE la foto, como en el diseño: en un pie
+   aparte se separan de la imagen que describen en cuanto la lista es larga. */
+.ft-marco{position:relative;}
+.ft-marco .ft-img{border-radius:0;}
+.ft-sobre{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 12px;color:#fff;
+  background:linear-gradient(to top,rgba(17,24,39,.75),rgba(17,24,39,0));pointer-events:none;}
+.ft-sobre-a{font-size:9.5px;font-weight:800;letter-spacing:.9px;opacity:.85;text-transform:uppercase;}
+.ft-sobre-f{font-size:15px;font-weight:800;margin-top:1px;font-variant-numeric:tabular-nums;}
+.ft-cam{position:absolute;right:12px;bottom:12px;color:rgba(255,255,255,.8);pointer-events:none;}
+
+/* La franja que dice qué se está comparando y cuánto ha cambiado el peso. */
+.ft-franja{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px;
+  background:#F5F6FA;border:1px solid #EDEFF4;border-radius:12px;padding:13px 18px;
+  font-size:13px;color:#6B7280;}
+.ft-franja b{color:#111827;font-variant-numeric:tabular-nums;}
+.ft-franja .der{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.ft-franja .dif{font-weight:700;font-variant-numeric:tabular-nums;}
+.ft-franja .dif.baja{color:#059669;} .ft-franja .dif.sube{color:#D97706;}
+
+/* Historial de tomas: agrupadas por fecha, de la más reciente a la más vieja. */
+.ft-hist{background:#fff;border:1px solid #EEF0F3;border-radius:14px;margin-top:16px;
+  padding:18px 22px 22px;}
+.ft-hist-cab{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+.ft-grupo{margin-top:18px;}
+.ft-grupo-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.ft-grupo-f{font-size:14px;font-weight:800;color:#111827;font-variant-numeric:tabular-nums;}
+.ft-grupo-p{font-size:12.5px;color:#9CA3AF;}
+.ft-usar{margin-left:auto;display:flex;gap:8px;}
+.ft-usar button{padding:7px 13px;border:1px solid #E5E7EB;border-radius:9px;background:#fff;
+  color:#374151;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.ft-usar button:hover{border-color:#C7D2FE;color:#4F46E5;background:#FAFAFF;}
+.ft-fila{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.ft-toma{position:relative;border:1.5px solid transparent;border-radius:12px;overflow:hidden;
+  cursor:pointer;background:#F6F7F9;transition:border-color .15s;}
+.ft-toma:hover{border-color:#C7D2FE;}
+.ft-toma.usada{border-color:#4F46E5;}
+.ft-toma img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+.ft-tag{position:absolute;left:10px;bottom:10px;background:rgba(17,24,39,.62);color:#fff;
+  font-size:9.5px;font-weight:800;letter-spacing:.7px;padding:4px 9px;border-radius:6px;
+  text-transform:uppercase;}
+.ft-hist-vacio{font-size:13px;color:#9CA3AF;padding:22px 0;text-align:center;}
+@media(max-width:900px){ .ft-par{grid-template-columns:1fr;} .ft-fila{grid-template-columns:repeat(2,1fr);} }
 .ft-hueco{aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;text-align:center;
   background:#FAFBFC;color:#9CA3AF;font-size:13px;padding:24px;line-height:1.6;}
 
@@ -5324,6 +5366,8 @@ var FT_ANGULOS = [
   { clave: 'espalda', campo: 'photo3',    etiqueta: 'Espalda' },
 ];
 var _ftAngulo = 'frente', _ftIni = null, _ftAct = null;
+// El historial tiene SU filtro: el de arriba solo cambia la comparativa.
+var _ftHistFiltro = 'todos';
 
 /* Las tomas que tienen foto EN ESTE ángulo, de la más antigua a la más nueva.
    Ofrecer una fecha sin foto en el ángulo elegido deja un hueco donde debería
@@ -5339,6 +5383,27 @@ function _ftTomas(angulo) {
     }))
     .filter(t => t.fecha)
     .sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+/* Todas las fotos, agrupadas por fecha y de la más reciente a la más antigua.
+
+   `_ftTomas` mira un solo ángulo porque la comparativa compara peras con
+   peras. El historial es lo contrario: enseña lo que mandó el cliente ese
+   día, tenga uno, dos o los tres. */
+function _ftGrupos(angulo) {
+  const angulos = angulo && angulo !== 'todos'
+    ? FT_ANGULOS.filter(a => a.clave === angulo) : FT_ANGULOS;
+  return (checkins || [])
+    .map(c => ({
+      fecha: (c.checkin_date || c.created_at || '').slice(0, 10),
+      peso: c.weight == null ? null : Number(c.weight),
+      fotos: angulos.filter(a => c[a.campo])
+                    .map(a => ({ angulo: a.clave, etiqueta: a.etiqueta, url: c[a.campo] })),
+    }))
+    // Filtrando por un ángulo, una fecha sin foto de ese ángulo no tiene nada
+    // que enseñar: se cae de la lista en vez de dejar una fila vacía.
+    .filter(g => g.fecha && g.fotos.length)
+    .sort((a, b) => b.fecha.localeCompare(a.fecha));
 }
 
 function _renderPgFotos() {
@@ -5387,20 +5452,112 @@ function _renderPgFotos() {
     ${tomas.length ? `<div class="ft-par">
       ${_ftLado('ini', 'Foto inicial', _ftIni, tomas)}
       ${_ftLado('act', 'Foto actual', _ftAct, tomas)}
-    </div>` : `<div class="ft-cab"><div class="ft-cab-s">
-        No hay fotos de este ángulo. Prueba con otro.</div></div>`}`;
+    </div>
+    ${_ftFranja(tomas)}` : `<div class="ft-cab"><div class="ft-cab-s">
+        No hay fotos de este ángulo. Prueba con otro.</div></div>`}
+    ${_ftHistorial()}`;
+}
+
+/* Qué se está comparando y cuánto ha cambiado el peso entre las dos fechas.
+
+   El porcentaje va al lado de los kilos porque no dicen lo mismo: 1,8 kg son
+   un 2,2 % en alguien de 80 y casi el doble en alguien de 45. */
+function _ftFranja(tomas) {
+  const a = tomas.find(t => t.fecha === _ftIni);
+  const b = tomas.find(t => t.fecha === _ftAct);
+  const vista = (FT_ANGULOS.find(x => x.clave === _ftAngulo) || FT_ANGULOS[0]).etiqueta;
+
+  let peso = '';
+  /* Comparar una fecha consigo misma —lo que pasa con una sola toma— daba
+     "0.0 kg · 0.0%", que se lee como "no ha cambiado nada". Nadie ha dicho
+     eso: es que no hay dos fechas que comparar. */
+  if (a && b && a.fecha !== b.fecha && a.peso != null && b.peso != null) {
+    const dif = b.peso - a.peso;
+    const pct = a.peso ? (dif * 100 / a.peso) : null;
+    const clase = dif < 0 ? 'baja' : (dif > 0 ? 'sube' : '');
+    const signo = dif > 0 ? '+' : '';
+    peso = `<span>Peso <b>${a.peso}</b> → <b>${b.peso} kg</b></span>
+      <span class="dif ${clase}">${signo}${dif.toFixed(1)} kg${
+        pct == null ? '' : ` · ${signo}${pct.toFixed(1)}%`}</span>`;
+  }
+
+  return `<div class="ft-franja">
+    <span>Comparando <b>${esc(_ftIni || '—')}</b> vs <b>${esc(_ftAct || '—')}</b> · vista <b>${esc(vista)}</b></span>
+    ${peso ? `<span class="der">${peso}</span>` : ''}
+  </div>`;
+}
+
+/* El historial: lo que mandó el cliente cada día, para poder llevar cualquier
+   toma a la comparativa de arriba sin buscarla en el desplegable. */
+function _ftHistorial() {
+  const grupos = _ftGrupos(_ftHistFiltro);
+  const filtros = [{ clave: 'todos', etiqueta: 'Todos' }].concat(FT_ANGULOS);
+
+  const cuerpo = grupos.length ? grupos.map(g => `
+    <div class="ft-grupo">
+      <div class="ft-grupo-h">
+        <span class="ft-grupo-f">${esc(g.fecha)}</span>
+        ${g.peso != null ? `<span class="ft-grupo-p">· ${g.peso} kg</span>` : ''}
+        <span class="ft-usar">
+          <button onclick="_ftUsar('ini','${g.fecha}')">Usar como inicial</button>
+          <button onclick="_ftUsar('act','${g.fecha}')">Usar como actual</button>
+        </span>
+      </div>
+      <div class="ft-fila">
+        ${g.fotos.map(f => {
+          const usada = f.angulo === _ftAngulo && (g.fecha === _ftIni || g.fecha === _ftAct);
+          return `<div class="ft-toma${usada ? ' usada' : ''}"
+              onclick="_ftUsar('act','${g.fecha}','${f.angulo}')"
+              title="Usar esta foto como actual">
+            <img src="${esc(f.url)}" alt="${esc(f.etiqueta)} del ${esc(g.fecha)}" loading="lazy">
+            <span class="ft-tag">${esc(f.etiqueta)}</span>
+            <span class="ft-cam"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('')
+    : '<div class="ft-hist-vacio">No hay fotos de este ángulo.</div>';
+
+  return `<div class="ft-hist">
+    <div class="ft-hist-cab">
+      <div>
+        <div class="ft-cab-t">Historial de tomas</div>
+        <div class="ft-cab-s">Agrupadas por fecha · click para usar en la comparativa</div>
+      </div>
+      <div class="ft-angulos">${filtros.map(f => `
+        <button class="ft-ang${_ftHistFiltro === f.clave ? ' on' : ''}"
+                onclick="_ftHistAng('${f.clave}')">${f.etiqueta}</button>`).join('')}</div>
+    </div>
+    ${cuerpo}
+  </div>`;
+}
+
+function _ftHistAng(clave) { _ftHistFiltro = clave; _renderPgFotos(); }
+
+/* Llevar una toma a la comparativa.
+
+   Con un ángulo concreto —al pulsar una foto— la comparativa se cambia a ese
+   ángulo: si no, se elige una foto de espalda y arriba sigue el frente.
+   Desde los botones del grupo no se dice cuál, así que manda el que ya está
+   puesto; y si esa fecha no tiene foto en él, se coge la primera que sí,
+   porque un hueco donde debería haber una comparación no compara nada. */
+function _ftUsar(cual, fecha, angulo) {
+  if (angulo) _ftAngulo = angulo;
+  else if (!_ftTomas(_ftAngulo).some(t => t.fecha === fecha)) {
+    const g = _ftGrupos('todos').find(x => x.fecha === fecha);
+    if (g && g.fotos.length) _ftAngulo = g.fotos[0].angulo;
+  }
+  if (cual === 'ini') _ftIni = fecha; else _ftAct = fecha;
+  _renderPgFotos();
 }
 
 function _ftLado(cual, titulo, fecha, tomas) {
   const t = tomas.find(x => x.fecha === fecha);
-  // El peso de la OTRA foto, para poder decir cuánto ha cambiado entre las dos.
-  const otra = tomas.find(x => x.fecha === (cual === 'ini' ? _ftAct : _ftIni));
-  let dif = '';
-  if (cual === 'act' && t && otra && t.peso != null && otra.peso != null) {
-    const n = t.peso - otra.peso;
-    dif = `<span class="dif ${n < 0 ? 'baja' : (n > 0 ? 'sube' : '')}">${
-      (n > 0 ? '+' : '') + n.toFixed(1)} kg entre las dos</span>`;
-  }
+  // El ángulo se rotula SOBRE la foto: mirando dos imágenes parecidas, saber
+  // si son las dos de frente es justo lo que hay que poder comprobar de un
+  // vistazo. Cuánto ha cambiado el peso va en la franja de abajo, una sola
+  // vez, en vez de repetido en el pie de cada lado.
+  const ang = (FT_ANGULOS.find(a => a.clave === _ftAngulo) || FT_ANGULOS[0]).etiqueta;
   return `<div class="ft-lado">
     <div class="ft-h">
       <span class="ft-et ${cual}">${cual === 'ini' ? 'INICIO' : 'ACTUAL'}</span>
@@ -5410,14 +5567,16 @@ function _ftLado(cual, titulo, fecha, tomas) {
         ${tomas.map(x => `<option value="${x.fecha}"${x.fecha === fecha ? ' selected' : ''}>${x.fecha}</option>`).join('')}
       </select>
     </div>
-    ${t ? `<img class="ft-img" src="${esc(t.url)}" alt="${titulo} del ${t.fecha}"
-            onclick="window.open('${esc(t.url)}','_blank')">`
+    ${t ? `<div class="ft-marco">
+        <img class="ft-img" src="${esc(t.url)}" alt="${titulo} del ${t.fecha}"
+             onclick="window.open('${esc(t.url)}','_blank')">
+        <div class="ft-sobre">
+          <div class="ft-sobre-a">${esc(ang)}</div>
+          <div class="ft-sobre-f">${esc(t.fecha)}</div>
+        </div>
+        <span class="ft-cam"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+      </div>`
         : '<div class="ft-hueco">No hay foto de este ángulo en esa fecha.</div>'}
-    <div class="ft-pie">
-      <span>${t ? t.fecha : '—'}</span>
-      ${t && t.peso != null ? `<span>· <b>${t.peso} kg</b></span>` : ''}
-      ${dif}
-    </div>
   </div>`;
 }
 

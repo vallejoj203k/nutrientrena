@@ -80,3 +80,10 @@ class Aliment(Base):
     parent = relationship("Aliment", remote_side=[id], foreign_keys=[parent_id])
     diet_food_aliments = relationship("DietFoodAliment", back_populates="aliment")
     recipe_details = relationship("RecipeDetail", back_populates="aliment")
+
+    @property
+    def fiber(self):
+        """La fibra vive en la ficha de micronutrientes, pero el editor de
+        dietas la enseña junto a los macros. Sin esto, cada pantalla la leía
+        de `a.fiber` y encontraba nada: todo salía con 0 g."""
+        return self.description.fiber if self.description else None

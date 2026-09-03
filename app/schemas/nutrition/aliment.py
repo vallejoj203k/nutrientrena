@@ -95,6 +95,7 @@ class AlimentOut(BaseModel):
     carbohydrates: Optional[float] = None
     fats: Optional[float] = None
     calories: Optional[float] = None
+    fiber: Optional[float] = None   # de la ficha de micros, a mano del editor
     comments: Optional[str] = None
     meal_moments: Optional[str] = None
     use_in_generator: Optional[bool] = None

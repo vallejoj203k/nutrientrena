@@ -152,7 +152,9 @@ def find_all(
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
-    q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
+    q = (db.query(Aliment)
+         .options(joinedload(Aliment.description))
+         .filter(Aliment.parent_id.is_(None)))
     if org.solo_plataforma:
         q = q.filter(Aliment.organization_id.is_(None))
     elif org.org_id:
@@ -171,7 +173,9 @@ def search(
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
-    q = db.query(Aliment).filter(Aliment.parent_id.is_(None))
+    q = (db.query(Aliment)
+         .options(joinedload(Aliment.description))
+         .filter(Aliment.parent_id.is_(None)))
     if search:
         q = q.filter(Aliment.name.ilike(f"%{search}%"))
     if group_food_id:

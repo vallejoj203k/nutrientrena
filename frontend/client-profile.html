@@ -904,6 +904,50 @@
     .eex-no{color:#D1D5DB;}
     @media(max-width:900px){ .eplan-layout{flex-direction:column;} .eplan-carril{width:100%;border-right:none;border-bottom:1px solid #F3F4F6;} }
 
+    /* El chat con el cliente, dentro de su ficha. */
+    .cp-chat{display:flex;flex-direction:column;height:calc(100vh - 330px);min-height:420px;padding:0;}
+    .cp-chat-head{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid #F3F4F6;}
+    .cp-chat-t{font-size:15.5px;font-weight:800;color:#111827;}
+    .cp-chat-s{font-size:12.5px;color:#9CA3AF;margin-top:2px;display:flex;align-items:center;gap:6px;}
+    .cp-chat-s i{width:7px;height:7px;border-radius:50%;background:#22C55E;display:inline-block;}
+    .cp-chat-s.off i{background:#D1D5DB;}
+    .cp-chat-sw{margin-left:auto;display:flex;align-items:center;gap:9px;font-size:12.5px;
+      color:#6B7280;cursor:pointer;flex-shrink:0;}
+    .cp-chat-sw input{position:absolute;opacity:0;width:0;height:0;}
+    .cp-chat-sw-p{width:42px;height:24px;border-radius:20px;background:#D1D5DB;position:relative;
+      transition:background .18s;flex-shrink:0;}
+    .cp-chat-sw-p::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;
+      border-radius:50%;background:#fff;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+    .cp-chat-sw input:checked + .cp-chat-sw-p{background:#22C55E;}
+    .cp-chat-sw input:checked + .cp-chat-sw-p::after{transform:translateX(18px);}
+    .cp-chat-sw input:focus-visible + .cp-chat-sw-p{outline:2px solid #4F46E5;outline-offset:2px;}
+    .cp-chat-msgs{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:12px;
+      background:#fff;}
+    .cp-msg{max-width:70%;padding:11px 15px;border-radius:14px;font-size:14px;line-height:1.45;
+      word-break:break-word;}
+    .cp-msg.suyo{align-self:flex-start;background:#fff;border:1px solid #EAECF1;color:#111827;
+      box-shadow:0 1px 2px rgba(16,24,40,.05);}
+    .cp-msg.mio{align-self:flex-end;background:#4F46E5;color:#fff;}
+    .cp-msg-h{font-size:11px;margin-top:5px;color:#9CA3AF;}
+    .cp-msg.mio .cp-msg-h{color:rgba(255,255,255,.75);}
+    .cp-msg a{color:inherit;text-decoration:underline;}
+    .cp-chat-dia{align-self:center;font-size:11px;font-weight:700;color:#9CA3AF;background:#F3F4F6;
+      padding:3px 11px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+    .cp-chat-vacio{margin:auto;text-align:center;color:#9CA3AF;font-size:13px;max-width:280px;line-height:1.5;}
+    .cp-chat-pie{display:flex;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid #F3F4F6;}
+    .cp-chat-clip{border:none;background:none;color:#9CA3AF;cursor:pointer;padding:6px;line-height:0;
+      border-radius:8px;}
+    .cp-chat-clip:hover{color:#4F46E5;background:#F3F4F6;}
+    .cp-chat-in{flex:1;min-width:0;padding:12px 16px;border:1px solid #E5E7EB;border-radius:22px;
+      font-size:14px;font-family:inherit;color:#111827;outline:none;background:#fff;}
+    .cp-chat-in:focus{border-color:#C7D2FE;}
+    .cp-chat-in:disabled{background:#F9FAFB;color:#9CA3AF;}
+    .cp-chat-send{display:inline-flex;align-items:center;gap:7px;padding:11px 20px;border:none;
+      border-radius:22px;background:#4F46E5;color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;
+      font-family:inherit;flex-shrink:0;transition:background .15s;}
+    .cp-chat-send:hover{background:#4338CA;}
+    .cp-chat-send:disabled{background:#C7D2FE;cursor:default;}
+
     .nut-dist{margin:8px 10px 4px;border:1px solid #E9EBF2;border-radius:12px;overflow:hidden;background:#fff;}
     .nut-dist-head{display:flex;align-items:center;justify-content:space-between;gap:6px;
       padding:9px 11px 7px;}
@@ -2321,11 +2365,31 @@ table.sed-t tr.nohecha td{color:#9CA3AF;}
 
       <!-- ── CHAT ── -->
       <div class="tab-pane" id="tab-chat">
-        <div class="card">
-          <div class="card-head"><span class="card-title">Chat con el cliente</span></div>
-          <div style="padding:40px;text-align:center;color:#9CA3AF;">
-            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block;opacity:.3;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <p style="font-size:14px;">El chat estará disponible próximamente.</p>
+        <div class="card cp-chat">
+          <div class="cp-chat-head">
+            <div style="min-width:0;">
+              <div class="cp-chat-t" id="cpChatTitulo">Chat</div>
+              <div class="cp-chat-s" id="cpChatEstado"></div>
+            </div>
+            <label class="cp-chat-sw" title="Si lo apagas, el cliente no puede escribirte">
+              <span id="cpChatSwTxt">Activado</span>
+              <input type="checkbox" id="cpChatSw" onchange="toggleChatEnabled()">
+              <span class="cp-chat-sw-p"></span>
+            </label>
+          </div>
+          <div class="cp-chat-msgs" id="cpChatMsgs"></div>
+          <div class="cp-chat-pie">
+            <button class="cp-chat-clip" onclick="document.getElementById('cpChatFile').click()"
+                    title="Adjuntar un archivo" aria-label="Adjuntar un archivo">
+              <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <input type="file" id="cpChatFile" style="display:none" onchange="cpChatAdjuntar(this)">
+            <input class="cp-chat-in" id="cpChatIn" placeholder="Escribe un mensaje…"
+                   onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();cpChatEnviar();}">
+            <button class="cp-chat-send" id="cpChatSend" onclick="cpChatEnviar()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Enviar
+            </button>
           </div>
         </div>
       </div>
@@ -4451,7 +4515,7 @@ async function toggleChatEnabled() {
   const cur = clientData.chat_enabled !== false;
   const nv = !cur;
   const btn = document.getElementById('chatToggleBtn');
-  btn.disabled = true;
+  if (btn) btn.disabled = true;
   try {
     const r = await fetch(`${API}/users/client/${clientId}/chat-enabled`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json', ...h() },
@@ -4460,9 +4524,16 @@ async function toggleChatEnabled() {
     if (!r.ok) throw new Error();
     clientData.chat_enabled = nv;
     _renderHeaderControls();
+    // Hay dos interruptores para lo mismo —el de la cabecera y el de la
+    // pestaña de Chat— y tienen que decir lo mismo: uno en "Activado" y el
+    // otro en "Desactivado" deja al coach sin saber cuál manda.
+    _cpChatPintaEstado();
     showToast(nv ? 'Chat activado' : 'Chat desactivado', 'success');
-  } catch { showToast('No se pudo actualizar el chat', ''); }
-  finally { btn.disabled = false; }
+  } catch {
+    showToast('No se pudo actualizar el chat', '');
+    _cpChatPintaEstado();   // el interruptor vuelve a donde estaba
+  }
+  finally { if (btn) btn.disabled = false; }
 }
 
 async function setLifecycleStatus(val) {
@@ -4509,6 +4580,181 @@ function showTab(name) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(`tab-${name}`).classList.add('active');
   document.getElementById(`tab-${name}-btn`).classList.add('active');
+  // El chat se carga al abrir su pestaña: son dos consultas que la mayoría de
+  // las visitas a la ficha no llega a mirar.
+  if (name === 'chat') cpChatAbrir();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Chat con el cliente, dentro de su ficha
+
+   Es LA MISMA conversación que la pantalla de Chat, no otra: se pide al
+   servidor la que ya existe con esa persona, y solo se crea si no había
+   ninguna. Buscarla entre las que la pantalla tuviera cargadas —que es lo que
+   se hacía— acaba en dos conversaciones con el mismo cliente en cuanto la
+   lista está paginada, y los mensajes repartidos entre las dos.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _cpChat = null;        // la conversación
+var _cpChatMsgs = [];
+var _cpChatCargando = false;
+
+function _cpChatNombre() {
+  return ((clientData?.first_name || clientData?.name || '') + ' ' +
+          (clientData?.last_name || '')).trim() || 'el cliente';
+}
+
+async function cpChatAbrir() {
+  const caja = document.getElementById('cpChatMsgs');
+  if (!caja || _cpChatCargando) return;
+
+  const nombre = _cpChatNombre();
+  document.getElementById('cpChatTitulo').textContent = `Chat con ${nombre}`;
+  document.getElementById('cpChatIn').placeholder = `Mensaje para ${nombre}…`;
+  _cpChatPintaEstado();
+
+  if (_cpChat) { await cpChatCargarMensajes(); return; }
+
+  const uid = clientData?.user_id;
+  if (!uid) { caja.innerHTML = '<div class="cp-chat-vacio">No se ha podido identificar al cliente.</div>'; return; }
+
+  _cpChatCargando = true;
+  caja.innerHTML = '<div class="cp-chat-vacio">Abriendo la conversación…</div>';
+  try {
+    const r = await fetch(`${API}/chat/con/${uid}`, { headers: h() });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    _cpChat = (await r.json()).data;
+    await cpChatCargarMensajes();
+  } catch (e) {
+    caja.innerHTML = `<div class="cp-chat-vacio">No se ha podido abrir el chat.
+      <button class="nut-empty-link" style="display:block;margin:8px auto 0;" onclick="cpChatAbrir()">Reintentar</button></div>`;
+  } finally { _cpChatCargando = false; }
+}
+
+async function cpChatCargarMensajes() {
+  if (!_cpChat) return;
+  try {
+    const r = await fetch(`${API}/chat/conversations/${_cpChat.id}/messages?per_page=100`, { headers: h() });
+    if (!r.ok) throw new Error();
+    const j = await r.json();
+    const d = j.data || {};
+    _cpChatMsgs = (Array.isArray(d) ? d : (d.messages || d.items || [])).slice();
+    // La API los da del más nuevo al más viejo; en pantalla se leen al revés.
+    if (_cpChatMsgs.length > 1) {
+      const a = new Date(_cpChatMsgs[0].created_at || 0);
+      const b = new Date(_cpChatMsgs[_cpChatMsgs.length - 1].created_at || 0);
+      if (a > b) _cpChatMsgs.reverse();
+    }
+    _cpChatPinta();
+    // Abrir el chat es haberlo leído: dejar el aviso encendido con la
+    // conversación delante es contar mensajes que ya se han visto.
+    fetch(`${API}/chat/conversations/${_cpChat.id}/read`, { method: 'POST', headers: h() }).catch(() => {});
+  } catch (e) {
+    document.getElementById('cpChatMsgs').innerHTML =
+      '<div class="cp-chat-vacio">No se han podido cargar los mensajes.</div>';
+  }
+}
+
+function _cpChatPintaEstado() {
+  const on = clientData?.chat_enabled !== false;
+  const est = document.getElementById('cpChatEstado');
+  const sw = document.getElementById('cpChatSw');
+  const txt = document.getElementById('cpChatSwTxt');
+  if (est) {
+    est.className = 'cp-chat-s' + (on ? '' : ' off');
+    est.innerHTML = `<i></i>${on ? 'Chat activo · el cliente puede escribirte'
+                              : 'Chat desactivado · el cliente no puede escribirte'}`;
+  }
+  if (sw) sw.checked = on;
+  if (txt) txt.textContent = on ? 'Activado' : 'Desactivado';
+  // El cliente no puede escribir, pero el coach sí: apagarlo es cortarle el
+  // canal a él, no quedarse uno mismo sin poder avisarle de que lo ha hecho.
+}
+
+function _cpChatDia(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const hoy = new Date();
+  const ayer = new Date(); ayer.setDate(hoy.getDate() - 1);
+  const mismo = (a, b) => a.toDateString() === b.toDateString();
+  if (mismo(d, hoy)) return 'Hoy';
+  if (mismo(d, ayer)) return 'Ayer';
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+}
+
+function _cpChatPinta() {
+  const caja = document.getElementById('cpChatMsgs');
+  if (!caja) return;
+  if (!_cpChatMsgs.length) {
+    caja.innerHTML = `<div class="cp-chat-vacio">Todavía no hay mensajes con
+      ${esc(_cpChatNombre())}.<br>Escríbele el primero.</div>`;
+    return;
+  }
+
+  /* En una conversación de dos, lo que no es del cliente es mío. Se decide
+     así y no comparando con mi propio id porque ese id habría que ir a
+     buscarlo: aquí ya se sabe con quién se está hablando. */
+  const suyo = String(clientData?.user_id || '');
+  let dia = '';
+  caja.innerHTML = _cpChatMsgs.map(m => {
+    const mio = String(m.sender_user_id || m.user_id || '') !== suyo;
+    const hora = m.created_at
+      ? new Date(m.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+      : '';
+    let sep = '';
+    const d = _cpChatDia(m.created_at);
+    if (d && d !== dia) { dia = d; sep = `<div class="cp-chat-dia">${esc(d)}</div>`; }
+
+    // Un adjunto es un enlace, no un texto: sin él el mensaje sale vacío y
+    // parece que no se envió nada.
+    const cuerpo = m.attachment_url
+      ? `<a href="${esc(m.attachment_url)}" target="_blank" rel="noopener">${esc(m.attachment_name || m.content || 'Archivo adjunto')}</a>`
+      : esc(m.content || '');
+
+    return sep + `<div class="cp-msg ${mio ? 'mio' : 'suyo'}">${cuerpo}
+      <div class="cp-msg-h">${hora}</div></div>`;
+  }).join('');
+  caja.scrollTop = caja.scrollHeight;
+}
+
+async function cpChatEnviar() {
+  const inp = document.getElementById('cpChatIn');
+  const btn = document.getElementById('cpChatSend');
+  const texto = (inp.value || '').trim();
+  if (!texto || !_cpChat) return;
+
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/chat/conversations/${_cpChat.id}/messages`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...h() },
+      body: JSON.stringify({ content: texto }),
+    });
+    if (!r.ok) throw new Error();
+    // Se vacía DESPUÉS de que el servidor lo acepte: vaciarlo antes y fallar
+    // el envío se lleva por delante lo que la persona acababa de escribir.
+    inp.value = '';
+    await cpChatCargarMensajes();
+  } catch (e) {
+    showToast('No se ha podido enviar el mensaje', 'error');
+  } finally { btn.disabled = false; inp.focus(); }
+}
+
+async function cpChatAdjuntar(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file || !_cpChat) return;
+  showToast('Subiendo el archivo…', '');
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch(`${API}/chat/conversations/${_cpChat.id}/attachment`, {
+      method: 'POST', headers: h(), body: fd,
+    });
+    if (!r.ok) throw new Error();
+    await cpChatCargarMensajes();
+  } catch (e) {
+    showToast('No se ha podido enviar el archivo', 'error');
+  }
 }
 
 /* ── Progreso tab ── */

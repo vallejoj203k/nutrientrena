@@ -1678,16 +1678,15 @@ async function refrescarConversacionActiva() {
 }
 
 async function abrirPrivadoCon(userId) {
-  // Si ya hay conversación con esa persona, se abre; si no, se crea.
-  const ya = (_convs || []).find(c => c.type === 'individual' &&
-    (c.participants || []).some(p => p.user_id === userId));
-  if (ya) { selectConversation(ya.id); return; }
-  const r = await apiFetch('/chat/conversations', {
-    method: 'POST',
-    body: JSON.stringify({ type: 'individual', participant_user_ids: [userId] }),
-  });
-  if (r.success) { await loadConversations(); selectConversation(r.data.id); }
-  else alert(r.message || 'No se pudo abrir el chat privado');
+  /* La busca el SERVIDOR, que las tiene todas. Buscarla aquí entre `_convs`
+     solo encontraba las que estuvieran cargadas: con la lista paginada
+     bastaba con no haber llegado a la página donde estaba para crear una
+     segunda conversación con la misma persona, y los mensajes repartidos
+     entre las dos. */
+  const r = await apiFetch(`/chat/con/${userId}`);
+  if (!r.success) { alert(r.message || 'No se pudo abrir el chat privado'); return; }
+  if (r.data.creada) await loadConversations();
+  selectConversation(r.data.id);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────

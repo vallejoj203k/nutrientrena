@@ -611,3 +611,58 @@ window.__pinta=(rutina,sel)=>{
 destino17 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'entreno.html')
 open(destino17, 'w').write(entre)
 print('harness generado en', destino17)
+
+
+# ── Harness del chat dentro de la ficha del cliente ────────────────────────
+# Se saca el panel y su lógica de client-profile.html tal cual: lo que hay que
+# comprobar es que abre la conversación que YA existe y que un mensaje no se
+# pierde si el envío falla.
+a = perfil.index('/* \u2550\u2550\u2550')
+a = perfil.index('Chat con el cliente, dentro de su ficha')
+a = perfil.rindex('/*', 0, a)
+b = perfil.index('/* \u2500\u2500 Progreso tab \u2500\u2500 */')
+chat_js = perfil[a:b]
+panel = _bloque(perfil, '<div class="tab-pane" id="tab-chat">')
+
+chat = """<!doctype html><html><head><meta charset="utf-8"><style>%s
+/* El panel vive dentro de una pestaña, y el CSS de la página las oculta
+   mientras no estén activas. Aquí siempre lo está. */
+.tab-pane{display:block !important;}
+</style></head>
+<body style="margin:0;background:#F8FAFC"><div style="padding:16px;max-width:900px">
+%s
+</div>
+<script>
+const API='http://x'; const clientId='cli-1';
+function h(){return{};}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(m,t){window.__toast=m;window.__toastTipo=t;}
+function _renderHeaderControls(){}
+var clientData={user_id:77, first_name:'Carlos', last_name:'Gonz\u00e1lez', chat_enabled:true};
+window.__llamadas=[]; window.__mensajes=[]; window.__falla=null;
+window.fetch=function(url,opt){
+  const metodo=(opt&&opt.method)||'GET';
+  window.__llamadas.push({url:url, metodo:metodo, cuerpo:opt&&opt.body});
+  if (window.__falla && String(url).includes(window.__falla))
+    return Promise.resolve({ok:false, status:500, json:()=>Promise.resolve({})});
+  let data={};
+  if (String(url).includes('/chat/con/')) data={id:'conv-1', type:'individual', creada:false};
+  else if (String(url).includes('/messages') && metodo==='GET') data={messages:window.__mensajes};
+  return Promise.resolve({ok:true, json:()=>Promise.resolve({data:data})});
+};
+async function toggleChatEnabled(){
+  clientData.chat_enabled = !clientData.chat_enabled;
+  window.__llamadas.push({url:'chat-enabled', metodo:'PUT'});
+  _cpChatPintaEstado();
+}
+%s
+window.__reset=(msgs,activo)=>{
+  _cpChat=null; _cpChatMsgs=[]; _cpChatCargando=false;
+  window.__mensajes=msgs||[]; window.__llamadas=[]; window.__toast=null;
+  clientData.chat_enabled = activo !== false;
+};
+</script></body></html>""" % (cssp, panel, chat_js)
+
+destino18 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chatficha.html')
+open(destino18, 'w').write(chat)
+print('harness generado en', destino18)

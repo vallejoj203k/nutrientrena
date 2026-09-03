@@ -588,6 +588,69 @@ def create_conversation(
     return send_response(_serialize_conversation(conv, current_user.id, db), "Conversación creada")
 
 
+@router.get("/con/{user_id}", summary="La conversación con esa persona",
+            description="Devuelve la conversación individual con ese usuario, creándola si todavía no existe.")
+def conversacion_con(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Abrir el chat con alguien sin tener que buscarlo en la lista.
+
+    Hacía falta para poder chatear desde la ficha del cliente, pero arregla
+    algo más: hasta ahora cada pantalla se buscaba la conversación entre las
+    que tuviera cargadas y, si no la encontraba, creaba otra. Con la lista
+    paginada eso significa que basta con no haber cargado la página donde
+    estaba para acabar con dos conversaciones con la misma persona — y los
+    mensajes repartidos entre las dos, cada uno creyendo que el otro no
+    contesta.
+
+    Aquí la busca la base, que las tiene todas.
+    """
+    if user_id == current_user.id:
+        return send_error("Elige con quién quieres hablar", code=400)
+
+    otro = db.query(User).filter(User.id == user_id).first()
+    if not otro:
+        return send_error("Usuario no encontrado", code=404)
+
+    # De quién es: sin esto bastaba con cambiar el número de la URL para
+    # abrirle un chat al cliente de otra cuenta.
+    roles = _user_role_ids(current_user.id, db)
+    permitidos = _alcance(current_user.id, db)
+    if not (SUPERADMIN in roles and not permitidos) and user_id not in permitidos:
+        return send_error("Esa persona no es de tu cuenta", code=403)
+
+    mias = {p.conversation_id for p in db.query(ChatParticipant).filter(
+        ChatParticipant.user_id == current_user.id).all()}
+    conv = None
+    if mias:
+        for c in db.query(ChatConversation).filter(
+                ChatConversation.id.in_(mias),
+                ChatConversation.type == "individual").all():
+            if user_id in {p.user_id for p in c.participants}:
+                conv = c
+                break
+
+    creada = False
+    if conv is None:
+        now = datetime.utcnow()
+        conv = ChatConversation(
+            id=str(uuid.uuid4()), type="individual", name=None,
+            created_by_user_id=current_user.id, created_at=now, updated_at=now)
+        db.add(conv)
+        db.flush()
+        db.add(ChatParticipant(conversation_id=conv.id, user_id=current_user.id, joined_at=now))
+        db.add(ChatParticipant(conversation_id=conv.id, user_id=user_id, joined_at=now))
+        db.commit()
+        db.refresh(conv)
+        creada = True
+
+    datos = _serialize_conversation(conv, current_user.id, db)
+    datos["creada"] = creada
+    return send_response(datos, "OK")
+
+
 @router.get("/conversations/{conv_id}/messages")
 def list_messages(
     conv_id: str,

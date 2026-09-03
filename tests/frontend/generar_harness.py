@@ -767,3 +767,62 @@ window.__quitar=(i)=>quitarComida(_meals[i].id);
 destino20 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'comidas.html')
 open(destino20, 'w').write(comidas)
 print('harness generado en', destino20)
+
+
+# ── Harness del desplegable de micronutrientes ─────────────────────────────
+# El panel lo pinta el módulo compartido; lo que se saca de diets.html es el
+# `fsmSelect` de verdad, que es quien tiene que llamarlo al elegir un alimento.
+dts5 = open(os.path.join(RAIZ, 'frontend', 'diets.html')).read()
+cssm = open(os.path.join(RAIZ, 'frontend', 'css', 'micros-alimento.css')).read()
+cssd5 = '\n'.join(re.findall(r'<style>(.*?)</style>', dts5, re.S))
+
+i = dts5.index('function _fsmPresetsFor(unit) {')
+j = dts5.index('function fsmConfirmAdd(')
+seleccion = dts5[i:j]
+
+micros = """<!doctype html><html><head><meta charset="utf-8">
+<style>%s</style><style>%s</style></head>
+<body style="margin:0">
+<div class="fsm-detail" id="fsmDetail" style="display:none;width:360px">
+  <div class="fsm-detail-body">
+    <div class="fsm-detail-name" id="fsmDetName">-</div>
+    <span class="fsm-item-chip" id="fsmDetChip" style="display:none;"></span>
+    <div class="fsm-qty-box"><input id="fsmQtyInput" type="number"><span id="fsmQtyUnit"></span></div>
+    <div class="fsm-qty-presets" id="fsmQtyPresets"></div>
+    <div class="fsm-portion">
+      <div class="fsm-portion-row"><span>Calorías</span><b id="fsmPorK">0</b></div>
+      <div class="fsm-portion-row"><span>Proteínas</span><b id="fsmPorP">0</b></div>
+      <div class="fsm-portion-row"><span>Carbohidratos</span><b id="fsmPorC">0</b></div>
+      <div class="fsm-portion-row"><span>Grasas</span><b id="fsmPorF">0</b></div>
+      <div class="fsm-portion-row"><span>Fibra</span><b id="fsmPorFib">0</b></div>
+    </div>
+    <div id="fsmMicros" style="display:none;"></div>
+  </div>
+  <button class="fsm-add-btn" id="fsmAddBtn"></button>
+</div>
+<script>%s</script>
+<script>%s</script>
+<script>
+var _fsmCache = {}, _fsmSelId = null, _fsmQty = 0, _fsmMid = 1;
+var _fsmGroups = [{id: 3, name: 'Proteínas'}];
+var _meals = [{id: 1, name: 'Desayuno'}];
+/* La unidad y su factor los resuelve la pagina con sus propias funciones; aqui
+   no es lo que se mide. */
+function _unitFromAliment(a){
+  var u = window.macrosAlimento.unidadDe(a);
+  return u === 'ud' ? 'unidad' : u;
+}
+function getUnitMult(){ return 1; }
+%s
+window.__pinta = (al) => { _fsmCache[al.id] = al; fsmSelect(al.id); };
+window.__racion = () => ({
+  k: document.getElementById('fsmPorK').textContent,
+  p: document.getElementById('fsmPorP').textContent,
+  fib: document.getElementById('fsmPorFib').textContent,
+});
+</script></body></html>""" % (cssd5, cssm, _modulo('macros-alimento.js'),
+                              _modulo('micros-alimento.js'), seleccion)
+
+destino21 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'micros.html')
+open(destino21, 'w').write(micros)
+print('harness generado en', destino21)

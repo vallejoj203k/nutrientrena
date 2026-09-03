@@ -59,6 +59,7 @@ class AlimentSimpleOut(BaseModel):
     proteins: Optional[float] = None
     carbohydrates: Optional[float] = None
     fats: Optional[float] = None
+    fiber: Optional[float] = None
     quantity_type: Optional[QuantityTypeOut] = None
     quantity_unit: Optional[str] = None
     model_config = {"from_attributes": True}

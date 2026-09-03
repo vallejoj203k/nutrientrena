@@ -15,7 +15,7 @@ from app.core.dependencies import (
 from app.core.responses import send_response, send_error
 from app.core.macros import escalar
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment, Pathology, diet_pathologies_table
-from app.models.nutrition.aliment import Aliment
+from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.diet import DietCreate, DietUpdate, DietOut, DietFoodCreate, DietFoodAlimentCreate
 from app.pdf.diet_pdf import generate_diet_pdf
 
@@ -161,9 +161,21 @@ def _clone_aliment(db: Session, source: Aliment) -> Aliment:
         parent_id=source.id,
         created_user_id=source.created_user_id,
     )
+    # La ficha de micronutrientes (fibra, sodio, vitaminas…) va aparte. Sin
+    # copiarla, cada alimento metido en una dieta salía con 0 g de fibra
+    # aunque el del catálogo la tuviera.
+    if source.description:
+        clone.description = AlimentDescription(**_micros_de(source.description))
     db.add(clone)
     db.flush()
     return clone
+
+
+def _micros_de(desc: AlimentDescription) -> dict:
+    """Los valores de una ficha de micros, sin su id ni a quién pertenece."""
+    return {c.name: getattr(desc, c.name)
+            for c in AlimentDescription.__table__.columns
+            if c.name not in ("id", "aliment_id")}
 
 
 def _limpiar_clones(db: Session, aliment_ids) -> int:

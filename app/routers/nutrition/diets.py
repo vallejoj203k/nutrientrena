@@ -11,6 +11,7 @@ from app.core.dependencies import (
     EDITOR_CONTENIDO_GLOBAL,
     require_role_ids, get_org_context, OrgContext,
     verify_client_access, SUPERADMIN, ADMIN, COACH, CLIENT,
+    bloqueado_para_ver,
 )
 from app.core.responses import send_response, send_error
 from app.core.macros import escalar
@@ -804,10 +805,20 @@ def ai_generate(
 
 
 @router.get("/{id}/pdf", summary="Exportar dieta a PDF", description="Genera y descarga la dieta en formato PDF.")
-def pdf(id: str, db: Session = Depends(get_db), _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL))):
+def pdf(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
+    org: OrgContext = Depends(get_org_context),
+):
     diet = _get_or_404(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
+    # Aquí no había ninguna comprobación: con acertar el id se descargaba la
+    # dieta del cliente de otra cuenta.
+    motivo = bloqueado_para_ver(diet, org, current_user, db, "esta dieta")
+    if motivo:
+        return send_error(motivo, code=403)
     try:
         pdf_bytes = generate_diet_pdf(diet)
     except Exception as e:
@@ -862,7 +873,9 @@ def edit(
     diet = _get_or_404_with_pathologies(db, id)
     if not diet:
         return send_error("Dieta no encontrada")
-    motivo = _bloqueado_para_editar(diet, org, current_user, db)
+    # Ver, no editar: el catálogo de plataforma sale en la Librería de todos y
+    # con la comprobación de editar no se podía ni abrir.
+    motivo = bloqueado_para_ver(diet, org, current_user, db, "esta dieta")
     if motivo:
         return send_error(motivo, code=403)
     return send_response(_serialize(diet), "OK")

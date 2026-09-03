@@ -366,3 +366,78 @@ def filter_clients_by_role(all_clients: list, current_user, db: Session) -> list
         return [c for c in all_clients if c.id in owned]
 
     return []
+
+
+# ── Quién puede VER un contenido de biblioteca ─────────────────────────────
+# Ver no es editar, y hasta ahora las pantallas de detalle usaban la
+# comprobación de editar: un coach de una organización abría una rutina o una
+# dieta DE PLATAFORMA —las mismas que le salen listadas en su Librería— y le
+# respondía 403. En pantalla, "Error al cargar la rutina" y una dieta con
+# guiones en todo.
+#
+# Vive aquí y no en cada router porque la regla es la misma para rutinas y
+# para dietas, y ya hay demasiadas copias de esta lógica repartidas.
+
+def es_de_plataforma(obj, db: Session) -> bool:
+    """Si esto es del catálogo común, y no de una cuenta concreta.
+
+    No basta con `organization_id IS NULL`: un coach sin organización crea su
+    contenido privado también con NULL, y darlo por catálogo común dejaría su
+    biblioteca a la vista de cualquier otro coach. Lo que distingue al
+    catálogo es de quién es: de nadie, o de una cuenta de plataforma.
+    """
+    if obj.organization_id is not None:
+        return False
+    if getattr(obj, "user_id", None) is None:
+        return True
+    from app.models.user import RoleUser
+
+    roles = {r.role_id for r in db.query(RoleUser).filter(
+        RoleUser.user_id == obj.user_id).all()}
+    return bool(roles & {SUPERADMIN, ADMIN, EDITOR_CONTENIDO_GLOBAL})
+
+
+def bloqueado_para_ver(obj, org, current_user, db: Session,
+                       que: str = "este contenido"):
+    """Si hay que impedir VER esto, el motivo; si no, None.
+
+    En este orden:
+
+    1. Lo suyo, siempre.
+    2. Lo que está asignado a un cliente manda por la relación coach-cliente,
+       no por la organización: una dieta asignada se queda con
+       `organization_id` a NULL, así que sin esta regla ANTES que la del
+       catálogo, cualquier coach vería la dieta del cliente de otro.
+    3. El catálogo de plataforma lo ve todo el mundo: sale en su Librería.
+    4. Y lo de la propia organización, o todo si es superadmin/admin.
+    """
+    if getattr(obj, "user_id", None) == current_user.id:
+        return None
+
+    if getattr(obj, "user_id", None) is not None:
+        from app.models.user import RoleUser, UserDetail
+
+        es_cliente = db.query(RoleUser).filter(
+            RoleUser.user_id == obj.user_id, RoleUser.role_id == CLIENT
+        ).first() is not None
+        if es_cliente:
+            detalle = db.query(UserDetail).filter(
+                UserDetail.user_id == obj.user_id).first()
+            if not detalle:
+                return f"No tienes acceso a {que}"
+            verify_client_access(detalle.id, current_user, db)  # lanza 403 si no toca
+            return None
+
+    if es_de_plataforma(obj, db):
+        return None
+
+    # Mirando SOLO el catálogo común, lo de las cuentas no se abre: es la
+    # misma frontera que ya tienen los listados.
+    if getattr(org, "solo_plataforma", False):
+        return f"No tienes acceso a {que}"
+
+    if org.org_id is None and org.is_owner:
+        return None
+    if obj.organization_id is not None and obj.organization_id == org.org_id:
+        return None
+    return f"No tienes acceso a {que}"

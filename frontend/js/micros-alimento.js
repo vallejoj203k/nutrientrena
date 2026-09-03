@@ -138,6 +138,11 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  var LLAMA = '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>';
+  var PROTE = '<path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/>';
+  var TRIGO = '<path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/>';
+  var GOTA  = '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>';
+  var HOJA  = '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>';
   var ICONO = '<svg width="14" height="14" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>';
   var CHEVRON = '<svg class="fsm-mic-chev" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
 
@@ -174,6 +179,65 @@
       + '</div>';
   }
 
+
+  /* ── El resumen de un menú entero ─────────────────────────────────────────
+     Lo mismo, pero sumado: cuánto aporta el día completo. Los valores los
+     suma el servidor (`/aliments/resumen-nutricional`) porque los micros no
+     viajan con la dieta; aquí solo se pintan. */
+  function resumenHTML(d) {
+    d = d || {};
+    var micros = d.micros || {};
+    var tarjeta = function (color, dibujo, valor, unidad, etiqueta) {
+      return '<div class="rn-macro">'
+        + '<div class="rn-macro-t"><svg width="14" height="14" fill="none" stroke="' + color
+        +   '" stroke-width="2" viewBox="0 0 24 24">' + dibujo + '</svg>' + etiqueta + '</div>'
+        + '<div class="rn-macro-v" style="color:' + color + '">' + cifra(valor || 0)
+        +   '<small>' + unidad + '</small></div></div>';
+    };
+
+    var gs = grupos({ description: micros });
+    var cuerpo = gs.length
+      ? gs.map(function (g) {
+          return '<div class="fsm-mic-grupo"><div class="fsm-mic-grupo-t">' + esc(g.titulo) + '</div>'
+            + g.filas.map(function (f) {
+                return '<div class="fsm-mic-fila">'
+                  + '<span class="fsm-mic-nom">' + esc(f.nombre) + '</span>'
+                  + '<span class="fsm-mic-val">' + esc(f.texto)
+                  +   (f.unidad ? ' <span class="fsm-mic-uni">' + esc(f.unidad) + '</span>' : '')
+                  + '</span>'
+                  + '<span class="fsm-mic-vrn">' + (f.vrn != null ? f.vrn + '% VRN' : '') + '</span>'
+                  + '</div>';
+              }).join('')
+            + '</div>';
+        }).join('')
+      : '<div class="rn-vacio">Los alimentos añadidos no tienen micronutrientes'
+        + ' registrados todavía.</div>';
+
+    /* Si parte de los alimentos no tiene ficha, la suma se queda corta. Se
+       dice: un total incompleto que parece completo engaña más que no darlo. */
+    var falta = d.sin_datos
+      ? '<div class="rn-falta">' + d.sin_datos + (d.sin_datos === 1
+          ? ' alimento del plan no tiene micronutrientes en su ficha, así que no cuenta en esta suma.'
+          : ' alimentos del plan no tienen micronutrientes en su ficha, así que no cuentan en esta suma.')
+        + '</div>'
+      : '';
+
+    return '<div class="rn-macros">'
+      + tarjeta('#F97316', LLAMA, d.calories, ' kcal', 'Calorías')
+      + tarjeta('#EF4444', PROTE, d.proteins, ' g', 'Proteínas')
+      + tarjeta('#D97706', TRIGO, d.carbohydrates, ' g', 'Carbohidratos')
+      + tarjeta('#3B82F6', GOTA, d.fats, ' g', 'Grasas')
+      + tarjeta('#10B981', HOJA, micros.fiber, ' g', 'Fibra')
+      + '</div>'
+      + '<div class="rn-sec">' + ICONO + ' <b>Micronutrientes</b>'
+      +   '<span>acumulados de todos los alimentos del plan</span></div>'
+      + '<div class="rn-cuerpo">' + cuerpo + '</div>'
+      + falta
+      + '<div class="rn-pie">% VRN = porcentaje del valor de referencia diario para un'
+      + ' adulto medio. Solo se muestran los nutrientes con datos registrados en la'
+      + ' ficha del alimento.</div>';
+  }
+
   function alternar(btn) {
     var caja = btn.parentElement;
     var cuerpo = caja.querySelector('.fsm-mic-body');
@@ -197,6 +261,7 @@
 
   global.microsAlimento = {
     grupos: grupos, cuantos: cuantos, panelHTML: panelHTML, pinta: pinta,
+    resumenHTML: resumenHTML,
     alternar: alternar, cifra: cifra, porcion: porcion,
     NOMBRES: NOMBRES, UNIDADES: UNIDADES, VRN: VRN,
     _abierto: false

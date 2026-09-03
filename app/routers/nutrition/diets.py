@@ -123,22 +123,25 @@ def _serialize(diet: Diet) -> dict:
         data["goal_mode"] = "kcal"
     else:
         data["goal_mode"] = "libre"
-    # Si la dieta no tiene kcal/macros objetivo guardados (modo "libre"),
-    # se muestran los totales reales calculados de sus alimentos.
-    if not data.get("calories"):
-        k, p, c, f = _diet_food_totals(diet)
-        if k > 0:
+    # Lo que el coach escribió como objetivo manda; lo que no escribió se
+    # rellena con lo que suman los alimentos de verdad. Cada cifra por su
+    # cuenta: en modo "kcal" hay kcal escritas pero ningún macro, y antes
+    # bastaba con tener kcal para que Prot/Carb/Grasa salieran vacíos en la
+    # lista, con la dieta entera montada debajo.
+    k, p, c, f = _diet_food_totals(diet)
+    if k > 0:
+        if not data.get("calories"):
             data["calories"] = round(k)
-            det = data.get("detail")
-            if not isinstance(det, dict):
-                det = {}
-            if not det.get("proteins"):
-                det["proteins"] = round(p, 1)
-            if not det.get("carbs"):
-                det["carbs"] = round(c, 1)
-            if not det.get("fats"):
-                det["fats"] = round(f, 1)
-            data["detail"] = det
+        det = data.get("detail")
+        if not isinstance(det, dict):
+            det = {}
+        if not det.get("proteins"):
+            det["proteins"] = round(p, 1)
+        if not det.get("carbs"):
+            det["carbs"] = round(c, 1)
+        if not det.get("fats"):
+            det["fats"] = round(f, 1)
+        data["detail"] = det
     return data
 
 

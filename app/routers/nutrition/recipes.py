@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from typing import Optional
 
 from app.database import get_db
@@ -16,8 +16,17 @@ from app.schemas.nutrition.recipe import RecipeCreate, RecipeUpdate, RecipeOut, 
 router = APIRouter(prefix="/recipes", tags=["Nutrition - Recipes"])
 
 
+def _con_alimentos(q):
+    """Trae los alimentos de los ingredientes en la misma consulta.
+
+    La receta los necesita para decir de qué ingrediente habla; sin esto sería
+    una consulta por ingrediente y por receta.
+    """
+    return q.options(selectinload(Recipe.details).selectinload(RecipeDetail.aliment))
+
+
 def _get_or_404(db: Session, recipe_id: int):
-    return db.query(Recipe).filter(Recipe.id == recipe_id).first()
+    return _con_alimentos(db.query(Recipe)).filter(Recipe.id == recipe_id).first()
 
 
 @router.get("/findAll", summary="Listar recetas", description="Retorna todas las recetas activas del catálogo.")
@@ -26,7 +35,7 @@ def find_all(
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
-    q = db.query(Recipe).filter(Recipe.state == 1)
+    q = _con_alimentos(db.query(Recipe)).filter(Recipe.state == 1)
     if org.solo_plataforma:
         q = q.filter(Recipe.organization_id.is_(None))
     elif org.org_id:
@@ -43,7 +52,7 @@ def search(
     _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
     org: OrgContext = Depends(get_org_context),
 ):
-    q = db.query(Recipe).filter(Recipe.state == 1)
+    q = _con_alimentos(db.query(Recipe)).filter(Recipe.state == 1)
     if search:
         q = q.filter(Recipe.name.ilike(f"%{search}%"))
     if org.solo_plataforma:
@@ -82,7 +91,8 @@ def clients(
     client_detail = db.query(UserDetail).filter(UserDetail.id == client_id).first()
     if not client_detail:
         return send_error("Cliente no encontrado")
-    items = db.query(Recipe).filter(Recipe.instructor_id == client_detail.user_id).all()
+    items = _con_alimentos(db.query(Recipe)).filter(
+        Recipe.instructor_id == client_detail.user_id).all()
     return send_response([RecipeOut.model_validate(i).model_dump() for i in items], "OK")
 
 

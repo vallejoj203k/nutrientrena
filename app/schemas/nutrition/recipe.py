@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
+# El mismo resumen de alimento que usan las dietas. Se reutiliza a
+# propósito: dos versiones del mismo dato acaban diciendo cosas distintas.
+from app.schemas.nutrition.diet import AlimentSimpleOut
+
 
 class RecipeDetailCreate(BaseModel):
     aliment_id: str
@@ -53,6 +57,10 @@ class RecipeAssignRequest(BaseModel):
 class RecipeDetailOut(BaseModel):
     id: int
     aliment_id: str
+    # Sin esto la receta solo sabía a QUÉ id apunta cada ingrediente: el panel
+    # de detalle ponía "Ingrediente · 200g" en todas las líneas, y el editor
+    # tenía que pedir los alimentos uno a uno para recuperar los nombres.
+    aliment: Optional[AlimentSimpleOut] = None
     quantity: Optional[float] = None
     unit_id: Optional[int] = None
     notes: Optional[str] = None

@@ -868,3 +868,36 @@ window.__pinta=(n)=>{
 destino22 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receta.html')
 open(destino22, 'w').write(receta)
 print('harness generado en', destino22)
+
+
+# ── Harness del panel de detalle de la receta ──────────────────────────────
+# El panel entero —markup y `openRecipePreview`— sale de recipes.html: lo que
+# se comprueba es que cada línea diga QUÉ ingrediente es, que la preparación
+# salga, y que no se rompa cuando faltan datos.
+rcp2 = open(os.path.join(RAIZ, 'frontend', 'recipes.html')).read()
+cssr2 = '\n'.join(re.findall(r'<style>(.*?)</style>', rcp2, re.S))
+
+i = rcp2.index('  <div class="rdp-overlay" id="rdpOverlay"')
+j = rcp2.index('  <div id="formView">', i)
+panel = rcp2[i:j]
+
+i = rcp2.index('function _rcpRaciones(n) {')
+j = rcp2.index('function closeRecipePreview(){')
+logica = rcp2[i:j]
+
+detalle = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0">
+%s
+<script>%s</script>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var _lastRecipes=[];
+function openEdit(){ window.__accion='editar'; }
+function openDel(){ window.__accion='borrar'; }
+%s
+window.__pinta=(r)=>{ _lastRecipes=[r]; openRecipePreview(r.id); };
+</script></body></html>""" % (cssr2, panel, _modulo('macros-alimento.js'), logica)
+
+destino23 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'detalle-receta.html')
+open(destino23, 'w').write(detalle)
+print('harness generado en', destino23)

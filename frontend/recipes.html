@@ -118,13 +118,25 @@
     .rdp-img{width:100%;height:210px;object-fit:cover;border-radius:16px;margin:8px 0 16px;display:block;}
     .rdp-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
     .rdp-macro{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:13px 8px;text-align:center;}
-    .rdp-macro svg{color:#9CA3AF;margin-bottom:5px;}
+    .rdp-macro svg{margin-bottom:5px;}
     .rdp-macro-val{font-size:16px;font-weight:800;color:#111827;line-height:1.2;}
     .rdp-macro-lbl{font-size:11px;color:#9CA3AF;margin-top:2px;}
     .rdp-sec{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:9px;}
     .rdp-etiqs{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
     .rdp-etiq{font-size:13px;color:#6B7280;text-transform:capitalize;}
     .rdp-desc-txt{font-size:13.5px;color:#6B7280;line-height:1.6;margin-bottom:6px;}
+    .rdp-blq{margin-bottom:18px;}
+    /* Los ingredientes, en filas: el nombre a la izquierda y la cantidad a la
+       derecha, para poder leer la columna de cantidades de un vistazo. */
+    .rdp-lista{border:1px solid #EEF0F3;border-radius:12px;overflow:hidden;}
+    .rdp-ingr{display:flex;align-items:baseline;gap:12px;padding:11px 14px;border-top:1px solid #F3F4F6;font-size:13.5px;}
+    .rdp-ingr:first-child{border-top:none;}
+    .rdp-ingr-nm{flex:1;color:#374151;}
+    .rdp-ingr-q{color:#6B7280;font-weight:600;white-space:nowrap;}
+    .rdp-ingr-nota{color:#9CA3AF;font-weight:500;}
+    .rdp-pasos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px;}
+    .rdp-paso{display:flex;gap:11px;font-size:13.5px;color:#374151;line-height:1.55;}
+    .rdp-paso-n{width:22px;height:22px;border-radius:50%;background:#EEF2FF;color:var(--indigo,#4F46E5);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
     .rdp-foot{padding:16px 24px 20px;flex-shrink:0;background:#fff;border-top:1px solid #F0F1F3;display:flex;flex-direction:column;gap:9px;}
     .rdp-btn{width:100%;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s;}
     .rdp-btn-edit{background:var(--lib-primary,#4F46E5);color:#fff;}
@@ -548,6 +560,7 @@
     @media(max-width:600px){.ca-row-3{grid-template-columns:1fr;}.ca-row-2{grid-template-columns:1fr;}.ca-macro-grid{grid-template-columns:1fr 1fr;}.ca-macro-grid-2{grid-template-columns:1fr 1fr;}.ca-micro-grid{grid-template-columns:1fr 1fr;}.ca-micro-cols{grid-template-columns:1fr;}.ca-form{padding:16px 18px 24px;}.ca-modal-header{padding:18px 18px 0;}}
 
 </style>
+<script src="js/macros-alimento.js"></script>
 <script src="js/menu-fila.js"></script>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
@@ -733,22 +746,26 @@
       <div class="rdp-body">
         <img class="rdp-img" id="rdpImg" style="display:none" alt=""/>
         <div class="rdp-macros">
-          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><div class="rdp-macro-val" id="rdpKcal">—</div><div class="rdp-macro-lbl">Kcal</div></div>
-          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><div class="rdp-macro-val" id="rdpProt">—</div><div class="rdp-macro-lbl">Prot</div></div>
-          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12h20M12 2v20"/></svg><div class="rdp-macro-val" id="rdpCarb">—</div><div class="rdp-macro-lbl">Carb</div></div>
-          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9s-9-4.03-9-9a9 9 0 0 1 9-9z"/></svg><div class="rdp-macro-val" id="rdpFat">—</div><div class="rdp-macro-lbl">Grasa</div></div>
+          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><div class="rdp-macro-val" id="rdpKcal">—</div><div class="rdp-macro-lbl">Kcal</div></div>
+          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg><div class="rdp-macro-val" id="rdpProt">—</div><div class="rdp-macro-lbl">Prot</div></div>
+          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/></svg><div class="rdp-macro-val" id="rdpCarb">—</div><div class="rdp-macro-lbl">Carb</div></div>
+          <div class="rdp-macro"><svg width="15" height="15" fill="none" stroke="#3B82F6" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg><div class="rdp-macro-val" id="rdpFat">—</div><div class="rdp-macro-lbl">Grasa</div></div>
         </div>
-        <div id="rdpEtiqsWrap" style="display:none;">
-          <div class="rdp-sec">Etiquetas</div>
-          <div class="rdp-etiqs" id="rdpEtiqs"></div>
-        </div>
-        <div id="rdpDescWrap" style="display:none;margin-top:14px;">
+        <div id="rdpDescWrap" class="rdp-blq" style="display:none;">
           <div class="rdp-sec">Descripción</div>
           <div class="rdp-desc-txt" id="rdpDescTxt"></div>
         </div>
-        <div id="rdpIngrWrap" style="display:none;margin-top:14px;">
-          <div class="rdp-sec">Ingredientes</div>
-          <div class="rdp-desc-txt" id="rdpIngr"></div>
+        <div id="rdpIngrWrap" class="rdp-blq" style="display:none;">
+          <div class="rdp-sec" id="rdpIngrSec">Ingredientes</div>
+          <div class="rdp-lista" id="rdpIngr"></div>
+        </div>
+        <div id="rdpPrepWrap" class="rdp-blq" style="display:none;">
+          <div class="rdp-sec">Preparación</div>
+          <ol class="rdp-pasos" id="rdpPrep"></ol>
+        </div>
+        <div id="rdpEtiqsWrap" class="rdp-blq" style="display:none;">
+          <div class="rdp-sec">Etiquetas</div>
+          <div class="rdp-etiqs" id="rdpEtiqs"></div>
         </div>
       </div>
       <div class="rdp-foot">
@@ -795,20 +812,20 @@
         <!-- Barra de totales (estilo constructor de dietas) -->
         <div class="rcp-stats">
           <div class="rcp-stat">
-            <div class="rcp-stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
-            <div><div class="rcp-stat-lbl">Calorías</div><div class="rcp-stat-val" id="cv-kcal" style="color:#D97706;">0</div></div>
+            <div class="rcp-stat-ico" style="background:#FFF7ED;color:#F97316;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
+            <div><div class="rcp-stat-lbl">Calorías</div><div class="rcp-stat-val" id="cv-kcal" style="color:#F97316;">0</div></div>
           </div>
           <div class="rcp-stat">
-            <div class="rcp-stat-ico" style="background:#D1FAE5;color:#059669;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg></div>
-            <div><div class="rcp-stat-lbl">Proteínas</div><div class="rcp-stat-val" id="cv-prot" style="color:#059669;">0<small>g</small></div></div>
+            <div class="rcp-stat-ico" style="background:#FEF2F2;color:#EF4444;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/></svg></div>
+            <div><div class="rcp-stat-lbl">Proteínas</div><div class="rcp-stat-val" id="cv-prot" style="color:#EF4444;">0<small>g</small></div></div>
           </div>
           <div class="rcp-stat">
-            <div class="rcp-stat-ico" style="background:#FFEDD5;color:#EA580C;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/></svg></div>
-            <div><div class="rcp-stat-lbl">Carbos</div><div class="rcp-stat-val" id="cv-carb" style="color:#EA580C;">0<small>g</small></div></div>
+            <div class="rcp-stat-ico" style="background:#FEF3C7;color:#D97706;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/></svg></div>
+            <div><div class="rcp-stat-lbl">Carbos</div><div class="rcp-stat-val" id="cv-carb" style="color:#D97706;">0<small>g</small></div></div>
           </div>
           <div class="rcp-stat">
-            <div class="rcp-stat-ico" style="background:#FEE2E2;color:#DC2626;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
-            <div><div class="rcp-stat-lbl">Grasas</div><div class="rcp-stat-val" id="cv-fat" style="color:#DC2626;">0<small>g</small></div></div>
+            <div class="rcp-stat-ico" style="background:#EFF6FF;color:#3B82F6;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
+            <div><div class="rcp-stat-lbl">Grasas</div><div class="rcp-stat-val" id="cv-fat" style="color:#3B82F6;">0<small>g</small></div></div>
           </div>
           <div class="rcp-stat">
             <div class="rcp-stat-ico" style="background:#ECFDF5;color:#10B981;"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg></div>
@@ -1125,6 +1142,18 @@ function recipeRow(r, isAdmin) {
     + '</tr>';
 }
 
+/* La preparación se escribe en un cuadro de texto libre, así que los pasos
+   son sus líneas. Si el autor ya los numeró ("1. Cuece el arroz"), se le quita
+   el número: si no, saldría "1 1. Cuece el arroz". */
+/* "ración" + "es" da "raciónes": el plural pierde la tilde. */
+function _rcpRaciones(n) { return n === 1 ? 'ración' : 'raciones'; }
+
+function _rcpPasos(texto) {
+  return String(texto || '').split(/\r?\n/)
+    .map(l => l.replace(/^\s*(?:\d+[.)\-]?|[-*\u2022])\s+/, '').trim())
+    .filter(Boolean);
+}
+
 // ── Panel lateral de detalle de la receta ──
 function openRecipePreview(id) {
   const r = _lastRecipes.find(x => x.id === id);
@@ -1141,7 +1170,7 @@ function openRecipePreview(id) {
   document.getElementById('rdpTitle').textContent = r.name || '—';
   const subParts = [];
   if (r.prep_time) subParts.push(r.prep_time + ' min');
-  if (r.servings) subParts.push(r.servings + ' ración' + (r.servings !== 1 ? 'es' : ''));
+  if (r.servings) subParts.push(r.servings + ' ' + _rcpRaciones(r.servings));
   document.getElementById('rdpSub').textContent = subParts.join(' · ');
 
   const img = document.getElementById('rdpImg');
@@ -1163,16 +1192,37 @@ function openRecipePreview(id) {
   if (r.description) { document.getElementById('rdpDescTxt').textContent = r.description; dWrap.style.display = 'block'; }
   else dWrap.style.display = 'none';
 
+  // ── Ingredientes ────────────────────────────────────────────────────────
+  // Cada línea dice QUÉ es y cuánto. Antes ponía "Ingrediente · 200g" en
+  // todas: la receta solo sabía a qué id apuntaba, no cómo se llamaba.
   const iWrap = document.getElementById('rdpIngrWrap');
-  const ingrs = (r.details || []);
+  const ingrs = (r.details || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
   if (ingrs.length) {
+    document.getElementById('rdpIngrSec').textContent = 'Ingredientes'
+      + (r.servings ? ' · ' + r.servings + ' ' + _rcpRaciones(r.servings) : '');
     document.getElementById('rdpIngr').innerHTML = ingrs.map(d => {
-      const nm = d.aliment?.name || d.name || 'Ingrediente';
-      const q = d.quantity ? ' · ' + d.quantity + 'g' : '';
-      return '<div style="padding:3px 0;">' + esc(nm) + q + '</div>';
+      const al = d.aliment || null;
+      // Un alimento borrado del catálogo deja la línea sin nombre: se dice,
+      // en vez de llamarlo "Ingrediente" como si fuera uno más.
+      const nm = al && al.name ? esc(al.name) : '<span class="rdp-ingr-nota">Alimento no disponible</span>';
+      const uni = window.macrosAlimento ? window.macrosAlimento.unidadDe(al) : 'g';
+      const q = d.quantity != null ? (Math.round(d.quantity * 100) / 100) + ' ' + uni : '';
+      const nota = d.notes ? ' <span class="rdp-ingr-nota">(' + esc(d.notes) + ')</span>' : '';
+      return '<div class="rdp-ingr"><span class="rdp-ingr-nm">' + nm + '</span>'
+        + '<span class="rdp-ingr-q">' + q + nota + '</span></div>';
     }).join('');
     iWrap.style.display = 'block';
   } else iWrap.style.display = 'none';
+
+  // ── Preparación ─────────────────────────────────────────────────────────
+  const pWrap = document.getElementById('rdpPrepWrap');
+  const pasos = _rcpPasos(r.instructions);
+  if (pasos.length) {
+    document.getElementById('rdpPrep').innerHTML = pasos.map((t, i) =>
+      '<li class="rdp-paso"><span class="rdp-paso-n">' + (i + 1) + '</span><span>' + esc(t) + '</span></li>'
+    ).join('');
+    pWrap.style.display = 'block';
+  } else pWrap.style.display = 'none';
 
   const be = document.getElementById('rdpBtnEdit'), bd = document.getElementById('rdpBtnDel');
   be.style.display = canEdit ? '' : 'none';
@@ -1369,28 +1419,29 @@ function rcpAddAliment(id){
 document.addEventListener('click',function(e){ if(!e.target.closest('.rcp-search')){ var d=document.getElementById('rcpAcDrop'); if(d)d.classList.remove('open'); } });
 
 // Carga de los alimentos al editar una receta (resuelve macros/fibra de cada uno)
-async function loadRecipeDetails(details){
-  _ingrRows=[];
-  renderIngrTable();
-  for(var i=0;i<details.length;i++){
-    var d=details[i];
-    if(!d.aliment_id) continue;
-    var rowId=++_rowSeq;
-    var row={ id:rowId, aliment_id:d.aliment_id, aliment_name:'', group_food_id:null, group_food_name:'',
-      proteins:null,carbohydrates:null,fats:null,calories:null,fiber:null,
-      quantity:(d.quantity!=null?String(d.quantity):''), _source:'platform' };
-    _ingrRows.push(row);
-    try{
-      var r=await fetch(API+'/aliments/'+d.aliment_id+'/edit',{headers:headers()});
-      var jd=await r.json();
-      if(jd.data){ var a=jd.data;
-        row.aliment_name=a.name||''; row.group_food_id=a.group_food_id!=null?a.group_food_id:null;
-        row.group_food_name=(a.group_food&&a.group_food.name)||'';
-        row.proteins=a.proteins; row.carbohydrates=a.carbohydrates; row.fats=a.fats; row.calories=a.calories;
-        row.fiber=a.fiber!=null?a.fiber:null;
-      }
-    }catch(e){}
-  }
+function loadRecipeDetails(details){
+  /* El alimento viene con el ingrediente. Antes se pedía uno a uno
+     (`/aliments/{id}/edit` por fila): con una receta de diez ingredientes eran
+     diez peticiones, y cualquiera que fallara dejaba la fila sin nombre y sin
+     macros, contando como cero en el total. */
+  _ingrRows = [];
+  (details || []).forEach(function(d){
+    if(!d.aliment_id) return;
+    var a = d.aliment || {};
+    _ingrRows.push({
+      id: ++_rowSeq, aliment_id: d.aliment_id,
+      aliment_name: a.name || '',
+      group_food_id: a.group_food_id != null ? a.group_food_id : null,
+      group_food_name: (a.group_food && a.group_food.name) || '',
+      proteins: a.proteins != null ? a.proteins : null,
+      carbohydrates: a.carbohydrates != null ? a.carbohydrates : null,
+      fats: a.fats != null ? a.fats : null,
+      calories: a.calories != null ? a.calories : null,
+      fiber: a.fiber != null ? a.fiber : null,
+      quantity: (d.quantity != null ? String(d.quantity) : ''),
+      _source: 'platform'
+    });
+  });
   renderIngrTable(); recalcMacros();
 }
 

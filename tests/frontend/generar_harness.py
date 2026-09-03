@@ -826,3 +826,45 @@ window.__racion = () => ({
 destino21 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'micros.html')
 open(destino21, 'w').write(micros)
 print('harness generado en', destino21)
+
+
+# ── Harness del creador de recetas: la tarjeta de alimentos ────────────────
+# Se saca el CSS y el markup REALES de la pantalla, y el `renderIngrTable` de
+# verdad: lo que falla es cómo encaja la tarjeta en la columna, y eso solo se
+# ve montando la página tal cual.
+rcp = open(os.path.join(RAIZ, 'frontend', 'recipes.html')).read()
+cssr = '\n'.join(re.findall(r'<style>(.*?)</style>', rcp, re.S))
+
+i = rcp.index('<div class="fv-body">')
+j = rcp.index('<div class="fv-sidebar">', i)
+cuerpo = rcp[i:j] + '<div class="fv-sidebar"></div></div>'
+
+i = rcp.index("var FOOD_ICO='")
+j = rcp.index('function rcpFocusSearch(', i)
+tabla = rcp[i:j]
+
+receta = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0">
+<div style="display:flex;flex-direction:column;height:100vh">
+  <div class="fv-bar"><span class="fv-title">Nueva receta</span></div>
+  <div class="fv-header"><input class="fv-name" placeholder="Nombre de la receta..."></div>
+  %s
+</div>
+<script>
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var _ingrRows=[];
+function openFoodSearch(){ window.__abierto=true; }
+function autoGrow(){}
+%s
+window.__pinta=(n)=>{
+  _ingrRows=[];
+  for(var i=1;i<=n;i++) _ingrRows.push({id:i, aliment_id:'a'+i,
+    aliment_name:'Alimento '+i, group_food_name:'Lacteos',
+    quantity:200, calories:139, proteins:6.4, carbohydrates:5.4, fats:10.2, fiber:0});
+  renderIngrTable(); recalcMacros();
+};
+</script></body></html>""" % (cssr, cuerpo, tabla)
+
+destino22 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receta.html')
+open(destino22, 'w').write(receta)
+print('harness generado en', destino22)

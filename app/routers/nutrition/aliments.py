@@ -15,6 +15,7 @@ from app.core.dependencies import (
 )
 from app.core.responses import send_response, send_error
 from app.core.momentos import booleano, momentos_a_claves
+from app.core.macros import escalar
 from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.aliment import AlimentCreate, AlimentUpdate, AlimentOut
 from app.config import settings
@@ -144,6 +145,85 @@ def _upsert_description(db: Session, aliment_id: str, desc_data: dict):
             setattr(existing, field, value)
     else:
         db.add(AlimentDescription(aliment_id=aliment_id, **desc_data))
+
+
+class _ItemResumen(BaseModel):
+    aliment_id: str
+    quantity: Optional[float] = None
+
+
+class _ResumenRequest(BaseModel):
+    items: List[_ItemResumen] = []
+
+
+@router.post("/resumen-nutricional", summary="Sumar lo que aportan varios alimentos",
+             description="Suma kcal, macros y micronutrientes de una lista de alimentos con sus cantidades.")
+def resumen_nutricional(
+    data: _ResumenRequest,
+    db: Session = Depends(get_db),
+    _=Depends(require_role_ids(SUPERADMIN, ADMIN, COACH, EDITOR_CONTENIDO_GLOBAL)),
+):
+    """Lo que suma un menú entero, micronutrientes incluidos.
+
+    La suma se hace aquí y no en la pantalla porque los micros no viajan con
+    la dieta: son treinta números por alimento y la lista de dietas los
+    llevaría a cuestas sin usarlos casi nunca. Se piden cuando alguien quiere
+    verlos, con las cantidades que hay puestas en ese momento — así vale
+    también para una dieta que todavía no se ha guardado.
+
+    Solo se suma lo que tiene dato. Un micronutriente que ningún alimento
+    registra no sale: es distinto de "cero", y decir cero sería mentir.
+    """
+    ids = [i.aliment_id for i in data.items if i.aliment_id]
+    encontrados = {}
+    if ids:
+        for al in (db.query(Aliment)
+                     .options(joinedload(Aliment.description))
+                     .filter(Aliment.id.in_(ids)).all()):
+            encontrados[str(al.id)] = al
+
+    macros = {"calories": 0.0, "proteins": 0.0, "carbohydrates": 0.0, "fats": 0.0}
+    micros: dict[str, float] = {}
+    con_ficha = 0
+    sin_ficha = 0
+    no_encontrados = []
+
+    for item in data.items:
+        al = encontrados.get(str(item.aliment_id))
+        if al is None:
+            no_encontrados.append(item.aliment_id)
+            continue
+        cantidad = item.quantity or 0
+        if not cantidad:
+            continue
+        for campo in macros:
+            macros[campo] += escalar(getattr(al, campo, None), al, cantidad)
+
+        ficha = al.description
+        if ficha is None:
+            sin_ficha += 1
+            continue
+        aporta = False
+        for campo in CAMPOS_FICHA:
+            valor = getattr(ficha, campo, None)
+            if valor is None:
+                continue
+            aporta = True
+            # El índice glucémico no se suma: no es una cantidad, es una
+            # propiedad del alimento. Sumar tres índices no significa nada.
+            if campo == "glycemic_index":
+                continue
+            micros[campo] = micros.get(campo, 0.0) + escalar(valor, al, cantidad)
+        con_ficha += 1 if aporta else 0
+        sin_ficha += 0 if aporta else 1
+
+    return send_response({
+        **{k: round(v, 1) for k, v in macros.items()},
+        "micros": {k: round(v, 3) for k, v in micros.items()},
+        "con_datos": con_ficha,
+        "sin_datos": sin_ficha,
+        "no_encontrados": no_encontrados,
+    }, "OK")
 
 
 @router.get("/findAll", summary="Listar alimentos", description="Retorna todos los alimentos del catálogo (sin clones).")

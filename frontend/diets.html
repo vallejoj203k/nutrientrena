@@ -571,6 +571,9 @@
     .fsm-overlay.open{display:flex;}
     .fsm-panel{background:#fff;border-radius:20px;width:100%;max-width:1100px;max-height:calc(100vh - 96px);display:flex;flex-direction:row;box-shadow:0 24px 64px rgba(0,0,0,.25);overflow:hidden;}
     .fsm-left{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+    .rn-abrir-fila{display:flex;justify-content:flex-end;margin:0 0 12px;}
+    .rn-abrir{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid #E5E7EB;border-radius:20px;background:#fff;color:#4B5563;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s;}
+    .rn-abrir:hover{border-color:#C7D2FE;color:#4F46E5;background:#F8F8FE;}
     .fsm-detail{width:360px;flex-shrink:0;border-left:1px solid #EEF0F3;background:#FAFBFC;display:flex;flex-direction:column;overflow-y:auto;}
     .fsm-detail-body{flex:1;padding:26px 26px 16px;}
     .fsm-detail-eyebrow{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
@@ -1206,6 +1209,13 @@
           <div class="pm2-left" id="left_fib" style="display:none;"></div>
         </div>
       </div>
+      <!-- El resumen del día, con los micronutrientes sumados -->
+      <div class="rn-abrir-fila">
+        <button type="button" class="rn-abrir" onclick="abrirResumenNutricional()">
+          <svg width="14" height="14" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          Información nutricional completa
+        </button>
+      </div>
       <!-- Tarjetas de comidas -->
       <div id="pm2List"></div>
       <button class="pm2-add-meal" onclick="addNewMeal()">
@@ -1222,6 +1232,19 @@
 
 <!-- Hidden meal backing store -->
 <div id="mealsContainer" style="display:none;visibility:hidden;position:absolute;left:-9999px;"></div>
+
+<!-- ── Resumen nutricional del día ── -->
+<div class="rn-overlay" id="rnOverlay" onclick="if(event.target===this)cerrarResumenNutricional()">
+  <div class="rn-caja">
+    <div class="rn-head">
+      <button class="rn-x" onclick="cerrarResumenNutricional()" title="Cerrar">&times;</button>
+      <div class="rn-eye">Información nutricional</div>
+      <div class="rn-t">Resumen del día</div>
+      <div class="rn-s">Suma de todos los alimentos añadidos a las comidas</div>
+    </div>
+    <div class="rn-body" id="rnBody"></div>
+  </div>
+</div>
 
 <!-- ── Food Search Modal ── -->
 <div class="fsm-overlay" id="fsmOverlay" onclick="if(event.target===this)closeFoodSearch()">
@@ -3018,6 +3041,56 @@ function fsmRenderList(items) {
       + '</div>';
   }).join('');
 }
+
+
+/* ═══ El resumen nutricional del día ═══════════════════════════════════════
+   Lo que suma el menú entero, micronutrientes incluidos. Los micros no viajan
+   con la dieta —son treinta números por alimento— así que se piden al abrir
+   la ventana, con las cantidades que hay puestas en ese momento: vale igual
+   para una dieta que todavía no se ha guardado. */
+async function abrirResumenNutricional() {
+  var cuerpo = document.getElementById('rnBody');
+  document.getElementById('rnOverlay').classList.add('open');
+  cuerpo.innerHTML = '<div class="rn-cargando">Sumando el plan…</div>';
+
+  saveAllMealDOMState();
+  var items = [];
+  _meals.forEach(function(m) {
+    (m.rows || []).forEach(function(r) {
+      var q = parseFloat(r.quantity) || 0;
+      if (r.aliment_id && q > 0) items.push({ aliment_id: r.aliment_id, quantity: q });
+    });
+  });
+  if (!items.length) {
+    cuerpo.innerHTML = window.microsAlimento.resumenHTML({ micros: {} });
+    return;
+  }
+
+  try {
+    var r = await fetch(API + '/aliments/resumen-nutricional', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ items: items }),
+    });
+    var j = await r.json();
+    if (!r.ok) throw new Error(j.message || 'error');
+    cuerpo.innerHTML = window.microsAlimento.resumenHTML(j.data || j);
+  } catch (e) {
+    // Se dice, y se puede reintentar: una ventana en blanco parece un plan sin
+    // nada, que es justo lo contrario de lo que se ha venido a mirar.
+    cuerpo.innerHTML = '<div class="rn-cargando">No se ha podido calcular el resumen. '
+      + '<button type="button" class="rn-abrir" style="margin-left:8px;" '
+      + 'onclick="abrirResumenNutricional()">Reintentar</button></div>';
+  }
+}
+
+function cerrarResumenNutricional() {
+  document.getElementById('rnOverlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') cerrarResumenNutricional();
+});
 
 /* ── Detail panel: select food, adjust quantity, live portion macros ── */
 

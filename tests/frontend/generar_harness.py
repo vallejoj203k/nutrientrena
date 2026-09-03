@@ -953,3 +953,45 @@ window.__sel=()=>JSON.parse(JSON.stringify(_rcpSel));
 destino24 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'form-receta.html')
 open(destino24, 'w').write(form)
 print('harness generado en', destino24)
+
+
+# ── Harness del resumen nutricional del día (diets.html) ───────────────────
+# Se saca el markup de la ventana y la lógica de verdad de diets.html: lo que
+# se comprueba es QUÉ se manda a sumar y qué se pinta con lo que vuelve.
+dts6 = open(os.path.join(RAIZ, 'frontend', 'diets.html')).read()
+cssd6 = '\n'.join(re.findall(r'<style>(.*?)</style>', dts6, re.S))
+cssm6 = open(os.path.join(RAIZ, 'frontend', 'css', 'micros-alimento.css')).read()
+
+i = dts6.index('<!-- ── Resumen nutricional del día ── -->')
+j = dts6.index('<!-- ── Food Search Modal ── -->')
+ventana = dts6[i:j]
+
+i = dts6.index('async function abrirResumenNutricional() {')
+j = dts6.index('/* ── Detail panel: select food', i)
+logica_rn = dts6[i:j]
+
+resumen = """<!doctype html><html><head><meta charset="utf-8">
+<style>%s</style><style>%s</style></head>
+<body style="margin:0">
+<button class="rn-abrir" onclick="abrirResumenNutricional()">Información nutricional completa</button>
+%s
+<script>%s</script>
+<script>
+var API='http://x', token='t';
+var _meals=[];
+function saveAllMealDOMState(){}
+window.__llamadas=[];
+window.__respuesta={calories:0,proteins:0,carbohydrates:0,fats:0,micros:{},sin_datos:0};
+window.__falla=false;
+window.fetch=async(url,opc)=>{
+  window.__llamadas.push({url:url, cuerpo:JSON.parse((opc&&opc.body)||'null')});
+  if(window.__falla) return {ok:false,json:async()=>({message:'boom'})};
+  return {ok:true,json:async()=>({data:window.__respuesta})};
+};
+%s
+window.__comidas=(m)=>{_meals=m;};
+</script></body></html>""" % (cssd6, cssm6, ventana, _modulo('micros-alimento.js'), logica_rn)
+
+destino25 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resumen-dia.html')
+open(destino25, 'w').write(resumen)
+print('harness generado en', destino25)

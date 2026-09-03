@@ -65,3 +65,46 @@
 .fsm-mic-val { color: #111827; font-weight: 700; text-align: right; white-space: nowrap; }
 .fsm-mic-uni { color: #9CA3AF; font-weight: 600; font-size: 11.5px; }
 .fsm-mic-vrn { color: #9CA3AF; font-size: 11.5px; text-align: right; white-space: nowrap; }
+
+/* ── El resumen nutricional de un menú entero ─────────────────────────────
+   La ventana que abre "Información nutricional completa" en el constructor de
+   dietas. Vive aquí porque el contenido lo pinta el mismo módulo. */
+.rn-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(17, 24, 39, .45);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.rn-overlay.open { opacity: 1; pointer-events: all; }
+.rn-caja {
+  background: #fff; border-radius: 16px; width: 100%; max-width: 760px;
+  max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .22);
+  transform: translateY(10px); transition: transform .2s;
+}
+.rn-overlay.open .rn-caja { transform: translateY(0); }
+.rn-head { padding: 20px 24px 16px; border-bottom: 1px solid #F0F1F3; position: relative; flex-shrink: 0; }
+.rn-eye { font-size: 10.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .8px; }
+.rn-t { font-size: 19px; font-weight: 800; color: #111827; margin-top: 4px; }
+.rn-s { font-size: 13px; color: #6B7280; margin-top: 3px; }
+.rn-x {
+  position: absolute; top: 18px; right: 20px; width: 30px; height: 30px;
+  border: none; background: none; border-radius: 8px; cursor: pointer;
+  color: #6B7280; font-size: 19px; line-height: 1;
+}
+.rn-x:hover { background: #F3F4F6; color: #111827; }
+.rn-body { padding: 20px 24px 22px; overflow-y: auto; }
+
+.rn-macros { display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr)); gap: 10px; }
+.rn-macro { border: 1px solid #EEF0F3; border-radius: 12px; padding: 12px 14px; }
+.rn-macro-t { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .6px; }
+.rn-macro-v { font-size: 22px; font-weight: 800; margin-top: 6px; }
+.rn-macro-v small { font-size: 12px; font-weight: 600; color: #9CA3AF; margin-left: 2px; }
+
+.rn-sec { display: flex; align-items: center; gap: 8px; margin: 22px 0 10px; font-size: 14px; color: #111827; }
+.rn-sec span { font-size: 12px; color: #9CA3AF; font-weight: 500; }
+.rn-cuerpo { border: 1px solid #EEF0F3; border-radius: 12px; padding: 4px 14px 12px; }
+.rn-vacio { text-align: center; color: #9CA3AF; font-size: 13px; padding: 22px 10px; }
+.rn-falta { margin-top: 12px; font-size: 12.5px; color: #B45309; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 12px; }
+.rn-pie { margin-top: 14px; font-size: 11.5px; color: #9CA3AF; line-height: 1.5; }
+.rn-cargando { text-align: center; color: #9CA3AF; font-size: 13px; padding: 40px 10px; }

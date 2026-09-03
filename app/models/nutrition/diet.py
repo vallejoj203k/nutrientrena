@@ -18,6 +18,9 @@ class Pathology(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     state = Column(Integer, default=1)
+    # "Digestivo", "Metabólico"... Una lista plana de treinta patologías no se
+    # lee; agrupada, se encuentra la que se busca.
+    grupo = Column(String(60), nullable=True)
 
 
 class Diet(Base):

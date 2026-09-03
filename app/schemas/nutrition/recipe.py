@@ -28,6 +28,15 @@ class RecipeCreate(BaseModel):
     prep_time: Optional[int] = None
     image: Optional[str] = None
     meal_type: Optional[str] = None
+    tags: Optional[str] = None
+    notes: Optional[str] = None
+    difficulty: Optional[str] = None
+    allergen_free: Optional[str] = None
+    diet_styles: Optional[str] = None
+    glycemic_index: Optional[str] = None
+    sodium_level: Optional[str] = None
+    fiber: Optional[float] = None
+    pathology_ids: Optional[List[int]] = None
     details: Optional[List[RecipeDetailCreate]] = []
 
 
@@ -45,6 +54,15 @@ class RecipeUpdate(BaseModel):
     prep_time: Optional[int] = None
     image: Optional[str] = None
     meal_type: Optional[str] = None
+    tags: Optional[str] = None
+    notes: Optional[str] = None
+    difficulty: Optional[str] = None
+    allergen_free: Optional[str] = None
+    diet_styles: Optional[str] = None
+    glycemic_index: Optional[str] = None
+    sodium_level: Optional[str] = None
+    fiber: Optional[float] = None
+    pathology_ids: Optional[List[int]] = None
     state: Optional[int] = None
     details: Optional[List[RecipeDetailCreate]] = None
 
@@ -69,6 +87,13 @@ class RecipeDetailOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PathologyOut(BaseModel):
+    id: int
+    name: str
+    grupo: Optional[str] = None
+    model_config = {"from_attributes": True}
+
+
 class RecipeOut(BaseModel):
     id: int
     name: str
@@ -84,8 +109,17 @@ class RecipeOut(BaseModel):
     prep_time: Optional[int] = None
     image: Optional[str] = None
     meal_type: Optional[str] = None
+    tags: Optional[str] = None
+    notes: Optional[str] = None
+    difficulty: Optional[str] = None
+    allergen_free: Optional[str] = None
+    diet_styles: Optional[str] = None
+    glycemic_index: Optional[str] = None
+    sodium_level: Optional[str] = None
+    fiber: Optional[float] = None
     state: int
     organization_id: Optional[str] = None
     details: List[RecipeDetailOut] = []
+    pathologies: List[PathologyOut] = []
 
     model_config = {"from_attributes": True}

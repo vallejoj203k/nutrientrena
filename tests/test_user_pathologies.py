@@ -11,8 +11,13 @@ def _pathology_ids(client, h, *nombres):
 def test_crear_cliente_con_patologias(client, seed, admin_headers, db):
     h = admin_headers
     from app.models.nutrition.diet import Pathology
-    if not db.query(Pathology).first():
-        db.add_all([Pathology(name="Enfermedad celíaca"), Pathology(name="Intolerancia a la lactosa")])
+    # Lo que falte, por nombre: con "solo si la tabla está vacía" bastaba con
+    # que otra prueba sembrara antes para quedarse sin las suyas.
+    hay = {p.name for p in db.query(Pathology).all()}
+    faltan = [Pathology(name=n) for n in ("Enfermedad celíaca", "Intolerancia a la lactosa")
+              if n not in hay]
+    if faltan:
+        db.add_all(faltan)
         db.commit()
 
     ids, catalogo = _pathology_ids(client, h, "Enfermedad celíaca")

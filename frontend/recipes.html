@@ -258,6 +258,34 @@
     .sec-card{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;}
     .sec-card-head{padding:16px 20px;border-bottom:1px solid #EBEBEB;font-size:14px;font-weight:700;color:#111;}
     .sec-card-body{padding:20px;}
+    /* Etiquetas, alérgenos y estilos: todos son lo mismo —una lista donde se
+       marca lo que aplica— así que se pintan igual en los tres sitios. */
+    .rcp-chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .rcp-chip{font-size:12.5px;font-weight:600;color:#6B7280;background:#fff;border:1px solid #E5E7EB;border-radius:20px;padding:6px 13px;cursor:pointer;font-family:inherit;transition:.15s;}
+    .rcp-chip:hover{border-color:#C7D2FE;color:#4F46E5;}
+    .rcp-chip.on{background:#EEF2FF;border-color:#4F46E5;color:#4F46E5;}
+    .rcp-notas{width:100%;min-height:92px;margin-top:14px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:10px;font-family:inherit;font-size:13.5px;color:#111;outline:none;resize:vertical;transition:.15s;}
+    .rcp-notas:focus{border-color:var(--indigo);}
+    .rcp-sec{font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin:18px 0 9px;display:flex;align-items:center;gap:6px;}
+    .rcp-sec:first-child{margin-top:0;}
+    .rcp-grupo{font-size:12px;font-weight:700;color:#6B7280;margin:12px 0 7px;}
+    /* La cabecera del desplegable clínico: es un botón, no un adorno. */
+    .rcp-clin-head{width:100%;display:flex;align-items:center;gap:13px;padding:16px 20px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s;}
+    .rcp-clin-head:hover{background:#FAFAFB;}
+    .rcp-clin-ico{width:38px;height:38px;border-radius:10px;background:#EEF2FF;color:#4F46E5;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .rcp-clin-t{font-size:14px;font-weight:700;color:#111;}
+    .rcp-clin-s{font-size:12px;color:#9CA3AF;margin-top:2px;}
+    .rcp-clin-chev{margin-left:auto;color:#9CA3AF;flex-shrink:0;transition:transform .2s;}
+    .rcp-clin.abierto .rcp-clin-chev{transform:rotate(180deg);}
+    .rcp-clin-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:20px;}
+    .rcp-clin-nums label{display:block;font-size:10.5px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;}
+    .rcp-clin-nums select,.rcp-clin-nums input{width:100%;margin-top:7px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13.5px;font-family:inherit;color:#111;background:#fff;outline:none;}
+    .rcp-clin-nums select:focus,.rcp-clin-nums input:focus{border-color:var(--indigo);}
+    /* Reparto de macros: una barra que dice de dónde vienen las calorías. */
+    .rcp-rep-bar{display:flex;height:8px;border-radius:20px;overflow:hidden;background:#F3F4F6;margin-bottom:10px;}
+    .rcp-rep-leg{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:#6B7280;font-weight:600;}
+    .rcp-rep-leg span{display:flex;align-items:center;gap:5px;}
+    .rcp-rep-pt{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
     .circles-row{display:flex;justify-content:space-around;align-items:center;padding:8px 0;}
     .circle-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
     .circle-wrap svg{width:90px;height:90px;}
@@ -845,6 +873,42 @@
             <textarea id="fInstr" placeholder="Describe los pasos de preparacion..." oninput="autoGrow(this)"></textarea>
           </div>
         </div>
+        <div class="sec-card">
+          <div class="sec-card-head">Etiquetas y notas</div>
+          <div class="sec-card-body">
+            <div class="rcp-chips" id="fTags"></div>
+            <textarea class="rcp-notas" id="fNotes" placeholder="Notas del nutricionista (variaciones, sustituciones, trucos...)"></textarea>
+          </div>
+        </div>
+        <div class="sec-card rcp-clin" id="fClinCard">
+          <button type="button" class="rcp-clin-head" onclick="toggleClinicas()" aria-expanded="false">
+            <div class="rcp-clin-ico"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></div>
+            <div>
+              <div class="rcp-clin-t">Opciones clínicas avanzadas</div>
+              <div class="rcp-clin-s">Para nutricionistas clínicos: patologías, alérgenos, estilos, índice glucémico...</div>
+            </div>
+            <svg class="rcp-clin-chev" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sec-card-body" id="fClinBody" hidden>
+            <div class="rcp-sec">Apta para excluir alérgenos</div>
+            <div class="rcp-chips" id="fAlerg"></div>
+            <div class="rcp-sec">Estilo alimentario</div>
+            <div class="rcp-chips" id="fEstilos"></div>
+            <div class="rcp-sec">Apta para patologías / condiciones</div>
+            <div id="fPatos"></div>
+            <div class="rcp-clin-nums">
+              <label>Índice glucémico
+                <select id="fGI"><option value="">—</option><option value="bajo">Bajo</option><option value="medio">Medio</option><option value="alto">Alto</option></select>
+              </label>
+              <label>Sodio
+                <select id="fNa"><option value="">—</option><option value="bajo">Bajo</option><option value="medio">Medio</option><option value="alto">Alto</option></select>
+              </label>
+              <label>Fibra (g)
+                <input id="fFiber" type="number" min="0" step="0.1" placeholder="Estimada: 0"/>
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="fv-sidebar">
         <div class="sb-card">
@@ -869,6 +933,17 @@
             <img id="fImagePreviewImg" src="" alt=""/>
             <button class="img-preview-remove" onclick="removeRecipeImage()" title="Quitar foto">x</button>
           </div>
+        </div>
+        <div class="sb-card">
+          <div class="sb-title">Dificultad</div>
+          <select class="sb-textarea" id="fDifficulty" style="min-height:0;padding:10px 12px;">
+            <option value="facil">Fácil</option>
+            <option value="media">Media</option>
+            <option value="dificil">Difícil</option>
+          </select>
+          <div class="sb-title" style="margin-top:16px;">Reparto de macros</div>
+          <div class="rcp-rep-bar" id="repBar"></div>
+          <div class="rcp-rep-leg" id="repLeg"></div>
         </div>
         <div id="fFormError" class="form-error"></div>
         <button class="save-btn" id="saveBtn" onclick="save()">GUARDAR</button>
@@ -1285,6 +1360,21 @@ function openForm(recipe) {
   document.getElementById('fImageFile').value = '';
   setImagePreview((recipe && recipe.image) || null);
 
+  document.getElementById('fNotes').value      = (recipe && recipe.notes) || '';
+  document.getElementById('fDifficulty').value = (recipe && recipe.difficulty) || 'facil';
+  document.getElementById('fGI').value         = (recipe && recipe.glycemic_index) || '';
+  document.getElementById('fNa').value         = (recipe && recipe.sodium_level) || '';
+  document.getElementById('fFiber').value      = (recipe && recipe.fiber != null) ? recipe.fiber : '';
+  rcpCargaEtiquetas(recipe);
+  // El desplegable clínico arranca cerrado, salvo que la receta traiga algo
+  // dentro: si no, se guardó un dato que no se ve al abrirla.
+  var _hayClinico = _rcpSel.alerg.length || _rcpSel.estilos.length || _rcpSel.patos.length
+    || (recipe && (recipe.glycemic_index || recipe.sodium_level || recipe.fiber != null));
+  var _clin = document.getElementById('fClinCard');
+  _clin.classList.toggle('abierto', !!_hayClinico);
+  document.getElementById('fClinBody').hidden = !_hayClinico;
+  _clin.querySelector('.rcp-clin-head').setAttribute('aria-expanded', _hayClinico ? 'true' : 'false');
+
   loadRecipeDetails((recipe && recipe.details) || []);
 
   document.getElementById('listView').style.display = 'none';
@@ -1305,9 +1395,134 @@ var _rcpTimer=null, _rcpCache={};
 var FOOD_ICO='<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>';
 var TRASH_ICO='<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>';
 
+
+/* ═══ Etiquetas, alérgenos, estilos y patologías ═══════════════════════════
+   Las cuatro son lo mismo: una lista donde se marca lo que aplica. Se guardan
+   como texto separado por comas —igual que `meal_type`, que ya iba así— salvo
+   las patologías, que tienen catálogo propio y se guardan por id: son las
+   MISMAS que usan las dietas, y dos listas parecidas acabarían diciendo cosas
+   distintas. */
+var RCP_TAGS = ['Desayuno','Media mañana','Comida','Merienda','Cena','Alta proteína',
+  'Baja en calorías','Rápida','Meal prep','Pre-entreno','Post-entreno','Antiinflamatoria'];
+var RCP_ALERGENOS = ['Gluten','Lactosa','Frutos secos','Cacahuete','Huevo','Pescado',
+  'Marisco','Soja','Mostaza','Sésamo','Sulfitos','Apio','Altramuces'];
+var RCP_ESTILOS = ['Omnívora','Vegetariana','Vegana','Pescetariana','Cetogénica',
+  'Mediterránea','Paleo','Baja en FODMAP','Halal','Kosher'];
+/* El orden de los grupos de patologías. Lo que llegue con un grupo que no esté
+   aquí no se pierde: se pinta al final. */
+var RCP_GRUPOS = ['Intolerancias','Digestivo','Metabólico','Hormonal','Cardiovascular',
+  'Renal','Hepático','Hematológico','Óseo','Otros'];
+
+var _rcpSel = { tags: [], alerg: [], estilos: [], patos: [] };
+var _rcpPatologias = [];
+
+function _rcpChips(id, opciones, clave) {
+  var cont = document.getElementById(id);
+  if (!cont) return;
+  cont.innerHTML = opciones.map(function(o) {
+    var puesto = _rcpSel[clave].indexOf(o) >= 0;
+    return '<button type="button" class="rcp-chip' + (puesto ? ' on' : '') + '" '
+      + 'onclick="rcpToggleChip(\'' + clave + '\',this)" data-v="' + esc(o) + '">' + esc(o) + '</button>';
+  }).join('');
+}
+
+function rcpToggleChip(clave, btn) {
+  var v = btn.getAttribute('data-v');
+  var i = _rcpSel[clave].indexOf(v);
+  if (i >= 0) _rcpSel[clave].splice(i, 1); else _rcpSel[clave].push(v);
+  btn.classList.toggle('on', i < 0);
+}
+
+function rcpTogglePato(id, btn) {
+  var i = _rcpSel.patos.indexOf(id);
+  if (i >= 0) _rcpSel.patos.splice(i, 1); else _rcpSel.patos.push(id);
+  btn.classList.toggle('on', i < 0);
+}
+
+function _rcpPintaPatologias() {
+  var cont = document.getElementById('fPatos');
+  if (!cont) return;
+  if (!_rcpPatologias.length) { cont.innerHTML = ''; return; }
+  var porGrupo = {};
+  _rcpPatologias.forEach(function(p) {
+    var g = p.grupo || 'Otros';
+    (porGrupo[g] = porGrupo[g] || []).push(p);
+  });
+  var orden = RCP_GRUPOS.filter(function(g){ return porGrupo[g]; })
+    .concat(Object.keys(porGrupo).filter(function(g){ return RCP_GRUPOS.indexOf(g) < 0; }));
+  cont.innerHTML = orden.map(function(g) {
+    return '<div class="rcp-grupo">' + esc(g) + '</div><div class="rcp-chips">'
+      + porGrupo[g].map(function(p) {
+          var puesto = _rcpSel.patos.indexOf(p.id) >= 0;
+          return '<button type="button" class="rcp-chip' + (puesto ? ' on' : '') + '" '
+            + 'onclick="rcpTogglePato(' + p.id + ',this)">' + esc(p.name) + '</button>';
+        }).join('')
+      + '</div>';
+  }).join('');
+}
+
+async function _rcpCargaPatologias() {
+  if (_rcpPatologias.length) { _rcpPintaPatologias(); return; }
+  try {
+    var r = await fetch(API + '/pathologies/findAll', { headers: headers() });
+    var d = await r.json();
+    _rcpPatologias = d.data || [];
+  } catch(e) { _rcpPatologias = []; }
+  _rcpPintaPatologias();
+}
+
+function toggleClinicas() {
+  var caja = document.getElementById('fClinCard');
+  var cuerpo = document.getElementById('fClinBody');
+  var abierto = !caja.classList.contains('abierto');
+  caja.classList.toggle('abierto', abierto);
+  cuerpo.hidden = !abierto;
+  caja.querySelector('.rcp-clin-head').setAttribute('aria-expanded', abierto ? 'true' : 'false');
+}
+
+/* Pinta las cuatro listas con lo que traiga la receta (o vacías, si es nueva). */
+function rcpCargaEtiquetas(r) {
+  var lista = function(v){ return String(v || '').split(',').map(function(x){return x.trim();}).filter(Boolean); };
+  _rcpSel.tags = lista(r && r.tags);
+  _rcpSel.alerg = lista(r && r.allergen_free);
+  _rcpSel.estilos = lista(r && r.diet_styles);
+  _rcpSel.patos = ((r && r.pathologies) || []).map(function(p){ return p.id; });
+  _rcpChips('fTags', RCP_TAGS, 'tags');
+  _rcpChips('fAlerg', RCP_ALERGENOS, 'alerg');
+  _rcpChips('fEstilos', RCP_ESTILOS, 'estilos');
+  _rcpPintaPatologias();
+  _rcpCargaPatologias();
+}
+
+/* De dónde vienen las calorías: 4 kcal por gramo de proteína y de carbo, 9 por
+   gramo de grasa. Sin macros no se pinta una barra a cero, que parecería un
+   dato. */
+function rcpReparto(p, c, f) {
+  var kp = (p || 0) * 4, kc = (c || 0) * 4, kf = (f || 0) * 9;
+  var t = kp + kc + kf;
+  var barra = document.getElementById('repBar'), leg = document.getElementById('repLeg');
+  if (!barra || !leg) return;
+  var pp = t ? Math.round(kp / t * 100) : 0;
+  var pc = t ? Math.round(kc / t * 100) : 0;
+  var pf = t ? Math.max(0, 100 - pp - pc) : 0;
+  barra.innerHTML = t
+    ? '<div style="width:' + pp + '%;background:#4F46E5"></div>'
+      + '<div style="width:' + pc + '%;background:#F59E0B"></div>'
+      + '<div style="width:' + pf + '%;background:#EF4444"></div>'
+    : '';
+  leg.innerHTML = '<span><i class="rcp-rep-pt" style="background:#4F46E5"></i>Prot ' + pp + '%</span>'
+    + '<span><i class="rcp-rep-pt" style="background:#F59E0B"></i>Carb ' + pc + '%</span>'
+    + '<span><i class="rcp-rep-pt" style="background:#EF4444"></i>Gras ' + pf + '%</span>';
+}
+
+/* Cuánto aporta la cantidad puesta. Dividía entre 100 a ciegas: un huevo, que
+   trae sus kcal por UNIDAD, contaba como la centésima parte de un huevo. La
+   cuenta la hace el módulo compartido, igual que el servidor. */
 function _ingMac(row){
   var q=parseFloat(row.quantity)||0;
-  return {k:((row.calories||0)/100)*q, p:((row.proteins||0)/100)*q, c:((row.carbohydrates||0)/100)*q, f:((row.fats||0)/100)*q, fib:((row.fiber||0)/100)*q};
+  var al={quantity:row.porcion};
+  var e=function(v){ return window.macrosAlimento.escalar(v, al, q); };
+  return {k:e(row.calories), p:e(row.proteins), c:e(row.carbohydrates), f:e(row.fats), fib:e(row.fiber)};
 }
 function _g1(v){return (Math.round(v*10)/10)+'g';}
 
@@ -1330,6 +1545,11 @@ function recalcMacros(){
   S('cv-fib',  Math.round(fib)+'<small>g</small>');
   var T=function(id,v){var e=document.getElementById(id); if(e)e.textContent=v;};
   T('rcpTotK',Math.round(k)); T('rcpTotP',_g1(p)); T('rcpTotC',_g1(c)); T('rcpTotG',_g1(f)); T('rcpTotF',_g1(fib));
+  rcpReparto(p, c, f);
+  // La fibra se puede escribir a mano; mientras no se escriba, se dice la que
+  // sale de los ingredientes.
+  var fi=document.getElementById('fFiber');
+  if(fi) fi.placeholder = 'Estimada: ' + (Math.round(fib*10)/10);
   var fe=document.getElementById('fFormError'); if(fe)fe.textContent='';
 }
 
@@ -1438,6 +1658,8 @@ function loadRecipeDetails(details){
       fats: a.fats != null ? a.fats : null,
       calories: a.calories != null ? a.calories : null,
       fiber: a.fiber != null ? a.fiber : null,
+      /* A qué cantidad se refieren esos macros: 100 g, 1 unidad, un cacito. */
+      porcion: a.quantity != null ? a.quantity : null,
       quantity: (d.quantity != null ? String(d.quantity) : ''),
       _source: 'platform'
     });
@@ -1562,6 +1784,7 @@ function fsmConfirmAdd(){
     group_food_name:_groupNameById(a.group_food_id),
     proteins:a.proteins!=null?a.proteins:null, carbohydrates:a.carbohydrates!=null?a.carbohydrates:null,
     fats:a.fats!=null?a.fats:null, calories:a.calories!=null?a.calories:null, fiber:a.fiber!=null?a.fiber:null,
+    porcion:a.quantity!=null?a.quantity:null,
     quantity:String(grams), _source:(a._personal?'personal':'platform') });
   renderIngrTable(); recalcMacros();
   closeFoodSearch();
@@ -1924,20 +2147,21 @@ async function save() {
   const mealType = ['desayuno','almuerzo','cena','merienda']
     .filter(function(t) { return document.getElementById('mc-' + t).checked; }).join(',') || null;
 
-  let _kcal = 0, _prot = 0, _carb = 0, _fat = 0;
+  let _kcal = 0, _prot = 0, _carb = 0, _fat = 0, _fib = 0;
   const details = _ingrRows.filter(function(r) { return r.aliment_id; }).map(function(r, i) {
     const qtyEl = document.getElementById('iqty-' + r.id);
     const qty = parseFloat(qtyEl && qtyEl.value) || 0;
-    _kcal += ((r.calories      || 0) / 100) * qty;
-    _prot += ((r.proteins      || 0) / 100) * qty;
-    _carb += ((r.carbohydrates || 0) / 100) * qty;
-    _fat  += ((r.fats          || 0) / 100) * qty;
+    var _m = _ingMac({ quantity: qty, porcion: r.porcion, calories: r.calories,
+                       proteins: r.proteins, carbohydrates: r.carbohydrates,
+                       fats: r.fats, fiber: r.fiber });
+    _kcal += _m.k; _prot += _m.p; _carb += _m.c; _fat += _m.f; _fib += _m.fib;
     return { aliment_id: r.aliment_id, quantity: qty || null, notes: null, order: i };
   });
   const kcalVal = _kcal > 0 ? parseFloat(_kcal.toFixed(1)) : null;
   const protVal = _prot > 0 ? parseFloat(_prot.toFixed(1)) : null;
   const carbVal = _carb > 0 ? parseFloat(_carb.toFixed(1)) : null;
   const fatVal  = _fat  > 0 ? parseFloat(_fat.toFixed(1))  : null;
+  const fibVal  = _fib  > 0 ? parseFloat(_fib.toFixed(1))  : null;
 
   const payload = {
     name: name,
@@ -1953,6 +2177,17 @@ async function save() {
     fats:         fatVal,
     image:        _imageUrl || null,
     meal_type:    mealType,
+    tags:          _rcpSel.tags.join(',') || null,
+    notes:         document.getElementById('fNotes').value.trim() || null,
+    difficulty:    document.getElementById('fDifficulty').value || null,
+    allergen_free: _rcpSel.alerg.join(',') || null,
+    diet_styles:   _rcpSel.estilos.join(',') || null,
+    glycemic_index: document.getElementById('fGI').value || null,
+    sodium_level:   document.getElementById('fNa').value || null,
+    // Vacío = "usa la estimada de los ingredientes", no cero.
+    fiber:         document.getElementById('fFiber').value !== ''
+                     ? parseFloat(document.getElementById('fFiber').value) : fibVal,
+    pathology_ids: _rcpSel.patos,
     details:      details
   };
 

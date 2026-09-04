@@ -35,15 +35,41 @@ En Railway: *Proyecto → el servicio de la API → Settings → Networking →
 Custom Domain → `app.alzum.io`*. Railway devuelve un destino con la forma
 `xxxx.up.railway.app`.
 
-En el DNS de `alzum.io` (donde esté el dominio: Cloudflare, el registrador…):
+Ojo con **qué servicio**: tiene que ser el que responde hoy en
+`nutrientrena-production.up.railway.app` (el que sirve `/api` y `/app`). Si se
+añade al servicio de la web de presentación, `app.alzum.io` enseñará esa web.
 
-| Tipo | Nombre | Valor |
-|------|--------|-------|
-| CNAME | `app` | el destino que dio Railway |
+En el DNS de `alzum.io` — **Namecheap**:
 
-Si el DNS es Cloudflare, dejar el registro en **DNS only** (nube gris) mientras
-Railway emite el certificado; luego puede activarse el proxy. El certificado
-TLS lo emite Railway solo, y tarda unos minutos desde que el DNS resuelve.
+1. *Domain List → alzum.io → **Manage***.
+2. En la pestaña **Domain**, comprobar que en *NAMESERVERS* pone **Namecheap
+   BasicDNS**. Si pusiera *Custom DNS*, los registros van donde apunten esos
+   servidores (Cloudflare, por ejemplo) y no aquí.
+3. Pestaña **Advanced DNS** → *HOST RECORDS* → **ADD NEW RECORD**:
+
+   | Campo | Valor |
+   |-------|-------|
+   | Type | **CNAME Record** |
+   | Host | `app` |
+   | Value | el destino que dio Railway, sin `https://` y sin barra final |
+   | TTL | Automatic (o 1 min mientras se prueba) |
+
+4. Guardar con el **✓** verde de la fila.
+
+Si ya existiera otro registro con Host `app` —A, CNAME o *URL Redirect*—, hay
+que borrarlo: solo puede haber uno. El `www` de esta cuenta ya apunta a
+Railway con un CNAME igual, así que el camino está probado.
+
+Si el DNS estuviera en Cloudflare, dejar el registro en **DNS only** (nube
+gris) mientras Railway emite el certificado; luego puede activarse el proxy.
+El certificado TLS lo emite Railway solo, y tarda unos minutos desde que el
+DNS resuelve.
+
+Para ver si el DNS ya ha propagado, sin esperar a nada:
+
+```bash
+dig +short app.alzum.io      # debe devolver el destino de Railway
+```
 
 **2. Ajustar dos variables de entorno** (Railway → Variables):
 

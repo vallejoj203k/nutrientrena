@@ -995,3 +995,54 @@ window.__comidas=(m)=>{_meals=m;};
 destino25 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resumen-dia.html')
 open(destino25, 'w').write(resumen)
 print('harness generado en', destino25)
+
+
+# ── Harness de las capas de ejercicios.html ────────────────────────────────
+# El CSS y el markup reales de la pantalla: lo que se comprueba es qué queda
+# ENCIMA de qué, y eso solo lo sabe el navegador.
+ejs2 = open(os.path.join(RAIZ, 'frontend', 'ejercicios.html')).read()
+csse2 = '\n'.join(re.findall(r'<style>(.*?)</style>', ejs2, re.S))
+
+i = ejs2.index('<div class="modal-overlay" id="videoOverlay"')
+j = ejs2.index('\n', ejs2.index('</div>\n</div>', i) + len('</div>\n</div>'))
+ventana_video = ejs2[i:j]
+
+capas = """<!doctype html><html><head><meta charset="utf-8"><style>%s</style></head>
+<body style="margin:0">
+<div style="padding:20px">Lista de ejercicios</div>
+
+<!-- El cajon de detalle, como en la pagina -->
+<div class="xv-overlay" id="xvOverlay"></div>
+<div class="xv-panel" id="xvPanel">
+  <div style="padding:20px" id="xvContenido">Dominadas agarre prono - descripcion del ejercicio</div>
+</div>
+
+<!-- El formulario a pantalla completa -->
+<div class="xf-panel" id="xfPanel"><div style="padding:20px">Formulario</div></div>
+
+%s
+
+<div class="toast" id="toast">Un aviso</div>
+
+<script>
+window.__abreCajon=()=>{
+  document.getElementById('xvOverlay').classList.add('open');
+  document.getElementById('xvPanel').classList.add('open');
+};
+window.__abreFormulario=()=>{ document.getElementById('xfPanel').classList.add('open'); };
+window.__abreVideo=()=>{ document.getElementById('videoOverlay').classList.add('open'); };
+window.__avisa=()=>{ document.getElementById('toast').classList.add('show'); };
+/* Quien manda en un punto de la pantalla: es lo que ve y toca el usuario. */
+window.__encima=(sel)=>{
+  const c=document.querySelector(sel).getBoundingClientRect();
+  const el=document.elementFromPoint(c.left+c.width/2, c.top+c.height/2);
+  return el ? (el.closest('#videoOverlay') ? 'video'
+             : el.closest('#xfPanel') ? 'formulario'
+             : el.closest('#xvPanel') ? 'cajon'
+             : el.id || el.className || el.tagName) : 'nada';
+};
+</script></body></html>""" % (csse2, ventana_video)
+
+destino26 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'capas-ejercicios.html')
+open(destino26, 'w').write(capas)
+print('harness generado en', destino26)

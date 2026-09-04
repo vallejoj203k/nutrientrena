@@ -56,6 +56,23 @@ En el DNS de `alzum.io` — **Namecheap**:
 
 4. Guardar con el **✓** verde de la fila.
 
+**Railway suele pedir DOS registros, no uno.** Cuando el dominio raíz ya está
+en uso —`alzum.io` lo está—, junto al CNAME exige un TXT de verificación de
+propiedad, y mientras falte deja el dominio en *Waiting for DNS update* y no
+emite el certificado, aunque el CNAME salga en verde. El diálogo *Show DNS
+records* del dominio los lista los dos; hay que añadir el segundo igual:
+
+   | Campo | Valor |
+   |-------|-------|
+   | Type | **TXT Record** |
+   | Host | `_railway-verify.app` — con el guion bajo y sin `.alzum.io` detrás |
+   | Value | el `railway-verify=…` completo |
+   | TTL | Automatic |
+
+El valor sale cortado con puntos suspensivos en el diálogo: hay que copiarlo
+con el botón de copiar, no escribirlo a mano. Truncado falla igual que si no
+estuviera.
+
 Si ya existiera otro registro con Host `app` —A, CNAME o *URL Redirect*—, hay
 que borrarlo: solo puede haber uno. El `www` de esta cuenta ya apunta a
 Railway con un CNAME igual, así que el camino está probado.
@@ -68,8 +85,22 @@ DNS resuelve.
 Para ver si el DNS ya ha propagado, sin esperar a nada:
 
 ```bash
-dig +short app.alzum.io      # debe devolver el destino de Railway
+dig +short app.alzum.io                        # el destino de Railway
+dig +short TXT _railway-verify.app.alzum.io    # el railway-verify=…
 ```
+
+Mejor preguntarle a los servidores de Namecheap en vez de a la caché del
+sistema, que puede tardar en enterarse:
+
+```bash
+dig +short @dns1.registrar-servers.com TXT _railway-verify.app.alzum.io
+```
+
+Hasta que Railway emita el certificado, la página se sirve por `http` y el
+navegador dice *No seguro*. **No hay que usarla así**: la API va por `https` y
+el navegador bloquea esas llamadas por contenido mixto, de modo que la página
+carga pero el login no responde. Se entra por `https://app.alzum.io` —una vez
+emitido el certificado, Railway redirige solo.
 
 **2. Ajustar dos variables de entorno** (Railway → Variables):
 

@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.core.dependencies import require_role_ids, SUPERADMIN, ADMIN, COACH, CLIENT
 from app.core.responses import send_response, send_error
-from app.core.macros import escalar
+from app.core.macros import escalar, totales_de_dieta
 from app.models.user import User, UserDetail, UserParent
 from app.models.routine import Routine
 from app.models.session_log import WorkoutSession
@@ -243,11 +243,31 @@ _DAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "
 
 
 def _diet_meals_macros(diet):
-    """Comidas (con kcal por comida) y macros de una dieta."""
+    """Comidas (con kcal por comida) y macros de una dieta.
+
+    Los macros salían SOLO de lo que el coach hubiera escrito como objetivo al
+    crear la dieta. Con un plan montado en modo "kcal" —el más habitual: se
+    escriben las kcal y no los macros— el cliente abría su nutrición y veía un
+    guion en proteínas, carbohidratos y grasas, y el día sin kcal, con las
+    comidas enteras debajo.
+
+    Lo escrito manda; lo que falte se suma de los alimentos, con la misma
+    cuenta que usa la biblioteca del coach.
+    """
     kcal = diet.calories
     prot = carb = fat = None
     if diet.detail:
         prot, carb, fat = diet.detail.proteins, diet.detail.carbs, diet.detail.fats
+    tk, tp, tc, tf = totales_de_dieta(diet)
+    if tk > 0:
+        if not kcal:
+            kcal = round(tk)
+        if not prot:
+            prot = round(tp, 1)
+        if not carb:
+            carb = round(tc, 1)
+        if not fat:
+            fat = round(tf, 1)
     meals = []
     for food in diet.foods:
         mk = 0.0

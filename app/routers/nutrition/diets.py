@@ -14,7 +14,7 @@ from app.core.dependencies import (
     bloqueado_para_ver,
 )
 from app.core.responses import send_response, send_error
-from app.core.macros import escalar
+from app.core.macros import escalar, totales_de_dieta
 from app.models.nutrition.diet import Diet, DietDetail, DietFood, DietFoodAliment, Pathology, diet_pathologies_table
 from app.models.nutrition.aliment import Aliment, AlimentDescription
 from app.schemas.nutrition.diet import DietCreate, DietUpdate, DietOut, DietFoodCreate, DietFoodAlimentCreate
@@ -99,18 +99,11 @@ def _get_or_404_with_pathologies(db: Session, diet_id: str):
 
 
 def _diet_food_totals(diet: Diet):
-    """Suma kcal y macros reales a partir de los alimentos de la dieta."""
-    k = p = c = f = 0.0
-    for food in (diet.foods or []):
-        for dfa in (food.detail or []):
-            al = dfa.aliment
-            q = dfa.quantity or 0
-            if al and q:
-                k += escalar(al.calories, al, q)
-                p += escalar(al.proteins, al, q)
-                c += escalar(al.carbohydrates, al, q)
-                f += escalar(al.fats, al, q)
-    return k, p, c, f
+    """Suma kcal y macros reales a partir de los alimentos de la dieta.
+
+    La cuenta vive en `app/core/macros.py`: la misma que usa el plan del
+    cliente, para que las dos pantallas no digan cosas distintas."""
+    return totales_de_dieta(diet)
 
 
 def _serialize(diet: Diet) -> dict:

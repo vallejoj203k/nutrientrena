@@ -78,3 +78,27 @@ def unidad_de(aliment) -> str:
     if not u:
         return "g"
     return _ALIAS.get(u, u)
+
+
+def totales_de_dieta(diet):
+    """Lo que suman DE VERDAD los alimentos de una dieta: kcal y macros.
+
+    Vive aquí y no en un router porque lo necesitan los dos lados: la
+    biblioteca del coach y el plan que ve el cliente. Cuando cada uno hacía su
+    cuenta, la lista de dietas decía una cosa y la pantalla del cliente otra.
+
+    Devuelve `(kcal, proteínas, carbohidratos, grasas)` sin redondear: quien
+    lo pinte decide con cuántos decimales.
+    """
+    k = p = c = f = 0.0
+    for food in (getattr(diet, "foods", None) or []):
+        for dfa in (getattr(food, "detail", None) or []):
+            al = getattr(dfa, "aliment", None)
+            cantidad = getattr(dfa, "quantity", None) or 0
+            if not al or not cantidad:
+                continue
+            k += escalar(al.calories, al, cantidad)
+            p += escalar(al.proteins, al, cantidad)
+            c += escalar(al.carbohydrates, al, cantidad)
+            f += escalar(al.fats, al, cantidad)
+    return k, p, c, f

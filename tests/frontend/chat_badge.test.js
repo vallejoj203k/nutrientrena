@@ -9,7 +9,10 @@ const path = require('path');
   let f = 0;
   const ck = (n, c, x) => { console.log((c ? 'OK   ' : 'FALLO ') + n + (c ? '' : ' -> ' + String(JSON.stringify(x)).slice(0, 200))); if (!c) f++; };
 
+  // El origen de la API lo decide `js/api-base.js`, que en una página real
+  // se carga antes que nada. Aquí también: el módulo lo usa.
   const modulo = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'js', 'chat-badge.js'), 'utf8');
+  const base = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'js', 'api-base.js'), 'utf8');
 
   // Página mínima con el enlace de chat. Se acelera el reloj (setInterval con
   // un tope de 120 ms) para no esperar 20 s reales, y se cuenta cada petición.
@@ -26,6 +29,7 @@ const path = require('path');
     window.setInterval = (fn, ms) => _si(fn, Math.min(ms, 120));
     window.fetch = () => { window.__llamadas++; return Promise.resolve({ json: () => Promise.resolve({ data: { total: 3 } }) }); };
   </script>
+  <script>${base}</script>
   <script>${modulo}</script>
   </body></html>`;
 
@@ -67,7 +71,8 @@ const path = require('path');
   const p2 = await b.newPage();
   await p2.setContent(`<!doctype html><html><body><a href="chat.html">Chat</a>
     <script>Object.defineProperty(window,'localStorage',{value:{getItem:()=>null,setItem(){},removeItem(){}}});window.__llamadas=0;window.fetch=()=>{window.__llamadas++;return Promise.resolve({json:()=>Promise.resolve({})});};</script>
-    <script>${modulo}</script></body></html>`);
+    <script>${base}</script>
+  <script>${modulo}</script></body></html>`);
   await p2.waitForTimeout(300);
   ck('sin sesión no pide nada', await p2.evaluate(() => window.__llamadas) === 0);
 

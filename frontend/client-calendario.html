@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <title>NutriEntrena — Calendario</title>
+  <!-- El origen de la API: el mismo que sirve esta página. -->
+  <script src="js/api-base.js"></script>
   <script>
     (function(){ var t=localStorage.getItem('token'),r=localStorage.getItem('role_id')||'';
       if(!t){location.replace('login.html');return;} if(r&&r!=='6'){location.replace('dashboard.html');} })();
@@ -189,7 +191,7 @@
 </div>
 
 <script>
-  const API = 'https://nutrientrena-production.up.railway.app/api';
+  const API = API_BASE;
   const token = localStorage.getItem('token');
   const headers = () => ({ Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' });
   function esc(s){ if(s==null)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

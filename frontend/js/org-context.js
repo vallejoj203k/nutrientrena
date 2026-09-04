@@ -13,7 +13,6 @@
    Este fichero debe cargarse ANTES que el script de la página, para que la
    envoltura esté puesta antes de la primera petición. */
 (function () {
-  var API_HOST = 'nutrientrena-production.up.railway.app';
   var CLAVE = 'org_context';       // '' = plataforma
   var CLAVE_NOMBRE = 'org_context_name';
   // Centinela que entiende el backend: "solo el catálogo de la plataforma".

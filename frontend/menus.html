@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <title>ALZUM.io — Librería · Menús</title>
+  <!-- El origen de la API: el mismo que sirve esta página. -->
+  <script src="js/api-base.js"></script>
   <script src="js/permisos-contenido.js"></script>
   <script>if((localStorage.getItem("role_id")||"")==="6"){location.replace("client-home.html");}</script>
   <style>
@@ -839,7 +841,7 @@
 <script src="js/menu-fila.js"></script>
 <script src="js/org-context.js"></script>
 <script>
-const API = 'https://nutrientrena-production.up.railway.app/api';
+const API = API_BASE;
 const token = localStorage.getItem('token');
 if (!token) location.href = 'login.html';
 

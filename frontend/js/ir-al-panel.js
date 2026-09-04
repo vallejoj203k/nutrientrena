@@ -12,7 +12,7 @@
    guardado en localStorage vale para no preguntar cuando es que no —y ahorrar
    una petición en cada página a todo el mundo—, pero no para decir que sí. */
 (function () {
-  var API = 'https://nutrientrena-production.up.railway.app/api';
+  var API = API_BASE;
   var SUPERADMIN = '1';
 
   function arrancar() {

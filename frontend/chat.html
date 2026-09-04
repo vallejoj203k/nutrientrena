@@ -355,6 +355,8 @@
     .btn-sonido:hover{border-color:var(--indigo);color:var(--indigo);}
     .btn-sonido.mudo{color:#C6CAD1;}
   </style>
+  <!-- El origen de la API: el mismo que sirve esta página. -->
+  <script src="js/api-base.js"></script>
 <script src="js/aviso-chat.js"></script>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
@@ -628,8 +630,7 @@
 </div>
 
 <script>
-const API = 'https://nutrientrena-production.up.railway.app/api';
-const WS_BASE = 'wss://nutrientrena-production.up.railway.app/ws/chat';
+const API = API_BASE;
 
 let _me = null;
 let _token = null;

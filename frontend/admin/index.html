@@ -525,6 +525,8 @@
   </div>
 </div>
 
+  <!-- El origen de la API: el mismo que sirve esta página. -->
+  <script src="../js/api-base.js"></script>
 <script>
 /* Entrar aquí es volver a ser la plataforma.
 
@@ -542,7 +544,7 @@ try { localStorage.removeItem('org_context'); localStorage.removeItem('org_conte
 <script src="../js/menu-plataforma.js"></script>
 <script src="../js/org-context.js"></script>
 <script>
-const API = 'https://nutrientrena-production.up.railway.app/api';
+const API = API_BASE;
 const token = localStorage.getItem('token');
 if (!token) location.replace('../login.html');
 

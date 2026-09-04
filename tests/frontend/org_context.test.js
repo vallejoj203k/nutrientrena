@@ -3,6 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 const MOD = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'js', 'org-context.js'), 'utf8');
+// El origen de la API lo decide `js/api-base.js`, que en una página real se
+// carga antes que nada. Aquí también: el módulo lo usa para saber qué llamadas
+// son suyas.
+const BASE = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'js', 'api-base.js'), 'utf8');
 
 /* Página mínima con el hueco del menú donde se engancha el selector.
    `almacen` precarga localStorage (que no funciona en el origen opaco de
@@ -31,6 +35,7 @@ function pagina(almacen, contextos) {
       window.__recargas = 0;
     })();
   </script>
+  <script>${BASE}</script>
   <script>${MOD}</script>
   </head><body>
   <div class="sidebar-user"><div class="user-name">Alguien</div></div>

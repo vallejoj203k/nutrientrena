@@ -10,7 +10,7 @@
    bajo esa misma línea repetida, que es donde se esconden los errores de
    verdad cuando hay que diagnosticar algo. */
 (function(){
-  var API='https://nutrientrena-production.up.railway.app/api';
+  var API=API_BASE;
   var token=localStorage.getItem('token'); if(!token) return;
   var INTERVALO=20000;
 

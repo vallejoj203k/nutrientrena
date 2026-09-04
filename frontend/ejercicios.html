@@ -123,6 +123,12 @@
     .empty svg{margin-bottom:16px;opacity:.3;}
     .empty h3{font-size:16px;font-weight:600;color:#6B7280;margin-bottom:6px;}
     .empty p{font-size:13px;}
+    /* ── El orden de las capas ────────────────────────────────────────────
+       El cajón de detalle (601) y el formulario a pantalla completa (650)
+       tapan lo que tenga un número menor. Y desde ellos se abre el vídeo, y
+       salen los avisos al subir un fichero: si se quedan por debajo, el vídeo
+       aparece detrás de la descripción y un error de subida no se ve. Lo que
+       se abre ENCIMA de un panel va por encima de él. */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
     .modal{background:#fff;border-radius:16px;width:680px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
@@ -170,14 +176,14 @@
     .ms-chip{display:inline-flex;align-items:center;gap:3px;background:var(--indigo-pale);color:var(--indigo);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;}
     .ms-chip-x{background:none;border:none;cursor:pointer;color:var(--indigo);font-size:14px;line-height:1;padding:0 1px;opacity:.7;}
     .ms-chip-x:hover{opacity:1;}
-    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+    .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:720;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
     .confirm-box{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:.2s;}
     .confirm-overlay.open .confirm-box{transform:translateY(0);}
     .confirm-box h3{font-size:16px;font-weight:700;color:#111;margin-bottom:8px;}
     .confirm-box p{font-size:14px;color:#6B7280;margin-bottom:20px;line-height:1.5;}
     .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
-    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:400;}
+    .toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:900;}
     .toast.show{transform:translateY(0);opacity:1;}
     .toast.success{background:#059669;}
     .toast.error{background:#DC2626;}

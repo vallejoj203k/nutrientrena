@@ -160,7 +160,7 @@
        creer que se ha cambiado de sitio, y encima calladamente. Se dice lo que
        pasa y se ofrece reintentar. */
   function pedirAcceso(token, intento) {
-    fetch('https://nutrientrena-production.up.railway.app/api/admin/me',
+    fetch(API_BASE + '/admin/me',
           { headers: { Authorization: 'Bearer ' + token } })
       .then(function (r) {
         if (r.status === 401 || r.status === 403) { salirDelModo(); return null; }

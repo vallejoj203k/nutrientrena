@@ -16,7 +16,7 @@
 
    Va aquí y no copiado en cada página por lo de siempre: 38 copias divergen. */
 (function () {
-  var API = 'https://nutrientrena-production.up.railway.app/api';
+  var API = API_BASE;
   var token;
   try { token = localStorage.getItem('token'); } catch (e) { return; }
   if (!token) return;

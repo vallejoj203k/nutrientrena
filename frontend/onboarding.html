@@ -193,6 +193,8 @@
       .form-row{grid-template-columns:1fr;}
     }
   </style>
+  <!-- El origen de la API: el mismo que sirve esta página. -->
+  <script src="js/api-base.js"></script>
 <script src="js/org-context.js"></script>
 <script src="js/nav-roles.js"></script>
   <!-- Atajo al panel de plataforma desde la barra del coach. Solo lo ve el
@@ -395,7 +397,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const API = 'https://nutrientrena-production.up.railway.app';
+  const API = API_ORIGIN;
 
   function tok() { return localStorage.getItem('token'); }
 

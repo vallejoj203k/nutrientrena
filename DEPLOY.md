@@ -23,6 +23,86 @@ Password: Admin123!
 
 ---
 
+## Poner la aplicación en un dominio propio (app.alzum.io)
+
+La aplicación no lleva ningún dominio escrito dentro: cada página le habla al
+mismo servidor que se la ha servido. Ponerla en `app.alzum.io` es, por tanto,
+configuración — no hace falta tocar código ni volver a desplegar el frontend.
+
+**1. Apuntar el dominio a Railway.**
+
+En Railway: *Proyecto → el servicio de la API → Settings → Networking →
+Custom Domain → `app.alzum.io`*. Railway devuelve un destino con la forma
+`xxxx.up.railway.app`.
+
+Ojo con **qué servicio**: tiene que ser el que responde hoy en
+`nutrientrena-production.up.railway.app` (el que sirve `/api` y `/app`). Si se
+añade al servicio de la web de presentación, `app.alzum.io` enseñará esa web.
+
+En el DNS de `alzum.io` — **Namecheap**:
+
+1. *Domain List → alzum.io → **Manage***.
+2. En la pestaña **Domain**, comprobar que en *NAMESERVERS* pone **Namecheap
+   BasicDNS**. Si pusiera *Custom DNS*, los registros van donde apunten esos
+   servidores (Cloudflare, por ejemplo) y no aquí.
+3. Pestaña **Advanced DNS** → *HOST RECORDS* → **ADD NEW RECORD**:
+
+   | Campo | Valor |
+   |-------|-------|
+   | Type | **CNAME Record** |
+   | Host | `app` |
+   | Value | el destino que dio Railway, sin `https://` y sin barra final |
+   | TTL | Automatic (o 1 min mientras se prueba) |
+
+4. Guardar con el **✓** verde de la fila.
+
+Si ya existiera otro registro con Host `app` —A, CNAME o *URL Redirect*—, hay
+que borrarlo: solo puede haber uno. El `www` de esta cuenta ya apunta a
+Railway con un CNAME igual, así que el camino está probado.
+
+Si el DNS estuviera en Cloudflare, dejar el registro en **DNS only** (nube
+gris) mientras Railway emite el certificado; luego puede activarse el proxy.
+El certificado TLS lo emite Railway solo, y tarda unos minutos desde que el
+DNS resuelve.
+
+Para ver si el DNS ya ha propagado, sin esperar a nada:
+
+```bash
+dig +short app.alzum.io      # debe devolver el destino de Railway
+```
+
+**2. Ajustar dos variables de entorno** (Railway → Variables):
+
+| Variable | Valor |
+|----------|-------|
+| `FRONTEND_URL` | `https://app.alzum.io` |
+| `ALLOWED_ORIGINS` | `https://app.alzum.io` |
+
+`FRONTEND_URL` es la que se mete en los enlaces de los correos —restablecer
+contraseña, formularios que se le mandan al cliente— así que con el valor
+viejo esos correos seguirían llevando al dominio de Railway aunque la web ya
+estuviera en el suyo.
+
+`ALLOWED_ORIGINS` no hace falta para la aplicación (habla con su propio
+origen), pero sí para cualquier otra web que llame a esta API.
+
+**3. Comprobar**, con el dominio ya resolviendo:
+
+```bash
+curl -sS https://app.alzum.io/api/health          # {"status":"ok",...}
+curl -sSI https://app.alzum.io/ | head -3         # 307 a /app/login.html
+```
+
+Y en el navegador, entrar en `https://app.alzum.io`, abrir la consola y
+comprobar que las peticiones van a `https://app.alzum.io/api/...` y no al
+dominio de Railway.
+
+**Sobre el dominio antiguo:** sigue funcionando. Si se quiere que deje de
+usarse, quitarlo en Railway *después* de comprobar que el nuevo va; los
+enlaces ya enviados por correo con el dominio viejo dejarían de abrir.
+
+---
+
 ## Variables de entorno en Railway
 
 Ir a **Railway → Proyecto → Variables** y configurar:

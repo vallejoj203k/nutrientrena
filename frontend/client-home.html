@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <title>NutriEntrena — Mi espacio</title>
   <!-- Guard: esta zona es solo del cliente (rol 6). -->
+  <!-- El origen de la API: el mismo que sirve esta página. -->
+  <script src="js/api-base.js"></script>
   <script>
     (function(){
       var t = localStorage.getItem('token');
@@ -246,7 +248,7 @@
 </div>
 
 <script>
-  const API = 'https://nutrientrena-production.up.railway.app/api';
+  const API = API_BASE;
   const token = localStorage.getItem('token');
 
   function logout(){ localStorage.removeItem('token'); localStorage.removeItem('role_id'); localStorage.removeItem('refresh_token'); location.href = 'login.html'; }
